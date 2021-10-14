@@ -280,7 +280,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Get_Game_List_Of_All_GameProviders()
         {
             // arrange
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
@@ -290,118 +289,117 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Active, false);
             var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
 
-            var gameProviders = new[]
-            {
-                evoGp,
-                sboGp
-            };
-
             var subGameProviders = new[]
             {
-                new SubGameProviderWithLocationDataInfo(
-                    evoGp.Id,
-                    evoGp.Code,
+                new BrandSubGameProviderInfo(
                     "EVO",
                     "EVO",
                     "EVO",
-                    "{}"),
-                new SubGameProviderWithLocationDataInfo(
                     evoGp.Id,
                     evoGp.Code,
+                    false,
+                    Status.Active,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
                     "NT",
-                    "{}"),
-                new SubGameProviderWithLocationDataInfo(
                     evoGp.Id,
                     evoGp.Code,
+                    false,
+                    Status.Active,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
                     "RT",
-                    "{}"),
-                new SubGameProviderWithLocationDataInfo(
+                    evoGp.Id,
+                    evoGp.Code,
+                    false,
+                    Status.Active,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
+                    "SBO",
+                    "SBO",
+                    "SBO",
                     sboGp.Id,
                     sboGp.Code,
-                    sboGp.Code,
-                    sboGp.Code,
-                    sboGp.Code,
-                    "{}")
+                    false,
+                    Status.Active,
+                    Status.Active)
             };
 
             var games = new[]
             {
-                new GameDataInfo(
+                new BrandGameInfo(
                     1,
                     "1",
                     "1",
-                    string.Empty,
+                    "test",
+                    "EVO",
+                    evoGp.Id,
                     "EVO",
                     GameStatus.Active,
+                    GameStatus.Active,
                     GameType.LiveDealer,
-                    GamePlatformType.DesktopAndMobile,
+                    GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty),
-                new GameDataInfo(
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
                     2,
                     "2",
                     "2",
-                    string.Empty,
-                    "NT",
+                    "test",
+                    "RT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.Slot,
-                    GamePlatformType.DesktopAndMobile,
+                    GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty),
-                new GameDataInfo(
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
                     3,
                     "3",
                     "3",
-                    string.Empty,
-                    "RT",
+                    "test",
+                    "NT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.Slot,
-                    GamePlatformType.DesktopAndMobile,
+                    GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty),
-                new GameDataInfo(
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
                     4,
                     "4",
                     "4",
-                    string.Empty,
+                    "test",
+                    "SBO",
+                    sboGp.Id,
                     "SBO",
                     GameStatus.Active,
+                    GameStatus.Active,
                     GameType.Sportsbook,
-                    GamePlatformType.DesktopAndMobile,
+                    GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty)
+                    string.Empty,
+                    GameTag.New,
+                    0)
             };
-
-            var brandGameProviders = gameProviders.Select(
-                gp => new CachedBrandGameProvider
-                {
-                    GameProviderId = gp.Id,
-                    GameProviderCode = gp.Code,
-                    GameProviderConfigurationId = Guid.NewGuid(),
-                    BrandGameProviderStatus = Status.Active
-                }).ToArray();
-
-            var brandGames = games.Select(g => new CachedBrandGame
-            {
-                GameId = g.Id,
-                GameProviderId = subGameProviders
-                    .Where(sbp => sbp.Code == g.SubGameProviderCode)
-                    .Select(sbp => sbp.GameProviderId)
-                    .First(),
-                PlatformType = g.PlatformType,
-                BrandGameStatus = g.Status,
-                Tag = GameTag.None,
-                DisplayOrder = 99,
-                ExternalGameId = g.Id.ToString()
-            }).ToArray();
 
             fakeValidStatus.GetStatus(Arg.Any<PlayerType>())
                 .Returns(new[]
@@ -418,22 +416,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GameStatus.Testing
                 });
 
-            fakeBrandOperations.GetBrandGameProvidersAsync(Arg.Is(brandId))
-                .Returns(Task.FromResult(brandGameProviders));
-
-            fakeBrandOperations.GetBrandGamesAsync(Arg.Is(brandId))
-                .Returns(Task.FromResult(brandGames));
-
-            fakeGameProviderRepository.QuerySubGameProvidersAsync()
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
                 .Returns(subGameProviders.ToAsyncEnumerable());
 
-            fakeGameProviderRepository.QueryGameProvidersAsync()
-                .Returns(gameProviders.ToAsyncEnumerable());
-
-            fakeGameProviderRepository.QueryGamesAsync(
-                    Arg.Any<IEnumerable<Guid>>(),
-                    Arg.Any<IEnumerable<GameStatus>>(),
-                    Arg.Any<IEnumerable<GamePlatformType>>())
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
                 .Returns(games.ToAsyncEnumerable());
 
             var query = new GetAllGamesByGameTypeQuery(
