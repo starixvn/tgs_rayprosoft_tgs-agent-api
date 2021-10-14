@@ -297,8 +297,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "EVO",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "NT",
@@ -306,8 +306,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "NT",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "RT",
@@ -315,8 +315,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "RT",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "SBO",
@@ -324,8 +324,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "SBO",
                     sboGp.Id,
                     sboGp.Code,
-                    false,
-                    Status.Active,
+                    sboGp.IsTransferWallet,
+                    sboGp.Status,
                     Status.Active)
             };
 
@@ -502,8 +502,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "EVO",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "NT",
@@ -511,8 +511,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "NT",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "RT",
@@ -520,8 +520,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "RT",
                     evoGp.Id,
                     evoGp.Code,
-                    false,
-                    Status.Active,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
                     Status.Active),
                 new BrandSubGameProviderInfo(
                     "SBO",
@@ -529,8 +529,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "SBO",
                     sboGp.Id,
                     sboGp.Code,
-                    false,
-                    Status.Active,
+                    sboGp.IsTransferWallet,
+                    sboGp.Status,
                     Status.Active)
             };
 
@@ -651,6 +651,175 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             Assert.AreEqual(expected.Length, result.Length);
             Assert.AreNotEqual(games.Length, result.Length);
+        }
+
+        [Test]
+        public async Task Get_Game_List_If_System_Game_Provider_Is_Inactive()
+        {
+            // arrange
+            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+            var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var brandId = Guid.NewGuid();
+
+            var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Inactive, false);
+            var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
+
+            var subGameProviders = new[]
+            {
+                new BrandSubGameProviderInfo(
+                    "EVO",
+                    "EVO",
+                    "EVO",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
+                    "NT",
+                    "NT",
+                    "NT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
+                    "RT",
+                    "RT",
+                    "RT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    Status.Active),
+                new BrandSubGameProviderInfo(
+                    "SBO",
+                    "SBO",
+                    "SBO",
+                    sboGp.Id,
+                    sboGp.Code,
+                    evoGp.IsTransferWallet,
+                    sboGp.Status,
+                    Status.Active)
+            };
+
+            var games = new[]
+            {
+                new BrandGameInfo(
+                    1,
+                    "1",
+                    "1",
+                    "test",
+                    "EVO",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameStatus.Active,
+                    GameType.LiveDealer,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    2,
+                    "2",
+                    "2",
+                    "test",
+                    "RT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    3,
+                    "3",
+                    "3",
+                    "test",
+                    "NT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    4,
+                    "4",
+                    "4",
+                    "test",
+                    "SBO",
+                    sboGp.Id,
+                    "SBO",
+                    GameStatus.Active,
+                    GameStatus.Active,
+                    GameType.Sportsbook,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0)
+            };
+
+            fakeValidStatus.GetStatus(Arg.Any<PlayerType>())
+                .Returns(new[]
+                {
+                    Status.Active,
+                    Status.Maintenance
+                });
+
+            fakeValidGameStatus.GetStatus(Arg.Any<PlayerType>())
+                .Returns(new[]
+                {
+                    GameStatus.Active,
+                    GameStatus.Maintenance,
+                    GameStatus.Testing
+                });
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+                .Returns(games.ToAsyncEnumerable());
+
+            var sut = new GetAllGamesByGameTypeQueryService(
+                fakeValidStatus,
+                fakeValidGameStatus,
+                fakeGameProviderRepository);
+
+            var query = new GetAllGamesByGameTypeQuery(
+                brandId,
+                PlayerType.RealPlayer,
+                PlatformType.Desktop,
+                Array.Empty<GameType>());
+
+            // act
+            var result = await sut.QueryAsync(query).ToArrayAsync();
+
+            // assert
+            var expectedSubGpCodes = subGameProviders.Where(sgp => sgp.GpStatus == Status.Active)
+                .Select(sgp => sgp.Code).Distinct().ToArray();
+
+            var actualSubGpCodes = result.Select(g => g.GameProviderCode).Distinct().ToArray();
+
+            Assert.That(actualSubGpCodes, Has.All.Matches<string>(s => expectedSubGpCodes.Contains(s)));
         }
 
         [Test]
