@@ -54,39 +54,51 @@ namespace TGS.Services.Operator.Services.Game
 
             var gameTypes = query.Types;
 
-            var infos = from g in brandGames
-                        join sgp in brandSubGps on g.GpId equals sgp.GameProviderId
-                        where g.AvailableToBrand && (gameTypes.Length == 0
-                            || gameTypes.Contains(g.Type))
-                        let isActive = statuses.Contains(sgp.GpStatus)
-                            && statuses.Contains(sgp.BrandGpStatus)
-                            && gameStatuses.Contains(g.BrandGameStatus)
-                            && gameStatuses.Contains(g.GameStatus)
-                        select new GameInfo
-                        {
-                            Id = g.Id,
-                            Code = g.Code,
-                            Name = g.Name,
-                            Description = g.Description,
-                            GameProviderCode = g.SubGpCode,
-                            Type = g.Type,
-                            IsActive = isActive,
-                            Tag = new TagInfo
-                            {
-                                New = g.Tag.IsNew(),
-                                Hot = g.Tag.IsHot(),
-                                Recommend = g.Tag.IsRecommend()
-                            },
-                            DisplayOrder = g.DisplayOrder,
-                            Localization = string.IsNullOrEmpty(g.Localization)
-                                ? new Dictionary<string, JsonDocument>()
-                                : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
-                                    g.Localization)
-                        };
+            var infos = (from g in brandGames
+                         join sgp in brandSubGps on g.GpId equals sgp.GameProviderId
+                         where g.AvailableToBrand && (gameTypes.Length == 0
+                             || gameTypes.Contains(g.Type))
+                         let isActive = statuses.Contains(sgp.GpStatus)
+                             && statuses.Contains(sgp.BrandGpStatus)
+                             && gameStatuses.Contains(g.BrandGameStatus)
+                             && gameStatuses.Contains(g.GameStatus)
+                         select new
+                         {
+                             g.Id,
+                             g.Code,
+                             g.Name,
+                             g.Description,
+                             GameProviderCode = g.SubGpCode,
+                             g.Type,
+                             IsActive = isActive,
+                             g.Tag,
+                             g.DisplayOrder,
+                             g.Localization
+                         }).Distinct();
 
             foreach (var item in infos.OrderBy(g => g.Id))
             {
-                yield return item;
+                yield return new GameInfo
+                {
+                    Id = item.Id,
+                    Code = item.Code,
+                    Name = item.Name,
+                    Description = item.Description,
+                    GameProviderCode = item.GameProviderCode,
+                    Type = item.Type,
+                    IsActive = item.IsActive,
+                    Tag = new TagInfo
+                    {
+                        New = item.Tag.IsNew(),
+                        Hot = item.Tag.IsHot(),
+                        Recommend = item.Tag.IsRecommend()
+                    },
+                    DisplayOrder = item.DisplayOrder,
+                    Localization = string.IsNullOrEmpty(item.Localization)
+                        ? new Dictionary<string, JsonDocument>()
+                        : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
+                            item.Localization)
+                };
 
                 if (cancellationToken.IsCancellationRequested)
                 {
