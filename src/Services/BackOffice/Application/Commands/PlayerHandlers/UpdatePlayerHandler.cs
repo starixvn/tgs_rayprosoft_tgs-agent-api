@@ -85,10 +85,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             {
                 return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
+            _logger.LogInformation($"Before request.Type->{request.Type}||player.Status->{player.Status } || request.Status->{request.Status}");
 
             await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
 
-            _logger.LogInformation($" request.Type->{request.Type}||player.Status->{player.Status } || request.Status->{request.Status}");
+            _logger.LogInformation($"After request.Type->{request.Type}||player.Status->{player.Status } || request.Status->{request.Status}");
             if (player.Status != request.Status)
             {
                 if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
