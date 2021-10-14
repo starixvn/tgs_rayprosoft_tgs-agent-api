@@ -20,7 +20,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class ManualDepositController : ControllerBase
     {
         [HttpGet("{id}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<ManualDepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
             [FromServices]
@@ -68,7 +68,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("{id}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
@@ -77,11 +77,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromForm(Name = "file")] IFormFile manualReceipt)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
             var contentType = manualReceipt.ContentType;
             await using var fileStream = manualReceipt.OpenReadStream();
 
             var command = new SubmitBankDepositFormCommand(
+                brandId,
                 playerTokenData.PlayerCode,
                 id,
                 contentType,
@@ -93,7 +95,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async ValueTask<Guid> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,

@@ -6,11 +6,11 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Clients.Promotion.Client;
-using TGS.Core.Infrastructures.Json;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using TGS.Clients.Promotion.Client;
+using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
@@ -289,17 +289,30 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 moqPaymentServiceClient.Object,
                 moqFileServiceClient.Object);
 
+            var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
             var formId = Guid.NewGuid();
             var contentType = "image/jpeg";
-            var fileStream = new MemoryStream();
+            using var fileStream = new MemoryStream();
 
             var command = new SubmitBankDepositFormCommand(
+                brandId,
                 playerCode,
                 formId,
                 contentType,
                 fileStream,
                 id => "{}");
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == command.BrandId),
+                    It.Is<Guid>(x => x == command.FormId)))
+                .Returns(ValueTask.FromResult(
+                    new DepositFormInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = PaymentFlowState.WaitPayment
+                    }));
 
             moqFileServiceClient
                 .Setup(fake => fake.UploadFileAsync(
@@ -323,6 +336,65 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
                     It.IsAny<string>()),
                 Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Submit_Manual_DepositForm_If_Status_Not_WaitPayment_Will_No_Action()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+            var moqFileServiceClient = new Mock<IFileServiceClient>();
+
+            var sut = new SubmitBankDepositFormCommandService(
+                moqPaymentServiceClient.Object,
+                moqFileServiceClient.Object);
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "ThisIsPlayerCode";
+            var formId = Guid.NewGuid();
+            var contentType = "image/jpeg";
+            using var fileStream = new MemoryStream();
+
+            var command = new SubmitBankDepositFormCommand(
+                brandId,
+                playerCode,
+                formId,
+                contentType,
+                fileStream,
+                id => "{}");
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == command.BrandId),
+                    It.Is<Guid>(x => x == command.FormId)))
+                .Returns(ValueTask.FromResult(
+                    new DepositFormInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = PaymentFlowState.Approved
+                    }));
+
+            moqFileServiceClient
+                .Setup(fake => fake.UploadFileAsync(
+                    It.IsAny<string>(),
+                    It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+                    It.IsAny<Stream>()))
+                .Returns(ValueTask.FromResult(new FileView
+                {
+                    Id = "testFileId",
+                    ContentType = contentType
+                }));
+
+            await sut.ExecuteAsync(command);
+
+            moqFileServiceClient.Verify(
+                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
+                Times.Exactly(0));
+            moqPaymentServiceClient.Verify(
+                fake => fake.SubmitDepositFormStatusAsync(
+                    It.IsAny<Guid>(),
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>()),
+                Times.Exactly(0));
         }
 
         [Test]

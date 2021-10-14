@@ -26,6 +26,15 @@ namespace TGS.Services.Operator.Services.Deposit
         public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
             CancellationToken cancellationToken = default)
         {
+            var formData = await _paymentServiceClient
+                .GetDepositFormAsync(
+                    command.BrandId,
+                    command.FormId)
+                .ConfigureAwait(false);
+
+            if (formData == null || formData.Status != PaymentFlowState.WaitPayment)
+                return;
+
             var randomFileName = StringGenerator.GenerateAlphanumericString(32);
 
             var uploadResult = await _fileServiceClient
