@@ -8,6 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.GameProviders.KickPlayerServer.Client;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
@@ -15,15 +16,18 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
     {
         private readonly IAgentService _agentService;
         private readonly IPlayerService _service;
+        private readonly IKickPlayerServiceClient _kickPlayerServiceClient;
 
         public UpdatePlayerHandler(
             IPlayerService service,
             IAgentService agentService,
-            IHttpContextAccessor accessor) :
+            IHttpContextAccessor accessor,
+            IKickPlayerServiceClient kickPlayerServiceClient) :
             base(accessor)
         {
             _service = service;
             _agentService = agentService;
+            _kickPlayerServiceClient = kickPlayerServiceClient ?? throw new System.ArgumentNullException(nameof(kickPlayerServiceClient));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -79,6 +83,14 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             }
 
             await _service.UpdatePlayerAsync(player, request);
+
+            if (request.Type == updatePlayerType[0]
+                &&
+                player.Status != request.Status
+                && (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist))
+            {
+                await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+            }
 
             return CreateValidResponse<MessageResponse>();
         }
