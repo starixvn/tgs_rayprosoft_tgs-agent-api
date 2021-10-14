@@ -2134,6 +2134,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("remark");
 
+                    b.Property<DateTimeOffset?>("ReviewedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_on");
+
+                    b.Property<string>("ReviewedUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_id");
+
+                    b.Property<string>("ReviewedUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_name");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -5871,6 +5883,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
+
+                    b.Property<DateTimeOffset?>("ReviewedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_on");
+
+                    b.Property<string>("ReviewedUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_id");
+
+                    b.Property<string>("ReviewedUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_name");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()

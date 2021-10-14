@@ -37,5 +37,10 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string ThirdPartyOrderNo { get; set; }
 
         public DateTimeOffset UpdatedOn { get; set; }
+
+        public string ReviewedUserId { get; set; }
+        public string ReviewedUserName { get; set; }
+        public DateTimeOffset? ReviewedOn { get; set; }
+
     }
 }
