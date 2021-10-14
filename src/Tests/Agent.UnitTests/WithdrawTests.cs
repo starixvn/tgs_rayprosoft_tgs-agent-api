@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
@@ -51,7 +53,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -133,7 +142,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))

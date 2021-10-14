@@ -10,6 +10,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
         string UserName,
         string ChannelName,
         string ThirdPartyOrderNo,
+        Guid? FormId,
         Guid? PaymentMethodId,
         IEnumerable<PaymentFlowState> Status,
         (DateTimeOffset Begin, DateTimeOffset End)? CreateOnRange,

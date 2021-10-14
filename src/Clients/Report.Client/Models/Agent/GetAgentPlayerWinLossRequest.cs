@@ -1,10 +1,9 @@
 ﻿using System;
-using MediatR;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Clients.Report.Client.Models.Agent
 {
-    public class GetAgentPlayerWinLossRequest : PageableRequest, IRequest<PagedResponse<AgentPlayerWinLossModel>>
+    public class GetAgentPlayerWinLossRequest : PageableRequest
     {
         public Guid AgentId { get; set; }
         public DateTimeOffset From { get; set; }

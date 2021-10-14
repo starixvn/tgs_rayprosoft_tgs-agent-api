@@ -20,15 +20,15 @@ namespace TGS.Services.Operator.Services.Player
 {
     internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
     {
-        private readonly IStatusValidator _statusValidator;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IPlayerQueries _playerQueries;
-        private readonly IPasswordHandler _passwordHandler;
-        private readonly ITokenProvider _tokenProvider;
+        private readonly IBrandOperations _brandOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IJwtTokenHandler _jwtTokenHandler;
-        private readonly IBrandOperations _brandOperations;
+        private readonly IPasswordHandler _passwordHandler;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IPlayerQueries _playerQueries;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IStatusValidator _statusValidator;
+        private readonly ITokenProvider _tokenProvider;
 
         public LoginCommandService(
             IStatusValidator statusValidator,

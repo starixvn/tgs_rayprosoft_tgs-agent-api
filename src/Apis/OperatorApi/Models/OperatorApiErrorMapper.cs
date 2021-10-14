@@ -79,7 +79,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
                 [TgsApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
-                [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
+                [TgsApiError.PlayerNotFound] = StatusCodes.Status400BadRequest,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
                 [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,

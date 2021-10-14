@@ -76,6 +76,18 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddRedis(Configuration)
                 .AddNats()
                 .ForwardToPrometheus();
+
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

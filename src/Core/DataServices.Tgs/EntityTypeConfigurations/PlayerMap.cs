@@ -55,8 +55,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(16)
                 .IsRequired();
 
-            builder.Property(c => c.RegisteredOn)
-                .IsRequired();
+            builder.Property(c => c.RegisteredOn);
 
             builder.Property(c => c.LastActiveOn)
                 .IsRequired();
@@ -112,6 +111,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(p => p.BetLimitId)
                 .HasDatabaseName("ix_players_bet_limit_id");
+
+            builder.HasIndex(p => new { p.BrandId, p.AreaCode, p.Phone })
+                .IsUnique()
+                .HasDatabaseName("ux_players_brand_phone");
         }
     }
 }

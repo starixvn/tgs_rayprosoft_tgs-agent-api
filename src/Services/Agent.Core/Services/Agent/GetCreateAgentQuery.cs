@@ -8,8 +8,6 @@ namespace TGS.Services.Agent.Services.Agent
 
         public decimal CardGameRebatePercentage { get; init; }
 
-        public decimal DividendPercentage { get; init; }
-
         public decimal LiveDealerRebatePercentage { get; init; }
 
         public decimal LotteryRebatePercentage { get; init; }
@@ -32,5 +30,14 @@ namespace TGS.Services.Agent.Services.Agent
         public string Username { get; set; } = default!;
 
         public decimal VirtualSportsRebatePercentage { get; init; }
+        public AgentDividendConditionModel[] AgentDividendConditions { get; init; }
+    }
+
+    public class AgentDividendConditionModel
+    {
+        public int Rank { get; set; }
+        public decimal NetProfit { get; set; }
+        public int ActiveNumber { get; set; }
+        public decimal DividendPercentage { get; set; }
     }
 }

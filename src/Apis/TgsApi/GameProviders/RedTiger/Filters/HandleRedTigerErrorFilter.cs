@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Filters;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;

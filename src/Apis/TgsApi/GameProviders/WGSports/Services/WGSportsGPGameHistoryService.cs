@@ -59,7 +59,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             _brandGameProviderConfigurationIds = new Dictionary<Guid, Guid>();
 
             var responseUnSettle = await UnSettleAsync(source).ConfigureAwait(false);
+
+            if (!responseUnSettle.Success)
+            {
+                return new()
+                {
+                    Success = false
+                };
+            }
             var responseSettle = await SettleAsync(source).ConfigureAwait(false);
+
+            if (!responseSettle.Success)
+            {
+                return new()
+                {
+                    Success = false
+                };
+            }
 
             var LastGameRecorTime = responseUnSettle.LastGameRecordTime;
             if (LastGameRecorTime == null)
@@ -84,7 +100,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             };
         }
 
-        private async ValueTask<(int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> UnSettleAsync(WGSportsGPGameRecordRequest source)
+        private async ValueTask<(bool Success, int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> UnSettleAsync(WGSportsGPGameRecordRequest source)
         {
             var request = new WGSportsGameRecordRequest()
             {
@@ -96,13 +112,16 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             var response = await _client.GetGameRecordAsync(_configuration, request).ConfigureAwait(false);
             if (response.ReturnCode.IgnoreCaseNotEquals("1"))
             {
-                throw new GameProviderApiErrorException(response.ReturnCode.ToString());
+                return (false, 0, 0, 0, null);
             }
-
+            if (response.BetInfo == null || response.BetInfo.Length == 0)
+            {
+                return (true, 0, 0, 0, null);
+            }
             return await ExecuteRecordAsync(response.BetInfo).ConfigureAwait(false);
         }
 
-        private async ValueTask<(int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> SettleAsync(WGSportsGPGameRecordRequest source)
+        private async ValueTask<(bool Success, int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> SettleAsync(WGSportsGPGameRecordRequest source)
         {
             var request = new WGSportsGameRecordRequest()
             {
@@ -114,17 +133,17 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             var response = await _client.GetGameRecordAsync(_configuration, request).ConfigureAwait(false);
             if (response.ReturnCode.IgnoreCaseNotEquals("1"))
             {
-                throw new GameProviderApiErrorException(response.ReturnCode.ToString());
+                return (false, 0, 0, 0, null);
             }
-            if (response.BetInfo == null || response.BetInfo.Length == 1)
+            if (response.BetInfo == null || response.BetInfo.Length == 0)
             {
-                return (0, 0, 0, null);
+                return (true, 0, 0, 0, null);
             }
             return await ExecuteRecordAsync(response.BetInfo).ConfigureAwait(false);
 
         }
 
-        private async ValueTask<(int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> ExecuteRecordAsync(WGSportsBetInfo[] betInfos)
+        private async ValueTask<(bool Success, int Count, int SuccessCount, int FailCount, DateTimeOffset? LastGameRecordTime)> ExecuteRecordAsync(WGSportsBetInfo[] betInfos)
         {
             var count = 0;
             var successCount = 0;
@@ -192,7 +211,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                 lastGameRecordTime = (externalClosedOn.HasValue) ? externalClosedOn : createdOn;
             }
 
-            return (count, successCount, failCount, lastGameRecordTime);
+            return (true, count, successCount, failCount, lastGameRecordTime);
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.AllBet.Incoming;

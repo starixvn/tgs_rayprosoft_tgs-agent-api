@@ -103,6 +103,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasConstraintName("fk_agents_parent_agent_id")
                 .IsRequired(false);
 
+            builder.HasMany(p => p.AgentDividendConditions)
+                .WithOne(p => p.Agent)
+                .HasForeignKey(p => p.AgentId)
+                .HasConstraintName("fk_agents_dividend_conditions_agent_id");
+
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_agents_brand_id");
         }

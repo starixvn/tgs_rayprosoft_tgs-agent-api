@@ -116,6 +116,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 }
             }.ToHashSet();
 
+            agent.AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendCondition
+            {
+                Rank = x.Rank,
+                NetProfit = x.NetProfit,
+                ActiveNumber = x.ActiveNumber,
+                DividendPercentage = x.DividendPercentage
+            }).ToHashSet();
+
             await CreateEntityAsync(agent);
         }
 
@@ -134,8 +142,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IAgentService.UpdateAgentAsync(Agent agent, UpdateAgentRequest request)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
-
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             var parentAgent =
@@ -159,6 +165,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             switch (request.UpdateType)
             {
                 case MemberUpdateType.Info:
+
+                    await DeleteEntitiesAsync(agent.AgentDividendConditions);
+
                     agent.RealName = request.RealName;
                     agent.ParentAgentId = parentAgent?.Id;
                     agent.Status = request.Status;
@@ -188,6 +197,15 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     agent.AgentStatus = operation == AgentOperation.Agent
                         ? AgentConfigStatus.WaitForConfigurePercentage
                         : AgentConfigStatus.DoneForConfigurePercentage;
+                    agent.AgentDividendConditions = request.AgentDividendConditions.Select(x
+                        => new AgentDividendCondition
+                        {
+                            Rank = x.Rank,
+                            NetProfit = x.NetProfit,
+                            ActiveNumber = x.ActiveNumber,
+                            DividendPercentage = x.DividendPercentage
+                        }).ToHashSet();
+
                     break;
 
                 case MemberUpdateType.Contact:
