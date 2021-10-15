@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
@@ -140,6 +142,39 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
+        }
+
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpGet("exportWithdraw/{brandId}")]
+        public async Task<IActionResult> ExportWithdrawAsync(
+            [FromServices] IGetService<ExportWithdrawForm, MemoryStream> queryService,
+             Guid brandId,
+            [FromQuery] WithdrawFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new ExportWithdrawForm(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status.ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Withdraw.xlsx");
         }
     }
 }

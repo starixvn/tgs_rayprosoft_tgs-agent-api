@@ -181,6 +181,22 @@ namespace TGS.Apis.BackendOffice
                 httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
+            services.AddKickPlayerServerClient((options, sp) =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+
+                configuration.GetSection("TGSGameProvidersKickPlayerApi").Bind(options);
+
+                options.JsonSerializerOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Converters =
+                        {
+                            new JsonStringEnumConverter()
+                        }
+                };
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",

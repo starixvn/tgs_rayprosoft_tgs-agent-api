@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.ServiceUtility;
 
@@ -19,9 +16,9 @@ namespace TGS.Services.Agent.Services.Agent
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async IAsyncEnumerable<AgentInfos> QueryAsync(
-            GetAgentInfosQuery query, 
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<AgentInfos> QueryAsync(
+            GetAgentInfosQuery query,
+            CancellationToken cancellationToken = default)
         {
             var agents = from agent in _tgsRepository.Agents.AsQueryable()
                          where agent.BrandId == query.BrandId
@@ -49,19 +46,16 @@ namespace TGS.Services.Agent.Services.Agent
                              AgentId = agent.Id
                          };
 
-            if(query.Status != null)
+            if (query.Status != null)
             {
                 agents = agents.Where(x => x.Status == query.Status);
             }
-            if(!string.IsNullOrWhiteSpace(query.Username))
+            if (!string.IsNullOrWhiteSpace(query.Username))
             {
                 agents = agents.Where(x => x.Username == query.Username);
             }
 
-            foreach (var item in agents)
-            {
-                yield return item;
-            }
+            return agents.ToAsyncEnumerable();
         }
     }
 }
