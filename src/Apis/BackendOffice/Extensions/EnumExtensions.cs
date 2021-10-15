@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
@@ -15,6 +14,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 PaymentFlowState.WaitApprove => FlowState.Review,
                 PaymentFlowState.Reject => FlowState.Rejected,
                 PaymentFlowState.Approved => FlowState.Approved,
+                PaymentFlowState.Paid => FlowState.Paid,
                 _ => FlowState.Unkown,
             };
 
@@ -26,15 +26,21 @@ namespace TGS.Apis.BackendOffice.Extensions
                 FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
                 FlowState.Approved => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
-                _ => new[] { PaymentFlowState.WaitPayment, PaymentFlowState.WaitApprove, PaymentFlowState.Approved, PaymentFlowState.Reject }
+                _ => new[] {
+                    PaymentFlowState.WaitPayment,
+                    PaymentFlowState.WaitApprove,
+                    PaymentFlowState.Approved,
+                    PaymentFlowState.Reject,
+                    PaymentFlowState.Paid
+                }
             };
         }
 
         public static ReviewState ToReviewState(this ReviewResponseState reviewResponse)
-                            => reviewResponse switch
-                            {
-                                ReviewResponseState.Approve => ReviewState.Approve,
-                                _ => ReviewState.Reject
-                            };
+            => reviewResponse switch
+            {
+                ReviewResponseState.Approve => ReviewState.Approve,
+                _ => ReviewState.Reject
+            };
     }
 }

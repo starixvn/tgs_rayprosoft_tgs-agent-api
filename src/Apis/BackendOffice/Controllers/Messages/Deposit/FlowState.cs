@@ -6,6 +6,7 @@
         WaitingPayment,
         Review,
         Approved,
-        Rejected
+        Rejected,
+        Paid
     }
 }

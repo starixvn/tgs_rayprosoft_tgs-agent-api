@@ -39,6 +39,7 @@ namespace TGS.Apis.BackendOffice.Services
                 brandId,
                 formId,
                 ReviewState.Approve,
+                request.ActualAmount,
                 null,
                 null,
                 null);

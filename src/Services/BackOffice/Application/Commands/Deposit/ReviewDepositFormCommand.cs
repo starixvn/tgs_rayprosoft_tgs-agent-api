@@ -7,6 +7,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         Guid BrandId,
         Guid FormId,
         ReviewState Status,
+        decimal? ActualAmount,
         string Remark,
         string ReviewUserId,
         string ReviewUserName);
