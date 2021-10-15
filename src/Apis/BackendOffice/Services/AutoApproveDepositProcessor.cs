@@ -39,7 +39,7 @@ namespace TGS.Apis.BackendOffice.Services
                 brandId,
                 formId,
                 ReviewState.Approve,
-                request.ActualAmount,
+                request.ActualAmount?.ToDecimal(),
                 null,
                 null,
                 null);
