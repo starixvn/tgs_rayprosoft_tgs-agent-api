@@ -18,30 +18,38 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 {
     public interface ISBOBETActionModelMapper
     {
-        BetData Request(GameProviderConfigurationData data, PlaceBetRequest request,
+        BetData Request(
+            GameProviderConfigurationData data, PlaceBetRequest request,
             bool allowPlaceBetWithDifferentPlatformToken = false);
 
-        BetData CancelAndPlaceBetRequest(GameProviderConfigurationData data, PlaceBetRequest request,
+        BetData CancelAndPlaceBetRequest(
+            GameProviderConfigurationData data, PlaceBetRequest request,
             bool allowPlaceBetWithDifferentPlatformToken = false);
 
-        BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request,
+        BetData Request(
+            GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request,
             bool hasRollback, bool forceCloseRound = false);
 
-        BetData WanMeiRequest(GameProviderConfigurationData data, string betTransactionId, string externalRoundId,
+        BetData WanMeiRequest(
+            GameProviderConfigurationData data, string betTransactionId, string externalRoundId,
             SettleBetRequest request, bool hasRollback);
 
         BetData Request(GameProviderConfigurationData data, CancelBetRequest request);
 
-        BetData Request(GameProviderConfigurationData data, CancelBetRequest request,
+        BetData Request(
+            GameProviderConfigurationData data, CancelBetRequest request,
             GameActionExternalIds[] validGameActionExternalIds);
 
-        BetData Request(GameProviderConfigurationData data, RollbackRequest request,
+        BetData Request(
+            GameProviderConfigurationData data, RollbackRequest request,
             GameActionExternalIds[] gameActionExternalIds);
 
-        BetData WanMeiRequest(GameProviderConfigurationData data, RollbackRequest request,
+        BetData WanMeiRequest(
+            GameProviderConfigurationData data, RollbackRequest request,
             GameActionData gameActionData);
 
-        BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound,
+        BatchBetData Request(
+            Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound,
             BatchRequest request);
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
@@ -91,7 +99,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, CancelBetRequest request,
+        BetData ISBOBETActionModelMapper.Request(
+            GameProviderConfigurationData data, CancelBetRequest request,
             GameActionExternalIds[] validGameActionExternalIds)
         {
             var transactions = validGameActionExternalIds
@@ -112,11 +121,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, RollbackRequest request,
+        BetData ISBOBETActionModelMapper.Request(
+            GameProviderConfigurationData data, RollbackRequest request,
             GameActionExternalIds[] gameActionExternalIds)
         {
             var externalIds = gameActionExternalIds.OrderBy(ga => ga.RecordedOn).ToArray();
             var last = externalIds.Last();
+
             var reference =
                 externalIds
                     .FirstOrDefault(ga => ga.ExternalTransactionId == last.ExternalReferencedTransactionId);
@@ -145,12 +156,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETActionModelMapper.WanMeiRequest(GameProviderConfigurationData data, RollbackRequest request,
+        BetData ISBOBETActionModelMapper.WanMeiRequest(
+            GameProviderConfigurationData data, RollbackRequest request,
             GameActionData gameActionData)
         {
             var gameActions = gameActionData.GameActions.OrderBy(ga => ga.RecordedOn).ToArray();
 
             GameActionRecord[] gameActionsToCancel = null;
+
             if (gameActionData.Round.Status == RoundStatus.Closed)
             {
                 var cancellations = gameActions.Where(ga => ga.Type == CancelTransaction).ToArray();
@@ -165,7 +178,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 }
             }
 
-            gameActionsToCancel ??= new[] {gameActions.Last()};
+            gameActionsToCancel ??= new[]
+            {
+                gameActions.Last()
+            };
 
             var transactions = gameActionsToCancel.Select(t => new TransactionData
             {
@@ -315,7 +331,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalBetId = externalRoundId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
-                    GameActionType = GetGameActionType(request.Result),
+                    GameActionType = GetGameActionType(request.Result, request.WinLoss),
                     TimeStamp = request.SettleTime,
                     RoundClosed = forceCloseRound ? true : null
                 }
@@ -348,7 +364,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalBetId = externalRoundId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
-                    GameActionType = GetGameActionType(request.Result),
+                    GameActionType = GetGameActionType(request.Result, request.WinLoss),
                     TimeStamp = request.SettleTime,
                     RoundClosed = true
                 }
@@ -357,7 +373,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
+        BetData ISBOBETActionModelMapper.Request(
+            GameProviderConfigurationData data, PlaceBetRequest request,
             bool allowPlaceBetWithDifferentPlatformToken)
         {
             var externalTransactionId = request.ExternalTransactionId;
@@ -381,7 +398,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
         }
 
-        BetData ISBOBETActionModelMapper.CancelAndPlaceBetRequest(GameProviderConfigurationData data,
+        BetData ISBOBETActionModelMapper.CancelAndPlaceBetRequest(
+            GameProviderConfigurationData data,
             PlaceBetRequest request, bool allowPlaceBetWithDifferentPlatformToken)
         {
             var externalTransactionId = request.ExternalTransactionId;
@@ -420,7 +438,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         #region Private Methods
 
-        private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
+        private static BetData GetBetData(
+            GameProviderConfigurationData data, string playerCode,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>
             new()
             {
@@ -436,12 +455,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 Transactions = transactions
             };
 
-        private static GameActionType GetGameActionType(ResultType result) =>
+        private static GameActionType GetGameActionType(ResultType result, decimal settleAmount) =>
             result switch
             {
-                ResultType.Tie  => TieBet,
-                ResultType.Loss => LoseBet,
-                _               => WinBet
+                ResultType.Tie                        => TieBet,
+                ResultType.Loss when settleAmount > 0 => WinBet,
+                ResultType.Loss                       => LoseBet,
+                _                                     => WinBet
             };
 
         private static BetStatus GetBetStatus(RoundRecord roundData) =>
@@ -449,7 +469,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 ? roundData.ValidBetAmount == 0 && roundData.WinLoss == 0 ? BetStatus.Void : BetStatus.Settled
                 : BetStatus.Running;
 
-        private static (decimal stake, decimal winloss) GetStakeAndWinLoss(BetStatus status, GameActionData ga,
+        private static (decimal stake, decimal winloss) GetStakeAndWinLoss(
+            BetStatus status, GameActionData ga,
             string externalRoundId, string externalTransactionId)
         {
             if (status == BetStatus.Void)
@@ -476,7 +497,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return (stake, winloss);
         }
 
-        private static decimal GetStake(HashSet<GameActionRecord> validActions, string externalRoundId,
+        private static decimal GetStake(
+            HashSet<GameActionRecord> validActions, string externalRoundId,
             string externalTransactionId)
         {
             if (externalTransactionId.IgnoreCaseEquals(externalRoundId))
@@ -506,7 +528,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 Balance = error != GameApiError.Success ? null : balance
             };
 
-        BatchBetData ISBOBETActionModelMapper.Request(Guid gameProviderId,
+        BatchBetData ISBOBETActionModelMapper.Request(
+            Guid gameProviderId,
             Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound, BatchRequest request) =>
             new()
             {
