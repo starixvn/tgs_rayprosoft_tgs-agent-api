@@ -144,6 +144,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.BrandId,
                 formId,
                 reviewResponse.ReviewResponse.ToReviewState(),
+                null,
                 reviewResponse.Remark,
                 UserId,
                 Username);

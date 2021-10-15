@@ -67,6 +67,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 formId,
                 ReviewState.Approve,
                 null,
+                null,
                 "93a723b2-9ebb-4607-ee8d-08d978fba75f",
                 "reviewUserName");
             await sut.ExecuteAsync(command);
@@ -104,6 +105,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 formId,
                 ReviewState.Reject,
                 null,
+                null,
                 "93a723b2-9ebb-4607-ee8d-08d978fba75f",
                 "reviewUserName");
             await sut.ExecuteAsync(command);
@@ -139,6 +141,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 brandId,
                 formId,
                 ReviewState.Approve,
+                null,
                 null,
                 "93a723b2-9ebb-4607-ee8d-08d978fba75f",
                 "reviewUserName"

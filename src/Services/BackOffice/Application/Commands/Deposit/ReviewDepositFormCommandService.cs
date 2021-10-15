@@ -41,11 +41,27 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 .GetDepositFormAsync(command.BrandId, command.FormId)
                 .ConfigureAwait(false);
 
-            if (form.Status == PaymentFlowState.Approved || form.Status == PaymentFlowState.Reject)
+            if (form == null
+                || form.Status == PaymentFlowState.Approved
+                || form.Status == PaymentFlowState.Reject)
                 return;
 
+            if (command.ActualAmount != null)
+                await _paymentServiceClient
+                    .SubmitDepositFormStatusAsync(
+                        form.Id,
+                        form.Status,
+                        actualAmount: command.ActualAmount)
+                    .ConfigureAwait(false);
+
+
             await _paymentServiceClient
-                .ReviewDepositFormAsync(command.FormId, command.Status, command.ReviewUserId, command.ReviewUserName, command.Remark)
+                .ReviewDepositFormAsync(
+                    command.FormId,
+                    command.Status,
+                    command.ReviewUserId,
+                    command.ReviewUserName,
+                    command.Remark)
                 .ConfigureAwait(false);
 
             if (command.Status == ReviewState.Approve)
