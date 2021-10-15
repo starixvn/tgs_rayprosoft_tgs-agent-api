@@ -134,6 +134,7 @@ namespace TGS.Core.Models
 
             public static class UserInfo
             {
+                public static string UserIdKey = "UserId";
                 public static string UsernameKey = "Username";
                 public static string RolenameKey = "Rolename";
                 public static string RoleTypeKey = "RoleType";

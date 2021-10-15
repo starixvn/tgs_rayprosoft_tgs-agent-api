@@ -62,11 +62,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
             fakePaymentServiceClient.GetDepositFormAsync(brandId, formId)
                 .Returns(new DepositFormInfo { Status = PaymentFlowState.Approved });
 
-            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
+            var command = new ReviewDepositFormCommand(
+                brandId,
+                formId,
+                ReviewState.Approve,
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
             await sut.ExecuteAsync(command);
 
             _ = fakePaymentServiceClient.Received(0)
-                .ReviewDepositFormAsync(brandId, ReviewState.Approve, null);
+                .ReviewDepositFormAsync(
+                    brandId,
+                    ReviewState.Approve,
+                    "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                    "reviewUserName",
+                    null);
         }
 
         public async Task Manager_Can_Not_Review_DepositForm_When_Form_Status_Is_Reject()
@@ -88,11 +99,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
             fakePaymentServiceClient.GetDepositFormAsync(brandId, formId)
                 .Returns(new DepositFormInfo { Status = PaymentFlowState.Reject });
 
-            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Reject, null);
+            var command = new ReviewDepositFormCommand(
+                brandId,
+                formId,
+                ReviewState.Reject,
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
             await sut.ExecuteAsync(command);
 
             _ = fakePaymentServiceClient.Received(0)
-                .ReviewDepositFormAsync(brandId, ReviewState.Reject, null);
+                .ReviewDepositFormAsync(
+                    brandId,
+                    ReviewState.Reject,
+                    "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                    "reviewUserName",
+                    null);
         }
 
         [Test]
@@ -113,7 +135,14 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
             var walletId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
+            var command = new ReviewDepositFormCommand(
+                brandId,
+                formId,
+                ReviewState.Approve,
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName"
+                );
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
@@ -149,6 +178,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fake => fake.ReviewDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
 

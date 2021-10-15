@@ -8,5 +8,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
         Guid FormId,
         Guid? BrandPaymentId,
         ReviewState Status,
-        string Remark);
+        string Remark,
+        string ReviewUserId,
+        string ReviewUserName);
 }

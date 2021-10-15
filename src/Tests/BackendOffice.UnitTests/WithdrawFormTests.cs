@@ -59,7 +59,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 formId,
                 brandPaymentId,
                 ReviewState.Approve,
-                null);
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetWithdrawFormAsync(
@@ -80,6 +82,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == formId),
                     It.Is<Guid>(x => x == brandPaymentId),
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }

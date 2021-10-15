@@ -45,7 +45,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 return;
 
             await _paymentServiceClient
-                .ReviewDepositFormAsync(command.FormId, command.Status, command.remark)
+                .ReviewDepositFormAsync(command.FormId, command.Status, command.ReviewUserId, command.ReviewUserName, command.Remark)
                 .ConfigureAwait(false);
 
             if (command.Status == ReviewState.Approve)

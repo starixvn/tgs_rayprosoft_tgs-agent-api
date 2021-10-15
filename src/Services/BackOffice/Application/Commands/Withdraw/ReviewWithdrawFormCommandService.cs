@@ -40,6 +40,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                         command.FormId,
                         command.BrandPaymentId.Value,
                         command.Status,
+                        command.ReviewUserId,
+                        command.ReviewUserName,
                         command.Remark)
                     .ConfigureAwait(false);
             }
@@ -50,6 +52,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                         command.FormId,
                         command.BrandPaymentId.Value,
                         command.Status,
+                        command.ReviewUserId,
+                        command.ReviewUserName,
                         command.Remark)
                     .ConfigureAwait(false);
 
