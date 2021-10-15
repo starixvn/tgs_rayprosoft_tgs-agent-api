@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -13,13 +12,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public interface IWMCasinoServices
     {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+            Guid gameProviderId,
             Guid gameProviderConfigurationId, string playerCode, string externalGameId);
 
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataWithDesktopPlatformAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId);
 
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId,
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+            Guid gameProviderId,
             string playerCode, string externalGameActionGroupId);
     }
 
@@ -39,7 +40,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             _gameActionQueries = gameActionQueries;
         }
 
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+            Guid gameProviderId,
             Guid gameProviderConfigurationId, string playerCode, string externalGameId)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
@@ -74,7 +76,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         public ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
             Guid gameProviderId, string playerCode, string externalGameActionGroupId)
-            => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(gameProviderId, playerCode,
+            => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(gameProviderId,
+                playerCode,
                 externalGameActionGroupId);
 
         private async ValueTask<PlatformType> GetPlatformTypeAsync(
@@ -85,6 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 PlatformType.Desktop,
                 PlatformType.Mobile
             };
+
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId)
                 .ConfigureAwait(false);
 
@@ -92,20 +96,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ? platformTypes
                 : games.SelectMany(GetPlatformTypes).Distinct().ToArray();
 
-            var loginRecords = await _playerOperations.GetPlayerEnabledLoginRecordsAsync(playerCode)
-                .ConfigureAwait(false);
-
-            var platformType = (from rec in loginRecords
-                                join p in gamePlatforms on rec.PlatformType equals p
-                                orderby rec.ExpiredOn descending
-                                select (PlatformType?)rec.PlatformType).FirstOrDefault();
-
-            if (!platformType.HasValue)
-            {
-                throw new PlayerLoginExpiredException(playerCode);
-            }
-
-            return platformType.Value;
+            return gamePlatforms.DefaultIfEmpty(PlatformType.Desktop).FirstOrDefault();
 
             PlatformType[] GetPlatformTypes(CachedGame game) =>
                 game.PlatformType switch

@@ -13,7 +13,7 @@ namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
-        Task<PlayerValidationResult> ValidatePlayerAsync(PlayerValidationData data);
+        ValueTask<PlayerValidationResult> ValidatePlayerAsync(PlayerValidationData data);
     }
 
     public sealed partial class GamePlayActions
@@ -51,21 +51,30 @@ namespace TGS.Services.GameOperations
         }
 
         /// <summary>
-        ///     Validate player for single game api
+        /// Validate player for single game api
         /// </summary>
-        async Task<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
+        async ValueTask<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
         {
-            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode).ConfigureAwait(false);
             var brandId = player.BrandId;
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode);
+
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(data.GameProviderCode)
+                .ConfigureAwait(false);
+
             var gameProviderConfigurationId =
-                await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
+                await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
+                    .ConfigureAwait(false);
 
-            await ValidatePlayerAsync(player, gameProviderId, gameProviderConfigurationId, data.PlatformType);
+            await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(player.PlayerCode, data.PlatformType)
+                .ConfigureAwait(false);
 
-            var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+            await ValidateRequiredStatusAsync(player, gameProviderId, gameProviderConfigurationId)
+                .ConfigureAwait(false);
 
-            var brand = await _brandOperations.GetCachedBrandAsync(brandId);
+            var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId)
+                .ConfigureAwait(false);
+
+            var brand = await _brandOperations.GetCachedBrandAsync(brandId).ConfigureAwait(true);
 
             return new()
             {
@@ -80,25 +89,26 @@ namespace TGS.Services.GameOperations
         }
 
         /// <summary>
-        ///     Validate player on betting if needed.
+        /// Validate statuses on betting if needed.
         /// </summary>
-        private async Task ValidatePlayerAsync(CachedPlayer player, Guid gameProviderId,
-            Guid gameProviderConfigurationId, PlatformType? platform, bool ignoreExpired = false)
+        private async ValueTask ValidateRequiredStatusAsync(
+            CachedPlayer player,
+            Guid gameProviderId,
+            Guid gameProviderConfigurationId)
         {
-            if (!ignoreExpired)
-            {
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(player.PlayerCode, platform);
-            }
-
             var brandId = player.BrandId;
             var status = _validStatus.GetStatus(player.Type);
-            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
+
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status).ConfigureAwait(false);
+
             await _statusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(gameProviderId,
-                gameProviderConfigurationId, status);
-            await ValidatePlayerStatusAsync(player, gameProviderId);
+                gameProviderConfigurationId,
+                status).ConfigureAwait(false);
+
+            await ValidatePlayerStatusAsync(player, gameProviderId).ConfigureAwait(false);
         }
 
-        private async Task ValidatePlayerStatusAsync(CachedPlayer player, Guid gameProviderId)
+        private async ValueTask ValidatePlayerStatusAsync(CachedPlayer player, Guid gameProviderId)
         {
             _statusValidator.ThrowIfPlayerDisabled(player.Status);
 
@@ -108,7 +118,9 @@ namespace TGS.Services.GameOperations
             }
 
             var gameProviderSupportTestPlayer =
-                await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId);
+                await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId)
+                    .ConfigureAwait(false);
+
             if (!gameProviderSupportTestPlayer)
             {
                 throw new InvalidOperationException("Test player is not supported.");
