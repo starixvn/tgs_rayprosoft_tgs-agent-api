@@ -93,63 +93,6 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
-        /// Get an agent information
-        /// </summary>
-        [HttpGet("info")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<GetAgentResponse> GetAgentInfoAsync(
-            [FromServices] IStatusValidator statusValidator,
-            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
-
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-
-            var agentId = agentTokenData.AgentId;
-
-            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
-
-            if (agentInfo == null)
-            {
-                throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
-            }
-
-            return new GetAgentResponse
-            {
-                Data = new AgentData
-                {
-                    Id = agentInfo.Id,
-                    Username = agentInfo.Username,
-                    RealName = agentInfo.RealName,
-                    Email = agentInfo.Email,
-                    Phone = agentInfo.Phone,
-                    QQ = agentInfo.QQ,
-                    Wechat = agentInfo.Wechat,
-                    InvitationCode = agentInfo.InvitationCode,
-                    BrandUrl = agentInfo.BrandUrl,
-                    IsSetPayPassword = agentInfo.PayPassword.Length > 0,
-                    AgentLevel = agentInfo.AgentLevel,
-                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
-                    DividendPercentage = agentInfo.DividendPercentage,
-                    ParentUsername = agentInfo.ParentUserName,
-                    RegisteredOn = agentInfo.RegisteredOn,
-                    Balance = agentInfo.Balance,
-                    Status = agentInfo.Status.ToString(),
-                    Type = agentInfo.Type.ToString(),
-                    LevelType = agentInfo.AgentLevelType.ToString(),
-                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
-                    {
-                        Rank = x.Rank,
-                        NetProfit = x.NetProfit,
-                        ActiveNumber = x.ActiveNumber,
-                        DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray()
-                }
-            };
-        }
-
-        /// <summary>
         /// Get an agent information by id
         /// </summary>
         [HttpGet("info/{agentId}")]
@@ -207,9 +150,9 @@ namespace TGS.Apis.AgentApi.Controllers
         [Description("Get agents")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagedResponse<AgentModel>> GetAgentsAsync(
-            [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
-            [FromQuery] GetAgentsRequest request,
-            [FromQuery] PagingRequest pagingRequest)
+                    [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
+                    [FromQuery] GetAgentsRequest request,
+                    [FromQuery] PagingRequest pagingRequest)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
@@ -292,6 +235,63 @@ namespace TGS.Apis.AgentApi.Controllers
                     .ApplyPaging(paging)
                     .ToArrayAsync()
                     .ConfigureAwait(false)
+            };
+        }
+
+        /// <summary>
+        /// Get an agent information
+        /// </summary>
+        [HttpGet("info")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<GetAgentResponse> GetLoginAgentInfoAsync(
+            [FromServices] IStatusValidator statusValidator,
+            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+            var agentId = agentTokenData.AgentId;
+
+            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
+
+            if (agentInfo == null)
+            {
+                throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+            }
+
+            return new GetAgentResponse
+            {
+                Data = new AgentData
+                {
+                    Id = agentInfo.Id,
+                    Username = agentInfo.Username,
+                    RealName = agentInfo.RealName,
+                    Email = agentInfo.Email,
+                    Phone = agentInfo.Phone,
+                    QQ = agentInfo.QQ,
+                    Wechat = agentInfo.Wechat,
+                    InvitationCode = agentInfo.InvitationCode,
+                    BrandUrl = agentInfo.BrandUrl,
+                    IsSetPayPassword = agentInfo.PayPassword.Length > 0,
+                    AgentLevel = agentInfo.AgentLevel,
+                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
+                    DividendPercentage = agentInfo.DividendPercentage,
+                    ParentUsername = agentInfo.ParentUserName,
+                    RegisteredOn = agentInfo.RegisteredOn,
+                    Balance = agentInfo.Balance,
+                    Status = agentInfo.Status.ToString(),
+                    Type = agentInfo.Type.ToString(),
+                    LevelType = agentInfo.AgentLevelType.ToString(),
+                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
+                    {
+                        Rank = x.Rank,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        DividendPercentage = x.DividendPercentage
+                    }).OrderBy(x => x.Rank).ToArray()
+                }
             };
         }
 
