@@ -100,12 +100,15 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<GetAgentResponse> GetAgentInfoAsync(
             [FromServices] IStatusValidator statusValidator,
             [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
-            [FromQuery] Guid agentId)
+            [FromQuery] Guid? agentId)
         {
             var brandId = HttpContext.Items.GetBrandId();
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
-            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
+            if (agentId == null)
+                agentId = HttpContext.Items.GetAgentTokenData().AgentId;
+
+            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId.Value));
 
             if (agentInfo == null)
             {
@@ -116,6 +119,7 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 Data = new AgentData
                 {
+                    Id = agentInfo.Id,
                     Username = agentInfo.Username,
                     RealName = agentInfo.RealName,
                     Email = agentInfo.Email,
