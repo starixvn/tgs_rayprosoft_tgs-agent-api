@@ -38,14 +38,7 @@ namespace TGS.Services.Operator.Services.Game
             var statuses = _validStatus.GetStatus(query.PlayerType);
             var gameStatuses = _validGameStatus.GetStatus(query.PlayerType);
 
-            var gpStatuses = new[]
-            {
-                Status.Active,
-                Status.Maintenance
-            };
-
             var brandSubGps = await _gameProviderRepository.QueryAllSubGameProvidersAsync(query.BrandId)
-                .Where(subGp => gpStatuses.Contains(subGp.GpStatus) && gpStatuses.Contains(subGp.BrandGpStatus))
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             var brandGames = await _gameProviderRepository.QueryAllGamesAsync(query.BrandId)
@@ -54,27 +47,25 @@ namespace TGS.Services.Operator.Services.Game
 
             var gameTypes = query.Types;
 
-            var infos = (from g in brandGames
-                         join sgp in brandSubGps on g.GpId equals sgp.GameProviderId
-                         where g.AvailableToBrand && (gameTypes.Length == 0
-                             || gameTypes.Contains(g.Type))
-                         let isActive = statuses.Contains(sgp.GpStatus)
-                             && statuses.Contains(sgp.BrandGpStatus)
-                             && gameStatuses.Contains(g.BrandGameStatus)
-                             && gameStatuses.Contains(g.GameStatus)
-                         select new
-                         {
-                             g.Id,
-                             g.Code,
-                             g.Name,
-                             g.Description,
-                             GameProviderCode = g.SubGpCode,
-                             g.Type,
-                             IsActive = isActive,
-                             g.Tag,
-                             g.DisplayOrder,
-                             g.Localization
-                         }).Distinct();
+            var infos = from g in brandGames
+                        join sgp in brandSubGps on g.SubGpCode equals sgp.Code
+                        where g.AvailableToBrand && (gameTypes.Length == 0
+                            || gameTypes.Contains(g.Type))
+                        let isActive = statuses.Contains(sgp.Status)
+                            && gameStatuses.Contains(g.Status)
+                        select new
+                        {
+                            g.Id,
+                            g.Code,
+                            g.Name,
+                            g.Description,
+                            GameProviderCode = g.SubGpCode,
+                            g.Type,
+                            IsActive = isActive,
+                            g.Tag,
+                            g.DisplayOrder,
+                            g.Localization
+                        };
 
             foreach (var item in infos.OrderBy(g => g.Id))
             {

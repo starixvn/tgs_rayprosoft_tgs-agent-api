@@ -34,7 +34,7 @@ namespace TGS.Services.Operator.Services.GameBalance
             var processGps = _gameProviderRepository
                 .QueryAllSubGameProvidersAsync(command.BrandId)
                 .Where(gp => gp.IsTransferWallet
-                    && gp.GpStatus == Status.Active)
+                    && gp.Status == Status.Active)
                 .Select(gp => gp.GpCode)
                 .Distinct();
 

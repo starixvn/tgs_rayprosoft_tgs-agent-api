@@ -114,46 +114,102 @@ namespace TGS.Operator.Repositories
                             && sgp.GameProviderId == gp.Id
                             && status.Contains(bg.Status)
                             && status.Contains(game.Status)
-                        select new BrandGameInfo(
+                        select new
+                        {
                             game.Id,
                             game.Code,
                             game.Name,
                             game.Description,
-                            game.SubGameProviderCode,
-                            gp.Id,
-                            gp.Code,
-                            game.Status,
-                            bg.Status,
+                            SubGpCode = game.SubGameProviderCode,
+                            GpId = gp.Id,
+                            GpCode = gp.Code,
+                            GameStatus = game.Status,
+                            BrandGameStatus = bg.Status,
                             game.Type,
                             game.PlatformType,
                             game.AvailableToBrand,
                             game.AvailableCurrencies,
                             game.Localization,
                             bg.Tag,
-                            bg.DisplayOrder);
+                            bg.DisplayOrder
+                        };
 
-            return query.ToAsyncEnumerable();
+            return query.ToAsyncEnumerable().Select(info =>
+            {
+                var gameStatus = GameStatus.Active;
+
+                if (info.BrandGameStatus == GameStatus.Maintenance || info.GameStatus == GameStatus.Maintenance)
+                {
+                    gameStatus = GameStatus.Maintenance;
+                }
+                else if (info.BrandGameStatus == GameStatus.Testing || info.GameStatus == GameStatus.Testing)
+                {
+                    gameStatus = GameStatus.Testing;
+                }
+
+                return new BrandGameInfo(
+                    info.Id,
+                    info.Code,
+                    info.Name,
+                    info.Description,
+                    info.SubGpCode,
+                    info.GpId,
+                    info.GpCode,
+                    gameStatus,
+                    info.Type,
+                    info.PlatformType,
+                    info.AvailableToBrand,
+                    info.AvailableCurrencies,
+                    info.Localization,
+                    info.Tag,
+                    info.DisplayOrder);
+            });
         }
 
         public IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId)
         {
+            var status = new[]
+            {
+                Status.Active,
+                Status.Maintenance
+            };
+
             var query = from brandGp in _tgsRepository.BrandGameProviders.AsQueryable()
                         from gp in _tgsRepository.GameProviders
                         from subGp in _tgsRepository.SubGameProviders
                         where brandGp.GameProviderId == gp.Id
                             && brandGp.GameProviderId == subGp.GameProviderId
                             && brandGp.BrandId == brandId
-                        select new BrandSubGameProviderInfo(
-                            subGp.Code,
+                            && status.Contains(gp.Status)
+                            && status.Contains(brandGp.Status)
+                        select new
+                        {
+                            SubGpCode = subGp.Code,
                             subGp.Name,
                             subGp.Description,
-                            gp.Id,
-                            gp.Code,
+                            GpId = gp.Id,
+                            GpCode = gp.Code,
                             gp.TransferWallet,
-                            gp.Status,
-                            brandGp.Status);
+                            GpStatus = gp.Status,
+                            BrandGpStatus = brandGp.Status
+                        };
 
-            return query.ToAsyncEnumerable();
+            return query.ToAsyncEnumerable()
+                .Select(info =>
+                {
+                    var gpStatus = info.BrandGpStatus == Status.Maintenance || info.GpStatus == Status.Maintenance
+                        ? Status.Maintenance
+                        : Status.Active;
+
+                    return new BrandSubGameProviderInfo(
+                        info.SubGpCode,
+                        info.Name,
+                        info.Description,
+                        info.GpId,
+                        info.GpCode,
+                        info.TransferWallet,
+                        gpStatus);
+                });
         }
 
         public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId)

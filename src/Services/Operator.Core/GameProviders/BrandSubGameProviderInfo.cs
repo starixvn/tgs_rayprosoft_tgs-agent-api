@@ -10,6 +10,5 @@ namespace TGS.Services.Operator
         Guid GameProviderId,
         string GpCode,
         bool IsTransferWallet,
-        Status GpStatus,
-        Status BrandGpStatus);
+        Status Status);
 }

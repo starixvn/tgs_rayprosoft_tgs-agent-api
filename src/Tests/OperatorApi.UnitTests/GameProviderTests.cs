@@ -41,7 +41,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                             Guid.NewGuid(),
                             "GpCode",
                             true,
-                            Status.Active,
                             Status.Active)
                     }.ToAsyncEnumerable());
 

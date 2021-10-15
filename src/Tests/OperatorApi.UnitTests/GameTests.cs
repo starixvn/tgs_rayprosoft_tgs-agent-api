@@ -117,7 +117,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -126,7 +125,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -135,7 +133,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -179,7 +176,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -188,7 +184,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -197,7 +192,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -241,7 +235,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -250,7 +243,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -259,7 +251,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -298,8 +289,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -307,8 +297,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -316,8 +305,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -325,8 +313,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     sboGp.IsTransferWallet,
-                    sboGp.Status,
-                    Status.Active)
+                    sboGp.Status)
             };
 
             var games = new[]
@@ -339,7 +326,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "EVO",
                     evoGp.Id,
                     "EVO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.LiveDealer,
                     GamePlatformType.Desktop,
@@ -357,7 +343,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -374,7 +359,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -390,7 +374,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "SBO",
                     sboGp.Id,
                     "SBO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.Sportsbook,
                     GamePlatformType.Desktop,
@@ -503,8 +486,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -512,8 +494,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -521,8 +502,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -530,8 +510,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     sboGp.IsTransferWallet,
-                    sboGp.Status,
-                    Status.Active)
+                    sboGp.Status)
             };
 
             var games = new[]
@@ -544,7 +523,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "EVO",
                     evoGp.Id,
                     "EVO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.LiveDealer,
                     GamePlatformType.Desktop,
@@ -562,7 +540,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -579,7 +556,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -595,7 +571,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "SBO",
                     sboGp.Id,
                     "SBO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.Sportsbook,
                     GamePlatformType.Desktop,
@@ -675,8 +650,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -684,8 +658,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -693,8 +666,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status,
-                    Status.Active),
+                    evoGp.Status),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -702,8 +674,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     evoGp.IsTransferWallet,
-                    sboGp.Status,
-                    Status.Active)
+                    sboGp.Status)
             };
 
             var games = new[]
@@ -716,7 +687,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "EVO",
                     evoGp.Id,
                     "EVO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.LiveDealer,
                     GamePlatformType.Desktop,
@@ -734,7 +704,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -751,7 +720,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     "EVO",
                     GameStatus.Active,
-                    GameStatus.Active,
                     GameType.Slot,
                     GamePlatformType.Desktop,
                     true,
@@ -767,7 +735,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "SBO",
                     sboGp.Id,
                     "SBO",
-                    GameStatus.Active,
                     GameStatus.Active,
                     GameType.Sportsbook,
                     GamePlatformType.Desktop,
@@ -814,7 +781,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var result = await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
-            var expectedSubGpCodes = subGameProviders.Where(sgp => sgp.GpStatus == Status.Active)
+            var expectedSubGpCodes = subGameProviders.Where(sgp => sgp.Status == Status.Active)
                 .Select(sgp => sgp.Code).Distinct().ToArray();
 
             var actualSubGpCodes = result.Select(g => g.GameProviderCode).Distinct().ToArray();
@@ -1028,7 +995,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         GameStatus.Active,
-                        GameStatus.Active,
                         GameType.Arcade,
                         GamePlatformType.Desktop,
                         true,
@@ -1151,7 +1117,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
-                    Status.Active,
                     Status.Active)));
 
             _ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
@@ -1223,7 +1188,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
-                    Status.Active,
                     Status.Active)));
 
             _ = fakeGetLobbyGameUrlQueryService.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
