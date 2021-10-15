@@ -6,11 +6,11 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Clients.Promotion.Client;
-using TGS.Core.Infrastructures.Json;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using TGS.Clients.Promotion.Client;
+using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
@@ -321,6 +321,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.SubmitDepositFormStatusAsync(
                     It.IsAny<Guid>(),
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }
