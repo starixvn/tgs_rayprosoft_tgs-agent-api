@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Caches;
-using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.Operator.Services.Game;
@@ -41,7 +37,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                             Guid.NewGuid(),
                             "GpCode",
                             true,
-                            Status.Active)
+                            Status.Active,
+                            string.Empty)
                     }.ToAsyncEnumerable());
 
             var expected = "GpCode";
@@ -56,54 +53,436 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var brandId = Guid.NewGuid();
 
-            var brandGameProviders = new CachedBrandGameProvider[]
+            var query = new GetGameProvidersQuery(
+                brandId,
+                "CNY",
+                null,
+                PlatformType.Desktop);
+
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Active, false);
+            var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
+
+            var subGameProviders = new[]
             {
-                new()
-                {
-                    GameProviderId = Guid.NewGuid(),
-                    BrandGameProviderStatus = Status.Active
-                },
-                new()
-                {
-                    GameProviderId = Guid.NewGuid(),
-                    BrandGameProviderStatus = Status.Active
-                }
+                new BrandSubGameProviderInfo(
+                    "EVO",
+                    "EVO",
+                    "EVO",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "NT",
+                    "NT",
+                    "NT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "RT",
+                    "RT",
+                    "RT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "SBO",
+                    "SBO",
+                    "SBO",
+                    sboGp.Id,
+                    sboGp.Code,
+                    sboGp.IsTransferWallet,
+                    sboGp.Status,
+                    string.Empty)
             };
+
+            var games = new[]
+            {
+                new BrandGameInfo(
+                    1,
+                    "1",
+                    "1",
+                    "test",
+                    "EVO",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.LiveDealer,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    2,
+                    "2",
+                    "2",
+                    "test",
+                    "RT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    3,
+                    "3",
+                    "3",
+                    "test",
+                    "NT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    4,
+                    "4",
+                    "4",
+                    "test",
+                    "SBO",
+                    sboGp.Id,
+                    "SBO",
+                    GameStatus.Active,
+                    GameType.Sportsbook,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0)
+            };
+
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+                .Returns(games.ToAsyncEnumerable());
+
+            var sut = new GetGameProvidersQueryService(
+                fakePlayerOperations,
+                fakeGameProviderRepository);
+
+            // act
+            var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+            Assert.AreEqual(actual.Length, subGameProviders.Length);
+        }
+
+        [Test]
+        public async Task Get_GameProvider_List_When_GameProvider_Is_Inactive()
+        {
+            var brandId = Guid.NewGuid();
 
             var query = new GetGameProvidersQuery(
                 brandId,
                 "CNY",
-                new PlayerTokenData(),
-                PlatformType.Desktop,
-                "zh-CN");
+                null,
+                PlatformType.Desktop);
 
-            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
+            var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Active, false);
+            var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Inactive, false);
+
+            var subGameProviders = new[]
+            {
+                new BrandSubGameProviderInfo(
+                    "EVO",
+                    "EVO",
+                    "EVO",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "NT",
+                    "NT",
+                    "NT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "RT",
+                    "RT",
+                    "RT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "SBO",
+                    "SBO",
+                    "SBO",
+                    sboGp.Id,
+                    sboGp.Code,
+                    sboGp.IsTransferWallet,
+                    sboGp.Status,
+                    string.Empty)
+            };
+
+            var games = new[]
+            {
+                new BrandGameInfo(
+                    1,
+                    "1",
+                    "1",
+                    "test",
+                    "EVO",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.LiveDealer,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    2,
+                    "2",
+                    "2",
+                    "test",
+                    "RT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    3,
+                    "3",
+                    "3",
+                    "test",
+                    "NT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    4,
+                    "4",
+                    "4",
+                    "test",
+                    "SBO",
+                    sboGp.Id,
+                    "SBO",
+                    GameStatus.Active,
+                    GameType.Sportsbook,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0)
+            };
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+                .Returns(games.ToAsyncEnumerable());
+
             var sut = new GetGameProvidersQueryService(
-                fakeBrandCurrencyCodeMapper,
                 fakePlayerOperations,
-                fakeBrandLanguageCodeMapper,
-                fakeBrandOperations,
                 fakeGameProviderRepository);
 
-            fakeBrandOperations.GetBrandGameProvidersAsync(brandId)
-                .Returns(Task.FromResult(brandGameProviders));
+            // act
+            var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+            // assert
+            var expected = subGameProviders.Where(gp => gp.Status == Status.Active).ToArray();
+
+            Assert.AreEqual(expected.Length, actual.Length);
+        }
+
+        [Test]
+        public async Task Get_GameProvider_List_When_GameProvider_Is_UnderMaintenance()
+        {
+            var brandId = Guid.NewGuid();
+
+            var query = new GetGameProvidersQuery(
+                brandId,
+                "CNY",
+                null,
+                PlatformType.Desktop);
+
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Maintenance, false);
+            var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
+
+            var subGameProviders = new[]
+            {
+                new BrandSubGameProviderInfo(
+                    "EVO",
+                    "EVO",
+                    "EVO",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "NT",
+                    "NT",
+                    "NT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "RT",
+                    "RT",
+                    "RT",
+                    evoGp.Id,
+                    evoGp.Code,
+                    evoGp.IsTransferWallet,
+                    evoGp.Status,
+                    string.Empty),
+                new BrandSubGameProviderInfo(
+                    "SBO",
+                    "SBO",
+                    "SBO",
+                    sboGp.Id,
+                    sboGp.Code,
+                    sboGp.IsTransferWallet,
+                    sboGp.Status,
+                    string.Empty)
+            };
+
+            var games = new[]
+            {
+                new BrandGameInfo(
+                    1,
+                    "1",
+                    "1",
+                    "test",
+                    "EVO",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.LiveDealer,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    2,
+                    "2",
+                    "2",
+                    "test",
+                    "RT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    3,
+                    "3",
+                    "3",
+                    "test",
+                    "NT",
+                    evoGp.Id,
+                    "EVO",
+                    GameStatus.Active,
+                    GameType.Slot,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    4,
+                    "4",
+                    "4",
+                    "test",
+                    "SBO",
+                    sboGp.Id,
+                    "SBO",
+                    GameStatus.Active,
+                    GameType.Sportsbook,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    GameTag.New,
+                    0)
+            };
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
+                .Returns(games.ToAsyncEnumerable());
+
+            var sut = new GetGameProvidersQueryService(
+                fakePlayerOperations,
+                fakeGameProviderRepository);
 
             // act
-            await sut.QueryAsync(query).ToArrayAsync();
+            var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-            _ = fakeGameProviderRepository.Received(1)
-                .QueryGameProvidersAsync();
+            // assert
+            var expected = subGameProviders.Where(gp => gp.Status == Status.Maintenance).ToArray();
+            var maintenanceGps = actual.Where(gp => gp.Status == Status.Maintenance).ToArray();
 
-            _ = fakeGameProviderRepository.Received(1)
-                .QuerySubGameProvidersAsync();
+            Assert.AreEqual(expected.Length, maintenanceGps.Length);
 
-            _ = fakeGameProviderRepository.Received(1)
-                .QueryAllGamesAsync(Arg.Any<Guid>(), Arg.Any<IEnumerable<GameStatus>>());
+            foreach (var sgp in expected)
+            {
+                var exists = maintenanceGps.Any(gp => gp.Code == sgp.Code);
+                Assert.True(exists);
+            }
         }
     }
 }

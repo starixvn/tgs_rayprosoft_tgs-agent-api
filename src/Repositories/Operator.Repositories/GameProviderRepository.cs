@@ -191,7 +191,8 @@ namespace TGS.Operator.Repositories
                             GpCode = gp.Code,
                             gp.TransferWallet,
                             GpStatus = gp.Status,
-                            BrandGpStatus = brandGp.Status
+                            BrandGpStatus = brandGp.Status,
+                            subGp.Localization
                         };
 
             return query.ToAsyncEnumerable()
@@ -208,7 +209,8 @@ namespace TGS.Operator.Repositories
                         info.GpId,
                         info.GpCode,
                         info.TransferWallet,
-                        gpStatus);
+                        gpStatus,
+                        info.Localization);
                 });
         }
 

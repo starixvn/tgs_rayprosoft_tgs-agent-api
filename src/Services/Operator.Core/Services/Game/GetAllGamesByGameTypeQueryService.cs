@@ -43,14 +43,15 @@ namespace TGS.Services.Operator.Services.Game
 
             var brandGames = await _gameProviderRepository.QueryAllGamesAsync(query.BrandId)
                 .Where(g => gamePlatformTypes.Contains(g.PlatformType))
+                .Where(g => g.AvailableToBrand)
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             var gameTypes = query.Types;
 
             var infos = from g in brandGames
                         join sgp in brandSubGps on g.SubGpCode equals sgp.Code
-                        where g.AvailableToBrand && (gameTypes.Length == 0
-                            || gameTypes.Contains(g.Type))
+                        where gameTypes.Length == 0
+                            || gameTypes.Contains(g.Type)
                         let isActive = statuses.Contains(sgp.Status)
                             && gameStatuses.Contains(g.Status)
                         select new

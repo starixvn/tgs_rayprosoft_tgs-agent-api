@@ -117,7 +117,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -125,7 +126,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -133,7 +135,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active)
+                        Status.Active,
+                        string.Empty)
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -176,7 +179,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -184,7 +188,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -192,7 +197,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active)
+                        Status.Active,
+                        string.Empty)
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -235,7 +241,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -243,7 +250,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
-                        Status.Active),
+                        Status.Active,
+                        string.Empty),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -251,7 +259,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
-                        Status.Active)
+                        Status.Active,
+                        string.Empty)
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -289,7 +298,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -297,7 +307,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -305,7 +316,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -313,7 +325,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     sboGp.IsTransferWallet,
-                    sboGp.Status)
+                    sboGp.Status,
+                    string.Empty)
             };
 
             var games = new[]
@@ -486,7 +499,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -494,7 +508,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -502,7 +517,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -510,7 +526,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     sboGp.IsTransferWallet,
-                    sboGp.Status)
+                    sboGp.Status,
+                    string.Empty)
             };
 
             var games = new[]
@@ -650,7 +667,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -658,7 +676,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -666,7 +685,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Id,
                     evoGp.Code,
                     evoGp.IsTransferWallet,
-                    evoGp.Status),
+                    evoGp.Status,
+                    string.Empty),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -674,7 +694,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Id,
                     sboGp.Code,
                     evoGp.IsTransferWallet,
-                    sboGp.Status)
+                    sboGp.Status,
+                    string.Empty)
             };
 
             var games = new[]
@@ -1117,7 +1138,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
-                    Status.Active)));
+                    Status.Active,
+                    string.Empty)));
 
             _ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
                 .Returns(ValueTask.FromResult(new GameUrlInfo(0, string.Empty, "http://www.google.com")));
@@ -1188,7 +1210,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
-                    Status.Active)));
+                    Status.Active,
+                    string.Empty)));
 
             _ = fakeGetLobbyGameUrlQueryService.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
                 .Returns(ValueTask.FromResult(new LobbyGameUrlInfo(0, string.Empty, "http://www.google.com")));
