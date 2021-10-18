@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Mime;
-using System.Threading.Tasks;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -17,41 +19,65 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class GameProviderController : ControllerBase
     {
         /// <summary>
-        ///     Get game provider list
+        /// Get game provider list
         /// </summary>
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public async Task<GetGameProvidersResponse> GetGameProvidersAsync(
+        public async IAsyncEnumerable<GameProviderModel> GetGameProvidersAsync(
             [FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> getGameProviderQueryService,
             [FromQuery] GetGameProvidersRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var currentCultureInfo = CultureInfo.CurrentUICulture;
+            var cultureCode = currentCultureInfo.Name;
+
             var query = new GetGameProvidersQuery(
                 brandId,
                 request.CurrencyCode,
                 playerTokenData,
-                request.PlatformType,
-                request.LanguageCode);
+                request.PlatformType);
+
             var infos = await getGameProviderQueryService
                 .QueryAsync(query)
-                .ToListAsync()
+                .ToArrayAsync()
                 .ConfigureAwait(false);
 
-            var gameProviders = infos.Select(info =>
-                    new GameProviderModel
-                    {
-                        Code = info.Code,
-                        Description = info.Description,
-                        GameTypes = info.GameTypes,
-                        IsTransferWallet = info.IsTransferWallet,
-                        Name = info.Name,
-                        Status = info.Status
-                    })
-                .ToArray();
+            foreach (var info in infos)
+            {
+                var lang = info.Localization.ContainsKey(cultureCode)
+                    ? info.Localization[cultureCode]
+                    : JsonDocument.Parse("{}");
 
-            return new GetGameProvidersResponse {GameProviders = gameProviders};
+                yield return new GameProviderModel
+                {
+                    Code = info.Code,
+                    Description = GetLocalization(
+                        lang.RootElement,
+                        "description",
+                        info.Description),
+                    GameTypes = info.GameTypes,
+                    IsTransferWallet = info.IsTransferWallet,
+                    Name = GetLocalization(
+                        lang.RootElement,
+                        "name",
+                        info.Name),
+                    Status = info.Status
+                };
+            }
+        }
+
+        private string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+        {
+            if (!element.TryGetProperty(propertyName, out var value))
+            {
+                return defaultValue;
+            }
+
+            var val = value.GetString();
+
+            return string.IsNullOrEmpty(val) ? defaultValue : val;
         }
     }
 }

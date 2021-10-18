@@ -10,7 +10,6 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator.GameProviders;
 using TGS.ServiceUtility;
 
@@ -18,26 +17,15 @@ namespace TGS.Services.Operator.Services.GameProvider
 {
     internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuery, GameProviderInfo>
     {
-        private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
-        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
-
-        private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IPlayerOperations _playerOperations;
 
         public GetGameProvidersQueryService(
-            IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
             IPlayerOperations playerOperations,
-            IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            IBrandOperations brandOperations,
             IGameProviderRepository gameProviderRepository)
         {
-            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
-                throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandLanguageCodeMapper = brandLanguageCodeMapper ??
-                throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+
             _gameProviderRepository =
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
@@ -47,7 +35,6 @@ namespace TGS.Services.Operator.Services.GameProvider
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var brandId = query.BrandId;
-            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, brandId);
 
             var playerTokenData = query.PlayerTokenData;
             var platformType = query.PlatformType;
@@ -62,99 +49,60 @@ namespace TGS.Services.Operator.Services.GameProvider
                 }
 
                 cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
+
                 if (cachedPlayer != null
-                    && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
+                    && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(query.CurrencyCode))
                 {
-                    throw new CurrencyNotMatchingException(cachedPlayer.DefaultWalletCurrencyCode, currencyCode);
+                    throw new CurrencyNotMatchingException(cachedPlayer.DefaultWalletCurrencyCode, query.CurrencyCode);
                 }
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, brandId)
-                .ConfigureAwait(false);
-
-            var brandGameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId)
-                .ConfigureAwait(false);
 
             var statuses = GetAvailableStatus(playerType);
             var gameStatuses = GetAvailableGameStatus(playerType);
 
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
-            var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
-                .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
-            var gameProviders = await _gameProviderRepository
-                .QueryGameProvidersAsync()
-                .Where(gp => gameProviderIds.Contains(gp.Id)
-                    && statuses.Contains(gp.Status))
+            var brandSubGps = await _gameProviderRepository
+                .QueryAllSubGameProvidersAsync(query.BrandId)
+                .Where(sgp => statuses.Contains(sgp.Status))
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync()
-                .Where(sgp => gameProviderIds.Contains(sgp.GameProviderId))
+            var brandGames = await _gameProviderRepository.QueryAllGamesAsync(brandId)
+                .Where(g => gamePlatformTypes.Contains(g.PlatformType))
+                .Where(g => g.AvailableToBrand)
+                .Where(g => gameStatuses.Contains(g.Status))
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-            var allGames = await _gameProviderRepository.QueryAllGamesAsync(brandId, gameStatuses)
-                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
-
-            var gameTypeInfos = (from game in allGames
-                                 where gamePlatformTypes.Contains(game.PlatformType)
-                                 group game.Type by game.SubGameProviderCode
+            var gameTypeInfos = (from game in brandGames
+                                 where game.AvailableToBrand
+                                 group game.Type by game.SubGpCode
                                  into g
                                  select g)
                 .ToDictionary(x => x.Key, x => x.Distinct().ToArray());
 
-            foreach (var gp in gameProviders)
+            foreach (var sgp in brandSubGps)
             {
-                foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
+                if (!gameTypeInfos.TryGetValue(sgp.Code, out var gameTypes) || gameTypes.Length == 0)
                 {
-                    if (!gameTypeInfos.TryGetValue(sgp.Code, out var gameTypes) || gameTypes.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    if (string.IsNullOrEmpty(sgp.Localization))
-                    {
-                        yield return new GameProviderInfo
-                        {
-                            Code = sgp.Code,
-                            Name = sgp.Name,
-                            Description = sgp.Description,
-                            Status = gp.Status,
-                            IsTransferWallet = gp.IsTransferWallet,
-                            GameTypes = gameTypes
-                        };
-
-                        continue;
-                    }
-
-                    var localization = JsonDocument.Parse(sgp.Localization);
-                    if (!localization.RootElement.TryGetProperty(culture, out var lang) ||
-                        lang.ValueKind == JsonValueKind.Undefined)
-                    {
-                        yield return new GameProviderInfo
-                        {
-                            Code = sgp.Code,
-                            Name = sgp.Name,
-                            Description = sgp.Description,
-                            Status = gp.Status,
-                            IsTransferWallet = gp.IsTransferWallet,
-                            GameTypes = gameTypes
-                        };
-
-                        continue;
-                    }
-
-                    yield return new GameProviderInfo
-                    {
-                        Code = sgp.Code,
-                        Name = GetLocalization(lang, "name", sgp.Name),
-                        Description = GetLocalization(lang, "description", sgp.Description),
-                        Status = gp.Status,
-                        IsTransferWallet = gp.IsTransferWallet,
-                        GameTypes = gameTypes
-                    };
+                    continue;
                 }
+
+                yield return new GameProviderInfo
+                {
+                    Code = sgp.Code,
+                    Name = sgp.Name,
+                    Description = sgp.Description,
+                    Status = sgp.Status,
+                    IsTransferWallet = sgp.IsTransferWallet,
+                    GameTypes = gameTypes,
+                    Localization = string.IsNullOrEmpty(sgp.Localization)
+                        ? new Dictionary<string, JsonDocument>()
+                        : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
+                            sgp.Localization)
+                };
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -164,57 +112,43 @@ namespace TGS.Services.Operator.Services.GameProvider
         }
 
         private static GameStatus[] GetAvailableGameStatus(PlayerType playerType)
-        {
-            switch (playerType)
+            => playerType switch
             {
-                case PlayerType.RealPlayer:
-                    return new[]
-                    {
-                        GameStatus.Active,
-                        GameStatus.Maintenance
-                    };
-
-                case PlayerType.TestPlayer:
-                case PlayerType.All:
-                    return new[]
-                    {
-                        GameStatus.Active,
-                        GameStatus.Maintenance,
-                        GameStatus.Testing
-                    };
-
-                default:
-                    return Array.Empty<GameStatus>();
-            }
-        }
+                PlayerType.RealPlayer => new[]
+                {
+                    GameStatus.Active,
+                    GameStatus.Maintenance
+                },
+                PlayerType.TestPlayer => new[]
+                {
+                    GameStatus.Active,
+                    GameStatus.Maintenance,
+                    GameStatus.Testing
+                },
+                PlayerType.All => new[]
+                {
+                    GameStatus.Active,
+                    GameStatus.Maintenance,
+                    GameStatus.Testing
+                },
+                _ => Array.Empty<GameStatus>()
+            };
 
         private static Status[] GetAvailableStatus(PlayerType playerType)
         {
-            switch (playerType)
+            var statuses = new[]
             {
-                case PlayerType.RealPlayer:
-                case PlayerType.TestPlayer:
-                case PlayerType.All:
-                    return new[]
-                    {
-                        Status.Active,
-                        Status.Maintenance
-                    };
+                Status.Active,
+                Status.Maintenance
+            };
 
-                default:
-                    return Array.Empty<Status>();
-            }
-        }
-
-        private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
-        {
-            if (!element.TryGetProperty(propertyName, out var value))
+            return playerType switch
             {
-                return defaultValue;
-            }
-
-            var val = value.GetString();
-            return string.IsNullOrEmpty(val) ? defaultValue : val;
+                PlayerType.RealPlayer => statuses,
+                PlayerType.TestPlayer => statuses,
+                PlayerType.All        => statuses,
+                _                     => Array.Empty<Status>()
+            };
         }
     }
 }
