@@ -11,6 +11,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     public class BaseContextController : ControllerBase
     {
+        protected Guid UserId => new(GetUserMap()[Consts.BackendOffice.UserInfo.UserIdKey]);
         protected string Username => GetUserMap()[Consts.BackendOffice.UserInfo.UsernameKey];
         protected string RoleName => GetUserMap()[Consts.BackendOffice.UserInfo.RolenameKey];
 
@@ -37,8 +38,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
         private Dictionary<string, string> GetUserMap()
-        {
-            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-        }
+            => HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
     }
 }

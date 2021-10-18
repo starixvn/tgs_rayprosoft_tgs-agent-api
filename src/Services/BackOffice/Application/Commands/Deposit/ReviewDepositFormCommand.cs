@@ -7,5 +7,6 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         Guid BrandId,
         Guid FormId,
         ReviewState Status,
-        string remark);
+        string remark,
+        Guid? OperatorUserId);
 }

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
@@ -103,29 +102,28 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new DepositViewModel()
+            var response = new DepositViewModel
             {
-
                 Valid = true,
                 TotalCount = result.TotalCount,
                 Items = result.Items
-                .Select(form => new DepositFormViewModel
-                {
-                    Id = form.Id,
-                    PlayerCode = form.PlayerCode,
-                    UserName = form.UserName,
-                    BrandId = form.BrandId,
-                    BrandPaymentId = form.BrandPaymentId,
-                    PaymentMethodId = form.PaymentMethodId,
-                    ChannelName = form.ChannelName,
-                    Status = form.Status.ToFlowState(),
-                    Amount = form.Amount,
-                    Remark = form.Remark,
-                    CreatedOn = form.CreatedOn,
-                    UpdatedOn = form.UpdatedOn,
-                    ThirdPartyOrderNo = form.ThirdPartyOrderNo
-                })
-                .ToArray(),
+                    .Select(form => new DepositFormViewModel
+                    {
+                        Id = form.Id,
+                        PlayerCode = form.PlayerCode,
+                        UserName = form.UserName,
+                        BrandId = form.BrandId,
+                        BrandPaymentId = form.BrandPaymentId,
+                        PaymentMethodId = form.PaymentMethodId,
+                        ChannelName = form.ChannelName,
+                        Status = form.Status.ToFlowState(),
+                        Amount = form.Amount,
+                        Remark = form.Remark,
+                        CreatedOn = form.CreatedOn,
+                        UpdatedOn = form.UpdatedOn,
+                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
+                    })
+                    .ToArray(),
                 Sum = result.Sum
             };
 
@@ -148,7 +146,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.BrandId,
                 formId,
                 reviewResponse.ReviewResponse.ToReviewState(),
-                reviewResponse.Remark);
+                reviewResponse.Remark,
+                UserId);
 
             await reviewCommandService
                 .ExecuteAsync(command)
@@ -161,7 +160,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpGet("exportDeposit/{brandId}")]
         public async Task<IActionResult> ExportDepositAsync(
             [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,
-             Guid brandId,
+            Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
         {
@@ -186,7 +185,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 updateOnRange,
                 paging);
 
-            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Deposit.xlsx");
+            return File(await queryService.GetAsync(query).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Deposit.xlsx");
         }
     }
 }

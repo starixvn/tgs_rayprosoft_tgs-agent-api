@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
-using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
@@ -28,14 +28,18 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             IPromotionClient promotionClient,
             ILogger<ReviewDepositFormCommandService> logger)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+
+            _playerBucketRepository =
+                playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
         {
             var form = await _paymentServiceClient
                 .GetDepositFormAsync(command.BrandId, command.FormId)
@@ -62,7 +66,10 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             form.PromotionId,
                             player.PlayerCode,
                             player.DefaultWalletId,
-                            form.Amount))
+                            form.Amount,
+                            command.remark,
+                            command.FormId,
+                            command.OperatorUserId))
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 

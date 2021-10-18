@@ -23,7 +23,8 @@ namespace TGS.Services.Promotion.Handlers
         private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public DispatchPromotionBonusHandler(IPlayerBucketRepository service,
+        public DispatchPromotionBonusHandler(
+            IPlayerBucketRepository service,
             IPromotionBonusRepository promotionBonusService,
             IWalletRepository walletRepository,
             ITgsTransactionRepository transactionRepository,
@@ -36,7 +37,8 @@ namespace TGS.Services.Promotion.Handlers
             _transactionRepository = transactionRepository;
         }
 
-        public override async Task<MessageResponse> Handle(DispatchPromotionBonusRequest request,
+        public override async Task<MessageResponse> Handle(
+            DispatchPromotionBonusRequest request,
             CancellationToken cancellationToken)
         {
             var playerCodes = request.Players.Select(x => x.PlayerCode).ToArray();
@@ -73,18 +75,25 @@ namespace TGS.Services.Promotion.Handlers
             }
 
             await _service.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
-                    new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
+                    new CreatePlayerBucketRequest(x.BrandId,
+                        x.PlayerCode,
+                        x.DefaultWalletId,
+                        x.BucketType,
                         x.BucketAmount))
                 .ToArray()).ConfigureAwait(false);
 
             await _promotionBonusService.UpdatePromotionBonusPlayersAsync(players);
 
             var transactionPromotions = new List<TransactionPromotion>();
+
             foreach (var promotionPlayer in playerBuckets)
             {
                 var (transactionId, balance) = await _walletRepository.ExchangeAsync(promotionPlayer.BrandId,
-                    promotionPlayer.DefaultWalletId, promotionPlayer.PlayerCode, TransactionTypes.Promotion,
-                    promotionPlayer.BonusAmount).ConfigureAwait(false);
+                    promotionPlayer.DefaultWalletId,
+                    promotionPlayer.PlayerCode,
+                    TransactionTypes.Promotion,
+                    promotionPlayer.BonusAmount,
+                    createdByUserId: request.OperatorUserId).ConfigureAwait(false);
 
                 transactionPromotions.Add(new()
                 {

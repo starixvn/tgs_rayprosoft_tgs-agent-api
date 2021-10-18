@@ -13,6 +13,7 @@ namespace TGS.Services.Promotion.Models.PromotionDispatch
 
     public class DispatchPromotionBonusRequest : IRequest<MessageResponse>
     {
+        public Guid OperatorUserId { get; set; }
         public DispatchPlayer[] Players { get; set; } = default!;
     }
 }

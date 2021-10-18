@@ -126,6 +126,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var claims = new List<Claim>
             {
+                new(Consts.BackendOffice.UserInfo.UserIdKey, user.Id.ToString()),
                 new(Consts.BackendOffice.UserInfo.UsernameKey, user.Username),
                 new(Consts.BackendOffice.UserInfo.RolenameKey, user.Role.Name),
                 new(Consts.BackendOffice.UserInfo.RoleTypeKey, user.Role.RoleType.ToString()),
