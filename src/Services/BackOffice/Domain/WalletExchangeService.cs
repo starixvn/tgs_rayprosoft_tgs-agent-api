@@ -50,8 +50,7 @@ namespace TGS.Services.BackOffice.Domain
                         brandId,
                         Guid.Parse(userId),
                         transactionType,
-                        amount,
-                        reviewUserId);
+                        amount);
 
                 default:
                     throw new InvalidOperationException();
@@ -62,8 +61,7 @@ namespace TGS.Services.BackOffice.Domain
             Guid brandId,
             Guid agentId,
             TransactionTypes transactionType,
-            decimal amount,
-            string reviewUserId)
+            decimal amount)
         {
             var agent = await _agentService
                 .GetAgentAsync(x => x.Id == agentId)
