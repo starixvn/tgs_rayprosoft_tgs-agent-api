@@ -98,8 +98,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = fakeGameProviderRepository.Received(1)
                 .QueryGameProvidersAsync();
+
             _ = fakeGameProviderRepository.Received(1)
                 .QuerySubGameProvidersAsync();
+
             _ = fakeGameProviderRepository.Received(1)
                 .QueryAllGamesAsync(Arg.Any<Guid>(), Arg.Any<IEnumerable<GameStatus>>());
         }
