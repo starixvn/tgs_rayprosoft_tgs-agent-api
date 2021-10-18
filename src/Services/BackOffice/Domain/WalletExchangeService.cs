@@ -22,7 +22,9 @@ namespace TGS.Services.BackOffice.Domain
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
-            _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
+
+            _agentWalletRepository =
+                agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
         }
 
         public ValueTask ExchangeAsync(
@@ -30,7 +32,8 @@ namespace TGS.Services.BackOffice.Domain
             UserType userType,
             string userId,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string reviewUserId)
         {
             switch (userType)
             {
@@ -39,14 +42,16 @@ namespace TGS.Services.BackOffice.Domain
                         brandId,
                         userId,
                         transactionType,
-                        amount);
+                        amount,
+                        reviewUserId);
 
                 case UserType.Agent:
                     return ExchangeAgentWalletAsync(
                         brandId,
                         Guid.Parse(userId),
                         transactionType,
-                        amount);
+                        amount,
+                        reviewUserId);
 
                 default:
                     throw new InvalidOperationException();
@@ -57,7 +62,8 @@ namespace TGS.Services.BackOffice.Domain
             Guid brandId,
             Guid agentId,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string reviewUserId)
         {
             var agent = await _agentService
                 .GetAgentAsync(x => x.Id == agentId)
@@ -72,10 +78,11 @@ namespace TGS.Services.BackOffice.Domain
         }
 
         private async ValueTask ExchangePlayerWalletAsync(
-                    Guid brandId,
+            Guid brandId,
             string playerCode,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string reviewUserId)
         {
             var player = await _playerService
                 .GetPlayerAsync(x => x.PlayerCode == playerCode)
@@ -86,7 +93,8 @@ namespace TGS.Services.BackOffice.Domain
                 player.DefaultWalletId,
                 playerCode,
                 transactionType,
-                amount).ConfigureAwait(false);
+                amount,
+                createdByUserId: Guid.Parse(reviewUserId)).ConfigureAwait(false);
         }
     }
 }

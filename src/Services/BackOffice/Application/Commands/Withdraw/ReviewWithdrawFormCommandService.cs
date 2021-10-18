@@ -19,12 +19,16 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
             IPaymentClient paymentClient,
             IWalletExchangeService walletExchangeService)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-            _walletExchangeService = walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));
+
+            _walletExchangeService =
+                walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));
         }
 
-        public async ValueTask ExecuteAsync(ReviewWithdrawFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            ReviewWithdrawFormCommand command, CancellationToken cancellationToken = default)
         {
             var formData = await _paymentServiceClient
                 .GetWithdrawFormAsync(command.BrandId, command.FormId)
@@ -62,7 +66,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                     formData.UserType,
                     formData.UserId,
                     TransactionTypes.CancelWithdrawal,
-                    formData.Amount).ConfigureAwait(false);
+                    formData.Amount,
+                    command.ReviewUserId).ConfigureAwait(false);
             }
         }
     }

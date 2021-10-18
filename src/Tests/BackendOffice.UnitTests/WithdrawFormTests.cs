@@ -136,6 +136,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var agentId = Guid.NewGuid();
             var transactionType = TransactionTypes.CancelWithdrawal;
             var amount = 1000M;
+            var userId = Guid.NewGuid();
 
             moqAgentService
                 .Setup(fake => fake.GetAgentAsync(
@@ -152,7 +153,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 userType,
                 agentId.ToString(),
                 transactionType,
-                amount);
+                amount,
+                userId.ToString());
 
             moqAgentWalletRepository.Verify(
                 fake => fake.ExchangeAsync(
@@ -184,6 +186,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var playerCode = "ThisIsPlayerCode";
             var transactionType = TransactionTypes.CancelWithdrawal;
             var amount = 1000M;
+            var userId = Guid.NewGuid();
 
             moqPlayerService
                 .Setup(fake => fake.GetPlayerAsync(
@@ -200,7 +203,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 userType,
                 playerCode,
                 transactionType,
-                amount);
+                amount,
+                userId.ToString());
 
             moqWalletRepository.Verify(
                 fake => fake.ExchangeAsync(
