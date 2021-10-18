@@ -118,7 +118,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -127,7 +127,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -136,7 +136,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp2",
                         true,
                         Status.Active,
-                        string.Empty)
+                        "{}")
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -180,7 +180,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -189,7 +189,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -198,7 +198,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp2",
                         true,
                         Status.Active,
-                        string.Empty)
+                        "{}")
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -242,7 +242,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub2",
                         "sub2",
@@ -251,7 +251,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp1",
                         true,
                         Status.Active,
-                        string.Empty),
+                        "{}"),
                     new BrandSubGameProviderInfo(
                         "sub3",
                         "sub3",
@@ -260,7 +260,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "gp2",
                         true,
                         Status.Active,
-                        string.Empty)
+                        "{}")
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
@@ -299,7 +299,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -308,7 +308,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -317,7 +317,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -326,7 +326,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Code,
                     sboGp.IsTransferWallet,
                     sboGp.Status,
-                    string.Empty)
+                    "{}")
             };
 
             var games = new[]
@@ -344,7 +344,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -360,7 +360,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -376,7 +376,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -392,7 +392,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0)
             };
@@ -500,7 +500,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -509,7 +509,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -518,7 +518,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -527,7 +527,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Code,
                     sboGp.IsTransferWallet,
                     sboGp.Status,
-                    string.Empty)
+                    "{}")
             };
 
             var games = new[]
@@ -545,7 +545,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -561,7 +561,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -577,7 +577,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -593,7 +593,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0)
             };
@@ -668,7 +668,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "NT",
                     "NT",
@@ -677,7 +677,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "RT",
                     "RT",
@@ -686,7 +686,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     evoGp.Code,
                     evoGp.IsTransferWallet,
                     evoGp.Status,
-                    string.Empty),
+                    "{}"),
                 new BrandSubGameProviderInfo(
                     "SBO",
                     "SBO",
@@ -695,7 +695,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     sboGp.Code,
                     evoGp.IsTransferWallet,
                     sboGp.Status,
-                    string.Empty)
+                    "{}")
             };
 
             var games = new[]
@@ -713,7 +713,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -729,7 +729,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -745,7 +745,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0),
                 new BrandGameInfo(
@@ -761,7 +761,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     GamePlatformType.Desktop,
                     true,
                     string.Empty,
-                    string.Empty,
+                    "{}",
                     GameTag.New,
                     0)
             };
@@ -1020,7 +1020,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         GamePlatformType.Desktop,
                         true,
                         string.Empty,
-                        string.Empty,
+                        "{}",
                         GameTag.New,
                         0)
                 }.ToAsyncEnumerable());
