@@ -36,7 +36,7 @@ namespace TGS.Services.Report.Application.Queries.Market
 
             var exportData = markets.Items?.Select(x => new ExportMarketModel
             {
-                ReportDate = x.ReportDate,
+                ReportDate = x.ReportDate.ToOffset(new(8, 0, 0)).ToString("d"),
                 RegisteredCount = x.RegisteredCount,
                 FirstFundInCount = x.FirstFundInCount,
                 DepositAmount = x.DepositAmount,
