@@ -761,7 +761,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 });
 
             fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(brandId))
-                .Returns(subGameProviders.ToAsyncEnumerable());
+                .Returns(subGameProviders.Where(sgp => sgp.Status != Status.Inactive).ToAsyncEnumerable());
 
             fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(brandId))
                 .Returns(games.ToAsyncEnumerable());
