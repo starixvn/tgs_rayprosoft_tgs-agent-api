@@ -18,11 +18,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Can_Get_Identity_By_ApiKey()
         {
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
 
             var sut = new GetAuthQueryService(
-                fakeBrandOperations,
-                fakeStatusValidator);
+                fakeBrandOperations);
 
             var apiKey = "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
             var currency = "CNY";
