@@ -43,6 +43,9 @@ namespace TGS.Clients.Report.Client
         Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             GetPlayerAccountChangesRequest request);
 
+        Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
+            GetPlayersAccountChangesRequest request);
+
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
@@ -258,6 +261,24 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetPlayerAccountChangesRequest, PagedResponse<PlayerAccountChangeModel>
             >(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+        }
+
+        public async Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
+            GetPlayersAccountChangesRequest request)
+        {
+            var prefix = $"Report.BrandId.{request.BrandId}.GetPlayersAccountChanges";
+            var path = ClientPath.AppendWithProperties("/api/playerReport/playersAccountChanges?", request);
+
+            return await ExecuteJsonRequestAsync<GetPlayersAccountChangesRequest,
+                PagedResponse<PlayersAccountChangeModel>>(
                 HttpMethod.Get,
                 path,
                 request,
