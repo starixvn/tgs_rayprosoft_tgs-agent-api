@@ -121,7 +121,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Remark = form.Remark,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
+                    ThirdPartyOrderNo = form.ThirdPartyOrderNo,
+                    ReviewedUserName = form.ReviewedUserName
                     })
                     .ToArray(),
                 Sum = result.Sum
@@ -146,8 +147,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.BrandId,
                 formId,
                 reviewResponse.ReviewResponse.ToReviewState(),
+                null,
                 reviewResponse.Remark,
-                UserId);
+                UserId,
+                Username);
 
             await reviewCommandService
                 .ExecuteAsync(command)

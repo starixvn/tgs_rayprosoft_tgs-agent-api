@@ -37,8 +37,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -67,7 +67,7 @@
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
-    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.2" />
+    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>

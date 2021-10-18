@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Utility;
+using TGS.Services.Operator.Services.BrandPayments;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
@@ -12,20 +14,51 @@ namespace TGS.Services.Operator.Services.Deposit
     internal class SubmitBankDepositFormCommandService : ICommandService<SubmitBankDepositFormCommand>
     {
         private readonly IFileServiceClient _fileServiceClient;
+        private readonly IQueryService<BrandPaymentsQuery, BrandPaymentInfo> _brandPaymentsQueryService;
+        private readonly IGetService<GetPaymentQuery, PaymentInfo> _getPaymentService;
         private readonly IPaymentServiceClient _paymentServiceClient;
 
         public SubmitBankDepositFormCommandService(
             IPaymentServiceClient paymentServiceClient,
-            IFileServiceClient fileServiceClient)
+            IFileServiceClient fileServiceClient,
+            IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+            IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
         {
             _paymentServiceClient =
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
+            _brandPaymentsQueryService = brandPaymentsQueryService ?? throw new ArgumentNullException(nameof(brandPaymentsQueryService));
+            _getPaymentService = getPaymentService ?? throw new ArgumentNullException(nameof(getPaymentService));
         }
 
         public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
             CancellationToken cancellationToken = default)
         {
+            var formData = await _paymentServiceClient
+                .GetDepositFormAsync(
+                    command.BrandId,
+                    command.FormId)
+                .ConfigureAwait(false);
+
+            if (formData?.Status != PaymentFlowState.WaitPayment)
+                return;
+
+            var brandPayment = await _brandPaymentsQueryService
+                .QueryAsync(new BrandPaymentsQuery(command.BrandId, command.PlayerCode))
+                .Where(bp => bp.Id == formData.BrandPaymentId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (brandPayment?.TransferType != TransferType.Deposit)
+                return;
+
+            var paymentInfo = await _getPaymentService
+                .GetAsync(new GetPaymentQuery(brandPayment.PaymentId))
+                .ConfigureAwait(false);
+
+            if (paymentInfo?.Code != "Manual")
+                return;
+
             var randomFileName = StringGenerator.GenerateAlphanumericString(32);
 
             var uploadResult = await _fileServiceClient

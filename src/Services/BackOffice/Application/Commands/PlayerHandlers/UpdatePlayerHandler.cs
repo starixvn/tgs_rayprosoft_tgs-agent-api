@@ -50,7 +50,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.UpdateTypeNotFound);
             }
 
-            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
+            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode).ConfigureAwait(false);
 
             if (player == null)
             {
@@ -86,21 +86,24 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
 
-            await _service.UpdatePlayerAsync(player, request);
+            var kickPlayer = false;
+            if (request.Type == updatePlayerType[0] &&
+                player.Status != request.Status)
+            {
+                kickPlayer = true;
+            }
 
+            await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
 
-            _logger.LogInformation("call KickPlayerAsync");
-            
-            await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
-            /*
-                 if (request.Type == updatePlayerType[0]
-                 &&
-                 player.Status != request.Status
-                 && (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist))
-             {
-                 await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
-             }
-            */
+            if (kickPlayer)
+            {
+                if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
+                {
+                    _logger.LogInformation("call KickPlayerAsync");
+                    await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+                }
+            }
+
             return CreateValidResponse<MessageResponse>();
         }
     }

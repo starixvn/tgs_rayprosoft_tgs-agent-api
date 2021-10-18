@@ -33,9 +33,9 @@
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
-    <PackageReference Include="TGS.GameProviders.KickPlayerServer.Client" Version="0.0.2" />    
-    <PackageReference Include="Tgs.Payment.Client" Version="0.1.5" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.29" />
+    <PackageReference Include="TGS.GameProviders.KickPlayerServer.Client" Version="0.0.3" />    
+    <PackageReference Include="Tgs.Payment.Client" Version="0.2.1" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.31" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
@@ -101,11 +101,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Currency.resx</DependentUpon>
     </Compile>
-    <Compile Update="Application\Resources\Deposit.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Deposit.resx</DependentUpon>
-    </Compile>
     <Compile Update="Application\Resources\GameProvider.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -140,11 +135,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>VipLevel.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Application\Resources\Withdraw.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Withdraw.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -181,10 +171,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Currency.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Application\Resources\Deposit.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Deposit.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\GameProvider.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProvider.Designer.cs</LastGenOutput>
@@ -212,10 +198,6 @@
     <EmbeddedResource Update="Application\Resources\Language.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Language.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Application\Resources\Withdraw.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Withdraw.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

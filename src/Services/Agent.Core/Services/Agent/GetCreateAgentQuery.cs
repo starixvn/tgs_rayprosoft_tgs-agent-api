@@ -2,11 +2,26 @@
 
 namespace TGS.Services.Agent.Services.Agent
 {
+    public class AgentDividendConditionModel
+    {
+        public int ActiveNumber { get; set; }
+
+        public decimal DividendPercentage { get; set; }
+
+        public decimal NetProfit { get; set; }
+
+        public int Rank { get; set; }
+    }
+
     public class GetCreateAgentQuery
     {
+        public AgentDividendConditionModel[] AgentDividendConditions { get; init; } = default!;
+
         public Guid BrandId { get; init; }
 
         public decimal CardGameRebatePercentage { get; init; }
+
+        public string Email { get; init; } = default!;
 
         public decimal LiveDealerRebatePercentage { get; init; }
 
@@ -16,10 +31,9 @@ namespace TGS.Services.Agent.Services.Agent
 
         public string Password { get; init; } = default!;
 
-        public string RealName { get; init; } = default!;
-
-        public string Email { get; init; } = default!;
         public string Phone { get; init; } = default!;
+
+        public string RealName { get; init; } = default!;
 
         public string? Remarks { get; init; }
 
@@ -30,14 +44,5 @@ namespace TGS.Services.Agent.Services.Agent
         public string Username { get; set; } = default!;
 
         public decimal VirtualSportsRebatePercentage { get; init; }
-        public AgentDividendConditionModel[] AgentDividendConditions { get; init; }
-    }
-
-    public class AgentDividendConditionModel
-    {
-        public int Rank { get; set; }
-        public decimal NetProfit { get; set; }
-        public int ActiveNumber { get; set; }
-        public decimal DividendPercentage { get; set; }
     }
 }

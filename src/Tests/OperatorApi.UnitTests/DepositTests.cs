@@ -1,19 +1,23 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Clients.Promotion.Client;
-using TGS.Core.Infrastructures.Json;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using TGS.Clients.Promotion.Client;
+using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
+using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
+using TGS.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -284,22 +288,60 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqBrandPaymentQueryService = new Mock<IQueryService<BrandPaymentsQuery, BrandPaymentInfo>>();
+            var moqGetPaymentService = new Mock<IGetService<GetPaymentQuery, PaymentInfo>>();
 
             var sut = new SubmitBankDepositFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqFileServiceClient.Object);
+                moqFileServiceClient.Object,
+                moqBrandPaymentQueryService.Object,
+                moqGetPaymentService.Object);
 
+            var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
             var formId = Guid.NewGuid();
             var contentType = "image/jpeg";
-            var fileStream = new MemoryStream();
+            using var fileStream = new MemoryStream();
 
             var command = new SubmitBankDepositFormCommand(
+                brandId,
                 playerCode,
                 formId,
                 contentType,
                 fileStream,
                 id => "{}");
+
+            moqBrandPaymentQueryService
+                .Setup(fake => fake.QueryAsync(
+                    It.IsAny<BrandPaymentsQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(new[] {
+                    new BrandPaymentInfo
+                    {
+                        TransferType = TransferType.Deposit
+                    }
+                }.ToAsyncEnumerable());
+
+            moqGetPaymentService
+                .Setup(fake => fake.GetAsync(
+                    It.IsAny<GetPaymentQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.FromResult(
+                    new PaymentInfo
+                    {
+                        Code = "Manual"
+                    }));
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == command.BrandId),
+                    It.Is<Guid>(x => x == command.FormId)))
+                .Returns(ValueTask.FromResult(
+                    new DepositFormInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = PaymentFlowState.WaitPayment
+                    }));
 
             moqFileServiceClient
                 .Setup(fake => fake.UploadFileAsync(
@@ -321,8 +363,96 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.SubmitDepositFormStatusAsync(
                     It.IsAny<Guid>(),
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Submit_Manual_DepositForm_If_Status_Not_WaitPayment_Will_No_Action()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+            var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqBrandPaymentQueryService = new Mock<IQueryService<BrandPaymentsQuery, BrandPaymentInfo>>();
+            var moqGetPaymentService = new Mock<IGetService<GetPaymentQuery, PaymentInfo>>();
+
+            var sut = new SubmitBankDepositFormCommandService(
+                moqPaymentServiceClient.Object,
+                moqFileServiceClient.Object,
+                moqBrandPaymentQueryService.Object,
+                moqGetPaymentService.Object);
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "ThisIsPlayerCode";
+            var formId = Guid.NewGuid();
+            var contentType = "image/jpeg";
+            using var fileStream = new MemoryStream();
+
+            var command = new SubmitBankDepositFormCommand(
+                brandId,
+                playerCode,
+                formId,
+                contentType,
+                fileStream,
+                id => "{}");
+
+            moqBrandPaymentQueryService
+                .Setup(fake => fake.QueryAsync(
+                    It.IsAny<BrandPaymentsQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(new[] {
+                    new BrandPaymentInfo
+                    {
+                        TransferType = TransferType.Deposit
+                    }
+                }.ToAsyncEnumerable());
+
+            moqGetPaymentService
+                .Setup(fake => fake.GetAsync(
+                    It.IsAny<GetPaymentQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.FromResult(
+                    new PaymentInfo
+                    {
+                        Code = "Manual"
+                    }));
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == command.BrandId),
+                    It.Is<Guid>(x => x == command.FormId)))
+                .Returns(ValueTask.FromResult(
+                    new DepositFormInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Status = PaymentFlowState.Approved
+                    }));
+
+            moqFileServiceClient
+                .Setup(fake => fake.UploadFileAsync(
+                    It.IsAny<string>(),
+                    It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+                    It.IsAny<Stream>()))
+                .Returns(ValueTask.FromResult(new FileView
+                {
+                    Id = "testFileId",
+                    ContentType = contentType
+                }));
+
+            await sut.ExecuteAsync(command);
+
+            moqFileServiceClient.Verify(
+                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
+                Times.Exactly(0));
+            moqPaymentServiceClient.Verify(
+                fake => fake.SubmitDepositFormStatusAsync(
+                    It.IsAny<Guid>(),
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
+                    It.IsAny<string>()),
+                Times.Exactly(0));
         }
 
         [Test]

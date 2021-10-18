@@ -5,6 +5,9 @@ namespace TGS.Apis.AgentApi.Models
 {
     public record AgentData
     {
+        [JsonPropertyName("id")]
+        public Guid Id { get; init; }
+
         [JsonPropertyName("username")]
         public string Username { get; init; }
 

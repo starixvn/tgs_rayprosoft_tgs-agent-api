@@ -12,6 +12,7 @@ namespace TGS.Services.BackOffice.Domain
             UserType userType,
             string userId,
             TransactionTypes transactionType,
-            decimal amount);
+            decimal amount,
+            string reviewUserId);
     }
 }
