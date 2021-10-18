@@ -161,6 +161,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 createdFormId,
                 applyInfo.Response.OrderNo);
 
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ConfigureAwait(false);
+
             return new LeePayDepositFormCreatedResponse
             {
                 FormId = createdFormId,
