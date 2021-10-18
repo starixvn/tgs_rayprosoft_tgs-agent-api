@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace TGS.Services.Report.Application.Models.Market
+﻿namespace TGS.Services.Report.Application.Models.Market
 {
     public class ExportMarketModel
     {
-        public DateTimeOffset ReportDate { get; set; }
+        public string ReportDate { get; set; }
         public int RegisteredCount { get; set; }
         public int FirstFundInCount { get; set; }
         public decimal DepositAmount { get; set; }
