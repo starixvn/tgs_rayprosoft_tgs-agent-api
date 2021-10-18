@@ -131,9 +131,12 @@
     <value>Review</value>
   </data>
   <data name="Approved" xml:space="preserve">
-    <value>Approved</value>
+    <value>Waiting Payment</value>
   </data>
   <data name="Rejected" xml:space="preserve">
     <value>Rejected</value>
+  </data>
+  <data name="Paid" xml:space="preserve">
+    <value>Paid</value>
   </data>
 </root>
