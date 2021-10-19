@@ -87,6 +87,46 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
+        public async Task Manager_Can_Paid_Manual_WithdrawFormAsync()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new PaidWithdrawFormCommandService(moqPaymentServiceClient.Object);
+
+            var formId = Guid.NewGuid();
+            var brandPaymentId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+            var command = new PaidWithdrawFormCommand(
+                brandId,
+                formId,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetWithdrawFormAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(
+                    new WithdrawFormInfo
+                    {
+                        Id = formId,
+                        BrandId = brandId,
+                        Status = PaymentFlowState.Approved
+                    }));
+
+            await sut.ExecuteAsync(command);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.SubmitWithdrawFormStatusAsync(
+                    It.Is<Guid>(x => x == formId),
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.Paid),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
+                    It.IsAny<string>()),
+                Times.Exactly(1));
+        }
+
+        [Test]
         public async Task User_Can_List_WithdrawFormAsync()
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
