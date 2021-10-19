@@ -43,12 +43,10 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_WithdrawForm()
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
-            var moqPaymentClient = new Mock<IPaymentClient>();
             var moqWalletExchangeService = new Mock<IWalletExchangeService>();
 
             var sut = new ReviewWithdrawFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqPaymentClient.Object,
                 moqWalletExchangeService.Object);
 
             var formId = Guid.NewGuid();
