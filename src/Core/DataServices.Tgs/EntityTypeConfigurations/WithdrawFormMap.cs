@@ -31,6 +31,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(w => w.ReviewedOn);
 
+            builder.Property(w => w.PaidUserId);
+
+            builder.Property(w => w.PaidUserName);
+
+            builder.Property(w => w.PaidOn);
+
             builder.Property(w => w.Amount)
                 .HasPrecision(18, 6)
                 .IsRequired();

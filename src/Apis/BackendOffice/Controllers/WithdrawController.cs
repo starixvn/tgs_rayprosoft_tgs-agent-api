@@ -20,6 +20,39 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class WithdrawController : BaseContextController
     {
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpGet("exportWithdraw/{brandId}")]
+        public async Task<IActionResult> ExportWithdrawAsync(
+            [FromServices] IGetService<ExportWithdrawForm, MemoryStream> queryService,
+             Guid brandId,
+            [FromQuery] WithdrawFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new ExportWithdrawForm(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status.ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Withdraw.xlsx");
+        }
+
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<WithdrawFormDetailViewModel>> GetWithdrawFormDetailAsync(
             [FromServices] IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo> getWithdrawFormService,
@@ -125,56 +158,39 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPost("{formId}")]
         public async Task<MessageResponse> ReviewWithdrawFormAsync(
             [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
+            [FromServices] ICommandService<PaidWithdrawFormCommand> paidCommandService,
             Guid formId,
             [FromBody] WithdrawReviewRequest reviewResponse)
         {
-            var command = new ReviewWithdrawFormCommand(
-                reviewResponse.BrandId,
-                formId,
-                reviewResponse.BrandPaymentId,
-                reviewResponse.ReviewResponse.ToReviewState(),
-                reviewResponse.Remark,
-                UserId,
-                Username);
+            if (reviewResponse.ReviewResponse == ReviewResponseState.Paid)
+            {
+                var command = new PaidWithdrawFormCommand(
+                    reviewResponse.BrandId,
+                    formId,
+                    UserId,
+                    Username);
 
-            await reviewCommandService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
+                await paidCommandService
+                    .ExecuteAsync(command)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var command = new ReviewWithdrawFormCommand(
+                    reviewResponse.BrandId,
+                    formId,
+                    reviewResponse.BrandPaymentId,
+                    reviewResponse.ReviewResponse.ToReviewState(),
+                    reviewResponse.Remark,
+                    UserId,
+                    Username);
+
+                await reviewCommandService
+                    .ExecuteAsync(command)
+                    .ConfigureAwait(false);
+            }
 
             return CreateValidResponse<MessageResponse>();
-        }
-
-        [AllowAnonymous]
-        [IgnoreAntiforgeryToken]
-        [HttpGet("exportWithdraw/{brandId}")]
-        public async Task<IActionResult> ExportWithdrawAsync(
-            [FromServices] IGetService<ExportWithdrawForm, MemoryStream> queryService,
-             Guid brandId,
-            [FromQuery] WithdrawFormRequest request,
-            [FromQuery] PageableRequest paging)
-        {
-            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-
-            if (request.BeginCreateOn != null && request.EndCreateOn != null)
-                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
-
-            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
-                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
-
-            var query = new ExportWithdrawForm(
-                brandId,
-                request.UserName,
-                request.ChannelName,
-                request.ThirdPartyOrderNo,
-                request.FormId,
-                request.PaymentMethodId,
-                request.Status.ToPaymentFlowState(),
-                createOnRange,
-                updateOnRange,
-                paging);
-
-            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Withdraw.xlsx");
         }
     }
 }
