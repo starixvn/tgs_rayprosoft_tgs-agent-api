@@ -138,6 +138,15 @@ namespace TGS.Services.Agent.Services.Agent
                 RegisteredOn = DateTimeOffset.Now
             };
 
+            agent.AgentDividendConditions = query.AgentDividendConditions.Select(x
+                => new CoreModels.AgentDividendCondition
+                {
+                    Rank = x.Rank,
+                    NetProfit = x.NetProfit,
+                    ActiveNumber = x.ActiveNumber,
+                    DividendPercentage = x.DividendPercentage
+                }).ToHashSet();
+
             var (salt, pwd) = _passwordHandler.GenerateCredential(query.Password);
 
             agent.Password = pwd;
