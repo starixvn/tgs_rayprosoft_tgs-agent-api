@@ -48,6 +48,11 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
+            if (query.AgentDividendConditions.Length > 1)
+            {
+                throw new DividendConditionException("Can only have one rank.");
+            }
+
             foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
             {
                 var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
