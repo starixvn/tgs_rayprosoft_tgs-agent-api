@@ -133,7 +133,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
                         NetProfit = playerAggregates.Sum(p
                             => p.WinLossAmount - p.AdjustmentAmount - p.RebateAmount - p.PromotionAmount -
-                            p.WinLossAmount * brand.PlatformCharge)
+                            p.WinLossAmount * brand.PlatformCharge / 100)
                     })
                 .Select(x => new
                 {
