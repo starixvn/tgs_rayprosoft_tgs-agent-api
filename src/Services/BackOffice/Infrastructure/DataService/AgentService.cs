@@ -77,12 +77,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    request.LiveDealerRebatePercentage == 0 && request.DividendPercentage == 0
-                    && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
-                    request.CardGameRebatePercentage == 0
-                    && request.SportsRebatePercentage == 0 && request.VirtualSportsRebatePercentage == 0
-                        ? AgentConfigStatus.WaitForConfigurePercentage
-                        : AgentConfigStatus.DoneForConfigurePercentage,
+                    request.AgentDividendConditions.Length > 0
+                        ? AgentConfigStatus.DoneForConfigurePercentage
+                        : AgentConfigStatus.WaitForConfigurePercentage,
                 CommissionPercentage = request.CommissionPercentage,
                 DividendPercentage = request.DividendPercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
@@ -218,7 +215,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             Rank = x.Rank,
                             NetProfit = x.NetProfit,
                             ActiveNumber = x.ActiveNumber,
-                            DividendPercentage = x.DividendPercentage
+                            DividendPercentage = operation == AgentOperation.Agent ? 0 : x.DividendPercentage
                         }).ToHashSet();
 
                     break;
@@ -265,33 +262,15 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var results = await _repository.SqlQueryMultipleAsync<AgentModel>(spName,
                 parameters: new Dictionary<string, object>
                 {
-                    {
-                        "_brand_id", request.BrandId
-                    },
-                    {
-                        "_username", request.Username
-                    },
-                    {
-                        "_page_size", request.ShowAll ? int.MaxValue : request.Rows
-                    },
-                    {
-                        "_page_number", request.ShowAll ? 1 : request.Page
-                    },
-                    {
-                        "_sort_by", request.SortBy
-                    },
-                    {
-                        "_is_desc", request.IsDesc
-                    },
-                    {
-                        "_status", request.Status
-                    },
-                    {
-                        "_type", request.Type
-                    },
-                    {
-                        "_level_type", request.LevelType
-                    }
+                    { "_brand_id", request.BrandId },
+                    { "_username", request.Username },
+                    { "_page_size", request.ShowAll ? int.MaxValue : request.Rows },
+                    { "_page_number", request.ShowAll ? 1 : request.Page },
+                    { "_sort_by", request.SortBy },
+                    { "_is_desc", request.IsDesc },
+                    { "_status", request.Status },
+                    { "_type", request.Type },
+                    { "_level_type", request.LevelType }                   
                 });
 
             return (results, results.Any() ? results.First().TotalCount : 0);
@@ -304,6 +283,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             foreach (var agent in childAgents)
             {
                 agent.DividendPercentage = 0M;
+
+                foreach (var condition in agent.AgentDividendConditions)
+                {
+                    condition.DividendPercentage = 0M;
+                }
 
                 yield return agent;
 
