@@ -10,18 +10,15 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
 {
     internal class ReviewWithdrawFormCommandService : ICommandService<ReviewWithdrawFormCommand>
     {
-        private readonly IPaymentClient _paymentClient;
         private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IWalletExchangeService _walletExchangeService;
 
         public ReviewWithdrawFormCommandService(
             IPaymentServiceClient paymentServiceClient,
-            IPaymentClient paymentClient,
             IWalletExchangeService walletExchangeService)
         {
             _paymentServiceClient =
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-            _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
 
             _walletExchangeService =
                 walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));

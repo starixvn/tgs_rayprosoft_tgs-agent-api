@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.10")
+                .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -5887,6 +5887,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<DateTimeOffset?>("PaidOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_on");
+
+                    b.Property<string>("PaidUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("paid_user_id");
+
+                    b.Property<string>("PaidUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("paid_user_name");
 
                     b.Property<string>("PaymentReturn")
                         .HasColumnType("jsonb")

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
@@ -27,73 +26,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BankDepositController : ControllerBase
     {
         private static Random _Random = new Random();
-
-        [HttpPost("applepay")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
-        public async Task<ApplePayDepositFormCreatedResponse> SubmitApplePayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ApplePaySerializer serializer,
-            [FromBody] SubmitApplePayDepositRequest request
-            )
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.applepay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new ApplePayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("storeGuid").GetString(),
-                        formId,
-                        brandPaymentInfo.RootElement.GetProperty("type").GetString(),
-                        request.TransName)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<ApplePayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (applyInfo.Response.Result == 1)
-            {
-                return new ApplePayDepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = applyInfo.Response.ReceiveUrl.ToString(),
-                    ErrorMessage = string.Empty
-                };
-            }
-            else
-            {
-                throw new PaymentFailException(applyInfo.Response.Msg);
-            }
-        }
 
         [HttpPost("maticpay")]
         [PlayerCheckEnabled]

@@ -48,7 +48,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 
             var resultPaymentMethods = await _paymentServiceClient.GetAllPaymentMethodsAsync().ToDictionaryAsync(x => x.Id).ConfigureAwait(false);
 
-            var resource = new ResourceManager(typeof(Resources.Deposit));
+            var resource = new ResourceManager(typeof(Resources.Withdraw));
 
             var exportData = result.Items?.Select((x, index) => new ExportWithdrawModel
             {
