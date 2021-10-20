@@ -68,6 +68,11 @@ namespace TGS.Services.GameOperations
 
         private async ValueTask ValidateRequiredStatusOnBettingAsync(BetData data, CachedPlayer player)
         {
+            if (data.IgnorePlaceBetValidation)
+            {
+                return;
+            }
+
             await ValidateRequiredStatusAsync(player, data.GameProviderId, data.GameProviderConfigurationId)
                 .ConfigureAwait(false);
 
