@@ -166,14 +166,14 @@ namespace TGS.Services.GameOperations
                 return GameStatus.Inactive;
             }
 
-            if (brandGameStatus == GameStatus.Maintenance || gameStatus == GameStatus.Maintenance)
-            {
-                return GameStatus.Maintenance;
-            }
-
             if (brandGameStatus == GameStatus.Testing || gameStatus == GameStatus.Testing)
             {
                 return GameStatus.Testing;
+            }
+
+            if (brandGameStatus == GameStatus.Maintenance || gameStatus == GameStatus.Maintenance)
+            {
+                return GameStatus.Maintenance;
             }
 
             return GameStatus.Active;

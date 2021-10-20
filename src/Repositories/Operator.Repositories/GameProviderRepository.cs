@@ -138,13 +138,13 @@ namespace TGS.Operator.Repositories
             {
                 var gameStatus = GameStatus.Active;
 
-                if (info.BrandGameStatus == GameStatus.Maintenance || info.GameStatus == GameStatus.Maintenance)
-                {
-                    gameStatus = GameStatus.Maintenance;
-                }
-                else if (info.BrandGameStatus == GameStatus.Testing || info.GameStatus == GameStatus.Testing)
+                if (info.BrandGameStatus == GameStatus.Testing || info.GameStatus == GameStatus.Testing)
                 {
                     gameStatus = GameStatus.Testing;
+                }
+                else if (info.BrandGameStatus == GameStatus.Maintenance || info.GameStatus == GameStatus.Maintenance)
+                {
+                    gameStatus = GameStatus.Maintenance;
                 }
 
                 return new BrandGameInfo(
