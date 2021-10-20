@@ -51,7 +51,7 @@ namespace TGS.Services.GameOperations.Data
             _roundStatusManager = roundStatusManager;
         }
 
-        async ValueTask<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
+        public async ValueTask<BetResult> ExecuteAsync(ProcessorData data)
         {
             var transactionResults = new List<TransactionResult>();
             var betData = data.BetData;

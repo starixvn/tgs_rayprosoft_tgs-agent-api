@@ -17,7 +17,6 @@ using TGS.Core.Models.Services.Games;
 using Tgs.Logging;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
 using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.GameOperations.Data
@@ -44,19 +43,16 @@ namespace TGS.Services.GameOperations.Data
         private readonly IBrandOperations _brandOperations;
         private readonly Func<string, IErrorMapper> _errorMapperFactory;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IGameActionDataOperations _interface;
         private readonly IJsonSerializationProvider _json;
         private readonly ITgsLog _log;
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameActionProcessor _processor;
         private readonly Func<ITgsRepository> _repoFactory;
-        private readonly IStatusValidator _statusValidator;
         private readonly ITransactionManager _transactionManager;
 
         public GameActionDataOperations(
             Func<ITgsRepository> repoFactory,
             ITransactionManager transactionManager,
-            IStatusValidator statusValidator,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
@@ -67,7 +63,6 @@ namespace TGS.Services.GameOperations.Data
         {
             _repoFactory = repoFactory;
             _transactionManager = transactionManager;
-            _statusValidator = statusValidator;
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
@@ -75,14 +70,13 @@ namespace TGS.Services.GameOperations.Data
             _json = json;
             _log = log;
             _errorMapperFactory = errorMapperFactory;
-
-            _interface = this;
         }
 
-        ValueTask<BetResult> IGameActionDataOperations.LockAmountAsync(BetData data) =>
-            ExecuteGameActionAsync(data);
+        public ValueTask<BetResult> LockAmountAsync(BetData data)
+            =>
+                ExecuteGameActionAsync(data);
 
-        ValueTask<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
+        public ValueTask<BetResult> PlaceBetAsync(BetData data)
         {
             if (data.Transactions.Any(t
                 => t.GameActionType.IsNotAllOf(LockAmount, UnlockAmount, PlaceBet, CancelTransaction)))
@@ -94,20 +88,20 @@ namespace TGS.Services.GameOperations.Data
             return ExecuteGameActionAsync(data);
         }
 
-        ValueTask<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data) =>
-            ExecuteGameActionAsync(data);
+        public ValueTask<BetResult> SettleBetAsync(BetData data)
+            => ExecuteGameActionAsync(data);
 
-        ValueTask<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data) =>
-            ExecuteGameActionAsync(data);
+        public ValueTask<BetResult> CancelTransactionAsync(BetData data)
+            => ExecuteGameActionAsync(data);
 
-        ValueTask<BetResult> IGameActionDataOperations.PlaceAndSettleBetAsync(BetData data) =>
-            ExecuteGameActionAsync(data);
+        public ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data)
+            => ExecuteGameActionAsync(data);
 
-        ValueTask<BatchBetResult> IGameActionDataOperations.SettleBatchAsync(BatchBetData data) =>
-            ExecuteBatchAsync(data, betData => _interface.SettleBetAsync(betData));
+        public ValueTask<BatchBetResult> SettleBatchAsync(BatchBetData data)
+            => ExecuteBatchAsync(data, SettleBetAsync);
 
-        ValueTask<BatchBetResult> IGameActionDataOperations.CancelBatchAsync(BatchBetData data) =>
-            ExecuteBatchAsync(data, betData => _interface.CancelTransactionAsync(betData));
+        public ValueTask<BatchBetResult> CancelBatchAsync(BatchBetData data)
+            => ExecuteBatchAsync(data, CancelTransactionAsync);
 
         private async ValueTask<BetResult> ExecuteGameActionAsync(BetData data)
         {

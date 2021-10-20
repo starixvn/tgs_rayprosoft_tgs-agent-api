@@ -29,7 +29,7 @@ namespace TGS.Services.GameOperations
 
     public sealed partial class GamePlayActions : IGamePlayActions
     {
-        async ValueTask<GetBalanceResult> IGamePlayActions.GetBalanceAsync(string gameProviderCode, string playerCode)
+        public async ValueTask<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
@@ -45,23 +45,23 @@ namespace TGS.Services.GameOperations
             };
         }
 
-        ValueTask<BetResult> IGamePlayActions.LockAmountAsync(BetData data)
+        public ValueTask<BetResult> LockAmountAsync(BetData data)
             => ExecuteGamePlayActionAsync(data,
                 _operations.PlaceAndSettleBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
-        ValueTask<BetResult> IGamePlayActions.PlaceBetAsync(BetData data)
+        public ValueTask<BetResult> PlaceBetAsync(BetData data)
             => ExecuteGamePlayActionAsync(data,
                 _operations.PlaceAndSettleBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
-        ValueTask<BetResult> IGamePlayActions.SettleBetAsync(BetData data)
+        public ValueTask<BetResult> SettleBetAsync(BetData data)
             => ExecuteGamePlayActionAsync(data, _operations.SettleBetAsync);
 
-        ValueTask<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data)
+        public ValueTask<BetResult> CancelTransactionAsync(BetData data)
             => ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
 
-        ValueTask<BetResult> IGamePlayActions.PlaceAndSettleBetAsync(BetData data)
+        public ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data)
             => ExecuteGamePlayActionAsync(data,
                 _operations.PlaceAndSettleBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
