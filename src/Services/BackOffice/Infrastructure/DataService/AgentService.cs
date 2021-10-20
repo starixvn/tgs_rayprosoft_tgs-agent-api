@@ -215,7 +215,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             Rank = x.Rank,
                             NetProfit = x.NetProfit,
                             ActiveNumber = x.ActiveNumber,
-                            DividendPercentage = x.DividendPercentage
+                            DividendPercentage = operation == AgentOperation.Agent ? 0 : x.DividendPercentage
                         }).ToHashSet();
 
                     break;
@@ -283,6 +283,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             foreach (var agent in childAgents)
             {
                 agent.DividendPercentage = 0M;
+
+                foreach (var condition in agent.AgentDividendConditions)
+                {
+                    condition.DividendPercentage = 0M;
+                }
 
                 yield return agent;
 
