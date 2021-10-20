@@ -57,10 +57,12 @@ namespace TGS.Services.GameOperations.Data
             throw new InvalidGameActionException("Missing external bet ID.");
         }
 
-        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(ITgsRepository repository,
+        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(
+            ITgsRepository repository,
             string externalRoundId, string externalTransactionId)
         {
             var foundExternalRoundId = await GetExternalRoundIdAsync(repository, externalTransactionId);
+
             if (foundExternalRoundId.IsNotNullOrEmpty() &&
                 foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
             {
@@ -86,7 +88,9 @@ namespace TGS.Services.GameOperations.Data
                     InvalidGameActionErrorCode.ActionProhibited);
             }
 
-            return GetDuplicateTransactionResult(action.Id, s.ExternalTransactionId, s.InternalRoundId!.Value,
+            return GetDuplicateTransactionResult(action.Id,
+                s.ExternalTransactionId,
+                s.InternalRoundId!.Value,
                 s.GameId);
         }
 
@@ -114,21 +118,21 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private async Task ThrowIfStatusesIsInvalidAsync(GameActionState s)
-        {
-            var playerType = s.PlayerData.PlayerType;
-            var brandId = s.PlayerData.BrandId;
-            var gameActionType = s.GameActionType;
-            var gameProviderId = s.GameProvider.Id;
-            var gameId = s.GameId;
+        //private async Task ThrowIfStatusesIsInvalidAsync(GameActionState s)
+        //{
+        //    var playerType = s.PlayerData.PlayerType;
+        //    var brandId = s.PlayerData.BrandId;
+        //    var gameActionType = s.GameActionType;
+        //    var gameProviderId = s.GameProvider.Id;
+        //    var gameId = s.GameId;
 
-            var status = _validStatus.GetStatus(playerType, gameActionType);
-            var gameStatus = _validGameStatus.GetStatus(playerType, gameActionType);
+        //    var status = _validStatus.GetStatus(playerType, gameActionType);
+        //    var gameStatus = _validGameStatus.GetStatus(playerType, gameActionType);
 
-            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
-            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(brandId, gameProviderId, gameId,
-                s.ExternalGameId, status, gameStatus);
-        }
+        //    await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
+        //    await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(brandId, gameProviderId, gameId,
+        //        s.ExternalGameId, status, gameStatus);
+        //}
 
         private static void VerifyLockedAndUnlockedAmounts(GameActionState s)
         {

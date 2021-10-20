@@ -5,17 +5,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Interfaces;
 using TGS.Core.Models.Services.Games;
+using Tgs.Logging;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
@@ -118,7 +117,6 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode).ConfigureAwait(false);
-            ThrowIfPlayerDisableToPlaceBet(data.Transactions, player.Status);
 
             // TODO: validate if place bet cap amount is exceed
 
@@ -167,7 +165,8 @@ namespace TGS.Services.GameOperations.Data
                         Player = playerRelatedData,
                         GameProvider = gameProvider,
                         Games = games
-                    }), autoDetectChangesEnabled: false)
+                    }),
+                    autoDetectChangesEnabled: false)
                 .ConfigureAwait(false);
 
             return transactionResult;
@@ -183,7 +182,8 @@ namespace TGS.Services.GameOperations.Data
 
         #region Batch Actions
 
-        private async ValueTask<BatchBetResult> ExecuteBatchAsync(BatchBetData data,
+        private async ValueTask<BatchBetResult> ExecuteBatchAsync(
+            BatchBetData data,
             Func<BetData, ValueTask<BetResult>> execute)
         {
             await using var repo = _repoFactory();
@@ -210,16 +210,23 @@ namespace TGS.Services.GameOperations.Data
 
                 foreach (var segment in segments)
                 {
-                    var subStates = await segment.EachAsync(degreeOfParallelism, CancellationToken.None,
+                    var subStates = await segment.EachAsync(degreeOfParallelism,
+                        CancellationToken.None,
                         () => new BatchBetPartitionState(batch.Id),
                         async (t, state, _) =>
                         {
                             var errorMapper = _errorMapperFactory(data.ErrorMapperKey);
+
                             await ExecuteSegmentTransactionsAsync(
-                                gameProviderId, gameProviderCode,
-                                data.AutoCloseRound, data.HasCurrencyFromGameProvider,
+                                gameProviderId,
+                                gameProviderCode,
+                                data.AutoCloseRound,
+                                data.HasCurrencyFromGameProvider,
                                 data.AllowCancelCancelTransaction,
-                                t, state, execute, errorMapper);
+                                t,
+                                state,
+                                execute,
+                                errorMapper);
                         }).ConfigureAwait(false);
 
                     states.AddRange(subStates);
@@ -230,6 +237,7 @@ namespace TGS.Services.GameOperations.Data
             var results = states.SelectMany(s => s.Results).ToArray();
 
             Dictionary<string, decimal> playerBalances = new();
+
             foreach (var (playerCode, balance) in states.SelectMany(s => s.PlayerBalances))
             {
                 playerBalances[playerCode] = balance;
@@ -264,8 +272,13 @@ namespace TGS.Services.GameOperations.Data
         {
             try
             {
-                var betData = MapBetData(state.BatchId, gameProviderId, gameProviderCode, autoCloseRound,
-                    hasCurrencyFromGameProvider, allowCancelCancelTransaction, transaction);
+                var betData = MapBetData(state.BatchId,
+                    gameProviderId,
+                    gameProviderCode,
+                    autoCloseRound,
+                    hasCurrencyFromGameProvider,
+                    allowCancelCancelTransaction,
+                    transaction);
 
                 var betResult = await execute(betData).ConfigureAwait(false);
                 var isSuccess = betResult.Error == TgsApiError.None;
@@ -309,7 +322,8 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private static async ValueTask<GameActionBatch> CreateBatchAsync(ITgsRepository repo,
+        private static async ValueTask<GameActionBatch> CreateBatchAsync(
+            ITgsRepository repo,
             Guid gameProviderId, string externalBatchId)
         {
             var batch = await repo.GameActionBatches.FirstOrDefaultAsync(b =>
@@ -352,6 +366,7 @@ namespace TGS.Services.GameOperations.Data
         private static void AssignIndexPerPlayer(BatchTransactionData[] transactions)
         {
             Dictionary<string, int> dict = new();
+
             foreach (var btd in transactions)
             {
                 var playerCode = btd.PlayerCode;
@@ -367,7 +382,8 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private static BetData MapBetData(Guid batchId, Guid gameProviderId, string gameProviderCode,
+        private static BetData MapBetData(
+            Guid batchId, Guid gameProviderId, string gameProviderCode,
             bool autoCloseRound, bool hasCurrencyFromGameProvider, bool allowCancelCancelTransaction,
             BatchTransactionData transaction) =>
             new()
