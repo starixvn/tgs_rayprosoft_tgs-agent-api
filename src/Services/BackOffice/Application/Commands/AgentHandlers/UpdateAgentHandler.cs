@@ -34,6 +34,11 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
 
+            if (request.AgentDividendConditions.Length > 1)
+            {
+                return CreateInvalidResponse<MessageResponse>("Can only have one rank.");
+            }
+
             if (request.ParentUsername.IsNotNullOrEmpty())
             {
                 var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
