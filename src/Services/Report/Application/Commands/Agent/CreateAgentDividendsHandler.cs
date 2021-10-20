@@ -72,12 +72,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             do
             {
+                var agentDividendPercentage = agent.AgentDividendConditions.First(x => x.Rank == 1).DividendPercentage;
+
                 yield return new AgentDividendMultipleLayerModel
                 {
                     AgentId = currentAgentId,
                     DividendProviderAgentId = providerAgentId,
                     Layer = layer,
-                    Dividend = netProfit * (agent.AgentDividendConditions.First(x => x.Rank == 1).DividendPercentage -
+                    Dividend = netProfit * (agentDividendPercentage -
                         childDividendPercentage) / 100M
                 };
 
@@ -88,7 +90,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     continue;
                 }
 
-                childDividendPercentage = agent.DividendPercentage;
+                childDividendPercentage = agentDividendPercentage;
 
                 var parentAgent = agents.First(x => x.Id == agent.ParentAgentId);
                 currentAgentId = parentAgent.Id;
