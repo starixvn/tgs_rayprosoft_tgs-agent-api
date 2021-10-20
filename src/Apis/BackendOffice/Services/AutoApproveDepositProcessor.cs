@@ -16,7 +16,8 @@ namespace TGS.Apis.BackendOffice.Services
         private readonly ILogger<AutoApproveDepositProcessor> _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public AutoApproveDepositProcessor(IServiceProvider serviceProvider, ILogger<AutoApproveDepositProcessor> logger)
+        public AutoApproveDepositProcessor(
+            IServiceProvider serviceProvider, ILogger<AutoApproveDepositProcessor> logger)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -33,7 +34,8 @@ namespace TGS.Apis.BackendOffice.Services
 
             using var scope = _serviceProvider.CreateScope();
 
-            var reviewCommandService = scope.ServiceProvider.GetRequiredService<ICommandService<ReviewDepositFormCommand>>();
+            var reviewCommandService =
+                scope.ServiceProvider.GetRequiredService<ICommandService<ReviewDepositFormCommand>>();
 
             var command = new ReviewDepositFormCommand(
                 brandId,

@@ -4227,6 +4227,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
+                    b.Property<string>("SentByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by_username");
+
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("sent_on");
@@ -4616,6 +4620,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("PromotionBonusId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_bonus_id");
+
+                    b.Property<string>("SentByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by_username");
 
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
@@ -5430,6 +5438,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")

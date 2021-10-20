@@ -41,8 +41,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
         private Dictionary<string, string> GetUserMap()
-        {
-            return HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-        }
+            => HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
     }
 }

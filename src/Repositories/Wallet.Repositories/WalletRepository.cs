@@ -19,12 +19,15 @@ namespace TGS.Wallet.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(Guid brandId,
+        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
+            Guid brandId,
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
             decimal amount,
-            string? description)
+            string? description,
+            string? externalId,
+            Guid? createdByUserId)
         {
             const string sql = "dbo.wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
@@ -53,22 +56,24 @@ namespace TGS.Wallet.Repositories
                     Balance = postBalance,
                     Type = transactionType switch
                     {
-                        TransactionTypes.Deposit => TransactionType.Deposit,
-                        TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                        TransactionTypes.Adjust => TransactionType.Adjust,
-                        TransactionTypes.Bonus => TransactionType.Bonus,
-                        TransactionTypes.Rebate => TransactionType.Rebate,
-                        TransactionTypes.Dividend => TransactionType.Dividend,
-                        TransactionTypes.Promotion => TransactionType.Promotion,
-                        TransactionTypes.GameProviderFundIn => TransactionType.GameProviderFundIn,
-                        TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
-                        TransactionTypes.CancelWithdrawal => TransactionType.CancelWithdrawal,
-                        TransactionTypes.GameProviderDeposit => TransactionType.GameProviderDeposit,
+                        TransactionTypes.Deposit                => TransactionType.Deposit,
+                        TransactionTypes.Withdrawal             => TransactionType.Withdrawal,
+                        TransactionTypes.Adjust                 => TransactionType.Adjust,
+                        TransactionTypes.Bonus                  => TransactionType.Bonus,
+                        TransactionTypes.Rebate                 => TransactionType.Rebate,
+                        TransactionTypes.Dividend               => TransactionType.Dividend,
+                        TransactionTypes.Promotion              => TransactionType.Promotion,
+                        TransactionTypes.GameProviderFundIn     => TransactionType.GameProviderFundIn,
+                        TransactionTypes.GameProviderFundOut    => TransactionType.GameProviderFundOut,
+                        TransactionTypes.CancelWithdrawal       => TransactionType.CancelWithdrawal,
+                        TransactionTypes.GameProviderDeposit    => TransactionType.GameProviderDeposit,
                         TransactionTypes.GameProviderWithdrawal => TransactionType.GameProviderWithdrawal,
-                        _ => TransactionType.Other
+                        _                                       => TransactionType.Other
                     },
                     Description = description,
-                    RecordedOn = DateTimeOffset.Now
+                    RecordedOn = DateTimeOffset.Now,
+                    ExternalTransactionId = externalId,
+                    CreatedByUserId = createdByUserId
                 })
                 .ConfigureAwait(false);
 
@@ -87,8 +92,8 @@ namespace TGS.Wallet.Repositories
 
             if (playerWallet.PlayerCode == playerCode)
                 return playerWallet.Balance;
-            else
-                throw new Exception("Can't find player wallet.");
+
+            throw new Exception("Can't find player wallet.");
         }
     }
 }
