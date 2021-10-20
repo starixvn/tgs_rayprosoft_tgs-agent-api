@@ -45,7 +45,7 @@ namespace TGS.Services.Operator.Services.GameBalance
                     .ExecuteAsync(new FundOutGameBalanceCommand(
                         command.GpCode,
                         command.PlayerCode,
-                        (int)Math.Floor(playerBalance.Main)), cancellationToken)
+                        fundOutAmount), cancellationToken)
                     .ConfigureAwait(false);
             }
         }

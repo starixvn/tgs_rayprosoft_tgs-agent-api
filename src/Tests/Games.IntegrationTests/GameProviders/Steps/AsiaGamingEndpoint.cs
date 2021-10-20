@@ -7,7 +7,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using TechTalk.SpecFlow;
+using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
@@ -65,6 +67,20 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddTgsLog()
                 .AddApiClient()
                 .AddRedis();
+
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
+
+            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -415,7 +431,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             GameActionType type, decimal amount)
         {
             var gas = await GetGameActionsByRoundId();
-            var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType));
+            var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType)
+                && ga.Type == GameActionType.PlaceBet);
             var ga = gas.First(ga => ga.ReferencedGameActionId == placeGa.Id);
             ga.Type.Should().Be(type);
             ga.Amount.Should().Be(amount);

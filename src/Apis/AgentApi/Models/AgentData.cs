@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace TGS.Apis.AgentApi.Models
 {
@@ -39,5 +40,35 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("dividendpercentage")]
         public decimal DividendPercentage { get; init; }
+
+        [JsonPropertyName("parentusername")]
+        public string ParentUsername { get; init; }
+
+        [JsonPropertyName("registeredon")]
+        public DateTimeOffset RegisteredOn { get; init; }
+
+        [JsonPropertyName("balance")]
+        public decimal Balance { get; init; }
+
+        [JsonPropertyName("status")]
+        public string Status { get; init; }
+
+        /// <summary>
+        /// 代理類型
+        /// </summary>
+        [JsonPropertyName("type")]
+        public string Type { get; init; }
+
+        /// <summary>
+        /// 代理種類
+        /// </summary>
+        [JsonPropertyName("leveltype")]
+        public string LevelType { get; init; }
+
+        /// <summary>
+        /// 分紅設置
+        /// </summary>
+        [JsonPropertyName("dividendconditions")]
+        public DividendConditionModel[] DividendConditions { get; init; }
     }
 }

@@ -10,6 +10,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
@@ -18,6 +19,70 @@ namespace TGS.Tests.OperatorApi.UnitTests
 {
     public class PlayerCreateTests
     {
+        [Test]
+        public async Task Create_Player_Must_Record_Ip_Address()
+        {
+            // arrange
+            var brandId = Guid.NewGuid();
+
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        false)));
+
+            fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+                .Returns("TestPlayerCode");
+
+            fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
+                .Returns(new Player
+                {
+                    RegisteredOn = DateTimeOffset.UtcNow
+                });
+
+            var sut = new CreatePlayerCommandService(
+                fakeStatusValidator,
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeSysRepository);
+
+            var command = new CreatePlayerCommand(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                null,
+                false,
+                "192.168.50.123");
+
+            // act
+            var actual = await sut.GetAsync(command);
+
+            // assert
+            _ = fakePlayerRepository.Received(1)
+                .PlayerRegisterIpAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(command.IpAddress),
+                    Arg.Any<DateTimeOffset>());
+        }
+
         [Test]
         public async Task Register_Player_With_Existent_InvitationCode()
         {

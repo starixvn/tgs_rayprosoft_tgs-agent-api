@@ -165,7 +165,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode);
+            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode, "127.0.0.1");
 
             moqValidateCodeOperator
                 .Setup(
@@ -196,7 +196,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var phone = "0988123456";
             var areaCode = "886";
 
-            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode);
+            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode, "127.0.0.1");
 
             moqValidateCodeOperator
                 .Setup(
@@ -228,6 +228,50 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
                     It.Is<object>(x => x.ToString() == playerCode),
                     It.Is<bool>(x => x == false)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Commit_Init_Player_Phone_Should_Set_RegisteredOn()
+        {
+            var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
+            var moqPlayerRepository = new Mock<IPlayerRepository>();
+            var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqCacheManager = new Mock<IRedisCacheManager>();
+
+            var sut = new CommitPlayerInitPhoneService(
+                moqValidateCodeOperator.Object,
+                moqPlayerRepository.Object,
+                moqCacheManager.Object);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var phone = "0988123456";
+            var areaCode = "886";
+
+            var command = new CommitPlayerInitPhoneCommand(
+                securityKey, 
+                validateCode, 
+                "127.0.0.1");
+
+            moqValidateCodeOperator
+                .Setup(
+                    fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
+                        It.Is<string>(x => x == validateCode),
+                        It.Is<string>(x => x == securityKey)))
+                .Returns(ValueTask.FromResult(new PhoneValidateData(
+                    areaCode,
+                    phone,
+                    playerCode)));
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerRepository.Verify(
+                fake => fake.PlayerRegisterIpAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.Is<string>(x => x == command.IpAddress),
+                    It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
         }
     }

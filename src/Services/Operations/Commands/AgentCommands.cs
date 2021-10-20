@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Messages;
@@ -29,10 +30,10 @@ namespace TGS.Apis.PromotionApi.Middlewares
                 var name = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>()?.MethodInfo.Name;
 
                 var message = exception.GetMessageChain();
-                log.SetLogger(name);
+                log.SetLogger(name!);
                 log.LogError($"Promotion api error on :{context.Request.Host} with message: {message}", exception);
 
-                await context.Response.WriteAsJsonAsync(new MessageResponse {Message = message, Valid = false});
+                await context.Response.WriteAsJsonAsync(new MessageResponse { Message = message, Valid = false });
             }
         }
     }

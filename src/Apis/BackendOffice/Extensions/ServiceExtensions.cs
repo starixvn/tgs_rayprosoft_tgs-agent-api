@@ -87,19 +87,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddTgsAgentWalletRepositories();
 
             services
-                .AddPaymentClient()
-                .AddNatsMessageQueue(config =>
-                {
-                    config
-                        .ConfigQueueOptions((options, sp) =>
-                        {
-                            var configuration = sp.GetRequiredService<IConfiguration>();
-
-                            options.Url = configuration.GetValue<string>("NatsSetting:Urls");
-                        })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
-                });
-
+                .AddPaymentClient();
+                
             return services;
         }
     }

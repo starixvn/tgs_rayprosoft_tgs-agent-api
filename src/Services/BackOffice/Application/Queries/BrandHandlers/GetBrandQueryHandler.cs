@@ -49,6 +49,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     ApiKey = brand.ApiKey,
                     SettlementDay = brand.SettlementDay,
                     SettlementIntervalType = brand.SettlementIntervalType,
+                    PlatformCharge = brand.PlatformCharge,
+                    CheckDividendActiveCount = brand.CheckDividendActiveCount,
                     Domains = brand.Domains.Select(x => x.Url).ToArray(),
                     Currencies = brand.Currencies
                         .Select(x => new BrandCurrencyModel

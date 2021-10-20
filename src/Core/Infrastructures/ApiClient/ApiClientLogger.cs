@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Core.Infrastructures.ApiClient
 {
@@ -23,27 +22,31 @@ namespace TGS.Core.Infrastructures.ApiClient
             _log = log;
         }
 
+        void IApiClientLogger.LogHttpResponse(ApiLogEvent apiLogEvent)
+        {
+            _log.LogApi(apiLogEvent);
+        }
+
         async Task IApiClientLogger.LogHttpResponseAsync(HttpResponseMessage response, int executionTimeMs, string requestContent, string logPrefix)
         {
             var request = response.RequestMessage;
             var resMessage = await response.Content?.ReadAsStringAsync();
 
-            var apiCallLogEvent =
-                new ApiLogEvent
-                {
-                    ip = string.Empty,
-                    path = request.RequestUri.AbsoluteUri.NoLongerThan(512),
-                    method = request.Method.ToString().NoLongerThan(8),
-                    prefix = logPrefix.IsNullOrEmpty() ? GetPrefix(request.RequestUri.AbsolutePath) : logPrefix,
-                    servername = Environment.MachineName.NoLongerThan(128),
-                    requestheaders = request.Headers + request.Content?.Headers?.ToString(),
-                    requestcontent = requestContent,
-                    responseheaders = response.Headers.ToString(),
-                    responsecontent = resMessage,
-                    responsecode = (int)response.StatusCode,
-                    executiontimems = executionTimeMs,
-                    recordedon = DateTimeOffset.UtcNow
-                };
+            var apiCallLogEvent = new ApiLogEvent
+            {
+                Ip = string.Empty,
+                Path = request.RequestUri.AbsoluteUri.NoLongerThan(512),
+                Method = request.Method.ToString().NoLongerThan(8),
+                Prefix = logPrefix.IsNullOrEmpty() ? GetPrefix(request.RequestUri.AbsolutePath) : logPrefix,
+                ServerName = Environment.MachineName.NoLongerThan(128),
+                RequestHeaders = request.Headers + request.Content?.Headers?.ToString(),
+                RequestContent = requestContent,
+                ResponseHeaders = response.Headers.ToString(),
+                ResponseContent = resMessage,
+                ResponseCode = (short)response.StatusCode,
+                ExecutionTimeMs = executionTimeMs,
+                RecordedOn = DateTimeOffset.UtcNow
+            };
 
             _log.LogApi(apiCallLogEvent);
         }
@@ -52,11 +55,6 @@ namespace TGS.Core.Infrastructures.ApiClient
         {
             var arr = path.Split('/');
             return arr.Length < 3 ? arr[^1] : arr[2];
-        }
-
-        void IApiClientLogger.LogHttpResponse(ApiLogEvent apiLogEvent)
-        {
-            _log.LogApi(apiLogEvent);
         }
     }
 }

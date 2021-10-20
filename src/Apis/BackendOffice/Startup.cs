@@ -14,11 +14,11 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Models;
@@ -77,10 +77,6 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapMetrics();
             });
 
-            var requestLocalizationOptions =
-                app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
-            app.UseRequestLocalization(requestLocalizationOptions);
-
             if (!env.IsProduction())
             {
                 app.UseSwagger();
@@ -92,7 +88,19 @@ namespace TGS.Apis.BackendOffice
         {
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories();
+                .AddBackendOfficeRepositories()
+                .AddNatsMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                        })
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
+                        .ProcessAllSubjects();
+                }); ;
 
             services.AddPaymentServiceClient((options, sp) =>
             {
@@ -131,7 +139,7 @@ namespace TGS.Apis.BackendOffice
                 {
                     c.RegisterValidatorsFromAssembly(
                         Assembly.GetExecutingAssembly(),
-                        lifetime: ServiceLifetime.Singleton);
+                        lifetime: ServiceLifetime.Scoped);
                 })
                 .AddJsonOptions(options =>
                 {

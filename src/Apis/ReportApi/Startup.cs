@@ -52,6 +52,18 @@ namespace TGS.Apis.ReportApi
                 .AddTransactions()
                 .AddPlayerBucketRepositoriesServices();
 
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
+
             services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
@@ -80,6 +92,16 @@ namespace TGS.Apis.ReportApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRequestLocalization(options =>
+            {
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
+            });
+
             var defaultBypassRouting = new[]
             {
                 "/health",

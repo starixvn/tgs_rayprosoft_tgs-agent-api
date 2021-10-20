@@ -48,6 +48,13 @@ namespace TGS.Services.Operator.Services.Player
                 .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)
                 .ConfigureAwait(false);
 
+            await _playerRepository
+                .PlayerRegisterIpAsync(
+                    result.PlayerCode,
+                    command.IpAddress,
+                    DateTimeOffset.UtcNow)
+                .ConfigureAwait(false);
+
             await _cacheManager
                 .ClearCacheAsync(RedisCacheType.Player, playerCode)
                 .ConfigureAwait(false);

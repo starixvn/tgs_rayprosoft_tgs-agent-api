@@ -62,7 +62,7 @@ namespace TGS.Clients.Report.Client
         async Task<MessageResponse> IReportAggregateClient.ManualCreateRoundAggregateAsync(
             ManualCreateUpdateRoundAggregateModel request)
         {
-            var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
+            var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdateRoundAggregate";
             return await ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(
                 HttpMethod.Post,
                 "/api/roundAggregate/manual", request, logPrefix: prefix,

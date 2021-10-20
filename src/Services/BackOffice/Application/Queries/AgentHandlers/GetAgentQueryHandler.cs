@@ -71,7 +71,14 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                         BankName = b.BankName,
                         BankAccount = b.BankAccount
                     }).ToArray(),
-                    AccumulatedProfitSharing = dividend
+                    AccumulatedProfitSharing = dividend,
+                    AgentDividendConditions = agent.AgentDividendConditions.Select(x => new AgentDividendConditionModel
+                    {
+                        Rank = x.Rank,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        DividendPercentage = x.DividendPercentage
+                    }).OrderBy(x => x.Rank).ToArray()
                 }
             };
         }

@@ -27,11 +27,13 @@ namespace TGS.Services.Agent.Services.Agent
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask<CreateAgentInfo> GetAsync(GetCreateAgentQuery query,
+        public async ValueTask<CreateAgentInfo> GetAsync(
+            GetCreateAgentQuery query,
             CancellationToken cancellationToken = default)
         {
             var parentAgent = await _tgsRepository.Agents.AsQueryable()
                 .FirstAsync(x => x.Id == query.ParentAgentId);
+
             var brand = await _tgsRepository.Brands.AsQueryable()
                 .FirstAsync(x => x.Id == query.BrandId)
                 .ConfigureAwait(false);
@@ -46,15 +48,53 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
-            if (parentAgent.DividendPercentage < query.DividendPercentage)
+            if (query.AgentDividendConditions.Length > 1)
             {
-                throw new DividendPercentageException(parentAgent.DividendPercentage);
+                throw new DividendConditionException("Can only have one rank.");
+            }
+
+            foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
+            {
+                var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
+
+                if (parent is null)
+                {
+                    throw new DividendConditionException($"Parent rank {condition.Rank} is not found.");
+                }
+
+                if (condition.NetProfit < parent.NetProfit)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} net profit must greater than or equal {parent.NetProfit}.");
+                }
+
+                if (condition.ActiveNumber < parent.ActiveNumber)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} active number must greater than or equal {parent.ActiveNumber}.");
+                }
+
+                if (condition.DividendPercentage > parent.DividendPercentage)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} dividend percentage must less than or equal {parent.DividendPercentage}.");
+                }
+
+                var previous = query.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
+
+                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                    condition.ActiveNumber < previous.ActiveNumber ||
+                    condition.DividendPercentage < previous.DividendPercentage))
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} must greater than previous rank.");
+                }
             }
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
             while (await _tgsRepository.Agents.AsQueryable()
-                .AnyAsync(agent => agent.InvitationCode == invitationCode)
+                .AnyAsync(agent => agent.InvitationCode == invitationCode, cancellationToken)
                 .ConfigureAwait(false))
             {
                 invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
@@ -72,16 +112,9 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    query.LiveDealerRebatePercentage == 0
-                    && query.DividendPercentage == 0
-                    && query.SlotRebatePercentage == 0
-                    && query.LotteryRebatePercentage == 0
-                    && query.CardGameRebatePercentage == 0
-                    && query.SportsRebatePercentage == 0
-                    && query.VirtualSportsRebatePercentage == 0
-                        ? AgentConfigStatus.WaitForConfigurePercentage
-                        : AgentConfigStatus.DoneForConfigurePercentage,
-                DividendPercentage = query.DividendPercentage,
+                    query.AgentDividendConditions.Length > 0
+                        ? AgentConfigStatus.DoneForConfigurePercentage
+                        : AgentConfigStatus.WaitForConfigurePercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
                 SlotRebatePercentage = query.SlotRebatePercentage,
                 LotteryRebatePercentage = query.LotteryRebatePercentage,
@@ -100,12 +133,22 @@ namespace TGS.Services.Agent.Services.Agent
                 RegisteredOn = DateTimeOffset.Now
             };
 
+            agent.AgentDividendConditions = query.AgentDividendConditions.Select(x
+                => new CoreModels.AgentDividendCondition
+                {
+                    Rank = x.Rank,
+                    NetProfit = x.NetProfit,
+                    ActiveNumber = x.ActiveNumber,
+                    DividendPercentage = x.DividendPercentage
+                }).ToHashSet();
+
             var (salt, pwd) = _passwordHandler.GenerateCredential(query.Password);
 
             agent.Password = pwd;
             agent.Salt = salt;
             agent.WithdrawPassword = Array.Empty<byte>();
             agent.WithdrawSalt = Array.Empty<byte>();
+
             agent.Wallets = new[]
                 {
                     new CoreModels.AgentWallet
@@ -120,8 +163,8 @@ namespace TGS.Services.Agent.Services.Agent
                 }
                 .ToHashSet();
 
-            await _tgsRepository.Agents.AddAsync(agent).ConfigureAwait(false);
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            await _tgsRepository.Agents.AddAsync(agent, cancellationToken).ConfigureAwait(false);
+            await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return new CreateAgentInfo
             {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Hangfire;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;

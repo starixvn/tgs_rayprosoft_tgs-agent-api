@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Apis.AgentApi
 {
@@ -11,6 +12,10 @@ namespace TGS.Apis.AgentApi
                 .ConfigureAppConfiguration((_, builder) =>
                 {
                     builder.AddJsonFile("/config/appsettings.json", true);
+                })
+                .ConfigureLogging((_, builder) =>
+                {
+                    builder.AddTgsLog();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

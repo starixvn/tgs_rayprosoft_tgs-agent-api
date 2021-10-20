@@ -24,14 +24,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         Task<bool> ExistsAsync(Expression<Func<Agent, bool>> predicate);
 
-        Task<Agent> GetAgentAsync(Expression<Func<Agent, bool>> predicate,
+        Task<Agent> GetAgentAsync(
+            Expression<Func<Agent, bool>> predicate,
             Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null);
 
         IQueryable<AgentAuditLog> GetAgentAuditLogQueries(
             Func<IQueryable<AgentAuditLog>, IQueryable<AgentAuditLog>> preQuery = null,
             bool tracking = false);
 
-        IQueryable<Agent> GetAgentQueries(Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null,
+        IQueryable<Agent> GetAgentQueries(
+            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null,
             bool tracking = false);
 
         Task UpdateAgentAsync(Agent agent, UpdateAgentRequest request);
@@ -75,12 +77,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    request.LiveDealerRebatePercentage == 0 && request.DividendPercentage == 0
-                    && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
-                    request.CardGameRebatePercentage == 0
-                    && request.SportsRebatePercentage == 0 && request.VirtualSportsRebatePercentage == 0
-                        ? AgentConfigStatus.WaitForConfigurePercentage
-                        : AgentConfigStatus.DoneForConfigurePercentage,
+                    request.AgentDividendConditions.Length > 0
+                        ? AgentConfigStatus.DoneForConfigurePercentage
+                        : AgentConfigStatus.WaitForConfigurePercentage,
                 CommissionPercentage = request.CommissionPercentage,
                 DividendPercentage = request.DividendPercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
@@ -103,6 +102,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             agent.Salt = salt;
             agent.WithdrawPassword = Array.Empty<byte>();
             agent.WithdrawSalt = Array.Empty<byte>();
+
             agent.Wallets = new[]
             {
                 new AgentWallet
@@ -116,26 +116,34 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 }
             }.ToHashSet();
 
+            agent.AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendCondition
+            {
+                Rank = x.Rank,
+                NetProfit = x.NetProfit,
+                ActiveNumber = x.ActiveNumber,
+                DividendPercentage = x.DividendPercentage
+            }).ToHashSet();
+
             await CreateEntityAsync(agent);
         }
 
         Task<bool> IAgentService.ExistsAsync(Expression<Func<Agent, bool>> predicate) => ExistsAsync(predicate);
 
-        Task<Agent> IAgentService.GetAgentAsync(Expression<Func<Agent, bool>> predicate,
+        Task<Agent> IAgentService.GetAgentAsync(
+            Expression<Func<Agent, bool>> predicate,
             Func<IQueryable<Agent>, IQueryable<Agent>> preQuery) => GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         IQueryable<AgentAuditLog> IAgentService.GetAgentAuditLogQueries(
             Func<IQueryable<AgentAuditLog>, IQueryable<AgentAuditLog>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        IQueryable<Agent> IAgentService.GetAgentQueries(Func<IQueryable<Agent>, IQueryable<Agent>> preQuery,
+        IQueryable<Agent> IAgentService.GetAgentQueries(
+            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
         async Task IAgentService.UpdateAgentAsync(Agent agent, UpdateAgentRequest request)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
-
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             var parentAgent =
@@ -159,35 +167,57 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             switch (request.UpdateType)
             {
                 case MemberUpdateType.Info:
+
+                    await DeleteEntitiesAsync(agent.AgentDividendConditions);
+
                     agent.RealName = request.RealName;
                     agent.ParentAgentId = parentAgent?.Id;
                     agent.Status = request.Status;
+
                     agent.LevelType = request.ParentUsername.IsNullOrEmpty()
                         ? AgentLevelType.Chief
                         : AgentLevelType.Agent;
                     agent.Type = request.Type;
+
                     agent.CommissionPercentage =
                         operation == AgentOperation.Agent ? -1 : request.CommissionPercentage;
                     agent.DividendPercentage = operation == AgentOperation.Agent ? -1 : request.DividendPercentage;
+
                     agent.LiveDealerRebatePercentage = operation == AgentOperation.Agent
                         ? -1
                         : request.LiveDealerRebatePercentage;
+
                     agent.SlotRebatePercentage =
                         operation == AgentOperation.Agent ? -1 : request.SlotRebatePercentage;
+
                     agent.LotteryRebatePercentage = operation == AgentOperation.Agent
                         ? -1
                         : request.LotteryRebatePercentage;
+
                     agent.CardGameRebatePercentage = operation == AgentOperation.Agent
                         ? -1
                         : request.CardGameRebatePercentage;
+
                     agent.SportsRebatePercentage =
                         operation == AgentOperation.Agent ? -1 : request.SportsRebatePercentage;
+
                     agent.VirtualSportsRebatePercentage = operation == AgentOperation.Agent
                         ? -1
                         : request.VirtualSportsRebatePercentage;
+
                     agent.AgentStatus = operation == AgentOperation.Agent
                         ? AgentConfigStatus.WaitForConfigurePercentage
                         : AgentConfigStatus.DoneForConfigurePercentage;
+
+                    agent.AgentDividendConditions = request.AgentDividendConditions.Select(x
+                        => new AgentDividendCondition
+                        {
+                            Rank = x.Rank,
+                            NetProfit = x.NetProfit,
+                            ActiveNumber = x.ActiveNumber,
+                            DividendPercentage = operation == AgentOperation.Agent ? 0 : x.DividendPercentage
+                        }).ToHashSet();
+
                     break;
 
                 case MemberUpdateType.Contact:
@@ -195,12 +225,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     agent.Email = request.Email;
                     agent.QQ = request.QQ;
                     agent.Wechat = request.Wechat;
+
                     break;
 
                 case MemberUpdateType.Password:
                     var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
                     agent.Password = pwd;
                     agent.Salt = salt;
+
                     break;
             }
 
@@ -226,28 +258,37 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         public async Task<(IEnumerable<AgentModel>, int)> GetAgentsAsync(GetAgentsRequest request)
         {
             const string spName = "dbo.agent_get_agents_with_team_counts";
+
             var results = await _repository.SqlQueryMultipleAsync<AgentModel>(spName,
                 parameters: new Dictionary<string, object>
                 {
-                    {"_brand_id", request.BrandId},
-                    {"_username", request.Username},
-                    {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
-                    {"_page_number", request.ShowAll ? 1 : request.Page},
-                    {"_sort_by", request.SortBy},
-                    {"_is_desc", request.IsDesc},
-                    {"_status", request.Status},
-                    {"_type", request.Type},
-                    {"_level_type", request.LevelType}
+                    { "_brand_id", request.BrandId },
+                    { "_username", request.Username },
+                    { "_page_size", request.ShowAll ? int.MaxValue : request.Rows },
+                    { "_page_number", request.ShowAll ? 1 : request.Page },
+                    { "_sort_by", request.SortBy },
+                    { "_is_desc", request.IsDesc },
+                    { "_status", request.Status },
+                    { "_type", request.Type },
+                    { "_level_type", request.LevelType }
                 });
+
             return (results, results.Any() ? results.First().TotalCount : 0);
         }
 
         private static IEnumerable<Agent> GetChildAgents(Guid parentAgentId, Agent[] agents)
         {
             var childAgents = agents.Where(x => x.ParentAgentId == parentAgentId).ToArray();
+
             foreach (var agent in childAgents)
             {
                 agent.DividendPercentage = 0M;
+
+                foreach (var condition in agent.AgentDividendConditions)
+                {
+                    condition.DividendPercentage = 0M;
+                }
+
                 yield return agent;
 
                 if (agents.Any(x => x.ParentAgentId == agent.Id))

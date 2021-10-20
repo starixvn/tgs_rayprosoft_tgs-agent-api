@@ -68,8 +68,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("{id}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
             [FromServices] ManualDepositSerializer serializer,
@@ -95,8 +95,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

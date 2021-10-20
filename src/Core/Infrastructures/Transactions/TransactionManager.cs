@@ -3,9 +3,9 @@ using System.Data;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
+using Tgs.Logging;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 
 namespace TGS.Core.Infrastructures.Transactions
 {

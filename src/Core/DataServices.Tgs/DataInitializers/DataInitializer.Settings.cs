@@ -424,6 +424,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("LicenseeReport")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("MarketReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        }
+                    }
+                },
                 new MenuSetting("Merchant")
                 {
                     SubMenus = new[]

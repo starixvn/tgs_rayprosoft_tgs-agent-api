@@ -64,5 +64,20 @@ namespace TGS.Apis.ReportApi.Controllers
         public Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
             [FromQuery] GetAgentAccountChangesRequest request) =>
             _mediator.Send(request);
+
+        [HttpGet("exportAgentContributions")]
+        [Description("export agent contributions")]
+        public async Task<IActionResult> ExportAgentContributionsAsync(
+            [FromQuery] ExportAgentContributionsRequest request)
+            => File(
+                await _mediator.Send(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        [HttpGet("exportAgentDividends")]
+        [Description("export agent dividends")]
+        public async Task<IActionResult> ExportAgentDividendsAsync([FromQuery] ExportAgentDividendsRequest request)
+            => File(
+                await _mediator.Send(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 }

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.10.56">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -16,8 +16,8 @@
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="TGS.FileService.Client" Version="0.0.4" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.1.5" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.20" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.1.7" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.23" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.6-alpha" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.0.0" />

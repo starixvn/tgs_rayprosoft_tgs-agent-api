@@ -23,5 +23,6 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public decimal SportsRebatePercentage { get; init; }
         public decimal VirtualSportsRebatePercentage { get; init; }
         public string Remarks { get; init; }
+        public AgentDividendConditionModel[] AgentDividendConditions { get; init; }
     }
 }

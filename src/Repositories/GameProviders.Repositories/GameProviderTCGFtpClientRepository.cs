@@ -5,24 +5,21 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-using Microsoft.Extensions.Options;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log.Events;
 using TGS.GameProviders.Repositories.Models.GameProviderTCGFtpClient;
-using TGS.GameProviders.Repositories.Options;
 
 namespace TGS.GameProviders.Repositories
 {
     internal sealed class GameProviderTCGFtpClientRepository : IGameProviderTCGFtpClientRepository
     {
-        private readonly IApiClientLogger _logger;
-        private readonly IJsonSerializationProvider _json;
         private readonly HttpClient _client;
+        private readonly IJsonSerializationProvider _json;
+        private readonly IApiClientLogger _logger;
+
         public GameProviderTCGFtpClientRepository(
             HttpClient client,
             IApiClientLogger logger,
@@ -92,18 +89,18 @@ namespace TGS.GameProviders.Repositories
                 }
                 _logger.LogHttpResponse(new ApiLogEvent
                 {
-                    ip = string.Empty,
-                    path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
-                    method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                    prefix = logPrefix,
-                    servername = Environment.MachineName.NoLongerThan(128),
-                    requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
-                    requestcontent = null,
-                    responseheaders = httpResponseMessage.RequestMessage.Headers.ToString(),
-                    responsecontent = responseMessage,
-                    responsecode = (int)httpResponseMessage.StatusCode,
-                    executiontimems = (int)sw.ElapsedMilliseconds,
-                    recordedon = DateTimeOffset.UtcNow
+                    Ip = string.Empty,
+                    Path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
+                    Method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
+                    Prefix = logPrefix,
+                    ServerName = Environment.MachineName.NoLongerThan(128),
+                    RequestHeaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
+                    RequestContent = null,
+                    ResponseHeaders = httpResponseMessage.RequestMessage.Headers.ToString(),
+                    ResponseContent = responseMessage,
+                    ResponseCode = (short)httpResponseMessage.StatusCode,
+                    ExecutionTimeMs = (int)sw.ElapsedMilliseconds,
+                    RecordedOn = DateTimeOffset.UtcNow
                 });
             }
             catch (Exception ex)
