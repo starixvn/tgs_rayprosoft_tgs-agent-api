@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -128,7 +129,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     request.Amount,
                     request.Remark,
                     null,
-                    new(UserId)
+                    Guid.Parse(UserId)
                 );
             }
 

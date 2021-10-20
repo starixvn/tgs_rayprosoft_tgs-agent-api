@@ -112,7 +112,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
                     remark,
                     null,
-                    new(UserId)).ConfigureAwait(false);
+                    Guid.Parse(UserId)).ConfigureAwait(false);
 
                 if (isTransferToAgent)
                 {
