@@ -104,6 +104,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
         {
             var agents = await _agentService
                 .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id))
+                .Include(x => x.AgentDividendConditions)
                 .ToArrayAsync(cancellationToken);
 
             var playerData = await _playerAggregateService.GetPlayerAggregateQueries()
