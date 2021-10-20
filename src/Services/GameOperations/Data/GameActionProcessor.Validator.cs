@@ -118,21 +118,6 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        //private async Task ThrowIfStatusesIsInvalidAsync(GameActionState s)
-        //{
-        //    var playerType = s.PlayerData.PlayerType;
-        //    var brandId = s.PlayerData.BrandId;
-        //    var gameActionType = s.GameActionType;
-        //    var gameProviderId = s.GameProvider.Id;
-        //    var gameId = s.GameId;
-
-        //    var status = _validStatus.GetStatus(playerType, gameActionType);
-        //    var gameStatus = _validGameStatus.GetStatus(playerType, gameActionType);
-
-        //    await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, status);
-        //    await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(brandId, gameProviderId, gameId,
-        //        s.ExternalGameId, status, gameStatus);
-        //}
 
         private static void VerifyLockedAndUnlockedAmounts(GameActionState s)
         {

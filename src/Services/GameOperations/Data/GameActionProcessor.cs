@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -35,36 +34,21 @@ namespace TGS.Services.GameOperations.Data
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
         private readonly IBetValuesCalculator _betValuesCalculator;
-        private readonly IJsonSerializationProvider _json;
         private readonly IRoundStatusManager _roundStatusManager;
-        private readonly IStatusValidator _statusValidator;
-        private readonly ITimeZoneManager _timeZoneManager;
         private readonly ITransactionSettingsGenerator _transactionSettingsGenerator;
-        private readonly IValidStatus<GameStatus> _validGameStatus;
-        private readonly IValidStatus<Status> _validStatus;
 
         public GameActionProcessor(
             ITransactionSettingsGenerator transactionSettingsGenerator,
             IAmountValidator amountValidator,
-            IStatusValidator statusValidator,
             IActionWithinRoundValidator actionWithinRoundValidator,
             IBetValuesCalculator betValuesCalculator,
-            ITimeZoneManager timeZoneManager,
-            IRoundStatusManager roundStatusManager,
-            IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus,
-            IJsonSerializationProvider json)
+            IRoundStatusManager roundStatusManager)
         {
             _transactionSettingsGenerator = transactionSettingsGenerator;
             _amountValidator = amountValidator;
-            _statusValidator = statusValidator;
             _actionWithinRoundValidator = actionWithinRoundValidator;
             _betValuesCalculator = betValuesCalculator;
-            _timeZoneManager = timeZoneManager;
             _roundStatusManager = roundStatusManager;
-            _validStatus = validStatus;
-            _validGameStatus = validGameStatus;
-            _json = json;
         }
 
         async ValueTask<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
@@ -77,6 +61,14 @@ namespace TGS.Services.GameOperations.Data
             {
                 var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx);
                 var hasWalletUpdate = transactionSettings.HasWalletUpdate;
+
+                var gamePlatformTypes = trx.GameActionType == PlaceBet &&
+                    betData.AllowPlaceBetWithDifferentPlatformToken ||
+                    !betData.PlatformType.HasValue
+                        ? Consts.AllGamePlatformTypes
+                        : betData.PlatformType.Value.ToGamePlatformTypes();
+
+                var games = data.Games.Where(g => gamePlatformTypes.Contains(g.PlatformType)).ToArray();
 
                 var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
@@ -91,11 +83,10 @@ namespace TGS.Services.GameOperations.Data
                     ValidateAmount = transactionSettings.ValidateAmount,
                     PrepareAmount = transactionSettings.GetTransactionAmount,
                     PlayerData = player,
-                    GameProviderGames = data.Games,
+                    GameProviderGames = games,
                     ForceGetPreviousActions = betData.ForceGetPreviousActions,
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
-                    AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
                     WithCustomBetValues = betData.WithCustomBetValues,
                     AutoCloseRound = betData.AutoCloseRound,
                     OppositeBetRules = betData.OppositeBetRules ?? Array.Empty<OppositeBetRule>()
@@ -139,8 +130,6 @@ namespace TGS.Services.GameOperations.Data
             s = GetNewRoundStatus(s);
 
             VerifyLockedAndUnlockedAmounts(s);
-
-            //await ThrowIfStatusesIsInvalidAsync(s).ConfigureAwait(false);
 
             var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
 
@@ -195,14 +184,7 @@ namespace TGS.Services.GameOperations.Data
 
             if (s.HasExtGameId)
             {
-                var types = s.GameActionType == PlaceBet &&
-                    s.AllowPlaceBetWithDifferentPlatformToken ||
-                    !s.PlatformType.HasValue
-                        ? Consts.AllGamePlatformTypes
-                        : s.PlatformType.Value.ToGamePlatformTypes();
-
-                game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId)
-                    && types.Contains(g.PlatformType));
+                game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId));
             }
 
             if (game == null && s.HasExtRefTransactionId)
@@ -297,7 +279,7 @@ namespace TGS.Services.GameOperations.Data
                     IsCancelled = false,
                     JackpotContribution = act.JackpotContribution == null
                         ? null
-                        : _json.DeserializeFromString<JackpotContribution>(act.JackpotContribution)
+                        : JsonSerializer.Deserialize<JackpotContribution>(act.JackpotContribution)
                 })
                 .ToDictionary(e => e.Id);
 
@@ -686,7 +668,11 @@ namespace TGS.Services.GameOperations.Data
                 BetType = s.BetType,
                 ExtraData = s.ExtraData,
                 JackpotContribution = s.JackpotContribution != null
-                    ? _json.SerializeToString(s.JackpotContribution)
+                    ? JsonSerializer.Serialize(s.JackpotContribution,
+                        new JsonSerializerOptions
+                        {
+                            WriteIndented = false
+                        })
                     : null
             };
 

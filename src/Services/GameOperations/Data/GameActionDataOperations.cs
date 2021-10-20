@@ -172,14 +172,6 @@ namespace TGS.Services.GameOperations.Data
             return transactionResult;
         }
 
-        private void ThrowIfPlayerDisableToPlaceBet(TransactionData[] transactions, PlayerStatus playerStatus)
-        {
-            if (transactions.Any(t => t.GameActionType.IsOneOf(LockAmount, PlaceBet)))
-            {
-                _statusValidator.ThrowIfPlayerDisabledToPlaceBet(playerStatus);
-            }
-        }
-
         #region Batch Actions
 
         private async ValueTask<BatchBetResult> ExecuteBatchAsync(
