@@ -17,7 +17,7 @@ namespace TGS.Services.Operations.Commands
 {
     public sealed class PlayerCommands : IPlayerCommands
     {
-        private const int RetryCount = 3;
+        private const int _RetryCount = 3;
         private readonly ITgsLog _log;
         private readonly ITgsRepository _repository;
 
@@ -51,7 +51,7 @@ namespace TGS.Services.Operations.Commands
 
             var vip = await _repository.VipLevels.FirstOrDefaultAsync(x => x.BrandId == data.BrandId && x.Level == 1);
 
-            while (retries < RetryCount)
+            while (retries < _RetryCount)
             {
                 playerCode = PlayerCodeGenerator.NewId();
 
@@ -101,11 +101,11 @@ namespace TGS.Services.Operations.Commands
                     retries++;
 
                     var err =
-                        $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
+                        $"Exception occurs when creating player. This is attempt number {retries} of {_RetryCount}.";
 
                     _log.LogError(err, e);
 
-                    if (retries == RetryCount)
+                    if (retries == _RetryCount)
                     {
                         throw new InvalidOperationException(err, e);
                     }
