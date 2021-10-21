@@ -137,7 +137,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     AgentId = x.agent.Id,
                     x.agent.Username,
                     x.agent.BrandId,
-                    x.agent.AgentDividendConditions.First(c => c.Rank == 1).DividendPercentage,
+                    DividendPercentage =
+                        x.agent.AgentDividendConditions.FirstOrDefault(c => c.Rank == 1)?.DividendPercentage ?? 0M,
                     data?.PromotionAmount,
                     data?.RebateAmount,
                     data?.DepositAmount,
@@ -369,7 +370,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             do
             {
-                var agentDividendPercentage = agent.AgentDividendConditions.First(x => x.Rank == 1).DividendPercentage;
+                var agentDividendPercentage =
+                    agent.AgentDividendConditions.FirstOrDefault(x => x.Rank == 1)?.DividendPercentage ?? 0M;
 
                 yield return new AgentDividendMultipleLayerModel
                 {
