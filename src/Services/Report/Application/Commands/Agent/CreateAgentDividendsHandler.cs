@@ -201,7 +201,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 {
                     AgentId = x.agent.Id,
                     x.agent.BrandId,
-                    x.agent.DividendPercentage,
+                    x.agent.AgentDividendConditions.First(c => c.Rank == 1).DividendPercentage,
                     data?.PromotionAmount,
                     data?.RebateAmount,
                     data?.DepositAmount,
