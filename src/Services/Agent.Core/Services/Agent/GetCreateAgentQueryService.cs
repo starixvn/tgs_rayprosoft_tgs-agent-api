@@ -112,14 +112,9 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    query.LiveDealerRebatePercentage == 0
-                    && query.SlotRebatePercentage == 0
-                    && query.LotteryRebatePercentage == 0
-                    && query.CardGameRebatePercentage == 0
-                    && query.SportsRebatePercentage == 0
-                    && query.VirtualSportsRebatePercentage == 0
-                        ? AgentConfigStatus.WaitForConfigurePercentage
-                        : AgentConfigStatus.DoneForConfigurePercentage,
+                    query.AgentDividendConditions.Length > 0
+                        ? AgentConfigStatus.DoneForConfigurePercentage
+                        : AgentConfigStatus.WaitForConfigurePercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
                 SlotRebatePercentage = query.SlotRebatePercentage,
                 LotteryRebatePercentage = query.LotteryRebatePercentage,

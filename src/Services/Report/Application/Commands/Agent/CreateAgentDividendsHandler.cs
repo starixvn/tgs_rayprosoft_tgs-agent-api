@@ -25,13 +25,9 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly IAgentDividendService _agentDividendService;
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
-        private readonly IPlayerAggregateService _playerAggregateService;
-        private readonly IPlayerGameAggregateService _playerGameAggregateService;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
-            IPlayerAggregateService playerAggregateService,
-            IPlayerGameAggregateService playerGameAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
@@ -40,8 +36,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
         {
             _agentService = agentService;
             _brandService = brandService;
-            _playerAggregateService = playerAggregateService;
-            _playerGameAggregateService = playerGameAggregateService;
             _agentDividendService = agentDividendService;
             _walletRepository = walletRepository;
         }
@@ -82,7 +76,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 var brands = await _brandService.GetBrandQueries(q
                             =>
                             q.Where(brandCode is not null, x => x.Code == brandCode)
-                                .Where(brandCode is null, x => queryDate > x.CurrentSettlementTo),
+                                .Where(x => queryDate > x.CurrentSettlementTo),
                         true)
                     .ToArrayAsync(cancellationToken);
                 hasBrands = brands.Any();

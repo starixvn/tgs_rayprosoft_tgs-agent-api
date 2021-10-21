@@ -135,6 +135,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 (x, data) => new
                 {
                     AgentId = x.agent.Id,
+                    x.agent.Username,
                     x.agent.BrandId,
                     x.agent.DividendPercentage,
                     data?.PromotionAmount,
@@ -225,6 +226,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 .SelectMany(x => x.games.DefaultIfEmpty(),
                     (x, games) => new CreateAgentDividendModel
                     {
+                        AgentUsername = x.agent.Username,
                         AgentId = x.agent.AgentId,
                         BrandId = x.agent.BrandId,
                         AutoSend = brand.AutoSentAgentBonus,
