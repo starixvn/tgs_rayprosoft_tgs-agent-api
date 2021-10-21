@@ -13,6 +13,6 @@ namespace TGS.Services.Report.Application.Models.Agent
         public decimal AgentDividendPercentage { get; set; }
         public decimal AgentDividendAmount { get; set; }
         public decimal NegativeDividendAmount { get; set; }
-        public string AutoSend { get; set; }
+        public bool AutoSend { get; set; }
     }
 }

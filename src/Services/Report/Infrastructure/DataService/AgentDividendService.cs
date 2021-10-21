@@ -137,7 +137,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     AgentId = x.agent.Id,
                     x.agent.Username,
                     x.agent.BrandId,
-                    x.agent.DividendPercentage,
+                    x.agent.AgentDividendConditions.First(c => c.Rank == 1).DividendPercentage,
                     data?.PromotionAmount,
                     data?.RebateAmount,
                     data?.DepositAmount,

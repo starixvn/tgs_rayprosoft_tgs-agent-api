@@ -68,7 +68,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     AgentDividendAmount = x.AgentDividendAmount,
                     NegativeDividendAmount =
                         noSendDividends.Where(n => n.AgentId == x.AgentId).Sum(s => s.AgentDividendAmount),
-                    AutoSend = x.AutoSend.ToString()
+                    AutoSend = x.AutoSend
                 });
 
             var xlsx = exportData.Export("agentDividendsTrialCalculation");
