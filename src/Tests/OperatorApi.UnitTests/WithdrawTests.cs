@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Services.Caches;
+using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator.BrandPayment;
@@ -138,6 +138,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
+
             var optionsAccessor = new OptionsWrapper<JsonOptions>(
                 new JsonOptions());
 
@@ -219,6 +220,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Player_Can_Get_Withdraw_Required_Amount()
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
@@ -226,8 +228,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var playerCode = "4ucmqplxb029";
 
             repository.PlayerBuckets.AddRange(
-                new CoreModels.PlayerBucket() { PlayerCode = playerCode, BucketAmount = 100, CurrentBucketAmount = 100 },
-                new CoreModels.PlayerBucket() { PlayerCode = playerCode, BucketAmount = 200, CurrentBucketAmount = 100 });
+                new CoreModels.PlayerBucket
+                {
+                    PlayerCode = playerCode,
+                    BucketAmount = 100,
+                    CurrentBucketAmount = 100
+                },
+                new CoreModels.PlayerBucket
+                {
+                    PlayerCode = playerCode,
+                    BucketAmount = 200,
+                    CurrentBucketAmount = 100
+                });
 
             await repository.SaveChangesAsync();
 

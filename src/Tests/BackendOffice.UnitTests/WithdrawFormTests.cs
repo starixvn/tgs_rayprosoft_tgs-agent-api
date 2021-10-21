@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
@@ -43,23 +43,24 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_WithdrawForm()
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
-            var moqPaymentClient = new Mock<IPaymentClient>();
             var moqWalletExchangeService = new Mock<IWalletExchangeService>();
 
             var sut = new ReviewWithdrawFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqPaymentClient.Object,
                 moqWalletExchangeService.Object);
 
             var formId = Guid.NewGuid();
             var brandPaymentId = Guid.NewGuid();
             var brandId = Guid.NewGuid();
+
             var command = new ReviewWithdrawFormCommand(
                 brandId,
                 formId,
                 brandPaymentId,
                 ReviewState.Approve,
-                null);
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetWithdrawFormAsync(
@@ -80,6 +81,48 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == formId),
                     It.Is<Guid>(x => x == brandPaymentId),
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Manager_Can_Paid_Manual_WithdrawFormAsync()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new PaidWithdrawFormCommandService(moqPaymentServiceClient.Object);
+
+            var formId = Guid.NewGuid();
+            var brandPaymentId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+            var command = new PaidWithdrawFormCommand(
+                brandId,
+                formId,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetWithdrawFormAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(
+                    new WithdrawFormInfo
+                    {
+                        Id = formId,
+                        BrandId = brandId,
+                        Status = PaymentFlowState.Approved
+                    }));
+
+            await sut.ExecuteAsync(command);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.SubmitWithdrawFormStatusAsync(
+                    It.Is<Guid>(x => x == formId),
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.Paid),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }
@@ -131,6 +174,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var agentId = Guid.NewGuid();
             var transactionType = TransactionTypes.CancelWithdrawal;
             var amount = 1000M;
+            var userId = Guid.NewGuid();
 
             moqAgentService
                 .Setup(fake => fake.GetAgentAsync(
@@ -147,7 +191,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 userType,
                 agentId.ToString(),
                 transactionType,
-                amount);
+                amount,
+                userId.ToString());
 
             moqAgentWalletRepository.Verify(
                 fake => fake.ExchangeAsync(
@@ -179,6 +224,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var playerCode = "ThisIsPlayerCode";
             var transactionType = TransactionTypes.CancelWithdrawal;
             var amount = 1000M;
+            var userId = Guid.NewGuid();
 
             moqPlayerService
                 .Setup(fake => fake.GetPlayerAsync(
@@ -195,7 +241,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 userType,
                 playerCode,
                 transactionType,
-                amount);
+                amount,
+                userId.ToString());
 
             moqWalletRepository.Verify(
                 fake => fake.ExchangeAsync(
@@ -204,7 +251,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<string>(x => x == playerCode),
                     It.Is<TransactionTypes>(x => x == transactionType),
                     It.Is<decimal>(x => x == amount),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Guid?>()),
                 Times.Exactly(1));
         }
     }

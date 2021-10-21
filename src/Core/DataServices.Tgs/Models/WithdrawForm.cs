@@ -26,9 +26,21 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid Id { get; set; }
 
+        public DateTimeOffset? PaidOn { get; set; }
+
+        public string PaidUserId { get; set; }
+
+        public string PaidUserName { get; set; }
+
         public string PaymentReturn { get; set; }
 
         public string Remark { get; set; }
+
+        public DateTimeOffset? ReviewedOn { get; set; }
+
+        public string ReviewedUserId { get; set; }
+
+        public string ReviewedUserName { get; set; }
 
         public int Status { get; set; }
 

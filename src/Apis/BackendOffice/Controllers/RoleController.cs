@@ -213,7 +213,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             role.UpdatedByUsername = Username;
             role.UpdatedOn = DateTimeOffset.Now;
 
-            if (!role.IsRoot && role.RoleType == RoleType.Admin)
+            if (!role.IsRoot || role.RoleType == RoleType.Admin)
             {
                 await _roleCommands.UpdateAsync(role);
 
@@ -478,6 +478,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 var menus = GetMenuSetting(templateRole.MenuSetting, roleItem.MenuSetting);
                 roleItem.MenuSetting = _jsonSerializationProvider.SerializeToString(menus);
+                roleItem.UpdatedByUsername = Username;
+                roleItem.UpdatedOn = DateTimeOffset.Now;
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Promotion.Client;
@@ -27,7 +28,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
         [HttpPost]
         [Description("Dispatch promotion")]
         public Task<MessageResponse> DispatchPromotionsAsync(
-            [FromBody] DispatchPromotionBonusRequest request) =>
-            _client.DispatchPromotionAsync(request);
+            [FromBody] DispatchPromotionBonusRequest request)
+        {
+            request.OperatorUserId = Guid.Parse(UserId);
+
+            return _client.DispatchPromotionAsync(request);
+        }
     }
 }

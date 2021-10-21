@@ -31,7 +31,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public CreatePromotionBonusDailyQueryHandler(IPromotionBonusRepository promotionBonusService,
+        public CreatePromotionBonusDailyQueryHandler(
+            IPromotionBonusRepository promotionBonusService,
             IPlayerBucketRepository playerBucketService,
             IWalletRepository walletRepository,
             ITgsTransactionRepository transactionRepository,
@@ -47,17 +48,29 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             _transactionRepository = transactionRepository;
         }
 
-        public override async Task<MessageResponse> Handle(CreatePromotionBonusDailyRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreatePromotionBonusDailyRequest request,
             CancellationToken cancellationToken)
         {
             var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
-            var reportDate = new DateTimeOffset(previousDay.Year, previousDay.Month, previousDay.Day, 0, 0, 0,
+
+            var reportDate = new DateTimeOffset(previousDay.Year,
+                previousDay.Month,
+                previousDay.Day,
+                0,
+                0,
+                0,
                 previousDay.Offset);
 
             if (request.Date.IsNotNullOrEmpty() &&
                 DateTimeOffset.TryParse($"{request.Date} 00:00 +08:00", out var result))
             {
-                reportDate = new(result.Year, result.Month, result.Day, 0, 0, 0,
+                reportDate = new(result.Year,
+                    result.Month,
+                    result.Day,
+                    0,
+                    0,
+                    0,
                     result.Offset);
             }
 
@@ -74,9 +87,14 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             if (await _promotionBonusService.GetPromotionBonusQueries()
                 .AnyAsync(
                     x => promotionIds.Contains(x.PromotionId) && reportDate == x.From &&
-                        reportDate == x.To, cancellationToken))
+                        reportDate == x.To,
+                    cancellationToken))
             {
-                return new() {Valid = false, Message = $"Promotion bonus report date {reportDate} is already existed."};
+                return new()
+                {
+                    Valid = false,
+                    Message = $"Promotion bonus report date {reportDate} is already existed."
+                };
             }
 
             var gameProviderIds = promotions.SelectMany(x => x.PromotionGameProviders).Select(x => x.GameProviderId)
@@ -89,17 +107,34 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
                 .GroupJoin(_repository.BrandGames,
-                    aggregate => new {aggregate.BrandId, aggregate.GameId},
-                    brandGame => new {brandGame.BrandId, brandGame.GameId},
-                    (aggregate, brandGame) => new {aggregate, brandGame})
+                    aggregate => new
+                    {
+                        aggregate.BrandId,
+                        aggregate.GameId
+                    },
+                    brandGame => new
+                    {
+                        brandGame.BrandId,
+                        brandGame.GameId
+                    },
+                    (aggregate, brandGame) => new
+                    {
+                        aggregate,
+                        brandGame
+                    })
                 .SelectMany(x => x.brandGame.DefaultIfEmpty(),
-                    (x, brandGame) => new {x.aggregate, brandGame})
+                    (x, brandGame) => new
+                    {
+                        x.aggregate,
+                        brandGame
+                    })
                 .Where(x => x.brandGame == null || x.brandGame.Rebate)
                 .ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
             {
                 var id = GuidExtensions.NewSequentialGuid();
+
                 var (players, amountUsed) =
                     GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate));
                 x.AmountUsed = amountUsed;
@@ -120,7 +155,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                     TurnoverMultiple = x.TurnoverMultiple,
                     CreatedOn = DateTimeOffset.Now,
                     SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
-                    Players = players
+                    Players = players.Where(p => p.BonusAmount > 0M).ToArray()
                 };
             }).ToArray();
             var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
@@ -128,13 +163,26 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             var players = await _repository.Players.AsQueryable()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new
+                {
+                    x.BrandId,
+                    x.PlayerCode,
+                    x.Wallets,
+                    x.DefaultWalletId
+                })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                    return x.Players.Join(players,
+                            pb => pb.PlayerCode,
+                            p => p.PlayerCode,
+                            (pb, p) => new
+                            {
+                                pb,
+                                p
+                            })
                         .Select(p => new
                         {
                             x.BrandId,
@@ -153,16 +201,23 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             await _promotionRepository.UpdatePromotionsAsync(promotions).ConfigureAwait(false);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus).ConfigureAwait(false);
+
             await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
-                new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
+                new CreatePlayerBucketRequest(x.BrandId,
+                    x.PlayerCode,
+                    x.DefaultWalletId,
+                    x.BucketType,
                     x.BucketAmount)).ToArray()).ConfigureAwait(false);
 
             var transactionPromotions = new List<TransactionPromotion>();
+
             foreach (var createPlayerBucketRequest in playerBuckets)
             {
                 var (transactionId, balance) = await _walletRepository.ExchangeAsync(createPlayerBucketRequest.BrandId,
-                    createPlayerBucketRequest.DefaultWalletId, createPlayerBucketRequest.PlayerCode,
-                    TransactionTypes.Promotion, createPlayerBucketRequest.BonusAmount);
+                    createPlayerBucketRequest.DefaultWalletId,
+                    createPlayerBucketRequest.PlayerCode,
+                    TransactionTypes.Promotion,
+                    createPlayerBucketRequest.BonusAmount);
 
                 transactionPromotions.Add(new()
                 {
@@ -180,7 +235,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             return CreateValidResponse<MessageResponse>();
         }
 
-        private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,
+        private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
+            Guid id,
             Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameAggregate> aggregates)
         {
             var amount = promotion.AmountUsed;

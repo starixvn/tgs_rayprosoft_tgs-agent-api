@@ -24,11 +24,19 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromQuery] GetPlayerContributionsRequest request) =>
             _client.GetPlayerContributionsAsync(request);
 
+        [HttpGet("playersAccountChanges")]
+        [Description("Get account changes of multiple players")]
+        public Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
+            [FromServices] IReportClient client,
+            [FromQuery] GetPlayersAccountChangesRequest request) =>
+            client.GetPlayersAccountChangesAsync(request);
+
         [HttpGet("exportPlayerContributions")]
         public async Task<IActionResult> ExportPlayerContributionsAsync(
             [FromQuery] ExportPlayerContributionsRequest request)
             => File(
                 await _client.ExportPlayerContributionsAsync(request).ConfigureAwait(false),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PlayerContributions.xlsx");
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "PlayerContributions.xlsx");
     }
 }

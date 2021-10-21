@@ -21,6 +21,7 @@
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
+    <None Remove="SqlScripts\Indexes\licensee_fuzzy_query_trgm.sql" />
     <None Remove="SqlScripts\Indexes\players_brand_id_email.sql" />
     <None Remove="SqlScripts\Indexes\rounds_createdon.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
@@ -75,6 +76,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\promotion_update_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\licensee_fuzzy_query_trgm.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\players_brand_id_email.sql" />
@@ -123,10 +125,11 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="27.1.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
   </ItemGroup>
 

@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.PayPassowrd;
 
 namespace TGS.Services.Operator.Services.PayPassowrd
 {
     internal class SetFirstPayPasswordCommandService : ICommandService<SetFirstPayPasswordCommand>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IPasswordHandler _passwordHandler;
+        private readonly IPlayerOperations _playerOperations;
 
         public SetFirstPayPasswordCommandService(IPlayerOperations playerOperations, IPasswordHandler passwordHandler)
         {
@@ -19,7 +18,8 @@ namespace TGS.Services.Operator.Services.PayPassowrd
             _passwordHandler = passwordHandler;
         }
 
-        public async ValueTask ExecuteAsync(SetFirstPayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            SetFirstPayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)

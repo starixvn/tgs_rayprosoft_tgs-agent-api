@@ -55,7 +55,6 @@ namespace TGS.Services.Operations.Queries
 
         public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
             _repository.Players
-                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
 
         public Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>

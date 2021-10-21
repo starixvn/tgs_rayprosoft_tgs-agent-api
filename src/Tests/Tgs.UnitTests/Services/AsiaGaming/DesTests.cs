@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 
 namespace TGS.UnitTests.Services.AsiaGaming
 {
@@ -23,7 +23,7 @@ namespace TGS.UnitTests.Services.AsiaGaming
             var cryptoProviderFactory = sp.GetService<ISymmetricCryptoProviderFactory>();
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.DES);
         }
-        
+
         [Test]
         public async Task Can_EncryptAsync()
         {
@@ -31,20 +31,28 @@ namespace TGS.UnitTests.Services.AsiaGaming
             var key = "12341234";
             var expectedResult = "IGcOAYEQN88F1NFLtBOK29IcQSW2a8b/G8UgSaeEyaA=";
 
-            var result = await _cryptoProvider.EncryptStringAsync(original, key, key, 
-                CipherMode.ECB, PaddingMode.PKCS7, Encoding.UTF8);
+            var result = await _cryptoProvider.EncryptStringAsync(original,
+                key,
+                key,
+                CipherMode.ECB,
+                PaddingMode.PKCS7,
+                Encoding.UTF8);
             result.Should().BeEquivalentTo(expectedResult);
         }
-        
+
         [Test]
         public async Task Can_DecryptAsync()
         {
             var encrypted = "IGcOAYEQN88F1NFLtBOK29IcQSW2a8b/G8UgSaeEyaA=";
             var key = "12341234";
             var expectedResult = "cagent=81288128/\\\\\\\\/method=tc";
-        
-            var result = await _cryptoProvider.DecryptStringAsync(encrypted, key, key, 
-                CipherMode.ECB, PaddingMode.PKCS7, Encoding.UTF8);
+
+            var result = await _cryptoProvider.DecryptStringAsync(encrypted,
+                key,
+                key,
+                CipherMode.ECB,
+                PaddingMode.PKCS7,
+                Encoding.UTF8);
             result.Should().BeEquivalentTo(expectedResult);
         }
     }

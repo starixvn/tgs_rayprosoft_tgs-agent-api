@@ -15,6 +15,15 @@ namespace TGS.Services.BackOffice.Application
     {
         private readonly Dictionary<string, string> _userInfoMap;
 
+        protected string UserId => _userInfoMap[Consts.BackendOffice.UserInfo.UserIdKey];
+        protected string Username => _userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
+        protected string RoleName => _userInfoMap[Consts.BackendOffice.UserInfo.RolenameKey];
+
+        protected Guid? ResellerId => GetIdByKey(Consts.BackendOffice.UserInfo.ResellerKey);
+
+        protected Guid? LicenseeId => GetIdByKey(Consts.BackendOffice.UserInfo.LicenseeKey);
+        protected Guid? BrandId => GetIdByKey(Consts.BackendOffice.UserInfo.BrandKey);
+
         protected Handler(IHttpContextAccessor accessor)
         {
             if (accessor.HttpContext != null)
@@ -23,13 +32,6 @@ namespace TGS.Services.BackOffice.Application
             }
         }
 
-        protected string Username => _userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
-        protected string RoleName => _userInfoMap[Consts.BackendOffice.UserInfo.RolenameKey];
-
-        protected Guid? ResellerId => GetIdByKey(Consts.BackendOffice.UserInfo.ResellerKey);
-
-        protected Guid? LicenseeId => GetIdByKey(Consts.BackendOffice.UserInfo.LicenseeKey);
-        protected Guid? BrandId => GetIdByKey(Consts.BackendOffice.UserInfo.BrandKey);
         public abstract Task<TOut> Handle(T request, CancellationToken cancellationToken);
 
         protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new() =>

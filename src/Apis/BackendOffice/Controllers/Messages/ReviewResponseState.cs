@@ -4,6 +4,7 @@
     {
         WaitingPayment,
         Approve,
-        Reject
+        Reject,
+        Paid
     }
 }

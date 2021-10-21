@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
@@ -14,10 +14,10 @@ namespace TGS.Services.Operator.Services.Player
 {
     internal class ChangePasswordQueryService : IGetService<ChangePasswordQuery, ChangePasswordInfo>
     {
-        private readonly IStatusValidator _statusValidator;
-        private readonly IPlayerQueries _playerQueries;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IPlayerQueries _playerQueries;
+        private readonly IStatusValidator _statusValidator;
 
         public ChangePasswordQueryService(
             IStatusValidator statusValidator,
@@ -31,11 +31,13 @@ namespace TGS.Services.Operator.Services.Player
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask<ChangePasswordInfo> GetAsync(ChangePasswordQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<ChangePasswordInfo> GetAsync(
+            ChangePasswordQuery query, CancellationToken cancellationToken = default)
         {
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
 
             var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(query.PlayerCode);
+
             if (!_passwordHandler.Verify(password, salt, query.OldPassword))
             {
                 throw new InvalidCredentialsException("");
@@ -47,7 +49,7 @@ namespace TGS.Services.Operator.Services.Player
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(query.NewPassword);
 
             await _playerOperations.ChangePlayerPasswordAsync(
-                new ChangePlayerPasswordData()
+                new ChangePlayerPasswordData
                 {
                     Username = username,
                     PlayerCode = query.PlayerCode,
@@ -56,7 +58,7 @@ namespace TGS.Services.Operator.Services.Player
                     UpdatedOn = updatedOn
                 });
 
-            return new ChangePasswordInfo()
+            return new ChangePasswordInfo
             {
                 PlayerCode = query.PlayerCode,
                 UpdateTime = updatedOn

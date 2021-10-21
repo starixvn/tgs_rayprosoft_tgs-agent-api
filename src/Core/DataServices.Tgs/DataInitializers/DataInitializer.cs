@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Base.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameType;
@@ -150,11 +150,18 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private async Task GeneratePromotionsAsync()
         {
-            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, DateTimeOffset.Now.Day, 0,
-                0, 0, new(8, 0, 0));
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year,
+                DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day,
+                0,
+                0,
+                0,
+                new(8, 0, 0));
+
             var promotions = _brandCreated.Select(x =>
             {
                 var promotionId = Guid.NewGuid();
+
                 return new Promotion
                 {
                     Id = promotionId,
@@ -230,19 +237,34 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             foreach (var brand in brands)
             {
                 var chiefId = GuidExtensions.NewSequentialGuid();
-                _agents.Add(CreateAgent($"{brand.Name}Chief", AgentStatus.Enabled,
+
+                _agents.Add(CreateAgent($"{brand.Name}Chief",
+                    AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Chief,
-                    AgentType.Cash, brand.Id, "CNY", chiefId));
-                _agents.Add(CreateAgent($"{brand.Name}Agent1", AgentStatus.Enabled,
+                    AgentType.Cash,
+                    brand.Id,
+                    "CNY",
+                    chiefId));
+
+                _agents.Add(CreateAgent($"{brand.Name}Agent1",
+                    AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Agent,
-                    AgentType.Cash, brand.Id, "CNY", null,
+                    AgentType.Cash,
+                    brand.Id,
+                    "CNY",
+                    null,
                     chiefId));
-                _agents.Add(CreateAgent($"{brand.Name}Agent2", AgentStatus.Enabled,
+
+                _agents.Add(CreateAgent($"{brand.Name}Agent2",
+                    AgentStatus.Enabled,
                     AgentConfigStatus.WaitForConfigurePercentage,
                     AgentLevelType.Agent,
-                    AgentType.Cash, brand.Id, "CNY", null,
+                    AgentType.Cash,
+                    brand.Id,
+                    "CNY",
+                    null,
                     chiefId));
             }
 
@@ -394,25 +416,38 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             var playerDefined = new PlayerDefined[]
             {
-                new("4ucmqplwxqlv", new("2EA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                new("4ucmqplwxqlv",
+                    new("2EA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
                     new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[0].Id),
-                new("4ucmqplx11cs", new("30A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                new("4ucmqplx11cs",
+                    new("30A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
                     new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[0].Id),
-                new("4ucmqplx4dti", new("32A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                new("4ucmqplx4dti",
+                    new("32A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
                     new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
                     _agents[1].Id),
-                new("4ucmqplx7okb", new("34A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"), _agents[2].Id),
-                new("4ucmqplxb029", new("36A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
-                new("4ucmqplxe65x", new("38A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
-                new("4ucmqplxhfoe", new("3AA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null),
-                new("4ucmqplxkuyd", new("3CA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
-                    new("4E86719F-243F-46F6-B010-5C758B7285AF"), null)
+                new("4ucmqplx7okb",
+                    new("34A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                    new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A"),
+                    _agents[2].Id),
+                new("4ucmqplxb029",
+                    new("36A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"),
+                    null),
+                new("4ucmqplxe65x",
+                    new("38A6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"),
+                    null),
+                new("4ucmqplxhfoe",
+                    new("3AA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"),
+                    null),
+                new("4ucmqplxkuyd",
+                    new("3CA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
+                    new("4E86719F-243F-46F6-B010-5C758B7285AF"),
+                    null)
             };
 
             var (salt, password) = _passwordHandler.GenerateCredential("TgsP@ssw0rd");
@@ -425,20 +460,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 var realName = Generator.RandomString(12);
                 var vipId = _vipLevels.First(x => x.BrandId == brandId).Id;
 
-                return CreatePlayer(playerCode, brandId, p.WalletId, username, realName, salt, password, vipId,
-                    PlayerType.RealPlayer, p.AgentId);
+                return CreatePlayer(playerCode,
+                    brandId,
+                    p.WalletId,
+                    username,
+                    realName,
+                    salt,
+                    password,
+                    vipId,
+                    PlayerType.RealPlayer,
+                    p.AgentId);
             }).ToArray();
 
             await _repository.Players.AddRangeAsync(_players);
             await _repository.SaveChangesAsync();
         }
 
-        private Player CreatePlayer(string playerCode,
+        private Player CreatePlayer(
+            string playerCode,
             Guid brandId, Guid walletId, string username, string realName, byte[] salt,
             byte[] password, Guid vipId, PlayerType playerType,
             Guid? agentId, string currencyCode = "CNY")
         {
             var brand = _brandCreated.Values.First(b => b.Id == brandId);
+
             var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
@@ -831,6 +876,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var brandGameProviders = gameProviders.Select(gp =>
             {
                 var brandGameProviderId = Guid.NewGuid();
+
                 return new BrandGameProvider
                 {
                     Id = brandGameProviderId,
@@ -887,9 +933,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             }).ToHashSet();
 
             var timeSpan = new TimeSpan(8, 0, 0);
-            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
-                DateTimeOffset.Now.Day, 0,
-                0, 0, timeSpan);
+
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year,
+                DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day,
+                0,
+                0,
+                0,
+                timeSpan);
 
             var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                 GetInterval(brand.Type, now, brand.SettlementDay, now);
@@ -937,6 +988,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 BrandGroups = brand.Groups.Select(name =>
                 {
                     var brandGroupId = Guid.NewGuid();
+
                     return new BrandGroup
                     {
                         Id = brandGroupId,
@@ -957,6 +1009,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         BrandGroupBetLimits = betLimits.Select(b =>
                         {
                             var brandGroupBetLimitId = Guid.NewGuid();
+
                             return new BrandGroupBetLimit
                             {
                                 Id = brandGroupBetLimitId,
@@ -971,6 +1024,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 {
                                     var gpBetLimits = g.GameProvider.BetLimits
                                         .OrderBy(gb => gb.MinBet).ToArray();
+
                                     if (gpBetLimits.Length == 0)
                                     {
                                         return null;
@@ -1084,28 +1138,46 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 "andy.chu",
                 "jj"
             };
+
             string[] brandAccounts =
             {
                 "aaron.xiao",
                 "meg.chiu"
             };
+
             var users = new List<User>
             {
-                CreateUser("admin.disabled", UserStatus.Disabled, Roles.AdminRoleId,
+                CreateUser("admin.disabled",
+                    UserStatus.Disabled,
+                    Roles.AdminRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("admin.enabled", UserStatus.Enabled, Roles.AdminRoleId,
+                CreateUser("admin.enabled",
+                    UserStatus.Enabled,
+                    Roles.AdminRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("reseller.enabled", UserStatus.Enabled, Roles.ResellerRoleId,
+                CreateUser("reseller.enabled",
+                    UserStatus.Enabled,
+                    Roles.ResellerRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("reseller.disabled", UserStatus.Disabled, Roles.ResellerRoleId,
+                CreateUser("reseller.disabled",
+                    UserStatus.Disabled,
+                    Roles.ResellerRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("licensee.enabled", UserStatus.Enabled, Roles.LicenseeRoleId,
+                CreateUser("licensee.enabled",
+                    UserStatus.Enabled,
+                    Roles.LicenseeRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("licensee.disabled", UserStatus.Disabled, Roles.LicenseeRoleId,
+                CreateUser("licensee.disabled",
+                    UserStatus.Disabled,
+                    Roles.LicenseeRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("brand.enabled", UserStatus.Enabled, Roles.TgsBrandRoleId,
+                CreateUser("brand.enabled",
+                    UserStatus.Enabled,
+                    Roles.TgsBrandRoleId,
                     AdminDepartments[MarketDepartment]),
-                CreateUser("brand.disabled", UserStatus.Disabled, Roles.TgsBrandRoleId,
+                CreateUser("brand.disabled",
+                    UserStatus.Disabled,
+                    Roles.TgsBrandRoleId,
                     AdminDepartments[MarketDepartment])
             };
 
@@ -1113,6 +1185,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreateUser(username, UserStatus.Enabled, Roles.AdminRoleId, AdminDepartments[ProductDepartment])));
 
             var brandDepartment = Departments.First(x => x.BrandId == _GpiBrandRole.BrandId);
+
             users.AddRange(brandAccounts.Select(username =>
                 CreateUser(username, UserStatus.Enabled, _GpiBrandRole.Id, brandDepartment.Id)));
 
@@ -1142,6 +1215,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 foreach (var game in games)
                 {
                     var createdOn = timestamp = timestamp.AddSeconds(1);
+
                     var closedOn = game.Type == Sportsbook || game.Type == VirtualSports
                         ? timestamp.AddDays(1)
                         : timestamp.AddSeconds(3);
@@ -1151,8 +1225,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
                     var externalGameActionGroupId = round.ExternalRoundId;
                     var betAmount = ((decimal)rand.Next(5, 20)).Negate();
-                    var placeBetAction = CreateGameAction(round.PlayerCode, betAmount, round.Id,
-                        PlaceBet, externalGameActionGroupId, createdOn, createdOn);
+
+                    var placeBetAction = CreateGameAction(round.PlayerCode,
+                        betAmount,
+                        round.Id,
+                        PlaceBet,
+                        externalGameActionGroupId,
+                        createdOn,
+                        createdOn);
 
                     await _repository.GameActions.AddAsync(placeBetAction);
 
@@ -1167,6 +1247,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     };
 
                     decimal turnover = 0, winloss = 0;
+
                     if (resultActionType != CancelTransaction)
                     {
                         turnover = betAmount.Negate();
@@ -1175,8 +1256,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         round.WinLoss = winloss;
                     }
 
-                    var resultAction = CreateGameAction(round.PlayerCode, resultAmount, round.Id,
-                        resultActionType, externalGameActionGroupId, closedOn, closedOn, turnover, winloss,
+                    var resultAction = CreateGameAction(round.PlayerCode,
+                        resultAmount,
+                        round.Id,
+                        resultActionType,
+                        externalGameActionGroupId,
+                        closedOn,
+                        closedOn,
+                        turnover,
+                        winloss,
                         placeBetAction.Id);
 
                     await _repository.GameActions.AddAsync(resultAction);
@@ -1204,7 +1292,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await _repository.SaveChangesAsync();
         }
 
-        private static Round CreateRound(Player player, GameProvider gameProvider,
+        private static Round CreateRound(
+            Player player, GameProvider gameProvider,
             GameProviderConfiguration configuration, Models.Game game, DateTimeOffset createdOn,
             DateTimeOffset closedOn)
         {
@@ -1229,7 +1318,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
         }
 
-        private static GameAction CreateGameAction(string playerCode, decimal amount, Guid roundId,
+        private static GameAction CreateGameAction(
+            string playerCode, decimal amount, Guid roundId,
             GameActionType gameActionType, string externalGameActionGroupId, DateTimeOffset recordedOn,
             DateTimeOffset sentOn, decimal turnover = 0, decimal winloss = 0, Guid? refTransactionId = null,
             Guid? batchId = null)
@@ -1312,6 +1402,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         public static string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz0123456789";
+
             return new(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }
@@ -1319,6 +1410,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         public static string RandomIntString(int length)
         {
             const string chars = "0123456789";
+
             return new(Enumerable.Repeat(chars, length)
                 .Select(s => s[Random.Next(s.Length)]).ToArray());
         }

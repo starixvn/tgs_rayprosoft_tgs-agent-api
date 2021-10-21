@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
@@ -23,7 +23,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context,
+        public async Task InvokeAsync(
+            HttpContext context,
             IBrandOperations brandOperations,
             IStatusValidator statusValidator,
             IJwtTokenHandler handler)
@@ -34,6 +35,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             }
 
             var authorization = values.FirstOrDefault();
+
             if (authorization == null || !authorization.StartsWith("Bearer", true, null))
             {
                 throw new MissingTokenException("Missing Authorization Bearer Header");
@@ -54,7 +56,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var secretKey = await brandOperations.GetBrandSecretKeyAsync(brandId);
             var signature = $"{brandId}:{currency}:{secretKey}";
 
-            handler.ValidateToken(token, new()
+            handler.ValidateToken(token,
+                new()
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
@@ -19,7 +19,8 @@ namespace TGS.Services.Operator.Services.Player
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask<bool> GetAsync(PlayerPasswordValidateCommand command,
+        public async ValueTask<bool> GetAsync(
+            PlayerPasswordValidateCommand command,
             CancellationToken cancellationToken = default)
         {
             var passwordInfo = await _playerRepository

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +21,8 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         private readonly IPlayerService _playerService;
         private readonly IWalletRepository _walletRepository;
 
-        public AdjustAgentAmountHandler(IAgentService agentService,
+        public AdjustAgentAmountHandler(
+            IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
             IPlayerService playerService,
@@ -34,7 +36,8 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        public override async Task<MessageResponse> Handle(CreateAgentAdjustmentRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreateAgentAdjustmentRequest request,
             CancellationToken cancellationToken)
         {
             var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId);
@@ -123,7 +126,11 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     targetPlayer.DefaultWalletId,
                     targetPlayer.PlayerCode,
                     TransactionTypes.Adjust,
-                    request.Amount);
+                    request.Amount,
+                    request.Remark,
+                    null,
+                    Guid.Parse(UserId)
+                );
             }
 
             return CreateValidResponse<MessageResponse>();

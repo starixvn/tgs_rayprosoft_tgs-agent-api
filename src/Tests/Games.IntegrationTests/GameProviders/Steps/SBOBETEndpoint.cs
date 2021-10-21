@@ -11,25 +11,22 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Moq;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
-using Tgs.Logging;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -86,7 +83,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var apiUrlSection = configuration.GetSection("ApiUrls");
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
@@ -95,6 +92,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 services.AddTransient<IPlayerApiClient>(sp =>
                     ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, Hooks.OpApiClient));
+
                 services.AddTransient<ISBOBETApiClient>(sp =>
                     ActivatorUtilities.CreateInstance<SBOBETApiClient>(sp, Hooks.TgsApiClient));
             }
@@ -111,7 +109,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode,
+        public Task GivenPlayerOfBrandLoginViaAsync(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -119,6 +118,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
         {
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var playerCode = await
                 (from p in db.Players.AsQueryable()
                  join b in db.Brands on p.BrandId equals b.Id
@@ -135,6 +135,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenPlayerLogoutAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
+
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
@@ -154,6 +155,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenGameHasStatusSetToAsync(string externalGameId, GameStatus gameStatus)
         {
             Set(SR.ExternalGameId, externalGameId);
+
             return ChangeGameStatusAsync(_serviceProvider, GameProviderCode, externalGameId, gameStatus);
         }
 
@@ -175,6 +177,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var tokenData = Get<PlayerTokenData>(tokenKey);
 
             var manager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
+
             return manager.ClearCacheByBatchAsync(new CacheKey[]
             {
                 new()
@@ -197,8 +200,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(_serviceProvider);
 
             var sql = "delete from dbo.player_login_records where player_code = @player_code;";
-            await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> {{"@player_code", playerCode}}).ConfigureAwait(false);
+
+            await db.ExecuteSqlCommandAsync(sql,
+                CommandType.Text,
+                new Dictionary<string, object>
+                {
+                    {
+                        "@player_code", playerCode
+                    }
+                }).ConfigureAwait(false);
         }
 
         [When(@"I request the player balance")]
@@ -233,6 +243,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenIPlaceBetWithSetRoundIdOfForGame(decimal amount, string externalGameId)
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
+
             return PlaceBetAsync(amount, externalGameId, externalRoundId);
         }
 
@@ -445,6 +456,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalRoundIds = betRequests.Select(r => r.ExternalRoundId).ToArray();
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var roundData = await (from r in db.Rounds.AsQueryable()
                                    where externalRoundIds.Contains(r.ExternalRoundId)
                                    from g in db.Games
@@ -544,6 +556,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -593,6 +606,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 select act).AsNoTracking().ToArrayAsync();
 
             var last = gameActions.Last();
+
             var isCanceled = gameActions.Any(ga =>
                 ga.Type == GameActionType.CancelTransaction && ga.Id == last.ReferencedGameActionId);
 
@@ -614,7 +628,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
+                .SelectMany(ga => new[]
+                {
+                    ga.Id,
+                    ga.ReferencedGameActionId
+                })
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -684,6 +702,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameActions = await db.GameActions
                 .AsQueryable()
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
@@ -696,6 +715,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             gameActions.Length.Should().Be(txids.Length);
 
             var players = Get<Dictionary<string, decimal>>(SR.Players);
+
             foreach (var ga in gameActions)
             {
                 var data = await db.Wallets
@@ -744,13 +764,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private record PlayerData
         {
-            public string Username { get; init; }
+            public decimal Balance { get; init; }
+            public decimal BetAmount { get; init; }
             public string Brand { get; init; }
             public string CurrencyCode { get; init; }
-            public PlatformType Platform { get; init; }
-            public decimal Balance { get; init; }
             public string GameId { get; init; }
-            public decimal BetAmount { get; init; }
+            public PlatformType Platform { get; init; }
+            public string Username { get; init; }
         }
 
         #endregion Private Classes
@@ -767,8 +787,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [After]
         public Task AfterChangeGameStatusScenarioAsync() =>
-            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
-                GameStatus.Active, true);
+            ChangeGameStatusAsync(_serviceProvider,
+                GameProviderCode,
+                Get<string>(SR.ExternalGameId),
+                GameStatus.Active,
+                true);
 
         [After]
         public Task AfterChangeBrandStatusScenarioAsync() =>
@@ -781,7 +804,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private static string NewRoundId() =>
             Guid.NewGuid().ToString();
 
-        private static (int GameType, int ProductType) GetGameTypeAndProductType(string externalGameId,
+        private static (int GameType, int ProductType) GetGameTypeAndProductType(
+            string externalGameId,
             PlaceBetRequest betRequest)
         {
             if (externalGameId.IsNullOrEmpty())
@@ -790,6 +814,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             var types = externalGameId.SplitByUnderscore().Select(int.Parse).ToArray();
+
             return (types[1], types[0]);
         }
 
@@ -900,13 +925,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        private async Task CancelTransactionAsync(PlaceBetRequest betRequest, bool isVoid = false,
+        private async Task CancelTransactionAsync(
+            PlaceBetRequest betRequest, bool isVoid = false,
             string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var config = await GetConfigurationAsync();
 
             var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);
+
             var request = new CancelBetRequest
             {
                 CompanyKey = config.CompanyKey,

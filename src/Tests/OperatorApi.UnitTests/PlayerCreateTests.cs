@@ -6,7 +6,7 @@ using NUnit.Framework;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -290,6 +290,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
+
             var request = new CreatePlayerRequest
             {
                 Password = "123456",
@@ -311,6 +312,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
+
             var request = new CreatePlayerRequest
             {
                 Password = "123456",
@@ -333,6 +335,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
+
             var request = new CreatePlayerRequest
             {
                 Password = "123456",
@@ -354,6 +357,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
+
             var request = new CreatePlayerRequest
             {
                 Password = "123456789012345678901",
@@ -375,6 +379,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
+
             var request = new CreatePlayerRequest
             {
                 Password = "1234",

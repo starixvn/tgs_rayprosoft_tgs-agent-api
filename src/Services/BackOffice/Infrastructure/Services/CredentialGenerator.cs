@@ -1,5 +1,5 @@
 ﻿using TGS.Core.Infrastructures.Base62;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 
 namespace TGS.Services.BackOffice.Infrastructure.Services
 {

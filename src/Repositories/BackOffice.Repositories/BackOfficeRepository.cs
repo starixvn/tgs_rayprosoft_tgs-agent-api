@@ -315,10 +315,23 @@ namespace TGS.BackOffice.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async ValueTask ChangeStatusAsync(Guid id, int status, string modifier)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.Status = status;
+            banner.UpdatedByUserName = modifier;
+            banner.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {
-                0    => BannerFlowStatus.WaitApprving,
+                0    => BannerFlowStatus.WaitApproving,
                 1000 => BannerFlowStatus.Approved,
                 2000 => BannerFlowStatus.Rejected,
                 _    => BannerFlowStatus.Unknown

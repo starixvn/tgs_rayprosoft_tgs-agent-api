@@ -30,5 +30,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal VipVirtualSportsRebatePercentage { get; set; }
         public decimal VipLotteryRebatePercentage { get; set; }
         public decimal RebateAmount { get; set; }
+        public string SentByUsername { get; set; }
     }
 }

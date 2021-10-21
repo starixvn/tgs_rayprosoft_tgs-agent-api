@@ -8,22 +8,30 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.GameProviders.KickPlayerServer.Client;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
     {
+        private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IAgentService _agentService;
         private readonly IPlayerService _service;
+        private readonly IKickPlayerServiceClient _kickPlayerServiceClient;
 
         public UpdatePlayerHandler(
+            ILogger<UpdatePlayerHandler> logger,
             IPlayerService service,
             IAgentService agentService,
-            IHttpContextAccessor accessor) :
+            IHttpContextAccessor accessor,
+            IKickPlayerServiceClient kickPlayerServiceClient) :
             base(accessor)
         {
+            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             _service = service;
             _agentService = agentService;
+            _kickPlayerServiceClient = kickPlayerServiceClient ?? throw new System.ArgumentNullException(nameof(kickPlayerServiceClient));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -42,7 +50,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.UpdateTypeNotFound);
             }
 
-            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
+            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode).ConfigureAwait(false);
 
             if (player == null)
             {
@@ -78,7 +86,23 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
 
-            await _service.UpdatePlayerAsync(player, request);
+            var kickPlayer = false;
+            if (request.Type == updatePlayerType[0] &&
+                player.Status != request.Status)
+            {
+                kickPlayer = true;
+            }
+
+            await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
+
+            if (kickPlayer)
+            {
+                if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
+                {
+                    _logger.LogInformation("call KickPlayerAsync");
+                    await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+                }
+            }
 
             return CreateValidResponse<MessageResponse>();
         }
