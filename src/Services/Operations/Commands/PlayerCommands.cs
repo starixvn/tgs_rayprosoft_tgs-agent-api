@@ -240,24 +240,5 @@ namespace TGS.Services.Operations.Commands
 
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
-
-        public async Task TagPlayerFirstDepositAsync(string playerCode)
-        {
-            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
-
-            if (player.FirstDepositOn == null)
-            {
-                player.FirstDepositOn = DateTimeOffset.UtcNow;
-
-                await _repository.SaveChangesAsync().ConfigureAwait(false);
-            }
-        }
-
-        public Task UpdatePlayerIdNumberAsync(Player player)
-        {
-            _repository.Entry(player).State = EntityState.Modified;
-
-            return _repository.SaveChangesAsync();
-        }
     }
 }

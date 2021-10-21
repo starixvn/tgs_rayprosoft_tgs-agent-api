@@ -10,8 +10,6 @@ namespace TGS.Services.Operations.Commands
     {
         Task<string> CreatePlayerAsync(CreatePlayerData data);
 
-        Task UpdatePlayerIdNumberAsync(Player player);
-
         Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data);
 
         Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data);
@@ -36,7 +34,5 @@ namespace TGS.Services.Operations.Commands
         Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
 
         Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn);
-
-        Task TagPlayerFirstDepositAsync(string playerCode);
     }
 }
