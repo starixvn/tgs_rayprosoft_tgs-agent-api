@@ -4,14 +4,13 @@ using System.Data;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Tgs.Logging;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
+using Tgs.Logging;
 using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Operations.Commands
@@ -30,22 +29,15 @@ namespace TGS.Services.Operations.Commands
             _log = log;
         }
 
-        public Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
+        public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
         {
-            var player = new Player
-            {
-                PlayerCode = data.PlayerCode,
-                Salt = data.Salt,
-                Password = data.Password,
-                UpdatedOn = data.UpdatedOn
-            };
+            var player = await _repository.Players.FindAsync(data.PlayerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(player);
-            _repository.Entry(player).Property(nameof(player.Salt)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.Password)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
+            player.Salt = data.Salt;
+            player.Password = data.Password;
+            player.UpdatedOn = data.UpdatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<string> CreatePlayerAsync(CreatePlayerData data)
@@ -107,6 +99,7 @@ namespace TGS.Services.Operations.Commands
                 catch (Exception e) when (e.InnerException?.InnerException is NpgsqlException exception)
                 {
                     retries++;
+
                     var err =
                         $"Exception occurs when creating player. This is attempt number {retries} of {RetryCount}.";
 
@@ -130,22 +123,34 @@ namespace TGS.Services.Operations.Commands
         public Task DeauthorizePlayerAsync(string playerCode, Guid loginRecordId)
         {
             const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
-            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
+
+            return _repository.ExecuteSqlCommandAsync(sql,
+                CommandType.Text,
                 new Dictionary<string, object>
                 {
-                    { ":player_code", playerCode },
-                    { ":login_record_id", loginRecordId }
+                    {
+                        ":player_code", playerCode
+                    },
+                    {
+                        ":login_record_id", loginRecordId
+                    }
                 });
         }
 
         public Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
-            return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
+
+            return _repository.ExecuteSqlCommandAsync(sql,
+                CommandType.Text,
                 new Dictionary<string, object>
                 {
-                    { ":player_code", playerCode },
-                    { ":platform_type", platformType }
+                    {
+                        ":player_code", playerCode
+                    },
+                    {
+                        ":platform_type", platformType
+                    }
                 });
         }
 
@@ -171,109 +176,69 @@ namespace TGS.Services.Operations.Commands
 
         public async Task<int> SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
         {
-            var updateInfo = await _repository.Players.FirstOrDefaultAsync(x => x.PlayerCode == playerCode);
-            if (updateInfo == null)
-            {
-                throw new PlayerNotFoundException(playerCode);
-            }
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            updateInfo.Email = email;
-            updateInfo.UpdatedOn = updatedOn;
+            player.Email = email;
+            player.UpdatedOn = updatedOn;
 
-            _repository.Players.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
-
-            return await _repository.SaveChangesAsync();
+            return await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetIdentityAsync(string playerCode, string realName, string identity, bool isAuthenticate,
+        public async Task SetIdentityAsync(
+            string playerCode, string realName, string identity, bool isAuthenticate,
             DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                RealName = realName,
-                IdNumber = identity,
-                IdentityAuthentication = isAuthenticate,
-                UpdatedOn = updatedOn
-            };
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.RealName)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.IdNumber)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.IdentityAuthentication)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+            player.RealName = realName;
+            player.IdNumber = identity;
+            player.IdentityAuthentication = isAuthenticate;
+            player.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        public async Task SetPayPasswordAsync(
+            string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
         {
-            var player = new Player
-            {
-                PlayerCode = playerCode,
-                WithdrawPassword = newPassword,
-                WithdrawSalt = newSalt,
-                UpdatedOn = updatedOn
-            };
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(player);
-            _repository.Entry(player).Property(nameof(player.WithdrawSalt)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.WithdrawPassword)).IsModified = true;
-            _repository.Entry(player).Property(nameof(player.UpdatedOn)).IsModified = true;
+            player.WithdrawSalt = newSalt;
+            player.WithdrawPassword = newPassword;
+            player.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
+        public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                Phone = phone,
-                PhoneAuthentication = true,
-                UpdatedOn = updatedOn
-            };
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.Phone)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.PhoneAuthentication)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+            player.Phone = phone;
+            player.PhoneAuthentication = true;
+            player.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                QQ = qqId,
-                UpdatedOn = updatedOn
-            };
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.QQ)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+            player.QQ = qqId;
+            player.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
+        public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
-            {
-                PlayerCode = playerCode,
-                Wechat = weChatId,
-                UpdatedOn = updatedOn
-            };
+            var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            _repository.Players.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.Wechat)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+            player.Wechat = weChatId;
+            player.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task TagPlayerFirstDepositAsync(string playerCode)
@@ -291,6 +256,7 @@ namespace TGS.Services.Operations.Commands
         public Task UpdatePlayerIdNumberAsync(Player player)
         {
             _repository.Entry(player).State = EntityState.Modified;
+
             return _repository.SaveChangesAsync();
         }
     }
