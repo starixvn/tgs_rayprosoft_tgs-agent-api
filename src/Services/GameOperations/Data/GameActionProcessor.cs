@@ -122,6 +122,7 @@ namespace TGS.Services.GameOperations.Data
             s = await FillRoundDataAsync(s).ConfigureAwait(false);
 
             var (st, r) = await GetAndValidatePreviousActionsAsync(s).ConfigureAwait(false);
+
             if (r != null)
             {
                 s.PlayerData.Wallet.Balance =
@@ -164,7 +165,10 @@ namespace TGS.Services.GameOperations.Data
         private static async ValueTask<GameActionState> FillRoundDataAsync(GameActionState s)
         {
             var roundData = await GetRoundByExternalRoundIdAsync(s.Repository,
-                    s.GameProviderConfigurationId, s.PlayerData.Wallet.Id, s.ExternalRoundId, s.GameId)
+                    s.GameProviderConfigurationId,
+                    s.PlayerData.Wallet.Id,
+                    s.ExternalRoundId,
+                    s.GameId)
                 .ConfigureAwait(false);
 
             if (roundData == null)
@@ -203,8 +207,11 @@ namespace TGS.Services.GameOperations.Data
 
             if (game == null && s.HasExtRefTransactionId)
             {
-                var gameId = await GetGameIdInSameRoundAsync(s.Repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
-                        s.ExternalRoundId, s.ExternalTransactionReferenceId)
+                var gameId = await GetGameIdInSameRoundAsync(s.Repository,
+                        s.GameProvider.Id,
+                        s.PlayerData.PlayerCode,
+                        s.ExternalRoundId,
+                        s.ExternalTransactionReferenceId)
                     .ConfigureAwait(false);
 
                 if (gameId.HasValue)
@@ -238,13 +245,17 @@ namespace TGS.Services.GameOperations.Data
 
                 // get all transactions belonging to this round
                 actionsData =
-                    await GetGameActionsInSameRoundAsync(repository, s.GameProvider.Id, s.PlayerData.PlayerCode,
-                            externalRoundId, s.GameId)
+                    await GetGameActionsInSameRoundAsync(repository,
+                            s.GameProvider.Id,
+                            s.PlayerData.PlayerCode,
+                            externalRoundId,
+                            s.GameId)
                         .ConfigureAwait(false);
 
                 if (actionsData.Length == 0 && s.HasExtRefTransactionId)
                 {
-                    await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository, externalRoundId,
+                    await ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(repository,
+                        externalRoundId,
                         s.ExternalTransactionReferenceId).ConfigureAwait(false);
 
                     return (s, null);
@@ -304,16 +315,19 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var r = ValidateReferenceAction(s);
+
             if (r != null)
             {
                 return (s, r);
             }
 
             s.ValidPreviousActions = GetValidPreviousActions(actions);
+
             return (s, r);
         }
 
-        private static (IList<BetActionData>, BetActionData) GetPreviousActions(GameActionType currentActionType,
+        private static (IList<BetActionData>, BetActionData) GetPreviousActions(
+            GameActionType currentActionType,
             Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
         {
             var refGameAction = default(BetActionData);
@@ -348,7 +362,8 @@ namespace TGS.Services.GameOperations.Data
             return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToArray();
         }
 
-        private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(GameActionState s,
+        private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(
+            GameActionState s,
             SameRoundActionData[] actionsData)
         {
             var amount = s.PrepareAmount(s.Amount);
@@ -390,18 +405,19 @@ namespace TGS.Services.GameOperations.Data
         }
 
         /// <summary>
-        ///     get previous actions:
-        ///     1. ForceGetPreviousActions = true
-        ///     2. for settlement transactions
-        ///     3. place bet is not slot games
-        ///     4. not lock amount action
+        /// get previous actions:
+        /// 1. ForceGetPreviousActions = true
+        /// 2. for settlement transactions
+        /// 3. place bet is not slot games
+        /// 4. not lock amount action
         /// </summary>
         private static bool ShouldGetPreviousActions(GameActionState s) =>
             s.ForceGetPreviousActions ||
             s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
             !_BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
-        private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
+        private static GameActionResult GetDuplicateTransactionResult(
+            Guid gameActionId,
             string externalTransactionId, Guid roundId, int gameId) =>
             new()
             {
@@ -415,7 +431,8 @@ namespace TGS.Services.GameOperations.Data
                 }
             };
 
-        private static void UpdateReferenceGameActionIsCancelled(GameActionType currentActionType,
+        private static void UpdateReferenceGameActionIsCancelled(
+            GameActionType currentActionType,
             BetActionData reference)
         {
             if (currentActionType != CancelTransaction)
@@ -469,13 +486,8 @@ namespace TGS.Services.GameOperations.Data
                 AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
-            if (s.WithCustomBetValues && s.CustomBetValues != null)
-            {
-                current.Turnover = s.CustomBetValues.Turnover;
-                current.WinLoss = s.CustomBetValues.WinLoss;
-            }
-
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
+
             if (error != null)
             {
                 throw error;
@@ -485,17 +497,27 @@ namespace TGS.Services.GameOperations.Data
                 .Where(r => r.ExternalGameIds.IgnoreCaseContains(s.Game.ExternalId))
                 .SelectMany(r => r.Patterns).Select(p => new OppositeBetPattern(p.BetType, p.GroupId)).ToArray();
 
-            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
-                s.PreviousActions, oppositePatterns);
+            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet,
+                current,
+                s.PreviousActions,
+                oppositePatterns);
+
+            if (s.WithCustomBetValues && s.CustomBetValues != null)
+            {
+                betValues = betValues with
+                {
+                    BetAmount = s.CustomBetValues.BetAmount ?? betValues.BetAmount,
+                    ValidBetAmount = s.CustomBetValues.BetAmount ?? betValues.ValidBetAmount,
+                    SettleAmount = s.CustomBetValues.SettleAmount ?? betValues.SettleAmount,
+                    Turnover = s.CustomBetValues.Turnover,
+                    WinLoss = s.CustomBetValues.WinLoss
+                };
+            }
 
             s.BetValueResult = betValues;
 
-            if (!s.WithCustomBetValues)
-            {
-                current.Turnover = betValues.Turnover;
-                current.WinLoss = betValues.WinLoss;
-            }
-
+            current.Turnover = betValues.Turnover;
+            current.WinLoss = betValues.WinLoss;
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);
@@ -514,6 +536,7 @@ namespace TGS.Services.GameOperations.Data
             var walletId = s.PlayerData.Wallet.Id;
 
             decimal balance;
+
             if (s.HasWalletUpdate && s.Amount != 0)
             {
                 balance =
@@ -703,7 +726,9 @@ namespace TGS.Services.GameOperations.Data
                 s.PreviousActions.Where(act => act.Type == PlaceBet).All(act => act.IsCancelled);
 
             var clientStatus =
-                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound,
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus,
+                    s.BetValueResult,
+                    gameActionWithSingleRound,
                     isVoidRound);
 
             round.Status = s.NewRoundStatus;
@@ -716,7 +741,8 @@ namespace TGS.Services.GameOperations.Data
             round.Turnover = s.BetValueResult.Turnover;
         }
 
-        private static decimal GetRemainingLockedAmount(IList<BetActionData> validPreviousActions,
+        private static decimal GetRemainingLockedAmount(
+            IList<BetActionData> validPreviousActions,
             GameActionType gameActionType, BetActionData referencedGameAction)
         {
             var actions = validPreviousActions?.Where(a =>
