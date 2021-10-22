@@ -136,16 +136,7 @@ namespace TGS.Operator.Repositories
 
             return query.ToAsyncEnumerable().Select(info =>
             {
-                var gameStatus = GameStatus.Active;
-
-                if (info.BrandGameStatus == GameStatus.Testing || info.GameStatus == GameStatus.Testing)
-                {
-                    gameStatus = GameStatus.Testing;
-                }
-                else if (info.BrandGameStatus == GameStatus.Maintenance || info.GameStatus == GameStatus.Maintenance)
-                {
-                    gameStatus = GameStatus.Maintenance;
-                }
+                var gameStatus = GetGameStatus(info.BrandGameStatus, info.GameStatus);
 
                 return new BrandGameInfo(
                     info.Id,
@@ -320,6 +311,26 @@ namespace TGS.Operator.Repositories
             _tgsRepository.PlayerFavoriteGames.Remove(fg);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus)
+        {
+            if (brandGameStatus == GameStatus.Inactive || gameStatus == GameStatus.Inactive)
+            {
+                return GameStatus.Inactive;
+            }
+
+            if (brandGameStatus == GameStatus.Testing || gameStatus == GameStatus.Testing)
+            {
+                return GameStatus.Testing;
+            }
+
+            if (brandGameStatus == GameStatus.Maintenance || gameStatus == GameStatus.Maintenance)
+            {
+                return GameStatus.Maintenance;
+            }
+
+            return GameStatus.Active;
         }
     }
 }
