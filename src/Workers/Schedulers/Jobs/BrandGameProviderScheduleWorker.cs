@@ -100,7 +100,7 @@ namespace TGS.Workers.Schedulers.Jobs
             Status sourceStatus, Status targetStatus,
             Func<BrandGameProviderSchedule, bool> predicate)
         {
-            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries()
+            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries(tracking: true)
                 .Where(x => x.Status == sourceStatus && !x.IsManualChangeStatus)
                 .ToArrayAsync();
 

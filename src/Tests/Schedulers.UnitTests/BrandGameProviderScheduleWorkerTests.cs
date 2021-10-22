@@ -60,7 +60,7 @@ namespace TGS.Tests.Schedulers.UnitTests
                 };
             }
 
-            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, false))
+            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, true))
                 .Returns(brandGameProviders);
 
             await _service.ExecuteAsync(It.IsAny<object>());
