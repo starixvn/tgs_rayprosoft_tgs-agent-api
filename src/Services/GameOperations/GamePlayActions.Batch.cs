@@ -12,10 +12,10 @@ namespace TGS.Services.GameOperations
 
     public sealed partial class GamePlayActions
     {
-        ValueTask<BatchBetResult> IGamePlayActions.SettleBatchAsync(BatchBetData data) =>
-            _operations.SettleBatchAsync(data);
+        public ValueTask<BatchBetResult> SettleBatchAsync(BatchBetData data)
+            => _operations.SettleBatchAsync(data);
 
-        ValueTask<BatchBetResult> IGamePlayActions.CancelBatchAsync(BatchBetData data) =>
-            _operations.CancelBatchAsync(data);
+        public ValueTask<BatchBetResult> CancelBatchAsync(BatchBetData data)
+            => _operations.CancelBatchAsync(data);
     }
 }

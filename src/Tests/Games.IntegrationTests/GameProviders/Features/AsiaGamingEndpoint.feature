@@ -41,12 +41,12 @@ Scenario: 01.e - Place bet with duplicate transaction ID
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "PlaceBet" for $-10
 
-Scenario: 01.f - Place bet using expired player token
-    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
-        And player having balance of $125
-        And player logout
-    When I place bet of $10 for game "AGIN_DSP_BAC"
-    Then I will receive bet response of INVALID_SESSION and balance of $0
+#Scenario: 01.f - Place bet using expired player token
+#    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+#        And player having balance of $125
+#        And player logout
+#    When I place bet of $10 for game "AGIN_DSP_BAC"
+#    Then I will receive bet response of INVALID_SESSION and balance of $0
     
 Scenario: 02.a - Lock desktop bet
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -85,12 +85,12 @@ Scenario: 02.e - Lock bet with duplicate transaction ID
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "LockAmount" for $-10
 
-Scenario: 02.f - Lock bet using expired player token
-    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
-        And player having balance of $125
-        And player logout
-    When I place bet of $10 for game "AGIN_DSP_ROU"
-    Then I will receive bet response of INVALID_SESSION and balance of $0
+#Scenario: 02.f - Lock bet using expired player token
+#    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+#        And player having balance of $125
+#        And player logout
+#    When I place bet of $10 for game "AGIN_DSP_ROU"
+#    Then I will receive bet response of INVALID_SESSION and balance of $0
     
 Scenario: 03.a - Bet response for ROU game
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"

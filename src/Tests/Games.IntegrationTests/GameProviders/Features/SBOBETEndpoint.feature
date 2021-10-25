@@ -114,7 +114,7 @@ Scenario: 02.l - Player cannot place bet with unknown game
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I place bet of $10 for game "1_0"
-	Then I will receive bet response of error "SystemError"
+	Then I will receive bet response of error "GameNotExist"
 
 Scenario: 02.m - Player can place mobile bet with desktop virtual sports
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Mobile"

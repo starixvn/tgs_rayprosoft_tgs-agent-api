@@ -98,7 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 ? GetPlaceBetAndSettleTransactionsForMultipleSettlesInGame(request)
                 : GetPlaceBetAndSettleTransactionsForNormalCase(request);
 
-            return GetBetData(playerCode, data, transactions);
+            return GetBetData(playerCode, data, transactions, true, true);
         }
 
         public BetData VoidRoundRequest(
@@ -285,8 +285,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         }
 
         private static BetData GetBetData(
-            string playerCode, GameProviderConfigurationData data,
-            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false)
+            string playerCode,
+            GameProviderConfigurationData data,
+            TransactionData[] transactions,
+            bool allowPlaceBetWithDifferentPlatformToken = false,
+            bool ignorePlaceBetValidation = false)
             => new BetData
             {
                 GameProviderId = data.GameProviderId,
@@ -297,13 +300,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 HasCurrencyFromGameProvider = false,
                 GameProviderCode = _GameProviderCode,
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
+                IgnorePlaceBetValidation = ignorePlaceBetValidation,
                 PlayerCode = playerCode,
                 WithCustomBetValues = true
             };
 
         private static DateTimeOffset ParseDateTimeOffset(string timestamp)
         {
-            var dateTime = DateTime.ParseExact(timestamp,
+            var dateTime = DateTime.ParseExact(
+                timestamp,
                 _TimestampFormat,
                 null,
                 DateTimeStyles.AllowWhiteSpaces);
