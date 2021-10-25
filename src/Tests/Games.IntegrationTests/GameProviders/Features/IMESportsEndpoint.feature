@@ -34,12 +34,12 @@ Scenario: 02.b - Place mobile bet
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 		
-Scenario: 02.c - Player cannot place bet without login
-	Given player "TP01cny" of brand "GPI" without login
-		And player having balance of $100
-		And add valid session token in redis for game "ESPORTSBULL"
-	When I place bet of $-10 for game "ESPORTSBULL"
-	Then I will receive bet response of error "InvalidToken"
+#Scenario: 02.c - Player cannot place bet without login
+#	Given player "TP01cny" of brand "GPI" without login
+#		And player having balance of $100
+#		And add valid session token in redis for game "ESPORTSBULL"
+#	When I place bet of $-10 for game "ESPORTSBULL"
+#	Then I will receive bet response of error "InvalidToken"
 	
 Scenario: 02.d - Player cannot place bet with unknown game
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"

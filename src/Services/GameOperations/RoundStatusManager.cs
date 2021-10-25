@@ -11,15 +11,16 @@ namespace TGS.Services.GameOperations
     {
         RoundStatus GetStatus(RoundStatusData data);
 
-        ClientRoundStatus GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult,
+        ClientRoundStatus GetClientRoundStatus(
+            RoundStatus status, BetValuesResult betValuesResult,
             bool gameActionWithSingleRound, bool isVoidRound);
     }
 
     internal sealed class RoundStatusManager : IRoundStatusManager
     {
-        ClientRoundStatus IRoundStatusManager.
-            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool gameActionWithSingleRound,
-                bool isVoidRound)
+        public ClientRoundStatus GetClientRoundStatus(
+            RoundStatus status, BetValuesResult betValuesResult, bool gameActionWithSingleRound,
+            bool isVoidRound)
         {
             if (status is RoundStatus.New or RoundStatus.Open || betValuesResult == null)
             {
@@ -72,7 +73,7 @@ namespace TGS.Services.GameOperations
             return ClientRoundStatus.Loss;
         }
 
-        RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
+        public RoundStatus GetStatus(RoundStatusData data)
         {
             var requestToCloseRound = data.RequestToCloseRound;
             var gameActionType = data.GameActionType;
@@ -106,7 +107,9 @@ namespace TGS.Services.GameOperations
                 return requestToCloseRound.Value ? RoundStatus.Closed : oldStatus;
             }
 
-            if (gameActionType.IsNotAllOf(WinBet, LoseBet, TieBet,
+            if (gameActionType.IsNotAllOf(WinBet,
+                LoseBet,
+                TieBet,
                 CancelTransaction))
             {
                 return oldStatus;
@@ -125,7 +128,10 @@ namespace TGS.Services.GameOperations
                 .Select(r => r.Id);
 
             // filter out current reference bet as well
-            unsettledBetIds = unsettledBetIds.Except(new[] {data.ReferencedGameAction.Id});
+            unsettledBetIds = unsettledBetIds.Except(new[]
+            {
+                data.ReferencedGameAction.Id
+            });
 
             // can close the round if no bets left
             return !unsettledBetIds.Any() ? RoundStatus.Closed : oldStatus;

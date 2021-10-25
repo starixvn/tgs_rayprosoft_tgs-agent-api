@@ -55,6 +55,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         {
             var rows = table.CreateList(CreateBetValuesCalculatorRowInstance);
             var dupRowId = rows.GroupBy(r => r.Id).FirstOrDefault(g => g.Count() > 1);
+
             if (dupRowId != null)
             {
                 throw new ArgumentException("Test definition error: Duplicate row ID=" +
@@ -95,7 +96,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             var previousInput = new List<BetActionData>();
             var previousOutput = new List<BetValuesResult>();
-            var calculator = (IBetValuesCalculator)new DefaultBetValuesCalculator();
+            var calculator = new DefaultBetValuesCalculator();
 
             var oppositeBetPatterns = HasTag("OppositeBets")
                 ? Get<IList<OppositeBetPattern>>(SR.OppositeBetPatterns)
@@ -104,11 +105,13 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             foreach (var current in rows)
             {
                 var action = actionById[current.Id];
+
                 if (current.Type != BetValuesCalculatorRowName.Totals)
                 {
                     if (action.Type == GameActionType.CancelTransaction)
                     {
                         action.Reference.IsCancelled = true;
+
                         if (action.Reference.Type == GameActionType.CancelTransaction)
                         {
                             action.Reference.Reference.IsCancelled = false;
@@ -145,7 +148,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         }
 
         [Then(@"the final bet amount is (.*) and valid bet amount is (.*) and settle amount is (.*)")]
-        public void ThenTheFinalBetAmountIsAndValidBetAmountIsAndSettleAmountIs(decimal betAmount,
+        public void ThenTheFinalBetAmountIsAndValidBetAmountIsAndSettleAmountIs(
+            decimal betAmount,
             decimal validBetAmount, decimal settleAmount)
         {
             var results = Get<List<BetValuesResult>>(SR.BetValuesResults);
@@ -185,6 +189,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         private static decimal? ParseNullableDecimal(TableRow row, string name)
         {
             var value = row[name];
+
             if (string.IsNullOrEmpty(value))
             {
                 return null;
@@ -199,6 +204,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         private static bool? ParseNullableBool(TableRow row, string name)
         {
             var s = row[name].ToLowerInvariant().Trim();
+
             return s switch
             {
                 "yes"   => true,
@@ -209,7 +215,8 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             };
         }
 
-        private static void ValidateTotals(IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput,
+        private static void ValidateTotals(
+            IList<BetActionData> previousInput, IList<BetValuesResult> previousOutput,
             BetValuesCalculatorRow current)
         {
             var amount = previousInput.Sum(e => e.Amount);
@@ -245,8 +252,10 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             result.Turnover.Should().Be(current.Turnover, $" that is Turnover [for row:{current.Type} ID={idAsInt}]");
             result.WinLoss.Should().Be(current.WinLoss, $" that is WinLoss [for row:{current.Type} ID={idAsInt}]");
+
             result.UnsettledBets.Should().Be(current.UnsettledBets,
                 $" that is Unsettled Bets [for row:{current.Type} ID={idAsInt}]");
+
             result.TieBetAdjustment.Should().Be(current.TieBetAdjustment,
                 $" that is TieBetAdjustment Bets [for row:{current.Type} ID={idAsInt}]");
         }
@@ -268,18 +277,18 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
     internal class BetValuesCalculatorRow
     {
-        public Guid Id { get; set; }
-        public Guid? RefId { get; set; }
-        public BetValuesCalculatorRowName Type { get; set; }
         public GameActionType ActionType => (GameActionType)Type;
         public decimal Amount { get; set; }
-        public decimal PostBalance { get; set; }
-        public decimal Turnover { get; set; }
-        public decimal WinLoss { get; set; }
-        public decimal TieBetAdjustment { get; set; }
-        public decimal UnsettledBets { get; set; }
         public string BetType { get; set; }
-        public bool? RoundClosed { get; set; }
+        public Guid Id { get; set; }
         public decimal? JackpotContributionAmount { get; set; }
+        public decimal PostBalance { get; set; }
+        public Guid? RefId { get; set; }
+        public bool? RoundClosed { get; set; }
+        public decimal TieBetAdjustment { get; set; }
+        public decimal Turnover { get; set; }
+        public BetValuesCalculatorRowName Type { get; set; }
+        public decimal UnsettledBets { get; set; }
+        public decimal WinLoss { get; set; }
     }
 }

@@ -20,13 +20,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
 
         BalanceResponse Response(BetResult r);
 
-        BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+        BetData CancelLockAmountRequest(
+            string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, CancelBetRequest request);
 
-        BetData PlaceAndSettleBetRequest(string playerCode, GameProviderConfigurationData data,
+        BetData PlaceAndSettleBetRequest(
+            string playerCode, GameProviderConfigurationData data,
             SettleBetRequest request);
 
-        BetData VoidRoundRequest(string playerCode, GameProviderConfigurationData data,
+        BetData VoidRoundRequest(
+            string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, VoidGameRequest request);
     }
 
@@ -37,7 +40,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         private static readonly TimeSpan _Offset = TimeSpan.FromHours(8);
 
         private readonly JsonSerializerOptions _jsonSerializerOptions =
-            new() { WriteIndented = false };
+            new()
+            {
+                WriteIndented = false
+            };
 
         public BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, BetRequest request)
         {
@@ -55,13 +61,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 TimeStamp = ParseDateTimeOffset(request.Timestamp)
             };
 
-            return GetBetData(playerCode, data, new[]
-            {
-                transaction
-            });
+            return GetBetData(playerCode,
+                data,
+                new[]
+                {
+                    transaction
+                });
         }
 
-        public BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData CancelLockAmountRequest(
+            string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, CancelBetRequest request)
         {
             var transactions = externalIds.Select(ga => new TransactionData
@@ -81,7 +90,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             return GetBetData(playerCode, data, transactions);
         }
 
-        public BetData PlaceAndSettleBetRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData PlaceAndSettleBetRequest(
+            string playerCode, GameProviderConfigurationData data,
             SettleBetRequest request)
         {
             var externalRoundId = request.ExternalRoundId;
@@ -133,20 +143,22 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                     AllowLoseBetNegativeAmount = true,
                     CustomBetValues = new CustomBetValues(validBet, playerWinLoss.Negate()),
                     RoundDetail = JsonSerializer.Serialize(new
-                    {
-                        request.OutMoney,
-                        request.Chair,
-                        request.Banker,
-                        request.PlayId,
-                        request.Tiles
-                    }, _jsonSerializerOptions)
+                        {
+                            request.OutMoney,
+                            request.Chair,
+                            request.Banker,
+                            request.PlayId,
+                            request.Tiles
+                        },
+                        _jsonSerializerOptions)
                 }
             };
 
-            return GetBetData(playerCode, data, transactions);
+            return GetBetData(playerCode, data, transactions, true, true);
         }
 
-        public BetData VoidRoundRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData VoidRoundRequest(
+            string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, VoidGameRequest request)
         {
             var transactions = externalIds.Select(ga => new TransactionData
@@ -180,8 +192,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 Balance = r.Balance
             };
 
-        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
-            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false)
+        private static BetData GetBetData(
+            string playerCode,
+            GameProviderConfigurationData data,
+            TransactionData[] transactions,
+            bool allowPlaceBetWithDifferentPlatformToken = false,
+            bool ignorePlaceBetValidation = false)
             => new BetData
             {
                 GameProviderId = data.GameProviderId,
@@ -192,13 +208,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 HasCurrencyFromGameProvider = false,
                 GameProviderCode = _GameProviderCode,
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
+                IgnorePlaceBetValidation = ignorePlaceBetValidation,
                 PlayerCode = playerCode,
                 WithCustomBetValues = true
             };
 
         private static DateTimeOffset ParseDateTimeOffset(string timestamp)
         {
-            var dateTime = DateTime.ParseExact(timestamp, _TimestampFormat, null,
+            var dateTime = DateTime.ParseExact(timestamp,
+                _TimestampFormat,
+                null,
                 DateTimeStyles.AllowWhiteSpaces);
 
             return new DateTimeOffset(dateTime, _Offset);

@@ -5,7 +5,7 @@ using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 namespace TGS.UnitTests.Services.WMCasino
 {
     [TestFixture]
-    public class WMCasionUtilityTests
+    public class WmCasinoUtilityTests
     {
         [Test]
         public void Can_Get_Correct_Round_Id()
