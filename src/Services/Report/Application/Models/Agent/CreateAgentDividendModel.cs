@@ -6,6 +6,7 @@ namespace TGS.Services.Report.Application.Models.Agent
     {
         public int? Id { get; set; }
         public int? ReferencedAgentDividendId { get; set; }
+        public string AgentUsername { get; set; }
         public Guid AgentId { get; set; }
         public Guid BrandId { get; set; }
         public DateTimeOffset From { get; set; }

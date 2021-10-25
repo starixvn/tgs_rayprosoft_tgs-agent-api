@@ -65,6 +65,8 @@ namespace TGS.Clients.Report.Client
 
         Task<Stream> ExportVipsAsync(ExportVipReportRequest request);
 
+        Task<Stream> ExportAgentDividendsTrialCalculationAsync(ExportAgentDividendsTrialCalculationRequest request);
+
         Task<Stream> ExportLicenseeMarketsAsync(ExportLicenseeMarketsRequest request);
     }
 
@@ -431,6 +433,25 @@ namespace TGS.Clients.Report.Client
         public async Task<Stream> ExportVipsAsync(ExportVipReportRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/vipReport/exportVips?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentDividendsTrialCalculationAsync(
+           ExportAgentDividendsTrialCalculationRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividendsTrialCalculation?",
+                request);
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
