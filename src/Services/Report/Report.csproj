@@ -47,6 +47,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AgentDividend.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\LicenseeMarket.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LicenseeMarket.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\Player.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -81,6 +86,10 @@
     <EmbeddedResource Update="Application\Resources\AgentDividend.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AgentDividend.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\LicenseeMarket.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LicenseeMarket.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\Player.resx">
       <Generator>ResXFileCodeGenerator</Generator>
