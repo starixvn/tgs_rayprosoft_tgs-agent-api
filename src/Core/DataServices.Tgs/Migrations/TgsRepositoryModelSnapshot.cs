@@ -462,7 +462,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("adjustment_amount");
 
                     b.Property<decimal>("AgentDividendAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("agent_dividend_amount");
 
                     b.Property<decimal>("AgentDividendPercentage")

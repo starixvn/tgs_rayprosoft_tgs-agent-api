@@ -28,10 +28,12 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id,
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(
+            Guid id,
             [FromQuery] GetAgentTeamInfoRequest request)
         {
             request.AgentId = id;
+
             return _mediator.Send(request);
         }
 
@@ -76,6 +78,14 @@ namespace TGS.Apis.ReportApi.Controllers
         [HttpGet("exportAgentDividends")]
         [Description("export agent dividends")]
         public async Task<IActionResult> ExportAgentDividendsAsync([FromQuery] ExportAgentDividendsRequest request)
+            => File(
+                await _mediator.Send(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        [HttpGet("exportAgentDividendsTrialCalculation")]
+        [Description("export agent dividends trial calculation")]
+        public async Task<IActionResult> ExportAgentDividendsTrialCalculationAsync(
+            [FromQuery] ExportAgentDividendsTrialCalculationRequest request)
             => File(
                 await _mediator.Send(request).ConfigureAwait(false),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

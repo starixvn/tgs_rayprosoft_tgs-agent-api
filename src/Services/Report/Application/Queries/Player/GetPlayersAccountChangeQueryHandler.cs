@@ -30,8 +30,8 @@ namespace TGS.Services.Report.Application.Queries.Player
             => _transactionService.GetTransactionQueries().Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.RecordedOn >= request.From && x.RecordedOn < request.To)
                 .Where(request.TransactionType is not null, x => x.Type == request.TransactionType)
-                .Where(x => x.Type == TransactionType.Deposit || x.Type == TransactionType.Withdrawal ||
-                    x.Type == TransactionType.Rebate || x.Type == TransactionType.Promotion)
+                .Where(x => x.Type == TransactionType.Adjust || x.Type == TransactionType.Rebate ||
+                    x.Type == TransactionType.Promotion)
                 .Join(_transactionService.TgsRepository.Players,
                     transaction => transaction.PlayerCode,
                     player => player.PlayerCode,
