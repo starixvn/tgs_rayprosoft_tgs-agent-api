@@ -17,8 +17,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             _client = client;
         }
 
+        [HttpGet("exportLicenseeMarkets")]
+        [Description(" Export licensee markets")]
+        public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportLicenseeMarketsRequest request) => File(
+            await _client.ExportLicenseeMarketsAsync(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "LicenseeMarkets.xlsx");
+
         [HttpGet]
-        [Description("Get licensee market report")]
+        [Description("Get licensee markets")]
         public Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync([FromQuery] GetLicenseeMarketsRequest request) =>
             _client.GetLicenseeMarketsAsync(request);
     }
