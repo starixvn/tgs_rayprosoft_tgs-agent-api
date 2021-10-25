@@ -24,8 +24,13 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         CreatePromotionBonusWeeklyHandler : Handler<CreatePromotionBonusWeeklyRequest,
             MessageResponse>
     {
-        private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
-            DateTimeOffset.Now.Day, 0, 0, 0, new(8, 0, 0));
+        private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year,
+            DateTimeOffset.Now.Month,
+            DateTimeOffset.Now.Day,
+            0,
+            0,
+            0,
+            new(8, 0, 0));
 
         private static readonly DateTimeOffset _PreviousMonday = _Now.AddDays(-7).GetMonday();
         private static readonly DateTimeOffset _PreviousSunday = _Now.AddDays(-7).GetSunday();
@@ -36,7 +41,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public CreatePromotionBonusWeeklyHandler(IPromotionBonusRepository promotionBonusService,
+        public CreatePromotionBonusWeeklyHandler(
+            IPromotionBonusRepository promotionBonusService,
             IPlayerBucketRepository playerBucketService,
             IWalletRepository walletRepository,
             ITgsTransactionRepository transactionRepository,
@@ -52,11 +58,12 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             _transactionRepository = transactionRepository;
         }
 
-        public override async Task<MessageResponse> Handle(CreatePromotionBonusWeeklyRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreatePromotionBonusWeeklyRequest request,
             CancellationToken cancellationToken)
         {
             var promotions = await _promotionRepository.GetPromotionQueries()
-                .Where(x => x.Status == SwitchStatus.Enabled)
+                .Where(x => x.Status == PromotionStatus.Enabled)
                 .Where(x => x.SettlementIntervalType == "Weekly")
                 .Where(x => x.From >= _PreviousMonday && x.From <= _PreviousSunday ||
                     x.To >= _PreviousMonday && x.To <= _PreviousSunday ||
@@ -68,7 +75,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             if (await _promotionBonusService.GetPromotionBonusQueries()
                 .AnyAsync(
                     x => promotionIds.Contains(x.PromotionId) && _PreviousMonday <= x.From &&
-                        _PreviousSunday >= x.To, cancellationToken))
+                        _PreviousSunday >= x.To,
+                    cancellationToken))
             {
                 return new()
                 {
@@ -88,11 +96,27 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
                 .GroupJoin(_repository.BrandGames,
-                    aggregate => new { aggregate.BrandId, aggregate.GameId },
-                    brandGame => new { brandGame.BrandId, brandGame.GameId },
-                    (aggregate, brandGame) => new { aggregate, brandGame })
+                    aggregate => new
+                    {
+                        aggregate.BrandId,
+                        aggregate.GameId
+                    },
+                    brandGame => new
+                    {
+                        brandGame.BrandId,
+                        brandGame.GameId
+                    },
+                    (aggregate, brandGame) => new
+                    {
+                        aggregate,
+                        brandGame
+                    })
                 .SelectMany(x => x.brandGame.DefaultIfEmpty(),
-                    (x, brandGame) => new { x.aggregate, brandGame })
+                    (x, brandGame) => new
+                    {
+                        x.aggregate,
+                        brandGame
+                    })
                 .Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
@@ -100,6 +124,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 var id = GuidExtensions.NewSequentialGuid();
                 var from = x.From > _PreviousMonday ? x.From : _PreviousMonday;
                 var to = x.To < _PreviousSunday ? x.To : _PreviousSunday;
+
                 var (players, amountUsed) =
                     GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate), from, to);
                 x.AmountUsed = amountUsed;
@@ -128,13 +153,26 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             var players = await _repository.Players.AsQueryable()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
+                .Select(x => new
+                {
+                    x.BrandId,
+                    x.PlayerCode,
+                    x.Wallets,
+                    x.DefaultWalletId
+                })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new { pb, p })
+                    return x.Players.Join(players,
+                            pb => pb.PlayerCode,
+                            p => p.PlayerCode,
+                            (pb, p) => new
+                            {
+                                pb,
+                                p
+                            })
                         .Select(p => new
                         {
                             x.BrandId,
@@ -153,16 +191,23 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             await _promotionRepository.UpdatePromotionsAsync(promotions);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+
             await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
-                new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
+                new CreatePlayerBucketRequest(x.BrandId,
+                    x.PlayerCode,
+                    x.DefaultWalletId,
+                    x.BucketType,
                     x.BucketAmount)).ToArray()).ConfigureAwait(false);
 
             var transactionPromotions = new List<TransactionPromotion>();
+
             foreach (var createPlayerBucketRequest in playerBuckets)
             {
                 var (transactionId, balance) = await _walletRepository.ExchangeAsync(createPlayerBucketRequest.BrandId,
-                    createPlayerBucketRequest.DefaultWalletId, createPlayerBucketRequest.PlayerCode,
-                    TransactionTypes.Promotion, createPlayerBucketRequest.BonusAmount);
+                    createPlayerBucketRequest.DefaultWalletId,
+                    createPlayerBucketRequest.PlayerCode,
+                    TransactionTypes.Promotion,
+                    createPlayerBucketRequest.BonusAmount);
 
                 transactionPromotions.Add(new()
                 {
@@ -180,7 +225,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             return CreateValidResponse<MessageResponse>();
         }
 
-        private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,
+        private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(
+            Guid id,
             Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameAggregate> aggregates,
             DateTimeOffset from, DateTimeOffset to)
         {

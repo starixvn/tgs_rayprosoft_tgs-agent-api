@@ -11,7 +11,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public string? Name { get; set; }
 
-        public SwitchStatus? Status { get; set; }
+        public PromotionStatus? Status { get; set; }
 
         public string? Type { get; set; }
         public DateTimeOffset? From { get; set; }

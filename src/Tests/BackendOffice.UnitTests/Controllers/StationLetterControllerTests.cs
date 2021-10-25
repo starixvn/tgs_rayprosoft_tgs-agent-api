@@ -201,7 +201,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var queriesMock = new Mock<ITgsQueries<StationLetter>>();
             var playerQueriesMock = new Mock<ITgsQueries<Player>>();
             var commandsMock = new Mock<ITgsCommands<StationLetter>>();
-            var playerCommandsMock = new Mock<ITgsCommands<StationLetterPlayer>>();
             var uploadServiceMock = new Mock<IUploadService>();
             var stationLetterServiceMock = new Mock<IStationLetterService>();
 
