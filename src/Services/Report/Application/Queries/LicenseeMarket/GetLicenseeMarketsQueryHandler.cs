@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.LicenseeMarket;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -15,8 +12,8 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
 {
     internal class GetLicenseeMarketsQueryHandler : Handler<GetLicenseeMarketsRequest, LicenseeMarketsResponse>
     {
-        private readonly IPlayerAggregateService _service;
         private readonly ITgsBrandService _brandService;
+        private readonly IPlayerAggregateService _service;
 
         public GetLicenseeMarketsQueryHandler(
             IPlayerAggregateService service,
@@ -43,7 +40,8 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
 
             var brands = await _brandService.GetBrandQueries(q =>
             q.Where(x => x.LicenseeId == request.LicenseeId)
-            .Where(!string.IsNullOrEmpty(request.CurrencyCode), x => x.Currencies.Where(x => x.CurrencyCode == request.CurrencyCode).Count() > 0), true)
+            .Where(!string.IsNullOrEmpty(request.CurrencyCode), x => x.Currencies.Where(x => x.CurrencyCode == request.CurrencyCode).Count() > 0)
+            .Where(request.CurrencyCodes != null, x => request.CurrencyCodes.Contains(x.Currencies.FirstOrDefault().CurrencyCode)), true)
                 .Select(x => new
                 {
                     LicenseeId = x.LicenseeId,
@@ -53,8 +51,6 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                 })
                 .ToArrayAsync()
                 .ConfigureAwait(false);
-
-
 
             var withdrawals = await _service.Repository.WithdrawForms.AsQueryable()
               .Where(x => brands.Select(x => x.BrandId).Contains(x.BrandId))
@@ -68,7 +64,6 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
               })
               .ToArrayAsync(cancellationToken)
               .ConfigureAwait(false);
-
 
             var playerAggregates = await _service.GetPlayerAggregateQueries()
                 .Where(x => brands.Select(x => x.BrandId).Contains(x.BrandId))
