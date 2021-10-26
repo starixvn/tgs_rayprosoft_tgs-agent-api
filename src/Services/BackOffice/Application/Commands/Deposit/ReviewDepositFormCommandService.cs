@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
-using TGS.Clients.Promotion.Client;
 using Tgs.Payment.Clients;
+using TGS.Clients.Promotion.Client;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
@@ -58,7 +58,6 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                         actualAmount: command.ActualAmount)
                     .ConfigureAwait(false);
 
-
             await _paymentServiceClient
                 .ReviewDepositFormAsync(
                     command.FormId,
@@ -85,7 +84,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             form.Amount,
                             command.Remark,
                             command.FormId,
-                            Guid.Parse(command.ReviewUserId)))
+                            string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 
