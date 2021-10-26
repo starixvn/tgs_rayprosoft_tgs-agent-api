@@ -22,7 +22,7 @@ namespace TGS.Services.Agent.Services.Agent
             CancellationToken cancellationToken = default)
             => await _tgsRepository.Agents.AsQueryable()
                 .AnyAsync(x => x.BrandId == query.BrandId
-                        && EF.Functions.ILike(x.Username, $"%{query.Username}%"),
+                        && EF.Functions.ILike(x.Username, query.Username),
                     cancellationToken);
     }
 }
