@@ -2117,6 +2117,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<string>("OrderNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("order_no");
+
                     b.Property<string>("PaymentReturn")
                         .HasColumnType("jsonb")
                         .HasColumnName("payment_return");
@@ -5888,6 +5893,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("OrderNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("order_no");
 
                     b.Property<DateTimeOffset?>("PaidOn")
                         .HasColumnType("timestamp with time zone")
