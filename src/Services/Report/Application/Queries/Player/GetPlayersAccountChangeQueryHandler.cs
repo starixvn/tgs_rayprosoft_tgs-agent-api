@@ -41,13 +41,19 @@ namespace TGS.Services.Report.Application.Queries.Player
                         Player = player
                     })
                 .Where(request.Username.IsNotNullOrEmpty(), x => x.Player.Username == request.Username)
-                .Join(_transactionService.TgsRepository.Users,
+                .GroupJoin(_transactionService.TgsRepository.Users,
                     group => group.Transaction.CreatedByUserId,
                     user => user.Id,
                     (group, user) => new
                     {
-                        group.Transaction,
-                        group.Player,
+                        Group = group,
+                        User = user
+                    })
+                .SelectMany(x => x.User.DefaultIfEmpty(),
+                    (x, user) => new
+                    {
+                        x.Group.Transaction,
+                        x.Group.Player,
                         User = user
                     })
                 .Select(x => new PlayersAccountChangeModel
@@ -58,7 +64,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                     AfterBalance = x.Transaction.Balance,
                     TransactionType = x.Transaction.Type,
                     RecordedOn = x.Transaction.RecordedOn,
-                    Operator = x.User.Username,
+                    Operator = x.User.Username ?? "System",
                     Description = x.Transaction.Description
                 }).CreatePagedResponseAsync(request);
     }
