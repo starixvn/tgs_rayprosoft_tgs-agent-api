@@ -30,7 +30,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
 
-            if (request.AgentDividendConditions.Length > 1)
+            if (request.AgentDividendConditions.Length != 1)
             {
                 return CreateInvalidResponse<MessageResponse>("Can only have one rank.");
             }
@@ -55,20 +55,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                             condition.Rank));
                     }
 
-                    if (condition.NetProfit < parent.NetProfit)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
-                            condition.Rank,
-                            parent.NetProfit));
-                    }
-
-                    if (condition.ActiveNumber < parent.ActiveNumber)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
-                            condition.Rank,
-                            parent.ActiveNumber));
-                    }
-
                     if (condition.DividendPercentage > parent.DividendPercentage)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(
@@ -76,19 +62,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                             condition.Rank,
                             parent.DividendPercentage));
                     }
-                }
-            }
-
-            foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
-            {
-                var previous = request.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
-
-                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
-                    condition.ActiveNumber < previous.ActiveNumber ||
-                    condition.DividendPercentage < previous.DividendPercentage))
-                {
-                    return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
-                        condition.Rank));
                 }
             }
 
