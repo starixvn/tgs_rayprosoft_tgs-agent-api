@@ -169,6 +169,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
+                brandId,
                 CultureInfo.CurrentUICulture,
                 request.Email));
         }

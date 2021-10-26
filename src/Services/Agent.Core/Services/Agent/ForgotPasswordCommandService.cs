@@ -31,7 +31,8 @@ namespace TGS.Services.Agent.Services.Agent
             CancellationToken cancellationToken = default)
         {
             var agent = _tgsRepository.Agents.AsQueryable()
-                .Where(agent => agent.Email == command.Email)
+                .Where(agent => agent.BrandId == command.BrandId
+                    && agent.Email == command.Email)
                 .FirstOrDefault();
 
             if (agent == null)
@@ -58,7 +59,12 @@ namespace TGS.Services.Agent.Services.Agent
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            await _validateCodeOperator.SendEmailAsync(command.CultureInfo, agent.Email, saveResult.ValidateCode);
+            await _validateCodeOperator
+                .SendEmailAsync(
+                    command.CultureInfo,
+                    agent.Email,
+                    saveResult.ValidateCode)
+                .ConfigureAwait(false);
 
             return saveResult.Token;
         }
