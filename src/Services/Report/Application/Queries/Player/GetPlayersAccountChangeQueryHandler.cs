@@ -60,8 +60,8 @@ namespace TGS.Services.Report.Application.Queries.Player
                 {
                     Username = x.Player.Username,
                     Amount = x.Transaction.Amount,
-                    BeforeBalance = x.Transaction.Balance + x.Transaction.Amount,
-                    AfterBalance = x.Transaction.Balance,
+                    BeforeBalance = x.Transaction.Balance,
+                    AfterBalance = x.Transaction.Balance + x.Transaction.Amount,
                     TransactionType = x.Transaction.Type,
                     RecordedOn = x.Transaction.RecordedOn,
                     Operator = x.User.Username ?? "System",
