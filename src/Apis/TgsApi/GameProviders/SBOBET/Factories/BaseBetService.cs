@@ -35,12 +35,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             RedisCacheManager = redisCacheManager;
         }
 
+        protected ISBOBETActionModelMapper ActionModelMap { get; }
+
         protected IGamePlayActions GamePlayActions { get; }
         protected HttpContext HttpContext { get; }
-        protected ISBOBETActionModelMapper ActionModelMap { get; }
+        protected IRedisCacheManager RedisCacheManager { get; }
         protected ISBOBETServices Services { get; }
         protected ISettingOperations SettingOperations { get; }
-        protected IRedisCacheManager RedisCacheManager { get; }
 
         public virtual async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
         {
@@ -66,8 +67,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
             var (platformType, _) = await Services
-                .GetPlatformTypeAndGameWithLoginRecordsAsync(gameProviderId, request.ExternalGameId,
+                .GetPlatformTypeAndGameWithLoginRecordsAsync(gameProviderId,
+                    request.ExternalGameId,
                     request.PlayerCode).ConfigureAwait(false);
 
             var data = await Services
@@ -76,6 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
             var betData = ActionModelMap.Request(data, request);
             var r = await GamePlayActions.PlaceBetAsync(betData).ConfigureAwait(false);
+
             return ActionModelMap.Response(request, r);
         }
 
@@ -100,19 +104,21 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .ConfigureAwait(false);
 
             var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
+                externalRoundId,
+                () => Task.FromResult(false)).ConfigureAwait(false);
 
             var betData = ActionModelMap.Request(data, externalRoundId, request, hasRollback);
             var r = await GamePlayActions.SettleBetAsync(betData).ConfigureAwait(false);
 
             await RedisCacheManager.ClearCacheAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, true).ConfigureAwait(false);
+                externalRoundId,
+                true).ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
         }
 
         /// <summary>
-        ///     case: Cancel Bet or Void Round
+        /// case: Cancel Bet or Void Round
         /// </summary>
         public virtual async ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
         {
@@ -127,7 +133,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
         }
 
         /// <summary>
-        ///     case: Cancel Settle or Cancel CancelTransaction
+        /// case: Cancel Settle or Cancel CancelTransaction
         /// </summary>
         public virtual async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
@@ -135,14 +141,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var externalRoundId = request.ExternalRoundId;
 
             var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
+                externalRoundId,
+                () => Task.FromResult(false)).ConfigureAwait(false);
 
             if (hasRollback)
             {
-                return ActionModelMap.Response<RollbackResponse>(playerCode, GameApiError.BetAlreadyRollback);
+                return ActionModelMap.Response<RollbackResponse>(playerCode, 0, GameApiError.BetAlreadyRollback);
             }
 
-            var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet, CancelTransaction};
+            var actionTypes = new[]
+            {
+                WinBet,
+                LoseBet,
+                TieBet,
+                FreeBet,
+                CancelTransaction
+            };
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -160,7 +174,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
             var gameActionExternalIds =
                 await Services
-                    .GetGameActionExternalIdsAsync(gameProviderId, request.PlayerCode, externalRoundId, gameId,
+                    .GetGameActionExternalIdsAsync(gameProviderId,
+                        request.PlayerCode,
+                        externalRoundId,
+                        gameId,
                         actionTypes).ConfigureAwait(false);
 
             var betData = ActionModelMap.Request(data, request, gameActionExternalIds);
@@ -168,8 +185,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
             if (r.Transactions.All(t => !t.IsDuplicate))
             {
-                await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.RollbackTransaction,
+                await RedisCacheManager.SafeCacheAsync(SBOBETConsts.RedisKey.RollbackTransaction,
                     externalRoundId,
+                    TimeSpan.FromDays(7),
                     true);
             }
 
@@ -202,7 +220,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             return ActionModelMap.Response(request, ga);
         }
 
-        private async ValueTask<CancelBetResponse> CancelBetAsync(Guid gameProviderId,
+        private async ValueTask<CancelBetResponse> CancelBetAsync(
+            Guid gameProviderId,
             Guid gameProviderConfigurationId, CancelBetRequest request)
         {
             var (_, _, platformType) = await Services.GetRoundStatusAndGameIdAndPlatformAsync(
@@ -212,10 +231,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 request.ExternalTransactionId).ConfigureAwait(false);
 
             var data = await Services.GetGameProviderConfigurationDataAsync(gameProviderId,
-                gameProviderConfigurationId, platformType);
+                gameProviderConfigurationId,
+                platformType);
 
             var betData = ActionModelMap.Request(data, request);
             var r = await GamePlayActions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
             return ActionModelMap.Response(request, r);
         }
 
@@ -239,14 +260,18 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
             if (roundStatus == RoundStatus.Closed && gameActionExternalIds.Length == 0)
             {
-                return ActionModelMap.Response<CancelBetResponse>(request.PlayerCode, GameApiError.BetAlreadyCanceled);
+                return ActionModelMap.Response<CancelBetResponse>(request.PlayerCode,
+                    0,
+                    GameApiError.BetAlreadyCanceled);
             }
 
             var data = await Services.GetGameProviderConfigurationDataAsync(gameProviderId,
-                gameProviderConfigurationId, platformType);
+                gameProviderConfigurationId,
+                platformType);
 
             var betData = ActionModelMap.Request(data, request, gameActionExternalIds);
             var r = await GamePlayActions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
             return ActionModelMap.Response(request, r);
         }
     }
