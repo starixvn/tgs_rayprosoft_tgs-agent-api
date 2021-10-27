@@ -4,13 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
-using Tgs.Logging;
-using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -25,12 +22,13 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly ITgsLog _tgsLog;
-        private readonly IPlayerService _playerService;
         private readonly IPlayerBucketRepository _playerBucketRepository;
+        private readonly IPlayerService _playerService;
+        private readonly ITgsLog _tgsLog;
         private readonly IWalletRepository _walletRepository;
 
-        public AdjustPlayerAmountHandler(IAgentService agentService,
+        public AdjustPlayerAmountHandler(
+            IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
             IPlayerService playerService,
@@ -45,15 +43,22 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             }
 
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
-            _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
+
+            _agentWalletRepository =
+                agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+
+            _playerBucketRepository =
+                playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
         }
 
-        public override async Task<MessageResponse> Handle(CreatePlayerAdjustmentRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreatePlayerAdjustmentRequest request,
             CancellationToken cancellationToken)
         {
             var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode);
@@ -64,6 +69,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             }
 
             var isTransferToAgent = IsTransferToAgent(request);
+
             var targetAgent = isTransferToAgent
                 ? await _agentService
                     .GetAgentAsync(x => x.Id == player.AgentId)
@@ -75,7 +81,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.TargetAgentNotFound);
             }
 
-            var wallet = player.Wallets.First(x => x.Id == player.DefaultWalletId);
+            var wallet = player.Wallets.FirstOrDefault(x => x.Id == player.DefaultWalletId);
 
             if (wallet is null)
             {
@@ -104,7 +110,9 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     player.PlayerCode,
                     TransactionTypes.Adjust,
                     request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
-                    remark).ConfigureAwait(false);
+                    remark,
+                    null,
+                    Guid.Parse(UserId)).ConfigureAwait(false);
 
                 if (isTransferToAgent)
                 {
@@ -120,14 +128,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             if (request.BucketAmount > 0)
             {
                 await _playerBucketRepository
-                    .CreatePlayerBucketsAsync(new[]{
+                    .CreatePlayerBucketsAsync(new[]
+                    {
                         new CreatePlayerBucketRequest(
                             player.BrandId,
                             player.PlayerCode,
                             player.DefaultWalletId,
                             BucketType.Adjustment,
                             request.BucketAmount)
-                            })
+                    })
                     .ConfigureAwait(false);
 
                 _tgsLog.LogInfo($"Adjust add bucket {player.PlayerCode}: {request.BucketAmount}");

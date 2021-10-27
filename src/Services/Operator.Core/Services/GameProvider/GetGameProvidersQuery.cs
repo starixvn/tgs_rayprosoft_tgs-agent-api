@@ -7,7 +7,6 @@ namespace TGS.Services.Operator.Services.GameProvider
     public record GetGameProvidersQuery(
         Guid BrandId,
         string CurrencyCode,
-        PlayerTokenData PlayerTokenData,
-        PlatformType PlatformType,
-        string LanguageCode);
+        PlayerTokenData? PlayerTokenData,
+        PlatformType PlatformType);
 }

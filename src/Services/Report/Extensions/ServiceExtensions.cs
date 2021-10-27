@@ -20,8 +20,10 @@ namespace TGS.Services.Report.Extensions
             services.AddTransient<IPlayerGameAggregateService, PlayerGameAggregateService>();
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
+            services.AddTransient<ITransactionService, TransactionService>();
 
             services.AddPlayerBucketRepositoriesServices();
+
             services.AddWallet()
                 .AddTgsWalletRepositories()
                 .AddTgsAgentWalletRepositories();

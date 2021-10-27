@@ -27,10 +27,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id,
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(
+            Guid id,
             [FromQuery] GetAgentTeamInfoRequest request)
         {
             request.AgentId = id;
+
             return _client.GetAgentTeamInfoAsync(request);
         }
 
@@ -48,10 +50,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{id}/winLoss")]
         [Description("Get agent player Win/Loss report")]
-        public Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(Guid id,
+        public Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
+            Guid id,
             [FromQuery] GetAgentPlayerWinLossRequest request)
         {
             request.AgentId = id;
+
             return _client.GetAgentPlayerWinLossAsync(request);
         }
 
@@ -60,13 +64,24 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromQuery] ExportAgentContributionsRequest request)
             => File(
                 await _client.ExportAgentContributionsAsync(request).ConfigureAwait(false),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AgentContributions.xlsx");
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "AgentContributions.xlsx");
 
         [HttpGet("exportAgentDividends")]
         public async Task<IActionResult> ExportAgentDividendsFileAsync(
             [FromQuery] ExportAgentDividendsRequest request)
             => File(
                 await _client.ExportAgentDividendsAsync(request).ConfigureAwait(false),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AgentDividends.xlsx");
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "AgentDividends.xlsx");
+
+        [HttpGet("exportAgentDividendsTrialCalculation")]
+        [Description("export agent dividends trial calculation")]
+        public async Task<IActionResult> ExportAgentDividendsTrialCalculationAsync(
+            [FromQuery] ExportAgentDividendsTrialCalculationRequest request)
+            => File(
+                await _client.ExportAgentDividendsTrialCalculationAsync(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "AgentDividendsTrialCalculation.xlsx");
     }
 }

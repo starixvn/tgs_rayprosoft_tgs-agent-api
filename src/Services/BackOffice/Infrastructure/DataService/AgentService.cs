@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Agent;
@@ -270,7 +270,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     { "_is_desc", request.IsDesc },
                     { "_status", request.Status },
                     { "_type", request.Type },
-                    { "_level_type", request.LevelType }
+                    { "_level_type", request.LevelType }                   
                 });
 
             return (results, results.Any() ? results.First().TotalCount : 0);

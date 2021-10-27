@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
@@ -10,6 +12,7 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -25,6 +28,96 @@ namespace TGS.Apis.AgentApi.Controllers
         {
             _mediator = mediator;
             _client = client;
+        }
+
+        /// <summary>
+        /// Get account changes
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="pagingRequest"></param>
+        /// <returns></returns>
+        [HttpGet("accountchanges")]
+        [Description("Get account changes")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
+                   [FromQuery] GetAccountChangesRequest request,
+                   [FromQuery] PagingRequest pagingRequest,
+                   [FromQuery] Guid id)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var accountChangesRequest = new GetAgentAccountChangesRequest
+            {
+                AgentId = id,
+                BrandId = brandId,
+                From = request.From,
+                To = request.To,
+                TransactionType = request.TransactionType,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
+            };
+
+            var response = await _client.GetAgentAccountChangesAsync(accountChangesRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentAccountChangeModel>()
+            };
+        }
+
+        /// <summary>
+        /// Get account changes transaction types
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("accountchanges/transactiontypes")]
+        [Description("Get account changes transaction types")]
+        public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
+        {
+            var allowType = new TransactionType[]
+           {
+                TransactionType.Withdrawal,
+                TransactionType.CancelWithdrawal,
+                TransactionType.Adjust,
+                TransactionType.Dividend
+           };
+
+            var dict = Enum.GetValues(typeof(TransactionType))
+                   .Cast<TransactionType>()
+                   .Where(x => allowType.Contains(x))
+                   .ToDictionary(t => (int)t, t => t.ToString());
+
+            return Task.FromResult(dict);
+        }
+
+        [HttpGet("dividendDetails")]
+        [Description("Get agent dividend details")]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentDividendDetailModel>>
+                    GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+        {
+            var dividendRequest = new GetAgentDividendDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+            var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+            };
         }
 
         /// <summary>
@@ -100,30 +193,34 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
-        [HttpGet("dividendDetails")]
-        [Description("Get agent dividend details")]
-        [TgsResponseWrapper]
+        /// <summary>
+        /// Get team Information
+        /// </summary>
+        /// <param name="pagingRequest"></param>
+        /// <returns></returns>
+        [HttpGet("teaminfo")]
+        [Description("Get team Information")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<AgentDividendDetailModel>>
-            GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+        public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
+            [FromQuery] PagingRequest pagingRequest,
+            [FromQuery] Guid id)
         {
-            var dividendRequest = new GetAgentDividendDetailsRequest
+            var request = new GetAgentTeamInfoRequest
             {
-                AgentId = request.AgentId,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                AgentId = id,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
             };
-            var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+
+            var response = await _client.GetAgentTeamInfoAsync(request);
 
             return new()
             {
                 TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+                Items = response.Items ?? Array.Empty<TeamInfoModel>()
             };
         }
     }

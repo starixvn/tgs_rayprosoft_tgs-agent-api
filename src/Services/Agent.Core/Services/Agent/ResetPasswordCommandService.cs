@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
@@ -23,6 +23,7 @@ namespace TGS.Services.Agent.Services.Agent
         {
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+
             _validateCodeOperator =
                 validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
@@ -44,6 +45,7 @@ namespace TGS.Services.Agent.Services.Agent
             var updatedOn = DateTimeOffset.UtcNow;
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
+
             await _agentOperations
                 .ChangeAgentPasswordAsync(new ChangeAgentPasswordData
                 {

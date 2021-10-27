@@ -8,7 +8,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Player;
 
@@ -18,7 +18,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
 
-        Task<Player> GetPlayerAsync(Expression<Func<Player, bool>> predicate,
+        Task<Player> GetPlayerAsync(
+            Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
 
         IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
@@ -51,7 +52,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _cacheManager = cacheManager;
         }
 
-        Task<Player> IPlayerService.GetPlayerAsync(Expression<Func<Player, bool>> predicate,
+        Task<Player> IPlayerService.GetPlayerAsync(
+            Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 

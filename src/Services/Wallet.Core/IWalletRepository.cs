@@ -11,7 +11,9 @@ namespace TGS.Services.WalletService
             string playerCode,
             TransactionTypes transactionType,
             decimal amount,
-            string? description = null);
+            string? description = null,
+            string? externalId = null,
+            Guid? createdByUserId = null);
 
         ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode);
     }

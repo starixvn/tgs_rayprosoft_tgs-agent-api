@@ -1,21 +1,25 @@
-﻿using System.Threading.Tasks;
-using System.Web;
+﻿using System;
+using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.ApiClients.PragmaticPlay;
+using TGS.Shared.Game.Models.PragmaticPlay.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 {
     public sealed class PragmaticPlayGameInitializer : IGameInitializer
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IBrandOperations _brandOperations;
+        private readonly IPragmaticPlayApiClient _client;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPragmaticPlayHashProvider _hashProvider;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -24,16 +28,22 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             ITokenProvider tokenProvider,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
-            IBrandGameProviderOperations brandGameProviderOperations)
+            IBrandGameProviderOperations brandGameProviderOperations,
+            IPragmaticPlayHashProvider hashProvider,
+            IPragmaticPlayApiClient client)
         {
-            _tokenProvider = tokenProvider;
-            _settingOperations = settingOperations;
-            _playerOperations = playerOperations;
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _brandGameProviderOperations = brandGameProviderOperations;
+            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+
+            _gameProviderOperations =
+                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+
+            _brandGameProviderOperations = brandGameProviderOperations ??
+                throw new ArgumentNullException(nameof(brandGameProviderOperations));
+            _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -46,12 +56,11 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
             var brandId = player.BrandId;
-            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
-                request.Language);
 
-            var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
-                bgpc.GameProviderConfigurationId);
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(
+                gameProviderId,
+                brandId,
+                request.Language);
 
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId);
 
@@ -61,27 +70,44 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
             var isMobile = token.PlatformType == PlatformType.Mobile;
 
-            var queryString = configuration.GameUrlQueryStringTemplate
-                .Replace("{TOKEN}", encryptedToken)
-                .Replace("{CULTURE}", cultureCode)
-                .Replace("{EXTERNALGAMEID}", game.ExternalId)
-                .Replace("{TECHNOLOGY}", "H5")
-                .Replace("{PLATFORM}", isMobile ? "MOBILE" : "WEB");
+            var lobbyUrl = default(string);
 
             var extendedData = request.ExtendedData;
+
             if (extendedData != null && extendedData.RootElement.TryGetProperty("lobbyurl", out var prop))
             {
-                var lobbyUrl = prop.GetString();
-                queryString += $"&lobbyUrl={lobbyUrl}";
+                lobbyUrl = prop.GetString();
             }
 
-            var domain = isMobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
+            var model = new GameUrlRequest
+            {
+                SecureLogin = configuration.SecureLogin,
+                Language = cultureCode,
+                ExternalGameId = game.ExternalId,
+                Token = encryptedToken,
+                Platform = isMobile ? "MOBILE" : "WEB",
+                LobbyUrl = lobbyUrl
+            };
 
-            var url = domain.AppendQueryString(game.EndpointPath)
-                .Replace("{KEY}", HttpUtility.UrlEncode(queryString))
-                .Replace("{SECURELOGIN}", configuration.SecureLogin);
+            var hash = _hashProvider.ComputeHash(model, configuration.SecretKey);
 
-            return new() {Url = url};
+            var gameUrlRequest = model with
+            {
+                Hash = hash
+            };
+
+            var response = await _client.GetGameUrlAsync(configuration.ApiUrl, gameUrlRequest)
+                .ConfigureAwait(false);
+
+            if (response.Error.IgnoreCaseNotEquals("0"))
+            {
+                throw new GameProviderApiErrorException($"Get pragmatic play game url fail: {response.Description}");
+            }
+
+            return new()
+            {
+                Url = response.Url
+            };
         }
     }
 }

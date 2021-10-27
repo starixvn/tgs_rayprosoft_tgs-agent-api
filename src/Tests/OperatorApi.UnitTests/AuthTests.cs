@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator.Services.Auth;
@@ -18,11 +18,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Can_Get_Identity_By_ApiKey()
         {
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
 
             var sut = new GetAuthQueryService(
-                fakeBrandOperations,
-                fakeStatusValidator);
+                fakeBrandOperations);
 
             var apiKey = "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
             var currency = "CNY";
@@ -47,6 +45,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var brandId = Guid.NewGuid();
             var currency = "CNY";
+
             var identity = new ClaimsIdentity(
                 new[]
                 {

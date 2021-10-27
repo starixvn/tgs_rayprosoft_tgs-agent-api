@@ -9,6 +9,7 @@ namespace TGS.Promotion.Repositories
     internal class RedisPlayerDataRepository : IPlayerDataRepository
     {
         private static readonly string _KeyPrefix = "TGS:Promotion";
+        private static readonly TimeSpan _TimeZone = TimeSpan.FromHours(8);
         private readonly IDatabase _redisDatabase;
         private readonly IRedisRepository _redisRepository;
 
@@ -29,7 +30,7 @@ namespace TGS.Promotion.Repositories
 
         public async ValueTask<bool> CheckPlayerIsDailyFirstDepositAsync(string playerCode)
         {
-            var dataKey = $"{_KeyPrefix}:{DateTimeOffset.Now:yyyyMMdd}:{playerCode}";
+            var dataKey = $"{_KeyPrefix}:{DateTimeOffset.Now.ToOffset(_TimeZone):yyyyMMdd}:{playerCode}";
 
             return !await _redisDatabase
                 .KeyExistsAsync(dataKey)
@@ -38,7 +39,7 @@ namespace TGS.Promotion.Repositories
 
         public async ValueTask RemovePlayerDailyDepositFlagAsync(string playerCode)
         {
-            var currentDate = DateTimeOffset.Now;
+            var currentDate = DateTimeOffset.Now.ToOffset(_TimeZone);
             var dataKey = $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}";
 
             var count = await _redisDatabase
@@ -67,7 +68,7 @@ namespace TGS.Promotion.Repositories
 
         public async ValueTask SetPlayerDailyDepositFlagAsync(string playerCode)
         {
-            var currentDate = DateTimeOffset.Now;
+            var currentDate = DateTimeOffset.Now.ToOffset(_TimeZone);
             var key = $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}";
 
             await _redisDatabase

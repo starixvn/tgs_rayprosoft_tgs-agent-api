@@ -11,17 +11,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using Tgs.Logging;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
@@ -67,7 +66,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddTgsLog()
                 .AddApiClient()
                 .AddRedis();
-            
+
             services.AddScoped<ISettingQueries, SettingQueries>();
             services.AddTransient<Func<ISettingQueries>>(c => c.GetRequiredService<SettingQueries>);
             services.AddScoped<ISettingOperations, SettingOperations>();
@@ -85,7 +84,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var apiUrlSection = configuration.GetSection("ApiUrls");
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
@@ -94,6 +93,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 services.AddTransient<IPlayerApiClient>(sp =>
                     ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, Hooks.OpApiClient));
+
                 services.AddTransient<IJDBApiClient>(sp =>
                     ActivatorUtilities.CreateInstance<JDBApiClient>(sp, Hooks.TgsApiClient));
             }
@@ -110,7 +110,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandLoginViaAsync(string username, string brandCode,
+        public Task GivenPlayerOfBrandLoginViaAsync(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -123,13 +124,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             externalGameId = $"{Get<int>(SR.JDBGameType)}_{externalGameId}";
             Set(SR.ExternalGameId, externalGameId);
+
             return ChangeGameStatusAsync(_serviceProvider, GameProviderCode, externalGameId, gameStatus);
         }
-        
+
         [Given(@"game provider has status set to ""(.*)""")]
         public Task GivenGameProviderHasStatusSetToAsync(Status status) =>
             ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
-        
+
         [Given(@"game provider configuration has status set to ""(.*)""")]
         public Task GivenGameProviderConfigurationHasStatusSetToAsync(Status status) =>
             ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, status);
@@ -162,10 +164,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await client.GetPlayerBalanceAsync(new()
             {
-               ActionType = ActionType.GetBalance,
-               SystemTime= DateTime.UtcNow.Ticks,
-               UserId = playerCode,
-               Currency = "RB"
+                ActionType = ActionType.GetBalance,
+                SystemTime = DateTime.UtcNow.Ticks,
+                UserId = playerCode,
+                Currency = "RB"
             });
 
             Set(SR.Response, response);
@@ -175,7 +177,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [When(@"I place bet of \$(.*) for game ""(.*)"" and win \$(.*)")]
         public Task WhenIPlaceBetAndWinOfForGameAsync(decimal amount, string externalGameId, decimal win) =>
             PlaceBetAndWinAsync(amount, externalGameId, win);
-        
+
         [Given(@"I place bet of \$(.*) for game ""(.*)"" and lose")]
         [When(@"I place bet of \$(.*) for game ""(.*)"" and lose")]
         public Task WhenIPlaceBetAndLoseOfForGameAsync(decimal amount, string externalGameId) =>
@@ -203,12 +205,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
+
             if (type == GameActionType.WinBet || type == GameActionType.LoseBet)
             {
                 externalTransactionId += "_settle";
             }
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -229,7 +233,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Then(@"the round will be closed")]
         public Task ThenTheRoundWillBeClosedAsync() =>
             VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
-        
+
 
         [When("I resend the same bet")]
         public async Task WhenIResendTheSameBet()
@@ -244,11 +248,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenIVoidRound()
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            
+
             var systemTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             var client = _serviceProvider.GetRequiredService<IJDBApiClient>();
+
             var placeAndSettleRequest = Get<PlaceAndSettleBetRequest>(SR.Request) ??
-                new PlaceAndSettleBetRequest {TransferId = systemTime};
+                new PlaceAndSettleBetRequest
+                {
+                    TransferId = systemTime
+                };
 
             var request = new CancelTransactionRequest
             {
@@ -259,11 +267,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var response = await client.CancelTransactionsAsync(request);
-            
+
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
-        
+
         [Then(
             @"all cancel bet related database records will be created and the balance of each user will be matched as original")]
         public async Task
@@ -272,6 +280,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var request = Get<PlaceAndSettleBetRequest>(SR.PlaceBetRequest);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameActions = await db.GameActions
                 .AsQueryable()
                 .Where(ga => ga.ExternalTransactionId.StartsWith(request.TransferId.ToString()))
@@ -296,8 +305,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [After]
         public Task AfterChangeGameStatusScenarioAsync() =>
-            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
-                GameStatus.Active, true);
+            ChangeGameStatusAsync(_serviceProvider,
+                GameProviderCode,
+                Get<string>(SR.ExternalGameId),
+                GameStatus.Active,
+                true);
 
         [After]
         public Task AfterChangeBrandStatusScenarioAsync() =>
@@ -335,7 +347,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 IpAddress = "127.0.0.1",
                 ClientType = "Web",
                 SystemTakeWin = 0,
-                LastModifyTime =  now.ToString("dd-MM-yyyy HH:mm:ss"),
+                LastModifyTime = now.ToString("dd-MM-yyyy HH:mm:ss"),
                 RoomType = 0
             };
 

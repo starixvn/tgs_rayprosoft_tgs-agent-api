@@ -6,7 +6,7 @@ namespace TGS.Apis.OperatorApi.Extensions
 {
     public static class EnumExtensions
     {
-        public static FlowState ToFlowState(this PaymentFlowState status)
+        public static FlowState ToDepositFlowState(this PaymentFlowState status)
             => status switch
             {
                 PaymentFlowState.WaitPayment => FlowState.WaitingPayment,
@@ -23,9 +23,22 @@ namespace TGS.Apis.OperatorApi.Extensions
                 FlowState.WaitingPayment => new[] { PaymentFlowState.WaitPayment },
                 FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
                 FlowState.Approved => new[] { PaymentFlowState.Approved },
+                FlowState.WaitingPaid => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
+                FlowState.Paid => new[] { PaymentFlowState.Paid },
                 _ => new[] { PaymentFlowState.WaitPayment, PaymentFlowState.WaitApprove, PaymentFlowState.Approved, PaymentFlowState.Reject }
             };
         }
+
+        public static FlowState ToWithdrawFlowState(this PaymentFlowState status)
+                    => status switch
+                    {
+                        PaymentFlowState.WaitPayment => FlowState.WaitingPayment,
+                        PaymentFlowState.WaitApprove => FlowState.Review,
+                        PaymentFlowState.Reject => FlowState.Rejected,
+                        PaymentFlowState.Approved => FlowState.WaitingPaid,
+                        PaymentFlowState.Paid => FlowState.Paid,
+                        _ => FlowState.Unknown,
+                    };
     }
 }

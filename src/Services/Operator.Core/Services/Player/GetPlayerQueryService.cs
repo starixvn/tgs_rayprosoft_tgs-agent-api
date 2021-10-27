@@ -36,6 +36,7 @@ namespace TGS.Services.Operator.Services.Player
                 player.RealName,
                 player.Phone,
                 player.Email,
+                player.Vip.Level,
                 player.QQ,
                 player.Wechat,
                 IsSetPayPassword: player.WithdrawPassword.Length > 0,

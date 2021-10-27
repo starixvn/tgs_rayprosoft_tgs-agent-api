@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.10")
+                .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -462,7 +462,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("adjustment_amount");
 
                     b.Property<decimal>("AgentDividendAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("agent_dividend_amount");
 
                     b.Property<decimal>("AgentDividendPercentage")
@@ -2134,6 +2135,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("remark");
 
+                    b.Property<DateTimeOffset?>("ReviewedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_on");
+
+                    b.Property<string>("ReviewedUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_id");
+
+                    b.Property<string>("ReviewedUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_name");
+
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -3536,8 +3549,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("qq");
 
                     b.Property<string>("RealName")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("real_name");
 
                     b.Property<DateTimeOffset?>("RegisteredOn")
@@ -4215,6 +4228,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
+                    b.Property<string>("SentByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by_username");
+
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("sent_on");
@@ -4604,6 +4621,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("PromotionBonusId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_bonus_id");
+
+                    b.Property<string>("SentByUsername")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by_username");
 
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
@@ -5419,6 +5440,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -5864,6 +5889,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<DateTimeOffset?>("PaidOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_on");
+
+                    b.Property<string>("PaidUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("paid_user_id");
+
+                    b.Property<string>("PaidUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("paid_user_name");
+
                     b.Property<string>("PaymentReturn")
                         .HasColumnType("jsonb")
                         .HasColumnName("payment_return");
@@ -5871,6 +5908,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
+
+                    b.Property<DateTimeOffset?>("ReviewedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_on");
+
+                    b.Property<string>("ReviewedUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_id");
+
+                    b.Property<string>("ReviewedUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_name");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()

@@ -29,6 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
+
             _controller = new(
                 _roleQueriesMock.Object,
                 _settingQueriesMock.Object,
@@ -80,10 +81,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(x => x.GetQueries())
                 .Returns(roles);
+
             _resellerQueriesMock.Setup(x => x.GetQueries())
                 .Returns(resellers);
+
             _licenseeQueriesMock.Setup(x => x.GetQueries())
                 .Returns(licensees);
+
             _brandQueriesMock.Setup(x => x.GetQueries())
                 .Returns(brands);
 
@@ -109,6 +113,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Get_Role()
         {
             var role = CreateRoleFixture().Create<Role>();
+
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
@@ -117,6 +122,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Returns(Task.FromResult(new Fixture().Create<Setting>()));
 
             var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
             _jsonSerializationProviderMock.SetupSequence(p =>
                     p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
                 .Returns(menuSettings)
@@ -176,6 +182,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
+
             _roleCommandsMock.Verify(s => s.CreateAsync(It.Is<Role>(p =>
                 p.Name == request.Name &&
                 p.DisplayName == request.DisplayName &&
@@ -206,10 +213,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Can_Update_Role()
+        public async Task Can_Update_Admin_Role()
         {
             var roles = CreateRoleFixture()
-                .CreateMany<Role>(105)
+                .CreateMany<Role>(10)
                 .AsQueryable()
                 .BuildMock().Object;
             var firstId = roles.First().Id;
@@ -259,10 +266,491 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.UpdateAsync(role.Id, request);
 
             response.Valid.Should().BeTrue();
+
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r => r.MenuSetting == role.MenuSetting)),
+                Times.Once);
+        }
+
+        [Test]
+        public async Task Can_Update_Reseller_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var firstId = roles.First().Id;
+            var index = 0;
+            var role = new Role();
+
+            await roles.ForEachAsync(x =>
+            {
+                if (firstId == x.Id)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                }
+
+                if (2 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Reseller;
+                    role = x;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    x.ResellerId = role.ResellerId;
+                }
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
-                r.Length == roles.Count())));
+                r.Length == 2)));
+        }
+
+        [Test]
+        public async Task Can_Update_Reseller_Not_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var index = 0;
+            var role = new Role();
+            var resellerRootRole = new Role();
+
+            await roles.ForEachAsync(x =>
+            {
+                if (2 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Reseller;
+                    resellerRootRole = x;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Reseller;
+                    x.ResellerId = resellerRootRole.ResellerId;
+                    role = x;
+                }
+
+                if (4 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    x.ResellerId = resellerRootRole.ResellerId;
+                }
+
+                if (5 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                    x.ResellerId = resellerRootRole.ResellerId;
+                }
+
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
+                    r.MenuSetting == role.MenuSetting)),
+                Times.Once);
+
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
+                    r.Length == 1)),
+                Times.Never);
+        }
+
+        [Test]
+        public async Task Can_Update_Licensee_Not_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var firstId = roles.First().Id;
+            var index = 0;
+            var role = new Role();
+            var licenseeRootRole = new Role();
+
+
+            await roles.ForEachAsync(x =>
+            {
+                if (firstId == x.Id)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                }
+
+                if (2 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    licenseeRootRole = x;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = licenseeRootRole.Id;
+                    role = x;
+                }
+
+                if (4 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                }
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
+                    r.MenuSetting == role.MenuSetting)),
+                Times.Once);
+
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
+                    r.Length == 1)),
+                Times.Never);
+        }
+
+        [Test]
+        public async Task Can_Update_Licensee_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var firstId = roles.First().Id;
+            var index = 0;
+            var role = new Role();
+
+            await roles.ForEachAsync(x =>
+            {
+                if (firstId == x.Id)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                }
+
+                if (2 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    role = x;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+                if (4 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
+                r.Length == 3)));
+        }
+
+        [Test]
+        public async Task Can_Update_Brand_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var index = 0;
+            var role = new Role();
+
+            await roles.ForEachAsync(x =>
+            {
+                if (0 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                    role = x;
+                }
+
+                if (2 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+                if (4 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Brand;
+                    x.BrandId = role.BrandId;
+                }
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
+                r.Length == 2)));
+        }
+
+        [Test]
+        public async Task Can_Update_Brand_Not_Root_Role()
+        {
+            var roles = CreateRoleFixture()
+                .CreateMany<Role>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+            var index = 0;
+            var role = new Role();
+            var brandRootRole = new Role();
+
+            await roles.ForEachAsync(x =>
+            {
+                if (0 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Brand;
+                    brandRootRole = x;
+                }
+
+                if (2 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Brand;
+                    x.BrandId = brandRootRole.BrandId;
+                    role = x;
+                }
+
+                if (3 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+                if (4 == index)
+                {
+                    x.IsRoot = false;
+                    x.RoleType = RoleType.Brand;
+                    x.BrandId = role.BrandId;
+                }
+
+                if (5 == index)
+                {
+                    x.IsRoot = true;
+                    x.RoleType = RoleType.Licensee;
+                    x.LicenseeId = role.LicenseeId;
+                }
+
+
+                index++;
+            });
+
+            var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+
+            var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.DeserializeFromString<MenuSetting[]>(It.IsAny<string>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(menuSettings);
+
+            _jsonSerializationProviderMock.Setup(p =>
+                    p.SerializeToString(It.IsAny<MenuSetting[]>(), It.IsAny<JsonSerializerOptions>()))
+                .Returns(role.MenuSetting);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
+
+            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
+
+            var response = await _controller.UpdateAsync(role.Id, request);
+
+            response.Valid.Should().BeTrue();
+
+            _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
+            _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
+                    r.MenuSetting == role.MenuSetting)),
+                Times.Once);
+
+            _roleCommandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Role[]>(r =>
+                    r.Length == 2)),
+                Times.Never);
         }
 
         [Test]
@@ -285,9 +773,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Message.Should().Be(Apis.BackendOffice.Resources.Role.NotFound);
 
             _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
         [Test]
@@ -323,9 +812,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Message.Should().Be(Apis.BackendOffice.Resources.Role.NameExists);
 
             _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
 
@@ -347,8 +837,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.CopyAsync(role.Id, request);
 
             response.Valid.Should().BeTrue();
+
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.CreateAsync(It.Is<Role>(r =>
                 r.Name == request.Name &&
                 r.DisplayName == role.DisplayName &&
@@ -374,9 +866,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Message.Should().Be(Apis.BackendOffice.Resources.Role.NotFound);
 
             _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
         [Test]
@@ -411,10 +904,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
         [Test]
@@ -431,8 +926,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var response = await _controller.DeleteAsync(role.Id);
 
             response.Valid.Should().BeTrue();
+
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&
@@ -443,7 +940,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Not_Delete_Role_When_bind_With_Users()
         {
             var role = CreateRoleFixture().Create<Role>();
-            role.Users = new List<User> {new()};
+
+            role.Users = new List<User>
+            {
+                new()
+            };
+
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
@@ -491,10 +993,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
         [Test]
@@ -502,7 +1006,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            role.Users = new List<User> {new()};
+            role.Users = new List<User>
+            {
+                new()
+            };
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -515,10 +1022,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
+
             _roleCommandsMock.Verify(p => p.DeleteAsync(It.Is<Role>(r =>
-                r.Name == role.Name &&
-                r.DisplayName == role.DisplayName &&
-                r.Description == role.Description)), Times.Never);
+                    r.Name == role.Name &&
+                    r.DisplayName == role.DisplayName &&
+                    r.Description == role.Description)),
+                Times.Never);
         }
 
         [Test]
@@ -526,13 +1035,22 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            role.Users = new List<User> {new()};
+            role.Users = new List<User>
+            {
+                new()
+            };
 
-            var request = new GetMenuRequest {RoleType = RoleType.Admin};
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Admin
+            };
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult(new Setting {Value = "{}"}));
+                .Returns(Task.FromResult(new Setting
+                {
+                    Value = "{}"
+                }));
 
             var menuSettings = CreateMenuSettingFixture().CreateMany<MenuSetting>(10).ToArray();
 
@@ -563,9 +1081,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            var request = new GetMenuRequest {RoleType = RoleType.Admin};
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Admin
+            };
 
-            role.Users = new List<User> {new()};
+            role.Users = new List<User>
+            {
+                new()
+            };
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
@@ -581,9 +1105,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
 
-            var request = new GetMenuRequest {RoleType = RoleType.Licensee};
+            var request = new GetMenuRequest
+            {
+                RoleType = RoleType.Licensee
+            };
 
-            role.Users = new List<User> {new()};
+            role.Users = new List<User>
+            {
+                new()
+            };
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -597,146 +1127,189 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreateRoleFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<Role>(u => u
-                .With(s => s.Users, new User[]
-                {
-                })
+                .With(s => s.Users,
+                    new User[]
+                    {
+                    })
                 .With(s => s.MenuSetting));
+
             return fixture;
         }
 
         private Fixture CreateMenuSettingFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<MenuSetting>(u => u
-                .With(s => s.SubMenus, new MenuSetting[]
-                {
-                }));
+                .With(s => s.SubMenus,
+                    new MenuSetting[]
+                    {
+                    }));
 
 
             fixture.Customize<MenuSetting>(u => u
                 .With(s => s.SubMenus, fixture.CreateMany<MenuSetting>(5).ToArray()));
+
             return fixture;
         }
 
         private Fixture CreateRoleRequestFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<CreateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[]
-                {
-                }));
+                .With(s => s.Menus,
+                    new MenuSetting[]
+                    {
+                    }));
+
             return fixture;
         }
 
         private Fixture UpdateRoleRequestFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<UpdateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[]
-                {
-                }));
+                .With(s => s.Menus,
+                    new MenuSetting[]
+                    {
+                    }));
+
             return fixture;
         }
 
         private Fixture CreateResellerFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<Reseller>(u => u
-                .With(s => s.GameProviders, new ResellerGameProvider[]
-                {
-                })
-                .With(s => s.Languages, new ResellerLanguage[]
-                {
-                })
-                .With(s => s.Currencies, new ResellerCurrency[]
-                {
-                })
-                .With(s => s.BetLimits, new ResellerBetLimit[]
-                {
-                })
-                .With(s => s.Licensees, new Licensee[]
-                {
-                })
-                .With(s => s.Departments, new Department[]
-                {
-                }));
+                .With(s => s.GameProviders,
+                    new ResellerGameProvider[]
+                    {
+                    })
+                .With(s => s.Languages,
+                    new ResellerLanguage[]
+                    {
+                    })
+                .With(s => s.Currencies,
+                    new ResellerCurrency[]
+                    {
+                    })
+                .With(s => s.BetLimits,
+                    new ResellerBetLimit[]
+                    {
+                    })
+                .With(s => s.Licensees,
+                    new Licensee[]
+                    {
+                    })
+                .With(s => s.Departments,
+                    new Department[]
+                    {
+                    }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         }
 
         private Fixture CreateLicenseeFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<Licensee>(u => u
                 .With(s => s.Reseller, new Reseller())
-                .With(s => s.Brands, new Brand[]
-                {
-                })
-                .With(s => s.GameProviders, new LicenseeGameProvider[]
-                {
-                })
-                .With(s => s.Languages, new LicenseeLanguage[]
-                {
-                })
-                .With(s => s.Currencies, new LicenseeCurrency[]
-                {
-                })
-                .With(s => s.BetLimits, new LicenseeBetLimit[]
-                {
-                })
-                .With(s => s.Departments, new Department[]
-                {
-                }));
+                .With(s => s.Brands,
+                    new Brand[]
+                    {
+                    })
+                .With(s => s.GameProviders,
+                    new LicenseeGameProvider[]
+                    {
+                    })
+                .With(s => s.Languages,
+                    new LicenseeLanguage[]
+                    {
+                    })
+                .With(s => s.Currencies,
+                    new LicenseeCurrency[]
+                    {
+                    })
+                .With(s => s.BetLimits,
+                    new LicenseeBetLimit[]
+                    {
+                    })
+                .With(s => s.Departments,
+                    new Department[]
+                    {
+                    }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         }
 
         private Fixture CreateBrandFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<Brand>(u => u
                 .With(s => s.Licensee, new Licensee())
-                .With(s => s.GameProviders, new BrandGameProvider[]
-                {
-                })
-                .With(s => s.Languages, new BrandLanguage[]
-                {
-                })
-                .With(s => s.Currencies, new BrandCurrency[]
-                {
-                })
-                .With(s => s.Players, new Player[]
-                {
-                })
-                .With(s => s.Games, new BrandGame[]
-                {
-                })
-                .With(s => s.BetLimits, new BrandBetLimit[]
-                {
-                })
-                .With(s => s.BrandGroups, new BrandGroup[]
-                {
-                })
-                .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[]
-                {
-                })
-                .With(s => s.Announcements, new Announcement[]
-                {
-                })
-                .With(s => s.StationLetters, new StationLetter[]
-                {
-                })
-                .With(s => s.VipLevels, new VipLevel[]
-                {
-                })
-                .With(s => s.Departments, new Department[]
-                {
-                })
-                .With(s => s.Domains, new BrandDomain[]
-                {
-                }));
+                .With(s => s.GameProviders,
+                    new BrandGameProvider[]
+                    {
+                    })
+                .With(s => s.Languages,
+                    new BrandLanguage[]
+                    {
+                    })
+                .With(s => s.Currencies,
+                    new BrandCurrency[]
+                    {
+                    })
+                .With(s => s.Players,
+                    new Player[]
+                    {
+                    })
+                .With(s => s.Games,
+                    new BrandGame[]
+                    {
+                    })
+                .With(s => s.BetLimits,
+                    new BrandBetLimit[]
+                    {
+                    })
+                .With(s => s.BrandGroups,
+                    new BrandGroup[]
+                    {
+                    })
+                .With(s => s.PlayerLoginRecords,
+                    new PlayerLoginRecord[]
+                    {
+                    })
+                .With(s => s.Announcements,
+                    new Announcement[]
+                    {
+                    })
+                .With(s => s.StationLetters,
+                    new StationLetter[]
+                    {
+                    })
+                .With(s => s.VipLevels,
+                    new VipLevel[]
+                    {
+                    })
+                .With(s => s.Departments,
+                    new Department[]
+                    {
+                    })
+                .With(s => s.Domains,
+                    new BrandDomain[]
+                    {
+                    }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         }
     }

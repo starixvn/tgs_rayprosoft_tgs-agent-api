@@ -11,5 +11,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual PromotionBonus PromotionBonus { get; set; }
         public decimal BonusAmount { get; set; }
         public DateTimeOffset? SentOn { get; set; }
+        public string SentByUsername { get; set; }
     }
 }

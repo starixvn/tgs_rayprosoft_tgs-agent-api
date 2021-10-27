@@ -363,6 +363,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.SubmitDepositFormStatusAsync(
                     It.IsAny<Guid>(),
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }
@@ -447,6 +449,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.SubmitDepositFormStatusAsync(
                     It.IsAny<Guid>(),
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>(),
+                    It.IsAny<decimal?>(),
                     It.IsAny<string>()),
                 Times.Exactly(0));
         }

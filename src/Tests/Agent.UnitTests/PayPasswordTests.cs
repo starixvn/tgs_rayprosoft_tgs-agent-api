@@ -7,14 +7,14 @@ using NUnit.Framework;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.PayPassowrd;
 using TGS.Services.Agent.ValidateCode;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace Agent.UnitTests
 {
     [TestFixture]
     public class PayPasswordTests

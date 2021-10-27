@@ -45,6 +45,7 @@ namespace PlayerBucket.Repositories
         public async Task FillInBucketAsync(FillInPlayerBucketsRequest request)
         {
             var playerCodes = request.PlayerTurnovers.Select(x => x.PlayerCode).ToArray();
+
             var playerBuckets = await _repository.PlayerBuckets
                 .Where(x => playerCodes.Contains(x.PlayerCode) && !x.IsFull).ToArrayAsync();
             var playerBucketHistories = new List<PlayerBucketHistory>();
@@ -62,6 +63,7 @@ namespace PlayerBucket.Repositories
                     }
 
                     var amount = 0.0M;
+
                     if (turnover - (playerBucket.BucketAmount - playerBucket.CurrentBucketAmount) >= 0.0M)
                     {
                         amount = playerBucket.BucketAmount - playerBucket.CurrentBucketAmount;
@@ -103,14 +105,21 @@ namespace PlayerBucket.Repositories
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
-                request.PlayerCode, TransactionTypes.Deposit, request.DepositAmount);
+            await _walletRepository.ExchangeAsync(request.BrandId,
+                request.DefaultWalletId,
+                request.PlayerCode,
+                TransactionTypes.Deposit,
+                request.DepositAmount,
+                request.Remark,
+                request.FormId.ToString(),
+                request.UserId);
 
             if (request.PromotionId != null)
             {
                 var promotion = await _repository.Promotions.FindAsync(request.PromotionId.Value);
 
                 var bonusAmount = promotion.Percentage * request.DepositAmount / 100M;
+
                 bonusAmount = bonusAmount > promotion.BonusAmountLimit
                     ? promotion.BonusAmountLimit
                     : bonusAmount;
@@ -127,10 +136,17 @@ namespace PlayerBucket.Repositories
                 };
 
                 var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-                var reportDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0,
+
+                var reportDate = new DateTimeOffset(now.Year,
+                    now.Month,
+                    now.Day,
+                    0,
+                    0,
+                    0,
                     now.Offset);
 
                 var bonusId = GuidExtensions.NewSequentialGuid();
+
                 var bonus = new PromotionBonus
                 {
                     Id = bonusId,
@@ -165,7 +181,9 @@ namespace PlayerBucket.Repositories
 
                 var (transactionId, _) = await _walletRepository.ExchangeAsync(request.BrandId,
                     request.DefaultWalletId,
-                    request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
+                    request.PlayerCode,
+                    TransactionTypes.Promotion,
+                    bonusAmount);
 
                 var transactionPromotion = new TransactionPromotion
                 {
@@ -213,7 +231,8 @@ namespace PlayerBucket.Repositories
                 }).ConfigureAwait(false);
             await _repository.SaveChangesAsync().ConfigureAwait(false);
 
-            return await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode && x.IsFull == true).SumAsync(x => x.BucketAmount - x.CurrentBucketAmount);
+            return await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode && x.IsFull)
+                .SumAsync(x => x.BucketAmount - x.CurrentBucketAmount);
         }
     }
 }

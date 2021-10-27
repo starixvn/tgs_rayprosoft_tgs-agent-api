@@ -28,24 +28,43 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             IPromotionClient promotionClient,
             ILogger<ReviewDepositFormCommandService> logger)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+
+            _playerBucketRepository =
+                playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
         {
             var form = await _paymentServiceClient
                 .GetDepositFormAsync(command.BrandId, command.FormId)
                 .ConfigureAwait(false);
 
-            if (form.Status == PaymentFlowState.Approved || form.Status == PaymentFlowState.Reject)
+            if (form == null
+                || form.Status == PaymentFlowState.Approved
+                || form.Status == PaymentFlowState.Reject)
                 return;
 
+            if (command.ActualAmount != null)
+                await _paymentServiceClient
+                    .SubmitDepositFormStatusAsync(
+                        form.Id,
+                        form.Status,
+                        actualAmount: command.ActualAmount)
+                    .ConfigureAwait(false);
+
             await _paymentServiceClient
-                .ReviewDepositFormAsync(command.FormId, command.Status, command.remark)
+                .ReviewDepositFormAsync(
+                    command.FormId,
+                    command.Status,
+                    command.ReviewUserId,
+                    command.ReviewUserName,
+                    command.Remark)
                 .ConfigureAwait(false);
 
             if (command.Status == ReviewState.Approve)
@@ -62,7 +81,10 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             form.PromotionId,
                             player.PlayerCode,
                             player.DefaultWalletId,
-                            form.Amount))
+                            form.Amount,
+                            command.Remark,
+                            command.FormId,
+                            string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 

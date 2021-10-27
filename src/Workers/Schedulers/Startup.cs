@@ -14,7 +14,6 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -61,12 +60,13 @@ namespace TGS.Workers.Schedulers
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                    });
 
                 endpoints.MapMetrics();
 
@@ -122,6 +122,7 @@ namespace TGS.Workers.Schedulers
             services.AddHangfireServer((sp, options) =>
             {
                 var setting = sp.GetRequiredService<HangfireSettings>();
+
                 options.Queues = new[]
                 {
                     Consts.Queue.Schedule,

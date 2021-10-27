@@ -17,7 +17,19 @@ namespace TGS.Services.Operator.Services.Deposit
 
         public async ValueTask ExecuteAsync(SubmitDepositFormThirdPartyOrderNoCommand command, CancellationToken cancellationToken = default)
         {
-            await _paymentServiceClient.SubmitDepositFormThirdPartyOrderNoAsync(command.FormId, command.ThirdPartyOrderNo);
+            var formData = await _paymentServiceClient
+                .GetDepositFormAsync(command.FormId)
+                .ConfigureAwait(false);
+
+            if (formData == null)
+                return;
+
+            await _paymentServiceClient
+                .SubmitDepositFormStatusAsync(
+                    command.FormId,
+                    formData.Status,
+                    thirdPartyOrderNo: command.ThirdPartyOrderNo)
+                .ConfigureAwait(false);
         }
     }
 }

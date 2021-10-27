@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
@@ -18,6 +20,39 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class WithdrawController : BaseContextController
     {
+        [AllowAnonymous]
+        [IgnoreAntiforgeryToken]
+        [HttpGet("exportWithdraw/{brandId}")]
+        public async Task<IActionResult> ExportWithdrawAsync(
+            [FromServices] IGetService<ExportWithdrawForm, MemoryStream> queryService,
+             Guid brandId,
+            [FromQuery] WithdrawFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new ExportWithdrawForm(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status.ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Withdraw.xlsx");
+        }
+
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<WithdrawFormDetailViewModel>> GetWithdrawFormDetailAsync(
             [FromServices] IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo> getWithdrawFormService,
@@ -61,8 +96,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("{brandId}")]
-        public async Task<PagedResponse<WithdrawFormViewModel>> QueryWithdrawFormsAsync(
-            [FromServices] IGetService<WithdrawFormQuery, PagingResponse<WithdrawFormInfo>> queryService,
+        public async Task<WithdrawViewModel> QueryWithdrawFormsAsync(
+            [FromServices] IGetService<WithdrawFormQuery, WithdrawForms> queryService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -90,29 +125,31 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new PagedResponse<WithdrawFormViewModel>
+            var response = new WithdrawViewModel()
             {
                 Valid = true,
                 TotalCount = result.TotalCount,
                 Items = result.Items
-                    .Select(form => new WithdrawFormViewModel
-                    {
-                        Id = form.Id,
-                        UserId = form.UserId,
-                        UserName = form.UserName,
-                        UserType = form.UserType.ToString(),
-                        BrandId = form.BrandId,
-                        BrandPaymentId = form.BrandPaymentId,
-                        PaymentMethodId = form.PaymentMethodId,
-                        ChannelName = form.ChannelName,
-                        Status = form.Status.ToFlowState(),
-                        Amount = form.Amount,
-                        Remark = form.Remark,
-                        CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
-                    })
-                    .ToArray()
+                .Select(form => new WithdrawFormViewModel
+                {
+                    Id = form.Id,
+                    UserId = form.UserId,
+                    UserName = form.UserName,
+                    UserType = form.UserType.ToString(),
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    PaymentMethodId = form.PaymentMethodId,
+                    ChannelName = form.ChannelName,
+                    Status = form.Status.ToFlowState(),
+                    Amount = form.Amount,
+                    Remark = form.Remark,
+                    CreatedOn = form.CreatedOn,
+                    UpdatedOn = form.UpdatedOn,
+                    ThirdPartyOrderNo = form.ThirdPartyOrderNo,
+                    ReviewedUserName = form.ReviewedUserName
+                })
+                .ToArray(),
+                Sum = result.Sum
             };
 
             return response;
@@ -121,19 +158,37 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPost("{formId}")]
         public async Task<MessageResponse> ReviewWithdrawFormAsync(
             [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
+            [FromServices] ICommandService<PaidWithdrawFormCommand> paidCommandService,
             Guid formId,
             [FromBody] WithdrawReviewRequest reviewResponse)
         {
-            var command = new ReviewWithdrawFormCommand(
-                reviewResponse.BrandId,
-                formId,
-                reviewResponse.BrandPaymentId,
-                reviewResponse.ReviewResponse.ToReviewState(),
-                reviewResponse.Remark);
+            if (reviewResponse.ReviewResponse == ReviewResponseState.Paid)
+            {
+                var command = new PaidWithdrawFormCommand(
+                    reviewResponse.BrandId,
+                    formId,
+                    UserId,
+                    Username);
 
-            await reviewCommandService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
+                await paidCommandService
+                    .ExecuteAsync(command)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var command = new ReviewWithdrawFormCommand(
+                    reviewResponse.BrandId,
+                    formId,
+                    reviewResponse.BrandPaymentId,
+                    reviewResponse.ReviewResponse.ToReviewState(),
+                    reviewResponse.Remark,
+                    UserId,
+                    Username);
+
+                await reviewCommandService
+                    .ExecuteAsync(command)
+                    .ConfigureAwait(false);
+            }
 
             return CreateValidResponse<MessageResponse>();
         }

@@ -37,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 jsonSerializationProvider.SerializeToString(
                     request.Localization,
                     jsonOptions.JsonSerializerOptions),
-                this.Username);
+                Username);
 
             return createService.ExecuteAsync(command);
         }
@@ -114,7 +114,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             Guid brandId,
             [FromQuery] PageableRequest pagingRequest)
         {
-            var paging = new Paging.Paging<BannerInfo>();
+            var paging = new Paging<BannerInfo>();
 
             paging.RowCount = pagingRequest.Rows;
             paging.Page = pagingRequest.Page;
@@ -161,7 +161,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             Guid brandId,
             [FromQuery] PageableRequest pagingRequest)
         {
-            var paging = new Paging.Paging<BannerInfo>();
+            var paging = new Paging<BannerInfo>();
 
             paging.RowCount = pagingRequest.Rows;
             paging.Page = pagingRequest.Page;
@@ -208,7 +208,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             Guid brandId,
             [FromQuery] PageableRequest pagingRequest)
         {
-            var paging = new Paging.Paging<BannerInfo>();
+            var paging = new Paging<BannerInfo>();
 
             paging.RowCount = pagingRequest.Rows;
             paging.Page = pagingRequest.Page;
@@ -255,7 +255,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             Guid brandId,
             [FromQuery] PageableRequest pagingRequest)
         {
-            var paging = new Paging.Paging<BannerInfo>();
+            var paging = new Paging<BannerInfo>();
 
             paging.RowCount = pagingRequest.Rows;
             paging.Page = pagingRequest.Page;
@@ -348,6 +348,19 @@ namespace TGS.Apis.BackendOffice.Controllers
                 jsonSerializationProvider.SerializeToString(
                     request.Localization,
                     jsonOptions.JsonSerializerOptions),
+                Username);
+
+            return updateService.ExecuteAsync(command);
+        }
+
+        [HttpPut("archive/{bannerId}")]
+        public ValueTask ArchiveBannerAsync(
+            [FromServices] ICommandService<ChangeBannerStatusCommand> updateService,
+            Guid bannerId)
+        {
+            var command = new ChangeBannerStatusCommand(
+                bannerId,
+                4000,
                 Username);
 
             return updateService.ExecuteAsync(command);

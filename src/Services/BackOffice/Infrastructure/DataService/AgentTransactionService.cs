@@ -5,7 +5,7 @@ using System.Transactions;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 
@@ -27,13 +27,15 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _repository = repository;
         }
 
-        async Task IAgentTransactionService.CreateAgentTransactionAsync(Agent agent, CreateAgentAdjustmentRequest request)
+        async Task IAgentTransactionService.CreateAgentTransactionAsync(
+            Agent agent, CreateAgentAdjustmentRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
+
             var amount = request.AdjustmentType == AdjustmentType.Add
                 ? wallet.Balance + request.Amount
                 : wallet.Balance - request.Amount;

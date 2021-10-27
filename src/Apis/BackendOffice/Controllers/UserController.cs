@@ -9,7 +9,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -95,6 +95,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
+
             var user = new User
             {
                 Id = GuidExtensions.NewSequentialGuid(),
@@ -112,6 +113,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             await _userCommands.CreateAsync(user);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -144,6 +146,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.UpdatedOn = DateTimeOffset.Now;
 
             await _userCommands.UpdateAsync(user);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -165,6 +168,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             user.UpdatedOn = DateTimeOffset.Now;
 
             await _userCommands.UpdateAsync(user);
+
             return CreateValidResponse<MessageResponse>();
         }
     }

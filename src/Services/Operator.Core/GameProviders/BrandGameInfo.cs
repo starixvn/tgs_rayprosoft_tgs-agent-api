@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
@@ -13,8 +11,12 @@ namespace TGS.Services.Operator
         string SubGpCode,
         Guid GpId,
         string GpCode,
+        GameStatus Status,
         GameType Type,
-        TagInfo Tag,
-        int DisplayOrder,
-        IDictionary<string, JsonDocument>? Localization);
+        GamePlatformType PlatformType,
+        bool AvailableToBrand,
+        string AvailableCurrencies,
+        string Localization,
+        GameTag Tag,
+        int DisplayOrder);
 }

@@ -29,9 +29,7 @@ namespace TGS.Services.Operator.Services.Game
             var allGames = _queryService.QueryAsync(allQuery, cancellationToken);
 
             return allGames.Where(
-                gameInfo => gameInfo.GameProviderCode.Equals(
-                    query.SubGameProviderCode,
-                    StringComparison.InvariantCultureIgnoreCase));
+                gameInfo => gameInfo.GameProviderCode == query.SubGameProviderCode);
         }
     }
 }

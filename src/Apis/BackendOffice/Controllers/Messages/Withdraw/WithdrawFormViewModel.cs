@@ -32,5 +32,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
         public string UserType { get; init; }
 
         public string ThirdPartyOrderNo { get; init; }
+
+        public string ReviewedUserName { get; init; }
     }
 }

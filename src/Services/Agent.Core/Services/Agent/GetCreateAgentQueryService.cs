@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent.Exceptions;
 using TGS.ServiceUtility;
@@ -48,7 +48,7 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
-            if (query.AgentDividendConditions.Length > 1)
+            if (query.AgentDividendConditions.Length != 1)
             {
                 throw new DividendConditionException("Can only have one rank.");
             }
@@ -62,32 +62,10 @@ namespace TGS.Services.Agent.Services.Agent
                     throw new DividendConditionException($"Parent rank {condition.Rank} is not found.");
                 }
 
-                if (condition.NetProfit < parent.NetProfit)
-                {
-                    throw new DividendConditionException(
-                        $"Rank {condition.Rank} net profit must greater than or equal {parent.NetProfit}.");
-                }
-
-                if (condition.ActiveNumber < parent.ActiveNumber)
-                {
-                    throw new DividendConditionException(
-                        $"Rank {condition.Rank} active number must greater than or equal {parent.ActiveNumber}.");
-                }
-
                 if (condition.DividendPercentage > parent.DividendPercentage)
                 {
                     throw new DividendConditionException(
                         $"Rank {condition.Rank} dividend percentage must less than or equal {parent.DividendPercentage}.");
-                }
-
-                var previous = query.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
-
-                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
-                    condition.ActiveNumber < previous.ActiveNumber ||
-                    condition.DividendPercentage < previous.DividendPercentage))
-                {
-                    throw new DividendConditionException(
-                        $"Rank {condition.Rank} must greater than previous rank.");
                 }
             }
 

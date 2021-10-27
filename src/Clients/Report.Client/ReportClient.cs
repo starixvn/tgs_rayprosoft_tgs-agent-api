@@ -43,6 +43,9 @@ namespace TGS.Clients.Report.Client
         Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             GetPlayerAccountChangesRequest request);
 
+        Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
+            GetPlayersAccountChangesRequest request);
+
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
@@ -56,6 +59,7 @@ namespace TGS.Clients.Report.Client
         Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request);
 
         Task<Stream> ExportVipsAsync(ExportVipReportRequest request);
+        Task<Stream> ExportAgentDividendsTrialCalculationAsync(ExportAgentDividendsTrialCalculationRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
@@ -268,6 +272,24 @@ namespace TGS.Clients.Report.Client
                 });
         }
 
+        public async Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
+            GetPlayersAccountChangesRequest request)
+        {
+            var prefix = $"Report.BrandId.{request.BrandId}.GetPlayersAccountChanges";
+            var path = ClientPath.AppendWithProperties("/api/playerReport/playersAccountChanges?", request);
+
+            return await ExecuteJsonRequestAsync<GetPlayersAccountChangesRequest,
+                PagedResponse<PlayersAccountChangeModel>>(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+        }
+
         public async Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
             GetAgentAccountChangesRequest request)
         {
@@ -373,6 +395,25 @@ namespace TGS.Clients.Report.Client
         public async Task<Stream> ExportVipsAsync(ExportVipReportRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/vipReport/exportVips?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentDividendsTrialCalculationAsync(
+            ExportAgentDividendsTrialCalculationRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividendsTrialCalculation?",
+                request);
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 

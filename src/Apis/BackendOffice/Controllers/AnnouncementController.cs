@@ -31,8 +31,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly Dictionary<string, dynamic> _typeDictionary = new()
         {
             {
-                "pass",
-                new
+                "pass", new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Effective,
@@ -41,8 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "reject",
-                new
+                "reject", new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Rejected,
@@ -51,8 +49,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "invalid",
-                new
+                "invalid", new
                 {
                     AllowedStatus = AnnounceStatus.Effective,
                     VerifiedStatus = AnnounceStatus.Invalid,
@@ -116,6 +113,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             await _commands.CreateAsync(announcement);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -134,6 +132,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
                 .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId, l => l.BrandId == BrandId)
+                .Where(x => x.Status != AnnounceStatus.Archived)
                 .Where(hasExpiredStatus, p => now > p.To)
                 .Where(!hasExpiredStatus,
                     p => request.Status.Contains(p.Status) && now < p.To)
@@ -168,6 +167,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var serializerOptions = optionsAccessor.Value.JsonSerializerOptions;
 
             var announcement = await _queries.GetSingleAsync(p => p.Id == id);
+
             if (announcement == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
@@ -180,6 +180,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             announcement.Subject = request.Subject;
             announcement.Content = request.Content;
+
             announcement.Localization = request.Localization == null
                 ? "{}"
                 : jsonSerializationProvider.SerializeToString(
@@ -208,6 +209,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var announcement = await _queries.GetSingleAsync(p => p.Id == id);
+
             if (announcement == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
@@ -232,6 +234,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             announcement.UpdatedOn = DateTimeOffset.Now;
 
             await _commands.UpdateAsync(announcement);
+
             return CreateValidResponse<MessageResponse>();
         }
     }
