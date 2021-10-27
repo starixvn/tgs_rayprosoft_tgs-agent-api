@@ -168,7 +168,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var dict = Enum.GetValues(typeof(FlowState))
                .Cast<FlowState>()
-               .Where(x => x is not FlowState.Unknown or FlowState.Approved)
+               .Where(x => x is not (FlowState.Unknown or FlowState.Approved))
                .ToDictionary(t => (int)t, t => t.ToString());
             return Task.FromResult(dict);
         }
