@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -41,7 +42,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
 
             var playerWithdrawals = await _service.Repository.WithdrawForms.AsQueryable()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.UserType == 1 && x.Status == (int)PaymentFlowState.Paid)
                 .Where(x => x.CreatedOn >= request.From && x.CreatedOn < request.To)
                 .Join(_service.Repository.Players,
                     withdrawForm => withdrawForm.UserId,
