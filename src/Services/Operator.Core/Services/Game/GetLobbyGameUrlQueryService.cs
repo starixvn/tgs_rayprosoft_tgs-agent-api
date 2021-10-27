@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
 {

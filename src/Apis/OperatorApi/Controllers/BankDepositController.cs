@@ -9,6 +9,7 @@ using Tgs.Payment.Clients;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.UmPay;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
@@ -17,7 +18,6 @@ using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.Services.Operator.Services.Player;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

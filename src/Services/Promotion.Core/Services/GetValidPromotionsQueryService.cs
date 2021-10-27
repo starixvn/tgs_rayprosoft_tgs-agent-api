@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion.Models.Promotion;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Promotion.Services
 {

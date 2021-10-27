@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

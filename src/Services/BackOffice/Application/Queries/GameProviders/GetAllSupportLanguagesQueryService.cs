@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
 {

@@ -17,7 +17,7 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Queries.Game;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers.GameProvider

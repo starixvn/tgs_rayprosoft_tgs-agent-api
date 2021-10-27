@@ -3,12 +3,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent.Exceptions;
-using TGS.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using CoreUtility = TGS.Core.Infrastructures.Utility;
 
