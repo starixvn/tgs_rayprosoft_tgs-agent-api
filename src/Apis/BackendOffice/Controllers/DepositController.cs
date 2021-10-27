@@ -42,7 +42,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.ThirdPartyOrderNo,
                 request.FormId,
                 request.PaymentMethodId,
-                request.Status.SelectMany(s => s.ToPaymentFlowState()).Distinct(),
+                request.Status.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);
@@ -129,7 +130,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.ThirdPartyOrderNo,
                 request.FormId,
                 request.PaymentMethodId,
-                request.Status.SelectMany(s => s.ToPaymentFlowState()).Distinct(),
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);
