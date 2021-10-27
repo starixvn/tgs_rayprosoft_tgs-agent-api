@@ -51,7 +51,7 @@ namespace TGS.Services.Promotion.Handlers
 
             var currentDate = DateTimeOffset.Now;
 
-            if (promotion.Status != SwitchStatus.Enabled
+            if (promotion.Status != PromotionStatus.Enabled
                 && promotion.From <= currentDate
                 && promotion.To > currentDate)
             {
