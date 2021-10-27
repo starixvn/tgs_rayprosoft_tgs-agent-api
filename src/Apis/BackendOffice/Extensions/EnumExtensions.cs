@@ -26,6 +26,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
                 FlowState.Approved => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
+                FlowState.Paid => new[] { PaymentFlowState.Paid },
                 _ => new[] {
                     PaymentFlowState.WaitPayment,
                     PaymentFlowState.WaitApprove,
