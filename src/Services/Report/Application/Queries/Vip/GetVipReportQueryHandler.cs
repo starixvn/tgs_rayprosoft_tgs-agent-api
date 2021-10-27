@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.Report.Application.Models.Vip;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -66,7 +67,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
 
             var withdrawalByUserIds = await _service.Repository.WithdrawForms.AsQueryable()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.UserType == 1 && x.Status == (int)PaymentFlowState.Paid)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
                 .GroupBy(x => x.UserId,
                     (userId, withdrawals) => new

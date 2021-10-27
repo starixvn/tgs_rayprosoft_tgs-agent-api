@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Player;
@@ -15,19 +16,24 @@ namespace TGS.Services.Report.Application.Queries.Player
         GetPlayersAccountChangeQueryHandler : Handler<GetPlayersAccountChangesRequest,
             PagedResponse<PlayersAccountChangeModel>>
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITransactionService _transactionService;
 
         public GetPlayersAccountChangeQueryHandler(
             ITransactionService transactionService,
+            IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _transactionService = transactionService;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        public override Task<PagedResponse<PlayersAccountChangeModel>> Handle(
+        public override async Task<PagedResponse<PlayersAccountChangeModel>> Handle(
             GetPlayersAccountChangesRequest request,
             CancellationToken cancellationToken)
-            => _transactionService.GetTransactionQueries().Where(x => x.BrandId == request.BrandId)
+        {
+            var playersAccountChanges = await _transactionService.GetTransactionQueries()
+                .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.RecordedOn >= request.From && x.RecordedOn < request.To)
                 .Where(request.TransactionType is not null, x => x.Type == request.TransactionType)
                 .Where(x => x.Type == TransactionType.Adjust || x.Type == TransactionType.Rebate ||
@@ -60,12 +66,27 @@ namespace TGS.Services.Report.Application.Queries.Player
                 {
                     Username = x.Player.Username,
                     Amount = x.Transaction.Amount,
-                    BeforeBalance = x.Transaction.Balance,
-                    AfterBalance = x.Transaction.Balance + x.Transaction.Amount,
+                    BeforeBalance = x.Transaction.Balance - x.Transaction.Amount,
+                    AfterBalance = x.Transaction.Balance,
                     TransactionType = x.Transaction.Type,
                     RecordedOn = x.Transaction.RecordedOn,
                     Operator = x.User.Username ?? "System",
                     Description = x.Transaction.Description
                 }).CreatePagedResponseAsync(request);
+
+            foreach (var item in playersAccountChanges.Items)
+            {
+                if (item.TransactionType != TransactionType.Adjust)
+                {
+                    continue;
+                }
+
+                var adjustRemark =
+                    _jsonSerializationProvider.DeserializeFromString<AdjustRemarkModel>(item.Description);
+                item.Description = adjustRemark.Remark;
+            }
+
+            return playersAccountChanges;
+        }
     }
 }
