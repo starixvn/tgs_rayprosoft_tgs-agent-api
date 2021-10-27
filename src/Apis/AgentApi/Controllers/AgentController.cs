@@ -296,21 +296,30 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
+        /// Agent login
+        /// </summary>
+        [HttpPost]
+        [Route("login")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<LoginResponse> LoginAsync(LoginRequest request) =>
+            _mediator.Send(request);
+
+        /// <summary>
         /// Check username existed
         /// </summary>
         [HttpGet("checkUsername")]
         public async Task<CheckUsernameResponse> CheckUsernameAsync(
-            [FromServices] IGetService<CheckAgentExistedQuery, bool> getUserNameQueryService,
+            [FromServices] IGetService<CheckAgentExistsQuery, bool> getUserNameQueryService,
             [FromQuery] CheckUsernameRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var query = new CheckAgentExistedQuery(brandId, request.Username);
-            var isExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
+            var query = new CheckAgentExistsQuery(brandId, request.Username);
+            var hasExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CheckUsernameResponse
             {
-                IsExisted = isExisted
+                Exists = hasExisted
             };
         }
     }
