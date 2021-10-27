@@ -95,13 +95,6 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             using var tranScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            var remark = _jsonSerializationProvider.SerializeToString(new
-            {
-                request.TransactionType,
-                TargetAgent = targetAgent?.Username,
-                request.Remark
-            });
-
             if (request.Amount != 0M)
             {
                 await _walletRepository.ExchangeAsync(
@@ -110,7 +103,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     player.PlayerCode,
                     TransactionTypes.Adjust,
                     request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
-                    remark,
+                    request.Remark,
                     null,
                     Guid.Parse(UserId)).ConfigureAwait(false);
 
