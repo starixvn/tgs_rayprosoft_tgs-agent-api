@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Market;
@@ -51,7 +52,7 @@ namespace TGS.Services.Report.Application.Queries.Market
 
             var withdrawals = await _service.Repository.WithdrawForms.AsQueryable()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.UserType == 1 && x.Status == (int)PaymentFlowState.Paid)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -80,9 +81,9 @@ namespace TGS.Services.Report.Application.Queries.Market
                         market
                     })
                 .GroupBy(x => new
-                    {
-                        x.ReportDate
-                    },
+                {
+                    x.ReportDate
+                },
                     (market, markets) =>
                         new MarketModel
                         {
