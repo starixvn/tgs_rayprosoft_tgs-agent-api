@@ -26,7 +26,13 @@ namespace TGS.Apis.OperatorApi.Extensions
                 FlowState.WaitingPaid => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
                 FlowState.Paid => new[] { PaymentFlowState.Paid },
-                _ => new[] { PaymentFlowState.WaitPayment, PaymentFlowState.WaitApprove, PaymentFlowState.Approved, PaymentFlowState.Reject }
+                _ => new[] {
+                    PaymentFlowState.WaitPayment,
+                    PaymentFlowState.WaitApprove,
+                    PaymentFlowState.Approved,
+                    PaymentFlowState.Reject,
+                    PaymentFlowState.Paid
+                }
             };
         }
 
