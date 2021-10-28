@@ -89,6 +89,13 @@ namespace TGS.Apis.ReportApi
                     c.IncludeXmlComments(path);
                 }
             });
+
+            services.AddHttpClient<ITelegramService, TelegramService>((sp, c) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                c.BaseAddress = new(config.GetValue<string>("Telegram:Url"));
+            });
+            //services.AddTransient<ITelegramService, TelegramService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

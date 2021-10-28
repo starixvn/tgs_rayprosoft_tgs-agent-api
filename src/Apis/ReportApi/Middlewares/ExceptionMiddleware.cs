@@ -2,20 +2,21 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 
 namespace TGS.Apis.ReportApi.Middlewares
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ITelegramService _telegramService;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, ITelegramService telegramService)
         {
             _next = next;
+            _telegramService = telegramService;
         }
 
         public async Task InvokeAsync(HttpContext context, ITgsLog log)
@@ -33,7 +34,13 @@ namespace TGS.Apis.ReportApi.Middlewares
                 log.SetLogger(name);
                 log.LogError($"Report api error on :{context.Request.Host} with message: {message}", exception);
 
-                await context.Response.WriteAsJsonAsync(new MessageResponse {Message = message, Valid = false});
+                await _telegramService.SendMessage(message);
+
+                await context.Response.WriteAsJsonAsync(new MessageResponse
+                {
+                    Message = message,
+                    Valid = false
+                });
             }
         }
     }
