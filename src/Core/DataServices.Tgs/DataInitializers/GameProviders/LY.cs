@@ -52,14 +52,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 new CNYCurrency("RMB"),
                 new USDCurrency("USD"),
-                new VND1000Currency("VND"),
-                new IDR1000Currency("IDR"),
+                new VNDCurrency("VND"),
+                new IDRCurrency("IDR"),
                 new JPYCurrency("JPY"),
                 new KRWCurrency("KRW"),
                 new MYRCurrency("MYR"),
                 new THBCurrency("THB"),
-                new EURCurrency("EUR"),
-                new HKDCurrency("RMB")
+                new EURCurrency("EUR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
