@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Services.Promotion.Models.Promotion;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Promotion.Services
 {

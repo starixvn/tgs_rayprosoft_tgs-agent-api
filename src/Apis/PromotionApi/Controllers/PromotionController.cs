@@ -10,7 +10,7 @@ using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.PromotionApi.Controllers
 {

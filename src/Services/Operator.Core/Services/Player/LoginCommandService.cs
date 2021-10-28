@@ -13,7 +13,7 @@ using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

@@ -5,7 +5,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

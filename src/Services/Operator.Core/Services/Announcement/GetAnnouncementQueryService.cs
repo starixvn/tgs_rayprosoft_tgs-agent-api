@@ -4,8 +4,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Announcement
 {

@@ -1,15 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandLiveChat
 {
     internal class DeleteBrandLiveChatCommandService : ICommandService<DeleteBrandLiveChatCommand>
     {
-        private readonly ITgsQueries<CoreModels.BrandLiveChat> _tgsQueries;
         private readonly ITgsCommands<CoreModels.BrandLiveChat> _commands;
+        private readonly ITgsQueries<CoreModels.BrandLiveChat> _tgsQueries;
 
         public DeleteBrandLiveChatCommandService(
             ITgsQueries<CoreModels.BrandLiveChat> tgsQueries,

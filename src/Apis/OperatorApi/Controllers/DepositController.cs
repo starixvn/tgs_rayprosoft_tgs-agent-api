@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -136,7 +136,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .SelectAwait(async form => new DepositFormViewModel
                     {
                         Id = form.Id,
-                        Status = form.Status.ToFlowState(),
+                        Status = form.Status.ToDepositFlowState(),
                         Amount = form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CanUploadCerts = form.Status == PaymentFlowState.WaitPayment
@@ -160,7 +160,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var dict = Enum.GetValues(typeof(FlowState))
                .Cast<FlowState>()
-               .Where(x => x != FlowState.Unknown)
+               .Where(x => x is not (FlowState.Unknown or FlowState.WaitingPaid or FlowState.Paid))
                .ToDictionary(t => (int)t, t => t.ToString());
             return Task.FromResult(dict);
         }

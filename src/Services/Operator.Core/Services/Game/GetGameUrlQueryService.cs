@@ -12,7 +12,7 @@ using TGS.Services.Operations.Validators;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
 {

@@ -9,7 +9,7 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Agent.Services.Agent;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Filters
 {

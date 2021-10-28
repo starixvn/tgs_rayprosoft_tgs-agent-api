@@ -29,7 +29,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with {EndpointPath = EndpointPath};
+                        return (Game)g with
+                        {
+                            EndpointPath = EndpointPath
+                        };
                     })
                     .ToArray();
 
@@ -90,8 +93,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SecretKey = "testKey",
                 ProviderId = "PragmaticPlay",
                 ApiUrl = new("https://api.prerelease-env.biz"),
-                GameUrlQueryStringTemplate =
-                    "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}",
                 DelaySecondsForPlaceBet = 0
             };
 

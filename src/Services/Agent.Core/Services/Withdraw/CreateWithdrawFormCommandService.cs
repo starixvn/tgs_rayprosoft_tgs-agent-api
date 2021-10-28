@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.WalletService;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Withdraw
 {

@@ -147,7 +147,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                     TurnoverMultiple = x.TurnoverMultiple,
                     CreatedOn = DateTimeOffset.Now,
                     SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
-                    Players = players
+                    Players = players.Where(p => p.BonusAmount > 0M).ToArray()
                 };
             }).ToArray();
 

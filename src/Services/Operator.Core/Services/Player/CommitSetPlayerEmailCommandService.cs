@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

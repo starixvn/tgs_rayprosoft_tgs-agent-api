@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.Services.Player;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Filters
 {

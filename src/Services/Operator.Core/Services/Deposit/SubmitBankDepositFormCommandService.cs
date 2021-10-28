@@ -7,7 +7,7 @@ using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Services.Operator.Services.BrandPayments;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
 {

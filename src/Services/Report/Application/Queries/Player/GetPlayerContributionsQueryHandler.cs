@@ -8,6 +8,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -69,7 +70,7 @@ namespace TGS.Services.Report.Application.Queries.Player
 
             var withdrawalByUserIds = await _playerAggregateService.Repository.WithdrawForms.AsQueryable()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.UserType == 1 && x.Status == (int)PaymentFlowState.Paid)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
                 .Where(request.Username.IsNotNullOrEmpty(), x => x.UserId == tgsPlayer.PlayerCode)
                 .Where(request.Level, x => tgsPlayers.Contains(x.UserId))

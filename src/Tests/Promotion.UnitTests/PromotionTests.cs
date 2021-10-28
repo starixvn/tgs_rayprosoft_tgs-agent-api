@@ -18,7 +18,7 @@ using TGS.Services.Promotion;
 using TGS.Services.Promotion.Handlers;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace Promotion.UnitTests
 {

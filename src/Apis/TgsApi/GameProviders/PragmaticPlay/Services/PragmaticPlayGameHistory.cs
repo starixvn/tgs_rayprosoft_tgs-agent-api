@@ -41,7 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             _client = client;
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+            string playerCode, Round round,
             CachedGameProvider cachedGameProvider,
             CachedGame cachedGame, string language)
         {
@@ -60,20 +61,24 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             var model = new OpenHistoryExtendedRequest
             {
                 SecureLogin = configuration.SecureLogin,
-                playerCode = playerCode,
+                PlayerCode = playerCode,
                 RoundId = round.GameActions.First().ExternalGameActionGroupId,
                 Language = culture
             };
 
             var hash = _hashProvider.ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, request)
                 .ConfigureAwait(false);
 
             if (response.Error.IgnoreCaseNotEquals("0"))
             {
-                throw new GameProviderApiErrorException($"Get sbo bet history fail: {response.Description}");
+                throw new GameProviderApiErrorException($"Get pragmatic play bet history fail: {response.Description}");
             }
 
             return new()
@@ -84,7 +89,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                 {
-                    new UrlData {Url = response.Url}
+                    new UrlData
+                    {
+                        Url = response.Url
+                    }
                 }
             };
         }

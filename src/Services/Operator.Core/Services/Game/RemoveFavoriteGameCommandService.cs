@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operator.GameProviders;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
 {

@@ -8,7 +8,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.BrandCommunication;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.BrandCommunication;
 using TGS.Services.BackOffice.Application.Queries.BrandCommunication;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {

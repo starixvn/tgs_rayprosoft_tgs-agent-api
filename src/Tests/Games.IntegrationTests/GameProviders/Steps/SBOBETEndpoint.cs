@@ -868,7 +868,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             response.Should().NotBeNull();
             response.ErrorCode.Should().Be((int)error);
-            response.Balance.Should().BeNull();
+            response.Balance.Should().Be(0);
         }
 
         private async Task SettleBetAsync(GameActionType type, decimal amount, string externalGameId = null)
