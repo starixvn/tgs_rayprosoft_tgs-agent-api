@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
@@ -25,7 +24,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             CancellationToken cancellationToken)
         {
             if (await _service.ExistsAsync(x =>
-                x.BrandId == request.BrandId && EF.Functions.ILike(x.Username, $"%{request.Username}%")))
+                x.BrandId == request.BrandId && x.Username.ToLower().Equals(request.Username.ToLower())))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
