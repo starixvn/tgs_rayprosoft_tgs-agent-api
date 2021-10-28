@@ -90,17 +90,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new LYBrandMerchant
                         {
                             BrandCode = "Default",
-                            ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
-                            ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
-                            Deskey = "E2F3A416006F84F8",
-                            Md5key = "B563DF2A3DE58DFB",
+                            ApiUrl = new("https://wc1-api.wwdlw78.com/channelHandle"),
+                            ApiRecordUrl = new("https://wc1-record.wwdlw78.com/getRecordHandle"),
+                            Deskey = "706EB65DD6E6DF4C",
+                            Md5key = "3E00054B89B31B7A",
                             Status = true,
                             AgentMappers = new LYAgentMapper[]
                             {
                                 new()
                                 {
                                     CurrencyCode = "CNY",
-                                    AgentId = "72412",
+                                    AgentId = "200995",
                                     Status = true
                                 }
                             }
