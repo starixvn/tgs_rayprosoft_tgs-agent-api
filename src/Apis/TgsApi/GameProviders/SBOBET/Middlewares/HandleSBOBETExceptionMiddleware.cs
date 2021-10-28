@@ -38,15 +38,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 
             var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
 
-            var playerCode = request.PlayerCode;
-            var balanceResult = await _actions.GetBalanceAsync(_GameProviderCode, playerCode);
-
             var res = new BaseResponse
             {
                 ErrorCode = (int)error,
                 ErrorMessage = desc,
-                PlayerCode = playerCode,
-                Balance = balanceResult.Balance
+                PlayerCode = request.PlayerCode,
+                Balance = 0
             };
 
             context.Response.StatusCode = statusCode;

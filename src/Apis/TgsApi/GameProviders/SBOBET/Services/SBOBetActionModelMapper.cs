@@ -207,7 +207,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             var isDuplicate = r.Transactions.Any(t => t.IsDuplicate);
 
             var errorCode = isDuplicate ? GameApiError.BetAlreadyExists : GameApiError.Success;
-            decimal? balance = isDuplicate ? null : r.Balance;
+            var balance = errorCode != GameApiError.Success ? 0 : r.Balance;
 
             return new()
             {
@@ -221,17 +221,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         public SettleBetResponse Response(SettleBetRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
-                ? Response<SettleBetResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadySettled)
+                ? Response<SettleBetResponse>(request.PlayerCode, 0, GameApiError.BetAlreadySettled)
                 : Response<SettleBetResponse>(request.PlayerCode, r.Balance, GameApiError.Success);
 
         public CancelBetResponse Response(CancelBetRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
-                ? Response<CancelBetResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadyCanceled)
+                ? Response<CancelBetResponse>(request.PlayerCode, 0, GameApiError.BetAlreadyCanceled)
                 : Response<CancelBetResponse>(request.PlayerCode, r.Balance, GameApiError.Success);
 
         public RollbackResponse Response(RollbackRequest request, BetResult r) =>
             r.Transactions.Any(t => t.IsDuplicate)
-                ? Response<RollbackResponse>(request.PlayerCode, r.Balance, GameApiError.BetAlreadyRollback)
+                ? Response<RollbackResponse>(request.PlayerCode, 0, GameApiError.BetAlreadyRollback)
                 : Response<RollbackResponse>(request.PlayerCode, r.Balance, GameApiError.Success);
 
         public GetBetStatusResponse Response(GetBetStatusRequest request, GameActionData ga)
@@ -440,7 +440,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 ErrorCode = (int)error,
                 ErrorMessage = error.Description(),
                 PlayerCode = playerCode,
-                Balance = error != GameApiError.Success ? null : balance
+                Balance = error != GameApiError.Success ? 0 : balance
             };
 
         public BatchBetData Request(

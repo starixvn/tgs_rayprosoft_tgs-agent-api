@@ -62,7 +62,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             {
                 var res = await base.PlaceBetAsync(request).ConfigureAwait(false);
 
-                await CachePlaceBetTransaction(externalRoundId, request.Amount, false);
+                await CachePlaceBetTransactionAsync(externalRoundId, request.Amount, false)
+                    .ConfigureAwait(false);
 
                 return res;
             }
@@ -110,7 +111,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var betData = ActionModelMap.CancelAndPlaceBetRequest(data, request);
             var r = await GamePlayActions.PlaceBetAsync(betData).ConfigureAwait(false);
 
-            await CachePlaceBetTransaction(externalRoundId, request.Amount, true);
+            await CachePlaceBetTransactionAsync(externalRoundId, request.Amount, true)
+                .ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
         }
@@ -176,10 +178,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             return ActionModelMap.Response(request, r);
         }
 
-        private async Task CachePlaceBetTransaction(string externalRoundId, decimal amount, bool isAdjust) =>
-            await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.BetTransaction,
+        private Task CachePlaceBetTransactionAsync(string externalRoundId, decimal amount, bool isAdjust)
+            => RedisCacheManager.SafeCacheAsync(
+                SBOBETConsts.RedisKey.BetTransaction,
                 externalRoundId,
-                new BetTransaction(amount, isAdjust)).ConfigureAwait(false);
+                TimeSpan.FromDays(1),
+                new BetTransaction(amount, isAdjust));
 
         private record BetTransaction(decimal Amount, bool IsAdjust);
     }
