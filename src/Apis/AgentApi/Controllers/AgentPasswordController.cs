@@ -60,8 +60,13 @@ namespace TGS.Apis.AgentApi.Controllers
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
+
             return forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
+                .GetAsync(new ForgotPasswordCommand(
+                    brandId,
+                    CultureInfo.CurrentUICulture,
+                    request.Email));
         }
 
         /// <summary>

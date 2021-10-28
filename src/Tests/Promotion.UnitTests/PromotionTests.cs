@@ -12,8 +12,8 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Promotion;
 using TGS.Services.Promotion.Handlers;
 using TGS.Services.Promotion.Models.Promotion;
@@ -58,13 +58,16 @@ namespace Promotion.UnitTests
             promotionServiceMock.Setup(x =>
                     x.GetPromotionQueries(
                         It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                            IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(), false))
+                            IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                        false))
                 .Returns(list);
 
             var result = await promotionsQueryHandlerMock.Handle(request, new());
+
             promotionServiceMock.Verify(x => x.GetPromotionQueries(
                 It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                    IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(), false));
+                    IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                false));
 
             Assert.AreEqual(result.Items.Length, showAll ? 20 : 10);
         }
@@ -82,6 +85,7 @@ namespace Promotion.UnitTests
 
             var percentage = 10M;
             var bonusAmountLimit = 500M;
+
             fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
                 new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
@@ -102,8 +106,12 @@ namespace Promotion.UnitTests
         {
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
+
             var checkerFactory = new PromotionCheckerFactory(
-                new Dictionary<string, Type> { ["TestPromotionType"] = typeof(IPromotionChecker) },
+                new Dictionary<string, Type>
+                {
+                    ["TestPromotionType"] = typeof(IPromotionChecker)
+                },
                 fakeServiceProvider);
 
             var sut = new CheckCanJoinPromotionQueryService(
@@ -146,7 +154,8 @@ namespace Promotion.UnitTests
         [Test]
         public async Task Get_Promotions_By_Player_Should_Return_Match_Promotions()
         {
-            var fakeValidPromotionQueryService = Substitute.For<IQueryService<GetValidPromotionsQuery, PromotionModel>>();
+            var fakeValidPromotionQueryService =
+                Substitute.For<IQueryService<GetValidPromotionsQuery, PromotionModel>>();
             var fakePlayerService = Substitute.For<IPlayerService>();
             var fakePromotionCheckerFactory = Substitute.For<IPromotionCheckerFactory>();
             var fakePromotionChecker = Substitute.For<IPromotionChecker>();
@@ -162,7 +171,8 @@ namespace Promotion.UnitTests
             fakePromotionChecker.CheckAsync(Arg.Any<string>())
                 .Returns(true);
 
-            var testData = new[] {
+            var testData = new[]
+            {
                 new PromotionModel
                 {
                     Id = Guid.NewGuid(),
@@ -219,21 +229,88 @@ namespace Promotion.UnitTests
             fakePromotionRepository.Received(1)
                 .GetPromotionQueries(
                     Arg.Any<Func<
-                       IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                       IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                        IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                        IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
                     Arg.Any<bool>());
+        }
+
+        [Test]
+        public async Task Can_Get_Promotions_Without_Archived()
+        {
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            var promotionServiceMock = new Mock<IPromotionRepository>();
+
+            var promotionsQueryHandlerMock =
+                new GetPromotionsQueryHandler(promotionServiceMock.Object, mockHttpContextAccessor.Object);
+
+            var request = new GetPromotionsRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Page = 1,
+                Rows = 10,
+                SortBy = "updatedOn",
+                OrderBy = SortOrder.Descending,
+                ShowAll = false
+            };
+
+            var list = CreatePromotionFixture()
+                .CreateMany<TGS.Core.DataServices.Tgs.Models.Promotion>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+
+            var index = 0;
+
+            foreach (var promotion in list)
+            {
+                if (index == 0)
+                {
+                    promotion.Status = PromotionStatus.Archived;
+                }
+
+                promotion.BrandId = request.BrandId;
+
+                index++;
+            }
+
+            promotionServiceMock.Setup(x =>
+                    x.GetPromotionQueries(
+                        It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                            IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                        false))
+                .Returns(list);
+
+            var result = await promotionsQueryHandlerMock.Handle(request, new());
+
+            promotionServiceMock.Verify(x => x.GetPromotionQueries(
+                It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                    IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                false));
+
+            Assert.AreEqual(result.Items.Length, 9);
         }
 
         private Fixture CreatePromotionFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<TGS.Core.DataServices.Tgs.Models.Promotion>(u => u
-                .With(s => s.PromotionGameProviders, new PromotionGameProvider[] { })
-                .With(s => s.PromotionVipLevels, new PromotionVipLevel[] { })
-                .With(s => s.PromotionParticipants, new PromotionParticipant[] { })
+                .With(s => s.PromotionGameProviders,
+                    new PromotionGameProvider[]
+                    {
+                    })
+                .With(s => s.PromotionVipLevels,
+                    new PromotionVipLevel[]
+                    {
+                    })
+                .With(s => s.PromotionParticipants,
+                    new PromotionParticipant[]
+                    {
+                    })
                 .With(s => s.Brand, new Brand())
-                .With(s => s.Localization, "{}"));
+                .With(s => s.Localization, "{}")
+                .With(s => s.Status, PromotionStatus.Enabled));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         }
     }

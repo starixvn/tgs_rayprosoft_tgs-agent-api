@@ -5,5 +5,5 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Promotion.Models.Promotion
 {
-    public record ChangePromotionStatusRequest(Guid Id, SwitchStatus Status) : IRequest<MessageResponse>;
+    public record ChangePromotionStatusRequest(Guid Id, PromotionStatus Status) : IRequest<MessageResponse>;
 }

@@ -42,7 +42,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public string PromotionType { get; set; } = default!;
 
-        public SwitchStatus Status { get; set; }
+        public PromotionStatus Status { get; set; }
 
         public string? SubSubject { get; set; }
 

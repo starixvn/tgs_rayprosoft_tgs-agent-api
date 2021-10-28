@@ -40,7 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
 
         [HttpPut("{promotionId:guid}/{status}")]
         [Description("change a Promotion's status")]
-        public Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
+        public Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, PromotionStatus status) =>
             _client.ChangePromotionStatusAsync(new(promotionId, status));
     }
 }

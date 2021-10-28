@@ -169,7 +169,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Name = $"{x.Value.Name}_發發發流流流長江流水向東流",
                     From = now,
                     To = now.AddDays(7),
-                    Status = SwitchStatus.Enabled,
+                    Status = PromotionStatus.Enabled,
                     BrandId = x.Value.Id,
                     PromotionType = "TurnoverRebate",
                     BonusAmountLimit = 1000000,

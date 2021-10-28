@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.ServiceUtility;
@@ -20,14 +19,15 @@ namespace TGS.Services.Promotion.Services
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
         }
 
-        public IAsyncEnumerable<PromotionModel> QueryAsync(GetValidPromotionsQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<PromotionModel> QueryAsync(
+            GetValidPromotionsQuery query, CancellationToken cancellationToken = default)
         {
             var now = DateTimeOffset.Now;
 
             var promotionQueryable = _promotionRepository.GetPromotionQueries()
                 .Where(x => x.BrandId == query.BrandId)
                 .Where(x => x.Unlimited || x.TotalAmountLimit > x.AmountUsed)
-                .Where(x => x.Status == SwitchStatus.Enabled
+                .Where(x => x.Status == PromotionStatus.Enabled
                     && x.From <= now
                     && x.To > now)
                 .Select(x => new PromotionModel

@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string Name { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
-        public SwitchStatus Status { get; set; }
+        public PromotionStatus Status { get; set; }
         public bool AutoSentPlayerBonus { get; set; }
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
