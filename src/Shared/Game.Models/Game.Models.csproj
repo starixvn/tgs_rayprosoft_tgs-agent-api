@@ -10,10 +10,4 @@
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="LY\Commons\" />
-    <Folder Include="LY\Incoming\" />
-    <Folder Include="LY\Outgoing\" />
-  </ItemGroup>
-
 </Project>
