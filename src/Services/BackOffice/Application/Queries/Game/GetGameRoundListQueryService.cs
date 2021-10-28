@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models.Messages;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {

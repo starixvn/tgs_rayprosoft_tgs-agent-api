@@ -5,13 +5,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
-using TGS.ServiceUtility;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -19,6 +20,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepositController : BaseContextController
     {
+        [HttpGet("untreated/{brandId}")]
+        public ValueTask<int> CountUntreatedDepositFormsAsync(
+            [FromServices] IGetService<CountUntreatedDepositFormsQuery, int> countService,
+            Guid brandId)
+            => countService.GetAsync(new CountUntreatedDepositFormsQuery(brandId));
+
         [HttpGet("exportDeposit/{brandId}")]
         public async Task<IActionResult> ExportDepositAsync(
             [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,

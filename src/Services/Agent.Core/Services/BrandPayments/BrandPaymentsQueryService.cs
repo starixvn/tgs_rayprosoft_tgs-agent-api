@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Tgs.Payment.Clients;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.BrandPayments
 {

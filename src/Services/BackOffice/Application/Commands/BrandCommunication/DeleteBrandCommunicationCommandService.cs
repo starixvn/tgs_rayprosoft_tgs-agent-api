@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandCommunication
 {
     internal class DeleteBrandCommunicationCommandService : ICommandService<DeleteBrandCommunicationCommand>
     {
-        private readonly ITgsQueries<CoreModels.BrandCommunication> _tgsQueries;
         private readonly ITgsCommands<CoreModels.BrandCommunication> _commands;
+        private readonly ITgsQueries<CoreModels.BrandCommunication> _tgsQueries;
 
         public DeleteBrandCommunicationCommandService(
             ITgsQueries<CoreModels.BrandCommunication> tgsQueries,

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Auth
 {

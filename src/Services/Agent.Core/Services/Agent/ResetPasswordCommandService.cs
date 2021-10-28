@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Agent
 {

@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Properties;
 using TGS.Services.Agent.ValidateCode;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Agent
 {

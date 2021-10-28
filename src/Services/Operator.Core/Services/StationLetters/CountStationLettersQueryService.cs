@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.StationLetters;
+using Tgs.ServiceUtility;
 using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.Services.StationLetters

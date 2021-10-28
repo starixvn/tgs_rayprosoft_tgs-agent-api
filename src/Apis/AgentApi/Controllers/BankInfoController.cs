@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
-using TGS.ServiceUtility;
 using TGS.Services.Agent.Services.BankInfos;
-using Tgs.Payment.Clients;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

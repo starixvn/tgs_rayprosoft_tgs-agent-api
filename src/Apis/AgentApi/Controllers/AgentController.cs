@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
@@ -17,7 +18,6 @@ using TGS.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
 using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
 
 namespace TGS.Apis.AgentApi.Controllers

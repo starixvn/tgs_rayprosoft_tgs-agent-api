@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Player;
 
 namespace TGS.Services.Operator.Services.Player
 {
