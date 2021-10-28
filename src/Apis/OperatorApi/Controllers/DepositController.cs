@@ -136,7 +136,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .SelectAwait(async form => new DepositFormViewModel
                     {
                         Id = form.Id,
-                        Status = form.Status.ToFlowState(),
+                        Status = form.Status.ToDepositFlowState(),
                         Amount = form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CanUploadCerts = form.Status == PaymentFlowState.WaitPayment
@@ -160,7 +160,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var dict = Enum.GetValues(typeof(FlowState))
                .Cast<FlowState>()
-               .Where(x => x != FlowState.Unknown)
+               .Where(x => x is not (FlowState.Unknown or FlowState.WaitingPaid or FlowState.Paid))
                .ToDictionary(t => (int)t, t => t.ToString());
             return Task.FromResult(dict);
         }

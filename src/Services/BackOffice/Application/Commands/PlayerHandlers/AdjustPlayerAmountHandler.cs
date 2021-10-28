@@ -81,7 +81,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.TargetAgentNotFound);
             }
 
-            var wallet = player.Wallets.First(x => x.Id == player.DefaultWalletId);
+            var wallet = player.Wallets.FirstOrDefault(x => x.Id == player.DefaultWalletId);
 
             if (wallet is null)
             {

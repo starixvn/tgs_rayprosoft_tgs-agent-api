@@ -84,7 +84,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             form.Amount,
                             command.Remark,
                             command.FormId,
-                            Guid.Parse(command.ReviewUserId)))
+                            string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 
