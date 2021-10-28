@@ -35,6 +35,7 @@ namespace TGS.Core.Models
             public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
             public static readonly string TCG = string.Format(Template, Consts.GameProvider.TCG);
             public static readonly string Card365 = string.Format(Template, Consts.GameProvider.Card365);
+            public static readonly string LY = string.Format(Template, Consts.GameProvider.LY);
         }
     }
 }
