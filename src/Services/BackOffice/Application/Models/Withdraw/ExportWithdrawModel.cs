@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TGS.Services.BackOffice.Application.Models.Withdraw
+﻿namespace TGS.Services.BackOffice.Application.Models.Withdraw
 {
     public class ExportWithdrawModel
     {
@@ -14,8 +8,8 @@ namespace TGS.Services.BackOffice.Application.Models.Withdraw
         public string Id { get; init; }
         public string ThirdPartyOrderNo { get; init; }
         public decimal Amount { get; init; }
-        public DateTimeOffset ApplicationTime { get; init; }
-        public DateTimeOffset UpdateTime { get; init; }
+        public string ApplicationTime { get; init; }
+        public string UpdateTime { get; init; }
         public string Status { get; init; }
         public string Remark { get; init; }
     }
