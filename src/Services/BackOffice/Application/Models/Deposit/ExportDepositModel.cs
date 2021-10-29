@@ -16,6 +16,8 @@ namespace TGS.Services.BackOffice.Application.Models.Deposit
 
         public string Remark { get; init; }
 
+        public int SerialNumber { get; init; }
+
         public string Status { get; init; }
 
         public string ThirdPartyOrderNo { get; init; }
