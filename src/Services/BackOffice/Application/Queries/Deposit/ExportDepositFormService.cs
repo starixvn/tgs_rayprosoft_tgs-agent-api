@@ -58,8 +58,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             var resource = new ResourceManager(typeof(Resources.Deposit));
 
-            var exportData = result.Items?.Select(row => new ExportDepositModel
+            var exportData = result.Items?.Select((row, index) => new ExportDepositModel
             {
+                SerialNumber = index + 1,
                 UserName = row.UserName,
                 Id = row.Id.ToString(),
                 ThirdPartyOrderNo = row.ThirdPartyOrderNo,
@@ -74,7 +75,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             using var workbook = new XLWorkbook();
 
-            GenerateWorkSheet(workbook, exportData);
+            GenerateWorkSheet(workbook, exportData, result.Sum);
 
             var ms = new MemoryStream();
 
@@ -86,14 +87,16 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
         private void GenerateWorkSheet(
             XLWorkbook target,
-            IEnumerable<ExportDepositModel> data)
+            IEnumerable<ExportDepositModel> data,
+            decimal totalAmount)
         {
             using var fs = _templateFileInfo.CreateReadStream();
             using var template = new XLTemplate(fs);
 
             template.AddVariable(new
             {
-                Rows = data
+                Rows = data,
+                TotalAmount = totalAmount
             });
 
             template.Generate();
