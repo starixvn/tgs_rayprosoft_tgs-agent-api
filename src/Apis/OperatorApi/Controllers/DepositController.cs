@@ -145,7 +145,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                                 .GetAsync(new GetPaymentQuery(info.PaymentId))
                                 .ConfigureAwait(false)).Code == "Manual",
                         CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn
+                        UpdatedOn = form.UpdatedOn,
+                        OrderNo = form.OrderNo
                     })
                     .ToArrayAsync()
                     .ConfigureAwait(false)

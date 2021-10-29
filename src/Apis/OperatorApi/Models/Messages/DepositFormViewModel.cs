@@ -25,5 +25,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("canuploadcerts")]
         public bool CanUploadCerts { get; init; }
+
+        [JsonPropertyName("orderno")]
+        public string OrderNo { get; init; }
     }
 }

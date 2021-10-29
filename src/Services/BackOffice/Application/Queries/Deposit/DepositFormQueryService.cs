@@ -27,7 +27,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     ThirdPartyOrderNo = query.ThirdPartyOrderNo,
                     FormId = query.FormId,
                     UpdateOnRange = query.UpdateOnRange,
-                    UserName = query.UserName
+                    UserName = query.UserName,
+                    OrderNo = query.OrderNo
                 },
                 new Tgs.Payment.Clients.Paging
                 {

@@ -153,7 +153,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Amount = form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn
+                        UpdatedOn = form.UpdatedOn,
+                        OrderNo = form.OrderNo
                     })
                     .ToArray()
             };

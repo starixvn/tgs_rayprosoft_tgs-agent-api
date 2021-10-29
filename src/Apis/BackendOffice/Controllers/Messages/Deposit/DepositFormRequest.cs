@@ -34,5 +34,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         [FromQuery(Name = "eu")]
         public DateTimeOffset? EndUpdateOn { get; init; }
+
+        [FromQuery(Name = "orderNo")]
+        public string OrderNo { get; init; }
     }
 }
