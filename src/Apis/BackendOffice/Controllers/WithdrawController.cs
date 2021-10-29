@@ -97,7 +97,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
-                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo
+                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo,
+                    OrderNo = formDetail.OrderNo
                 }
             };
         }
@@ -123,6 +124,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.UserName,
                 request.ChannelName,
                 request.ThirdPartyOrderNo,
+                request.OrderNo,
                 request.FormId,
                 request.PaymentMethodId,
                 request.Status.ToPaymentFlowState(),
@@ -153,7 +155,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = form.CreatedOn,
                     UpdatedOn = form.UpdatedOn,
                     ThirdPartyOrderNo = form.ThirdPartyOrderNo,
-                    ReviewedUserName = form.ReviewedUserName
+                    ReviewedUserName = form.ReviewedUserName,
+                    OrderNo = form.OrderNo
                 })
                 .ToArray(),
                 Sum = result.Sum

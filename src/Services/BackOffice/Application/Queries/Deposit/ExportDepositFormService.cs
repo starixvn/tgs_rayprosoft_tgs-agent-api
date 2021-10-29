@@ -4,9 +4,9 @@ using System.Linq;
 using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Deposit;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
@@ -17,7 +17,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
         public ExportDepositFormService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<MemoryStream> GetAsync(ExportDepositForm query, CancellationToken cancellationToken)
@@ -47,8 +48,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 PaymentMethod = resource.GetString(resultPaymentMethods[x.PaymentMethodId].Name),
                 PaymentName = x.ChannelName,
                 Amount = x.Amount,
-                ApplicationTime = x.CreatedOn,
-                UpdateTime = x.UpdatedOn,
+                ApplicationTime = x.CreatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
+                UpdateTime = x.UpdatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),
                 Remark = x.Remark
             });

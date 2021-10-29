@@ -4,9 +4,9 @@ using System.Linq;
 using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Withdraw;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
@@ -17,7 +17,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 
         public ExportWithdrawFormService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<MemoryStream> GetAsync(ExportWithdrawForm query, CancellationToken cancellationToken)
@@ -44,7 +45,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     SortBy = query.Paging.SortBy
                 }).ConfigureAwait(false);
 
-            var resultPaymentMethods = await _paymentServiceClient.GetAllPaymentMethodsAsync().ToDictionaryAsync(x => x.Id).ConfigureAwait(false);
+            var resultPaymentMethods = await _paymentServiceClient.GetAllPaymentMethodsAsync()
+                .ToDictionaryAsync(x => x.Id).ConfigureAwait(false);
 
             var resource = new ResourceManager(typeof(Resources.Withdraw));
 
@@ -56,8 +58,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                 Id = x.Id.ToString(),
                 ThirdPartyOrderNo = x.ThirdPartyOrderNo,
                 Amount = x.Amount,
-                ApplicationTime = x.CreatedOn,
-                UpdateTime = x.UpdatedOn,
+                ApplicationTime = x.CreatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
+                UpdateTime = x.UpdatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),
                 Remark = x.Remark
             });

@@ -7,6 +7,7 @@ using TGS.Shared.Game.ApiClients.Evolution;
 using TGS.Shared.Game.ApiClients.IMESports;
 using TGS.Shared.Game.ApiClients.JDB;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.LY;
 using TGS.Shared.Game.ApiClients.PragmaticPlay;
 using TGS.Shared.Game.ApiClients.Saba;
 using TGS.Shared.Game.ApiClients.SBOBET;
@@ -48,12 +49,11 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<IWGHorseApiClient, WGHorseApiClient>();
             services.AddScoped<IWGHorseUtility, WGHorseUtility>();
             services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
-
             services.AddHttpClient<ITCGApiClient, TCGApiClient>();
             services.AddScoped<ITCGUtility, TCGUtility>();
-
             services.AddHttpClient<ICard365ApiClient, Card365ApiClient>();
-
+            services.AddHttpClient<ILYApiClient, LYApiClient>();
+            services.AddScoped<ILYUtility, LYUtility>();
             return services;
         }
     }
