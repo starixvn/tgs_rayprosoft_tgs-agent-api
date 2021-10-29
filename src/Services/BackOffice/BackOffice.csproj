@@ -11,10 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\deposit_forms_template.xlsx" />
     <None Remove="Assets\localization_template.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\deposit_forms_template.xlsx" />
     <EmbeddedResource Include="Assets\localization_template.xlsx" />
   </ItemGroup>
 

@@ -30,7 +30,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<IActionResult> ExportDepositAsync(
             [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,
             Guid brandId,
-            [FromQuery] ExportDepositFormsRequest request)
+            [FromQuery] DepositFormRequest request,
+            [FromQuery] PageableRequest paging)
         {
             var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
             var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
@@ -43,8 +44,16 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var query = new ExportDepositForm(
                 brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
-                updateOnRange);
+                updateOnRange,
+                paging);
 
             return File(
                 await queryService.GetAsync(query).ConfigureAwait(false),
