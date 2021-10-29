@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Agent
 {

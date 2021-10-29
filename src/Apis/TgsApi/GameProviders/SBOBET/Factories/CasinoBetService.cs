@@ -45,8 +45,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
             var (platformType, games) = await Services
-                .GetPlatformTypeAndGameWithLoginRecordsAsync(gameProviderId, externalGameId,
+                .GetPlatformTypeAndGameWithLoginRecordsAsync(gameProviderId,
+                    externalGameId,
                     request.PlayerCode).ConfigureAwait(false);
 
             var gameId = games.Where(g => g.ExternalId.IgnoreCaseEquals(externalGameId))
@@ -60,7 +62,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             {
                 var res = await base.PlaceBetAsync(request).ConfigureAwait(false);
 
-                await CachePlaceBetTransaction(externalRoundId, request.Amount, false);
+                await CachePlaceBetTransactionAsync(externalRoundId, request.Amount, false)
+                    .ConfigureAwait(false);
 
                 return res;
             }
@@ -75,18 +78,20 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                     .All(ga => cancellationReferenceIds.Contains(ga.Id));
 
                 var error = isVoid ? GameApiError.BetAlreadyCanceled : GameApiError.BetAlreadySettled;
-                return ActionModelMap.Response<PlaceBetResponse>(playerCode, error);
+
+                return ActionModelMap.Response<PlaceBetResponse>(playerCode, 0, error);
             }
 
             var bet = await RedisCacheManager.SafeGetAsync(
                 SBOBETConsts.RedisKey.BetTransaction,
-                externalRoundId, () => Task.FromResult((BetTransaction)null)).ConfigureAwait(false);
+                externalRoundId,
+                () => Task.FromResult((BetTransaction)null)).ConfigureAwait(false);
 
             var previousBetAmount = bet.Amount;
+
             if (previousBetAmount >= request.Amount)
             {
-                return ActionModelMap.Response<PlaceBetResponse>(playerCode,
-                    GameApiError.InvalidAmount);
+                return ActionModelMap.Response<PlaceBetResponse>(playerCode, 0, GameApiError.InvalidAmount);
             }
 
             var configuration =
@@ -106,7 +111,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var betData = ActionModelMap.CancelAndPlaceBetRequest(data, request);
             var r = await GamePlayActions.PlaceBetAsync(betData).ConfigureAwait(false);
 
-            await CachePlaceBetTransaction(externalRoundId, request.Amount, true);
+            await CachePlaceBetTransactionAsync(externalRoundId, request.Amount, true)
+                .ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
         }
@@ -133,12 +139,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             {
                 if (gameActionExternalIds.Length == 0)
                 {
-                    return ActionModelMap.Response<SettleBetResponse>(playerCode, GameApiError.BetAlreadyCanceled);
+                    return ActionModelMap.Response<SettleBetResponse>(playerCode, 0, GameApiError.BetAlreadyCanceled);
                 }
 
                 if (gameActionExternalIds.Any(ga => ga.GameActionType.IsSettleBet()))
                 {
-                    return ActionModelMap.Response<SettleBetResponse>(playerCode, GameApiError.BetAlreadySettled);
+                    return ActionModelMap.Response<SettleBetResponse>(playerCode, 0, GameApiError.BetAlreadySettled);
                 }
             }
 
@@ -147,32 +153,37 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .ConfigureAwait(false);
 
             var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
+                externalRoundId,
+                () => Task.FromResult(false)).ConfigureAwait(false);
 
             var betData = ActionModelMap.Request(data, externalRoundId, request, hasRollback, true);
             var r = await GamePlayActions.SettleBetAsync(betData).ConfigureAwait(false);
 
             await RedisCacheManager
                 .ClearCacheByBatchAsync(new CacheKey[]
-                {
-                    new()
                     {
-                        CacheType = SBOBETConsts.RedisKey.RollbackTransaction,
-                        Key = externalRoundId
+                        new()
+                        {
+                            CacheType = SBOBETConsts.RedisKey.RollbackTransaction,
+                            Key = externalRoundId
+                        },
+                        new()
+                        {
+                            CacheType = SBOBETConsts.RedisKey.BetTransaction,
+                            Key = externalRoundId
+                        }
                     },
-                    new()
-                    {
-                        CacheType = SBOBETConsts.RedisKey.BetTransaction,
-                        Key = externalRoundId
-                    }
-                }, true).ConfigureAwait(false);
+                    true).ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
         }
 
-        private async Task CachePlaceBetTransaction(string externalRoundId, decimal amount, bool isAdjust) =>
-            await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.BetTransaction,
-                externalRoundId, new BetTransaction(amount, isAdjust)).ConfigureAwait(false);
+        private Task CachePlaceBetTransactionAsync(string externalRoundId, decimal amount, bool isAdjust)
+            => RedisCacheManager.SafeCacheAsync(
+                SBOBETConsts.RedisKey.BetTransaction,
+                externalRoundId,
+                TimeSpan.FromDays(1),
+                new BetTransaction(amount, isAdjust));
 
         private record BetTransaction(decimal Amount, bool IsAdjust);
     }

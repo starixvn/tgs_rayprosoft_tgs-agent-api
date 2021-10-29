@@ -79,7 +79,6 @@ namespace TGS.Apis.AgentApi.Controllers
         {
             var allowType = new TransactionType[]
            {
-                TransactionType.Deposit,
                 TransactionType.Withdrawal,
                 TransactionType.CancelWithdrawal,
                 TransactionType.Adjust,

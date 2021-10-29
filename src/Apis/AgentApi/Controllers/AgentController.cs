@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
@@ -17,7 +18,6 @@ using TGS.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
 using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
 
 namespace TGS.Apis.AgentApi.Controllers
@@ -86,8 +86,8 @@ namespace TGS.Apis.AgentApi.Controllers
         public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
         {
             var dict = Enum.GetValues(typeof(AgentStatus))
-                   .Cast<AgentStatus>()
-                   .ToDictionary(t => (int)t, t => t.ToString());
+                .Cast<AgentStatus>()
+                .ToDictionary(t => (int)t, t => t.ToString());
 
             return Task.FromResult(dict);
         }
@@ -150,9 +150,9 @@ namespace TGS.Apis.AgentApi.Controllers
         [Description("Get agents")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagedResponse<AgentModel>> GetAgentsAsync(
-                    [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
-                    [FromQuery] GetAgentsRequest request,
-                    [FromQuery] PagingRequest pagingRequest)
+            [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
+            [FromQuery] GetAgentsRequest request,
+            [FromQuery] PagingRequest pagingRequest)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
@@ -207,7 +207,7 @@ namespace TGS.Apis.AgentApi.Controllers
             paging.Page = pagingRequest.Page;
             paging.RowCount = pagingRequest.Rows;
 
-            return new PagedResponse<AgentModel>()
+            return new PagedResponse<AgentModel>
             {
                 TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
                 Items = await agentInfos
@@ -303,5 +303,24 @@ namespace TGS.Apis.AgentApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public Task<LoginResponse> LoginAsync(LoginRequest request) =>
             _mediator.Send(request);
+
+        /// <summary>
+        /// Check username existed
+        /// </summary>
+        [HttpGet("checkUsername")]
+        public async Task<CheckUsernameResponse> CheckUsernameAsync(
+            [FromServices] IGetService<CheckAgentExistsQuery, bool> getUserNameQueryService,
+            [FromQuery] CheckUsernameRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new CheckAgentExistsQuery(brandId, request.Username);
+            var hasExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
+
+            return new CheckUsernameResponse
+            {
+                Exists = hasExisted
+            };
+        }
     }
 }

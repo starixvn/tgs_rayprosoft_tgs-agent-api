@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
@@ -44,10 +44,10 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
 
                 await _tgsRepository.SaveChangesAsync(cancellationToken);
 
-                return new UpdateGameLocationInfo {DiffGameIds = Array.Empty<int>()};
+                return new UpdateGameLocationInfo { DiffGameIds = Array.Empty<int>() };
             }
 
-            return new UpdateGameLocationInfo {DiffGameIds = diffGames};
+            return new UpdateGameLocationInfo { DiffGameIds = diffGames };
         }
     }
 }

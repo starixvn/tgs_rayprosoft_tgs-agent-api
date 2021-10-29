@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations;
 using TGS.Services.WalletService;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Wallet;
 
 namespace TGS.Services.Operator.Services.Wallet
 {
     internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
     {
-        private readonly IWalletRepository _walletRepository;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IWalletRepository _walletRepository;
 
         public GetBalanceQueryService(IWalletRepository walletRepository, IPlayerOperations playerOperations)
         {

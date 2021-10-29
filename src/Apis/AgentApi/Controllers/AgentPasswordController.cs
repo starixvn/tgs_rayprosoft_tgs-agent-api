@@ -3,12 +3,12 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.Services.Agent;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -60,8 +60,13 @@ namespace TGS.Apis.AgentApi.Controllers
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
+
             return forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
+                .GetAsync(new ForgotPasswordCommand(
+                    brandId,
+                    CultureInfo.CurrentUICulture,
+                    request.Email));
         }
 
         /// <summary>

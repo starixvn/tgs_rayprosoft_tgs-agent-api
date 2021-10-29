@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.SubGameProviderHandlers
 {
@@ -50,10 +50,10 @@ namespace TGS.Services.BackOffice.Application.Commands.SubGameProviderHandlers
 
                 await _tgsRepository.SaveChangesAsync(cancellationToken);
 
-                return new UpdateSubGameProvidersLocationInfo {DiffGameProviderCodes = Array.Empty<string>()};
+                return new UpdateSubGameProvidersLocationInfo { DiffGameProviderCodes = Array.Empty<string>() };
             }
 
-            return new UpdateSubGameProvidersLocationInfo {DiffGameProviderCodes = diffGameProviders};
+            return new UpdateSubGameProvidersLocationInfo { DiffGameProviderCodes = diffGameProviders };
         }
     }
 }

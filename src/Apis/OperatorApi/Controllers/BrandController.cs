@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Brand;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Resources;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Services.BackOffice.Application.Models.Withdraw;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {

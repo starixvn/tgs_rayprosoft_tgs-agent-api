@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.ServiceUtility;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
 using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.Services.Player

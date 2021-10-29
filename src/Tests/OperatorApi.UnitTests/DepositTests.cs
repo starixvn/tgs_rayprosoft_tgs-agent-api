@@ -17,7 +17,7 @@ using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
-using TGS.ServiceUtility;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -20,6 +21,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class WithdrawController : BaseContextController
     {
+        [HttpGet("untreated/{brandId}")]
+        public ValueTask<int> CountUntreatedWithdrawFormsAsync(
+            [FromServices] IGetService<CountUntreatedWithdrawFormsQuery, int> countService,
+            Guid brandId)
+            => countService.GetAsync(new CountUntreatedWithdrawFormsQuery(brandId));
+
         [AllowAnonymous]
         [IgnoreAntiforgeryToken]
         [HttpGet("exportWithdraw/{brandId}")]

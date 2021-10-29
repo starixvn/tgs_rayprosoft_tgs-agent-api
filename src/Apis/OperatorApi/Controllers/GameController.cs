@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
@@ -17,7 +18,6 @@ using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameBalance;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -26,6 +26,24 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
     {
+        [HttpGet("favorite/{gameType}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public IAsyncEnumerable<int> GetFavoriteGamesAsync(
+                    [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
+                    GameType gameType)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new ListFavoriteGameIdsQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                gameType);
+
+            return listService.QueryAsync(query)
+                .Select(fg => fg.GameId);
+        }
+
         /// <summary>
         ///     get game list of specific game provider
         /// </summary>
@@ -268,7 +286,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     subGp.Code))
                 .ConfigureAwait(false);
 
-
             if (subGp.IsTransferWallet)
             {
                 await fundService
@@ -285,6 +302,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ErrorMessage = info.ErrorMessage,
                 Url = info.Url
             };
+        }
+
+        [HttpDelete("favorite/{gameId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask RemoveGameFromFavoriteAsync(
+            [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
+            int gameId)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new RemoveFavoriteGameCommand(
+                playerTokenData.PlayerCode,
+                gameId);
+
+            return removeService.ExecuteAsync(command);
         }
 
         [HttpPut("favorite/{gameId}")]
@@ -314,39 +346,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             await setService
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
-        }
-
-        [HttpDelete("favorite/{gameId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask RemoveGameFromFavoriteAsync(
-            [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
-            int gameId)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new RemoveFavoriteGameCommand(
-                playerTokenData.PlayerCode,
-                gameId);
-
-            return removeService.ExecuteAsync(command);
-        }
-
-        [HttpGet("favorite/{gameType}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public IAsyncEnumerable<int> GetFavoriteGamesAsync(
-            [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
-            GameType gameType)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new ListFavoriteGameIdsQuery(
-                brandId,
-                playerTokenData.PlayerCode,
-                gameType);
-
-            return listService.QueryAsync(query)
-                .Select(fg => fg.GameId);
         }
 
         private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)

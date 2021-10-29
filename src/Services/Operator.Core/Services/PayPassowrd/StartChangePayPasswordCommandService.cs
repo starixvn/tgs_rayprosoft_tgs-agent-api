@@ -6,7 +6,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.Services.PayPassowrd

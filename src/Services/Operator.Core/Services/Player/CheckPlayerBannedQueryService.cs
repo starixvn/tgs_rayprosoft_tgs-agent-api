@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 using CoreEnums = TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.Services.Player

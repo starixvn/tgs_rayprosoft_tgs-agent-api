@@ -11,7 +11,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

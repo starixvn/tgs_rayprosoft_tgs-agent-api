@@ -468,12 +468,6 @@ namespace TGS.Services.GameOperations.Data
                 AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
-            if (s.WithCustomBetValues && s.CustomBetValues != null)
-            {
-                current.Turnover = s.CustomBetValues.Turnover;
-                current.WinLoss = s.CustomBetValues.WinLoss;
-            }
-
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
 
             if (error != null)
@@ -490,14 +484,22 @@ namespace TGS.Services.GameOperations.Data
                 s.PreviousActions,
                 oppositePatterns);
 
-            s.BetValueResult = betValues;
-
-            if (!s.WithCustomBetValues)
+            if (s.WithCustomBetValues && s.CustomBetValues != null)
             {
-                current.Turnover = betValues.Turnover;
-                current.WinLoss = betValues.WinLoss;
+                betValues = betValues with
+                {
+                    BetAmount = s.CustomBetValues.BetAmount ?? betValues.BetAmount,
+                    ValidBetAmount = s.CustomBetValues.BetAmount ?? betValues.ValidBetAmount,
+                    SettleAmount = s.CustomBetValues.SettleAmount ?? betValues.SettleAmount,
+                    Turnover = s.CustomBetValues.Turnover,
+                    WinLoss = s.CustomBetValues.WinLoss
+                };
             }
 
+            s.BetValueResult = betValues;
+
+            current.Turnover = betValues.Turnover;
+            current.WinLoss = betValues.WinLoss;
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);

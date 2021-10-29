@@ -12,7 +12,7 @@ using Tgs.Payment.Clients;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.BrandPayments;
 using TGS.Services.Agent.Services.Withdraw;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

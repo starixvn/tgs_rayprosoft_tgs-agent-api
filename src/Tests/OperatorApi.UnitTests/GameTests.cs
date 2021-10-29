@@ -22,7 +22,7 @@ using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.Services.Operator.Services.Wallet;
 using TGS.Services.PluggableServices;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 using PluggableModels = TGS.Services.PluggableServices.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests

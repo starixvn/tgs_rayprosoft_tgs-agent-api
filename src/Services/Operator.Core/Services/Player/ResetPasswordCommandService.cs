@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

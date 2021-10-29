@@ -5,9 +5,9 @@ using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Services.BackOffice.Application.Models.Deposit;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
@@ -71,6 +71,5 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             return new MemoryStream(stream.ToArray());
         }
-
     }
 }

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
@@ -25,12 +24,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             CancellationToken cancellationToken)
         {
             if (await _service.ExistsAsync(x =>
-                x.BrandId == request.BrandId && EF.Functions.ILike(x.Username, $"%{request.Username}%")))
+                x.BrandId == request.BrandId && x.Username.ToLower().Equals(request.Username.ToLower())))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
 
-            if (request.AgentDividendConditions.Length > 1)
+            if (request.AgentDividendConditions.Length != 1)
             {
                 return CreateInvalidResponse<MessageResponse>("Can only have one rank.");
             }
@@ -55,20 +54,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                             condition.Rank));
                     }
 
-                    if (condition.NetProfit < parent.NetProfit)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
-                            condition.Rank,
-                            parent.NetProfit));
-                    }
-
-                    if (condition.ActiveNumber < parent.ActiveNumber)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
-                            condition.Rank,
-                            parent.ActiveNumber));
-                    }
-
                     if (condition.DividendPercentage > parent.DividendPercentage)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(
@@ -76,19 +61,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                             condition.Rank,
                             parent.DividendPercentage));
                     }
-                }
-            }
-
-            foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
-            {
-                var previous = request.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
-
-                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
-                    condition.ActiveNumber < previous.ActiveNumber ||
-                    condition.DividendPercentage < previous.DividendPercentage))
-                {
-                    return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
-                        condition.Rank));
                 }
             }
 

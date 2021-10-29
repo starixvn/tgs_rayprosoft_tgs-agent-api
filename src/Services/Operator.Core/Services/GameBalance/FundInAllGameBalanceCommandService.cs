@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.GameProviders;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Services.WalletService;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Wallet
 {

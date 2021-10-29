@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
-using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
-using TGS.ServiceUtility;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -19,6 +20,47 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepositController : BaseContextController
     {
+        [HttpGet("untreated/{brandId}")]
+        public ValueTask<int> CountUntreatedDepositFormsAsync(
+            [FromServices] IGetService<CountUntreatedDepositFormsQuery, int> countService,
+            Guid brandId)
+            => countService.GetAsync(new CountUntreatedDepositFormsQuery(brandId));
+
+        [HttpGet("exportDeposit/{brandId}")]
+        public async Task<IActionResult> ExportDepositAsync(
+            [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,
+            Guid brandId,
+            [FromQuery] DepositFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new ExportDepositForm(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            return File(
+                await queryService.GetAsync(query).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Deposit.xlsx");
+        }
+
         /// <summary>
         /// Gets the deposit form detail.
         /// </summary>
@@ -97,7 +139,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.OrderNo,
                 request.FormId,
                 request.PaymentMethodId,
-                request.Status.ToPaymentFlowState(),
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);
@@ -160,40 +203,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
-        }
-
-
-        [HttpGet("exportDeposit/{brandId}")]
-        public async Task<IActionResult> ExportDepositAsync(
-            [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,
-            Guid brandId,
-            [FromQuery] DepositFormRequest request,
-            [FromQuery] PageableRequest paging)
-        {
-            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-
-            if (request.BeginCreateOn != null && request.EndCreateOn != null)
-                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
-
-            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
-                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
-
-            var query = new ExportDepositForm(
-                brandId,
-                request.UserName,
-                request.ChannelName,
-                request.ThirdPartyOrderNo,
-                request.FormId,
-                request.PaymentMethodId,
-                request.Status.ToPaymentFlowState(),
-                createOnRange,
-                updateOnRange,
-                paging);
-
-            return File(await queryService.GetAsync(query).ConfigureAwait(false),
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "Deposit.xlsx");
         }
     }
 }

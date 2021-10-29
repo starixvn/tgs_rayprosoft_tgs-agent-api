@@ -78,7 +78,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 .Include(x => x.PromotionGameProviders)
                 .Include(x => x.PromotionVipLevels)
                 .Include(x => x.PromotionParticipants)
-                .Where(x => x.Status == SwitchStatus.Enabled)
+                .Where(x => x.Status == PromotionStatus.Enabled)
                 .Where(x => x.SettlementIntervalType == "Daily")
                 .Where(x => x.From <= reportDate && x.To >= reportDate).ToArrayAsync(cancellationToken);
 
