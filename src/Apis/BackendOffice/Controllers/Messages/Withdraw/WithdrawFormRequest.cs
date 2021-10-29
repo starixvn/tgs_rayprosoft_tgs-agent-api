@@ -15,6 +15,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
         [FromQuery(Name = "thirdOrderNo")]
         public string ThirdPartyOrderNo { get; init; }
 
+        [FromQuery(Name = "orderNo")]
+        public string OrderNo { get; init; }
+
         [FromQuery(Name = "id")]
         public Guid? FormId { get; init; }
 

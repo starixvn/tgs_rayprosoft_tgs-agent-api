@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Tgs;
 using Tgs.ServiceUtility;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Agent.Services.Agent
 {

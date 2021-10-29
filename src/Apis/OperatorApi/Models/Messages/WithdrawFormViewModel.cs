@@ -22,5 +22,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("updatedon")]
         public DateTimeOffset UpdatedOn { get; init; }
+
+        [JsonPropertyName("orderno")]
+        public string OrderNo { get; init; }
     }
 }

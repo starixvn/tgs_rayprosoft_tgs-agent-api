@@ -145,6 +145,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 null,
                 null,
                 null,
+                null,
                 new PageableRequest());
 
             _ = await sut.GetAsync(query, default);
