@@ -26,25 +26,15 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                  new DepositFormQueryConditions
                  {
                      BrandId = query.BrandId,
-                     ChannelName = query.ChannelName,
                      CreateOnRange = query.CreateOnRange,
-                     PaymentMethodId = query.PaymentMethodId,
-                     Status = query.Status,
-                     ThirdPartyOrderNo = query.ThirdPartyOrderNo,
-                     FormId = query.FormId,
                      UpdateOnRange = query.UpdateOnRange,
-                     UserName = query.UserName
                  },
-                 new Tgs.Payment.Clients.Paging
-                 {
-                     IsDesc = query.Paging.IsDesc,
-                     Page = query.Paging.Page,
-                     Rows = query.Paging.Rows,
-                     ShowAll = true,
-                     SortBy = query.Paging.SortBy
-                 });
+                 null);
 
-            var resultPaymentMethods = await _paymentServiceClient.GetAllPaymentMethodsAsync().ToDictionaryAsync(x => x.Id).ConfigureAwait(false);
+            var resultPaymentMethods = await _paymentServiceClient
+                .GetAllPaymentMethodsAsync()
+                .ToDictionaryAsync(x => x.Id)
+                .ConfigureAwait(false);
 
             var resource = new ResourceManager(typeof(Resources.Deposit));
 
@@ -65,11 +55,13 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             var xlsx = exportData.ExportDepositLocalization("Deposit", result.Sum, resource);
 
-            await using var stream = new MemoryStream();
+            var stream = new MemoryStream();
 
             xlsx.SaveAs(stream);
 
-            return new MemoryStream(stream.ToArray());
+            stream.Position = 0;
+
+            return stream;
         }
     }
 }
