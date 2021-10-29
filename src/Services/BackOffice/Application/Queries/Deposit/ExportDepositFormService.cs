@@ -30,7 +30,10 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                      CreateOnRange = query.CreateOnRange,
                      UpdateOnRange = query.UpdateOnRange,
                  },
-                 null);
+                 new Tgs.Payment.Clients.Paging
+                 {
+                     ShowAll = true
+                 });
 
             var resultPaymentMethods = await _paymentServiceClient
                 .GetAllPaymentMethodsAsync()
