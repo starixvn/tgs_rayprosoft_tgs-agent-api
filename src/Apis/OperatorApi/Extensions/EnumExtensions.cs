@@ -26,19 +26,25 @@ namespace TGS.Apis.OperatorApi.Extensions
                 FlowState.WaitingPaid => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
                 FlowState.Paid => new[] { PaymentFlowState.Paid },
-                _ => new[] { PaymentFlowState.WaitPayment, PaymentFlowState.WaitApprove, PaymentFlowState.Approved, PaymentFlowState.Reject }
+                _ => new[] {
+                    PaymentFlowState.WaitPayment,
+                    PaymentFlowState.WaitApprove,
+                    PaymentFlowState.Approved,
+                    PaymentFlowState.Reject,
+                    PaymentFlowState.Paid
+                }
             };
         }
 
         public static FlowState ToWithdrawFlowState(this PaymentFlowState status)
-                    => status switch
-                    {
-                        PaymentFlowState.WaitPayment => FlowState.WaitingPayment,
-                        PaymentFlowState.WaitApprove => FlowState.Review,
-                        PaymentFlowState.Reject => FlowState.Rejected,
-                        PaymentFlowState.Approved => FlowState.WaitingPaid,
-                        PaymentFlowState.Paid => FlowState.Paid,
-                        _ => FlowState.Unknown,
-                    };
+            => status switch
+            {
+                PaymentFlowState.WaitPayment => FlowState.WaitingPayment,
+                PaymentFlowState.WaitApprove => FlowState.Review,
+                PaymentFlowState.Reject => FlowState.Rejected,
+                PaymentFlowState.Approved => FlowState.WaitingPaid,
+                PaymentFlowState.Paid => FlowState.Paid,
+                _ => FlowState.Unknown,
+            };
     }
 }

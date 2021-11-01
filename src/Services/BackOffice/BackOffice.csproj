@@ -11,10 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\deposit_forms_template.xlsx" />
     <None Remove="Assets\localization_template.xlsx" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\deposit_forms_template.xlsx" />
     <EmbeddedResource Include="Assets\localization_template.xlsx" />
   </ItemGroup>
 
@@ -35,7 +37,7 @@
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
     <PackageReference Include="TGS.GameProviders.KickPlayerServer.Client" Version="0.0.3" />    
     <PackageReference Include="Tgs.Payment.Client" Version="0.2.1" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.32" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.35" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 

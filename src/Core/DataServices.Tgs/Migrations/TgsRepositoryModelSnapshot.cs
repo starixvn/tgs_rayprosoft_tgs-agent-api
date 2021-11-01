@@ -2136,6 +2136,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
 
+                    b.Property<int?>("PromotionPlayerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("promotion_player_id");
+
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");

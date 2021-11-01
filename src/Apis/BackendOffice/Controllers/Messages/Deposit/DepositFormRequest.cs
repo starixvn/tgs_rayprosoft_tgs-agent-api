@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
@@ -22,7 +21,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public Guid? PaymentMethodId { get; init; }
 
         [FromQuery(Name = "status")]
-        [ModelBinder(BinderType = typeof(CommaSeparatedStringPaymentStatusBinder))]
         public FlowState[] Status { get; init; }
 
         [FromQuery(Name = "bc")]
@@ -36,5 +34,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         [FromQuery(Name = "eu")]
         public DateTimeOffset? EndUpdateOn { get; init; }
+
+        [FromQuery(Name = "orderNo")]
+        public string OrderNo { get; init; }
     }
 }

@@ -70,7 +70,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Localization
         }
 
         private void GenerateLanguageWorkSheet(
-                    XLWorkbook target,
+            XLWorkbook target,
             string cultureCode,
             Dictionary<string, string> locDict)
         {
