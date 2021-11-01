@@ -124,7 +124,7 @@
     <value>Bet Amount</value>
   </data>
   <data name="Turnover" xml:space="preserve">
-    <value>Turnover</value>
+    <value>ValidBetAmount</value>
   </data>
   <data name="WinLossAmount" xml:space="preserve">
     <value>Win Loss Amount</value>
