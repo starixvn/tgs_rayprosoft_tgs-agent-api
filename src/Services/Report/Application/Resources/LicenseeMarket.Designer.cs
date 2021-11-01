@@ -88,7 +88,7 @@ namespace TGS.Services.Report.Application.Resources {
         }
         
         /// <summary>
-        ///   查詢類似 Platfrom 的當地語系化字串。
+        ///   查詢類似 Brand 的當地語系化字串。
         /// </summary>
         internal static string BrandCode {
             get {
