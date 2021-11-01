@@ -25,5 +25,7 @@ namespace TGS.Clients.Promotion.Client
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
 
         Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(GetJoinedPromotionsRequest request);
+
+        Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request);
     }
 }
