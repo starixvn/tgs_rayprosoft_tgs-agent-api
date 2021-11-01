@@ -27,7 +27,11 @@ namespace TGS.Apis.TgsApi.GameProviders.LY.Services
             CachedGame cachedGame,
             string language)
         {
-            var gameRecord = JsonSerializer.Deserialize<LYGameRecord>(round.RoundDetail.AdditionalData);
+            var gameRecord = JsonSerializer.Deserialize<LYGameRecord>(round.RoundDetail.AdditionalData, new JsonSerializerOptions
+            {
+                // 設定在做序列化/反序列化時，尊重名稱大小寫
+                PropertyNameCaseInsensitive = true
+            });
 
             if (gameRecord == null)
             {
