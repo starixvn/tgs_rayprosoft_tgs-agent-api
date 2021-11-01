@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Promotion.Services
+﻿using System;
+
+namespace TGS.Services.Promotion.Services
 {
-    public record TagPlayerDepositCommand(string PlayerCode);
+    public record TagPlayerDepositCommand(string PlayerCode, Guid? PromotionId);
 }

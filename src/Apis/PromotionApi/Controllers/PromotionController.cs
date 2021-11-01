@@ -60,12 +60,14 @@ namespace TGS.Apis.PromotionApi.Controllers
             _mediator.Send(request);
 
         [HttpPut("deposit/{playerCode}")]
+        [HttpPut("deposit/{playerCode}/{promotionId?}")]
         [Description("Tag player deposit")]
         public async Task DepositAsync(
             [FromServices] ICommandService<TagPlayerDepositCommand> tagService,
-            string playerCode)
+            string playerCode,
+            Guid? promotionId)
         {
-            var command = new TagPlayerDepositCommand(playerCode);
+            var command = new TagPlayerDepositCommand(playerCode, promotionId);
 
             await tagService.ExecuteAsync(command).ConfigureAwait(false);
         }
