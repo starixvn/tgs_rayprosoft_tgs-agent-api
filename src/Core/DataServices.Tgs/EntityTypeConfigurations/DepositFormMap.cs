@@ -64,6 +64,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.OrderNo)
                 .HasMaxLength(50);
 
+            builder.Property(df => df.PromotionPlayerId);
+
             builder
                 .HasOne(c => c.Player)
                 .WithMany()
