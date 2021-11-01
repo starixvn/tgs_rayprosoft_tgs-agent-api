@@ -59,7 +59,7 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
             _mediator.Send(request);
 
-        [HttpPut("deposit/{playerCode}")]
+        [HttpPut("deposit/{playerCode}/{promotionId?}")]
         [Description("Tag player deposit")]
         public async Task DepositAsync(
             [FromServices] ICommandService<TagPlayerDepositCommand> tagService,
