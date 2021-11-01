@@ -50,7 +50,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("RMB"),
                 new USDCurrency("USD"),
                 new VNDCurrency("VND"),
                 new IDRCurrency("IDR"),
