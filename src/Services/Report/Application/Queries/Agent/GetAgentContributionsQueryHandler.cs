@@ -132,7 +132,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         .Where(x => playerCodes
                             .Contains(x.PlayerCode))
                         .Where(x => x.AgentId != null)
-                        .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To),
+                        .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To),
                     a => a.Id,
                     playerAggregate => playerAggregate.AgentId,
                     (agent, players) => new
