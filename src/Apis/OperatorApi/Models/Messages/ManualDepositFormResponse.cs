@@ -13,6 +13,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("bankaccountname")]
         public string BankAccountName { get; init; }
 
+        [JsonPropertyName("qrcode")]
+        public string QrCode { get; init; }
+
         [JsonPropertyName("bankname")]
         public string BankName { get; init; }
 

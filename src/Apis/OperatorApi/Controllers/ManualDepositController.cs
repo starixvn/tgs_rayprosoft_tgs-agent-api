@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.Payment.ManualDeposit;
+using Tgs.Payment.ManualDeposit.Converters;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -54,17 +56,75 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new(form.BrandPaymentId))
                 .ConfigureAwait(false);
 
-            var bankInfo = serializer.Deserialize<ManualDepositApplyInfo>(form.ApplyInfo);
+            paymentMethods.TryGetValue(brandPayment.MethodId, out var paymentMethodInfo);
 
-            return new()
+            var bankInfo = GetApplyInfo(serializer, paymentMethodInfo.BankType, form.ApplyInfo);
+
+            if (paymentMethodInfo.BankType == "Bank")
             {
-                MethodName = paymentMethods[brandPayment.MethodId].Name,
-                ChannelName = paymentChannels[brandPayment.ChannelId].Name,
-                Amount = form.Amount,
-                BankAccountName = bankInfo.ReceiveAccountName,
-                BankAccount = bankInfo.ReceiveBankAccount,
-                BankName = brandPayment.ChannelName
-            };
+                return new()
+                {
+                    MethodName = paymentMethods[brandPayment.MethodId].Name,
+                    ChannelName = paymentChannels[brandPayment.ChannelId].Name,
+                    Amount = form.Amount,
+                    BankAccountName = ((ManualDepositBankApplyInfo)bankInfo).ReceiveAccountName,
+                    BankAccount = ((ManualDepositBankApplyInfo)bankInfo).ReceiveBankAccount,
+                    BankName = brandPayment.ChannelName
+                };
+            }
+            else
+            {
+                return new()
+                {
+                    MethodName = paymentMethods[brandPayment.MethodId].Name,
+                    ChannelName = paymentChannels[brandPayment.ChannelId].Name,
+                    Amount = form.Amount,
+                    QrCode = ((ManualDepositThirdPartyApplyInfo)bankInfo).QrCode,
+                    BankName = brandPayment.ChannelName
+                };
+            }
+        }
+
+        [HttpPut]
+        [HttpPut("bank")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<Guid> SubmitDepositBankRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] ManualDepositSerializer serializer,
+            [FromBody] SubmitManualDepositBankRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositBankApplyInfo()
+                    {
+                        BankType = request.BankType,
+                        SendBankAccount = request.BankAccount,
+                        ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
+                        ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
+                    }));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
         [HttpPost("{id}")]
@@ -94,14 +154,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             await submitBankDepositFormCommandService.ExecuteAsync(command);
         }
 
-        [HttpPut]
+        [HttpPut("thirdparty")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<Guid> SubmitDepositRequestAsync(
+        public async ValueTask<Guid> SubmitDepositThirdPartyRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] ManualDepositSerializer serializer,
-            [FromBody] SubmitManualDepositRequest request)
+            [FromBody] SubmitManualDepositThirdPartyRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
@@ -120,16 +180,36 @@ namespace TGS.Apis.OperatorApi.Controllers
                 "tgs.payment.manual.deposit",
                 request.PromotionId,
                 _ => serializer.Serialize(
-                    new ManualDepositApplyInfo(
-                        request.BankAccount,
-                        brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                        brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
+                    new ManualDepositThirdPartyApplyInfo
+                    {
+                        BankType = request.BankType,
+                        QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString()
+                    }));
 
             await createDepositFormService
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
 
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+
+        private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string? applyInfo)
+        {
+            var serializeOptions = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                Converters =
+                {
+                    new ManualDepositApplyInfoJsonConverter()
+                }
+            };
+
+            return bankType switch
+            {
+                "Bank" => serializer.Deserialize<ManualDepositBankApplyInfo>(applyInfo),
+                "ThirdParty" => serializer.Deserialize<ManualDepositThirdPartyApplyInfo>(applyInfo),
+                _ => throw new NotImplementedException()
+            };
         }
     }
 }
