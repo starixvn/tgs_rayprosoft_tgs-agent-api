@@ -26,5 +26,9 @@ namespace TGS.Clients.Promotion.Client
         Task TagPlayerDepositAsync(string playerCode, Guid? promotionId);
 
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
+
+        Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request);
+
+        Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(int[] promotionPlayerIds);
     }
 }
