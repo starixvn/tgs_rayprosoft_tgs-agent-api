@@ -17,7 +17,7 @@
     <PackageReference Include="Tgs.FileService.Client" Version="0.0.4" />
     <PackageReference Include="Tgs.MessageQueue" Version="1.1.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.2.1" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.35" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.36-alpha" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 
