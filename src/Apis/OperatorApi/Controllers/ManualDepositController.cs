@@ -55,7 +55,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new(form.BrandPaymentId))
                 .ConfigureAwait(false);
 
-            paymentMethods.TryGetValue(brandPayment.MethodId, out var paymentMethodInfo);
+            var paymentMethodInfo = paymentMethods[brandPayment.MethodId];
 
             var bankInfo = GetApplyInfo(serializer, paymentMethodInfo.BankType, form.ApplyInfo);
 
