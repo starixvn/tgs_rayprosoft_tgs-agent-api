@@ -148,5 +148,12 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<PagedResponse<JoinedPromotionModel>> GetPromotionsAsync(
             [FromQuery] GetJoinedPromotionsRequest request) =>
             _mediator.Send(request);
+
+        [HttpGet("names")]
+        [Description("Get promotion names by ids")]
+        public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
+            [FromServices] IQueryService<GetPromotionNamesQuery, PromotionNameModel> queryService,
+            [FromQuery] GetPromotionNamesQuery query)
+            => queryService.QueryAsync(query).ToArrayAsync();
     }
 }
