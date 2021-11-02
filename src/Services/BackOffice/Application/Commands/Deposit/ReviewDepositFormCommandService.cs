@@ -89,6 +89,12 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                         .ConfigureAwait(false))
                     .ConfigureAwait(false);
 
+                await _paymentServiceClient
+                    .SubmitDepositFormStatusAsync(
+                        command.FormId,
+                        promotionPlayerId: promotionResponse.PromotionPlayerId)
+                    .ConfigureAwait(false);
+
                 await _playerService
                     .TopUpAccumulatedDepositAsync(form.PlayerCode, form.Amount)
                     .ConfigureAwait(false);
