@@ -25,7 +25,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
-        public SBOBETPlayerAction(ISettingOperations settingOperations,
+        public SBOBETPlayerAction(
+            ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBetLimitQueries betLimitQueries,
@@ -69,11 +70,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     .ConfigureAwait(false);
 
             var playerCode = request.PlayerCode;
+
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode)
                 .ConfigureAwait(false);
 
             var betLimits =
-                await _betLimitQueries.GetPlayerSportBetLimitsAsync(playerCode, gameProviderId,
+                await _betLimitQueries.GetPlayerSportBetLimitsAsync(playerCode,
+                    gameProviderId,
                     request.SportMarketTypeIds).ConfigureAwait(false);
 
             var response = await UpdatePlayerBetLimitsAsync(playerCode, betLimits, configuration)
@@ -87,7 +90,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return new();
         }
 
-        private async ValueTask<BaseResponse> UpdatePlayerBetLimitsAsync(string playerCode,
+        private async ValueTask<BaseResponse> UpdatePlayerBetLimitsAsync(
+            string playerCode,
             SportBetLimitResult[] betLimits,
             SBOConfiguration configuration)
         {
@@ -118,7 +122,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
 
-            var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
+            var registerResponse = await _client.CreatePlayerAsync(apiUrl,
                 new(configuration.AgentPrefix, player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,

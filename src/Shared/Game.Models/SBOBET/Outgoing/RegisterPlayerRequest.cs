@@ -18,10 +18,10 @@ namespace TGS.Shared.Game.Models.SBOBET.Outgoing
         }
 
         /// <summary>
-        ///     As per SBO, a agent can only have 1 currency
+        /// As per SBO, a agent can only have 1 currency
         /// </summary>
         [JsonPropertyName("Agent")]
-        public string Agent =>
+        public string AgentId =>
             $"{_agentPrefix}{_brandCode.ToUpper()}{_currencyCode.Replace("_", string.Empty).ToUpper()}";
     }
 }
