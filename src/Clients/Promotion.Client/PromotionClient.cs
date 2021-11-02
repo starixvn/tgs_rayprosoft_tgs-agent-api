@@ -204,5 +204,27 @@ namespace TGS.Clients.Promotion.Client
                     PropertyNameCaseInsensitive = true
                 });
         }
+
+        public async Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(
+            int[] promotionPlayerIds)
+        {
+            var prefix = "Promotion.GetPromotionBonusOfDeposit";
+
+            var request = new
+            {
+                promotionPlayerIds
+            };
+
+            var path = ClientPath.AppendWithProperties("/api/promotionBonus/bonusAmount?", request);
+
+            return await ExecuteJsonRequestAsync<object, PromotionBonusOfDepositModel[]>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+        }
     }
 }

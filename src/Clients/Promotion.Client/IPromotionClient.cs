@@ -27,5 +27,7 @@ namespace TGS.Clients.Promotion.Client
         Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(GetJoinedPromotionsRequest request);
 
         Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request);
+
+        Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(int[] promotionPlayerIds);
     }
 }
