@@ -13,18 +13,19 @@ namespace TGS.Clients.Promotion.Client
 
         Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request);
 
+        Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(GetJoinedPromotionsRequest request);
+
         Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request);
+
         Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request);
 
         Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
 
         Task RevertPromotionAsync(Guid promotionId, decimal amount);
 
-        Task TagPlayerDepositAsync(string playerCode);
+        Task TagPlayerDepositAsync(string playerCode, Guid? promotionId);
 
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
-
-        Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(GetJoinedPromotionsRequest request);
 
         Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request);
 

@@ -190,7 +190,7 @@ namespace Promotion.UnitTests
 
             var sut = new TagPlayerDepositCommandService(fakeCheckFactory);
 
-            var command = new TagPlayerDepositCommand("ThisIsPlayerCode");
+            var command = new TagPlayerDepositCommand("ThisIsPlayerCode", null);
 
             await sut.ExecuteAsync(command);
 

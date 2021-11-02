@@ -120,13 +120,17 @@ namespace TGS.Clients.Promotion.Client
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task TagPlayerDepositAsync(string playerCode)
+        public async Task TagPlayerDepositAsync(string playerCode, Guid? promotionId)
         {
             var prefix = $"Promotion.Deposit.{playerCode}";
 
+            var path = promotionId == null
+                ? $"/api/promotion/deposit/{playerCode}"
+                : $"/api/promotion/deposit/{playerCode}/{promotionId}";
+
             var request = new HttpRequestMessage(
                 HttpMethod.Put,
-                $"/api/promotion/deposit/{playerCode}");
+                path);
 
             request.Headers.Remove("Accept");
             request.Headers.Add("Accept", "application/json");
