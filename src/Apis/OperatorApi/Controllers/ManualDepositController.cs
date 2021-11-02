@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.ManualDeposit;
-using Tgs.Payment.ManualDeposit.Converters;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -195,15 +194,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string? applyInfo)
         {
-            var serializeOptions = new JsonSerializerOptions
-            {
-                WriteIndented = false,
-                Converters =
-                {
-                    new ManualDepositApplyInfoJsonConverter()
-                }
-            };
-
             return bankType switch
             {
                 "Bank" => serializer.Deserialize<ManualDepositBankApplyInfo>(applyInfo),
