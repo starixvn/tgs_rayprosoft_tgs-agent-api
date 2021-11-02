@@ -61,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             if (paymentMethodInfo.BankType == "Bank")
             {
-                return new()
+                return new ManualDepositBankFormResponse()
                 {
                     MethodName = paymentMethods[brandPayment.MethodId].Name,
                     ChannelName = paymentChannels[brandPayment.ChannelId].Name,
@@ -73,7 +73,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             else
             {
-                return new()
+                return new ManualDepositThirdPartyFormResponse()
                 {
                     MethodName = paymentMethods[brandPayment.MethodId].Name,
                     ChannelName = paymentChannels[brandPayment.ChannelId].Name,
