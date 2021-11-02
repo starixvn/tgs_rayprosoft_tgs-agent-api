@@ -99,7 +99,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             {
                                 new()
                                 {
-                                    CurrencyCode = "CNY",
+                                    CurrencyCode = "HKD",
                                     AgentId = "200995",
                                     Status = true
                                 }
