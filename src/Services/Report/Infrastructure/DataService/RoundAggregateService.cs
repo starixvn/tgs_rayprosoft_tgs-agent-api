@@ -165,6 +165,13 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 var playerRoundAggregates =
                     roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode).ToArray();
 
+                var playerRoundAggregate = playerRoundAggregates.FirstOrDefault();
+
+                if (playerRoundAggregate != null)
+                {
+                    playerAggregate.AgentId = playerRoundAggregate.AgentId;
+                }
+
                 playerAggregate.BetAmount =
                     playerRoundAggregates
                         .Sum(r => r.BetAmount);
