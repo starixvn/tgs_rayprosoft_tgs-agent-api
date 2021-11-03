@@ -15,12 +15,23 @@ namespace TGS.Services.Promotion
         public ValueTask<bool> CheckAsync(string playerCode)
             => _playerDataRepository.CheckPlayerIsDailyFirstDepositAsync(playerCode);
 
-        public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
+        public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
+            => ValueTask.CompletedTask;
 
         public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
-            => _playerDataRepository.RemovePlayerDailyDepositFlagAsync(playerCode);
+        {
+            if (promotionId is null)
+                return ValueTask.CompletedTask;
+
+            return _playerDataRepository.RemovePlayerDailyDepositFlagAsync(playerCode);
+        }
 
         public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
-            => _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
+        {
+            if (promotionId is null)
+                return ValueTask.CompletedTask;
+
+            return _playerDataRepository.SetPlayerDailyDepositFlagAsync(playerCode);
+        }
     }
 }

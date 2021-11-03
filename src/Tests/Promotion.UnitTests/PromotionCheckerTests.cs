@@ -90,7 +90,7 @@ namespace Promotion.UnitTests
         }
 
         [Test]
-        public async Task Player_DailyFirstDeposit_Rollback_Tag()
+        public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Rollback_Tag()
         {
             var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
@@ -98,12 +98,25 @@ namespace Promotion.UnitTests
 
             await sut.RollbackTagAsync("ThisIsPlayerCode", null);
 
+            _ = fakePlayerDataService.Received(0)
+                .RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+        }
+
+        [Test]
+        public async Task Player_DailyFirstDeposit_With_PromotionId_Rollback_Tag()
+        {
+            var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+
+            await sut.RollbackTagAsync("ThisIsPlayerCode", Guid.NewGuid());
+
             _ = fakePlayerDataService.Received(1)
                 .RemovePlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
         }
 
         [Test]
-        public async Task Player_DailyFirstDeposit_Tag()
+        public async Task Player_DailyFirstDeposit_With_PromotionId_Be_Tag()
         {
             var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
@@ -112,6 +125,19 @@ namespace Promotion.UnitTests
             await sut.TagPromotionTypeAsync("ThisIsPlayerCode", Guid.NewGuid());
 
             _ = fakePlayerDataService.Received(1)
+                .SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
+        }
+
+        [Test]
+        public async Task Player_DailyFirstDeposit_Without_PromotionId_Not_Tag()
+        {
+            var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new DailyFirstDepositChecker(fakePlayerDataService);
+
+            await sut.TagPromotionTypeAsync("ThisIsPlayerCode", null);
+
+            _ = fakePlayerDataService.Received(0)
                 .SetPlayerDailyDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
         }
 
@@ -179,42 +205,6 @@ namespace Promotion.UnitTests
         }
 
         [Test]
-        public async Task Player_FirstPromotion_Without_PromotionId_Not_Commit_Tag()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
-            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
-
-            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
-
-            var playerCode = "ThisIsPlayerCode";
-
-            await sut.CommitTagAsync(playerCode, null);
-
-            _ = fakePlayerDataRepository.Received(0)
-                .RemovePlayerFirstJoinPromotionAsync(Arg.Is(playerCode));
-            _ = fakePlayerService.Received(0)
-                .SetFirstPromotionTimeAsync(Arg.Is(playerCode), Arg.Any<DateTimeOffset>());
-        }
-
-        [Test]
-        public async Task Player_FirstPromotion_With_PromotionId_Commit_Tag()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
-            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
-
-            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
-
-            var playerCode = "ThisIsPlayerCode";
-
-            await sut.CommitTagAsync(playerCode, Guid.NewGuid());
-
-            _ = fakePlayerDataRepository.Received(1)
-                .RemovePlayerFirstJoinPromotionAsync(Arg.Is(playerCode));
-            _ = fakePlayerService.Received(1)
-                .SetFirstPromotionTimeAsync(Arg.Is(playerCode), Arg.Any<DateTimeOffset>());
-        }
-
-        [Test]
         public async Task Player_FirstDeposit_Rollback_Tag()
         {
             var fakePlayerService = Substitute.For<IPlayerService>();
@@ -226,34 +216,6 @@ namespace Promotion.UnitTests
 
             _ = fakePlayerDataRepository.Received(1)
                 .RemovePlayerFirstDepositFlagAsync(Arg.Is("ThisIsPlayerCode"));
-        }
-
-        [Test]
-        public async Task Player_FirstPromotion_Without_PromotionId_Not_Rollback_Tag()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
-            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
-
-            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
-
-            await sut.RollbackTagAsync("ThisIsPlayerCode", null);
-
-            _ = fakePlayerDataRepository.Received(0)
-                .RemovePlayerFirstJoinPromotionAsync(Arg.Is("ThisIsPlayerCode"));
-        }
-
-        [Test]
-        public async Task Player_FirstPromotion_With_PromotionId_Rollback_Tag()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
-            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
-
-            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
-
-            await sut.RollbackTagAsync("ThisIsPlayerCode", Guid.NewGuid());
-
-            _ = fakePlayerDataRepository.Received(1)
-                .RemovePlayerFirstJoinPromotionAsync(Arg.Is("ThisIsPlayerCode"));
         }
 
         [Test]
@@ -299,6 +261,70 @@ namespace Promotion.UnitTests
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 
             Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public async Task Player_FirstPromotion_With_PromotionId_Commit_Tag()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+
+            var playerCode = "ThisIsPlayerCode";
+
+            await sut.CommitTagAsync(playerCode, Guid.NewGuid());
+
+            _ = fakePlayerDataRepository.Received(1)
+                .RemovePlayerFirstJoinPromotionAsync(Arg.Is(playerCode));
+            _ = fakePlayerService.Received(1)
+                .SetFirstPromotionTimeAsync(Arg.Is(playerCode), Arg.Any<DateTimeOffset>());
+        }
+
+        [Test]
+        public async Task Player_FirstPromotion_With_PromotionId_Rollback_Tag()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+
+            await sut.RollbackTagAsync("ThisIsPlayerCode", Guid.NewGuid());
+
+            _ = fakePlayerDataRepository.Received(1)
+                .RemovePlayerFirstJoinPromotionAsync(Arg.Is("ThisIsPlayerCode"));
+        }
+
+        [Test]
+        public async Task Player_FirstPromotion_Without_PromotionId_Not_Commit_Tag()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+
+            var playerCode = "ThisIsPlayerCode";
+
+            await sut.CommitTagAsync(playerCode, null);
+
+            _ = fakePlayerDataRepository.Received(0)
+                .RemovePlayerFirstJoinPromotionAsync(Arg.Is(playerCode));
+            _ = fakePlayerService.Received(0)
+                .SetFirstPromotionTimeAsync(Arg.Is(playerCode), Arg.Any<DateTimeOffset>());
+        }
+
+        [Test]
+        public async Task Player_FirstPromotion_Without_PromotionId_Not_Rollback_Tag()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new FirstJoinPromotionChecker(fakePlayerService, fakePlayerDataRepository);
+
+            await sut.RollbackTagAsync("ThisIsPlayerCode", null);
+
+            _ = fakePlayerDataRepository.Received(0)
+                .RemovePlayerFirstJoinPromotionAsync(Arg.Is("ThisIsPlayerCode"));
         }
 
         [Test]
