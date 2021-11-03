@@ -61,7 +61,9 @@ namespace TGS.Services.Promotion.Services
             {
                 var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-                if (await checker.CheckAsync(playerCode).ConfigureAwait(false))
+                if (await checker
+                    .CheckAsync(playerCode)
+                    .ConfigureAwait(false))
                     yield return promotion;
             }
         }

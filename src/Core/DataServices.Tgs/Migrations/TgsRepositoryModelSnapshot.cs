@@ -3525,6 +3525,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_deposit_on");
 
+                    b.Property<DateTimeOffset?>("FirstPromotionOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_promotion_on");
+
                     b.Property<string>("IdNumber")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")

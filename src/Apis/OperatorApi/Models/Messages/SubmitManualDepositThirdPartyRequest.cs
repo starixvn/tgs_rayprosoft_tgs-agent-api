@@ -3,11 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record SubmitManualDepositRequest
+    public record SubmitManualDepositThirdPartyRequest
     {
-        [JsonPropertyName("account")]
-        public string BankAccount { get; init; }
-
         [JsonPropertyName("amount")]
         public decimal Amount { get; init; }
 
@@ -16,5 +13,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("promotionid")]
         public Guid? PromotionId { get; init; }
+
+        [JsonPropertyName("banktype")]
+        public string BankType { get; init; }
     }
 }

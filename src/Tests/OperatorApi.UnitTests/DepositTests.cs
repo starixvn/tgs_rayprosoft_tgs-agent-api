@@ -11,13 +11,14 @@ using NUnit.Framework;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.ManualDeposit;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
-using Tgs.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -79,10 +80,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "tgs.payment.manual",
                 null,
                 _ => serializer.Serialize(
-                    new ManualDepositApplyInfo(
-                        "ThisIsBankAccount",
-                        "ThisIsReceiveBankAccount",
-                        "ReceiveAccountName")));
+                    new ManualDepositBankApplyInfo()
+                    {
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName",
+                        BankType = "Bank"
+                    }));
 
             moqPaymentClient
                 .Setup(fake => fake.DepositAsync(
@@ -99,10 +103,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Amount = command.Amount,
                 PromotionId = command.PromotionId,
                 ApplyInfo = serializer.Serialize(
-                    new ManualDepositApplyInfo(
-                        "ThisIsBankAccount",
-                        "ThisIsReceiveBankAccount",
-                        "ReceiveAccountName"))
+                    new ManualDepositBankApplyInfo()
+                    {
+                        BankType = "Bank",
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName"
+                    })
             }.ToExpectedObject();
 
             await sut.ExecuteAsync(command);

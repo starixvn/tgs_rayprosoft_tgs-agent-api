@@ -17,16 +17,17 @@ namespace TGS.Services.Promotion.Services
             }
 
             var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
+            var firstJoinPromotionChecker = promotionCheckerFactory.GetPromotionChecker("FirstPromotion");
             var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 
-            _checkers = new[] { firstDepositChecker, dailyFirstDepositChecker };
+            _checkers = new[] { firstDepositChecker, firstJoinPromotionChecker, dailyFirstDepositChecker };
         }
 
         public async ValueTask ExecuteAsync(TagPlayerDepositCommand command, CancellationToken cancellationToken = default)
         {
             foreach (var checker in _checkers)
                 await checker
-                    .TagPromotionTypeAsync(command.PlayerCode)
+                    .TagPromotionTypeAsync(command.PlayerCode, command.PromotionId)
                     .ConfigureAwait(false);
         }
     }
