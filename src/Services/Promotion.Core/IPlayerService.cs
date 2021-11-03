@@ -21,5 +21,7 @@ namespace TGS.Services.Promotion
             bool tracking = false);
 
         Task SetFirstDepositTimeAsync(string playerCode, DateTimeOffset time);
+
+        Task SetFirstPromotionTimeAsync(string playerCode, DateTimeOffset time);
     }
 }

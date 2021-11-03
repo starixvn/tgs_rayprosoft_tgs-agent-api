@@ -63,7 +63,7 @@ namespace Promotion.UnitTests
             await sut.HandleAsync(formEvent.ToByteArray());
 
             _ = fakePromotionChecker.Received(2)
-                .CommitTagAsync(Arg.Any<string>());
+                .CommitTagAsync(Arg.Any<string>(), Arg.Any<Guid?>());
             _ = fakePlayerService.Received(1)
                 .SetFirstDepositTimeAsync(Arg.Is("ThisIsPlayerCode"), Arg.Any<DateTimeOffset>());
         }
@@ -115,7 +115,7 @@ namespace Promotion.UnitTests
             await sut.HandleAsync(formEvent.ToByteArray());
 
             _ = fakePromotionChecker.Received(2)
-                .RollbackTagAsync(Arg.Any<string>());
+                .RollbackTagAsync(Arg.Any<string>(), Arg.Any<Guid?>());
         }
     }
 }

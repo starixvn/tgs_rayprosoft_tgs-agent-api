@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             configuration
                 .RegisterPromotionChecker<FirstDepositChecker>("FirstDeposit")
+                .RegisterPromotionChecker<FirstJoinPromotionChecker>("FirstPromotion")
                 .RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
                 .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit")
                 .RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebate")
