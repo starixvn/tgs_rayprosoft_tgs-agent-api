@@ -3,17 +3,18 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -33,13 +34,7 @@ namespace TGS.Apis.PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[]
-            {
-                "/health",
-                "/metrics",
-                "/favicon.ico",
-                "/swagger"
-            };
+            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -52,7 +47,7 @@ namespace TGS.Apis.PromotionApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -74,7 +69,7 @@ namespace TGS.Apis.PromotionApi
         {
             services.AddTgsRepository(_configuration, "Tgs");
 
-            services.AddNats(_configuration)
+            services
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
@@ -99,10 +94,7 @@ namespace TGS.Apis.PromotionApi
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters =
-                        {
-                            new JsonStringEnumConverter()
-                        }
+                        Converters = { new JsonStringEnumConverter() }
                     };
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
                 });
@@ -111,7 +103,7 @@ namespace TGS.Apis.PromotionApi
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
-                httpClient.BaseAddress = new(config.GetValue<string>("Promotion:FileServiceBaseUrl"));
+                httpClient.BaseAddress = new Uri(config.GetValue<string>("Promotion:FileServiceBaseUrl"));
             });
 
             services.AddNatsMessageQueue(config =>
@@ -140,11 +132,7 @@ namespace TGS.Apis.PromotionApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new()
-                    {
-                        Title = "TGS Promotion API",
-                        Version = "v1"
-                    });
+                    new OpenApiInfo { Title = "TGS Promotion API", Version = "v1" });
 
                 var xml = "TGS.Apis.Promotion.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);

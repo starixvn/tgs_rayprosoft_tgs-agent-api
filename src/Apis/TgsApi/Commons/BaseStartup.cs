@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
@@ -40,7 +40,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
             services.AddTgsRepository(Configuration, "Tgs");
 
-            services.AddNats(Configuration)
+            services
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
@@ -74,7 +74,6 @@ namespace TGS.Apis.TgsApi.Commons
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
                 .AddRedis(Configuration)
-                .AddNats()
                 .ForwardToPrometheus();
 
             services.AddNatsMessageQueue(natsConfig =>
@@ -96,12 +95,7 @@ namespace TGS.Apis.TgsApi.Commons
             app.UseGlobalExceptionHandler();
 
             app.UseApiLogger(LogPrefix,
-                new[]
-                {
-                    "/health",
-                    "/favicon.ico",
-                    "/metrics"
-                });
+                new[] { "/health", "/favicon.ico", "/metrics" });
 
             UseCustomMiddlewaresBeforeRouting(app);
 
@@ -116,7 +110,7 @@ namespace TGS.Apis.TgsApi.Commons
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -131,16 +125,11 @@ namespace TGS.Apis.TgsApi.Commons
                                     var feature = sp.GetRequiredService<IFeatureManager>();
 
                                     var isFeatureEnabled = gpCode.IsNotNullOrEmpty() &&
-                                        await feature.IsEnabledAsync(gpCode);
+                                                           await feature.IsEnabledAsync(gpCode);
 
                                     return new Dictionary<string, object>
                                     {
-                                        {
-                                            "GameProviderCode", gpCode
-                                        },
-                                        {
-                                            "FeatureEnabled", isFeatureEnabled
-                                        }
+                                        { "GameProviderCode", gpCode }, { "FeatureEnabled", isFeatureEnabled }
                                     };
                                 })
                     });

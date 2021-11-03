@@ -11,7 +11,6 @@ using TechTalk.SpecFlow;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
@@ -68,7 +67,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()
-                .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
@@ -101,10 +99,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Operator")));
 
                 services.AddHttpClient<IHabaneroApiClient, HabaneroApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-Habanero")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Tgs-Habanero")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -113,8 +111,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginVia(
             string username, string brandCode,
-            string currencyCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            string currencyCode, PlatformType platformType)
+        {
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
         public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
@@ -150,16 +150,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
-            SetPlayerBalanceAsync(_serviceProvider, balance);
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
 
         [Given(@"game provider has status set to ""(.*)""")]
-        public Task GivenGameProviderHasStatusSetToAsync(Status status) =>
-            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
+        public Task GivenGameProviderHasStatusSetToAsync(Status status)
+        {
+            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
+        }
 
         [Given(@"brand has status set to ""(.*)""")]
-        public Task GivenBrandHasStatusSetToAsync(Status status) =>
-            ChangeBrandStatusAsync(_serviceProvider, status);
+        public Task GivenBrandHasStatusSetToAsync(Status status)
+        {
+            return ChangeBrandStatusAsync(_serviceProvider, status);
+        }
 
         [Given(@"balance now being \$(.*)")]
         public async Task GivenBalanceNowBeing(decimal balance)
@@ -172,13 +178,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [When(@"I place bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
         public Task GivenIPlacedBetForAndSettleItForForGame(
             decimal betAmount, decimal winAmount,
-            string externalGameId) =>
-            PlaceBetAndSettleAsync(betAmount, winAmount, externalGameId);
+            string externalGameId)
+        {
+            return PlaceBetAndSettleAsync(betAmount, winAmount, externalGameId);
+        }
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
-            PlaceBetAsync(amount, externalGameId);
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId);
+        }
 
         [When(@"I call authorize endpoint with username=""(.*)"" and passkey=""(.*)"" and brandid=""(.*)""")]
         public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(
@@ -190,27 +200,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
-            var response = await client.AuthorizePlayerAsync(new()
+            var response = await client.AuthorizePlayerAsync(new AuthorizePlayerRequest
             {
                 Type = "playerdetailrequest",
                 SentOn = DateTimeOffset.Now,
-                Game = new()
+                Game = new Game
                 {
-                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1",
-                    ExternalId = "AcesandEights1Hand"
+                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1", ExternalId = "AcesandEights1Hand"
                 },
-                Authorization = new()
+                Authorization = new Authorization
                 {
                     ClientId = clientId,
                     SecretKey = secretKey,
                     HabaneroBrandId = habaneroBrandId,
                     MachineName = "TESTSERVER"
                 },
-                Detail = new()
-                {
-                    Token = encryptedToken,
-                    GameLaunch = true
-                }
+                Detail = new PlayerDetail { Token = encryptedToken, GameLaunch = true }
             });
 
             Set(SR.Response, response);
@@ -225,16 +230,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"settle bet for \$(.*)")]
         [When(@"I settle bet for \$(.*)")]
-        public Task WhenISettleBetFor(decimal winAmount) =>
-            SettleBetAsync(winAmount);
+        public Task WhenISettleBetFor(decimal winAmount)
+        {
+            return SettleBetAsync(winAmount);
+        }
 
         [When(@"I got a free bet for \$(.*)")]
-        public Task WhenIGotAFreeBetFor(decimal amount) =>
-            SettleBetAsync(amount, type: FreeBet);
+        public Task WhenIGotAFreeBetFor(decimal amount)
+        {
+            return SettleBetAsync(amount, type: FreeBet);
+        }
 
         [When(@"I retry settle bet for \$(.*)")]
-        public Task WhenIRetrySettleBetFor(decimal winAmount) =>
-            SettleBetAsync(winAmount, true);
+        public Task WhenIRetrySettleBetFor(decimal winAmount)
+        {
+            return SettleBetAsync(winAmount, true);
+        }
 
         [When(@"I resend the same bet")]
         [When(@"I resend the same settle bet")]
@@ -251,16 +262,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I cancel transaction")]
         [When(@"I cancel transaction")]
-        public Task WhenICancelTransaction() =>
-            CancelTransactionAsync();
+        public Task WhenICancelTransaction()
+        {
+            return CancelTransactionAsync();
+        }
 
         [When(@"I cancel non-existent transaction for game ""(.*)""")]
-        public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
-            CancelNonExistentTransactionForGameAsync(externalGameId);
+        public Task WhenICancelNonExistentTransactionForGame(string externalGameId)
+        {
+            return CancelNonExistentTransactionForGameAsync(externalGameId);
+        }
 
         [When(@"I place bet for \$(.*) and settle invalid reference Id for game ""(.*)""")]
-        public Task WhenIPlaceBetForAndSettleInvalidReferenceIdForGame(decimal betAmount, string externalGameId) =>
-            PlaceBetAndSettleWithInvalidReferenceIdAsync(betAmount, externalGameId);
+        public Task WhenIPlaceBetForAndSettleInvalidReferenceIdForGame(decimal betAmount, string externalGameId)
+        {
+            return PlaceBetAndSettleWithInvalidReferenceIdAsync(betAmount, externalGameId);
+        }
 
         [When(@"I query bet existence")]
         public async Task WhenIQueryBetExistence()
@@ -274,11 +291,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
-            var response = await client.QueryGameActionAsync(new()
+            var response = await client.QueryGameActionAsync(new QueryRequest
             {
                 Type = "queryrequest",
                 Authorization = _authorization,
-                Detail = new()
+                Detail = new QueryDetail
                 {
                     PlayerCode = playerCode,
                     Token = encryptedToken,
@@ -301,11 +318,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
 
-            var response = await client.QueryGameActionAsync(new()
+            var response = await client.QueryGameActionAsync(new QueryRequest
             {
                 Type = "queryrequest",
                 Authorization = _authorization,
-                Detail = new()
+                Detail = new QueryDetail
                 {
                     PlayerCode = playerCode,
                     Token = string.Empty,
@@ -488,7 +505,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId.ToString() &&
-                    act.ExternalTransactionId == externalTransactionId
+                      act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
@@ -543,24 +560,32 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         #region After Scenario
 
         [After]
-        public Task AfterChangeGameProviderStatusScenarioAsync() =>
-            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+        public Task AfterChangeGameProviderStatusScenarioAsync()
+        {
+            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+        }
 
         [After]
-        public Task AfterChangeGameProviderConfigurationStatusScenarioAsync() =>
-            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+        public Task AfterChangeGameProviderConfigurationStatusScenarioAsync()
+        {
+            return ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+        }
 
         [After]
-        public Task AfterChangeGameStatusScenarioAsync() =>
-            ChangeGameStatusAsync(_serviceProvider,
+        public Task AfterChangeGameStatusScenarioAsync()
+        {
+            return ChangeGameStatusAsync(_serviceProvider,
                 GameProviderCode,
                 Get<string>(SR.ExternalGameId),
                 GameStatus.Active,
                 true);
+        }
 
         [After]
-        public Task AfterChangeBrandStatusScenarioAsync() =>
-            ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
+        public Task AfterChangeBrandStatusScenarioAsync()
+        {
+            return ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
+        }
 
         [After]
         public Task AfterChangePlayerStatusScenarioAsync()
@@ -581,12 +606,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private static string GetExternalTransactionId(
             FundTransferRequest fundTransferRequest,
-            int? transactionIndex = null) =>
-            fundTransferRequest.Detail.IsCancel
+            int? transactionIndex = null)
+        {
+            return fundTransferRequest.Detail.IsCancel
                 ? fundTransferRequest.Detail.FundTransfer.CancelTransaction.TransactionId
                 : fundTransferRequest.Detail.FundTransfer.Transactions[(transactionIndex ?? 1) - 1].TransactionId;
+        }
 
-        private static int NewRoundId() => (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        private static int NewRoundId()
+        {
+            return (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
 
         private async Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
@@ -625,11 +655,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = externalGameId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
                 {
                     RoundId = externalTransactionId,
                     ClientRoundId = externalRoundId.Value,
@@ -637,7 +664,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = false,
                     RetryCount = 0,
                     IsSettlementRetry = false,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = false,
                         Transactions = new Transaction[]
@@ -687,11 +714,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = betRequest.Game.ExternalId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = betRequest.Game.ExternalId },
+                Detail = new TransferDetail
                 {
                     RoundId = betRequest.Detail.RoundId,
                     ClientRoundId = betRequest.Detail.ClientRoundId,
@@ -699,7 +723,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = isRetry,
                     RetryCount = 0,
                     IsSettlementRetry = isRetry,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = false,
                         Transactions = new Transaction[]
@@ -754,11 +778,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = externalGameId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
                 {
                     RoundId = betExternalTransactionId,
                     ClientRoundId = externalRoundId,
@@ -766,7 +787,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = false,
                     RetryCount = 0,
                     IsSettlementRetry = false,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = true,
                         Transactions = new Transaction[]
@@ -822,11 +843,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = betRequest.Game.ExternalId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = betRequest.Game.ExternalId },
+                Detail = new TransferDetail
                 {
                     RoundId = betRequest.Detail.RoundId,
                     ClientRoundId = betRequest.Detail.ClientRoundId,
@@ -834,10 +852,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = true,
                     RetryCount = 0,
                     IsSettlementRetry = false,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = false,
-                        CancelTransaction = new()
+                        CancelTransaction = new CancelTransaction
                         {
                             CurrencyCode = betTransaction.CurrencyCode,
                             Amount = betTransaction.Amount,
@@ -883,11 +901,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = externalGameId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
                 {
                     RoundId = externalTransactionId,
                     ClientRoundId = externalRoundId,
@@ -895,10 +910,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = true,
                     RetryCount = 0,
                     IsSettlementRetry = false,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = false,
-                        CancelTransaction = new()
+                        CancelTransaction = new CancelTransaction
                         {
                             CurrencyCode = gameProviderCurrencyCode,
                             Amount = 10,
@@ -946,11 +961,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new()
-                {
-                    ExternalId = externalGameId
-                },
-                Detail = new()
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
                 {
                     RoundId = externalTransactionId,
                     ClientRoundId = externalRoundId,
@@ -958,7 +970,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     IsRetry = false,
                     RetryCount = 0,
                     IsSettlementRetry = false,
-                    FundTransfer = new()
+                    FundTransfer = new FundTransfer
                     {
                         IsBetAndSettle = true,
                         Transactions = new Transaction[]

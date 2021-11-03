@@ -11,7 +11,6 @@ using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -44,7 +43,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
             services
-                .AddNats(configuration)
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()

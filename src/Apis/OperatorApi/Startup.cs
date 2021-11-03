@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +28,6 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -86,7 +86,7 @@ namespace TGS.Apis.OperatorApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -107,7 +107,7 @@ namespace TGS.Apis.OperatorApi
         {
             services.AddTgsRepository(_configuration, "Tgs");
 
-            services.AddNats(_configuration)
+            services
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddRedis()
@@ -148,10 +148,7 @@ namespace TGS.Apis.OperatorApi
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters =
-                        {
-                            new JsonStringEnumConverter()
-                        }
+                        Converters = { new JsonStringEnumConverter() }
                     };
                 })
                 .Services
@@ -210,7 +207,7 @@ namespace TGS.Apis.OperatorApi
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
             {
                 var url = _configuration.GetSection("Email:Url");
-                c.BaseAddress = new(url.Value);
+                c.BaseAddress = new Uri(url.Value);
             });
 
             services.AddHttpContextAccessor();
@@ -248,11 +245,7 @@ namespace TGS.Apis.OperatorApi
                 services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1",
-                        new()
-                        {
-                            Title = "TGS Operator API",
-                            Version = "v1"
-                        });
+                        new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -262,10 +255,9 @@ namespace TGS.Apis.OperatorApi
                         Type = SecuritySchemeType.Http,
                         BearerFormat = "JWT",
                         Scheme = "bearer",
-                        Reference = new()
+                        Reference = new OpenApiReference
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
                         }
                     };
 
