@@ -11,6 +11,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
+using TGS.Services.Operations.CodeMappers;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.Models.SBOBET.Outgoing;
@@ -23,6 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IBrandOperations _brandOperations;
         private readonly ISBOApiClient _client;
+        private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
@@ -33,14 +35,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
+            IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
             ISBOApiClient client)
         {
-            _settingOperations = settingOperations;
-            _playerOperations = playerOperations;
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _brandGameProviderOperations = brandGameProviderOperations;
-            _client = client;
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+
+            _gameProviderOperations =
+                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+
+            _brandGameProviderOperations = brandGameProviderOperations ??
+                throw new ArgumentNullException(nameof(brandGameProviderOperations));
+
+            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ??
+                throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -59,8 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     .GameProviderConfigurations.SBOBET);
 
             var response =
-                await PlayerLoginAsync(configuration.ApiUrl, configuration.CompanyKey,
-                    configuration.AgentPrefix, player, gameType.Value);
+                await PlayerLoginAsync(gameProviderId, player, gameType.Value, configuration);
 
             if (response.Error.Code != None)
             {
@@ -72,7 +81,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
             var loginResponse = (LoginResponse)response;
-            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
+
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId,
+                brandId,
                 request.Language);
 
             var url = gameType switch
@@ -82,43 +93,91 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 _ => default
             };
 
-            return new() {Url = url};
+            return new()
+            {
+                Url = url
+            };
         }
 
-        private async Task<BaseResponse> PlayerLoginAsync(Uri apiUrl, string companyKey, string agentPrefix,
-            CachedPlayer player, GameType gameType)
+        private async ValueTask<BaseResponse> PlayerLoginAsync(
+            Guid gameProviderId,
+            CachedPlayer player,
+            GameType gameType,
+            SBOConfiguration configuration)
         {
             var portfolio = Utility.GetPortfolio(gameType);
 
             var loginRequest = new LoginRequest
             {
-                CompanyKey = companyKey,
+                CompanyKey = configuration.CompanyKey,
                 PlayerCode = player.PlayerCode,
                 Portfolio = portfolio
             };
 
-            var loginResponse = await _client.LoginAsync(apiUrl, loginRequest);
+            var apiUrl = configuration.ApiUrl;
+            var loginResponse = await _client.LoginAsync(apiUrl, loginRequest).ConfigureAwait(false);
+
             if (loginResponse.Error.Code == None || loginResponse.Error.Code != UserNotExist)
             {
                 return loginResponse;
             }
 
-            var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
-                new(agentPrefix, player.BrandCode, player.DefaultWalletCurrencyCode)
-                {
-                    CompanyKey = companyKey,
-                    PlayerCode = player.PlayerCode
-                });
+            var createPlayerResponse =
+                await CreatePlayerAsync(gameProviderId, player, configuration).ConfigureAwait(false);
 
-            if (registerResponse.Error.Code != None)
+            if (createPlayerResponse.Error.Code != None)
             {
-                return registerResponse;
+                return createPlayerResponse;
             }
 
             return await _client.LoginAsync(apiUrl, loginRequest);
         }
 
-        private static string GetSportsbookUrl(QueryStrings queryStrings, PlatformType platform,
+        private async ValueTask<BaseResponse> CreatePlayerAsync(
+            Guid gameProviderId, CachedPlayer player, SBOConfiguration configuration)
+        {
+            var createPlayerRequest = new RegisterPlayerRequest(
+                configuration.AgentPrefix,
+                player.BrandCode,
+                player.DefaultWalletCurrencyCode)
+            {
+                CompanyKey = configuration.CompanyKey,
+                PlayerCode = player.PlayerCode
+            };
+
+            var apiUrl = configuration.ApiUrl;
+
+            var registerResponse = await _client.CreatePlayerAsync(apiUrl, createPlayerRequest)
+                .ConfigureAwait(false);
+
+            if (registerResponse.Error.Code is None or not AgentNotExist)
+            {
+                return registerResponse;
+            }
+
+            var gameProviderCurrency =
+                await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode,
+                    gameProviderId).ConfigureAwait(false);
+
+            var createAgentResponse = await _client.CreateAgentAsync(apiUrl,
+                new CreateAgentRequest
+                {
+                    AgentId = createPlayerRequest.AgentId,
+                    CurrencyCode = gameProviderCurrency,
+                    CompanyKey = configuration.CompanyKey
+                }).ConfigureAwait(false);
+
+            if (createAgentResponse.Error.Code != None)
+            {
+                return createAgentResponse;
+            }
+
+            return await _client.CreatePlayerAsync(apiUrl, createPlayerRequest)
+                .ConfigureAwait(false);
+        }
+
+        private static string GetSportsbookUrl(
+            QueryStrings queryStrings, PlatformType platform,
             string url, string cultureCode)
         {
             var queryString = queryStrings.Desktop;
