@@ -16,7 +16,7 @@ namespace TGS.Shared.Game.Models.LY.Commons
         [JsonPropertyName("tableID")]
         public int TableID { get; init; }
         [JsonPropertyName("chairID")]
-        public int ChairID { get; init; }
+        public int? ChairID { get; init; }
         [JsonPropertyName("userCount")]
         public int UserCount { get; init; }
         [JsonPropertyName("cellScore")]

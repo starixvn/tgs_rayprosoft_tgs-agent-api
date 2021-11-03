@@ -12,6 +12,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid? AgentId { get; set; }
 
+        public string AreaCode { get; set; }
+
         public virtual ICollection<PlayerBankInfo> Banks { get; set; }
 
         public virtual BetLimit BetLimit { get; set; }
@@ -32,6 +34,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset? FirstDepositOn { get; set; }
 
+        public DateTimeOffset? FirstPromotionOn { get; set; }
+
         public virtual PlayerGameSetting GameSetting { get; set; }
 
         public bool IdentityAuthentication { get; set; }
@@ -43,8 +47,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<StationLetterPlayer> Letters { get; set; }
 
         public byte[] Password { get; set; }
-
-        public string AreaCode { get; set; }
 
         public string Phone { get; set; }
 
