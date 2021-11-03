@@ -107,7 +107,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     DepositAmount = ad.DepositAmount,
                     WithdrawalAmount = playerWithdrawals.Where(w => w.AgentId == ad.AgentId)
                         .Sum(w => w.WithdrawalAmount),
-                    AdjustmentAmount = ad.WithdrawalAmount,
+                    AdjustmentAmount = ad.AdjustmentAmount,
                     BonusAmount = ad.BonusAmount,
                     BetAmount = ad.BetAmount,
                     ValidBetAmount = ad.Turnover,
