@@ -19,16 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Operations", "src\Services\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redis.IntegrationTests", "src\Tests\Redis.IntegrationTests\Redis.IntegrationTests.csproj", "{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nats.IntegrationTests", "src\Tests\Nats.IntegrationTests\Nats.IntegrationTests.csproj", "{5C1CCE46-0C09-41B5-A6CE-44256B44492F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{897541B7-3AE6-4AEE-9D3E-51221088F2CC}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		.gitlab-ci.yml = .gitlab-ci.yml
 		docker-compose.yml = docker-compose.yml
-		DockerImageBuild.bat = DockerImageBuild.bat
 		nuget.config = nuget.config
-		RunDockerPush.bat = RunDockerPush.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataServices.Base", "src\Core\DataServices.Base\DataServices.Base.csproj", "{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}"
@@ -175,10 +170,6 @@ Global
 		{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5C1CCE46-0C09-41B5-A6CE-44256B44492F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5C1CCE46-0C09-41B5-A6CE-44256B44492F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5C1CCE46-0C09-41B5-A6CE-44256B44492F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5C1CCE46-0C09-41B5-A6CE-44256B44492F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -364,7 +355,6 @@ Global
 		{3763ECF4-01E1-416E-BAAC-887FBB939516} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{087A84A8-9BB1-41FC-8134-3A6876BD34D8} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{C94BD1F6-87B9-4A45-BFE5-901B80C24ABE} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
-		{5C1CCE46-0C09-41B5-A6CE-44256B44492F} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{EB47CAF6-6410-4F88-B220-41A1B61DBBE3} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 		{DF4A265E-9CC8-4CB6-A785-CCEC4C75EAF5} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{B92347FB-E471-4185-9A87-1F608D74B52F} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}

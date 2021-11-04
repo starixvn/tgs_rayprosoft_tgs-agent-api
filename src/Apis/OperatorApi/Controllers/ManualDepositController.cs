@@ -192,7 +192,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
-        private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string? applyInfo)
+        private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)
         {
             return bankType switch
             {

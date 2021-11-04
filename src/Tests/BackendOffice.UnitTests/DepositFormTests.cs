@@ -185,6 +185,16 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     DefaultWalletId = walletId
                 }));
 
+            moqPlayerBucketRepository
+                .Setup(fake => fake.CreatePlayerBucketWithDepositAsync(
+                    It.Is<CreatePlayerBucketWithDepositRequest>(
+                        x => x.BrandId == brandId
+                            && x.DefaultWalletId == walletId
+                            && x.DepositAmount == 1000M
+                            && x.PlayerCode == "ThisIsPlayerCode")))
+                .Returns(ValueTask.FromResult(
+                    new CreatePlayerBucketWithDepositResponse(1000M, null)));
+
             await sut.ExecuteAsync(command);
 
             moqPaymentServiceClient.Verify(

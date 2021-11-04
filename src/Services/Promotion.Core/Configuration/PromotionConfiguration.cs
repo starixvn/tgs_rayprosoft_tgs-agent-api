@@ -8,23 +8,25 @@ namespace TGS.Services.Promotion.Configuration
 {
     public class PromotionConfiguration
     {
-        private Dictionary<string, Type> _checkerTypes = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> _checkerTypes = new Dictionary<string, Type>();
 
         public IServiceCollection Services { get; }
 
         public PromotionConfiguration(IServiceCollection services)
         {
-            Services = services ?? throw new System.ArgumentNullException(nameof(services));
+            Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
-        public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>() where TPlayerDataRepository : class, IPlayerDataRepository
+        public PromotionConfiguration AddPlayerDataRepository<TPlayerDataRepository>()
+            where TPlayerDataRepository : class, IPlayerDataRepository
         {
             Services.AddTransient<IPlayerDataRepository, TPlayerDataRepository>();
 
             return this;
         }
 
-        public PromotionConfiguration AddPromotionBonusRepository<TPromotionBonusRepository>() where TPromotionBonusRepository : class, IPromotionBonusRepository
+        public PromotionConfiguration AddPromotionBonusRepository<TPromotionBonusRepository>()
+            where TPromotionBonusRepository : class, IPromotionBonusRepository
         {
             Services.AddTransient<IPromotionBonusRepository, TPromotionBonusRepository>();
 
@@ -39,14 +41,24 @@ namespace TGS.Services.Promotion.Configuration
             return this;
         }
 
-        public PromotionConfiguration AddPromotionRepository<TPromotionRepository>() where TPromotionRepository : class, IPromotionRepository
+        public PromotionConfiguration AddPromotionRepository<TPromotionRepository>()
+            where TPromotionRepository : class, IPromotionRepository
         {
             Services.AddTransient<IPromotionRepository, TPromotionRepository>();
 
             return this;
         }
 
-        public PromotionConfiguration AddSettingRepository<TSettingRepository>() where TSettingRepository : class, ISettingRepository
+        public PromotionConfiguration AddPromotionPlayerRepository<TPromotionPlayerRepository>()
+            where TPromotionPlayerRepository : class, IPromotionPlayerRepository
+        {
+            Services.AddTransient<IPromotionPlayerRepository, TPromotionPlayerRepository>();
+
+            return this;
+        }
+
+        public PromotionConfiguration AddSettingRepository<TSettingRepository>()
+            where TSettingRepository : class, ISettingRepository
         {
             Services.AddTransient<ISettingRepository, TSettingRepository>();
 
@@ -60,7 +72,8 @@ namespace TGS.Services.Promotion.Configuration
             return this;
         }
 
-        public PromotionConfiguration RegisterPromotionChecker<TChecker>(string typeName) where TChecker : class, IPromotionChecker
+        public PromotionConfiguration RegisterPromotionChecker<TChecker>(string typeName)
+            where TChecker : class, IPromotionChecker
         {
             Services.AddTransient<TChecker>();
 
@@ -69,7 +82,8 @@ namespace TGS.Services.Promotion.Configuration
             return this;
         }
 
-        public PromotionConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
+        public PromotionConfiguration AddPaymentServiceClient(
+            Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
             Services.AddPaymentServiceClient(configure);
 

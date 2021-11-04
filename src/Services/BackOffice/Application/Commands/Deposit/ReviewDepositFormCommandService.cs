@@ -39,7 +39,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         }
 
         public async ValueTask ExecuteAsync(
-            ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
+            ReviewDepositFormCommand command,
+            CancellationToken cancellationToken = default)
         {
             var form = await _paymentServiceClient
                 .GetDepositFormAsync(command.BrandId, command.FormId)
@@ -73,7 +74,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
-                var actualAmount = await Policy.Handle<PostgresException>()
+                var promotionResponse = await Policy.Handle<PostgresException>()
                     .RetryAsync(3, (ex, count) => _logger.LogWarning($"Retry occur {ex}"))
                     .ExecuteAsync(async () => await _playerBucketRepository
                         .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
@@ -86,6 +87,12 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             command.FormId,
                             string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
                         .ConfigureAwait(false))
+                    .ConfigureAwait(false);
+
+                await _paymentServiceClient
+                    .SubmitDepositFormStatusAsync(
+                        command.FormId,
+                        promotionPlayerId: promotionResponse.PromotionPlayerId)
                     .ConfigureAwait(false);
 
                 await _playerService

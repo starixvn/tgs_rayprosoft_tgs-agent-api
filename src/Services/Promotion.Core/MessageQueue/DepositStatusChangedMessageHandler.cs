@@ -68,12 +68,12 @@ namespace TGS.Services.Promotion.MessageQueue
                         .ConfigureAwait(false);
 
                     await _firstDepositChecker
-                        .CommitTagAsync(depositForm.PlayerCode)
+                        .CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                         .ConfigureAwait(false);
 
                     if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
                         await _dailyFirstDepositChecker
-                            .CommitTagAsync(depositForm.PlayerCode)
+                            .CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                             .ConfigureAwait(false);
 
                     if (depositForm.PromotionId.HasValue)
@@ -87,12 +87,12 @@ namespace TGS.Services.Promotion.MessageQueue
 
                 case PaymentFlowState.Reject:
                     await _firstDepositChecker
-                        .RollbackTagAsync(depositForm.PlayerCode)
+                        .RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                         .ConfigureAwait(false);
 
                     if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
                         await _dailyFirstDepositChecker
-                            .RollbackTagAsync(depositForm.PlayerCode)
+                            .RollbackTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                             .ConfigureAwait(false);
                     break;
             }

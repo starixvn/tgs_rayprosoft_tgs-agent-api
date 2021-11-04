@@ -19,7 +19,8 @@ namespace TGS.Services.Promotion.Services
                 throw new ArgumentNullException(nameof(promotionCheckerFactory));
         }
 
-        public async ValueTask<bool> GetAsync(CheckCanJoinPromotionQuery query,
+        public async ValueTask<bool> GetAsync(
+            CheckCanJoinPromotionQuery query,
             CancellationToken cancellationToken = default)
         {
             var promotionData = await _promotionRepository.GetPromotionByIdAsync(query.PromotionId);
@@ -31,7 +32,9 @@ namespace TGS.Services.Promotion.Services
 
             var checker = _promotionCheckerFactory.GetPromotionChecker(promotionData.PromotionType);
 
-            var isAllowed = await checker.CheckAsync(query.PlayerCode).ConfigureAwait(false);
+            var isAllowed = await checker
+                .CheckAsync(query.PlayerCode)
+                .ConfigureAwait(false);
             if (!isAllowed)
             {
                 return false;
