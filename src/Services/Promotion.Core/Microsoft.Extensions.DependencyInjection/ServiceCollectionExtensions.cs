@@ -18,8 +18,8 @@ namespace Microsoft.Extensions.DependencyInjection
             var configuration = new PromotionConfiguration(services);
 
             configuration
-                .RegisterPromotionChecker<FirstDepositChecker>("FirstDeposit")
-                .RegisterPromotionChecker<FirstJoinPromotionChecker>("FirstPromotion")
+                .RegisterPromotionChecker<FirstDepositChecker>("AccountFirstDeposit")
+                .RegisterPromotionChecker<FirstJoinPromotionChecker>("FirstDeposit")
                 .RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
                 .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit")
                 .RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebate")

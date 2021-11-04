@@ -340,7 +340,7 @@ namespace Promotion.UnitTests
                 new Dictionary<string, Type>
                 {
                     ["FirstDeposit"] = typeof(object),
-                    ["FirstPromotion"] = typeof(object),
+                    ["AccountFirstDeposit"] = typeof(object),
                     ["DailyFirstDeposit"] = typeof(object),
                     ["DailySecondDeposit"] = typeof(object),
                     ["TurnoverRebate"] = typeof(object),
