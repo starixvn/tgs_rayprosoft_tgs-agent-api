@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operations;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {
@@ -18,9 +18,9 @@ namespace TGS.Services.Operator.Services.Withdraw
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IWalletRepository _walletRepository;
 
         public CreateWithdrawFormCommandService(

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
@@ -27,7 +27,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     ThirdPartyOrderNo = query.ThirdPartyOrderNo,
                     FormId = query.FormId,
                     UpdateOnRange = query.UpdateOnRange,
-                    UserName = query.UserName
+                    UserName = query.UserName,
+                    OrderNo = query.OrderNo
                 },
                 new Tgs.Payment.Clients.Paging
                 {

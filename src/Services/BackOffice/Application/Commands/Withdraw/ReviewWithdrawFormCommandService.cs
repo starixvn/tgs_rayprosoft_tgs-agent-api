@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.WalletService;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Withdraw
 {

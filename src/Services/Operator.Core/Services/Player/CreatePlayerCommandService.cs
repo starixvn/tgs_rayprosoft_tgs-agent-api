@@ -10,7 +10,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

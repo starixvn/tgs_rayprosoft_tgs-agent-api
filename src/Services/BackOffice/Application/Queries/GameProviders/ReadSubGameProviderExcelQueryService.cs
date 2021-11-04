@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using ExcelDataReader;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviders
 {

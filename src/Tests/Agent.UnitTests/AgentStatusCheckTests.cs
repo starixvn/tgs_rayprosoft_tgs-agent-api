@@ -14,7 +14,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Agent.Services.Agent;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace Agent.UnitTests
 {

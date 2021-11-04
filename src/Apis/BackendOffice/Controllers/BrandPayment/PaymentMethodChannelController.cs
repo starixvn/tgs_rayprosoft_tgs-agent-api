@@ -12,7 +12,7 @@ using TGS.Services.BackOffice.Application.Commands.PaymentMethodChannel;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {

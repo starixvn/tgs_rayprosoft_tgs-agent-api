@@ -4,10 +4,10 @@ using System.Linq;
 using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Withdraw;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {

@@ -12,6 +12,11 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Linq;
+using System.Collections.Specialized;
+using System;
 
 namespace TGS.Clients.Report.Client
 {
@@ -59,7 +64,10 @@ namespace TGS.Clients.Report.Client
         Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request);
 
         Task<Stream> ExportVipsAsync(ExportVipReportRequest request);
+
         Task<Stream> ExportAgentDividendsTrialCalculationAsync(ExportAgentDividendsTrialCalculationRequest request);
+
+        Task<Stream> ExportLicenseeMarketsAsync(ExportLicenseeMarketsRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
@@ -310,8 +318,38 @@ namespace TGS.Clients.Report.Client
 
         public async Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
         {
-            var prefix = $"Report.LicenseeId.{request.LicenseeId}.GetMarkets";
-            var path = ClientPath.AppendWithProperties("/api/LicenseeMarketReport?", request);
+            var prefix = $"Report.LicenseeId.{request.LicenseeId}.GetLicenseeMarkets";
+
+            var keyValues = new Dictionary<string, string>();
+            foreach (var propertyInfo in request
+                .GetType()
+                .GetProperties()
+                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase)).ToArray())
+            {
+                var value = propertyInfo.GetValue(request);
+
+                if (value == null)
+                {
+                    continue;
+                }
+
+                if (propertyInfo.PropertyType == typeof(DateTimeOffset)
+                    || propertyInfo.PropertyType == typeof(DateTimeOffset?))
+                {
+                    value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                }
+                keyValues.Add(propertyInfo.Name, value.ToString());
+            }
+
+            var parameters = string.Join("&", keyValues.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
+
+            var currencyCodes = request.CurrencyCodes?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
+
+            var currencyCodeParameters = currencyCodes == null ? string.Empty : string.Join("&", currencyCodes);
+
+            parameters += (string.IsNullOrEmpty(parameters)) ? currencyCodeParameters : $"&{currencyCodeParameters }";
+
+            var path = $"/api/LicenseeMarketReport?{parameters}";
 
             return await ExecuteJsonRequestAsync<GetLicenseeMarketsRequest, LicenseeMarketsResponse>(
                 HttpMethod.Get,
@@ -410,10 +448,57 @@ namespace TGS.Clients.Report.Client
         }
 
         public async Task<Stream> ExportAgentDividendsTrialCalculationAsync(
-            ExportAgentDividendsTrialCalculationRequest request)
+           ExportAgentDividendsTrialCalculationRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividendsTrialCalculation?",
                 request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportLicenseeMarketsAsync(ExportLicenseeMarketsRequest request)
+        {
+            var prefix = $"Report.LicenseeId.{request.LicenseeId}.ExportLicenseeMarkets";
+
+            var keyValues = new Dictionary<string, string>();
+            foreach (var propertyInfo in request
+                .GetType()
+                .GetProperties()
+                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase)).ToArray())
+            {
+                var value = propertyInfo.GetValue(request);
+
+                if (value == null)
+                {
+                    continue;
+                }
+
+                if (propertyInfo.PropertyType == typeof(DateTimeOffset)
+                    || propertyInfo.PropertyType == typeof(DateTimeOffset?))
+                {
+                    value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                }
+                keyValues.Add(propertyInfo.Name, value.ToString());
+            }
+            var parameters = string.Join("&", keyValues.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
+
+            var currencyCodes = request.CurrencyCodes?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
+
+            var currencyCodeParameters = currencyCodes == null ? string.Empty : string.Join("&", currencyCodes);
+
+            parameters += (string.IsNullOrEmpty(parameters)) ? currencyCodeParameters : $"&{currencyCodeParameters }";
+
+            var path = $"/api/LicenseeMarketReport/exportLicenseeMarkets?{parameters}";
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 

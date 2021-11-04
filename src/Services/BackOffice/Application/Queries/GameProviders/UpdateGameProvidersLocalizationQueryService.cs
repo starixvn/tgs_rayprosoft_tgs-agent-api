@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviders
 {

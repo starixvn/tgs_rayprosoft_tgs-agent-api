@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using ClosedXML.Excel;
 using ClosedXML.Report;
 using Microsoft.Extensions.FileProviders;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Localization
 {
@@ -54,6 +54,21 @@ namespace TGS.Services.BackOffice.Application.Queries.Localization
             return ms;
         }
 
+        private void GenerateEmptyWorkSheet(XLWorkbook target)
+        {
+            using var fs = _templateFileInfo.CreateReadStream();
+            using var template = new XLTemplate(fs);
+
+            template.AddVariable(new
+            {
+                Rows = Array.Empty<object>()
+            });
+
+            template.Generate();
+
+            template.Workbook.Worksheet("template").CopyTo(target, "en-US");
+        }
+
         private void GenerateLanguageWorkSheet(
             XLWorkbook target,
             string cultureCode,
@@ -74,21 +89,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Localization
             template.Generate();
 
             template.Workbook.Worksheet("template").CopyTo(target, cultureCode);
-        }
-
-        private void GenerateEmptyWorkSheet(XLWorkbook target)
-        {
-            using var fs = _templateFileInfo.CreateReadStream();
-            using var template = new XLTemplate(fs);
-
-            template.AddVariable(new
-            {
-                Rows = Array.Empty<object>()
-            });
-
-            template.Generate();
-
-            template.Workbook.Worksheet("template").CopyTo(target, "en-US");
         }
     }
 }

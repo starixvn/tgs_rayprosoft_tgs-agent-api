@@ -30,6 +30,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public string ThirdPartyOrderNo { get; init; }
 
+        public string OrderNo { get; init; }
+
         public string ReviewedUserName { get; init; }
     }
 }

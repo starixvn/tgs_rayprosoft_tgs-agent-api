@@ -75,6 +75,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(w => w.ThirdPartyOrderNo);
 
+            builder.Property(w => w.OrderNo)
+                .HasMaxLength(50);
+
             builder.HasOne(w => w.Brand)
                 .WithMany()
                 .HasForeignKey(w => w.BrandId)

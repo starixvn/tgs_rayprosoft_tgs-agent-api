@@ -21,8 +21,8 @@
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.31" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.32" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +47,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>AgentDividend.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\LicenseeMarket.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LicenseeMarket.resx</DependentUpon>
     </Compile>
     <Compile Update="Application\Resources\Player.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -82,6 +87,10 @@
     <EmbeddedResource Update="Application\Resources\AgentDividend.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AgentDividend.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\LicenseeMarket.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LicenseeMarket.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\Player.resx">
       <Generator>ResXFileCodeGenerator</Generator>

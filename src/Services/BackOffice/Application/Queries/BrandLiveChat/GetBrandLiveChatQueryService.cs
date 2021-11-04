@@ -2,8 +2,8 @@
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.BackOffice.Application.Queries.BrandLiveChat

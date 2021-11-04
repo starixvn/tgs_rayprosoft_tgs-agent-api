@@ -84,6 +84,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(p => p.FirstDepositOn);
 
+            builder.Property(p => p.FirstPromotionOn);
+
             builder.HasOne(p => p.Brand)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.BrandId)

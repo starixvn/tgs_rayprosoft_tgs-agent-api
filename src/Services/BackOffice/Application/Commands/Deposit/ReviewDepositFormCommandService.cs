@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {

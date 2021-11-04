@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.ServiceUtility;
-using TGS.Services.Agent.Services.Localization;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Localization
 {

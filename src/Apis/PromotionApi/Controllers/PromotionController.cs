@@ -10,7 +10,7 @@ using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.PromotionApi.Controllers
 {
@@ -32,7 +32,7 @@ namespace TGS.Apis.PromotionApi.Controllers
 
         [HttpPut("{promotionId}/{status}")]
         [Description("Change promotion status")]
-        public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
+        public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, PromotionStatus status) =>
             _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
         [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}")]
@@ -137,6 +137,7 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {
             request.Id = id;
+
             return _mediator.Send(request);
         }
 

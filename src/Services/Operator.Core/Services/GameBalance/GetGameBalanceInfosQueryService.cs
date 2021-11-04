@@ -6,7 +6,7 @@ using System.Threading;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 //using System.Linq.Dynamic;
 

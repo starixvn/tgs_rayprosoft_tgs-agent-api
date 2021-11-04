@@ -28,7 +28,11 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             CachedGame cachedGame,
             string language)
         {
-            var gameRecord = JsonSerializer.Deserialize<KYGameRecord>(round.RoundDetail.AdditionalData);
+            var gameRecord = JsonSerializer.Deserialize<KYGameRecord>(round.RoundDetail.AdditionalData, new JsonSerializerOptions
+            {
+                // 設定在做序列化/反序列化時，尊重名稱大小寫
+                PropertyNameCaseInsensitive = true
+            });
 
             if (gameRecord == null)
             {
@@ -76,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 "7" => "七筒",
                 "8" => "⼋筒",
                 "9" => "九筒",
-                _   => "⽩板"
+                _ => "⽩板"
             };
 
 
@@ -86,7 +90,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 "0" => "♦",
                 "1" => "♣",
                 "2" => "♥",
-                _   => "♠"
+                _ => "♠"
             };
 
 
@@ -98,7 +102,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 "b" => "J",
                 "c" => "Q",
                 "d" => "K",
-                _   => number
+                _ => number
             };
     }
 }

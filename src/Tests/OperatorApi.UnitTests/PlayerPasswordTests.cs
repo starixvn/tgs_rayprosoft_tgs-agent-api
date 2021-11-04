@@ -225,7 +225,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator);
 
-            var command = new ForgotPasswordByMailCommand(CultureInfo.GetCultureInfo("en-US"), email);
+            var command = new ForgotPasswordByMailCommand(
+                player.BrandId,
+                CultureInfo.GetCultureInfo("en-US"),
+                email);
 
             var validateCode = "123456";
             var token = "abc123";
@@ -234,7 +237,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync(
+                    Arg.Is(validateCode),
+                    Arg.Is(token),
+                    Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
             await sut.GetAsync(command);
