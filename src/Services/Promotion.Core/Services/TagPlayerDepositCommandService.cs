@@ -17,10 +17,10 @@ namespace TGS.Services.Promotion.Services
             }
 
             var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
-            var firstJoinPromotionChecker = promotionCheckerFactory.GetPromotionChecker("FirstPromotion");
+            var AccountfirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
             var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 
-            _checkers = new[] { firstDepositChecker, firstJoinPromotionChecker, dailyFirstDepositChecker };
+            _checkers = new[] { firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker };
         }
 
         public async ValueTask ExecuteAsync(TagPlayerDepositCommand command, CancellationToken cancellationToken = default)
