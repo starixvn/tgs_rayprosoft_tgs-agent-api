@@ -12,13 +12,13 @@ using MockQueryable.Moq;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion;
 using TGS.Services.Promotion.Handlers;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using Tgs.ServiceUtility;
 
 namespace Promotion.UnitTests
 {
@@ -70,6 +70,61 @@ namespace Promotion.UnitTests
                 false));
 
             Assert.AreEqual(result.Items.Length, showAll ? 20 : 10);
+        }
+
+        [Test]
+        public async Task Can_Get_Promotions_Without_Archived()
+        {
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            var promotionServiceMock = new Mock<IPromotionRepository>();
+
+            var promotionsQueryHandlerMock =
+                new GetPromotionsQueryHandler(promotionServiceMock.Object, mockHttpContextAccessor.Object);
+
+            var request = new GetPromotionsRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Page = 1,
+                Rows = 10,
+                SortBy = "updatedOn",
+                OrderBy = SortOrder.Descending,
+                ShowAll = false
+            };
+
+            var list = CreatePromotionFixture()
+                .CreateMany<TGS.Core.DataServices.Tgs.Models.Promotion>(10)
+                .AsQueryable()
+                .BuildMock().Object;
+
+            var index = 0;
+
+            foreach (var promotion in list)
+            {
+                if (index == 0)
+                {
+                    promotion.Status = PromotionStatus.Archived;
+                }
+
+                promotion.BrandId = request.BrandId;
+
+                index++;
+            }
+
+            promotionServiceMock.Setup(x =>
+                    x.GetPromotionQueries(
+                        It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                            IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                        false))
+                .Returns(list);
+
+            var result = await promotionsQueryHandlerMock.Handle(request, new());
+
+            promotionServiceMock.Verify(x => x.GetPromotionQueries(
+                It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                    IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
+                false));
+
+            Assert.AreEqual(result.Items.Length, 9);
         }
 
         [Test]
@@ -232,61 +287,6 @@ namespace Promotion.UnitTests
                         IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
                         IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
                     Arg.Any<bool>());
-        }
-
-        [Test]
-        public async Task Can_Get_Promotions_Without_Archived()
-        {
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
-            var promotionServiceMock = new Mock<IPromotionRepository>();
-
-            var promotionsQueryHandlerMock =
-                new GetPromotionsQueryHandler(promotionServiceMock.Object, mockHttpContextAccessor.Object);
-
-            var request = new GetPromotionsRequest
-            {
-                BrandId = Guid.NewGuid(),
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = false
-            };
-
-            var list = CreatePromotionFixture()
-                .CreateMany<TGS.Core.DataServices.Tgs.Models.Promotion>(10)
-                .AsQueryable()
-                .BuildMock().Object;
-
-            var index = 0;
-
-            foreach (var promotion in list)
-            {
-                if (index == 0)
-                {
-                    promotion.Status = PromotionStatus.Archived;
-                }
-
-                promotion.BrandId = request.BrandId;
-
-                index++;
-            }
-
-            promotionServiceMock.Setup(x =>
-                    x.GetPromotionQueries(
-                        It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                            IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
-                        false))
-                .Returns(list);
-
-            var result = await promotionsQueryHandlerMock.Handle(request, new());
-
-            promotionServiceMock.Verify(x => x.GetPromotionQueries(
-                It.IsAny<Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                    IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>>>(),
-                false));
-
-            Assert.AreEqual(result.Items.Length, 9);
         }
 
         private Fixture CreatePromotionFixture()

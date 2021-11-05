@@ -9,6 +9,8 @@ using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Clients.Promotion.Client;
+using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
@@ -65,18 +67,36 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// Gets the deposit form detail.
         /// </summary>
         /// <param name="getDepositFormService">The get deposit form service.</param>
+        /// <param name="promotionClient">The promotion client.</param>
         /// <param name="brandId">The brand identifier.</param>
         /// <param name="formId">The form identifier.</param>
         /// <returns></returns>
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<DepositFormDetailViewModel>> GetDepositFormDetailAsync(
             [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] IPromotionClient promotionClient,
             Guid brandId,
             Guid formId)
         {
             var formDetail = await getDepositFormService
                 .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
                 .ConfigureAwait(false);
+
+            var promotionNames = (await promotionClient
+                .GetPromotionNamesAsync(new GetPromotionNamesRequest(
+                    new[] { formDetail.PromotionId }
+                        .Where(id => id != null)
+                        .Select(id => id.Value)
+                        .ToArray()))
+                .ConfigureAwait(false))
+                .ToDictionary(model => model.Id, model => model.Name);
+
+            var promotionBonus = (await promotionClient.GetPromotionBonusOfDepositAsync(
+                new[] { formDetail.PromotionPlayerId }
+                    .Where(id => id != null)
+                    .Select(id => id.Value)
+                    .ToArray()).ConfigureAwait(false))
+                    .ToDictionary(model => model.Id, model => model.BonusAmount);
 
             return new GenericResponse<DepositFormDetailViewModel>
             {
@@ -102,7 +122,15 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
                     ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo,
-                    OrderNo = formDetail.OrderNo
+                    OrderNo = formDetail.OrderNo,
+                    PromotionName = formDetail.PromotionId != null
+                        && promotionNames.TryGetValue(formDetail.PromotionId.Value, out var name)
+                        ? name
+                        : null,
+                    Bonus = formDetail.PromotionPlayerId != null
+                        && promotionBonus.TryGetValue(formDetail.PromotionPlayerId.Value, out var bonus)
+                        ? bonus
+                        : null
                 }
             };
         }
@@ -111,6 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// Queries the deposit forms.
         /// </summary>
         /// <param name="queryService">The query service.</param>
+        /// <param name="promotionClient">The promotion client.</param>
         /// <param name="brandId">The brand identifier.</param>
         /// <param name="request">The request.</param>
         /// <param name="paging">The paging.</param>
@@ -118,6 +147,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpGet("{brandId}")]
         public async Task<DepositViewModel> QueryDepositFormsAsync(
             [FromServices] IGetService<DepositFormQuery, DepositForms> queryService,
+            [FromServices] IPromotionClient promotionClient,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -147,6 +177,22 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
+            var promotionNames = (await promotionClient
+                .GetPromotionNamesAsync(new GetPromotionNamesRequest(
+                    result.Items
+                        .Where(info => info.PromotionId != null)
+                        .Select(info => info.PromotionId.Value)
+                        .ToArray()))
+                .ConfigureAwait(false))
+                .ToDictionary(model => model.Id, model => model.Name);
+
+            var promotionBonus = (await promotionClient.GetPromotionBonusOfDepositAsync(
+                result.Items
+                    .Where(info => info.PromotionPlayerId != null)
+                    .Select(info => info.PromotionPlayerId.Value)
+                    .ToArray()).ConfigureAwait(false))
+                    .ToDictionary(model => model.Id, model => model.BonusAmount);
+
             var response = new DepositViewModel
             {
                 Valid = true,
@@ -168,7 +214,15 @@ namespace TGS.Apis.BackendOffice.Controllers
                         UpdatedOn = form.UpdatedOn,
                         ThirdPartyOrderNo = form.ThirdPartyOrderNo,
                         ReviewedUserName = form.ReviewedUserName,
-                        OrderNo = form.OrderNo
+                        OrderNo = form.OrderNo,
+                        PromotionName = form.PromotionId != null
+                            && promotionNames.TryGetValue(form.PromotionId.Value, out var name)
+                            ? name
+                            : null,
+                        Bonus = form.PromotionPlayerId != null
+                            && promotionBonus.TryGetValue(form.PromotionPlayerId.Value, out var bonus)
+                            ? bonus
+                            : null
                     })
                     .ToArray(),
                 Sum = result.Sum

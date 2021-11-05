@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 
 namespace TGS.Core.Infrastructures.Utility
@@ -22,6 +23,17 @@ namespace TGS.Core.Infrastructures.Utility
                         || propertyInfo.PropertyType == typeof(DateTimeOffset?))
                     {
                         value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                    }
+
+                    if (propertyInfo.PropertyType.IsArray)
+                    {
+                        var query = string.Empty;
+                        var enumerable = (IEnumerable)value;
+
+                        query = enumerable.Cast<object>().Aggregate(query,
+                            (current1, itme) => current1 + $"{propertyInfo.Name}={itme}&");
+
+                        return $"{current}{query}";
                     }
 
                     return last.Equals(propertyInfo)

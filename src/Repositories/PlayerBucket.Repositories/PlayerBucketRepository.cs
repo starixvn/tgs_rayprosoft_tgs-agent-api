@@ -98,10 +98,11 @@ namespace PlayerBucket.Repositories
             scope.Complete();
         }
 
-        public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
+        public async ValueTask<CreatePlayerBucketWithDepositResponse> CreatePlayerBucketWithDepositAsync(
             CreatePlayerBucketWithDepositRequest request)
         {
             var depositBonusAmount = request.DepositAmount;
+            var promotionPlayerId = default(int?);
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -195,6 +196,8 @@ namespace PlayerBucket.Repositories
 
                 await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
                 await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+                promotionPlayerId = bonus.PromotionPlayers.First().Id;
             }
             else
             {
@@ -215,7 +218,7 @@ namespace PlayerBucket.Repositories
 
             scope.Complete();
 
-            return depositBonusAmount;
+            return new CreatePlayerBucketWithDepositResponse(depositBonusAmount, promotionPlayerId);
         }
 
         public async ValueTask<bool> IsBucketFullAsync(string playerCode) =>
