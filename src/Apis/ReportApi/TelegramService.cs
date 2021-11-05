@@ -25,9 +25,9 @@ namespace TGS.Apis.ReportApi
         {
             var model = new
             {
-                ChatId,
-                Text = $"<b><i>{message}</i></b>",
-                ParseMode = "HTML"
+                chat_id = ChatId,
+                text = $"<b><i>{message}</i></b>",
+                parse_mode = "HTML"
             };
 
             var todoItemJson = new StringContent(
