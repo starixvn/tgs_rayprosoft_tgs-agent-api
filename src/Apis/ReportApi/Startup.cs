@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.ReportApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -12,7 +14,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -37,7 +38,6 @@ namespace TGS.Apis.ReportApi
             services.AddTgsRepository(_configuration, "Tgs");
 
             services
-                .AddNats(_configuration)
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
@@ -73,11 +73,7 @@ namespace TGS.Apis.ReportApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new()
-                    {
-                        Title = "TGS Report API",
-                        Version = "v1"
-                    });
+                    new OpenApiInfo { Title = "TGS Report API", Version = "v1" });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
@@ -103,13 +99,7 @@ namespace TGS.Apis.ReportApi
                 config.GetSection("RequestLocalization").Bind(options);
             });
 
-            var defaultBypassRouting = new[]
-            {
-                "/health",
-                "/metrics",
-                "/favicon.ico",
-                "/swagger"
-            };
+            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -122,7 +112,7 @@ namespace TGS.Apis.ReportApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>

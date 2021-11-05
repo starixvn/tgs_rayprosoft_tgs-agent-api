@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Nats\**" />
     <Compile Remove="Security\**" />
+    <EmbeddedResource Remove="Nats\**" />
     <EmbeddedResource Remove="Security\**" />
+    <None Remove="Nats\**" />
     <None Remove="Security\**" />
   </ItemGroup>
 

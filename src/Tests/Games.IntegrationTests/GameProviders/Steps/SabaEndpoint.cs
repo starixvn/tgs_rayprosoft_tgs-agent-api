@@ -12,7 +12,6 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -57,7 +56,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()
-                .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
@@ -91,10 +89,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Operator")));
 
                 services.AddHttpClient<ISabaApiClient, SabaApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-Saba")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Tgs-Saba")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -103,12 +101,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginVia(
             string username, string brandCode,
-            string currencyCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            string currencyCode, PlatformType platformType)
+        {
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
 
         [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
-            SetPlayerBalanceAsync(_serviceProvider, balance);
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
@@ -120,11 +122,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var request = new GetBalanceRequest
             {
                 Key = configuration.SecretKey,
-                Body = new()
-                {
-                    Action = "getbalance",
-                    UserId = playerCode
-                }
+                Body = new GetBalanceRequest.Data { Action = "getbalance", UserId = playerCode }
             };
 
             var client = _serviceProvider.GetRequiredService<ISabaApiClient>();
@@ -155,7 +153,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var request = new PlaceBetRequest
             {
                 Key = configuration.SecretKey,
-                Body = new()
+                Body = new PlaceBetRequest.Data
                 {
                     Action = "bet",
                     UserId = playerCode,
@@ -226,7 +224,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId &&
-                    act.ExternalTransactionId == externalTransactionId
+                      act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
@@ -238,9 +236,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Methods
 
-        private async ValueTask<SabaConfiguration> GetConfigurationAsync() =>
-            await GetSettingAsync<SabaConfiguration>(_serviceProvider,
+        private async ValueTask<SabaConfiguration> GetConfigurationAsync()
+        {
+            return await GetSettingAsync<SabaConfiguration>(_serviceProvider,
                 SettingConsts.GameProviderConfigurations.Saba).ConfigureAwait(false);
+        }
 
         private Guid GetLoginRecordId(string playerCode, PlatformType platform)
         {

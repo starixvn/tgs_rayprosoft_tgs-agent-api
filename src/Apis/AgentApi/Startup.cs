@@ -7,6 +7,7 @@ using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,6 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -77,7 +77,7 @@ namespace TGS.Apis.AgentApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -98,7 +98,7 @@ namespace TGS.Apis.AgentApi
         {
             services.AddTgsRepository(_configuration, "Tgs");
 
-            services.AddNats(_configuration)
+            services
                 .AddWebApiServices()
                 .AddRedis()
                 .AddSystemJsonSerializer()
@@ -132,10 +132,7 @@ namespace TGS.Apis.AgentApi
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters =
-                        {
-                            new JsonStringEnumConverter()
-                        }
+                        Converters = { new JsonStringEnumConverter() }
                     };
                 })
                 .ConfigureWallet(config =>
@@ -147,7 +144,7 @@ namespace TGS.Apis.AgentApi
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
             {
                 var url = _configuration.GetSection("Email:Url");
-                c.BaseAddress = new(url.Value);
+                c.BaseAddress = new Uri(url.Value);
             });
 
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -193,11 +190,7 @@ namespace TGS.Apis.AgentApi
                 services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1",
-                        new()
-                        {
-                            Title = "TGS Agent API",
-                            Version = "v1"
-                        });
+                        new OpenApiInfo { Title = "TGS Agent API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -207,10 +200,9 @@ namespace TGS.Apis.AgentApi
                         Type = SecuritySchemeType.Http,
                         BearerFormat = "JWT",
                         Scheme = "bearer",
-                        Reference = new()
+                        Reference = new OpenApiReference
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
                         }
                     };
 
