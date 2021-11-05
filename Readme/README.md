@@ -9,16 +9,12 @@ first, Delete Initial and TgsRepositoryModelSnapshot
 ```
 add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
 ```
-**In Terminal Console:** (For repos root path) 
+**In Terminal Console:** (in DataServices.Tgs project folder) 
 ```
-dotnet ef migrations add <MigrationName> -c TgsRepository -p .\src\Core\DataServices.Tgs -s .\src\Apis\TgsApi\
+dotnet tool restore
+
+dotnet ef migrations add <MigrationName>
 ```
-
-#Log
-add-migration <MigrationName> -c LogRepository -p DataServices.Log -s LogApi
-
-#Report
-add-migration <MigrationName> -c ReportRepository -p DataServices.Report -s ReportApi
 
 
 ## Install Redis using Docker

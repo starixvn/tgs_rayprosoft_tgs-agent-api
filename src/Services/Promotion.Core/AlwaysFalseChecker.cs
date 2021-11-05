@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace TGS.Services.Promotion
 {
@@ -7,10 +8,10 @@ namespace TGS.Services.Promotion
         public ValueTask<bool> CheckAsync(string playerCode)
             => ValueTask.FromResult(false);
 
-        public ValueTask CommitTagAsync(string playerCode) => ValueTask.CompletedTask;
+        public ValueTask CommitTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 
-        public ValueTask RollbackTagAsync(string playerCode) => ValueTask.CompletedTask;
+        public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
 
-        public ValueTask TagPromotionTypeAsync(string playerCode) => ValueTask.CompletedTask;
+        public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId) => ValueTask.CompletedTask;
     }
 }

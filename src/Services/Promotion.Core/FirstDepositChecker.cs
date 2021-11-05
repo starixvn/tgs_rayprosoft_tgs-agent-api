@@ -33,14 +33,15 @@ namespace TGS.Services.Promotion
             return player.FirstDepositOn == null;
         }
 
-        public ValueTask CommitTagAsync(string playerCode)
+        public ValueTask CommitTagAsync(string playerCode, Guid? promotionId)
             => _playerDataRepository
                 .RemovePlayerFirstDepositFlagAsync(playerCode);
 
-        public ValueTask RollbackTagAsync(string playerCode)
-            => _playerDataRepository.RemovePlayerFirstDepositFlagAsync(playerCode);
+        public ValueTask RollbackTagAsync(string playerCode, Guid? promotionId)
+            => _playerDataRepository
+                .RemovePlayerFirstDepositFlagAsync(playerCode);
 
-        public ValueTask TagPromotionTypeAsync(string playerCode)
+        public ValueTask TagPromotionTypeAsync(string playerCode, Guid? promotionId)
             => _playerDataRepository.SetPlayerFirstDepositFlagAsync(playerCode);
     }
 }

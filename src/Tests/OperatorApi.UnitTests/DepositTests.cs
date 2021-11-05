@@ -372,7 +372,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
                     It.IsAny<string>(),
                     It.IsAny<decimal?>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<int?>()),
                 Times.Exactly(1));
         }
 
@@ -458,7 +459,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
                     It.IsAny<string>(),
                     It.IsAny<decimal?>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<int?>()),
                 Times.Exactly(0));
         }
 

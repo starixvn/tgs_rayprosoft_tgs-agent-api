@@ -43,7 +43,7 @@ namespace TGS.Services.Operator.Services.Deposit
             }
 
             await _promotionClient
-                .TagPlayerDepositAsync(command.PlayerCode)
+                .TagPlayerDepositAsync(command.PlayerCode, command.PromotionId)
                 .ConfigureAwait(false);
 
             var createFormId = Guid.NewGuid();

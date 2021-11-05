@@ -22,10 +22,10 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML.Report" Version="0.2.4" />
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.13.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation" Version="10.3.3" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.3" />
+    <PackageReference Include="FluentValidation" Version="10.3.4" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63">
@@ -37,7 +37,7 @@
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
     <PackageReference Include="TGS.GameProviders.KickPlayerServer.Client" Version="0.0.3" />    
     <PackageReference Include="Tgs.Payment.Client" Version="0.2.1" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.35" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.38-alpha" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 
