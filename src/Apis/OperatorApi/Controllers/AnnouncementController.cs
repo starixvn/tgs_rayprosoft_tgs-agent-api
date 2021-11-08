@@ -32,8 +32,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .Select(item => new Announcement
                 {
                     Content = item.Content,
-                    From = item.From,
-                    To = item.To,
+                    From = item.From.ToUnixTimeMilliseconds(),
+                    To = item.To.ToUnixTimeMilliseconds(),
                     Subject = item.Subject,
                     Localization = item.Localization.ContainsKey(currentCultureName) == true
                         ? item.Localization[currentCultureName]

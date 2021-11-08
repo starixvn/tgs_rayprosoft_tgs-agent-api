@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace TGS.Services.Operator
@@ -6,7 +7,8 @@ namespace TGS.Services.Operator
     public record AnnouncementInfo(
         string Subject,
         string Content,
-        long From,
-        long To,
+        DateTimeOffset From,
+        DateTimeOffset To,
+        int DisplayOrder,
         IDictionary<string, JsonDocument>? Localization);
 }
