@@ -181,6 +181,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<RoundDetail> RoundDetails { get; set; }
 
+        DbSet<RoundOperationRecord> RoundOperationRecords { get; set; }
+
         DbSet<Round> Rounds { get; set; }
 
         DbSet<Setting> Settings { get; set; }
@@ -384,6 +386,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<RoundAggregate> RoundAggregates { get; set; }
 
         public DbSet<RoundDetail> RoundDetails { get; set; }
+
+        public DbSet<RoundOperationRecord> RoundOperationRecords { get; set; }
 
         public DbSet<Round> Rounds { get; set; }
 
