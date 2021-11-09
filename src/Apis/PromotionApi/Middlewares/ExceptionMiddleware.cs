@@ -1,21 +1,34 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
+using Tgs.MessageQueue;
 
 namespace TGS.Apis.PromotionApi.Middlewares
 {
     public class ExceptionMiddleware
     {
+        private static readonly string[] _MethodNotifies =
+        {
+            "SettleDataDailyAsync",
+            "SettleDataWeeklyAsync",
+            "SettleDataMonthlyAsync"
+        };
+
+        private readonly IMessageSender _messageSender;
+
         private readonly RequestDelegate _next;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, IMessageSender messageSender)
         {
             _next = next;
+            _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         }
 
         public async Task InvokeAsync(HttpContext context, ITgsLog log)
@@ -33,7 +46,18 @@ namespace TGS.Apis.PromotionApi.Middlewares
                 log.SetLogger(name!);
                 log.LogError($"Promotion api error on :{context.Request.Host} with message: {message}", exception);
 
-                await context.Response.WriteAsJsonAsync(new MessageResponse { Message = message, Valid = false });
+                if (_MethodNotifies.Contains(name))
+                {
+                    await _messageSender.PublishAsync("report.error",
+                            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ReportErrorMessage(message))))
+                        .ConfigureAwait(false);
+                }
+
+                await context.Response.WriteAsJsonAsync(new MessageResponse
+                {
+                    Message = message,
+                    Valid = false
+                });
             }
         }
     }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 using Tgs.Logging;
+using Tgs.MessageQueue;
 
 namespace TGS.Apis.ReportApi.Middlewares
 {
@@ -19,13 +22,14 @@ namespace TGS.Apis.ReportApi.Middlewares
             "CreateRoundAggregateAsync"
         };
 
-        private readonly RequestDelegate _next;
-        private readonly ITelegramService _telegramService;
+        private readonly IMessageSender _messageSender;
 
-        public ExceptionMiddleware(RequestDelegate next, ITelegramService telegramService)
+        private readonly RequestDelegate _next;
+
+        public ExceptionMiddleware(RequestDelegate next, IMessageSender messageSender)
         {
             _next = next;
-            _telegramService = telegramService;
+            _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         }
 
         public async Task InvokeAsync(HttpContext context, ITgsLog log)
@@ -45,7 +49,9 @@ namespace TGS.Apis.ReportApi.Middlewares
 
                 if (_MethodNotifies.Contains(name))
                 {
-                    await _telegramService.SendMessage(message);
+                    await _messageSender.PublishAsync("report.error",
+                            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ReportErrorMessage(message))))
+                        .ConfigureAwait(false);
                 }
 
                 await context.Response.WriteAsJsonAsync(new MessageResponse

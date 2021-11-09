@@ -90,12 +90,19 @@ namespace TGS.Apis.ReportApi
                 }
             });
 
-            services.AddHttpClient<ITelegramService, TelegramService>((sp, c) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
-                c.BaseAddress = new(config.GetValue<string>("Telegram:Url"));
-            });
-            //services.AddTransient<ITelegramService, TelegramService>();
+            services
+                .AddMessageQueue()
+                .AddRabbitGlobPatternExchange("*", "amq.direct")
+                .AddRabbitMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
+
+                            configuration.GetSection("RabbitMQ").Bind(options);
+                        });
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
