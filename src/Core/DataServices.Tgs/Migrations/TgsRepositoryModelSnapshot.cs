@@ -5157,12 +5157,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("NewData")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("new_data");
 
                     b.Property<string>("OldData")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("jsonb")
                         .HasColumnName("old_data");
 
                     b.Property<Guid>("OperatorId")
