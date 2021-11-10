@@ -5169,6 +5169,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("operator_id");
 
+                    b.Property<string>("Remark")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("remark");
+
                     b.Property<Guid>("RoundId")
                         .HasColumnType("uuid")
                         .HasColumnName("round_id");
