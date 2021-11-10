@@ -14,5 +14,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string OldData { get; set; }
         public string NewData { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
+        public string Remark { get; set; }
     }
 }

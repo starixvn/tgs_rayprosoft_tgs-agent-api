@@ -31,9 +31,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.CreatedOn)
                 .IsRequired();
+            builder.Property(c => c.Remark)
+               .HasMaxLength(256);
 
             builder.HasIndex(c => new { c.RoundId })
-                .HasDatabaseName("ix_round_operation_records_round_id");
+                    .HasDatabaseName("ix_round_operation_records_round_id");
 
             builder.HasOne<Round>()
                 .WithMany()
