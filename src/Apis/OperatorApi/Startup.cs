@@ -11,11 +11,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Payment.ApplePay;
+using Tgs.Payment.LeePay;
+using Tgs.Payment.MaticPay;
+using Tgs.Payment.PrimePay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -31,12 +35,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using Tgs.Payment.ApplePay;
-using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
-using Tgs.Payment.MaticPay;
-using Tgs.Payment.PrimePay;
-using Tgs.Payment.UmPay;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
@@ -70,13 +69,12 @@ namespace TGS.Apis.OperatorApi
             });
 
             app.UseTgsErrorHandler();
-
+            app.UseBrandCertificate();
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
             app.UseRouting();
 
             app.UseHttpMetrics();
-
             app.UseCors();
 
             app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
@@ -96,11 +94,8 @@ namespace TGS.Apis.OperatorApi
                 endpoints.MapProfileViewer();
             });
 
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -123,7 +118,13 @@ namespace TGS.Apis.OperatorApi
 
                     config.GetSection("Promotion").Bind(options);
                 })
-                .AddTransactions();
+                .AddTransactions()
+                .AddBrandCertificateClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+                });
 
             services.AddErrorMapper()
                 .AddErrorMapper<OperatorApiErrorMapper>();
@@ -190,6 +191,7 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddControllers(options =>
                 {
+                    options.AddBrandCertificateFilters();
                     options.Filters.Add<CheckPlayerEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
                     options.AddWebApiToolkitFilters();
@@ -240,44 +242,38 @@ namespace TGS.Apis.OperatorApi
                 .AddInterceptionService()
                 .AddServiceUtiltiyInterceptors();
 
-            if (!_env.IsProduction())
+            services.AddSwaggerGen(c =>
             {
-                services.AddSwaggerGen(c =>
+                c.SwaggerDoc("v1",
+                    new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
+
+                var securityScheme = new OpenApiSecurityScheme
                 {
-                    c.SwaggerDoc("v1",
-                        new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
-
-                    var securityScheme = new OpenApiSecurityScheme
+                    Name = "Api Authorization",
+                    Description = "authorized jwt token, get from api/auth/jwt",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
                     {
-                        Name = "Api Authorization",
-                        Description = "authorized jwt token, get from api/auth/jwt",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "bearer",
-                        Reference = new OpenApiReference
-                        {
-                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
-                        }
-                    };
-
-                    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-
-                    c.OperationFilter<SwaggerHeaderFilter>();
-                    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-                    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
-                    c.ApplyWebApiToolkitSupport();
-
-                    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                    var path = Path.Combine(AppContext.BaseDirectory, xml);
-
-                    if (File.Exists(path))
-                    {
-                        c.IncludeXmlComments(path);
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
                     }
-                });
-            }
+                };
 
+                c.AddBrandCertificateSecurityDefinition();
+                c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+                c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+
+                var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+                if (File.Exists(path))
+                {
+                    c.IncludeXmlComments(path);
+                }
+            });
             services.AddCors(options =>
             {
                 var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();

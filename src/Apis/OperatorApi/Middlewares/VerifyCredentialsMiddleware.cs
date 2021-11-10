@@ -1,11 +1,6 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
-using TGS.Core.Infrastructures.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
@@ -25,52 +20,14 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
         public async Task InvokeAsync(
             HttpContext context,
-            IBrandOperations brandOperations,
-            IStatusValidator statusValidator,
-            IJwtTokenHandler handler)
+            IStatusValidator statusValidator)
         {
-            if (!context.Request.Headers.TryGetValue("Authorization", out var values))
-            {
+            var brandId = context.GetBrandId();
+
+            if (brandId is null)
                 throw new MissingTokenException("Missing Authorization Header");
-            }
 
-            var authorization = values.FirstOrDefault();
-
-            if (authorization == null || !authorization.StartsWith("Bearer", true, null))
-            {
-                throw new MissingTokenException("Missing Authorization Bearer Header");
-            }
-
-            var token = authorization[6..].Trim();
-            var jwt = handler.ReadToken(token);
-
-            var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
-            var currency = jwt.Claims.FirstOrDefault(x => x.Type == Consts.ClaimName.Currency)?.Value;
-
-            if (sub.IsNullOrEmpty() || !Guid.TryParse(sub, out var brandId))
-            {
-                throw new InvalidCredentialsException("Brand doesn't exist");
-            }
-
-            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
-            var secretKey = await brandOperations.GetBrandSecretKeyAsync(brandId);
-            var signature = $"{brandId}:{currency}:{secretKey}";
-
-            handler.ValidateToken(token,
-                new()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = Consts.Site,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                },
-                exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new InvalidCredentialsException("Token is expired"));
-
-            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
+            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId.Value, ValidStatus.Default);
 
             await _next(context);
         }
