@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using TGS.Core.Models.Enums;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {

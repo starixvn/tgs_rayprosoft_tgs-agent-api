@@ -2,18 +2,17 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.Properties;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.Services.Player
 {
     internal class StartSetPlayerEmailCommandService : IGetService<StartSetPlayerEmailCommand, string>
     {
-        private readonly IEmailClient _emailClient;
         private readonly IValidateCodeGenerator _codeGenerator;
+        private readonly IEmailClient _emailClient;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public StartSetPlayerEmailCommandService(

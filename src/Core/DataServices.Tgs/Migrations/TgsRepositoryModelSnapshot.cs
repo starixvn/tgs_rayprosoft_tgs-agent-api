@@ -2117,6 +2117,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<string>("OrderNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("order_no");
+
                     b.Property<string>("PaymentReturn")
                         .HasColumnType("jsonb")
                         .HasColumnName("payment_return");
@@ -2130,6 +2135,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid?>("PromotionId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
+
+                    b.Property<int?>("PromotionPlayerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("promotion_player_id");
 
                     b.Property<string>("Remark")
                         .HasColumnType("text")
@@ -3515,6 +3524,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset?>("FirstDepositOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("first_deposit_on");
+
+                    b.Property<DateTimeOffset?>("FirstPromotionOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_promotion_on");
 
                     b.Property<string>("IdNumber")
                         .HasMaxLength(50)
@@ -5888,6 +5901,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("OrderNo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("order_no");
 
                     b.Property<DateTimeOffset?>("PaidOn")
                         .HasColumnType("timestamp with time zone")

@@ -14,7 +14,6 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
-using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
@@ -32,11 +31,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
+
             _controller = new(
                 _queriesMock.Object,
                 _playerQueriesMock.Object,
                 _commandsMock.Object,
-                _playerCommandsMock.Object,
                 _uploadServiceMock.Object,
                 _stationLetterServiceMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
@@ -47,9 +46,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new();
         private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new();
         private readonly Mock<ITgsCommands<StationLetter>> _commandsMock = new();
-
-        private readonly Mock<ITgsCommands<StationLetterPlayer>> _playerCommandsMock =
-            new();
 
         private readonly Mock<IUploadService> _uploadServiceMock = new();
         private readonly Mock<IStationLetterService> _stationLetterServiceMock = new();
@@ -121,6 +117,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 To = DateTimeOffset.Now.AddDays(1),
                 PlayerUsernames = Array.Empty<string>()
             };
+
             request.PlayerUsernames = players
                 .Where(p => p.Status == PlayerStatus.Enabled && p.BrandId == request.BrandId)
                 .Select(p => p.Username).ToArray();
@@ -129,24 +126,27 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Returns(players);
             var serializationProvider = new JsonSerializationProvider();
             var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
             var response = await _controller.CreateAsync(
                 serializationProvider,
                 jsonOptionsAccessor,
                 request);
             response.Valid.Should().BeTrue();
+
             _stationLetterServiceMock.Verify(
                 p => p.CreateStationLetterAsync(
                     It.Is<StationLetter>(s =>
                         s.Subject == request.Subject &&
                         s.Content == request.Content &&
                         s.AssignedAllPlayers == request.AssignedAllPlayers),
-                It.Is<StationLetterPlayer[]>(x => x.Length == request.PlayerUsernames.Length)));
+                    It.Is<StationLetterPlayer[]>(x => x.Length == request.PlayerUsernames.Length)));
         }
 
         [Test]
         public async Task Can_Update()
         {
             var stationLetterId = Guid.NewGuid();
+
             var request = new StationLetterRequest
             {
                 BrandId = Guid.NewGuid(),
@@ -175,6 +175,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 stationLetterId,
                 request);
             response.Valid.Should().BeTrue();
+
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<StationLetter>(s =>
                 s.Subject == request.Subject &&
                 s.Content == request.Content)));
@@ -184,6 +185,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_Not_Found()
         {
             var stationLetterId = Guid.NewGuid();
+
             var request = new StationLetterRequest
             {
                 BrandId = Guid.NewGuid(),
@@ -199,7 +201,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var queriesMock = new Mock<ITgsQueries<StationLetter>>();
             var playerQueriesMock = new Mock<ITgsQueries<Player>>();
             var commandsMock = new Mock<ITgsCommands<StationLetter>>();
-            var playerCommandsMock = new Mock<ITgsCommands<StationLetterPlayer>>();
             var uploadServiceMock = new Mock<IUploadService>();
             var stationLetterServiceMock = new Mock<IStationLetterService>();
 
@@ -213,7 +214,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 queriesMock.Object,
                 playerQueriesMock.Object,
                 commandsMock.Object,
-                playerCommandsMock.Object,
                 uploadServiceMock.Object,
                 stationLetterServiceMock.Object);
 
@@ -227,6 +227,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.NotFound);
+
             commandsMock.Verify(
                 p => p.UpdateAsync(
                     It.Is<StationLetter>(s => s.Subject == request.Subject
@@ -251,6 +252,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.VerifyAsync(stationLetter.Id, type, request);
             response.Valid.Should().BeTrue();
+
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<StationLetter>(s =>
                 s.Status == targetStatus &&
                 s.UpdatedByUsername == Username &&
@@ -311,7 +313,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var playerUsernames = players.Select(p => new UploadPlayerModel { Username = p.Username }).ToList();
+            var playerUsernames = players.Select(p => new UploadPlayerModel
+            {
+                Username = p.Username
+            }).ToList();
+
             _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync<UploadPlayerModel>(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
 
@@ -323,6 +329,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.UploadAsync(It.IsAny<IFormFile>());
             response.Valid.Should().BeTrue();
+
             for (var i = 0; i < response.Players.Length; i++)
             {
                 response.Players[i].Username.Should().Be(expectedPlayers.ElementAt(i).Username);
@@ -333,8 +340,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreateStationLetterFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<StationLetter>(u => u
-                .With(s => s.Players, new StationLetterPlayer[] { })
+                .With(s => s.Players,
+                    new StationLetterPlayer[]
+                    {
+                    })
                 .With(s => s.Brand, new Brand())
                 .With(s => s.Localization, "{}"));
 
@@ -344,19 +355,45 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreatePlayerFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<Player>(u => u
                 .With(s => s.Agent, new Agent())
-                .With(s => s.Vip, new VipLevel { Id = Guid.NewGuid(), Level = 1 })
+                .With(s => s.Vip,
+                    new VipLevel
+                    {
+                        Id = Guid.NewGuid(),
+                        Level = 1
+                    })
                 .With(s => s.Brand, new Brand())
                 .With(s => s.BetLimit, new BetLimit())
                 .With(s => s.Banks, Array.Empty<PlayerBankInfo>())
-                .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
-                .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] { new Core.DataServices.Tgs.Models.Wallet { Balance = 0 } })
-                .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
-                .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
+                .With(s => s.PlayerLoginRecords,
+                    new PlayerLoginRecord[]
+                    {
+                    })
+                .With(s => s.Letters,
+                    new StationLetterPlayer[]
+                    {
+                    })
+                .With(s => s.Wallets,
+                    new[]
+                    {
+                        new Core.DataServices.Tgs.Models.Wallet
+                        {
+                            Balance = 0
+                        }
+                    })
+                .With(s => s.BrandPaymentPlayers,
+                    new BrandPaymentPlayer[]
+                    {
+                    })
+                .With(s => s.SportsBetLimits,
+                    new PlayerSportsBetLimit[]
+                    {
+                    }));
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             return fixture;
         }
     }

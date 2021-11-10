@@ -13,7 +13,8 @@ namespace TGS.Services.Promotion.Handlers
         private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
-        public ChangePromotionStatusHandler(IPromotionRepository service, ISettingsService settingsService,
+        public ChangePromotionStatusHandler(
+            IPromotionRepository service, ISettingsService settingsService,
             IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
@@ -21,14 +22,15 @@ namespace TGS.Services.Promotion.Handlers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        public override async Task<MessageResponse> Handle(ChangePromotionStatusRequest request,
+        public override async Task<MessageResponse> Handle(
+            ChangePromotionStatusRequest request,
             CancellationToken cancellationToken)
         {
             var promotion = await _service.GetPromotionAsync(q => q.Id == request.Id);
 
             if (promotion == null)
             {
-                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NotFound);
             }
 
             promotion.Status = request.Status;

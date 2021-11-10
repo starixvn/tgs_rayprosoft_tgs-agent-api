@@ -59,7 +59,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 
-            builder.Property(c=> c.ThirdPartyOrderNo);
+            builder.Property(c => c.ThirdPartyOrderNo);
+
+            builder.Property(c => c.OrderNo)
+                .HasMaxLength(50);
+
+            builder.Property(df => df.PromotionPlayerId);
 
             builder
                 .HasOne(c => c.Player)

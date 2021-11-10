@@ -16,7 +16,7 @@ namespace TGS.Services.GameOperations.Validators
 
     internal sealed class ActionWithinRoundValidator : IActionWithinRoundValidator
     {
-        Exception IActionWithinRoundValidator.FindError(BetActionData current, IList<BetActionData> previousActions)
+        public Exception FindError(BetActionData current, IList<BetActionData> previousActions)
         {
             previousActions ??= Array.Empty<BetActionData>();
 
@@ -69,10 +69,12 @@ namespace TGS.Services.GameOperations.Validators
                     $"Cannot close round on place bet action with ID='{current.ExternalId}' " +
                     $"for round with ID='{current.ExternalRoundId}'",
                     ActionProhibited);
+
                 return true;
             }
 
             error = null;
+
             return false;
         }
 
@@ -80,6 +82,7 @@ namespace TGS.Services.GameOperations.Validators
         private static bool IsFoundUnallowedReferencedActionType(BetActionData current, out Exception error)
         {
             error = null;
+
             if (current.Reference == null)
             {
                 return false;
@@ -99,6 +102,7 @@ namespace TGS.Services.GameOperations.Validators
                 error = new InvalidGameActionException(
                     $"You cannot perform any action on action of type '{refType}' for reference with ID='{refId}'",
                     ActionProhibited);
+
                 return true;
             }
 
@@ -109,6 +113,7 @@ namespace TGS.Services.GameOperations.Validators
                 error = new InvalidGameActionException(
                     $"It is not allowed to have '{gameActionType}' action with a referenced action of type '{refType}' for reference with ID='{refId}'",
                     ActionProhibited);
+
                 return true;
             }
 
@@ -119,6 +124,7 @@ namespace TGS.Services.GameOperations.Validators
                 error = new InvalidGameActionException(
                     $"It is not allowed to have '{gameActionType}' action with a referenced action of type '{refType}' for reference with ID='{refId}'",
                     ActionProhibited);
+
                 return true;
             }
 
@@ -130,13 +136,15 @@ namespace TGS.Services.GameOperations.Validators
                 error = new InvalidGameActionException(
                     $"It is not allowed to have '{gameActionType}' action with a referenced action of type '{refType}' for reference with ID='{refId}'",
                     ActionProhibited);
+
                 return true;
             }
 
             return false;
         }
 
-        private static bool IsCurrentReferenceCancelled(BetActionData current, IList<BetActionData> previousActions,
+        private static bool IsCurrentReferenceCancelled(
+            BetActionData current, IList<BetActionData> previousActions,
             out Exception error)
         {
             error = null;
@@ -170,7 +178,8 @@ namespace TGS.Services.GameOperations.Validators
             return error != null;
         }
 
-        private static bool IsCancelCancelTransactionThatHasMoreThanOnce(BetActionData current,
+        private static bool IsCancelCancelTransactionThatHasMoreThanOnce(
+            BetActionData current,
             IList<BetActionData> previousActions, out Exception error)
         {
             error = null;
@@ -206,7 +215,8 @@ namespace TGS.Services.GameOperations.Validators
             return error != null;
         }
 
-        private static bool IsCancellingActionThatHasUncancelledReferences(BetActionData current,
+        private static bool IsCancellingActionThatHasUncancelledReferences(
+            BetActionData current,
             IList<BetActionData> previousActions, out Exception error)
         {
             error = null;
@@ -240,6 +250,7 @@ namespace TGS.Services.GameOperations.Validators
             }
 
             var refId = current.Reference.Id;
+
             error = new InvalidGameActionException(
                 $"Cannot cancel {current.Reference.Type} action with ID='{refId}' " +
                 $"that is referenced by uncancelled action with ID='{uncancelledReferences.Id}' and Type='{uncancelledReferences.Type}'",
@@ -256,6 +267,7 @@ namespace TGS.Services.GameOperations.Validators
             }
 
             BetActionData closingAction = null;
+
             foreach (var a in actions)
             {
                 if (a.IsClosingRound)
@@ -271,7 +283,8 @@ namespace TGS.Services.GameOperations.Validators
             return closingAction;
         }
 
-        private static bool IsExplicitlyClosingAlreadyClosedRound(BetActionData current, BetActionData previouslyClosed,
+        private static bool IsExplicitlyClosingAlreadyClosedRound(
+            BetActionData current, BetActionData previouslyClosed,
             out Exception error)
         {
             error = null;
@@ -297,7 +310,8 @@ namespace TGS.Services.GameOperations.Validators
             return true;
         }
 
-        private static bool IsNotExplicitlyOpeningAlreadyClosedRound(BetActionData current,
+        private static bool IsNotExplicitlyOpeningAlreadyClosedRound(
+            BetActionData current,
             BetActionData previouslyClosed, out Exception error)
         {
             error = null;

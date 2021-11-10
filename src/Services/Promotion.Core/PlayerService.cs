@@ -51,5 +51,19 @@ namespace TGS.Services.Promotion
                 await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+
+        public async Task SetFirstPromotionTimeAsync(string playerCode, DateTimeOffset time)
+        {
+            var player = await _repository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (player.FirstPromotionOn is null)
+            {
+                player.FirstPromotionOn = time;
+
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
     }
 }

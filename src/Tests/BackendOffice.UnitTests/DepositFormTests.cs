@@ -6,12 +6,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
-using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
+using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
@@ -184,6 +185,16 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     DefaultWalletId = walletId
                 }));
 
+            moqPlayerBucketRepository
+                .Setup(fake => fake.CreatePlayerBucketWithDepositAsync(
+                    It.Is<CreatePlayerBucketWithDepositRequest>(
+                        x => x.BrandId == brandId
+                            && x.DefaultWalletId == walletId
+                            && x.DepositAmount == 1000M
+                            && x.PlayerCode == "ThisIsPlayerCode")))
+                .Returns(ValueTask.FromResult(
+                    new CreatePlayerBucketWithDepositResponse(1000M, null)));
+
             await sut.ExecuteAsync(command);
 
             moqPaymentServiceClient.Verify(
@@ -206,6 +217,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
+        public async Task User_Can_Get_Untreated_DepositForms_Count()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new CountUntreatedDepositFormsQueryService(moqPaymentServiceClient.Object);
+
+            var query = new CountUntreatedDepositFormsQuery(Guid.NewGuid());
+
+            await sut.GetAsync(query);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.CountUntreatedDepositFormsAsync(It.Is<Guid>(x => x == query.BrandId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
         public async Task User_Can_List_DepositForm()
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
@@ -214,6 +241,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var query = new DepositFormQuery(
                 Guid.NewGuid(),
+                null,
                 null,
                 null,
                 null,

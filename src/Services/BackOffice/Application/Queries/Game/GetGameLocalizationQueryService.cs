@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
-using TGS.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game

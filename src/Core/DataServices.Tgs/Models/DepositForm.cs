@@ -22,6 +22,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid Id { get; set; }
 
+        public string OrderNo { get; set; }
+
         public string PaymentReturn { get; set; }
 
         public virtual Player Player { get; set; }
@@ -30,17 +32,20 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid? PromotionId { get; set; }
 
+        public int? PromotionPlayerId { get; set; }
+
         public string Remark { get; set; }
+
+        public DateTimeOffset? ReviewedOn { get; set; }
+
+        public string ReviewedUserId { get; set; }
+
+        public string ReviewedUserName { get; set; }
 
         public int Status { get; set; }
 
         public string ThirdPartyOrderNo { get; set; }
 
         public DateTimeOffset UpdatedOn { get; set; }
-
-        public string ReviewedUserId { get; set; }
-        public string ReviewedUserName { get; set; }
-        public DateTimeOffset? ReviewedOn { get; set; }
-
     }
 }

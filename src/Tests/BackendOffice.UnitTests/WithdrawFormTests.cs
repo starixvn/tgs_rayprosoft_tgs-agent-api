@@ -12,6 +12,7 @@ using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.WalletService;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -144,6 +145,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 null,
                 null,
                 null,
+                null,
                 new PageableRequest());
 
             _ = await sut.GetAsync(query, default);
@@ -254,6 +256,24 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<string>(),
                     It.IsAny<Guid?>()),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task User_Can_Get_Untreated_WithdrawForms_Count()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new CountUntreatedWithdrawFormsQueryService(
+                moqPaymentServiceClient.Object);
+
+            var query = new CountUntreatedWithdrawFormsQuery(Guid.NewGuid());
+
+            await sut.GetAsync(query);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.CountUntreatedWithdrawFormsAsync(
+                    It.Is<Guid>(x => x == query.BrandId)),
                 Times.Exactly(1));
         }
     }

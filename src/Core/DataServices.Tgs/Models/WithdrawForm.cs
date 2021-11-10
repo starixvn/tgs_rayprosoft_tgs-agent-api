@@ -53,5 +53,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string UserName { get; set; }
 
         public int UserType { get; set; }
+
+        public string OrderNo { get; set; }
     }
 }

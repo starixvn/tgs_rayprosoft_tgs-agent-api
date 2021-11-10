@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Auth
 {

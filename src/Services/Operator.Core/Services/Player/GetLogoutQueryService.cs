@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
     internal class GetLogoutQueryService : IGetService<GetLogoutQuery, LogoutInfo>
     {
-        private readonly IStatusValidator _statusValidator;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IStatusValidator _statusValidator;
 
         public GetLogoutQueryService(
             IStatusValidator statusValidator,

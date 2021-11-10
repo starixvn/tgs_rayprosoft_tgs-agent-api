@@ -30,10 +30,12 @@ namespace TGS.Promotion.Repositories
         public Task ChangePromotionStatusAsync(Core.DataServices.Tgs.Models.Promotion promotion) =>
             UpdateEntityAsync(promotion);
 
-        public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request,
+        public async ValueTask<Guid> CreatePromotionAsync(
+            CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
             var promotionId = GuidExtensions.NewSequentialGuid();
+
             var promotion = new Core.DataServices.Tgs.Models.Promotion
             {
                 Id = promotionId,
@@ -41,7 +43,7 @@ namespace TGS.Promotion.Repositories
                 Name = request.Name,
                 From = request.From,
                 To = request.To,
-                Status = SwitchStatus.Enabled,
+                Status = PromotionStatus.Enabled,
                 AutoSentPlayerBonus = request.AutoSentPlayerBonus,
                 PromotionType = request.PromotionType,
                 BonusAmountLimit = request.BonusAmountLimit,
@@ -90,7 +92,8 @@ namespace TGS.Promotion.Repositories
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        public async Task UpdatePromotionAsync(Core.DataServices.Tgs.Models.Promotion promotion,
+        public async Task UpdatePromotionAsync(
+            Core.DataServices.Tgs.Models.Promotion promotion,
             UpdatePromotionRequest request)
         {
             var vips = await _repository.VipLevels.AsQueryable()
@@ -111,12 +114,23 @@ namespace TGS.Promotion.Repositories
             promotion.Percentage = request.Percentage;
             promotion.TotalAmountLimit = request.TotalAmountLimit;
             promotion.TurnoverMultiple = request.TurnoverMultiple;
+
             promotion.PromotionGameProviders =
                 request.GameProviderIds
-                    .Select(id => new PromotionGameProvider {GameProviderId = id, PromotionId = promotion.Id})
+                    .Select(id => new PromotionGameProvider
+                    {
+                        GameProviderId = id,
+                        PromotionId = promotion.Id
+                    })
                     .ToHashSet();
+
             promotion.PromotionVipLevels =
-                vips.Select(x => new PromotionVipLevel {VipLevelId = x.Id, Level = x.Level, PromotionId = promotion.Id})
+                vips.Select(x => new PromotionVipLevel
+                    {
+                        VipLevelId = x.Id,
+                        Level = x.Level,
+                        PromotionId = promotion.Id
+                    })
                     .ToHashSet();
             promotion.UpdatedByUsername = request.EditorUsername;
             promotion.UpdatedOn = DateTimeOffset.Now;
@@ -134,20 +148,30 @@ namespace TGS.Promotion.Repositories
         public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
         {
             const string sql = "dbo.promotion_update_amount_used";
+
             return await _repository
                 .SqlQuerySingleAsync<bool>(
                     sql,
-                    parameters: new Dictionary<string, object> {{"_promotion_id", promotionId}, {"_amount", amount}})
+                    parameters: new Dictionary<string, object>
+                    {
+                        { "_promotion_id", promotionId },
+                        { "_amount", amount }
+                    })
                 .ConfigureAwait(false);
         }
 
         public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
         {
             const string sql = "dbo.promotion_revert_amount_used";
+
             return await _repository
                 .SqlQuerySingleAsync<bool>(
                     sql,
-                    parameters: new Dictionary<string, object> {{"_promotion_id", promotionId}, {"_amount", amount}})
+                    parameters: new Dictionary<string, object>
+                    {
+                        { "_promotion_id", promotionId },
+                        { "_amount", amount }
+                    })
                 .ConfigureAwait(false);
         }
 
@@ -160,7 +184,12 @@ namespace TGS.Promotion.Repositories
         {
             var promotionGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
-                    new PromotionGameProvider {PromotionId = promotion.Id, GameProviderId = x.Id});
+                    new PromotionGameProvider
+                    {
+                        PromotionId = promotion.Id,
+                        GameProviderId = x.Id
+                    });
+
             return new(promotionGameProviders);
         }
 
@@ -170,7 +199,13 @@ namespace TGS.Promotion.Repositories
         {
             var promotionVipLevels = _repository.VipLevels.AsQueryable()
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
-                    new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
+                    new PromotionVipLevel
+                    {
+                        PromotionId = promotion.Id,
+                        VipLevelId = x.Id,
+                        Level = x.Level
+                    });
+
             return new(promotionVipLevels);
         }
     }

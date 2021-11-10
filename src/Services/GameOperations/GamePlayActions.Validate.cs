@@ -53,7 +53,7 @@ namespace TGS.Services.GameOperations
         /// <summary>
         /// Validate player for single game api
         /// </summary>
-        async ValueTask<PlayerValidationResult> IGamePlayActions.ValidatePlayerAsync(PlayerValidationData data)
+        public async ValueTask<PlayerValidationResult> ValidatePlayerAsync(PlayerValidationData data)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode).ConfigureAwait(false);
             var brandId = player.BrandId;

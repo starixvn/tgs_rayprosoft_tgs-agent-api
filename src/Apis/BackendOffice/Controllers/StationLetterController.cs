@@ -29,7 +29,6 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class StationLetterController : BaseContextController
     {
         private readonly ITgsCommands<StationLetter> _commands;
-        private readonly ITgsCommands<StationLetterPlayer> _playerCommands;
         private readonly ITgsQueries<Player> _playerQueries;
         private readonly ITgsQueries<StationLetter> _queries;
         private readonly IStationLetterService _stationLetterService;
@@ -47,14 +46,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<StationLetter> queries,
             ITgsQueries<Player> playerQueries,
             ITgsCommands<StationLetter> commands,
-            ITgsCommands<StationLetterPlayer> playerCommands,
             IUploadService uploadService,
             IStationLetterService stationLetterService)
         {
             _queries = queries;
             _playerQueries = playerQueries;
             _commands = commands;
-            _playerCommands = playerCommands;
             _uploadService = uploadService;
             _stationLetterService = stationLetterService;
         }
@@ -121,6 +118,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
                 return workbook;
             });
+
             return wb.Deliver("Player.xlsx");
         }
 
@@ -136,6 +134,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
                 .Where(BrandId, l => l.BrandId == BrandId)
                 .Where(p => p.Status == request.Status)
+                .Where(x => x.Status != StationLetterStatus.Archived)
                 .Select(a => new StationLetterModel
                 {
                     Id = a.Id,
@@ -165,6 +164,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var jsonOptions = jsonOptionsAccessor.Value;
 
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+
             if (stationLetter == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
@@ -172,6 +172,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             stationLetter.Subject = request.Subject;
             stationLetter.Content = request.Content;
+
             stationLetter.Localization = request.Localization == null
                 ? "{}"
                 : jsonSerializationProvider.SerializeToString(
@@ -181,6 +182,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             stationLetter.UpdatedOn = DateTimeOffset.Now;
 
             await _commands.UpdateAsync(stationLetter);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -222,6 +224,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+
             if (stationLetter == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
@@ -242,6 +245,27 @@ namespace TGS.Apis.BackendOffice.Controllers
             stationLetter.UpdatedOn = DateTimeOffset.Now;
 
             await _commands.UpdateAsync(stationLetter);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{id}/status/{status}")]
+        [Description("Change an station letter status")]
+        public async Task<MessageResponse> ChangeStatusAsync(Guid id, StationLetterStatus status)
+        {
+            var announcement = await _queries.GetSingleAsync(q => q.Id == id);
+
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            }
+
+            announcement.Status = status;
+            announcement.UpdatedOn = DateTimeOffset.Now;
+            announcement.UpdatedByUsername = Username;
+
+            await _commands.UpdateAsync(announcement);
+
             return CreateValidResponse<MessageResponse>();
         }
     }

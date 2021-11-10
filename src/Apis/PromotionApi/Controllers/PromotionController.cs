@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.PromotionApi.ViewModels;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.PromotionApi.Controllers
 {
@@ -22,18 +22,18 @@ namespace TGS.Apis.PromotionApi.Controllers
 
         public PromotionController(IMediator mediator)
         {
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpPost("{promotionId}/addPlayer/{playerCode}")]
         [Description("Add player to promotion")]
-        public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode) =>
-            _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
+        public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode)
+            => _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
 
         [HttpPut("{promotionId}/{status}")]
         [Description("Change promotion status")]
-        public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
-            _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
+        public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, PromotionStatus status)
+            => _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
         [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}")]
         public async Task<bool> CheckCanJoinPromotionAsync(
@@ -60,20 +60,35 @@ namespace TGS.Apis.PromotionApi.Controllers
             _mediator.Send(request);
 
         [HttpPut("deposit/{playerCode}")]
+        [HttpPut("deposit/{playerCode}/{promotionId?}")]
         [Description("Tag player deposit")]
         public async Task DepositAsync(
             [FromServices] ICommandService<TagPlayerDepositCommand> tagService,
-            string playerCode)
+            string playerCode,
+            Guid? promotionId)
         {
-            var command = new TagPlayerDepositCommand(playerCode);
+            var command = new TagPlayerDepositCommand(playerCode, promotionId);
 
             await tagService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
+        [HttpGet("names")]
+        [Description("Get promotion names by ids")]
+        public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
+            [FromServices] IQueryService<GetPromotionNamesQuery, PromotionNameModel> queryService,
+            [FromQuery] GetPromotionNamesQuery query)
+            => queryService.QueryAsync(query).ToArrayAsync();
+
         [HttpGet]
         [Description("Get promotions")]
-        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
-            _mediator.Send(request);
+        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
+            => _mediator.Send(request);
+
+        [HttpGet("joined")]
+        [Description("Get joined promotions")]
+        public Task<PagedResponse<JoinedPromotionModel>> GetPromotionsAsync(
+            [FromQuery] GetJoinedPromotionsRequest request)
+            => _mediator.Send(request);
 
         [HttpGet("valid")]
         [Description("Get promotions fro player")]
@@ -94,6 +109,7 @@ namespace TGS.Apis.PromotionApi.Controllers
                 paging.SortByPropertyName(request.SortBy, request.IsDesc);
 
             if (!request.ShowAll)
+            {
                 return new PagedResponse<PromotionModel>
                 {
                     TotalCount = await promotions.CountAsync().ConfigureAwait(false),
@@ -102,6 +118,8 @@ namespace TGS.Apis.PromotionApi.Controllers
                         .ToArrayAsync()
                         .ConfigureAwait(false)
                 };
+            }
+
             paging.Page = request.Page;
             paging.RowCount = request.Rows;
 
@@ -123,9 +141,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             decimal amount)
         {
             if (amount <= 0)
-            {
                 return;
-            }
 
             var command = new RevertPromotionAmountCommand(promotionId, amount);
 
@@ -137,13 +153,8 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {
             request.Id = id;
+
             return _mediator.Send(request);
         }
-
-        [HttpGet("joined")]
-        [Description("Get joined promotions")]
-        public Task<PagedResponse<JoinedPromotionModel>> GetPromotionsAsync(
-            [FromQuery] GetJoinedPromotionsRequest request) =>
-            _mediator.Send(request);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Promotion.Services
 {
@@ -17,16 +17,17 @@ namespace TGS.Services.Promotion.Services
             }
 
             var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
+            var AccountfirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("AccountFirstDeposit");
             var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 
-            _checkers = new[] { firstDepositChecker, dailyFirstDepositChecker };
+            _checkers = new[] { firstDepositChecker, AccountfirstDepositChecker, dailyFirstDepositChecker };
         }
 
         public async ValueTask ExecuteAsync(TagPlayerDepositCommand command, CancellationToken cancellationToken = default)
         {
             foreach (var checker in _checkers)
                 await checker
-                    .TagPromotionTypeAsync(command.PlayerCode)
+                    .TagPromotionTypeAsync(command.PlayerCode, command.PromotionId)
                     .ConfigureAwait(false);
         }
     }

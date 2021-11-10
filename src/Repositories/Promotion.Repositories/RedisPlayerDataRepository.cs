@@ -28,6 +28,15 @@ namespace TGS.Promotion.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async ValueTask<bool> CheckPlayerFirstJoinPromotionAsync(string playerCode)
+        {
+            var dataKey = $"{_KeyPrefix}:{playerCode}:Join";
+
+            return await _redisDatabase
+                .KeyExistsAsync(dataKey)
+                .ConfigureAwait(false);
+        }
+
         public async ValueTask<bool> CheckPlayerIsDailyFirstDepositAsync(string playerCode)
         {
             var dataKey = $"{_KeyPrefix}:{DateTimeOffset.Now.ToOffset(_TimeZone):yyyyMMdd}:{playerCode}";
@@ -66,6 +75,20 @@ namespace TGS.Promotion.Repositories
                     .ConfigureAwait(false);
         }
 
+        public async ValueTask RemovePlayerFirstJoinPromotionAsync(string playerCode)
+        {
+            var dataKey = $"{_KeyPrefix}:{playerCode}:Join";
+
+            var count = await _redisDatabase
+                .StringDecrementAsync(dataKey)
+                .ConfigureAwait(false);
+
+            if (count <= 0)
+                await _redisDatabase
+                    .KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
+                    .ConfigureAwait(false);
+        }
+
         public async ValueTask SetPlayerDailyDepositFlagAsync(string playerCode)
         {
             var currentDate = DateTimeOffset.Now.ToOffset(_TimeZone);
@@ -88,6 +111,15 @@ namespace TGS.Promotion.Repositories
         public async ValueTask SetPlayerFirstDepositFlagAsync(string playerCode)
         {
             var dataKey = $"{_KeyPrefix}:{playerCode}";
+
+            await _redisDatabase
+                .StringIncrementAsync(dataKey, flags: CommandFlags.FireAndForget)
+                .ConfigureAwait(false);
+        }
+
+        public async ValueTask SetPlayerFirstJoinPromotionAsync(string playerCode)
+        {
+            var dataKey = $"{_KeyPrefix}:{playerCode}:Join";
 
             await _redisDatabase
                 .StringIncrementAsync(dataKey, flags: CommandFlags.FireAndForget)

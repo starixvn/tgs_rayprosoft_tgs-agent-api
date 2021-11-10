@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Localization
 {

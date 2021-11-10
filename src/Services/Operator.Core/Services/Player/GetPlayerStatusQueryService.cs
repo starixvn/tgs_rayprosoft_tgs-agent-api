@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {

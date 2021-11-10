@@ -18,9 +18,8 @@ namespace TGS.Apis.BackendOffice.Extensions
                 _ => FlowState.Unkown,
             };
 
-        public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)
-        {
-            return status switch
+        public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState status)
+            => status switch
             {
                 FlowState.WaitingPayment => new[] { PaymentFlowState.WaitPayment },
                 FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
@@ -35,7 +34,15 @@ namespace TGS.Apis.BackendOffice.Extensions
                     PaymentFlowState.Paid
                 }
             };
-        }
+
+        public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)
+            => status?.ToPaymentFlowState() ?? new[] {
+                PaymentFlowState.WaitPayment,
+                PaymentFlowState.WaitApprove,
+                PaymentFlowState.Approved,
+                PaymentFlowState.Reject,
+                PaymentFlowState.Paid
+            };
 
         public static ReviewState ToReviewState(this ReviewResponseState reviewResponse)
             => reviewResponse switch

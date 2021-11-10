@@ -9,6 +9,7 @@ using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.IMESports;
 using TGS.Apis.TgsApi.GameProviders.JDB;
 using TGS.Apis.TgsApi.GameProviders.KY;
+using TGS.Apis.TgsApi.GameProviders.LY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
@@ -45,7 +46,8 @@ namespace TGS.Apis.TgsApi
             { WGHorse, typeof(WGHorseStartup) },
             { WMCasino, typeof(WMCasinoStartup) },
             { TCG, typeof(TCGStartup) },
-            { Card365, typeof(Card365Startup) }
+            { Card365, typeof(Card365Startup) },
+            { LY, typeof(LYStartup) }
         };
 
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
@@ -68,7 +70,8 @@ namespace TGS.Apis.TgsApi
             { WGHorse, "WGHorse/wghorse.json" },
             { WMCasino, "WMCasino/wmcasino.json" },
             { TCG, "TCG/tcg.json" },
-            { Card365, "Card365/card365.json" }
+            { Card365, "Card365/card365.json" },
+            { LY, "LY/ly.json" }
         };
     }
 }

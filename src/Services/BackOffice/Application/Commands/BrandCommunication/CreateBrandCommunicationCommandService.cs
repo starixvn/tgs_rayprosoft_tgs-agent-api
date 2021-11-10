@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandCommunication

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -13,7 +14,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Withdraw;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -153,7 +153,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Amount = form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn
+                        UpdatedOn = form.UpdatedOn,
+                        OrderNo = form.OrderNo
                     })
                     .ToArray()
             };

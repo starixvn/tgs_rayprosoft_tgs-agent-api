@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ValidateCode;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
@@ -28,7 +28,8 @@ namespace TGS.Services.Operator.Services.Player
         public async ValueTask<string> GetAsync(ForgotPasswordByMailCommand command, CancellationToken cancellationToken = default)
         {
             var player = _tgsRepository.Players.AsQueryable()
-                .Where(player => player.Email == command.Email)
+                .Where(player => player.BrandId == command.BrandId
+                    && player.Email == command.Email)
                 .FirstOrDefault();
 
             if (player == null)

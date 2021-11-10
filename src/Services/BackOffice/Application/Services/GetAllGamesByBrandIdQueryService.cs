@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Services
 {

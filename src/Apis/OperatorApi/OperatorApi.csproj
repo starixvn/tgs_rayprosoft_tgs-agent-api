@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -58,16 +58,16 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-    <PackageReference Include="Tgs.Interceptors" Version="0.0.1" />
+    <PackageReference Include="Tgs.Interceptors" Version="0.1.0" />
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />    
-    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.0" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.1-alpha" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
-    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.3" />
+    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -82,7 +82,6 @@
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
-    <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>
 
   <ItemGroup>

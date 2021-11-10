@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
@@ -25,6 +25,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     PaymentMethodId = query.PaymentMethodId,
                     Status = query.Status,
                     ThirdPartyOrderNo = query.ThirdPartyOrderNo,
+                    OrderNo = query.OrderNo,
                     FormId = query.FormId,
                     UpdateOnRange = query.UpdateOnRange,
                     UserName = query.UserName

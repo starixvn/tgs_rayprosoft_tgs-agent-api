@@ -19,7 +19,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
     {
         BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, WalletTransferRequest request);
 
-        BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+        BetData CancelLockAmountRequest(
+            string playerCode, GameProviderConfigurationData data,
             CancelWalletTransferRequest request);
 
         BetData PlaceAndSettleBetRequest(
@@ -63,7 +64,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             _json = json;
         }
 
-        public BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData LockAmountRequest(
+            string playerCode, GameProviderConfigurationData data,
             WalletTransferRequest request)
         {
             var externalGameId = request.ExternalGameId;
@@ -81,13 +83,16 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 TimeStamp = _utility.ParseDateTimeOffset(request.Timestamp)
             };
 
-            return GetBetData(playerCode, data, new[]
-            {
-                transaction
-            });
+            return GetBetData(playerCode,
+                data,
+                new[]
+                {
+                    transaction
+                });
         }
 
-        public BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData CancelLockAmountRequest(
+            string playerCode, GameProviderConfigurationData data,
             CancelWalletTransferRequest request)
         {
             var externalGameId = request.ExternalGameId;
@@ -107,10 +112,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 RoundClosed = false
             };
 
-            return GetBetData(playerCode, data, new[]
-            {
-                transaction
-            });
+            return GetBetData(playerCode,
+                data,
+                new[]
+                {
+                    transaction
+                });
         }
 
         public BetData PlaceAndSettleBetRequest(
@@ -171,7 +178,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                         BetType = betTypeCode,
                         TimeStamp = betTime,
                         ExtraData = _json.SerializeToString(
-                            new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
+                            new
+                            {
+                                BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
+                            },
                             _SerializerOptions)
                     }
                 });
@@ -190,7 +200,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     RoundDetail = r.GameResult,
                     RoundClosed = lockedAmount == 0,
                     ExtraData = _json.SerializeToString(
-                        new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
+                        new
+                        {
+                            BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
+                        },
                         _SerializerOptions),
                     CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
                     AllowLoseBetNegativeAmount = true
@@ -198,10 +211,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             }
 
             var transactions = bets.Concat(settles).ToArray();
-            return transactions.Length == 0 ? null : GetBetData(playerCode, data, transactions, true);
+
+            return transactions.Length == 0 ? null : GetBetData(playerCode, data, transactions, true, true);
         }
 
-        public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(GameProviderConfigurationData data,
+        public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
+            GameProviderConfigurationData data,
             string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds)
         {
             var cancels = new List<TransactionData>();
@@ -252,7 +267,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     RoundDetail = r.GameResult,
                     RoundClosed = remainingLockAmount == 0,
                     ExtraData = _json.SerializeToString(
-                        new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
+                        new
+                        {
+                            BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
+                        },
                         _SerializerOptions),
                     CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
                     AllowLoseBetNegativeAmount = true
@@ -265,7 +283,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             return (cancelBetData, settleBetData);
         }
 
-        public BetData VoidRoundRequest(GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
+        public BetData VoidRoundRequest(
+            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
             GameActionExternalIds[] externalIds)
         {
             var existBetResults = betResults
@@ -370,8 +389,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             };
 
 
-        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
-            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false)
+        private static BetData GetBetData(
+            string playerCode,
+            GameProviderConfigurationData data,
+            TransactionData[] transactions,
+            bool allowPlaceBetWithDifferentPlatformToken = false,
+            bool ignorePlaceBetValidation = false)
             => new BetData
             {
                 GameProviderId = data.GameProviderId,
@@ -382,6 +405,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 HasCurrencyFromGameProvider = false,
                 GameProviderCode = _GameProviderCode,
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
+                IgnorePlaceBetValidation = ignorePlaceBetValidation,
                 PlayerCode = playerCode,
                 WithCustomBetValues = true
             };
@@ -403,7 +427,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 .Sum(t => t.Amount);
         }
 
-        private static GameActionType GetSettleGameActionType(string externalGameId,
+        private static GameActionType GetSettleGameActionType(
+            string externalGameId,
             decimal betAmount, decimal winAmount)
         {
             if (winAmount == betAmount)

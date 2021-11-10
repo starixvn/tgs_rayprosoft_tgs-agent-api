@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Paging;
 using TGS.Services.BackOffice.Domain;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Services
 {

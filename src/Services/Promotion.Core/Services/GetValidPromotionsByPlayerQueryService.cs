@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Services.Promotion.Models.Promotion;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Promotion.Services
 {
@@ -61,7 +61,9 @@ namespace TGS.Services.Promotion.Services
             {
                 var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-                if (await checker.CheckAsync(playerCode).ConfigureAwait(false))
+                if (await checker
+                    .CheckAsync(playerCode)
+                    .ConfigureAwait(false))
                     yield return promotion;
             }
         }

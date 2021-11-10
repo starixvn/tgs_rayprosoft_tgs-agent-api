@@ -7,7 +7,7 @@ using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Services
 {

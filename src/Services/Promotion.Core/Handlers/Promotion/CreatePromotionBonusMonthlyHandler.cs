@@ -65,7 +65,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             CancellationToken cancellationToken)
         {
             var promotions = await _promotionRepository.GetPromotionQueries()
-                .Where(x => x.Status == SwitchStatus.Enabled)
+                .Where(x => x.Status == PromotionStatus.Enabled)
                 .Where(x => x.SettlementIntervalType == "Monthly")
                 .Where(x => x.From >= _PreviousFirstDayOfMonth && x.From <= _CurrentFirstDayOfMonth ||
                     x.To >= _PreviousFirstDayOfMonth && x.To <= _CurrentFirstDayOfMonth ||

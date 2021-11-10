@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations.Queries;
-using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {

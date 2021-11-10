@@ -23,19 +23,37 @@ namespace TGS.Services.GameOperations
 
             _map = new Dictionary<GameActionType, Func<TransactionData, TransactionSettings>>
             {
-                {GameActionType.PlaceBet, GetPlaceBetTransactionSettings},
-                {GameActionType.WinBet, GetWinBetTransactionSettings},
-                {GameActionType.LoseBet, GetLoseBetTransactionSettings},
-                {GameActionType.FreeBet, GetFreeBetTransactionSettings},
-                {GameActionType.TieBet, GetTieBetTransactionSettings},
-                {GameActionType.CancelTransaction, GetCancelTransactionSettings},
-                {GameActionType.LockAmount, GetLockAmountTransactionSettings},
-                {GameActionType.UnlockAmount, GetUnlockAmountTransactionSettings},
-                {GameActionType.WinJackpot, GetWinJackpotTransactionSettings}
+                {
+                    GameActionType.PlaceBet, GetPlaceBetTransactionSettings
+                },
+                {
+                    GameActionType.WinBet, GetWinBetTransactionSettings
+                },
+                {
+                    GameActionType.LoseBet, GetLoseBetTransactionSettings
+                },
+                {
+                    GameActionType.FreeBet, GetFreeBetTransactionSettings
+                },
+                {
+                    GameActionType.TieBet, GetTieBetTransactionSettings
+                },
+                {
+                    GameActionType.CancelTransaction, GetCancelTransactionSettings
+                },
+                {
+                    GameActionType.LockAmount, GetLockAmountTransactionSettings
+                },
+                {
+                    GameActionType.UnlockAmount, GetUnlockAmountTransactionSettings
+                },
+                {
+                    GameActionType.WinJackpot, GetWinJackpotTransactionSettings
+                }
             };
         }
 
-        TransactionSettings ITransactionSettingsGenerator.GetTransactionSettings(TransactionData transaction)
+        public TransactionSettings GetTransactionSettings(TransactionData transaction)
         {
             if (!_map.TryGetValue(transaction.GameActionType, out var func))
             {

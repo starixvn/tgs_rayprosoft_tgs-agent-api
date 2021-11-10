@@ -111,12 +111,12 @@ Scenario: 02.f - Place bet with duplicate transaction ID
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "PlaceBet" for $-10
 
-Scenario: 02.g - Place bet using expired player token
-    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
-        And player having balance of $125
-        And player logout
-    When I place bet of $10 for game "AcesandEights1Hand"
-    Then I will receive bet response with authorization error and no balance
+#Scenario: 02.g - Place bet using expired player token
+#    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+#        And player having balance of $125
+#        And player logout
+#    When I place bet of $10 for game "AcesandEights1Hand"
+#    Then I will receive bet response with authorization error and no balance
 
 Scenario: 02.h - Place bet with slot game
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -297,12 +297,12 @@ Scenario: 08.b - Place and lose bet in one request
         And #1 game action will be recorded in the database of type "PlaceBet" for $-10
         And #2 game action will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 08.c - Cannot place and settle bet after player logout
-    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
-        And player having balance of $100
-        And player logout
-    When I place bet for $10 and settle it for $15 for game "AcesandEights1Hand"
-    Then I will receive bet response with authorization error and no balance
+#Scenario: 08.c - Cannot place and settle bet after player logout
+#    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+#        And player having balance of $100
+#        And player logout
+#    When I place bet for $10 and settle it for $15 for game "AcesandEights1Hand"
+#    Then I will receive bet response with authorization error and no balance
 
 Scenario: 08.d - Place and settle bet with insufficient balance
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"

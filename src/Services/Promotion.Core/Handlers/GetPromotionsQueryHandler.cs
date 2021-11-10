@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
 
@@ -15,7 +16,8 @@ namespace TGS.Services.Promotion.Handlers
     {
         private readonly IPromotionRepository _service;
 
-        public GetPromotionsQueryHandler(IPromotionRepository service,
+        public GetPromotionsQueryHandler(
+            IPromotionRepository service,
             IHttpContextAccessor accessor) :
             base(accessor)
         {
@@ -31,6 +33,7 @@ namespace TGS.Services.Promotion.Handlers
                 .Where(request.Name, x => x.Name == request.Name)
                 .Where(request.From, x => x.To >= request.From)
                 .Where(request.To, x => x.From <= request.To)
+                .Where(x => x.Status != PromotionStatus.Archived)
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,
