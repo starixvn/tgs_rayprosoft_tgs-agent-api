@@ -5144,6 +5144,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("round_details", "bet");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundOperationRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("new_data");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("old_data");
+
+                    b.Property<Guid>("OperatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operator_id");
+
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_round_operation_records");
+
+                    b.HasIndex("RoundId")
+                        .HasDatabaseName("ix_round_operation_records_round_id");
+
+                    b.ToTable("round_operation_records", "bet");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Setting", b =>
                 {
                     b.Property<string>("Key")
@@ -7218,6 +7256,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundOperationRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Round", null)
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .HasConstraintName("fk_round_operation_records_round_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
