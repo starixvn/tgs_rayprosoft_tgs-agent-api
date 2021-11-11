@@ -153,7 +153,7 @@ namespace TGS.Core.Models
             public const string Promotion = "promotion";
             public const string MessengerQRCode = "messengerQRCode";
             public const string Banner = "banner";
-            public const string ManualAliPay = "manualAliPay";
+            public const string Payment = "payment";
 
             public static readonly string[] Types =
             {
@@ -161,7 +161,7 @@ namespace TGS.Core.Models
                 Promotion,
                 MessengerQRCode,
                 Banner,
-                ManualAliPay
+                Payment
             };
         }
 
