@@ -108,14 +108,15 @@ namespace TGS.Services.GameOperations
                 await _brandOperations.GetBrandGamesAsync(brandId, gameProviderId, gamePlatformTypes)
                     .ConfigureAwait(false);
 
-            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes)
+                .ConfigureAwait(false);
 
             var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes)
                 .ConfigureAwait(false);
 
             var gameInfo = from bg in brandGames
                            from g in cachedGames
-                           where bg.GameId == g.Id && placeBetExternalGameIds.Contains(g.ExternalId)
+                           where bg.GameId == g.Id
                            let gameStatus = GetGameStatus(bg.BrandGameStatus, g.Status)
                            select new GameInfo(g.Id, g.ExternalId, gameStatus, g.SubGame, g.AvailableToBrand);
 
@@ -124,7 +125,8 @@ namespace TGS.Services.GameOperations
                               where sg.Id == g.Id
                               select new GameInfo(g.Id, g.ExternalId, g.Status, g.SubGame, g.AvailableToBrand);
 
-            var games = gameInfo.Concat(subGameInfo).Distinct().ToArray();
+            var games = gameInfo.Concat(subGameInfo).Distinct()
+                .Where(g => placeBetExternalGameIds.Contains(g.ExternalId)).ToArray();
 
             if (games.Length == 0)
             {
