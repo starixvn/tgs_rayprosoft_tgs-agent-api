@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
-using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 
 namespace TGS.Apis.BackendOffice.Middlewares
 {
@@ -115,7 +115,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 "/health",
                 "/metrics",
                 "/favicon.ico",
-                "/swagger"
+                "/swagger",
+                "/api/fs/upload"
             };
 
             if (adminLogEvent.Path is null || !defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)))
@@ -141,7 +142,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
         }
 
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-                    RequestDelegate next)
+            RequestDelegate next)
         {
             var originalBodyStream = context.Response.Body;
             var responseStream = _recyclableMemoryStreamManager.GetStream();
