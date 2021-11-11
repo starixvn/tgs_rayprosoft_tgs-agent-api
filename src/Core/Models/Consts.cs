@@ -153,13 +153,15 @@ namespace TGS.Core.Models
             public const string Promotion = "promotion";
             public const string MessengerQRCode = "messengerQRCode";
             public const string Banner = "banner";
+            public const string ManualAliPay = "manualAliPay";
 
             public static readonly string[] Types =
             {
                 StationLetter,
                 Promotion,
                 MessengerQRCode,
-                Banner
+                Banner,
+                ManualAliPay
             };
         }
 
