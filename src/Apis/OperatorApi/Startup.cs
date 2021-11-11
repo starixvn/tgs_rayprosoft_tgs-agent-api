@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
@@ -54,8 +56,18 @@ namespace TGS.Apis.OperatorApi
             _env = env;
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
         {
+            app.UseForwardedHeaders();
+            app.Use((httpContext, next) =>
+            {
+                logger.LogInformation(
+                    $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
+                    $"Forward-For: {httpContext.Request.Headers["X-Forwarded-For"]}");
+
+                return next();
+            });
+
             app.UseRequestLocalization(options =>
             {
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
@@ -100,6 +112,33 @@ namespace TGS.Apis.OperatorApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddOptions<ForwardedHeadersOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                    options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
+
+                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>();
+
+                    foreach (var knownProxie in knownProxies)
+                        options.KnownProxies.Add(IPAddress.Parse(knownProxie));
+
+                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>();
+
+                    foreach (var cidr in knowNetworks)
+                    {
+                        (string ip, string range) = cidr.Split("/");
+
+                        options.KnownNetworks.Add(
+                            new IPNetwork(
+                                IPAddress.Parse(ip),
+                                string.IsNullOrEmpty(range)
+                                    ? 32
+                                    : int.Parse(range)));
+                    }
+                });
+
             services.AddTgsRepository(_configuration, "Tgs");
 
             services
@@ -246,21 +285,6 @@ namespace TGS.Apis.OperatorApi
             {
                 c.SwaggerDoc("v1",
                     new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
-
-                var securityScheme = new OpenApiSecurityScheme
-                {
-                    Name = "Api Authorization",
-                    Description = "authorized jwt token, get from api/auth/jwt",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
 
                 c.AddBrandCertificateSecurityDefinition();
                 c.SchemaFilter<SwaggerEnumDescriptionFilter>();

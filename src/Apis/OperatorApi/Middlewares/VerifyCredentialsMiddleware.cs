@@ -29,6 +29,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId.Value, ValidStatus.Default);
 
+            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
+
             await _next(context);
         }
     }
