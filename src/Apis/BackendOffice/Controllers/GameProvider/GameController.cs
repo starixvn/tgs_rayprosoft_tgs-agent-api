@@ -119,11 +119,6 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                     {
                         CellValue = new CellValue("Code"),
                         DataType = CellValues.String
-                    },
-                    new Cell
-                    {
-                        CellValue = new CellValue("Name"),
-                        DataType = CellValues.String
                     }
                 );
 
@@ -152,11 +147,6 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                         new Cell
                         {
                             CellValue = new CellValue(game.GameCode),
-                            DataType = CellValues.String
-                        },
-                        new Cell
-                        {
-                            CellValue = new CellValue(game.GameName),
                             DataType = CellValues.String
                         }
                     );
