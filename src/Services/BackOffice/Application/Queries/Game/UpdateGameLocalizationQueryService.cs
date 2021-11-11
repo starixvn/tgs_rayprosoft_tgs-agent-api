@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
@@ -14,9 +14,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
 
         public UpdateGameLocalizationQueryService(
             ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+            => _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
         public async ValueTask<UpdateGameLocationInfo> GetAsync(UpdateGameLocalizationQuery query,
             CancellationToken cancellationToken = default)
@@ -36,7 +34,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                 {
                     var model = query.Games.First(x => x.Id == item);
                     var game = await _tgsRepository.Games.FirstOrDefaultAsync(x => x.Id == item, cancellationToken);
-                    game.Name = model.Name;
                     game.Localization = model.Localization.ToJson();
                     game.UpdatedByUsername = query.EditorUsername;
                     game.UpdatedOn = DateTimeOffset.Now;
