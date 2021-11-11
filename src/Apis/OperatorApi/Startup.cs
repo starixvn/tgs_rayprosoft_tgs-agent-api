@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.Json;
@@ -63,7 +64,9 @@ namespace TGS.Apis.OperatorApi
             {
                 logger.LogInformation(
                     $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
-                    $"Forward-For: {httpContext.Request.Headers["X-Forwarded-For"]}");
+                    $"Forward-For: {string.Join(
+                        ", ",
+                        httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip))}");
 
                 return next();
             });
