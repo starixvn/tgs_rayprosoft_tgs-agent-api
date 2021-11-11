@@ -63,6 +63,11 @@ namespace TGS.Services.Report.Application.Queries.Player
                     x.BrandId == request.BrandId && x.Username == request.Username)
                 : null;
 
+            if (request.Username.IsNotNullOrEmpty() && tgsPlayer is null)
+            {
+                return new PagedResponse<PlayerContributionModel>();
+            }
+
             var tgsPlayers = request.Level == null
                 ? null
                 : players.Where(x => x.Vip?.Level == request.Level)
