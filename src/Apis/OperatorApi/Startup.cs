@@ -62,11 +62,12 @@ namespace TGS.Apis.OperatorApi
             app.UseForwardedHeaders();
             app.Use((httpContext, next) =>
             {
+                var forwardedIps = string.Join(
+                    ", ",
+                    httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip));
                 logger.LogInformation(
                     $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
-                    $"Forward-For: {string.Join(
-                        ", ",
-                        httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip))}");
+                    $"Forward-For: {forwardedIps}");
 
                 return next();
             });
