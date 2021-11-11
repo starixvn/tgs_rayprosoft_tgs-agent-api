@@ -119,12 +119,12 @@ namespace TGS.Apis.OperatorApi
                     options.ForwardedHeaders = ForwardedHeaders.All;
                     options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
 
-                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>();
+                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
 
                     foreach (var knownProxie in knownProxies)
                         options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>();
+                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>() ?? Array.Empty<string>();
 
                     foreach (var cidr in knowNetworks)
                     {
