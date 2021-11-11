@@ -85,6 +85,20 @@ namespace TGS.Apis.ReportApi
                     c.IncludeXmlComments(path);
                 }
             });
+
+            services
+                .AddMessageQueue()
+                .AddRabbitGlobPatternExchange("*", "amq.direct")
+                .AddRabbitMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
+
+                            configuration.GetSection("RabbitMQ").Bind(options);
+                        });
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

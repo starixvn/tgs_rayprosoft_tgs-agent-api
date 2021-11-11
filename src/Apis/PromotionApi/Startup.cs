@@ -142,6 +142,20 @@ namespace TGS.Apis.PromotionApi
                     c.IncludeXmlComments(path);
                 }
             });
+
+            services
+                .AddMessageQueue()
+                .AddRabbitGlobPatternExchange("*", "amq.direct")
+                .AddRabbitMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
+
+                            configuration.GetSection("RabbitMQ").Bind(options);
+                        });
+                });
         }
     }
 }
