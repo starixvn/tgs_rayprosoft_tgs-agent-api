@@ -7,7 +7,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Round
     {
         public decimal BetAmount { get; init; }
 
-        public ClosedClientRoundStatus ClientRoundStatus { get; init; }
+        public GameRoundClosedClientRoundStatus ClientRoundStatus { get; init; }
 
         public decimal Commission { get; init; }
 

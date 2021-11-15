@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> CloseGameRoundAsync(Guid roundId,
             [FromQuery] CloseGameRoundRequest request)
         {
-            var model = new ClosedGameRoundViewModel
+            var model = new GameRoundClosedViewModel
             {
                 BetAmount = request.BetAmount,
                 ClientRoundStatus = request.ClientRoundStatus,
@@ -48,7 +48,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 WinLoss = request.WinLoss
             };
 
-            await _gameRoundClient.ClosedGameRoundAsync(roundId, model).ConfigureAwait(false);
+            await _gameRoundClient.GameRoundClosedAsync(roundId, model).ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
         }
