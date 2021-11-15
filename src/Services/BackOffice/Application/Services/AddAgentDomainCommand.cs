@@ -2,5 +2,5 @@
 
 namespace TGS.Services.BackOffice.Application.Services
 {
-    public record AddAgentDomainCommand(Guid BrandId, Guid AgentId, string DomainName);
+    public record AddAgentDomainCommand(Guid AgentId, string DomainName);
 }
