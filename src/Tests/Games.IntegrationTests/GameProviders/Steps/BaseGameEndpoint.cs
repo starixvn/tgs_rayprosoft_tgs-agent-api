@@ -35,8 +35,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var player = await db.Players.AsQueryable().FirstOrDefaultAsync(p => p.Brand.Code == brandCode &&
-                p.Username.ToLower() == username.ToLower());
+            var player = await db.Players.AsQueryable()
+                .FirstOrDefaultAsync(p => p.Brand.Code == brandCode 
+                    && p.Username.ToLower() == username.ToLower());
 
             var playerCode = string.Empty;
 
