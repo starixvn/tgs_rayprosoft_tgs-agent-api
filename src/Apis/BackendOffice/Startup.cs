@@ -30,10 +30,7 @@ namespace TGS.Apis.BackendOffice
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => _configuration = configuration;
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -189,10 +186,26 @@ namespace TGS.Apis.BackendOffice
                 };
             });
 
+            services.AddGameProvidersPluggableServerClient((options, sp) =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+
+                options.BaseUrl = new(configuration.GetConnectionString("GameProvidersPluggable"));
+                options.JsonSerializerOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Converters = { new JsonStringEnumConverter() }
+                };
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new OpenApiInfo { Title = "TGS BackOffice API", Version = "v1" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS BackOffice API",
+                        Version = "v1"
+                    });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
