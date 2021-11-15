@@ -10,6 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<ISettingRepository, SettingRepository>()
                 .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
                 .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
+                .AddTransient<IAgentRepository, AgentRepository>()
                 .AddSingleton<ISystemClock, DefaultSystemClock>();
     }
 }
