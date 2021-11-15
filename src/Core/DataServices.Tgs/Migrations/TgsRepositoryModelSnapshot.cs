@@ -689,6 +689,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_dividend_multiple_layers");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDomain", b =>
+                {
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("DomainName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("domain_name");
+
+                    b.HasKey("AgentId", "DomainName")
+                        .HasName("pk_agent_domains");
+
+                    b.ToTable("agent_domains");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6117,6 +6134,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("AgentDividend");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDomain", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", null)
+                        .WithMany()
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agent_domains_agents_agent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>

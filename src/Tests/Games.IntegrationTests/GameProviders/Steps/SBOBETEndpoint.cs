@@ -112,7 +112,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             string username, string brandCode,
             string currencyCode, PlatformType platformType)
         {
-            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            return PlayerLoginAsync(
+                _serviceProvider,
+                username,
+                platformType,
+                brandCode,
+                currencyCode);
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
@@ -219,7 +224,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await client.GetPlayerBalanceAsync(new GetBalanceRequest
             {
-                CompanyKey = config.CompanyKey, PlayerCode = playerCode, GameType = 1, ProductType = 1
+                CompanyKey = config.CompanyKey,
+                PlayerCode = playerCode,
+                GameType = 1,
+                ProductType = 1
             });
 
             Set(SR.Response, response);
@@ -504,9 +512,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                    {
-                        r.PlayerCode, r.CurrencyCode, r.ExternalRoundId, r.ExternalGameId
-                    })
+                {
+                    r.PlayerCode,
+                    r.CurrencyCode,
+                    r.ExternalRoundId,
+                    r.ExternalGameId
+                })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -539,13 +550,19 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Then(@"I will receive bet response of no error and balance of \$(.*)")]
         public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
         {
-            VerifyResponseWithoutError<PlaceBetResponse>(expectedBalance);
+            var response = Get<PlaceBetResponse>(SR.Response);
+
+            response.ErrorCode.Should().Be(0, response.ErrorMessage);
+            response.Balance.Should().Be(expectedBalance);
         }
 
         [Then(@"I will receive settle bet response of no error and balance of \$(.*)")]
         public void ThenIWillReceiveSettleBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
         {
-            VerifyResponseWithoutError<SettleBetResponse>(expectedBalance);
+            var response = Get<SettleBetResponse>(SR.Response);
+
+            response.ErrorCode.Should().Be(0, response.ErrorMessage);
+            response.Balance.Should().Be(expectedBalance);
         }
 
         [Then(@"I will receive cancel response of no error and balance of \$(.*)")]
