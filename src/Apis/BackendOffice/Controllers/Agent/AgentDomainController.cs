@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.Agent
@@ -25,14 +26,20 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         }
 
         [HttpGet("{brandId}/{agentId}")]
-        public IAsyncEnumerable<string> GetAgentDomainsAsync(
+        public async Task<ResponseViewModel<string[]>> GetAgentDomainsAsync(
             [FromServices] IQueryService<AgentDomainsQuery, string> queryService,
             Guid brandId,
             Guid agentId)
         {
             var query = new AgentDomainsQuery(agentId);
 
-            return queryService.QueryAsync(query);
+            return new ResponseViewModel<string[]>
+            {
+                Valid = true,
+                Data = await queryService.QueryAsync(query)
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
         }
 
         [HttpDelete("{brandId}/{agentId}")]
