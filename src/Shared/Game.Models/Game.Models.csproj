@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="BetConstruct\Outgoing\" />
+  </ItemGroup>
+
 </Project>
