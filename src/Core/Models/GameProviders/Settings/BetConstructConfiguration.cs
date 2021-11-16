@@ -4,6 +4,6 @@
     {
         public string SharedKey { get; set; }
 
-        public string ParnterId { get; set; }
+        public string PartnerId { get; set; }
     }
 }
