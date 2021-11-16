@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="DataInitializers\Games\365.csv" />
     <None Remove="DataInitializers\Games\AB.csv" />
+    <None Remove="DataInitializers\Games\BC.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
     <None Remove="DataInitializers\Games\LY.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
@@ -45,6 +46,7 @@
     <EmbeddedResource Include="DataInitializers\Games\LY.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\KY.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\BC.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />

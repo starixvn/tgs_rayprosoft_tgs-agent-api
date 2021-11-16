@@ -100,6 +100,7 @@ namespace TGS.Core.Models
             public const string TCG = "TCG";
             public const string Card365 = "365";
             public const string LY = "LY";
+            public const string BetConstruct = "BC";
         }
 
         public static class EnvironmentVariable
