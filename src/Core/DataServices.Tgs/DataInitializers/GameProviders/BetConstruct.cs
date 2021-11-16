@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.GameProviders.Settings;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    internal partial class DataInitializer
     {
         internal record BetConstructProvider : IGameProvider
-        {            
+        {
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -52,7 +49,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new VNDCurrency(),
                 new GBPCurrency(),
                 new KRWCurrency(),
-                new USDCurrency()                
+                new USDCurrency()
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
@@ -60,7 +57,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new USLanguage("en"),
                 new CNLanguage("zh"),
                 new TWLanguage("zh")
-
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -78,26 +74,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SubGameProvider(GameProviderConst.BetConstruct,"BetConstruct")
             };
 
-            PluggableConfigurationBase IGameProvider.GetConfiguration() => new BetConstructConfiguration
-            {
-                ServiceEndpointUrl =
-                    _env.IsDocker() ? new Uri("http://game-betconstruct") : new("http://localhost:62330")
-            };
+            PluggableConfigurationBase IGameProvider.GetConfiguration() =>
+                new BetConstructConfiguration
+                {
+                    ServiceEndpointUrl =
+                        _env.IsDocker() ? new Uri("http://game-betconstruct") : new("http://localhost:62330"),
+                    SharedKey = "jiLEPYw5n3n5kcx6T3",
+                    ParnterId = "1877685"
+                };
         }
+
         internal class BetConstructGameProviderConfiguration : IGameProviderConfiguration
         {
             private static readonly string _endpoint = string.Empty;
-            Guid IGameProviderConfiguration.Id => new("575A70EC-1004-B324-4444-2ADE0261A0B2");
-
-            string IGameProviderConfiguration.Name => "Configuration BetConstruct";
-
             string IGameProviderConfiguration.ClientId => "BetConstruct-PG";
-
-            string IGameProviderConfiguration.SecretKey => "jiLEPYw5n3n5kcx6T3";
 
             string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
+            Guid IGameProviderConfiguration.Id => new("575A70EC-1004-B324-4444-2ADE0261A0B2");
+
             string IGameProviderConfiguration.MobileEndpoint => _endpoint;
+
+            string IGameProviderConfiguration.Name => "Configuration BetConstruct";
+
+            string IGameProviderConfiguration.SecretKey => "jiLEPYw5n3n5kcx6T3";
         }
     }
 }
