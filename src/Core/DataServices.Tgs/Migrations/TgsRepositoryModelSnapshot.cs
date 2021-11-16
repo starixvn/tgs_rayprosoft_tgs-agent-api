@@ -3709,6 +3709,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -4028,6 +4033,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("Minute")
                         .HasColumnType("integer")
                         .HasColumnName("minute");
+
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
@@ -5107,6 +5117,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("Minute")
                         .HasColumnType("integer")
                         .HasColumnName("minute");
+
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
