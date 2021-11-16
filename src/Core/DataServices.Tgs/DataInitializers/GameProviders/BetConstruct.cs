@@ -94,7 +94,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.ClientId => "BetConstruct-PG";
 
-            string IGameProviderConfiguration.SecretKey => "GaQMVGBCScM8JPJYjhcrxj5VDDT2QqAa";
+            string IGameProviderConfiguration.SecretKey => "jiLEPYw5n3n5kcx6T3";
 
             string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
 
