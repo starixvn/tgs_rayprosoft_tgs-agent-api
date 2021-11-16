@@ -52,8 +52,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new VNDCurrency(),
                 new GBPCurrency(),
                 new KRWCurrency(),
-                new USDCurrency(),
-                new VNDCurrency()//TODO:須詢問廠商是否為1:1000的VND
+                new USDCurrency()                
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
