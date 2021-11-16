@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
@@ -35,6 +37,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 scale: 6,
                 nullable: false,
                 defaultValue: 0m);
+
+            var assembly = Assembly.GetExecutingAssembly();
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_generate_round_aggregates"));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
