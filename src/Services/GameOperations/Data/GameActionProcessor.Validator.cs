@@ -12,14 +12,31 @@ namespace TGS.Services.GameOperations.Data
 {
     internal sealed partial class GameActionProcessor
     {
-        private void ValidateAmounts(GameActionState s)
+        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(
+            ITgsRepository repository,
+            string externalRoundId, string externalTransactionId)
         {
-            s.ValidateAmount(nameof(s.Amount), s.Amount);
+            var foundExternalRoundId = await GetExternalRoundIdAsync(repository, externalTransactionId);
 
-            if (s.Commission.HasValue)
+            if (foundExternalRoundId.IsNotNullOrEmpty() &&
+                foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
             {
-                _amountValidator.ThrowIfAmountIsNegative(nameof(s.Commission), s.Commission.Value);
+                throw new InvalidGameActionException(
+                    $"Expected the reference transaction '{externalTransactionId}' to belong to round '{externalRoundId}' but it belongs to '{foundExternalRoundId}'",
+                    InvalidGameActionErrorCode.TransactionNotFound);
             }
+        }
+
+        private static void ThrowIfHaveNoExternalBetIds(GameActionState s)
+        {
+            if (s.HasExtBetId ||
+                s.GameActionType.IsOneOf(LockAmount, PlaceBet, UnlockAmount) ||
+                s.GameActionType == CancelTransaction && s.ReferencedGameAction.Type == LockAmount)
+            {
+                return;
+            }
+
+            throw new InvalidGameActionException("Missing external bet ID.");
         }
 
         private static void ThrowIfHaveNoRequiredIds(GameActionState s)
@@ -43,55 +60,6 @@ namespace TGS.Services.GameOperations.Data
                     $"Missing game external id for '{s.PlatformType}' of provider config with id={s.GameProviderConfigurationId}",
                     InvalidGameActionErrorCode.GameNotFound);
             }
-        }
-
-        private static void ThrowIfHaveNoExternalBetIds(GameActionState s)
-        {
-            if (s.HasExtBetId ||
-                s.GameActionType.IsOneOf(LockAmount, PlaceBet, UnlockAmount) ||
-                s.GameActionType == CancelTransaction && s.ReferencedGameAction.Type == LockAmount)
-            {
-                return;
-            }
-
-            throw new InvalidGameActionException("Missing external bet ID.");
-        }
-
-        private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(
-            ITgsRepository repository,
-            string externalRoundId, string externalTransactionId)
-        {
-            var foundExternalRoundId = await GetExternalRoundIdAsync(repository, externalTransactionId);
-
-            if (foundExternalRoundId.IsNotNullOrEmpty() &&
-                foundExternalRoundId.IgnoreCaseNotEquals(externalTransactionId))
-            {
-                throw new InvalidGameActionException(
-                    $"Expected the reference transaction '{externalTransactionId}' to belong to round '{externalRoundId}' but it belongs to '{foundExternalRoundId}'",
-                    InvalidGameActionErrorCode.TransactionNotFound);
-            }
-        }
-
-        private static GameActionResult ValidateReferenceAction(GameActionState s)
-        {
-            var action = s.PreviousActions?.FirstOrDefault(pa => pa.ExternalId == s.ExternalTransactionId);
-
-            if (action == null)
-            {
-                return null;
-            }
-
-            if (s.PlayerData.Wallet.Id != action.WalletId)
-            {
-                throw new InvalidGameActionException(
-                    $"External transaction ID: {s.ExternalTransactionId} was already used for another player.",
-                    InvalidGameActionErrorCode.ActionProhibited);
-            }
-
-            return GetDuplicateTransactionResult(action.Id,
-                s.ExternalTransactionId,
-                s.InternalRoundId!.Value,
-                s.GameId);
         }
 
         private static void ThrowIfReferenceGameActionOrRoundIsNotFound(GameActionState s)
@@ -118,6 +86,27 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
+        private static GameActionResult ValidateReferenceAction(GameActionState s)
+        {
+            var action = s.PreviousActions?.FirstOrDefault(pa => pa.ExternalId == s.ExternalTransactionId);
+
+            if (action == null)
+            {
+                return null;
+            }
+
+            if (s.PlayerData.Wallet.Id != action.WalletId)
+            {
+                throw new InvalidGameActionException(
+                    $"External transaction ID: {s.ExternalTransactionId} was already used for another player.",
+                    InvalidGameActionErrorCode.ActionProhibited);
+            }
+
+            return GetDuplicateTransactionResult(action.Id,
+                s.ExternalTransactionId,
+                s.InternalRoundId!.Value,
+                s.GameId);
+        }
 
         private static void VerifyLockedAndUnlockedAmounts(GameActionState s)
         {
@@ -148,6 +137,11 @@ namespace TGS.Services.GameOperations.Data
                 throw new InvalidGameActionException(
                     $"Cannot close round when locked amount is {leftAmount} left");
             }
+        }
+
+        private void ValidateAmounts(GameActionState s)
+        {
+            s.ValidateAmount(nameof(s.Amount), s.Amount);
         }
     }
 }
