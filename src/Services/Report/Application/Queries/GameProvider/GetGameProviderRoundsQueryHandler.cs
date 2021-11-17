@@ -75,7 +75,7 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                         CurrencyCode = group.CurrencyCode,
                         BetAmount = items.Sum(i => i.aggregate.BetAmount),
                         ValidBetAmount = items.Sum(i => i.aggregate.ValidBetAmount),
-                        Turnover = items.Sum(i => i.aggregate.Turnover),
+                        OriginalTurnover = items.Sum(i => i.aggregate.OriginalTurnover),
                         CompanyWinLoss = items.Sum(i => i.aggregate.WinLoss)
                     }).CreatePagedResponseAsync(request);
         }

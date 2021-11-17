@@ -16,7 +16,7 @@ namespace TGS.Services.Report.Application.Models.GameProvider
 
         public decimal ValidBetAmount { get; set; }
 
-        public decimal Turnover { get; set; }
+        public decimal OriginalTurnover { get; set; }
 
         public decimal CompanyWinLoss { get; set; }
     }
