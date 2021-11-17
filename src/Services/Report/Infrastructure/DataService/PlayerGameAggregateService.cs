@@ -30,9 +30,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         public PlayerGameAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) :
             base(repository)
-        {
-            _repository = repository;
-        }
+            => _repository = repository;
 
         ITgsRepository IPlayerGameAggregateService.Repository => _repository;
 
@@ -50,6 +48,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Hour = model.Hour,
                 ReportDate = model.ReportDate,
                 CreatedOn = model.CreatedOn,
+                BetAmount = model.BetAmount.Truncate(2),
+                ValidBetAmount = model.ValidBetAmount.Truncate(2),
+                OriginalTurnover = model.OriginalTurnover.Truncate(2),
                 Turnover = model.Turnover.Truncate(2),
                 WinLoss = model.WinLoss.Truncate(2),
                 VipRebateAmount = model.VipRebateAmount.Truncate(2),
