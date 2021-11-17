@@ -176,6 +176,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     playerRoundAggregates
                         .Sum(r => r.BetAmount);
 
+                playerAggregate.OriginalTurnover =
+                    playerRoundAggregates
+                        .Sum(r => r.OriginalTurnover);
+
                 playerAggregate.Turnover =
                     playerRoundAggregates
                         .Sum(r => r.Turnover);
@@ -230,6 +234,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             VipCardGameRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
                             VipLotteryRebatePercentage = x.Vip?.LotteryRebatePercentage ?? 0M,
                             VipSlotRebatePercentage = x.Vip?.SlotRebatePercentage ?? 0M,
+                            OriginalTurnover = aggregate.Sum(a => a.r.OriginalTurnover),
                             Turnover = aggregate.Sum(a => a.r.Turnover),
                             WinLoss = aggregate.Sum(a => a.r.WinLoss),
                             VipRebateAmount =
@@ -248,7 +253,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             playerAggregates = playerAggregates.Where(x =>
                 x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
                 x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.RebateAmount != 0 || x.DividendAmount != 0 ||
-                x.PromotionAmount != 0 || x.BetAmount != 0 || x.Turnover != 0 ||
+                x.PromotionAmount != 0 || x.BetAmount != 0 || x.OriginalTurnover != 0 || x.Turnover != 0 ||
                 x.WinLossAmount != 0 || players.Contains(x.PlayerCode)).ToArray();
 
             return (playerAggregates, playerAggregateByGameType);
