@@ -489,7 +489,7 @@ namespace TGS.Clients.Report.Client
         public async Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
             GetGameProviderRoundsRequest request)
         {
-            var path = ClientPath.AppendWithProperties("/api/agentReport/gameProviderReport?", request);
+            var path = ClientPath.AppendWithProperties("/api/gameProviderReport?", request);
 
             return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, PagedResponse<GameProviderRoundsModel>>(
                 HttpMethod.Get,

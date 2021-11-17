@@ -19,7 +19,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "original_turnover",
+                name: "bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates",
                 type: "numeric(18,6)",
@@ -30,16 +30,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.AddColumn<decimal>(
                 name: "original_turnover",
-                schema: "report",
-                table: "player_aggregates",
-                type: "numeric(18,6)",
-                precision: 18,
-                scale: 6,
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates",
                 type: "numeric(18,6)",
@@ -52,6 +42,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "valid_bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates",
+                type: "numeric(18,6)",
+                precision: 18,
+                scale: 6,
+                nullable: false,
+                defaultValue: 0m);
+
+            migrationBuilder.AddColumn<decimal>(
+                name: "original_turnover",
+                schema: "report",
+                table: "player_aggregates",
                 type: "numeric(18,6)",
                 precision: 18,
                 scale: 6,
@@ -72,6 +72,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "report_generate_round_aggregates"));
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -82,17 +83,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "round_aggregates");
 
             migrationBuilder.DropColumn(
-                name: "original_turnover",
+                name: "bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates");
 
             migrationBuilder.DropColumn(
                 name: "original_turnover",
-                schema: "report",
-                table: "player_aggregates");
-
-            migrationBuilder.DropColumn(
-                name: "bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates");
 
@@ -100,6 +96,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "valid_bet_amount",
                 schema: "report",
                 table: "player_game_rebate_aggregates");
+
+            migrationBuilder.DropColumn(
+                name: "original_turnover",
+                schema: "report",
+                table: "player_aggregates");
 
             migrationBuilder.DropColumn(
                 name: "valid_bet_amount",

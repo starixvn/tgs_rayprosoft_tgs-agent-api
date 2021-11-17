@@ -1,7 +1,11 @@
-﻿namespace TGS.Services.Report.Application.Models.GameProvider
+﻿using System;
+
+namespace TGS.Services.Report.Application.Models.GameProvider
 {
     public class GameProviderRoundsModel
     {
+        public Guid BrandId { get; set; }
+
         public string GameProviderName { get; set; }
 
         public string CurrencyCode { get; set; }

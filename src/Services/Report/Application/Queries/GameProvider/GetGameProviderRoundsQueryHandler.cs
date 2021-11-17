@@ -43,6 +43,11 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                         aggregate,
                         gp
                     })
+                .Select(x => new
+                {
+                    x.aggregate,
+                    x.gp
+                })
                 .Join(_service.Repository.Brands,
                     group => group.aggregate.BrandId,
                     brand => brand.Id,
@@ -52,28 +57,27 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                         group.gp,
                         brand
                     })
+                .Select(x => new
+                {
+                    x.aggregate,
+                    x.gp,
+                    x.brand.Currencies.FirstOrDefault().CurrencyCode
+                })
                 .GroupBy(x => new
                     {
                         x.aggregate.GameProviderId,
                         x.gp.Name,
-                        x.brand.Currencies.First().CurrencyCode
+                        x.CurrencyCode
                     },
-                    (group, items) => new
+                    (group, items) => new GameProviderRoundsModel
                     {
-                        group.GameProviderId,
                         GameProviderName = group.Name,
-                        group.CurrencyCode,
-                        items
-                    })
-                .Select(x => new GameProviderRoundsModel
-                {
-                    GameProviderName = x.GameProviderName,
-                    CurrencyCode = x.CurrencyCode,
-                    BetAmount = x.items.Sum(i => i.aggregate.BetAmount),
-                    ValidBetAmount = x.items.Sum(i => i.aggregate.ValidBetAmount),
-                    Turnover = x.items.Sum(i => i.aggregate.Turnover),
-                    CompanyWinLoss = x.items.Sum(i => i.aggregate.WinLoss)
-                }).CreatePagedResponseAsync(request);
+                        CurrencyCode = group.CurrencyCode,
+                        BetAmount = items.Sum(i => i.aggregate.BetAmount),
+                        ValidBetAmount = items.Sum(i => i.aggregate.ValidBetAmount),
+                        Turnover = items.Sum(i => i.aggregate.Turnover),
+                        CompanyWinLoss = items.Sum(i => i.aggregate.WinLoss)
+                    }).CreatePagedResponseAsync(request);
         }
     }
 }
