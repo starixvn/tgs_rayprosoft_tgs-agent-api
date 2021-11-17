@@ -28,9 +28,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
         private readonly ITgsRepository _repository;
 
         public PlayerAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) : base(repository)
-        {
-            _repository = repository;
-        }
+            => _repository = repository;
 
         ITgsRepository IPlayerAggregateService.Repository => _repository;
 
@@ -53,6 +51,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 PromotionAmount = model.PromotionAmount.Truncate(2),
                 DividendAmount = model.DividendAmount.Truncate(2),
                 BetAmount = model.BetAmount.Truncate(2),
+                ValidBetAmount = model.ValidBetAmount.Truncate(2),
+                OriginalTurnover = model.OriginalTurnover.Truncate(2),
                 Turnover = model.Turnover.Truncate(2),
                 WinLossAmount = model.WinLossAmount.Truncate(2)
             }).ToArray());

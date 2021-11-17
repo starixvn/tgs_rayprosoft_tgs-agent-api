@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.GameProvider;
 using TGS.Clients.Report.Client.Models.LicenseeMarket;
 using TGS.Clients.Report.Client.Models.Market;
 using TGS.Clients.Report.Client.Models.Player;
@@ -51,6 +52,7 @@ namespace TGS.Clients.Report.Client
             GetPlayersAccountChangesRequest request);
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
+        Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
@@ -482,6 +484,19 @@ namespace TGS.Clients.Report.Client
             var stream = await response.Content.ReadAsStreamAsync();
 
             return stream;
+        }
+
+        public async Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+            GetGameProviderRoundsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/gameProviderReport?", request);
+
+            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, PagedResponse<GameProviderRoundsModel>>(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: "Report.GetGameProviderReport",
+                options: new() { PropertyNameCaseInsensitive = true });
         }
     }
 }
