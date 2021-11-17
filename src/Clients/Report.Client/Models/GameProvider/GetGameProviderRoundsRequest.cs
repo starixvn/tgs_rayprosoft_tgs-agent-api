@@ -14,6 +14,6 @@ namespace TGS.Clients.Report.Client.Models.GameProvider
 
         public string[] GameProviderCodes { get; set; }
 
-        public GameType GameType { get; set; }
+        public GameType? GameType { get; set; }
     }
 }

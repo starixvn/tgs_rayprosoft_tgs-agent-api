@@ -4,13 +4,13 @@ namespace TGS.Services.Report.Application.Models.GameProvider
 {
     public class GameProviderRoundsModel
     {
-        public Guid BrandId { get; set; }
+        public Guid GameProviderId { get; set; }
 
         public string GameProviderName { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public int Transactions { get; set; }
+        public int TransactionCount { get; set; }
 
         public decimal BetAmount { get; set; }
 

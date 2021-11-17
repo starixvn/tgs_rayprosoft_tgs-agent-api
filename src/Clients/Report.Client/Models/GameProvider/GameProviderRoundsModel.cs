@@ -1,12 +1,16 @@
-﻿namespace TGS.Clients.Report.Client.Models.GameProvider
+﻿using System;
+
+namespace TGS.Clients.Report.Client.Models.GameProvider
 {
     public class GameProviderRoundsModel
     {
+        public Guid GameProviderId { get; set; }
+
         public string GameProviderName { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public int Transactions { get; set; }
+        public int TransactionCount { get; set; }
 
         public decimal BetAmount { get; set; }
 

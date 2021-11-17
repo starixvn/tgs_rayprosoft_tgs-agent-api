@@ -15,10 +15,15 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
             PagedResponse<GameProviderRoundsModel>>
     {
         private readonly IPlayerGameAggregateService _service;
+        private readonly ITgsRoundService _tgsRoundService;
 
-        public GetGameProviderRoundsQueryHandler(IPlayerGameAggregateService service, IHttpContextAccessor accessor) :
+        public GetGameProviderRoundsQueryHandler(IPlayerGameAggregateService service, ITgsRoundService tgsRoundService,
+            IHttpContextAccessor accessor) :
             base(accessor)
-            => _service = service;
+        {
+            _service = service;
+            _tgsRoundService = tgsRoundService;
+        }
 
         public override async Task<PagedResponse<GameProviderRoundsModel>> Handle(
             GetGameProviderRoundsRequest request,
@@ -30,11 +35,42 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            return await _service.GetPlayerGameAggregateQueries()
+            var transactionCounts = await _tgsRoundService.GetRoundQueries().Where(x => x.BrandId == request.BrandId)
+                .Where(gameProviderIds.Length > 0, x => gameProviderIds.Contains(x.GameProviderId))
+                .GroupBy(x => new
+                    {
+                        x.GameProviderId,
+                        x.GameId
+                    },
+                    (group, items) => new
+                    {
+                        group.GameProviderId,
+                        group.GameId,
+                        Count = items.Count()
+                    }).ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            transactionCounts = transactionCounts.Join(_tgsRoundService.TgsRepository.Games,
+                    t => t.GameId,
+                    g => g.Id,
+                    (transactionCounts, game) => new
+                    {
+                        transactionCounts,
+                        game
+                    })
+                .Where(request.GameType is not null, x => x.game.Type == request.GameType)
+                .Select(x => new
+                {
+                    x.transactionCounts.GameProviderId,
+                    x.transactionCounts.GameId,
+                    x.transactionCounts.Count
+                })
+                .ToArray();
+
+            var response = await _service.GetPlayerGameAggregateQueries()
                 .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To)
                 .Where(gameProviderIds.Length > 0, x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.GameType == request.GameType)
+                .Where(request.GameType is not null, x => x.GameType == request.GameType)
                 .Join(_service.Repository.GameProviders,
                     aggregate => aggregate.GameProviderId,
                     gp => gp.Id,
@@ -71,6 +107,7 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                     },
                     (group, items) => new GameProviderRoundsModel
                     {
+                        GameProviderId = group.GameProviderId,
                         GameProviderName = group.Name,
                         CurrencyCode = group.CurrencyCode,
                         BetAmount = items.Sum(i => i.aggregate.BetAmount),
@@ -78,6 +115,14 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                         OriginalTurnover = items.Sum(i => i.aggregate.OriginalTurnover),
                         CompanyWinLoss = items.Sum(i => i.aggregate.WinLoss)
                     }).CreatePagedResponseAsync(request);
+
+            foreach (var item in response.Items)
+            {
+                item.TransactionCount =
+                    transactionCounts.Where(t => t.GameProviderId == item.GameProviderId).Sum(t => t.Count);
+            }
+
+            return response;
         }
     }
 }
