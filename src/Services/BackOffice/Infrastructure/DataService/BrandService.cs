@@ -453,6 +453,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Where(x => x.GameProvider.Currencies.Any(c => brandCurrencyCodes.Contains(c.CurrencyCode)))
                 .ToArrayAsync();
 
+            games = games.Where(x
+                => x.AvailableCurrencies.IsNullOrEmpty() ||
+                x.AvailableCurrencies.Split(",").Any(c => brandCurrencyCodes.Contains(c))).ToArray();
+
             var brandGames = games.Select(x =>
             {
                 var originBrandGame = brand.Games.FirstOrDefault(g => g.GameId == x.Id);
