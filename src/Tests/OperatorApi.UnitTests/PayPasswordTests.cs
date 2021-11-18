@@ -253,6 +253,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),
+                    false,
                     false));
 
             var actualSecurityKey = await sut.GetAsync(command);
