@@ -153,6 +153,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),
+                    true,
                     true));
 
             var expected = $"Your ID verification code is : {validateCode}";

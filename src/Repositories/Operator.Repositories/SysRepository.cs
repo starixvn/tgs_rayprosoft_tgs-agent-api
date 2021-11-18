@@ -37,7 +37,8 @@ namespace TGS.Operator.Repositories
                     default!,
                     default!,
                     default!,
-                    brand.EnableSms);
+                    brand.EnableSms,
+                    brand.EnableSmsRegisterFlow);
             }
 
             var logo = JsonSerializer.Deserialize<BrandSmsVendorSettings>(brand.LogoInfo)!;
@@ -48,7 +49,8 @@ namespace TGS.Operator.Repositories
                 logo.DesktopLogoUrl,
                 logo.MobileLogoUrl,
                 logo.LoadingUrl,
-                brand.EnableSms);
+                brand.EnableSms,
+                brand.EnableSmsRegisterFlow);
         }
 
         public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
