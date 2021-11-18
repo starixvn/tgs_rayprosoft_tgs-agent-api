@@ -137,6 +137,7 @@ namespace TGS.Services.Report.Application.Commands.Player
                                 .Sum(a => a.aggregate.Turnover) / 100M,
                         RebateAmount = list.Sum(l => l.aggregate.VipRebateAmount)
                     })
+                .Where(x => x.RebateAmount > 0)
                 .ToArrayAsync(cancellationToken);
 
             if (playerRebates.Length <= 0)
