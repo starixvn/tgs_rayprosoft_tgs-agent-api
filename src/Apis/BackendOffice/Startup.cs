@@ -178,12 +178,6 @@ namespace TGS.Apis.BackendOffice
                 var configuration = sp.GetRequiredService<IConfiguration>();
 
                 configuration.GetSection("TGSGameProvidersKickPlayerApi").Bind(options);
-
-                options.JsonSerializerOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters = { new JsonStringEnumConverter() }
-                };
             });
 
             services.AddGameProvidersPluggableServerClient((options, sp) =>
