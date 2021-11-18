@@ -3966,7 +3966,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("to");
 
                     b.Property<decimal>("Turnover")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
 
                     b.HasKey("Id")
