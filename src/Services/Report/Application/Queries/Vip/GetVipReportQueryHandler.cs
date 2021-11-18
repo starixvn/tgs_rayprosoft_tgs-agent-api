@@ -95,6 +95,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         AdjustmentAmount = players.Sum(m => m.AdjustmentAmount),
                         BonusAmount = players.Sum(m => m.RebateAmount + m.PromotionAmount),
                         BetAmount = players.Sum(m => m.BetAmount),
+                        ValidBetAmount = players.Sum(m => m.OriginalTurnover),
                         Turnover = players.Sum(m => m.Turnover),
                         WinLossAmount = players.Sum(m => m.WinLossAmount),
                         NetProfit = players.Sum(m
@@ -129,6 +130,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         x.p.AdjustmentAmount,
                         x.p.BonusAmount,
                         x.p.BetAmount,
+                        x.p.ValidBetAmount,
                         x.p.Turnover,
                         x.p.WinLossAmount,
                         x.p.NetProfit,
@@ -144,6 +146,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         x.AdjustmentAmount,
                         x.BonusAmount,
                         x.BetAmount,
+                        x.ValidBetAmount,
                         x.Turnover,
                         x.WinLossAmount,
                         x.NetProfit
@@ -160,6 +163,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                                 m.pg.VipRebateAmount),
                         BonusAmount = x.BonusAmount,
                         BetAmount = x.BetAmount,
+                        ValidBetAmount = x.ValidBetAmount,
                         Turnover = x.Turnover,
                         WinLossAmount = x.WinLossAmount,
                         NetProfit = x.NetProfit
@@ -182,6 +186,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                     RebateAmount = x.RebateAmount,
                     BonusAmount = x.BonusAmount,
                     BetAmount = x.BetAmount,
+                    ValidBetAmount = x.ValidBetAmount,
                     Turnover = x.Turnover,
                     WinLossAmount = x.WinLossAmount,
                     NetProfit = x.NetProfit

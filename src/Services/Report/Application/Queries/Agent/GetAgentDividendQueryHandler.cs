@@ -91,6 +91,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         AdjustmentAmount = list.Sum(l => l.AdjustmentAmount),
                         BonusAmount = list.Sum(l => l.BonusAmount),
                         BetAmount = list.Sum(l => l.BetAmount),
+                        ValidBetAmount = list.Sum(l => l.ValidBetAmount),
+                        OriginalTurnover = list.Sum(l => l.OriginalTurnover),
                         Turnover = list.Sum(l => l.Turnover),
                         WinLossAmount = list.Sum(l => l.WinLossAmount),
                         NetProfit = list.Sum(l => l.NetProfit),
@@ -110,7 +112,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     AdjustmentAmount = ad.AdjustmentAmount,
                     BonusAmount = ad.BonusAmount,
                     BetAmount = ad.BetAmount,
-                    ValidBetAmount = ad.Turnover,
+                    ValidBetAmount = ad.OriginalTurnover,
+                    Turnover = ad.Turnover,
                     WinLossAmount = ad.WinLossAmount,
                     NetProfit = ad.NetProfit,
                     AgentDividendAmount = ad.AgentDividendAmount
