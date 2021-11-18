@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.Report.Application.Models.Market;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -18,9 +18,7 @@ namespace TGS.Services.Report.Application.Queries.Market
 
         public GetMarketsQueryHandler(IPlayerAggregateService service, IHttpContextAccessor accessor) :
             base(accessor)
-        {
-            _service = service;
-        }
+            => _service = service;
 
         public override async Task<PagedResponse<MarketModel>> Handle(
             GetMarketsRequest request,
@@ -80,10 +78,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                         ReportDate = x.date,
                         market
                     })
-                .GroupBy(x => new
-                {
-                    x.ReportDate
-                },
+                .GroupBy(x => new { x.ReportDate },
                     (market, markets) =>
                         new MarketModel
                         {
@@ -100,7 +95,8 @@ namespace TGS.Services.Report.Application.Queries.Market
                                 markets.Sum(
                                     m => m.market == null ? 0 : m.market.RebateAmount + m.market.PromotionAmount),
                             BetAmount = markets.Sum(m => m.market?.BetAmount ?? 0),
-                            ValidBetAmount = markets.Sum(m => m.market?.Turnover ?? 0),
+                            ValidBetAmount = markets.Sum(m => m.market?.OriginalTurnover ?? 0),
+                            Turnover = markets.Sum(m => m.market?.Turnover ?? 0),
                             WinLossAmount = markets.Sum(m => m.market?.WinLossAmount ?? 0),
                             NetProfit = markets.Sum(m
                                 => m.market == null
