@@ -71,7 +71,7 @@ namespace TGS.Services.Operator.Services.Player
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(command.BrandId, currency)
                 .ConfigureAwait(false);
 
-            var playerStatus = brand.Code == "HKJP"
+            var playerStatus = brand.Code is "HKJP" or "WLGHK"
                 ? PlayerStatus.InBlacklist
                 : PlayerStatus.Enabled;
 
@@ -98,7 +98,8 @@ namespace TGS.Services.Operator.Services.Player
                     playerStatus).ConfigureAwait(false);
             }
 
-            if (!string.IsNullOrEmpty(resultPlayerCode) && brand.Code != "HKJP")
+            if (!string.IsNullOrEmpty(resultPlayerCode)
+                && brand.Code is not ("HKJP" or "WLGHK"))
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(
