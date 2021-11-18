@@ -1227,6 +1227,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("enable_sms");
 
+                    b.Property<bool>("EnableSmsRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_sms_register_flow");
+
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uuid")
                         .HasColumnName("licensee_id");
