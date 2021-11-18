@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
@@ -29,22 +30,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Middlewares
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var value = await context.Request.ReadAsStringAsync();
-            var elements = GetElements(value);
+            //var elements = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(value);
 
-            var gameProviderId = await _service.GetGameProviderIdByCodeAsync().ConfigureAwait(false);
+            //var gameProviderId = await _service.GetGameProviderIdByCodeAsync().ConfigureAwait(false);
 
-            context.Items.Add(ContextItems.GameProviderId, gameProviderId);
+            //context.Items.Add(ContextItems.GameProviderId, gameProviderId);
 
-            var tokenId = GetElementValue(elements, "sessionToken");
-            var loginRecord = await DecryptTokenAsync(tokenId);
+            //var tokenId = GetElementValue(elements, "AuthToken");
 
-            var platformType = loginRecord.PlatformType;
-            var brandId = await _service.GetBrandIdByPlayerCodeAsync(loginRecord.PlayerCode);
-            var bgpc = await _service.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+            //var loginRecord = await DecryptTokenAsync(tokenId);
 
-            context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-            context.Items.Add(ContextItems.PlayerCode, loginRecord.PlayerCode);
-            context.Items.Add(ContextItems.PlatformType, platformType);
+            //var platformType = loginRecord.PlatformType;
+            //var brandId = await _service.GetBrandIdByPlayerCodeAsync(loginRecord.PlayerCode);
+            //var bgpc = await _service.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+            //context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+            //context.Items.Add(ContextItems.PlayerCode, loginRecord.PlayerCode);
+            //context.Items.Add(ContextItems.PlatformType, platformType);
             await next(context);
         }
 
@@ -64,8 +66,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Middlewares
                 new Dictionary<string, string>();
         }
 
-        private static string GetElementValue(IReadOnlyDictionary<string, string> elements, string name) =>
-            elements.TryGetValue(name, out var value) ? value : string.Empty;
+        private static string GetElementValue(IReadOnlyDictionary<string, object> elements, string name)
+        {
+            var isSuccess = elements.TryGetValue(name, out var value);
+
+            return isSuccess ? value.ToString() : null;
+        }
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string tokenId)
         {
