@@ -30,7 +30,7 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
             CancellationToken cancellationToken)
         {
             var gameProviderIds = await _service.Repository.GameProviders.AsQueryable()
-                .Where(x => request.GameProviderCodes.Contains(x.Code))
+                .Where(request.GameProviderCode, x => request.GameProviderCode == x.Code)
                 .Select(x => x.Id)
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
