@@ -8,7 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.GameProviders.KickPlayerServer.Client;
+using Tgs.GameProviders.KickPlayerServer.Client;
 using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
