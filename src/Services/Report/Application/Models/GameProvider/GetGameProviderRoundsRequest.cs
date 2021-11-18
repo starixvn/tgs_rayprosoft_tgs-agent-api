@@ -13,7 +13,7 @@ namespace TGS.Services.Report.Application.Models.GameProvider
 
         public Guid BrandId { get; set; }
 
-        public string[] GameProviderCodes { get; set; }
+        public string GameProviderCode { get; set; }
 
         public GameType? GameType { get; set; }
     }
