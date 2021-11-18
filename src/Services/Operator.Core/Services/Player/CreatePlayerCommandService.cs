@@ -99,7 +99,7 @@ namespace TGS.Services.Operator.Services.Player
             }
 
             if (!string.IsNullOrEmpty(resultPlayerCode)
-                && (brand.Code != "HKJP" || brand.Code != "WLGHK"))
+                && brand.Code is not ("HKJP" or "WLGHK"))
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(
