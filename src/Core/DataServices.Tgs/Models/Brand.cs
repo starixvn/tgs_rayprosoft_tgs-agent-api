@@ -18,6 +18,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<BrandGroup> BrandGroups { get; set; }
 
+        public bool CheckDividendActiveCount { get; set; }
+
         public string ClientId { get; set; }
 
         public virtual ICollection<BrandCurrency> Currencies { get; set; }
@@ -33,6 +35,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<BrandDomain> Domains { get; set; }
 
         public bool EnableSms { get; set; }
+
+        public bool EnableSmsRegisterFlow { get; set; }
 
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
@@ -51,6 +55,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset NextSettlementTo { get; set; }
 
         public string OperationalEmail { get; set; }
+
+        public decimal PlatformCharge { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
@@ -77,7 +83,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string TimeZoneId { get; set; }
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
-        public decimal PlatformCharge { get; set; }
-        public bool CheckDividendActiveCount { get; set; }
     }
 }
