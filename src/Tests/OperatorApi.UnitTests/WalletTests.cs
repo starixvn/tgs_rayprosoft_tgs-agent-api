@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
 using NUnit.Framework;
+using Tgs.CashService.Client;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
@@ -18,10 +19,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Get_Balance_Info()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqCashServiceClient = new Mock<ICashServiceClient>();
             var moqPlayerOperations = new Mock<IPlayerOperations>();
 
-            var sut = new GetBalanceQueryService(moqWalletRepository.Object, moqPlayerOperations.Object);
+            var sut = new GetBalanceQueryService(moqCashServiceClient.Object, moqPlayerOperations.Object);
 
             var playerCode = "ThisIsPlayerCode";
             moqPlayerOperations.Setup(fake => fake.GetCachedPlayerAsync(It.Is<string>(x => x == playerCode)))
@@ -40,8 +41,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }));
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
-            moqWalletRepository
-                .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.Is<string>(x => x == playerCode)))
+            moqCashServiceClient
+                .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>()))
                 .Returns(ValueTask.FromResult(10000M));
 
             var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
