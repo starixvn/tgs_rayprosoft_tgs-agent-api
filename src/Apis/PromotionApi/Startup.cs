@@ -97,6 +97,12 @@ namespace TGS.Apis.PromotionApi
                         Converters = { new JsonStringEnumConverter() }
                     };
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
+                })
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Promotion:CashBaseUrl");
                 });
 
             services.AddFileServiceClient((sp, httpClient) =>
