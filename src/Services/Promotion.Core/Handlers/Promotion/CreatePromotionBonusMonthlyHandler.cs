@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Tgs.CashService.Client;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -37,27 +38,29 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         private static readonly DateTimeOffset _PreviousFirstDayOfMonth = _Now.AddMonths(-1).GetFirstDayOfMonth();
         private static readonly DateTimeOffset _PreviousLastDayOfMonth = _Now.AddMonths(-1).GetLastDayOfMonth();
         private readonly IPlayerBucketRepository _playerBucketService;
+        private readonly ICashServiceClient _cashServiceClient;
         private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly IPromotionRepository _promotionRepository;
         private readonly ITgsRepository _repository;
         private readonly ITgsTransactionRepository _transactionRepository;
-        private readonly IWalletRepository _walletRepository;
 
         public CreatePromotionBonusMonthlyHandler(
             IPromotionBonusRepository promotionBonusService,
             IPlayerBucketRepository playerBucketService,
-            IWalletRepository walletRepository,
+            ICashServiceClient cashServiceClient,
             ITgsTransactionRepository transactionRepository,
             ITgsRepository repository,
             IPromotionRepository promotionRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
-            _promotionBonusService = promotionBonusService;
-            _playerBucketService = playerBucketService;
-            _walletRepository = walletRepository;
-            _repository = repository;
-            _promotionRepository = promotionRepository;
-            _transactionRepository = transactionRepository;
+            if (accessor is null)
+                throw new ArgumentNullException(nameof(accessor));
+            _promotionBonusService = promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
+            _playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+            _transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -206,15 +209,18 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             foreach (var createPlayerBucketRequest in playerBuckets)
             {
-                var (transactionId, balance) = await _walletRepository.ExchangeAsync(createPlayerBucketRequest.BrandId,
-                    createPlayerBucketRequest.DefaultWalletId,
-                    createPlayerBucketRequest.PlayerCode,
-                    TransactionTypes.Promotion,
-                    createPlayerBucketRequest.BonusAmount);
+                var response = await _cashServiceClient
+                    .PromotionAsync(
+                        createPlayerBucketRequest.DefaultWalletId,
+                        createPlayerBucketRequest.BonusAmount,
+                        null,
+                        null,
+                        null)
+                    .ConfigureAwait(false);
 
                 transactionPromotions.Add(new()
                 {
-                    TransactionId = transactionId,
+                    TransactionId = response.TransactionId,
                     PromotionId = createPlayerBucketRequest.PromotionId,
                     PromotionBonusId = createPlayerBucketRequest.PromotionBonusId,
                     PromotionType = createPlayerBucketRequest.PromotionType
