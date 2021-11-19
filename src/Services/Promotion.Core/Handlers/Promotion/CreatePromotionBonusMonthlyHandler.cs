@@ -25,9 +25,9 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         CreatePromotionBonusMonthlyHandler : Handler<CreatePromotionBonusMonthlyRequest,
             MessageResponse>
     {
-        private static readonly DateTimeOffset _CurrentFirstDayOfMonth = _Now.GetFirstDayOfMonth();
+        private readonly DateTimeOffset _currentFirstDayOfMonth;
 
-        private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year,
+        private readonly DateTimeOffset _now = new(DateTimeOffset.Now.Year,
             DateTimeOffset.Now.Month,
             DateTimeOffset.Now.Day,
             0,
@@ -35,8 +35,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             0,
             new(8, 0, 0));
 
-        private static readonly DateTimeOffset _PreviousFirstDayOfMonth = _Now.AddMonths(-1).GetFirstDayOfMonth();
-        private static readonly DateTimeOffset _PreviousLastDayOfMonth = _Now.AddMonths(-1).GetLastDayOfMonth();
+        private readonly DateTimeOffset _previousFirstDayOfMonth;
+        private readonly DateTimeOffset _previousLastDayOfMonth;
         private readonly IPlayerBucketRepository _playerBucketService;
         private readonly ICashServiceClient _cashServiceClient;
         private readonly IPromotionBonusRepository _promotionBonusService;
@@ -61,6 +61,9 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
             _transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _previousLastDayOfMonth = _now.AddMonths(-1).GetLastDayOfMonth();
+            _previousFirstDayOfMonth = _now.AddMonths(-1).GetFirstDayOfMonth();
+            _currentFirstDayOfMonth = _now.GetFirstDayOfMonth();
         }
 
         public override async Task<MessageResponse> Handle(
@@ -70,24 +73,24 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var promotions = await _promotionRepository.GetPromotionQueries()
                 .Where(x => x.Status == PromotionStatus.Enabled)
                 .Where(x => x.SettlementIntervalType == "Monthly")
-                .Where(x => x.From >= _PreviousFirstDayOfMonth && x.From <= _CurrentFirstDayOfMonth ||
-                    x.To >= _PreviousFirstDayOfMonth && x.To <= _CurrentFirstDayOfMonth ||
-                    x.From < _PreviousFirstDayOfMonth && x.To > _CurrentFirstDayOfMonth
+                .Where(x => x.From >= _previousFirstDayOfMonth && x.From <= _currentFirstDayOfMonth ||
+                    x.To >= _previousFirstDayOfMonth && x.To <= _currentFirstDayOfMonth ||
+                    x.From < _previousFirstDayOfMonth && x.To > _currentFirstDayOfMonth
                 ).ToArrayAsync(cancellationToken);
 
             var promotionIds = promotions.Select(x => x.Id);
 
             if (await _promotionBonusService.GetPromotionBonusQueries()
                 .AnyAsync(
-                    x => promotionIds.Contains(x.PromotionId) && _PreviousFirstDayOfMonth <= x.From &&
-                        _PreviousLastDayOfMonth >= x.To,
+                    x => promotionIds.Contains(x.PromotionId) && _previousFirstDayOfMonth <= x.From &&
+                        _previousLastDayOfMonth >= x.To,
                     cancellationToken))
             {
                 return new()
                 {
                     Valid = false,
                     Message =
-                        $"Promotion bonus report date range {_PreviousFirstDayOfMonth} - {_PreviousLastDayOfMonth} is already existed Monthly."
+                        $"Promotion bonus report date range {_previousFirstDayOfMonth} - {_previousLastDayOfMonth} is already existed Monthly."
                 };
             }
 
@@ -97,7 +100,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
             var playerGameRoundAggregate = await _repository.PlayerGameAggregates.AsQueryable()
-                .Where(x => x.ReportDate >= _PreviousFirstDayOfMonth && x.ReportDate <= _CurrentFirstDayOfMonth)
+                .Where(x => x.ReportDate >= _previousFirstDayOfMonth && x.ReportDate <= _currentFirstDayOfMonth)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
                 .GroupJoin(_repository.BrandGames,
@@ -127,8 +130,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var promotionBonus = promotions.Select(x =>
             {
                 var id = GuidExtensions.NewSequentialGuid();
-                var from = x.From > _PreviousFirstDayOfMonth ? x.From : _PreviousFirstDayOfMonth;
-                var to = x.To < _CurrentFirstDayOfMonth ? x.To : _PreviousLastDayOfMonth;
+                var from = x.From > _previousFirstDayOfMonth ? x.From : _previousFirstDayOfMonth;
+                var to = x.To < _currentFirstDayOfMonth ? x.To : _previousLastDayOfMonth;
 
                 var (players, amountUsed) =
                     GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate), from, to);

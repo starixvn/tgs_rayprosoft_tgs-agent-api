@@ -44,6 +44,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(b => b.ValidBetAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.OriginalTurnover)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(b => b.Turnover)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -138,7 +146,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     b.To
                 })
                 .HasDatabaseName("ix_agent_dividends_brand_id_from_to");
-
 
             builder.HasIndex(b => new
                 {

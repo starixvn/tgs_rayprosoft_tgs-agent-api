@@ -104,51 +104,23 @@ namespace TGS.Services.GameOperations.Data
             };
         }
 
-        private async Task<GameActionResult> HandleGameActionAsync(GameActionState s)
+        private static DateTimeOffset AdjustRecordedOnIfNeeded(GameActionState s)
         {
-            ThrowIfHaveNoRequiredIds(s);
-            ValidateAmounts(s);
+            var now = DateTimeOffset.UtcNow;
 
-            s = await GetGameAsync(s).ConfigureAwait(false);
-            s = await FillRoundDataAsync(s).ConfigureAwait(false);
-
-            var (st, r) = await GetAndValidatePreviousActionsAsync(s).ConfigureAwait(false);
-
-            if (r != null)
+            if (s.PreviousActions == null)
             {
-                s.PlayerData.Wallet.Balance =
-                    await GetBalanceAsync(s.Repository, s.PlayerData.Wallet.Id)
-                        .ConfigureAwait(false);
-
-                return r;
+                return now;
             }
 
-            s = st;
+            var previousRecordedOn = s.PreviousActions
+                .OrderByDescending(x => x.RecordedOn)
+                .Select(x => x.RecordedOn)
+                .FirstOrDefault();
 
-            ThrowIfReferenceGameActionOrRoundIsNotFound(s);
-
-            s = GetNewRoundStatus(s);
-
-            VerifyLockedAndUnlockedAmounts(s);
-
-            var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
-
-            var output = new GameActionResult
-            {
-                TransactionResult = new()
-                {
-                    ExternalTransactionId = s.ExternalTransactionId,
-                    InternalTransactionId = ga.Id,
-                    RoundId = ga.RoundId,
-                    GameId = s.GameId,
-                    IsDuplicate = false
-                },
-                GameAction = ga,
-                ReferencedGameAction = s.ReferencedGameAction,
-                Game = s.Game
-            };
-
-            return output;
+            // due to multiple servers, if current server time is earlier than the latest timestamp,
+            // take the lasted timestamp and add 50 milliseconds as current timestamp.
+            return now > previousRecordedOn ? now : previousRecordedOn.AddMilliseconds(50);
         }
 
         private static async ValueTask<GameActionState> FillRoundDataAsync(GameActionState s)
@@ -177,6 +149,21 @@ namespace TGS.Services.GameOperations.Data
 
             return s;
         }
+
+        private static GameActionResult GetDuplicateTransactionResult(
+            Guid gameActionId,
+            string externalTransactionId, Guid roundId, int gameId) =>
+            new()
+            {
+                TransactionResult = new()
+                {
+                    ExternalTransactionId = externalTransactionId,
+                    InternalTransactionId = gameActionId,
+                    RoundId = roundId,
+                    GameId = gameId,
+                    IsDuplicate = true
+                }
+            };
 
         private static async Task<GameActionState> GetGameAsync(GameActionState s)
         {
@@ -213,6 +200,271 @@ namespace TGS.Services.GameOperations.Data
             s.Game = game;
 
             return s;
+        }
+
+        private static async ValueTask<decimal> GetOrUpdateBalanceAsync(GameActionState s)
+        {
+            var repository = s.Repository;
+            var walletId = s.PlayerData.Wallet.Id;
+
+            decimal balance;
+
+            if (s.HasWalletUpdate && s.Amount != 0)
+            {
+                balance =
+                    await AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
+                        .ConfigureAwait(false);
+
+                if (balance < 0 && s.GameActionType.IsOneOf(PlaceBet, LockAmount))
+                {
+                    throw new PlayerHasInsufficientFundsException();
+                }
+            }
+            else
+            {
+                balance = await GetBalanceAsync(repository, walletId)
+                    .ConfigureAwait(false);
+            }
+
+            return balance;
+        }
+
+        private static (IList<BetActionData>, BetActionData) GetPreviousActions(
+            GameActionType currentActionType,
+            Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
+        {
+            var refGameAction = default(BetActionData);
+            var actions = new List<BetActionData>();
+
+            foreach (var act in actionMap.Values)
+            {
+                if (act.ReferenceId.HasValue && actionMap.TryGetValue(act.ReferenceId.Value, out var refBet))
+                {
+                    act.Reference = refBet;
+                    UpdateReferenceGameActionIsCancelled(act.Type, act.Reference);
+                }
+
+                if (act.Id == refGameActionInternalId)
+                {
+                    refGameAction = act;
+                    UpdateReferenceGameActionIsCancelled(currentActionType, refGameAction);
+                }
+
+                actions.Add(act);
+            }
+
+            return (actions.ToArray(), refGameAction);
+        }
+
+        private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(
+            GameActionState s,
+            SameRoundActionData[] actionsData)
+        {
+            var amount = s.PrepareAmount(s.Amount);
+
+            if (actionsData.Length == 0)
+            {
+                return (null, null, amount);
+            }
+
+            Guid? refGameActionInternalId = null;
+            SameRoundActionData refData = null;
+
+            if (s.HasExtRefTransactionId)
+            {
+                refData = actionsData.FirstOrDefault(a =>
+                    a.ExternalTransactionId.IgnoreCaseEquals(s.ExternalTransactionReferenceId));
+
+                if (refData != null)
+                {
+                    if (refData.ExternalRoundId.IgnoreCaseNotEquals(s.ExternalRoundId))
+                    {
+                        throw new InvalidGameActionException(
+                            $"Round ID '{s.ExternalRoundId}' of referenced transaction was not as expected.");
+                    }
+
+                    refGameActionInternalId = refData.GameActionId;
+
+                    // if this is cancel action, get the amount from the referenced action
+                    if (s.GameActionType == CancelTransaction)
+                    {
+                        amount = s.PrepareAmount(refData.Amount);
+                    }
+                }
+            }
+
+            refData ??= actionsData[0];
+
+            return (refData, refGameActionInternalId, amount);
+        }
+
+        private static decimal GetRemainingLockedAmount(
+            IList<BetActionData> validPreviousActions,
+            GameActionType gameActionType, BetActionData referencedGameAction)
+        {
+            var actions = validPreviousActions?.Where(a =>
+                a.Type.IsOneOf(LockAmount, UnlockAmount) &&
+                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).ToArray();
+
+            return actions?.Sum(a => a.Amount) ?? 0;
+        }
+
+        private static IList<BetActionData> GetValidPreviousActions(IList<BetActionData> actions)
+        {
+            var allCancelledIdsInTheRound = actions
+                .Where(r => r.Type == CancelTransaction && r.Reference != null)
+                .Select(r => r.Reference.Id).ToHashSet();
+
+            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToArray();
+        }
+
+        /// <summary>
+        /// get previous actions:
+        /// 1. ForceGetPreviousActions = true
+        /// 2. for settlement transactions
+        /// 3. place bet is not slot games
+        /// 4. not lock amount action
+        /// </summary>
+        private static bool ShouldGetPreviousActions(GameActionState s) =>
+            s.ForceGetPreviousActions ||
+            s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
+            !_BypassPreviousActionGameTypes.Contains(s.Game.Type);
+
+        private static void UpdateReferenceGameActionIsCancelled(
+            GameActionType currentActionType,
+            BetActionData reference)
+        {
+            if (currentActionType != CancelTransaction)
+            {
+                return;
+            }
+
+            reference.IsCancelled = true;
+
+            //un-cancel transaction
+            if (reference.Type == CancelTransaction)
+            {
+                reference.Reference.IsCancelled = false;
+            }
+        }
+
+        private GameAction CreateGameAction(GameActionState s, BetActionData current)
+        {
+            var player = s.PlayerData;
+
+            var externalGameActionGroupId = s.ReferencedGameAction != null && !s.HasExternalGameActionGroupId
+                ? s.ReferencedGameAction.ExternalGameActionGroupId
+                : s.ExternalGameActionGroupId ?? s.ExternalRoundId;
+
+            var ga = new GameAction
+            {
+                Id = current.Id,
+                ExternalBetId = s.ExternalBetId,
+                ExternalTransactionId = s.ExternalTransactionId,
+                GameActionBatchId = s.BatchId,
+                ExternalGameActionGroupId = externalGameActionGroupId,
+                ReferencedGameActionId = s.ReferencedGameActionInternalId,
+                Type = s.GameActionType,
+                RoundId = s.InternalRoundId.Value,
+                RecordedOn = AdjustRecordedOnIfNeeded(s),
+                SentOn = s.Timestamp,
+                PlayerCode = player.PlayerCode,
+                PlayerIp = player.PlayerIp,
+                Turnover = current.Turnover,
+                WinLoss = current.WinLoss,
+                UnsettledBets = current.UnsettledBets,
+                IsClosingRound = current.IsClosingRound,
+                ClosingRoundExplicitRequest =
+                    current.IsExplicitlyClosingRound ? true :
+                    current.IsExplicitlyNotClosingRound ? false : null,
+                Amount = s.Amount,
+                Balance = player.Wallet.Balance,
+                BetType = s.BetType,
+                ExtraData = s.ExtraData,
+                JackpotContribution = s.JackpotContribution != null
+                    ? JsonSerializer.Serialize(s.JackpotContribution,
+                        new JsonSerializerOptions
+                        {
+                            WriteIndented = false
+                        })
+                    : null
+            };
+
+            s.Repository.GameActions.Add(ga);
+
+            return ga;
+        }
+
+        private Guid CreateNewRoundAndGetId(GameActionState s, BetActionData current)
+        {
+            var repository = s.Repository;
+            var roundId = GuidExtensions.NewSequentialGuid();
+
+            var round = new Round
+            {
+                Id = roundId,
+                ExternalRoundId = s.ExternalRoundId,
+                GameProviderId = s.GameProvider.Id,
+                PlayerCode = s.PlayerData.PlayerCode,
+                GameProviderConfigurationId = s.GameProviderConfigurationId,
+                WalletId = s.PlayerData.Wallet.Id,
+                GameId = s.GameId,
+                CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
+                BrandId = s.PlayerData.BrandId,
+                CreatedOn = s.UtcNow,
+                UpdatedOn = s.UtcNow,
+                Status = RoundStatus.Open,
+                ClientStatus = ClientRoundStatus.Open,
+                ExternalCreatedOn = s.Timestamp,
+                BetAmount = s.BetValueResult.BetAmount,
+                ValidBetAmount = s.BetValueResult.ValidBetAmount
+            };
+
+            if (s.NewRoundStatus == RoundStatus.Closed)
+            {
+                FillClosedRoundBetValues(s, current, round);
+            }
+
+            repository.Rounds.Add(round);
+
+            if (s.RoundDetail.IsNotNullOrEmpty())
+            {
+                repository.RoundDetails.Add(new()
+                {
+                    RoundId = roundId,
+                    AdditionalData = s.RoundDetail
+                });
+            }
+
+            return roundId;
+        }
+
+        private Guid CreateOrUpdateRound(GameActionState s, BetActionData current) =>
+            s.InternalRoundId == null ? CreateNewRoundAndGetId(s, current) : UpdatedRound(s, current);
+
+        private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
+        {
+            var gameActionWithSingleRound =
+                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
+                current.Type == WinJackpot;
+
+            var isVoidRound = !gameActionWithSingleRound &&
+                s.PreviousActions.Where(act => act.Type == PlaceBet).All(act => act.IsCancelled);
+
+            var clientStatus =
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus,
+                    s.BetValueResult,
+                    gameActionWithSingleRound,
+                    isVoidRound);
+
+            round.Status = s.NewRoundStatus;
+            round.ClientStatus = clientStatus;
+            round.ClosedOn = s.UtcNow;
+            round.ExternalClosedOn = s.Timestamp;
+            round.WinLoss = s.BetValueResult.WinLoss;
+            round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
+            round.SettleAmount = s.BetValueResult.SettleAmount;
+            round.Turnover = s.BetValueResult.Turnover;
         }
 
         private async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
@@ -308,129 +560,6 @@ namespace TGS.Services.GameOperations.Data
             return (s, r);
         }
 
-        private static (IList<BetActionData>, BetActionData) GetPreviousActions(
-            GameActionType currentActionType,
-            Guid? refGameActionInternalId, Dictionary<Guid, BetActionData> actionMap)
-        {
-            var refGameAction = default(BetActionData);
-            var actions = new List<BetActionData>();
-
-            foreach (var act in actionMap.Values)
-            {
-                if (act.ReferenceId.HasValue && actionMap.TryGetValue(act.ReferenceId.Value, out var refBet))
-                {
-                    act.Reference = refBet;
-                    UpdateReferenceGameActionIsCancelled(act.Type, act.Reference);
-                }
-
-                if (act.Id == refGameActionInternalId)
-                {
-                    refGameAction = act;
-                    UpdateReferenceGameActionIsCancelled(currentActionType, refGameAction);
-                }
-
-                actions.Add(act);
-            }
-
-            return (actions.ToArray(), refGameAction);
-        }
-
-        private static IList<BetActionData> GetValidPreviousActions(IList<BetActionData> actions)
-        {
-            var allCancelledIdsInTheRound = actions
-                .Where(r => r.Type == CancelTransaction && r.Reference != null)
-                .Select(r => r.Reference.Id).ToHashSet();
-
-            return actions.Where(r => !allCancelledIdsInTheRound.Contains(r.Id)).ToArray();
-        }
-
-        private static (SameRoundActionData, Guid?, decimal) GetReferencedActionAndActualAmount(
-            GameActionState s,
-            SameRoundActionData[] actionsData)
-        {
-            var amount = s.PrepareAmount(s.Amount);
-
-            if (actionsData.Length == 0)
-            {
-                return (null, null, amount);
-            }
-
-            Guid? refGameActionInternalId = null;
-            SameRoundActionData refData = null;
-
-            if (s.HasExtRefTransactionId)
-            {
-                refData = actionsData.FirstOrDefault(a =>
-                    a.ExternalTransactionId.IgnoreCaseEquals(s.ExternalTransactionReferenceId));
-
-                if (refData != null)
-                {
-                    if (refData.ExternalRoundId.IgnoreCaseNotEquals(s.ExternalRoundId))
-                    {
-                        throw new InvalidGameActionException(
-                            $"Round ID '{s.ExternalRoundId}' of referenced transaction was not as expected.");
-                    }
-
-                    refGameActionInternalId = refData.GameActionId;
-
-                    // if this is cancel action, get the amount from the referenced action
-                    if (s.GameActionType == CancelTransaction)
-                    {
-                        amount = s.PrepareAmount(refData.Amount);
-                    }
-                }
-            }
-
-            refData ??= actionsData[0];
-
-            return (refData, refGameActionInternalId, amount);
-        }
-
-        /// <summary>
-        /// get previous actions:
-        /// 1. ForceGetPreviousActions = true
-        /// 2. for settlement transactions
-        /// 3. place bet is not slot games
-        /// 4. not lock amount action
-        /// </summary>
-        private static bool ShouldGetPreviousActions(GameActionState s) =>
-            s.ForceGetPreviousActions ||
-            s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
-            !_BypassPreviousActionGameTypes.Contains(s.Game.Type);
-
-        private static GameActionResult GetDuplicateTransactionResult(
-            Guid gameActionId,
-            string externalTransactionId, Guid roundId, int gameId) =>
-            new()
-            {
-                TransactionResult = new()
-                {
-                    ExternalTransactionId = externalTransactionId,
-                    InternalTransactionId = gameActionId,
-                    RoundId = roundId,
-                    GameId = gameId,
-                    IsDuplicate = true
-                }
-            };
-
-        private static void UpdateReferenceGameActionIsCancelled(
-            GameActionType currentActionType,
-            BetActionData reference)
-        {
-            if (currentActionType != CancelTransaction)
-            {
-                return;
-            }
-
-            reference.IsCancelled = true;
-
-            //un-cancel transaction
-            if (reference.Type == CancelTransaction)
-            {
-                reference.Reference.IsCancelled = false;
-            }
-        }
-
         private GameActionState GetNewRoundStatus(GameActionState s)
         {
             s.NewRoundStatus = _roundStatusManager.GetStatus(new()
@@ -446,6 +575,53 @@ namespace TGS.Services.GameOperations.Data
             });
 
             return s;
+        }
+
+        private async Task<GameActionResult> HandleGameActionAsync(GameActionState s)
+        {
+            ThrowIfHaveNoRequiredIds(s);
+            ValidateAmounts(s);
+
+            s = await GetGameAsync(s).ConfigureAwait(false);
+            s = await FillRoundDataAsync(s).ConfigureAwait(false);
+
+            var (st, r) = await GetAndValidatePreviousActionsAsync(s).ConfigureAwait(false);
+
+            if (r != null)
+            {
+                s.PlayerData.Wallet.Balance =
+                    await GetBalanceAsync(s.Repository, s.PlayerData.Wallet.Id)
+                        .ConfigureAwait(false);
+
+                return r;
+            }
+
+            s = st;
+
+            ThrowIfReferenceGameActionOrRoundIsNotFound(s);
+
+            s = GetNewRoundStatus(s);
+
+            VerifyLockedAndUnlockedAmounts(s);
+
+            var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
+
+            var output = new GameActionResult
+            {
+                TransactionResult = new()
+                {
+                    ExternalTransactionId = s.ExternalTransactionId,
+                    InternalTransactionId = ga.Id,
+                    RoundId = ga.RoundId,
+                    GameId = s.GameId,
+                    IsDuplicate = false
+                },
+                GameAction = ga,
+                ReferencedGameAction = s.ReferencedGameAction,
+                Game = s.Game
+            };
+
+            return output;
         }
 
         private async Task<GameAction> SaveDatabaseRecordsAsync(GameActionState s)
@@ -465,7 +641,9 @@ namespace TGS.Services.GameOperations.Data
                 GameName = s.Game.Name,
                 GameProviderCode = s.GameProvider.Code,
                 BetType = s.BetType,
-                AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
+                AllowCancelCancelTransaction = s.AllowCancelCancelTransaction,
+                Turnover = s.CustomBetValues?.Turnover ?? 0,
+                WinLoss = s.CustomBetValues?.WinLoss ?? 0
             };
 
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
@@ -484,22 +662,21 @@ namespace TGS.Services.GameOperations.Data
                 s.PreviousActions,
                 oppositePatterns);
 
-            if (s.WithCustomBetValues && s.CustomBetValues != null)
+            betValues = betValues with
             {
-                betValues = betValues with
-                {
-                    BetAmount = s.CustomBetValues.BetAmount ?? betValues.BetAmount,
-                    ValidBetAmount = s.CustomBetValues.BetAmount ?? betValues.ValidBetAmount,
-                    SettleAmount = s.CustomBetValues.SettleAmount ?? betValues.SettleAmount,
-                    Turnover = s.CustomBetValues.Turnover,
-                    WinLoss = s.CustomBetValues.WinLoss
-                };
-            }
+                BetAmount = s.CustomBetValues?.BetAmount ?? betValues.BetAmount,
+                ValidBetAmount = s.CustomBetValues?.BetAmount ?? betValues.ValidBetAmount,
+                SettleAmount = s.CustomBetValues?.SettleAmount ?? betValues.SettleAmount
+            };
 
             s.BetValueResult = betValues;
 
-            current.Turnover = betValues.Turnover;
-            current.WinLoss = betValues.WinLoss;
+            if (s.CustomBetValues == null)
+            {
+                current.Turnover = betValues.Turnover;
+                current.WinLoss = betValues.WinLoss;
+            }
+
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);
@@ -510,80 +687,6 @@ namespace TGS.Services.GameOperations.Data
             await s.Repository.SaveChangesAsync().ConfigureAwait(false);
 
             return ga;
-        }
-
-        private static async ValueTask<decimal> GetOrUpdateBalanceAsync(GameActionState s)
-        {
-            var repository = s.Repository;
-            var walletId = s.PlayerData.Wallet.Id;
-
-            decimal balance;
-
-            if (s.HasWalletUpdate && s.Amount != 0)
-            {
-                balance =
-                    await AtomicUpdateBalanceAsync(repository, s.PlayerData.PlayerCode, walletId, s.Amount, s.UtcNow)
-                        .ConfigureAwait(false);
-
-                if (balance < 0 && s.GameActionType.IsOneOf(PlaceBet, LockAmount))
-                {
-                    throw new PlayerHasInsufficientFundsException();
-                }
-            }
-            else
-            {
-                balance = await GetBalanceAsync(repository, walletId)
-                    .ConfigureAwait(false);
-            }
-
-            return balance;
-        }
-
-        private Guid CreateOrUpdateRound(GameActionState s, BetActionData current) =>
-            s.InternalRoundId == null ? CreateNewRoundAndGetId(s, current) : UpdatedRound(s, current);
-
-        private Guid CreateNewRoundAndGetId(GameActionState s, BetActionData current)
-        {
-            var repository = s.Repository;
-            var roundId = GuidExtensions.NewSequentialGuid();
-
-            var round = new Round
-            {
-                Id = roundId,
-                ExternalRoundId = s.ExternalRoundId,
-                GameProviderId = s.GameProvider.Id,
-                PlayerCode = s.PlayerData.PlayerCode,
-                GameProviderConfigurationId = s.GameProviderConfigurationId,
-                WalletId = s.PlayerData.Wallet.Id,
-                GameId = s.GameId,
-                CurrencyCode = s.PlayerData.Wallet.CurrencyCode,
-                BrandId = s.PlayerData.BrandId,
-                CreatedOn = s.UtcNow,
-                UpdatedOn = s.UtcNow,
-                Status = RoundStatus.Open,
-                ClientStatus = ClientRoundStatus.Open,
-                ExternalCreatedOn = s.Timestamp,
-                BetAmount = s.BetValueResult.BetAmount,
-                ValidBetAmount = s.BetValueResult.ValidBetAmount
-            };
-
-            if (s.NewRoundStatus == RoundStatus.Closed)
-            {
-                FillClosedRoundBetValues(s, current, round);
-            }
-
-            repository.Rounds.Add(round);
-
-            if (s.RoundDetail.IsNotNullOrEmpty())
-            {
-                repository.RoundDetails.Add(new()
-                {
-                    RoundId = roundId,
-                    AdditionalData = s.RoundDetail
-                });
-            }
-
-            return roundId;
         }
 
         private Guid UpdatedRound(GameActionState s, BetActionData current)
@@ -634,108 +737,6 @@ namespace TGS.Services.GameOperations.Data
             }
 
             return roundId;
-        }
-
-        private GameAction CreateGameAction(GameActionState s, BetActionData current)
-        {
-            var player = s.PlayerData;
-
-            var externalGameActionGroupId = s.ReferencedGameAction != null && !s.HasExternalGameActionGroupId
-                ? s.ReferencedGameAction.ExternalGameActionGroupId
-                : s.ExternalGameActionGroupId ?? s.ExternalRoundId;
-
-            var ga = new GameAction
-            {
-                Id = current.Id,
-                ExternalBetId = s.ExternalBetId,
-                ExternalTransactionId = s.ExternalTransactionId,
-                GameActionBatchId = s.BatchId,
-                ExternalGameActionGroupId = externalGameActionGroupId,
-                ReferencedGameActionId = s.ReferencedGameActionInternalId,
-                Type = s.GameActionType,
-                RoundId = s.InternalRoundId.Value,
-                RecordedOn = AdjustRecordedOnIfNeeded(s),
-                SentOn = s.Timestamp,
-                PlayerCode = player.PlayerCode,
-                PlayerIp = player.PlayerIp,
-                Turnover = current.Turnover,
-                WinLoss = current.WinLoss,
-                UnsettledBets = current.UnsettledBets,
-                IsClosingRound = current.IsClosingRound,
-                ClosingRoundExplicitRequest =
-                    current.IsExplicitlyClosingRound    ? true :
-                    current.IsExplicitlyNotClosingRound ? false : null,
-                Amount = s.Amount,
-                Balance = player.Wallet.Balance,
-                BetType = s.BetType,
-                ExtraData = s.ExtraData,
-                JackpotContribution = s.JackpotContribution != null
-                    ? JsonSerializer.Serialize(s.JackpotContribution,
-                        new JsonSerializerOptions
-                        {
-                            WriteIndented = false
-                        })
-                    : null
-            };
-
-            s.Repository.GameActions.Add(ga);
-
-            return ga;
-        }
-
-        private static DateTimeOffset AdjustRecordedOnIfNeeded(GameActionState s)
-        {
-            var now = DateTimeOffset.UtcNow;
-
-            if (s.PreviousActions == null)
-            {
-                return now;
-            }
-
-            var previousRecordedOn = s.PreviousActions
-                .OrderByDescending(x => x.RecordedOn)
-                .Select(x => x.RecordedOn)
-                .FirstOrDefault();
-
-            // due to multiple servers, if current server time is earlier than the latest timestamp,
-            // take the lasted timestamp and add 50 milliseconds as current timestamp.
-            return now > previousRecordedOn ? now : previousRecordedOn.AddMilliseconds(50);
-        }
-
-        private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
-        {
-            var gameActionWithSingleRound =
-                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
-                current.Type == WinJackpot;
-
-            var isVoidRound = !gameActionWithSingleRound &&
-                s.PreviousActions.Where(act => act.Type == PlaceBet).All(act => act.IsCancelled);
-
-            var clientStatus =
-                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus,
-                    s.BetValueResult,
-                    gameActionWithSingleRound,
-                    isVoidRound);
-
-            round.Status = s.NewRoundStatus;
-            round.ClientStatus = clientStatus;
-            round.ClosedOn = s.UtcNow;
-            round.ExternalClosedOn = s.Timestamp;
-            round.WinLoss = s.BetValueResult.WinLoss;
-            round.TieBetAdjustment = s.BetValueResult.TieBetAdjustment;
-            round.SettleAmount = s.BetValueResult.SettleAmount;
-            round.Turnover = s.BetValueResult.Turnover;
-        }
-
-        private static decimal GetRemainingLockedAmount(
-            IList<BetActionData> validPreviousActions,
-            GameActionType gameActionType, BetActionData referencedGameAction)
-        {
-            var actions = validPreviousActions?.Where(a =>
-                a.Type.IsOneOf(LockAmount, UnlockAmount) &&
-                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).ToArray();
-
-            return actions?.Sum(a => a.Amount) ?? 0;
         }
     }
 }

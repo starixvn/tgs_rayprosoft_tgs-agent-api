@@ -100,7 +100,8 @@ namespace TGS.Services.Report.Application.Queries.Player
                         AdjustmentAmount = players.Sum(p => p.AdjustmentAmount),
                         BonusAmount = players.Sum(p => p.RebateAmount + p.PromotionAmount),
                         BetAmount = players.Sum(p => p.BetAmount),
-                        ValidBetAmount = players.Sum(p => p.Turnover),
+                        ValidBetAmount = players.Sum(p => p.OriginalTurnover),
+                        Turnover = players.Sum(p => p.Turnover),
                         WinLossAmount = players.Sum(p => p.WinLossAmount),
                         NetProfit = players.Sum(p
                             => p.WinLossAmount - p.AdjustmentAmount - p.RebateAmount - p.PromotionAmount)
@@ -127,6 +128,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                         BonusAmount = x.BonusAmount,
                         BetAmount = x.BetAmount,
                         ValidBetAmount = x.ValidBetAmount,
+                        Turnover = x.Turnover,
                         WinLossAmount = x.WinLossAmount,
                         NetProfit = x.NetProfit
                     };
@@ -147,6 +149,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                         BonusAmount = 0,
                         BetAmount = 0,
                         ValidBetAmount = 0,
+                        Turnover = 0,
                         WinLossAmount = 0,
                         NetProfit = 0
                     };

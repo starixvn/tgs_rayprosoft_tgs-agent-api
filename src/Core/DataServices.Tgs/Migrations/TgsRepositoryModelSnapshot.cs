@@ -542,6 +542,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<decimal>("PromotionAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -583,6 +588,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<decimal>("VirtualSportsWinLoss")
                         .HasPrecision(18, 6)
@@ -3960,7 +3970,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("to");
 
                     b.Property<decimal>("Turnover")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
 
                     b.HasKey("Id")
