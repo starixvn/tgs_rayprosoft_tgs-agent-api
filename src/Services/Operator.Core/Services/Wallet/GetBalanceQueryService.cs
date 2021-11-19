@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.Operator.Services.Wallet
 {
     internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
     {
+        private readonly ICashServiceClient _cashServiceClient;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IWalletRepository _walletRepository;
 
-        public GetBalanceQueryService(IWalletRepository walletRepository, IPlayerOperations playerOperations)
+        public GetBalanceQueryService(ICashServiceClient cashServiceClient, IPlayerOperations playerOperations)
         {
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
@@ -23,8 +23,8 @@ namespace TGS.Services.Operator.Services.Wallet
             var playerData = await _playerOperations
                 .GetCachedPlayerAsync(query.PlayerCode)
                 .ConfigureAwait(false);
-            var balance = await _walletRepository
-                .GetBalanceAsync(playerData.DefaultWalletId, query.PlayerCode)
+            var balance = await _cashServiceClient
+                .GetBalanceAsync(playerData.DefaultWalletId)
                 .ConfigureAwait(false);
 
             return new BalanceInfo(balance);
