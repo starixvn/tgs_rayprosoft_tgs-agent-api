@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
@@ -42,7 +41,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
-                .AddPaymentClient();
+                .AddPaymentClient()
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    options.BaseUrl = operatorOptions.CashBaseUrl;
+                });
 
             var opConfiguration = new OperatorConfiguration(services);
 
