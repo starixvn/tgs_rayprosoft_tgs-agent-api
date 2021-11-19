@@ -245,7 +245,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         "1",
                         formId,
                         amount,
-                        Rate: 1m,
+                        1m,
                         formId.ToString())));
 
             await createDepositFormService
