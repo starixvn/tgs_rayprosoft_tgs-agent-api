@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Tgs.Models;
+using Tgs.CashService.Client;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -14,7 +14,6 @@ using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Player
 {
@@ -23,25 +22,28 @@ namespace TGS.Services.Report.Application.Commands.Player
             MessageResponse>
     {
         private readonly ITgsBrandService _brandService;
+        private readonly ICashServiceClient _cashServiceClient;
+        private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerGameAggregateService _playerGameAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
         private readonly ITgsPlayerService _playerService;
-        private readonly IWalletRepository _walletRepository;
-        private readonly IPlayerBucketRepository _playerBucketRepository;
+
         public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
             IPlayerRebateService playerRebateService,
             IPlayerGameAggregateService playerGameAggregateService,
-            IWalletRepository walletRepository,
+            ICashServiceClient cashServiceClient,
             ITgsPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
-            _brandService = brandService;
-            _playerRebateService = playerRebateService;
-            _playerGameAggregateService = playerGameAggregateService;
-            _walletRepository = walletRepository;
-            _playerService = playerService;
-            _playerBucketRepository = playerBucketRepository;
+            if (accessor is null)
+                throw new ArgumentNullException(nameof(accessor));
+            _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
+            _playerRebateService = playerRebateService ?? throw new ArgumentNullException(nameof(playerRebateService));
+            _playerGameAggregateService = playerGameAggregateService ?? throw new ArgumentNullException(nameof(playerGameAggregateService));
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
@@ -67,11 +69,11 @@ namespace TGS.Services.Report.Application.Commands.Player
             var playerRebates = await _playerGameAggregateService
                 .GetPlayerGameAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
                 .GroupJoin(_playerGameAggregateService.Repository.BrandGames,
-                    aggregate => new {aggregate.BrandId, aggregate.GameId},
-                    brandGame => new {brandGame.BrandId, brandGame.GameId},
-                    (aggregate, brandGame) => new {aggregate, brandGame})
+                    aggregate => new { aggregate.BrandId, aggregate.GameId },
+                    brandGame => new { brandGame.BrandId, brandGame.GameId },
+                    (aggregate, brandGame) => new { aggregate, brandGame })
                 .SelectMany(x => x.brandGame.DefaultIfEmpty(),
-                    (x, brandGame) => new {x.aggregate, brandGame})
+                    (x, brandGame) => new { x.aggregate, brandGame })
                 .Where(x => x.brandGame == null || x.brandGame.Rebate)
                 .GroupBy(
                     x => new
@@ -141,7 +143,7 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             if (playerRebates.Length <= 0)
             {
-                return new() {Valid = false, Message = "Has no player rebate data."};
+                return new() { Valid = false, Message = "Has no player rebate data." };
             }
 
             var brandIds = playerRebates.Select(x => x.BrandId);
@@ -150,16 +152,16 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .ToArrayAsync(cancellationToken);
 
             var autoSentPlayer = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
                 .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var playerBonusesNotSend = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
                 .Where(x => !x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => autoSentPlayer.Select(p => p.PlayerCode).Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -172,11 +174,13 @@ namespace TGS.Services.Report.Application.Commands.Player
                     x.pb.RebateAmount)).ToArray()).ConfigureAwait(false);
 
             foreach (var playerBonus in autoSentPlayer.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
-                (pb, p) => new {pb, p}))
+                (pb, p) => new { pb, p }))
             {
-                var (transactionId, balance) = await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
-                    playerBonus.pb.PlayerCode, TransactionTypes.Rebate,
-                    playerBonus.pb.RebateAmount);
+                var response = await _cashServiceClient.RebateAsync(
+                    playerBonus.p.DefaultWalletId,
+                    playerBonus.pb.RebateAmount,
+                    null,
+                    null).ConfigureAwait(false);
             }
 
             scope.Complete();
