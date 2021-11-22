@@ -31,8 +31,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("{roundId}/CloseGameRound")]
         [Description("Close a game round")]
-        public async Task<MessageResponse> CloseGameRoundAsync(Guid roundId,
-            [FromQuery] CloseGameRoundRequest request)
+        public async Task<MessageResponse> CloseGameRoundAsync(Guid roundId, CloseGameRoundRequest request)
         {
             var model = new GameRoundClosedViewModel
             {
