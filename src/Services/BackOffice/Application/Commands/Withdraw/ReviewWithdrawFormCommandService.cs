@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Application.Commands.Withdraw
 {
@@ -58,11 +57,10 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                         command.Remark)
                     .ConfigureAwait(false);
 
-                await _walletExchangeService.ExchangeAsync(
+                await _walletExchangeService.CancelWithdrawAsync(
                     formData.BrandId,
                     formData.UserType,
                     formData.UserId,
-                    TransactionTypes.CancelWithdrawal,
                     formData.Amount,
                     command.ReviewUserId).ConfigureAwait(false);
             }
