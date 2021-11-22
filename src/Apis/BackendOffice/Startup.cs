@@ -173,23 +173,11 @@ namespace TGS.Apis.BackendOffice
                 httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
-            services.AddKickPlayerServerClient((options, sp) =>
-            {
-                var configuration = sp.GetRequiredService<IConfiguration>();
-
-                configuration.GetSection("TGSGameProvidersKickPlayerApi").Bind(options);
-            });
-
             services.AddGameProvidersPluggableServerClient((options, sp) =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
 
                 options.BaseUrl = new(configuration.GetConnectionString("GameProvidersPluggable"));
-                options.JsonSerializerOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters = { new JsonStringEnumConverter() }
-                };
             });
 
             services.AddSwaggerGen(c =>
