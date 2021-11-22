@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -60,7 +61,13 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                     config.GetSection("Promotion").Bind(options);
                 })
-                .AddPlayerBucketRepositoriesServices();
+                .AddPlayerBucketRepositoriesServices()
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("BackOffice:CashBaseUrl");
+                });
 
             services.AddWallet()
                 .AddTgsWalletRepositories()
