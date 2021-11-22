@@ -114,6 +114,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                              TieBetAdjustment = model.TieBetAdjustment,
                              UpdatedOn = model.UpdatedOn,
                              ValidBetAmount = model.ValidBetAmount,
+                             Turnover = model.Turnover,
                              WinLoss = model.WinLoss
                          }).ToArray()
             };
