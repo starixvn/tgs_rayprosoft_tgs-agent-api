@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Round;
 using TGS.Services.Report.Infrastructure.DataService;
@@ -21,6 +22,7 @@ namespace TGS.Services.Report.Application.Queries.Round
             GetOpenRoundsRequest request,
             CancellationToken cancellationToken) =>
             _service.GetRoundQueries(q => q
+                    .Where(x => x.Status == RoundStatus.Open)
                     .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
                     .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
                     .Where(request.ExternalRoundId, x => x.ExternalRoundId == request.ExternalRoundId)
