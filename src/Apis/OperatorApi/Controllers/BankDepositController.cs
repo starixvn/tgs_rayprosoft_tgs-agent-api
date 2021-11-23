@@ -6,6 +6,7 @@ using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.UmPay;
@@ -25,7 +26,86 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BankDepositController : ControllerBase
     {
-        private static Random _Random = new Random();
+        private static readonly Random _Random = new Random();
+
+        [HttpPost("help2pay")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<Help2PayDepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromServices] Help2PaySerializer serializer,
+            [FromBody] SubmitHelp2PayDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
+
+            var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.help2pay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new Help2PayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
+                        playerTokenData.PlayerCode,
+                        brandPaymentInfo.RootElement.GetProperty("securityCode").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
+                        formId,
+                        "https://google.com",
+                        clientIp)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<Help2PayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (!string.IsNullOrWhiteSpace(applyInfo.Response.PaymentDepositId))
+            {
+                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    applyInfo.Response.PaymentDepositId);
+
+                await updateDepositFormService
+                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                    .ConfigureAwait(false);
+
+                var storedId = Guid.NewGuid();
+
+                return new Help2PayDepositFormCreatedResponse
+                {
+                    FormId = createdFormId,
+                    PaymentUrl = $"/help2pay/web/{storedId}"
+                };
+            }
+
+            throw new PaymentFailException("Something went wrong to deposit via help2pay");
+        }
 
         [HttpPost("maticpay")]
         [PlayerCheckEnabled]
