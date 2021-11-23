@@ -41,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("BetConfirm")]
-        public ValueTask BetConfirm(BetConfirmRequest request)
+        public ValueTask BetConfirmAsync(BetConfirmRequest request)
         {
             return ValueTask.CompletedTask;
         }
@@ -78,7 +78,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("BetResulted")]
-        public async ValueTask<BetResultedResponse> BetResulted(BetResultedRequest request)
+        public async ValueTask<BetResultedResponse> BetResultedAsync(BetResultedRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -127,7 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("GetClientDetails")]
-        public async ValueTask<GetClientDetailsResponse> GetClientDetails(GetClientDetailsRequest request)
+        public async ValueTask<GetClientDetailsResponse> GetClientDetailsAsync(GetClientDetailsRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -149,7 +149,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("Rollback")]
-        public async ValueTask<RollbackResponse> Rollback(RollbackRequest request)
+        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);

@@ -70,7 +70,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                 });
 
             services.AddWallet()
-                .AddTgsWalletRepositories()
                 .AddTgsAgentWalletRepositories();
 
             services

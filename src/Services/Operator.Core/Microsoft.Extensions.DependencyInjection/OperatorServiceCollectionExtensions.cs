@@ -41,13 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
-                .AddPaymentClient()
-                .AddCashServiceClient((options, sp) =>
-                {
-                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
-
-                    options.BaseUrl = operatorOptions.CashBaseUrl;
-                });
+                .AddPaymentClient();
 
             var opConfiguration = new OperatorConfiguration(services);
 
