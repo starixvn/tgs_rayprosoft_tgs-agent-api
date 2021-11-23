@@ -5,6 +5,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 {
     public partial class AddRoundOperationRecordsTable : Migration
     {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "round_operation_records",
+                schema: "bet");
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -22,13 +29,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_round_operation_records", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_round_operation_records_round_id",
-                        column: x => x.round_id,
-                        principalSchema: "bet",
-                        principalTable: "rounds",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -36,13 +36,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "bet",
                 table: "round_operation_records",
                 column: "round_id");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "round_operation_records",
-                schema: "bet");
         }
     }
 }
