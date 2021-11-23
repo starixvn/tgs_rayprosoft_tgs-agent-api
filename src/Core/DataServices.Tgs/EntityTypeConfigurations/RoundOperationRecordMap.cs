@@ -36,12 +36,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(c => new { c.RoundId })
                     .HasDatabaseName("ix_round_operation_records_round_id");
-
-            builder.HasOne<Round>()
-                .WithMany()
-                .HasForeignKey(b => b.RoundId)
-                .HasConstraintName("fk_round_operation_records_round_id")
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
