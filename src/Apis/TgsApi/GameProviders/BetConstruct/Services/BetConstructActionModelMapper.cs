@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalRoundId = externalRoundId,
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
-                ExternalGameId = source.Selections.FirstOrDefault().SportId.ToString(),
+                ExternalGameId = "1",
                 GameActionType = GameActionType.PlaceBet,
                 ExtraData = DateTimeOffset
                     .FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp))
@@ -117,9 +117,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalTransactionId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
                 ExternalBetId = source.BetId.ToString(),
-                //ExternalGameId = 
-                ExternalGameActionGroupId = source.BetId.ToString(),
-                ExternalTransactionReferenceId = externalGameActionGroupId,
+                ExternalGameActionGroupId = externalRoundId,
+                ExternalGameId = "1",//Temp Fake Data
+                ExternalTransactionReferenceId = source.TransactionId.ToString(),
                 GameActionType = gameActionType.Value,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow
@@ -166,7 +166,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
                 case 5:
                     return source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
-                default:                    
+                default:
                     return null;
             }
         }
