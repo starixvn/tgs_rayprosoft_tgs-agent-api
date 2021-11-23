@@ -6,11 +6,11 @@ using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
-    public sealed class RedisList<T> : IRedisList<T>
+    internal class RedisList<T> : IRedisList<T>
     {
         private readonly IRedisList<T> _interface;
-        private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IRedisRepository _repository;
         private string _keyPrefix;
 
         public RedisList(
@@ -20,29 +20,6 @@ namespace TGS.Core.Infrastructures.Redis
             _interface = this;
             _repository = repository;
             _jsonSerializationProvider = jsonSerializationProvider;
-        }
-
-        void IRedisList<T>.SetKeyPrefix(string prefix)
-        {
-            _keyPrefix = prefix;
-        }
-
-        Task IRedisList<T>.AddToStartAsync(T item)
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var value = _jsonSerializationProvider.SerializeToString(item);
-            return db.ListLeftPushAsync(key, value);
-        }
-
-        Task IRedisList<T>.AddToStartAsync(T[] items)
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var values = items.Select(x => (RedisValue)_jsonSerializationProvider.SerializeToString(x)).ToArray();
-            return db.ListLeftPushAsync(key, values);
         }
 
         Task IRedisList<T>.AddToEndAsync(T item)
@@ -63,34 +40,30 @@ namespace TGS.Core.Infrastructures.Redis
             return db.ListRightPushAsync(key, values);
         }
 
-        async Task<T> IRedisList<T>.PopFromStartAsync()
+        Task IRedisList<T>.AddToStartAsync(T item)
         {
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            string value = await db.ListLeftPopAsync(key);
-            return string.IsNullOrEmpty(value)
-                ? default
-                : _jsonSerializationProvider.DeserializeFromString<T>(value);
+            var value = _jsonSerializationProvider.SerializeToString(item);
+            return db.ListLeftPushAsync(key, value);
         }
 
-        async Task<T> IRedisList<T>.PopFromEndAsync()
+        Task IRedisList<T>.AddToStartAsync(T[] items)
         {
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            string value = await db.ListRightPopAsync(key);
-            return string.IsNullOrEmpty(value)
-                 ? default
-                 : _jsonSerializationProvider.DeserializeFromString<T>(value);
+            var values = items.Select(x => (RedisValue)_jsonSerializationProvider.SerializeToString(x)).ToArray();
+            return db.ListLeftPushAsync(key, values);
         }
 
-        Task IRedisList<T>.ShrinkAsync(long maxSize)
+        Task IRedisList<T>.ClearAsync()
         {
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            return db.ListTrimAsync(key, 0, maxSize - 1);
+            return db.KeyDeleteAsync(key);
         }
 
         Task<long> IRedisList<T>.CountAsync()
@@ -101,9 +74,14 @@ namespace TGS.Core.Infrastructures.Redis
             return db.ListLengthAsync(key);
         }
 
-        Task<T[]> IRedisList<T>.TakeAsync(long count, long skip)
+        string IRedisList<T>.GetKey()
         {
-            return _interface.GetRangeAsync(skip, count);
+            if (string.IsNullOrEmpty(_keyPrefix))
+            {
+                throw new ArgumentNullException(nameof(_keyPrefix), "Key prefix should be set before using actual methods");
+            }
+
+            return $"{_keyPrefix}_{GetType().Name}_{typeof(T).Name}";
         }
 
         async Task<T[]> IRedisList<T>.GetRangeAsync(long start, long count)
@@ -122,22 +100,44 @@ namespace TGS.Core.Infrastructures.Redis
                 .ToArray();
         }
 
-        Task IRedisList<T>.ClearAsync()
+        async Task<T> IRedisList<T>.PopFromEndAsync()
         {
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            return db.KeyDeleteAsync(key);
+            string value = await db.ListRightPopAsync(key);
+            return string.IsNullOrEmpty(value)
+                 ? default
+                 : _jsonSerializationProvider.DeserializeFromString<T>(value);
         }
 
-        string IRedisList<T>.GetKey()
+        async Task<T> IRedisList<T>.PopFromStartAsync()
         {
-            if (string.IsNullOrEmpty(_keyPrefix))
-            {
-                throw new ArgumentNullException(nameof(_keyPrefix), "Key prefix should be set before using actual methods");
-            }
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
 
-            return $"{_keyPrefix}_{GetType().Name}_{typeof(T).Name}";
+            string value = await db.ListLeftPopAsync(key);
+            return string.IsNullOrEmpty(value)
+                ? default
+                : _jsonSerializationProvider.DeserializeFromString<T>(value);
+        }
+
+        void IRedisList<T>.SetKeyPrefix(string prefix)
+        {
+            _keyPrefix = prefix;
+        }
+
+        Task IRedisList<T>.ShrinkAsync(long maxSize)
+        {
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            return db.ListTrimAsync(key, 0, maxSize - 1);
+        }
+
+        Task<T[]> IRedisList<T>.TakeAsync(long count, long skip)
+        {
+            return _interface.GetRangeAsync(skip, count);
         }
     }
 }

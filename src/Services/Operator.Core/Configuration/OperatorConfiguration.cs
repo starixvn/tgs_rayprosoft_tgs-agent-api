@@ -25,6 +25,13 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
+        public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRedisRepository>()
+            where THelp2PayRedisRepository : class, IHelp2PayRedisRepository
+        {
+            Services.AddTransient<IHelp2PayRedisRepository, THelp2PayRedisRepository>();
+            return this;
+        }
+
         public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
         {
             Services

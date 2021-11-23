@@ -6,11 +6,11 @@ namespace TGS.Core.Infrastructures.Redis
 {
     public class RedisPublisher : IRedisPublisher
     {
-        private readonly IRedisConnection _connectionFactory;
+        private readonly IRedisConnectionFactory _connectionFactory;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         public RedisPublisher(
-            IRedisConnection connectionFactory,
+            IRedisConnectionFactory connectionFactory,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _connectionFactory = connectionFactory;
