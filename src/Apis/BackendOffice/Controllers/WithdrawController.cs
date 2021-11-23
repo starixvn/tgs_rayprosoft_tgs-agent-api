@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
@@ -52,7 +53,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.ThirdPartyOrderNo,
                 request.FormId,
                 request.PaymentMethodId,
-                request.Status.ToPaymentFlowState(),
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);
@@ -127,7 +129,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.OrderNo,
                 request.FormId,
                 request.PaymentMethodId,
-                request.Status.ToPaymentFlowState(),
+                request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
+                    ?? default(FlowState?).ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);

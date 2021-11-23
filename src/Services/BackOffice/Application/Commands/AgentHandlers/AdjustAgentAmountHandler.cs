@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.CashService.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -17,21 +18,21 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
     {
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
+        private readonly ICashServiceClient _cashServiceClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
-        private readonly IWalletRepository _walletRepository;
 
         public AdjustAgentAmountHandler(
             IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
-            IWalletRepository walletRepository,
+            ICashServiceClient cashServiceClient,
             IPlayerService playerService,
             IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
             _agentWalletRepository = agentWalletRepository;
-            _walletRepository = walletRepository;
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerService = playerService;
             _jsonSerializationProvider = jsonSerializationProvider;
         }
@@ -121,16 +122,14 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
             if (IsTransferToPlayer(request))
             {
-                await _walletRepository.ExchangeAsync(
-                    targetPlayer.BrandId,
-                    targetPlayer.DefaultWalletId,
-                    targetPlayer.PlayerCode,
-                    TransactionTypes.Adjust,
-                    request.Amount,
-                    request.Remark,
-                    null,
-                    Guid.Parse(UserId)
-                );
+                await _cashServiceClient
+                    .AdjustAsync(
+                        targetPlayer.DefaultWalletId,
+                        request.Amount,
+                        request.Remark,
+                        null,
+                        Guid.Parse(UserId))
+                    .ConfigureAwait(false);
             }
 
             return CreateValidResponse<MessageResponse>();

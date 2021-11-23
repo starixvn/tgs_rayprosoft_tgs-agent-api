@@ -8,11 +8,13 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
@@ -28,10 +30,7 @@ namespace TGS.Apis.BackendOffice
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => _configuration = configuration;
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -66,7 +65,7 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -96,7 +95,8 @@ namespace TGS.Apis.BackendOffice
                         })
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
                         .ProcessAllSubjects();
-                }); ;
+                });
+            ;
 
             services.AddPaymentServiceClient((options, sp) =>
             {
@@ -107,10 +107,7 @@ namespace TGS.Apis.BackendOffice
                 options.JsonSerializerOptions = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters =
-                    {
-                        new JsonStringEnumConverter()
-                    }
+                    Converters = { new JsonStringEnumConverter() }
                 };
             });
 
@@ -145,7 +142,6 @@ namespace TGS.Apis.BackendOffice
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
-                .AddNats()
                 .ForwardToPrometheus();
 
             services.AddAntiforgery(options =>
@@ -158,7 +154,7 @@ namespace TGS.Apis.BackendOffice
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new("/api/auth");
+                    options.LoginPath = new PathString("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
 
                     options.Events.OnRedirectToLogin = context =>
@@ -174,29 +170,20 @@ namespace TGS.Apis.BackendOffice
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
-                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
+                httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
-            services.AddKickPlayerServerClient((options, sp) =>
+            services.AddGameProvidersPluggableServerClient((options, sp) =>
             {
                 var configuration = sp.GetRequiredService<IConfiguration>();
 
-                configuration.GetSection("TGSGameProvidersKickPlayerApi").Bind(options);
-
-                options.JsonSerializerOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters =
-                        {
-                            new JsonStringEnumConverter()
-                        }
-                };
+                options.BaseUrl = new(configuration.GetConnectionString("GameProvidersPluggable"));
             });
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new()
+                    new OpenApiInfo
                     {
                         Title = "TGS BackOffice API",
                         Version = "v1"

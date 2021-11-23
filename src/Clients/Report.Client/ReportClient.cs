@@ -1,8 +1,12 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.GameProvider;
 using TGS.Clients.Report.Client.Models.LicenseeMarket;
 using TGS.Clients.Report.Client.Models.Market;
 using TGS.Clients.Report.Client.Models.Player;
@@ -12,11 +16,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Linq;
-using System.Collections.Specialized;
-using System;
 
 namespace TGS.Clients.Report.Client
 {
@@ -27,6 +26,7 @@ namespace TGS.Clients.Report.Client
         Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(GetVipRebateReportRequest request);
 
         Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request);
+        Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync(GetOpenRoundsRequest request);
 
         Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request);
 
@@ -52,6 +52,7 @@ namespace TGS.Clients.Report.Client
             GetPlayersAccountChangesRequest request);
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
+        Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
@@ -78,9 +79,7 @@ namespace TGS.Clients.Report.Client
             HttpClient client, IApiClientLogger logger,
             IJsonSerializationProvider json)
             : base(client, logger, json)
-        {
-            _client = client;
-        }
+            => _client = client;
 
         public async Task<PagedResponse<VipModel>> GetVipReportAsync(GetVipReportRequest request)
         {
@@ -91,10 +90,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(
@@ -108,10 +104,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request)
@@ -123,10 +116,19 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync(GetOpenRoundsRequest request)
+        {
+            var prefix = "Report.GetOpenRounds";
+            var path = ClientPath.AppendWithProperties("/api/roundReport/openRounds?", request);
+
+            return await ExecuteJsonRequestAsync<GetOpenRoundsRequest, PagedResponse<OpenRoundModel>>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request)
@@ -138,10 +140,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request)
@@ -153,10 +152,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(
@@ -170,10 +166,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(
@@ -187,10 +180,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<TeamInfoModel>> GetAgentTeamInfoAsync(
@@ -204,10 +194,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<AgentDividendModel>> GetAgentDividendsAsync(
@@ -221,10 +208,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
@@ -238,10 +222,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
@@ -256,10 +237,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
@@ -274,10 +252,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<PlayersAccountChangeModel>> GetPlayersAccountChangesAsync(
@@ -292,10 +267,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
@@ -310,10 +282,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
@@ -324,7 +293,8 @@ namespace TGS.Clients.Report.Client
             foreach (var propertyInfo in request
                 .GetType()
                 .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase)).ToArray())
+                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
+                .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -338,16 +308,18 @@ namespace TGS.Clients.Report.Client
                 {
                     value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
                 }
+
                 keyValues.Add(propertyInfo.Name, value.ToString());
             }
 
             var parameters = string.Join("&", keyValues.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
 
-            var currencyCodes = request.CurrencyCodes?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
+            var currencyCodes = request.CurrencyCodes
+                ?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
 
             var currencyCodeParameters = currencyCodes == null ? string.Empty : string.Join("&", currencyCodes);
 
-            parameters += (string.IsNullOrEmpty(parameters)) ? currencyCodeParameters : $"&{currencyCodeParameters }";
+            parameters += string.IsNullOrEmpty(parameters) ? currencyCodeParameters : $"&{currencyCodeParameters}";
 
             var path = $"/api/LicenseeMarketReport?{parameters}";
 
@@ -356,10 +328,7 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: prefix,
-                options: new()
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<Stream> ExportMarketsAsync(ExportMarketsRequest request)
@@ -448,7 +417,7 @@ namespace TGS.Clients.Report.Client
         }
 
         public async Task<Stream> ExportAgentDividendsTrialCalculationAsync(
-           ExportAgentDividendsTrialCalculationRequest request)
+            ExportAgentDividendsTrialCalculationRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividendsTrialCalculation?",
                 request);
@@ -474,7 +443,8 @@ namespace TGS.Clients.Report.Client
             foreach (var propertyInfo in request
                 .GetType()
                 .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase)).ToArray())
+                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
+                .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -488,15 +458,18 @@ namespace TGS.Clients.Report.Client
                 {
                     value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
                 }
+
                 keyValues.Add(propertyInfo.Name, value.ToString());
             }
+
             var parameters = string.Join("&", keyValues.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
 
-            var currencyCodes = request.CurrencyCodes?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
+            var currencyCodes = request.CurrencyCodes
+                ?.Select(currencyCode => string.Format("{0}={1}", "currencyCodes", currencyCode)).ToArray();
 
             var currencyCodeParameters = currencyCodes == null ? string.Empty : string.Join("&", currencyCodes);
 
-            parameters += (string.IsNullOrEmpty(parameters)) ? currencyCodeParameters : $"&{currencyCodeParameters }";
+            parameters += string.IsNullOrEmpty(parameters) ? currencyCodeParameters : $"&{currencyCodeParameters}";
 
             var path = $"/api/LicenseeMarketReport/exportLicenseeMarkets?{parameters}";
 
@@ -511,6 +484,19 @@ namespace TGS.Clients.Report.Client
             var stream = await response.Content.ReadAsStreamAsync();
 
             return stream;
+        }
+
+        public async Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+            GetGameProviderRoundsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/gameProviderReport?", request);
+
+            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, PagedResponse<GameProviderRoundsModel>>(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: "Report.GetGameProviderReport",
+                options: new() { PropertyNameCaseInsensitive = true });
         }
     }
 }

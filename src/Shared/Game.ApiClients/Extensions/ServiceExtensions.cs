@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TGS.Shared.Game.ApiClients.AllBet;
 using TGS.Shared.Game.ApiClients.AsiaGaming;
+using TGS.Shared.Game.ApiClients.BetConstruct;
 using TGS.Shared.Game.ApiClients.BigGaming;
 using TGS.Shared.Game.ApiClients.Card365;
 using TGS.Shared.Game.ApiClients.Evolution;
@@ -54,6 +55,9 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<ICard365ApiClient, Card365ApiClient>();
             services.AddHttpClient<ILYApiClient, LYApiClient>();
             services.AddScoped<ILYUtility, LYUtility>();
+            services.AddHttpClient<IBetConstructApiClient, BetConstructApiClient>();
+            services.AddScoped<IBetConstructUtility, BetConstructUtility>();
+
             return services;
         }
     }

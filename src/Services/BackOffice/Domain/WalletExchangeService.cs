@@ -10,47 +10,40 @@ namespace TGS.Services.BackOffice.Domain
     {
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
-        private readonly IPlayerService _playerService;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPlayerWalletExchangeService _playerWalletExchangeService;
 
         public WalletExchangeService(
-            IPlayerService playerService,
+            IPlayerWalletExchangeService playerWalletExchangeService,
             IAgentService agentService,
-            IWalletRepository walletRepository,
             IAgentWalletRepository agentWalletRepository)
         {
-            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _playerWalletExchangeService = playerWalletExchangeService ?? throw new ArgumentNullException(nameof(playerWalletExchangeService));
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
 
             _agentWalletRepository =
                 agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
         }
 
-        public ValueTask ExchangeAsync(
-            Guid brandId,
-            UserType userType,
-            string userId,
-            TransactionTypes transactionType,
-            decimal amount,
-            string reviewUserId)
+        public async ValueTask CancelWithdrawAsync(Guid brandId, UserType userType, string userId, decimal amount, string reviewUserId)
         {
             switch (userType)
             {
                 case UserType.Player:
-                    return ExchangePlayerWalletAsync(
-                        brandId,
+                    await _playerWalletExchangeService.CancelWithdrawalAsync(
                         userId,
-                        transactionType,
                         amount,
-                        reviewUserId);
+                        null,
+                        null,
+                        Guid.Parse(reviewUserId)).ConfigureAwait(false);
+                    return;
 
                 case UserType.Agent:
-                    return ExchangeAgentWalletAsync(
+                    await ExchangeAgentWalletAsync(
                         brandId,
                         Guid.Parse(userId),
-                        transactionType,
-                        amount);
+                        TransactionTypes.CancelWithdrawal,
+                        amount).ConfigureAwait(false);
+                    return;
 
                 default:
                     throw new InvalidOperationException();
@@ -73,26 +66,6 @@ namespace TGS.Services.BackOffice.Domain
                 agentId,
                 transactionType,
                 amount).ConfigureAwait(false);
-        }
-
-        private async ValueTask ExchangePlayerWalletAsync(
-            Guid brandId,
-            string playerCode,
-            TransactionTypes transactionType,
-            decimal amount,
-            string reviewUserId)
-        {
-            var player = await _playerService
-                .GetPlayerAsync(x => x.PlayerCode == playerCode)
-                .ConfigureAwait(false);
-
-            _ = await _walletRepository.ExchangeAsync(
-                brandId,
-                player.DefaultWalletId,
-                playerCode,
-                transactionType,
-                amount,
-                createdByUserId: Guid.Parse(reviewUserId)).ConfigureAwait(false);
         }
     }
 }

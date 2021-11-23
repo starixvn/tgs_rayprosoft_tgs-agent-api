@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Services.WalletService.Configuration;
 
@@ -86,6 +87,14 @@ namespace TGS.Services.Promotion.Configuration
             Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
             Services.AddPaymentServiceClient(configure);
+
+            return this;
+        }
+
+        public PromotionConfiguration AddCashServiceClient(
+            Action<CashServiceClientOptions, IServiceProvider> configure)
+        {
+            Services.AddCashServiceClient(configure);
 
             return this;
         }

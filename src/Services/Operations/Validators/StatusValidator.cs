@@ -7,21 +7,6 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operations.Validators
 {
-    public interface IStatusValidator
-    {
-        Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses);
-
-        Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId,
-            Guid gameProviderConfigurationId, params Status[] statuses);
-
-        Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid brandId, Guid gameProviderId, int gameId,
-            string idToThrow, Status[] statuses, GameStatus[] gameStatuses);
-
-        void ThrowIfPlayerDisabled(PlayerStatus playerStatus);
-
-        void ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status);
-    }
-
     public sealed class StatusValidator : IStatusValidator
     {
         private readonly IBrandOperations _brandOperations;
@@ -35,7 +20,7 @@ namespace TGS.Services.Operations.Validators
             _gameProviderOperations = gameProviderOperations;
         }
 
-        async Task IStatusValidator.ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses)
+        public async Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses)
         {
             EnsureStatus(statuses);
 
@@ -57,36 +42,13 @@ namespace TGS.Services.Operations.Validators
             }
         }
 
-        async Task IStatusValidator.ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(Guid gameProviderId,
-            Guid gameProviderConfigurationId, params Status[] statuses)
-        {
-            EnsureStatus(statuses);
-
-            var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId);
-            var configurationStatus =
-                await _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gameProviderId,
-                    gameProviderConfigurationId);
-
-            if (gameProviderStatus == null || configurationStatus == null)
-            {
-                throw new InvalidStatusException("GameProvider or GameProviderConfiguration doesn't exist");
-            }
-
-            if (!statuses.Contains(Status.Maintenance) &&
-                (gameProviderStatus == Status.Maintenance || configurationStatus == Status.Maintenance))
-            {
-                throw new GameProviderUnderMaintenanceException();
-            }
-
-            if (!statuses.Contains(gameProviderStatus.Value) || !statuses.Contains(configurationStatus.Value))
-            {
-                throw new InvalidStatusException(
-                    "GameProvider or GameProviderConfiguration doesn't exist or is not active");
-            }
-        }
-
-        async Task IStatusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(Guid brandId, Guid gameProviderId,
-            int gameId, string idToThrow, Status[] statuses, GameStatus[] gameStatuses)
+        public async Task ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
+            Guid brandId,
+            Guid gameProviderId,
+            int gameId,
+            string idToThrow,
+            Status[] statuses,
+            GameStatus[] gameStatuses)
         {
             EnsureStatus(statuses);
             EnsureStatus(gameStatuses);
@@ -118,21 +80,44 @@ namespace TGS.Services.Operations.Validators
                 brandGameStatus.Value);
         }
 
-        void IStatusValidator.ThrowIfPlayerDisabled(PlayerStatus status) =>
+        public async Task ThrowIfGameProviderOrConfigurationStatusIsNotOneOfAsync(
+            Guid gameProviderId,
+            Guid gameProviderConfigurationId,
+            params Status[] statuses)
+        {
+            EnsureStatus(statuses);
+
+            var gameProviderStatus = await _gameProviderOperations.GetGameProviderStatusAsync(gameProviderId);
+            var configurationStatus =
+                await _gameProviderOperations.GetGameProviderConfigurationStatusAsync(gameProviderId,
+                    gameProviderConfigurationId);
+
+            if (gameProviderStatus == null || configurationStatus == null)
+            {
+                throw new InvalidStatusException("GameProvider or GameProviderConfiguration doesn't exist");
+            }
+
+            if (!statuses.Contains(Status.Maintenance)
+                && (gameProviderStatus == Status.Maintenance
+                    || configurationStatus == Status.Maintenance))
+            {
+                throw new GameProviderUnderMaintenanceException();
+            }
+
+            if (!statuses.Contains(gameProviderStatus.Value) || !statuses.Contains(configurationStatus.Value))
+            {
+                throw new InvalidStatusException(
+                    "GameProvider or GameProviderConfiguration doesn't exist or is not active");
+            }
+        }
+
+        public void ThrowIfPlayerDisabled(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.Disabled);
 
-        void IStatusValidator.ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status) =>
+        public void ThrowIfPlayerDisabledToPlaceBet(PlayerStatus status) =>
             EnsurePlayerStatus(status, PlayerStatus.InBlacklist);
 
         #region Private Methods
-
-        private static void EnsureStatus<T>(T[] status) where T : struct
-        {
-            if (status == null || status.Length == 0)
-            {
-                throw new ArgumentException("No status provided");
-            }
-        }
 
         private static void EnsurePlayerStatus(PlayerStatus playerStatus, PlayerStatus statusToThrowException)
         {
@@ -144,6 +129,14 @@ namespace TGS.Services.Operations.Validators
             if (playerStatus == statusToThrowException)
             {
                 throw new PlayerDisabledException(playerStatus);
+            }
+        }
+
+        private static void EnsureStatus<T>(T[] status) where T : struct
+        {
+            if (status == null || status.Length == 0)
+            {
+                throw new ArgumentException("No status provided");
             }
         }
 

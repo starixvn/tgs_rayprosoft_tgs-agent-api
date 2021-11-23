@@ -444,9 +444,18 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             UpdateBrandRequest request)
         {
             var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
+
+            var brandCurrencyCodes = brand.Currencies.Select(x => x.CurrencyCode).ToArray();
+
             var games = await _repository.Games.AsQueryable()
                 .Where(x => x.AvailableToBrand)
-                .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
+                .Where(x => gameProviderIds.Contains(x.GameProviderId))
+                .Where(x => x.GameProvider.Currencies.Any(c => brandCurrencyCodes.Contains(c.CurrencyCode)))
+                .ToArrayAsync();
+
+            games = games.Where(x
+                => x.AvailableCurrencies.IsNullOrEmpty() ||
+                x.AvailableCurrencies.Split(",").Any(c => brandCurrencyCodes.Contains(c))).ToArray();
 
             var brandGames = games.Select(x =>
             {

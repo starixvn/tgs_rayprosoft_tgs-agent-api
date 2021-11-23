@@ -59,6 +59,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(b => b.ValidBetAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.OriginalTurnover)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(b => b.Turnover)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -82,7 +90,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 })
                 .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
-            builder.HasIndex(b => new {b.AgentId})
+            builder.HasIndex(b => new { b.AgentId })
                 .HasDatabaseName("ix_player_aggregates_agent_id");
         }
     }

@@ -16,6 +16,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.Id)
                 .ValueGeneratedOnAdd();
 
+            builder.Property(b => b.Turnover)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(c => c.From)
                 .IsRequired();
 

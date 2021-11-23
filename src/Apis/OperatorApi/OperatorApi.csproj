@@ -42,8 +42,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63">
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -58,6 +58,7 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
     <PackageReference Include="Tgs.Interceptors" Version="0.1.0" />
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />

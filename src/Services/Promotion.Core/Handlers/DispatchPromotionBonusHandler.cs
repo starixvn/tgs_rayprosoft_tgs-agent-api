@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Tgs.CashService.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -19,22 +20,24 @@ namespace TGS.Services.Promotion.Handlers
     public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
         private readonly IPromotionBonusRepository _promotionBonusService;
+        private readonly ICashServiceClient _cashServiceClient;
         private readonly IPlayerBucketRepository _service;
         private readonly ITgsTransactionRepository _transactionRepository;
-        private readonly IWalletRepository _walletRepository;
 
         public DispatchPromotionBonusHandler(
             IPlayerBucketRepository service,
             IPromotionBonusRepository promotionBonusService,
-            IWalletRepository walletRepository,
+            ICashServiceClient cashServiceClient,
             ITgsTransactionRepository transactionRepository,
             IHttpContextAccessor accessor) : base(
             accessor)
         {
-            _service = service;
-            _walletRepository = walletRepository;
-            _promotionBonusService = promotionBonusService;
-            _transactionRepository = transactionRepository;
+            if (accessor is null)
+                throw new ArgumentNullException(nameof(accessor));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _promotionBonusService = promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+            _transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -56,17 +59,17 @@ namespace TGS.Services.Promotion.Handlers
                 .ToArray();
 
             var playerBuckets = players.Select(x => new
-                {
-                    x.Player.BrandId,
-                    x.PlayerCode,
-                    x.Player.DefaultWalletId,
-                    BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
-                    x.BonusAmount,
-                    BucketType = BucketType.Promotion,
-                    x.PromotionBonus.PromotionId,
-                    x.PromotionBonusId,
-                    x.PromotionBonus.PromotionType
-                })
+            {
+                x.Player.BrandId,
+                x.PlayerCode,
+                x.Player.DefaultWalletId,
+                BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+                x.BonusAmount,
+                BucketType = BucketType.Promotion,
+                x.PromotionBonus.PromotionId,
+                x.PromotionBonusId,
+                x.PromotionBonus.PromotionType
+            })
                 .ToArray();
 
             foreach (var promotionPlayer in players)
@@ -88,16 +91,18 @@ namespace TGS.Services.Promotion.Handlers
 
             foreach (var promotionPlayer in playerBuckets)
             {
-                var (transactionId, balance) = await _walletRepository.ExchangeAsync(promotionPlayer.BrandId,
-                    promotionPlayer.DefaultWalletId,
-                    promotionPlayer.PlayerCode,
-                    TransactionTypes.Promotion,
-                    promotionPlayer.BonusAmount,
-                    createdByUserId: request.OperatorUserId).ConfigureAwait(false);
+                var response = await _cashServiceClient
+                    .PromotionAsync(
+                        promotionPlayer.DefaultWalletId,
+                        promotionPlayer.BonusAmount,
+                        null,
+                        null,
+                        request.OperatorUserId)
+                    .ConfigureAwait(false);
 
                 transactionPromotions.Add(new()
                 {
-                    TransactionId = transactionId,
+                    TransactionId = response.TransactionId,
                     PromotionId = promotionPlayer.PromotionId,
                     PromotionBonusId = promotionPlayer.PromotionBonusId,
                     PromotionType = promotionPlayer.PromotionType

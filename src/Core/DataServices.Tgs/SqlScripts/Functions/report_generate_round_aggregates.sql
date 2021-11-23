@@ -18,6 +18,7 @@ CREATE OR REPLACE FUNCTION DBO.report_generate_round_aggregates(
 	 "Minute" integer, 
 	 "BetAmount" decimal, 
 	 "ValidBetAmount" decimal, 
+	 "OriginalTurnover" decimal,
 	 "Turnover" decimal, 
 	 "WinLoss" decimal, 
 	 "ReportDate" timestamptz)
@@ -53,6 +54,7 @@ AS $$
 		_minute "minute",
 		sum(r.bet_amount) "bet_amount",
 		sum(r.valid_bet_amount) "valid_bet_amount",
+		sum(r.turnover) "original_turnover",
 		sum(CASE 
 		WHEN r.round_effective_betting_percentage is not null THEN r.turnover * r.round_effective_betting_percentage / 100
 		WHEN r.brand_game_effective_betting_percentage is not null THEN r.turnover * r.brand_game_effective_betting_percentage / 100 
@@ -65,8 +67,8 @@ AS $$
 		join dbo.players p on r.player_code = p.player_code
 		group by p.brand_id, g.game_provider_id, p.player_code, p.agent_id, p.username,g.id,g.type),
 		insert_rows AS(
-		INSERT INTO report.round_aggregates (brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,turnover,win_loss,report_date,created_on,game_id)
-		SELECT brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,turnover,win_loss,report_date,created_on,game_id
+		INSERT INTO report.round_aggregates (brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,original_turnover,turnover,win_loss,report_date,created_on,game_id)
+		SELECT brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,original_turnover,turnover,win_loss,report_date,created_on,game_id
 		FROM rows
 		),
 		update_rounds AS(
@@ -87,6 +89,7 @@ AS $$
 		minute "Minute",
 		bet_amount "BetAmount",
 		valid_bet_amount "ValidBetAmount",
+		original_turnover "OriginalTurnover",
 		turnover "Turnover",
 		win_loss "WinLoss",
 		report_date "ReportDate"

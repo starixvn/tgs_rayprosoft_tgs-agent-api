@@ -11,7 +11,6 @@ using TechTalk.SpecFlow;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
@@ -60,7 +59,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()
-                .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
@@ -94,10 +92,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Operator")));
 
                 services.AddHttpClient<IBigGamingApiClient, BigGamingApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-BigGaming")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Tgs-BigGaming")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -108,13 +106,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginViaAsync(
             string username, string brandCode,
-            string currencyCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            string currencyCode, PlatformType platformType)
+        {
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
 
 
         [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
-            SetPlayerBalanceAsync(_serviceProvider, balance);
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
 
         [Then(@"player balance response will be for \$(.*)")]
         public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
@@ -146,7 +148,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 LoginId = playerCode
             };
 
-
             var request = new BigGamingRequest
             {
                 Id = random,
@@ -155,7 +156,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Jsonrpc = "2.0"
             };
 
-
             var response = await _client.EntranceAsyncstAsync(request).ConfigureAwait(false);
 
             Set(SR.Response, response);
@@ -163,9 +163,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Methods
 
-        private async ValueTask<BigGamingConfiguration> GetConfigurationAsync() =>
-            await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
+        private async ValueTask<BigGamingConfiguration> GetConfigurationAsync()
+        {
+            return await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
                 SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
+        }
 
         private Guid GetLoginRecordId(string playerCode, PlatformType platform)
         {

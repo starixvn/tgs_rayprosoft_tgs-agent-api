@@ -9,6 +9,6 @@ namespace TGS.Services.BackOffice.Domain
 
         public IDictionary<string, JsonDocument> Localization { get; set; }
 
-        public string Name { get; set; }
+        public string Code { get; set; }
     }
 }

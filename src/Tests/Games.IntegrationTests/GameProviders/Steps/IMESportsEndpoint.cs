@@ -14,7 +14,6 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -60,7 +59,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()
-                .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
@@ -94,10 +92,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(c =>
-                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Operator")));
+                    c.BaseAddress = new Uri(apiUrlSection.GetValue<string>("Operator")));
 
                 services.AddHttpClient<IIMESportsApiClient, IMESportsApiClient>(c =>
-                    c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-IMESports")));
+                    c.BaseAddress = new Uri(apiUrlSection.GetValue<string>("Tgs-IMESports")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -107,8 +105,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandLoginViaAsync(
             string username, string brandCode,
-            string currencyCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            string currencyCode, PlatformType platformType)
+        {
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
 
         [Given(@"player logout")]
         public Task GivenPlayerLogoutAsync()
@@ -151,25 +151,27 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return cacheManager.SafeCacheAsync(IMESportsConsts.RedisKey.SessionToken,
                 redisKey,
                 TimeSpan.FromSeconds(timeToLeave),
-                new IMSessionToken
-                {
-                    SessionToken = SessionToken,
-                    TimeToLeave = timeToLeave
-                });
+                new IMSessionToken { SessionToken = SessionToken, TimeToLeave = timeToLeave });
         }
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
-            PlaceBetAsync(amount, externalGameId);
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId);
+        }
 
         [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid product wallet")]
-        public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId) =>
-            PlaceBetAsync(amount, externalGameId, validProductWallet: false);
+        public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId, validProductWallet: false);
+        }
 
         [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid prefix")]
-        public Task WhenIPlaceBetOfForGameWithInvalidPrefix(decimal amount, string externalGameId) =>
-            PlaceBetAsync(amount, externalGameId, validPrefix: false);
+        public Task WhenIPlaceBetOfForGameWithInvalidPrefix(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId, validPrefix: false);
+        }
 
         [Given(@"players place bets:")]
         public async Task GivenPlayersPlaceBets(Table table)
@@ -197,8 +199,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I use action (.*) to bet for \$(.*)")]
         [When(@"I use action (.*) to bet for \$(.*)")]
-        public Task WhenIUseActionToBetFor(ActionType actionType, decimal winAmount) =>
-            SettleAndCancelBetAsync(winAmount, actionType);
+        public Task WhenIUseActionToBetFor(ActionType actionType, decimal winAmount)
+        {
+            return SettleAndCancelBetAsync(winAmount, actionType);
+        }
 
         [When(@"I use action to bets")]
         public async Task WhenIUseActionToBets(Table table)
@@ -226,12 +230,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [When(@"I resend the settle bet")]
-        public Task WhenIResendTheWinBetAsync() =>
-            ResentSettleBetAsync();
+        public Task WhenIResendTheWinBetAsync()
+        {
+            return ResentSettleBetAsync();
+        }
 
         [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
-            SetPlayerBalanceAsync(_serviceProvider, balance);
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
@@ -240,11 +248,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var currency = Get<string>(SR.CurrencyCode);
             var config = await GetConfigurationAsync();
 
-            var response = await _client.GetPlayerBalanceAsync(new()
+            var response = await _client.GetPlayerBalanceAsync(new GetBalanceRequest
             {
-                ProductWallet = GetProductWallet(config),
-                PlayerCode = $"{Prefix}_{playerCode}",
-                Currency = currency
+                ProductWallet = GetProductWallet(config), PlayerCode = $"{Prefix}_{playerCode}", Currency = currency
             });
 
             Set(SR.Response, response);
@@ -338,11 +344,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gameActions = await db.GameActions
                 .AsQueryable()
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
-                .Select(ga => new
-                {
-                    ga.Round.PlayerCode,
-                    ga.Id
-                }).ToArrayAsync();
+                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
 
             gameActions.Length.Should().Be(txids.Length);
         }
@@ -360,11 +362,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                               on result.ExternalTransactionId equals transaction.ExternalTransactionId
                           join player in betPlayers
                               on transaction.PlayerCode equals player.Value.PlayerCode
-                          select new
-                          {
-                              player.Value.Username,
-                              result.Balance
-                          };
+                          select new { player.Value.Username, result.Balance };
 
             foreach (var result in results)
             {
@@ -374,8 +372,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"the round will be (.*)")]
-        public Task ThenTheRoundWillBeAsync(RoundStatus status) =>
-            VerifyRoundStatus(_serviceProvider, status);
+        public Task ThenTheRoundWillBeAsync(RoundStatus status)
+        {
+            return VerifyRoundStatus(_serviceProvider, status);
+        }
 
         private async Task PlaceBetAsync(
             decimal amount, string externalGameId, string externalRoundId = null,
@@ -434,7 +434,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await SubmitSettleAndCancelBetAsync(new[]
             {
-                GetTransactionRequest(new()
+                GetTransactionRequest(new PlayerData
                     {
                         PlayerCode = $"{Prefix}_{playerCode}",
                         Platform = platformType,
@@ -456,11 +456,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var config = await GetConfigurationAsync();
 
-            var request = new BetRequest
-            {
-                ProductWallet = GetProductWallet(config),
-                Transactions = transactions
-            };
+            var request = new BetRequest { ProductWallet = GetProductWallet(config), Transactions = transactions };
 
             Set(SR.Request, request);
 
@@ -469,8 +465,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private TransactionRequest GetTransactionRequest(
             PlayerData playerData, string externalRoundId,
-            string externalTransactionId) =>
-            new()
+            string externalTransactionId)
+        {
+            return new()
             {
                 PlayerCode = playerData.PlayerCode,
                 ActionType = playerData.ActionType,
@@ -482,6 +479,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Platform = playerData.Platform.ToString().ToUpper(),
                 Timestamp = DateTimeOffset.Now
             };
+        }
 
         private async Task ResentSettleBetAsync()
         {
@@ -492,26 +490,40 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        private static string NewRoundId() =>
-            Guid.NewGuid().ToString();
+        private static string NewRoundId()
+        {
+            return Guid.NewGuid().ToString();
+        }
 
-        private Task<IMESportsConfiguration> GetConfigurationAsync() =>
-            GetSettingAsync<IMESportsConfiguration>(_serviceProvider,
+        private Task<IMESportsConfiguration> GetConfigurationAsync()
+        {
+            return GetSettingAsync<IMESportsConfiguration>(_serviceProvider,
                 SettingConsts.GameProviderConfigurations.IMESports);
+        }
 
-        private string GetProductWallet(IMESportsConfiguration config) =>
-            ((ProductWalletType)config.ProductWallet).ToString();
+        private string GetProductWallet(IMESportsConfiguration config)
+        {
+            return ((ProductWalletType)config.ProductWallet).ToString();
+        }
 
         private record PlayerData
         {
             public ActionType ActionType { get; init; }
+
             public decimal Amount { get; init; }
+
             public decimal Balance { get; init; }
+
             public string Brand { get; init; }
+
             public string CurrencyCode { get; init; }
+
             public string GameId { get; init; }
+
             public PlatformType Platform { get; init; }
+
             public string PlayerCode { get; set; }
+
             public string Username { get; init; }
         }
     }

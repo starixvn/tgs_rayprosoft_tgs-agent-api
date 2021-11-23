@@ -14,7 +14,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -60,7 +59,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()
-                .AddNats(configuration)
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
@@ -93,10 +91,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 services.AddHttpClient<IPlayerApiClient, PlayerApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Operator")));
 
                 services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-AsiaGaming")));
+                    c => c.BaseAddress = new Uri(configuration.GetValue<string>("ApiUrls:Tgs-AsiaGaming")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -106,8 +104,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginVia(
             string username, string brandCode,
-            string currencyCode, PlatformType platformType) =>
-            PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+            string currencyCode, PlatformType platformType)
+        {
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
         public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
@@ -127,8 +127,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance) =>
-            SetPlayerBalanceAsync(_serviceProvider, balance);
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
 
         [Given(@"balance now being \$(.*)")]
         public async Task GivenBalanceNowBeing(decimal balance)
@@ -147,8 +149,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
-            PlaceBetAsync(amount, externalGameId);
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId);
+        }
 
         [Given(@"I place bet of \$(.*) for game ""(.*)"" for the same round")]
         public Task GivenIPlaceBetOfForGameForTheSameRoundAsync(decimal amount, string externalGameId)
@@ -168,13 +172,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [When(@"I send bet response with no record")]
-        public Task WhenISendBetResponseWithNoRecord() =>
-            SendBetResponse(null);
+        public Task WhenISendBetResponseWithNoRecord()
+        {
+            return SendBetResponse(null);
+        }
 
         [Given(@"settle bet for win amount \$(.*)")]
         [When(@"I settle bet for win amount \$(.*)")]
-        public Task WhenISettleBetForWinAmount(decimal winAmount) =>
-            SettleBetAsync(winAmount);
+        public Task WhenISettleBetForWinAmount(decimal winAmount)
+        {
+            return SettleBetAsync(winAmount);
+        }
 
         [When(@"I settle bet")]
         public async Task WhenISettleBet(Table table)
@@ -197,12 +205,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I cancel transaction")]
         [When(@"I cancel transaction")]
-        public Task WhenICancelTransaction() =>
-            CancelTransactionAsync();
+        public Task WhenICancelTransaction()
+        {
+            return CancelTransactionAsync();
+        }
 
         [When(@"I cancel non-existent transaction for game ""(.*)""")]
-        public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
-            CancelTransactionAsync(externalGameId, true);
+        public Task WhenICancelNonExistentTransactionForGame(string externalGameId)
+        {
+            return CancelTransactionAsync(externalGameId, true);
+        }
 
         [When(@"I resend the same bet")]
         [When(@"I resend the same settle bet")]
@@ -230,7 +242,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var request = new PostTransferRequest
             {
-                Record = new()
+                Record = new TransferRecord
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -239,10 +251,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new[]
-                    {
-                        externalTransactionId
-                    },
+                    TransactionIds = new[] { externalTransactionId },
                     RoundId = externalRoundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -292,10 +301,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = await _client.BetResponseAsync(request);
 
             Set(SR.ExternalTransactionId,
-                new List<string>
-                {
-                    transactionId
-                });
+                new List<string> { transactionId });
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -313,10 +319,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
 
             var transactionIds = isLockGame
-                ? new()
-                {
-                    betRequest.Record.TransactionId
-                }
+                ? new List<string> { betRequest.Record.TransactionId }
                 : Get<List<string>>(SR.ExternalTransactionId);
             var gamePlatformType = betRequest.Record.GamePlatformType;
             var gameRound = betRequest.Record.GameRound;
@@ -324,7 +327,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var settleRequest = new PostTransferRequest
             {
-                Record = new()
+                Record = new TransferRecord
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -393,7 +396,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var cancelRequest = new PostTransferRequest
             {
-                Record = new()
+                Record = new TransferRecord
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -401,10 +404,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new[]
-                    {
-                        transactionId
-                    },
+                    TransactionIds = new[] { transactionId },
                     RoundId = roundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -418,10 +418,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = await _client.PostTransferAsync(cancelRequest);
 
             Set(SR.ExternalTransactionId,
-                new List<string>
-                {
-                    $"{transactionId}_{TransactionType.REFUND}"
-                });
+                new List<string> { $"{transactionId}_{TransactionType.REFUND}" });
             Set(SR.Request, cancelRequest);
             Set(SR.Response, response);
         }
@@ -460,7 +457,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gas = await GetGameActionsByRoundId();
 
             var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType)
-                && ga.Type == GameActionType.PlaceBet);
+                                          && ga.Type == GameActionType.PlaceBet);
             var ga = gas.First(ga => ga.ReferencedGameActionId == placeGa.Id);
             ga.Type.Should().Be(type);
             ga.Amount.Should().Be(amount);
@@ -480,7 +477,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId &&
-                    externalTransactionIds.Contains(act.ExternalTransactionId)
+                      externalTransactionIds.Contains(act.ExternalTransactionId)
                 select act).AsNoTracking().ToArrayAsync();
 
             gas.Should().NotBeNull();
@@ -505,7 +502,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId &&
-                    externalTransactionIds.Contains(act.ExternalTransactionId)
+                      externalTransactionIds.Contains(act.ExternalTransactionId)
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
@@ -540,8 +537,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"the round will be closed")]
-        public Task ThenTheRoundWillBeClosedAsync() =>
-            VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
+        public Task ThenTheRoundWillBeClosedAsync()
+        {
+            return VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
+        }
 
         private Task<GameAction[]> GetGameActionsByRoundId()
         {
@@ -555,9 +554,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 select act).AsNoTracking().ToArrayAsync();
         }
 
-        private static string NewRoundId() => Guid.NewGuid().ToString();
+        private static string NewRoundId()
+        {
+            return Guid.NewGuid().ToString();
+        }
 
-        private string GetTimestamp() => DateTimeOffset.UtcNow.AddHours(-4).ToString("MM/dd/yyyy HH:mm:sss");
+        private string GetTimestamp()
+        {
+            return DateTimeOffset.UtcNow.AddHours(-4).ToString("MM/dd/yyyy HH:mm:sss");
+        }
 
         private string GetAsiaGamingPlayerCode()
         {
@@ -578,9 +583,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         private string[] GetGameId(string gameId)
-            => gameId.Split('_');
+        {
+            return gameId.Split('_');
+        }
 
         private string GetBillNo(string transactionId, string playType)
-            => $"{transactionId}_{playType}";
+        {
+            return $"{transactionId}_{playType}";
+        }
     }
 }

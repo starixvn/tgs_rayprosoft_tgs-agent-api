@@ -8,8 +8,8 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.GameProviders.KickPlayerServer.Client;
 using Microsoft.Extensions.Logging;
+using Tgs.GameProviders.Pluggable.Client;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
@@ -17,21 +17,22 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
     {
         private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IAgentService _agentService;
+        private readonly IGameProvidersPluggableClient _gameProvidersPluggableClient;
         private readonly IPlayerService _service;
-        private readonly IKickPlayerServiceClient _kickPlayerServiceClient;
+
 
         public UpdatePlayerHandler(
             ILogger<UpdatePlayerHandler> logger,
             IPlayerService service,
             IAgentService agentService,
             IHttpContextAccessor accessor,
-            IKickPlayerServiceClient kickPlayerServiceClient) :
+            IGameProvidersPluggableClient gameProvidersPluggableClient) :
             base(accessor)
         {
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             _service = service;
             _agentService = agentService;
-            _kickPlayerServiceClient = kickPlayerServiceClient ?? throw new System.ArgumentNullException(nameof(kickPlayerServiceClient));
+            _gameProvidersPluggableClient = gameProvidersPluggableClient ?? throw new System.ArgumentNullException(nameof(gameProvidersPluggableClient));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -100,7 +101,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
                 {
                     _logger.LogInformation("call KickPlayerAsync");
-                    await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+                    await _gameProvidersPluggableClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
                 }
             }
 

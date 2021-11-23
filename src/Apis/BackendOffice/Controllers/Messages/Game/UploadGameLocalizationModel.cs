@@ -6,7 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Game
     {
         public string Id { get; set; }
 
-        public string Name { get; set; }
+        public string Code { get; set; }
 
         [JsonPropertyName("enUS")]
         public string EnUS { get; set; }

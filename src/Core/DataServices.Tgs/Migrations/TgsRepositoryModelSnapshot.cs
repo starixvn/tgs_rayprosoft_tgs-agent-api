@@ -542,6 +542,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<decimal>("PromotionAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -583,6 +588,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<decimal>("VirtualSportsWinLoss")
                         .HasPrecision(18, 6)
@@ -687,6 +697,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_agent_dividend_multiple_layers_agent_id_dividend_provider_agent_id");
 
                     b.ToTable("agent_dividend_multiple_layers");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDomain", b =>
+                {
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("DomainName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("domain_name");
+
+                    b.HasKey("AgentId", "DomainName")
+                        .HasName("pk_agent_domains");
+
+                    b.ToTable("agent_domains");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
@@ -1209,6 +1236,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("enable_sms");
+
+                    b.Property<bool>("EnableSmsRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_sms_register_flow");
 
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uuid")
@@ -3692,6 +3725,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -3720,6 +3758,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<decimal>("WinLossAmount")
                         .HasPrecision(18, 6)
@@ -3927,7 +3970,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("to");
 
                     b.Property<decimal>("Turnover")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
 
                     b.HasKey("Id")
@@ -3984,6 +4028,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<decimal>("BetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bet_amount");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -4012,6 +4061,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -4026,6 +4080,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<decimal>("VipCardGameRebatePercentage")
                         .HasPrecision(9, 6)
@@ -5091,6 +5150,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
+                    b.Property<decimal>("OriginalTurnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("original_turnover");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -5142,6 +5206,49 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_round_details");
 
                     b.ToTable("round_details", "bet");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundOperationRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("NewData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("new_data");
+
+                    b.Property<string>("OldData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("old_data");
+
+                    b.Property<Guid>("OperatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operator_id");
+
+                    b.Property<string>("Remark")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("remark");
+
+                    b.Property<Guid>("RoundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_round_operation_records");
+
+                    b.HasIndex("RoundId")
+                        .HasDatabaseName("ix_round_operation_records_round_id");
+
+                    b.ToTable("round_operation_records", "bet");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Setting", b =>
@@ -6074,6 +6181,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("AgentDividend");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDomain", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", null)
+                        .WithMany()
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agent_domains_agents_agent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
@@ -7218,6 +7335,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundOperationRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Round", null)
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .HasConstraintName("fk_round_operation_records_round_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
