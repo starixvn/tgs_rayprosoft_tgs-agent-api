@@ -36,6 +36,7 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
                 .ConfigureAwait(false);
 
             var transactionCounts = await _tgsRoundService.GetRoundQueries().Where(x => x.BrandId == request.BrandId)
+                .Where(x => x.ClosedOn >= request.From && x.ClosedOn < request.To)
                 .Where(gameProviderIds.Length > 0, x => gameProviderIds.Contains(x.GameProviderId))
                 .GroupBy(x => new
                     {
