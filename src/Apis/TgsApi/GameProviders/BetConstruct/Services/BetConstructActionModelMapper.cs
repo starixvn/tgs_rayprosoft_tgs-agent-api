@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -59,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalGameId = "1",
                 GameActionType = GameActionType.PlaceBet,
                 ExtraData = DateTimeOffset
-                    .FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp))
+                    .FromUnixTimeSeconds(Convert.ToInt64(source.Created))
                     .ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
             };
@@ -100,7 +101,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             string externalRoundId = source.BetId.ToString();
 
             var autoCloseRound = data.AutoCloseRound;
-            var gameActionType = ProcessingSettlement(source);
+            var gameActionType = source.BetState switch
+            {
+                1 => GameActionType.CancelTransaction,
+                2 => GameActionType.TieBet,
+                3 => GameActionType.LoseBet,
+                4 => GameActionType.WinBet,
+                5 => source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                _ => GameActionType.PlaceBet
+            };
 
             var externalTransactionId = $"{source.TransactionId}_settle";
             var externalGameActionGroupId = source.BetId.ToString();
@@ -120,9 +129,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "1",//Temp Fake Data
                 ExternalTransactionReferenceId = source.TransactionId.ToString(),
-                GameActionType = gameActionType.Value,
-                ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
-                TimeStamp = DateTimeOffset.UtcNow
+                GameActionType = gameActionType,
+                ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.CalcDate)).ToIso8601String(true),
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)                
             };
 
             return GetBetData(data, playCode, transactions, autoCloseRound);
@@ -150,25 +160,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
         private static GameActionType? ProcessingSettlement(BetResultedRequest source)
         {
-            switch (source.BetState)
+            return source.BetState switch
             {
-                case 1:
-                    return GameActionType.CancelTransaction;
-
-                case 2:
-                    return GameActionType.TieBet;
-
-                case 3:
-                    return GameActionType.LoseBet;
-
-                case 4:
-                    return GameActionType.WinBet;
-
-                case 5:
-                    return source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
-                default:
-                    return null;
-            }
+                1 => GameActionType.CancelTransaction,
+                2 => GameActionType.TieBet,
+                3 => GameActionType.LoseBet,
+                4 => GameActionType.WinBet,
+                5 => source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                _ => null,
+            };
         }
     }
 }
