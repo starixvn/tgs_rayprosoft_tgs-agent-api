@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     partial class DataInitializer
     {
         internal record BetConstructProvider : IGameProvider
-        {
+        {            
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -45,8 +45,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new EURCurrency(),
+                new CNYCurrency(),
+                new THBCurrency(),
+                new MYRCurrency(),
                 new VNDCurrency(),
+                new INRCurrency(),                
+                new IDRCurrency(),
+                new HKDCurrency(),
+                new PHPCurrency(),
+                new EURCurrency(),                
                 new GBPCurrency(),
                 new KRWCurrency(),
                 new USDCurrency()
@@ -85,15 +92,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         }
 
         internal class BetConstructGameProviderConfiguration : IGameProviderConfiguration
-        {
-            private static readonly string _endpoint = string.Empty;
+        {            
             string IGameProviderConfiguration.ClientId => "BetConstruct-PG";
 
-            string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
+            string IGameProviderConfiguration.DesktopEndpoint => "https://devsportsbook.srvttt.com";
 
             Guid IGameProviderConfiguration.Id => new("575A70EC-1004-B324-4444-2ADE0261A0B2");
 
-            string IGameProviderConfiguration.MobileEndpoint => _endpoint;
+            string IGameProviderConfiguration.MobileEndpoint => "https://devmobile.srvttt.com";
 
             string IGameProviderConfiguration.Name => "Configuration BetConstruct";
 
