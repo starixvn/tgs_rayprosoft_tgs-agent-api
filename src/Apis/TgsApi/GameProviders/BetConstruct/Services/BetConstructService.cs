@@ -121,7 +121,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
         async ValueTask<Guid> IBetConstructService.GetGameProviderIdByCodeAsync() 
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BetConstruct);
         async ValueTask<Guid> IBetConstructService.GetBrandIdByPlayerCodeAsync(string playerCode) 
-            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BetConstruct);
+            => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
         async ValueTask<CachedBrandGameProviderConfiguration> IBetConstructService.GetBrandGameProviderConfigurationAsync(
             Guid brandId, 
             Guid gameProviderId) 

@@ -51,7 +51,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             new("USD", "United States Dollar", "United States Dollar", "$"),
             new("VND", "Vietnamese Dong", "đồng", "₫"),
             new("VND_1000", "Vietnamese Dong", "đồng", "₫"),
-            new("HKD", "Hong Kong Dollars", "元", "HK$")
+            new("HKD", "Hong Kong Dollars", "元", "HK$"),
+            new("PHP", "Philippine Peso", "Philippine Peso", "₱")
         };
 
         private readonly IList<IGameProvider> _gameProviders;

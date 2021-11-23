@@ -69,8 +69,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
         {
             var token = request.Token;
             var loginTokenId = token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
+            var encryptedToken = await _tokenProvider.EncryptAsync(request.Token.PlayerCode);
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             var brandId = player.BrandId;
             var platform = request.Token.PlatformType;
@@ -89,8 +89,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
                 bgpc.GameProviderConfigurationId);
 
+            //var currencyCode =
+            //    await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
             var currencyCode =
-                await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+                await _currencyCodeMapper.InternalToExternalAsync("VND", gameProviderId);
 
             var domain = platform == PlatformType.Mobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
 
@@ -99,7 +101,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             var url = domain.AppendQueryString(endpointPath)
                     .Replace("{CONTAINERID}", "bcsportsbookcontainer")
                     .Replace("{USERID}", configuration.PartnerId)
-                    .Replace("{AUTHTOKEN}", "anonymous")
+                    .Replace("{AUTHTOKEN}", encryptedToken)
                     .Replace("{LANG}", frontendLanguageCode)
                     .Replace("{SPORT}", "1");
 

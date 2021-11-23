@@ -43,6 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             var gameActionExternal = await _service
                 .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId)
                 .ConfigureAwait(false);
+
             if (gameActionExternal != null)
             {
                 return null;
@@ -116,6 +117,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalTransactionId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
                 ExternalBetId = source.BetId.ToString(),
+                //ExternalGameId = 
                 ExternalGameActionGroupId = source.BetId.ToString(),
                 ExternalTransactionReferenceId = externalGameActionGroupId,
                 GameActionType = gameActionType.Value,
