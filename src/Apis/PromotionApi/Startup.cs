@@ -83,7 +83,6 @@ namespace TGS.Apis.PromotionApi
                 .ConfigureWallet(config =>
                 {
                     config
-                        .AddTgsWalletRepositories()
                         .AddTgsAgentWalletRepositories();
                 })
                 .AddTgsPromotionRepositories()

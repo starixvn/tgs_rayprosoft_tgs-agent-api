@@ -28,7 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId, string playerCode, string externalTransactionId);
 
-        ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderIdAsync();
         ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
@@ -103,7 +103,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             return cachedBrandGameProviderConfiguration.GameProviderConfigurationId;
         }
 
-        async ValueTask<Guid> ISexyGamingServices.GetGameProviderId() => await _gameProviderOperations
+        async ValueTask<Guid> ISexyGamingServices.GetGameProviderIdAsync() => await _gameProviderOperations
             .GetGameProviderIdByCodeAsync(GameProvider.SexyGaming).ConfigureAwait(false);
 
         async ValueTask<CachedPlayerLoginRecord> ISexyGamingServices.DecryptTokenAsync(string token)

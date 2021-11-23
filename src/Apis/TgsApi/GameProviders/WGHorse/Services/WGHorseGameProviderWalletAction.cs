@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
 using TGS.Core.Models;
 using TGS.Core.Models.Services.Caches;
 using TGS.GameProviders.Repositories;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
 using TGS.Shared.Game.ApiClients.WGHorse;
 using TGS.Shared.Game.Models.WGHorse.Enums;
 using TGS.Shared.Game.Models.WGHorse.Outgoing;
@@ -16,13 +16,19 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
     {
         private readonly IWGHorseApiClient _client;
         private readonly IWGHorseService _service;
+
         public WGHorseGameProviderWalletAction(
-             IPlayerOperations playerOperations,
-             IGameProviderOperations gameProviderOperations,
-             IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
-             IWalletRepository walletRepository,
-             IWGHorseApiClient client,
-             IWGHorseService service) : base(playerOperations, gameProviderOperations, gameProviderFundTransferTransactionRepository, walletRepository)
+            IPlayerOperations playerOperations,
+            IGameProviderOperations gameProviderOperations,
+            IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
+            ICashServiceClient cashServiceClient,
+            IWGHorseApiClient client,
+            IWGHorseService service)
+            : base(
+                playerOperations,
+                gameProviderOperations,
+                gameProviderFundTransferTransactionRepository,
+                cashServiceClient)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _service = service ?? throw new ArgumentNullException(nameof(service));
@@ -41,7 +47,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                 AmountType = AmountTypes.FundIn,
                 OrderId = orderId,
                 Amount = amount.ToString()
-
             };
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
@@ -63,7 +68,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                 AmountType = AmountTypes.FundOut,
                 OrderId = orderId,
                 Amount = amount.ToString()
-
             };
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
