@@ -7337,16 +7337,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Round");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundOperationRecord", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Round", null)
-                        .WithMany()
-                        .HasForeignKey("RoundId")
-                        .HasConstraintName("fk_round_operation_records_round_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.MarketType", "MarketType")
