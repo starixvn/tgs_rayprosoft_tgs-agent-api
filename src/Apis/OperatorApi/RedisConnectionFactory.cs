@@ -36,7 +36,7 @@ namespace TGS.Apis.OperatorApi
             {
                 if (disposing)
                 {
-                    _connectionMultiplexer.Dispose();
+                    _connectionMultiplexer?.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

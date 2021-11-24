@@ -35,7 +35,9 @@ namespace TGS.Apis.ReportApi
             if (!_disposedValue)
             {
                 if (disposing)
-                    _connectionMultiplexer.Dispose();
+                {
+                    _connectionMultiplexer?.Dispose();
+                }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
