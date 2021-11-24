@@ -278,12 +278,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private async ValueTask<BigGamingResponse> GetGameUrlFishingAsync(BigGamingBrandMerchant brandMerchant, CachedPlayer player, string externalId, string cultureCode)
         {
+
             var request = new BigGamingGetGameUrlFishingRequest()
             {
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
-                Locale = cultureCode,
+                Locale = cultureCode.ToLower() switch
+                {
+                    "zh_cn" => "zh-CN",
+                    "vi_vn" => "vi-VN",
+                    "th_th" => "th-TH",
+                    _ => "en-US",
+                },
                 IsMobileUrl = 0,
                 IsHttpsUrl = 0,
                 ReturnUrl = string.Empty,
