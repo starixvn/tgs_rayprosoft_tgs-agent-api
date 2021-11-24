@@ -12,8 +12,8 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
     {
         [JsonPropertyName("loginId")]
         public string LoginId { get; init; }
-        [JsonPropertyName("locale")]
-        public string Locale { get; init; }
+        [JsonPropertyName("lang")]
+        public string Lang { get; init; }
         [JsonPropertyName("isMobileUrl")]
         public int IsMobileUrl { get; init; }
         [JsonPropertyName("isHttpsUrl")]

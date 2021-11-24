@@ -284,7 +284,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
-                Locale = cultureCode.ToLower() switch
+                Lang = cultureCode.ToLower() switch
                 {
                     "zh_cn" => "zh-CN",
                     "vi_vn" => "vi-VN",
