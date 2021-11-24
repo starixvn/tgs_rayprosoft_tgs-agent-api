@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.GameProviders;
@@ -86,9 +87,9 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
+        public OperatorConfiguration ConfigureWallet(Action<CashServiceClientOptions, IServiceProvider> configure)
         {
-            configure(Services.AddWallet());
+            Services.AddCashServiceClient(configure);
 
             return this;
         }

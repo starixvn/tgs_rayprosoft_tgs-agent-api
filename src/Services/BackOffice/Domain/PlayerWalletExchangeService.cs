@@ -69,7 +69,12 @@ namespace TGS.Services.BackOffice.Domain
                 createdByUserId).ConfigureAwait(false);
         }
 
-        public async ValueTask<TransactionResponse> DepositAsync(string playerCode, decimal amount, string description, string externalId)
+        public async ValueTask<TransactionResponse> DepositAsync(
+            string playerCode,
+            decimal amount,
+            string description,
+            string externalId,
+            Guid? createdByUserId)
         {
             var player = await _playerService
                 .GetPlayerAsync(x => x.PlayerCode == playerCode)
@@ -79,7 +84,8 @@ namespace TGS.Services.BackOffice.Domain
                 player.DefaultWalletId,
                 amount,
                 description,
-                externalId).ConfigureAwait(false);
+                externalId,
+                createdByUserId).ConfigureAwait(false);
         }
 
         public async ValueTask<TransactionResponse> GameProviderDepositAsync(string playerCode, decimal amount, string description, string externalId)

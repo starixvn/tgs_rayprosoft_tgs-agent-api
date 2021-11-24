@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -8,7 +9,6 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.GameProviders.Repositories;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
 using TGS.Shared.Game.ApiClients.LY;
 using TGS.Shared.Game.Models.LY.Enums;
 using TGS.Shared.Game.Models.LY.Outgoing;
@@ -28,12 +28,13 @@ namespace TGS.Apis.TgsApi.GameProviders.LY.Services
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
-            IWalletRepository walletRepository,
-            ILYService service
-        ) : base(playerOperations,
-            gameProviderOperations,
-            gameProviderFundTransferTransactionRepository,
-            walletRepository)
+            ICashServiceClient cashServiceClient,
+            ILYService service)
+            : base(
+                playerOperations,
+                gameProviderOperations,
+                gameProviderFundTransferTransactionRepository,
+                cashServiceClient)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));

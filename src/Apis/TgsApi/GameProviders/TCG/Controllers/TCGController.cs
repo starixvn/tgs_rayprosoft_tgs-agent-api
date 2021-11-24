@@ -42,7 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
 
         [Consumes("application/x-www-form-urlencoded")]
         [HttpPost("entrance")]
-        public ValueTask<TCGSingleWalletResponse> Entrance([FromForm] TCGSingleWalletRequest request)
+        public ValueTask<TCGSingleWalletResponse> EntranceAsync([FromForm] TCGSingleWalletRequest request)
             => ValueTask.FromResult(new TCGSingleWalletResponse
             {
                 Status = (int)GameApiError.MethodNotFound,

@@ -59,7 +59,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             var loginTokenId = token.LoginRecordId;
             var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
+            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             var brandId = player.BrandId;
 
             var cultureCode =

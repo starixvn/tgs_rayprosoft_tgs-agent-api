@@ -50,7 +50,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 
         async ValueTask<VRGPGameRecordResponse> IVRGPGameHistoryService.GameRecordAsync(VRGPGameRecordRequest source)
         {
-            var brandMerchant = await _service.GetBrandMerchant(source.BrandCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(source.BrandCode).ConfigureAwait(false);
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
 
             if (brandMerchant == null)
