@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -12,16 +13,15 @@ using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 
-namespace TGS.Apis.BackendOffice.Extensions
+namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddBackendOfficeServices(
             this IServiceCollection services,
@@ -48,7 +48,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddOperations()
                 .AddApiClient()
                 .AddPluggableServices()
@@ -75,6 +74,20 @@ namespace TGS.Apis.BackendOffice.Extensions
 
             services
                 .AddPaymentClient();
+
+            return services;
+        }
+
+        public static IServiceCollection AddRedis(
+            this IServiceCollection services,
+            Action<RedisOptions, IServiceProvider> configure)
+        {
+            services
+               .AddOptions<RedisOptions>()
+               .Configure(configure)
+               .Services
+               .AddRedisServices()
+               .RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
             return services;
         }
