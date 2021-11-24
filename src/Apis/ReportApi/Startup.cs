@@ -33,6 +33,48 @@ namespace TGS.Apis.ReportApi
             _configuration = configuration;
         }
 
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            app.UseRequestLocalization(options =>
+            {
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
+            });
+
+            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+            app.UseApiLogger(bypassRouting: defaultBypassRouting);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+
+                endpoints.MapHealthChecks("/health",
+                    new HealthCheckOptions
+                    {
+                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                    });
+
+                endpoints.MapMetrics();
+            });
+
+            if (!env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Report API"));
+            }
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs");
@@ -42,7 +84,6 @@ namespace TGS.Apis.ReportApi
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
@@ -50,6 +91,14 @@ namespace TGS.Apis.ReportApi
                 .AddReportServices()
                 .AddTransactions()
                 .AddPlayerBucketRepositoriesServices();
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -99,48 +148,6 @@ namespace TGS.Apis.ReportApi
                             configuration.GetSection("RabbitMQ").Bind(options);
                         });
                 });
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseRequestLocalization(options =>
-            {
-                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
-
-                options.SupportedCultures.Clear();
-                options.SupportedUICultures.Clear();
-
-                config.GetSection("RequestLocalization").Bind(options);
-            });
-
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
-            app.UseMiddleware<ExceptionMiddleware>();
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-            app.UseApiLogger(bypassRouting: defaultBypassRouting);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                    });
-
-                endpoints.MapMetrics();
-            });
-
-            if (!env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Report API"));
-            }
         }
     }
 }
