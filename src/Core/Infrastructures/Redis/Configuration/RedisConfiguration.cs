@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis.Configuration
 {

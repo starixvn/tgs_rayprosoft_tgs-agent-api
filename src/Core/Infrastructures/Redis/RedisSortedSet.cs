@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
     internal sealed class RedisSortedSet<T> : IRedisSortedSet<T>
     {
         private readonly IRedisSortedSet<T> _interface;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IRedisRepository _repository;
         private string _keyPrefix;
 
         public RedisSortedSet(
-            IRedisRepository repository,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IRedisRepository repository)
         {
             _interface = this;
             _repository = repository;
-            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         Task IRedisSortedSet<T>.AddAsync(double score, T item)
@@ -28,7 +25,7 @@ namespace TGS.Core.Infrastructures.Redis
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            var value = _jsonSerializationProvider.SerializeToString(item);
+            var value = JsonSerializer.Serialize(item);
             return db.SortedSetAddAsync(key, value, score);
         }
 
@@ -39,7 +36,7 @@ namespace TGS.Core.Infrastructures.Redis
 
             var values = items.Select(x =>
                 {
-                    var value = _jsonSerializationProvider.SerializeToString(x.Item);
+                    var value = JsonSerializer.Serialize(x.Item);
                     return new SortedSetEntry(value, x.Score);
                 })
                 .ToArray();
@@ -141,7 +138,7 @@ namespace TGS.Core.Infrastructures.Redis
 
         private T DeserializeItem(RedisValue item)
         {
-            return _jsonSerializationProvider.DeserializeFromString<T>(item);
+            return JsonSerializer.Deserialize<T>(item);
         }
 
         private int ToInt(long value)

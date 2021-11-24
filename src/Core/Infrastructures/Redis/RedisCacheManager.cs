@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
 
@@ -15,14 +15,12 @@ namespace TGS.Core.Infrastructures.Redis
         private static readonly TimeSpan _MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
         private readonly IRedisRepository _repository;
-        private readonly IJsonSerializationProvider _serializationProvider;
 
         public RedisCacheManager(
-            IRedisRepository repository,
-            IJsonSerializationProvider serializationProvider)
+            IRedisRepository repository)
         {
             _repository = repository;
-            _serializationProvider = serializationProvider;
+
             _interface = this;
         }
 
@@ -31,7 +29,7 @@ namespace TGS.Core.Infrastructures.Redis
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             var existingKey = await db.KeyExistsAsync(cacheKey);
-            var serializedValues = data.Select(d => (RedisValue)_serializationProvider.SerializeToString(d)).ToArray();
+            var serializedValues = data.Select(d => (RedisValue)JsonSerializer.Serialize(d)).ToArray();
             await db.ListRightPushAsync(cacheKey, serializedValues);
 
             if (existingKey == false)
@@ -110,7 +108,7 @@ namespace TGS.Core.Infrastructures.Redis
             if (values.Length == 0)
                 return await createFunc();
 
-            return values.Select(v => _serializationProvider.DeserializeFromString<T>(v)).ToList();
+            return values.Select(v => JsonSerializer.Deserialize<T>(v)).ToList();
         }
 
         Task<long> IRedisCacheManager.IncrementAsync(object cacheType, object key, long value)
@@ -307,7 +305,7 @@ namespace TGS.Core.Infrastructures.Redis
         {
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
-            var serializedValue = _serializationProvider.SerializeToString(data);
+            var serializedValue = JsonSerializer.Serialize(data);
             var flags = GetCommandFlags(cacheWithFireAndForget);
             return db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
         }
@@ -321,11 +319,11 @@ namespace TGS.Core.Infrastructures.Redis
 
             if (!value.IsNullOrEmpty)
             {
-                return _serializationProvider.DeserializeFromString<T>(value);
+                return JsonSerializer.Deserialize<T>(value);
             }
 
             var createdValue = await createFunc();
-            var serializedValue = _serializationProvider.SerializeToString(createdValue);
+            var serializedValue = JsonSerializer.Serialize(createdValue);
             var flags = GetCommandFlags(cacheWithFireAndForget);
             await db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
             return createdValue;
@@ -342,7 +340,7 @@ namespace TGS.Core.Infrastructures.Redis
                 return createFunc != null ? await createFunc() : default;
             }
 
-            return _serializationProvider.DeserializeFromString<T>(value);
+            return JsonSerializer.Deserialize<T>(value);
         }
 
         #endregion Internal Methods

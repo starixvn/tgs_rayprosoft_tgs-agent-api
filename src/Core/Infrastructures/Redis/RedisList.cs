@@ -1,25 +1,22 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
     internal class RedisList<T> : IRedisList<T>
     {
         private readonly IRedisList<T> _interface;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IRedisRepository _repository;
         private string _keyPrefix;
 
         public RedisList(
-            IRedisRepository repository,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IRedisRepository repository)
         {
             _interface = this;
             _repository = repository;
-            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         Task IRedisList<T>.AddToEndAsync(T item)
@@ -27,7 +24,7 @@ namespace TGS.Core.Infrastructures.Redis
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            var value = _jsonSerializationProvider.SerializeToString(item);
+            var value = JsonSerializer.Serialize(item);
             return db.ListRightPushAsync(key, value);
         }
 
@@ -36,7 +33,7 @@ namespace TGS.Core.Infrastructures.Redis
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            var values = items.Select(x => (RedisValue)_jsonSerializationProvider.SerializeToString(x)).ToArray();
+            var values = items.Select(x => (RedisValue)JsonSerializer.Serialize(x)).ToArray();
             return db.ListRightPushAsync(key, values);
         }
 
@@ -45,7 +42,7 @@ namespace TGS.Core.Infrastructures.Redis
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            var value = _jsonSerializationProvider.SerializeToString(item);
+            var value = JsonSerializer.Serialize(item);
             return db.ListLeftPushAsync(key, value);
         }
 
@@ -54,7 +51,7 @@ namespace TGS.Core.Infrastructures.Redis
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            var values = items.Select(x => (RedisValue)_jsonSerializationProvider.SerializeToString(x)).ToArray();
+            var values = items.Select(x => (RedisValue)JsonSerializer.Serialize(x)).ToArray();
             return db.ListLeftPushAsync(key, values);
         }
 
@@ -96,7 +93,7 @@ namespace TGS.Core.Infrastructures.Redis
             }
 
             return range
-                .Select(x => _jsonSerializationProvider.DeserializeFromString<T>(x))
+                .Select(x => JsonSerializer.Deserialize<T>(x))
                 .ToArray();
         }
 
@@ -108,7 +105,7 @@ namespace TGS.Core.Infrastructures.Redis
             string value = await db.ListRightPopAsync(key);
             return string.IsNullOrEmpty(value)
                  ? default
-                 : _jsonSerializationProvider.DeserializeFromString<T>(value);
+                 : JsonSerializer.Deserialize<T>(value);
         }
 
         async Task<T> IRedisList<T>.PopFromStartAsync()
@@ -119,7 +116,7 @@ namespace TGS.Core.Infrastructures.Redis
             string value = await db.ListLeftPopAsync(key);
             return string.IsNullOrEmpty(value)
                 ? default
-                : _jsonSerializationProvider.DeserializeFromString<T>(value);
+                : JsonSerializer.Deserialize<T>(value);
         }
 
         void IRedisList<T>.SetKeyPrefix(string prefix)

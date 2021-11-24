@@ -1,5 +1,4 @@
-﻿using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Redis;
+﻿using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Redis.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -8,13 +7,10 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         /// <summary>
         /// Dependency Injection of Redis, need to add the following dependencies beforehand:
-        /// 1. AddJson() in Infrastructures.Json
         /// 2. AddTgsLog() in Infrastructures.Log
         /// </summary>
         public static RedisConfiguration AddRedisServices(this IServiceCollection services)
         {
-            services.AddSingleton<IJsonSerializationProvider, JsonSerializationProvider>();
-
             services.AddSingleton<IRedisRepository, RedisRepository>();
             services.AddSingleton<IRedisCacheManager, RedisCacheManager>();
 
