@@ -28,8 +28,8 @@ namespace TGS.Services.Report.Application.Models.Agent
 
         public decimal AgentDividendAmount { get; set; }
 
-        public decimal ByPlayerAgentDividendAmount { get; set; }
+        public decimal FromPlayerAgentDividendAmount { get; set; }
 
-        public decimal ByTeamAgentDividendAmount { get; set; }
+        public decimal FromTeamAgentDividendAmount { get; set; }
     }
 }

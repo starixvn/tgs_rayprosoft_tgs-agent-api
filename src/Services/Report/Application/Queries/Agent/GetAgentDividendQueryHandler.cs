@@ -95,13 +95,13 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         WinLossAmount = list.Sum(l => l.WinLossAmount),
                         NetProfit = list.Sum(l => l.NetProfit),
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount),
-                        ByPlayerAgentDividendAmount =
+                        FromPlayerAgentDividendAmount =
                             _service.Repository.AgentDividendMultipleLayers.AsQueryable()
                                 .Where(a => a.AgentId == agentId)
                                 .Where(a => a.AgentDividend.CreatedOn >= request.From)
                                 .Where(a => a.AgentDividend.CreatedOn < request.To)
                                 .Where(a => a.AgentId == a.DividendProviderAgentId).Sum(a => a.Dividend),
-                        ByTeamAgentDividendAmount = _service.Repository.AgentDividendMultipleLayers.AsQueryable()
+                        FromTeamAgentDividendAmount = _service.Repository.AgentDividendMultipleLayers.AsQueryable()
                             .Where(a => a.AgentId == agentId)
                             .Where(a => a.AgentDividend.CreatedOn >= request.From)
                             .Where(a => a.AgentDividend.CreatedOn < request.To)
@@ -126,8 +126,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     WinLossAmount = ad.WinLossAmount,
                     NetProfit = ad.NetProfit,
                     AgentDividendAmount = ad.AgentDividendAmount,
-                    ByPlayerAgentDividendAmount = ad.ByPlayerAgentDividendAmount,
-                    ByTeamAgentDividendAmount = ad.ByTeamAgentDividendAmount
+                    FromPlayerAgentDividendAmount = ad.FromPlayerAgentDividendAmount,
+                    FromTeamAgentDividendAmount = ad.FromTeamAgentDividendAmount
                 }).ToArray();
 
             return await models.CreatePagedResponseAsync(models.Length);
