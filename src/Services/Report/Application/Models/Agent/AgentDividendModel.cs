@@ -27,5 +27,9 @@ namespace TGS.Services.Report.Application.Models.Agent
         public decimal NetProfit { get; set; }
 
         public decimal AgentDividendAmount { get; set; }
+
+        public decimal ByPlayerAgentDividendAmount { get; set; }
+
+        public decimal ByTeamAgentDividendAmount { get; set; }
     }
 }

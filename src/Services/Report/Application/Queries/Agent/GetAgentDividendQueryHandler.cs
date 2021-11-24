@@ -70,10 +70,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
             var subAgents = await _tgsAgentService.GetAgentQueries().Where(x => x.ParentAgentId == mainAgent.Id)
                 .ToListAsync(cancellationToken);
 
-            var agents = new List<Core.DataServices.Tgs.Models.Agent>
-            {
-                mainAgent
-            };
+            var agents = new List<Core.DataServices.Tgs.Models.Agent> { mainAgent };
             agents.AddRange(subAgents);
 
             var agentIds = agents.Select(x => x.Id).ToArray();
@@ -82,6 +79,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     .Where(x => x.CreatedOn >= request.From)
                     .Where(x => x.CreatedOn < request.To))
                 .Where(x => agentIds.Contains(x.AgentId))
+                .Include(x => x.AgentDividendMultipleLayers)
                 .GroupBy(x => x.AgentId,
                     (agentId, list) => new
                     {
@@ -96,7 +94,18 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         Turnover = list.Sum(l => l.Turnover),
                         WinLossAmount = list.Sum(l => l.WinLossAmount),
                         NetProfit = list.Sum(l => l.NetProfit),
-                        AgentDividendAmount = list.Sum(l => l.AgentDividendAmount)
+                        AgentDividendAmount = list.Sum(l => l.AgentDividendAmount),
+                        ByPlayerAgentDividendAmount =
+                            _service.Repository.AgentDividendMultipleLayers.AsQueryable()
+                                .Where(a => a.AgentId == agentId)
+                                .Where(a => a.AgentDividend.CreatedOn >= request.From)
+                                .Where(a => a.AgentDividend.CreatedOn < request.To)
+                                .Where(a => a.AgentId == a.DividendProviderAgentId).Sum(a => a.Dividend),
+                        ByTeamAgentDividendAmount = _service.Repository.AgentDividendMultipleLayers.AsQueryable()
+                            .Where(a => a.AgentId == agentId)
+                            .Where(a => a.AgentDividend.CreatedOn >= request.From)
+                            .Where(a => a.AgentDividend.CreatedOn < request.To)
+                            .Where(a => a.AgentId != a.DividendProviderAgentId).Sum(a => a.Dividend)
                     }).ToArrayAsync(cancellationToken);
 
             var models = agentDividends.Join(agents.ToArray(),
@@ -116,7 +125,9 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     Turnover = ad.Turnover,
                     WinLossAmount = ad.WinLossAmount,
                     NetProfit = ad.NetProfit,
-                    AgentDividendAmount = ad.AgentDividendAmount
+                    AgentDividendAmount = ad.AgentDividendAmount,
+                    ByPlayerAgentDividendAmount = ad.ByPlayerAgentDividendAmount,
+                    ByTeamAgentDividendAmount = ad.ByTeamAgentDividendAmount
                 }).ToArray();
 
             return await models.CreatePagedResponseAsync(models.Length);
