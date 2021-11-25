@@ -28,6 +28,28 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         private static readonly Random _Random = new Random();
 
+        [HttpGet("help2pay/pay/{identityId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        public async ValueTask<ContentResult> GetHelp2PayDepositHtmlAsync(
+            [FromServices] IHelp2PayRedisRepository redisRepository,
+            [FromRoute] Guid identityId)
+        {
+            var html = await redisRepository.GetDepositHtmlAsync(identityId)
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                throw new PaymentFailException($"Can not find help2pay deposit html of identity id:{identityId}");
+            }
+
+            return new ContentResult
+            {
+                StatusCode = StatusCodes.Status200OK,
+                ContentType = "text/html",
+                Content = html
+            };
+        }
+
         [HttpPost("help2pay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -36,6 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromServices] IHelp2PayRedisRepository redisRepository,
             [FromServices] Help2PaySerializer serializer,
             [FromBody] SubmitHelp2PayDepositRequest request)
         {
@@ -95,12 +118,15 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .ExecuteAsync(updateThirdPartyOrderNoCommand)
                     .ConfigureAwait(false);
 
-                var storedId = Guid.NewGuid();
+                var identityId = Guid.NewGuid();
+
+                await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
+                    .ConfigureAwait(false);
 
                 return new Help2PayDepositFormCreatedResponse
                 {
                     FormId = createdFormId,
-                    PaymentUrl = $"/help2pay/web/{storedId}"
+                    PaymentUrl = $"/api/deposit/bank/help2pay/pay/{identityId}"
                 };
             }
 

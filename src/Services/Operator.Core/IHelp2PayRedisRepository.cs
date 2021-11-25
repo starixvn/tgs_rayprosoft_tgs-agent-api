@@ -1,6 +1,12 @@
-﻿namespace TGS.Services.Operator
+﻿using System;
+using System.Threading.Tasks;
+
+namespace TGS.Services.Operator
 {
     public interface IHelp2PayRedisRepository
     {
+        ValueTask<string?> GetDepositHtmlAsync(Guid identityId);
+
+        ValueTask<bool> StoreDepositHtmlAsync(Guid identityId, string html);
     }
 }
