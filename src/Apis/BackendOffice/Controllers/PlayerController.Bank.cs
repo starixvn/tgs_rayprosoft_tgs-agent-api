@@ -9,16 +9,6 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     public partial class PlayerController
     {
-        [HttpPut("{playerCode}/bank/{id}")]
-        [Description("Update player bank")]
-        public Task<MessageResponse> UpdatePlayerBankAsync(string playerCode, Guid id,
-            [FromBody] UpdatePlayerBankRequest request)
-        {
-            request.PlayerCode = playerCode;
-            request.Id = id;
-            return _mediator.Send(request);
-        }
-
         [HttpPost("{playerCode}/bank")]
         [Description("Create a player bank")]
         public Task<MessageResponse> CreatePlayerBankAsync(string playerCode,
@@ -33,5 +23,15 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Delete a player bank")]
         public Task<MessageResponse> DeletePlayerBankAsync(string playerCode, Guid id) =>
             _mediator.Send(new DeletePlayerBankRequest(playerCode, id));
+
+        [HttpPut("{playerCode}/bank/{id}")]
+        [Description("Update player bank")]
+        public Task<MessageResponse> UpdatePlayerBankAsync(string playerCode, Guid id,
+            [FromBody] UpdatePlayerBankRequest request)
+        {
+            request.PlayerCode = playerCode;
+            request.Id = id;
+            return _mediator.Send(request);
+        }
     }
 }
