@@ -5,7 +5,7 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
 {
-    internal class Help2PayRedisRepository : IHelp2PayRedisRepository
+    internal class Help2PayRedisRepository : IHelp2PayRepository
     {
         private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
         private static readonly string _KeyPrefix = "Help2Pay:DepositHtml";

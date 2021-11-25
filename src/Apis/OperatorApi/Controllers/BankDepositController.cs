@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("help2pay/pay/{identityId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         public async ValueTask<ContentResult> GetHelp2PayDepositHtmlAsync(
-            [FromServices] IHelp2PayRedisRepository redisRepository,
+            [FromServices] IHelp2PayRepository redisRepository,
             [FromRoute] Guid identityId)
         {
             var html = await redisRepository.GetDepositHtmlAsync(identityId)
@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] IHelp2PayRedisRepository redisRepository,
+            [FromServices] IHelp2PayRepository redisRepository,
             [FromServices] Help2PaySerializer serializer,
             [FromBody] SubmitHelp2PayDepositRequest request)
         {
