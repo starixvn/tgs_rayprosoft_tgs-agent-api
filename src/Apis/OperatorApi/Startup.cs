@@ -20,6 +20,7 @@ using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Payment.ApplePay;
+using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
@@ -211,7 +212,8 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
-                .AddSingleton<MaticPaySerializer>();
+                .AddSingleton<MaticPaySerializer>()
+                .AddSingleton<Help2PaySerializer>();
 
             services.AddNatsMessageQueue(natsConfig =>
             {
