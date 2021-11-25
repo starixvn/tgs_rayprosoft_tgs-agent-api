@@ -94,7 +94,6 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
-                .AddRedis()
                 .AddSecurity()
                 .AddTransactions()
                 .AddOperations()
@@ -108,6 +107,14 @@ namespace TGS.Apis.TgsApi.Commons
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
+                });
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
             services.AddHttpContextAccessor();

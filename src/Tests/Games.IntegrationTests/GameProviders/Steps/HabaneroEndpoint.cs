@@ -69,8 +69,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddTgsLog()
-                .AddApiClient()
-                .AddRedis();
+                .AddApiClient();
+
+            Action<Apis.TgsApi.RedisOptions, IServiceProvider> action = (options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            };
+
+            services.AddRedis(action);
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -108,6 +116,63 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _serviceProvider = services.BuildServiceProvider();
         }
 
+        [Given(@"balance now being \$(.*)")]
+        public async Task GivenBalanceNowBeing(decimal balance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+            wallet.Balance.Should().Be(balance);
+        }
+
+        [Given(@"brand has status set to ""(.*)""")]
+        public Task GivenBrandHasStatusSetToAsync(Status status)
+        {
+            return ChangeBrandStatusAsync(_serviceProvider, status);
+        }
+
+        [Given(@"disable the player")]
+        public Task GivenDisableThePlayer()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+
+            return ChangePlayerStatusAsync(_serviceProvider, playerCode, PlayerStatus.Disabled);
+        }
+
+        [Given(@"game provider has status set to ""(.*)""")]
+        public Task GivenGameProviderHasStatusSetToAsync(Status status)
+        {
+            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
+        }
+
+        [Given(@"I placed bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
+        [When(@"I place bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
+        public Task GivenIPlacedBetForAndSettleItForForGame(
+            decimal betAmount, decimal winAmount,
+            string externalGameId)
+        {
+            return PlaceBetAndSettleAsync(betAmount, winAmount, externalGameId);
+        }
+
+        [Given(@"I set non-existent game action")]
+        public void GivenISetNonExistentGameAction()
+        {
+            Set(SR.ExternalTransactionId, Guid.NewGuid().ToString());
+            Set(SR.ExternalRoundId, NewRoundId());
+        }
+
+        [Given(@"player having balance of \$(.*)")]
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
+
+        [Given(@"player logout")]
+        public Task GivenPlayerLogoutAsync()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+
+            return DeauthorizePlayerAsync(_serviceProvider, playerCode);
+        }
+
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginVia(
             string username, string brandCode,
@@ -131,366 +196,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.BrandCode, brandCode);
             Set(SR.PlayerCode, playerCode);
-        }
-
-        [Given(@"player logout")]
-        public Task GivenPlayerLogoutAsync()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-
-            return DeauthorizePlayerAsync(_serviceProvider, playerCode);
-        }
-
-        [Given(@"disable the player")]
-        public Task GivenDisableThePlayer()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-
-            return ChangePlayerStatusAsync(_serviceProvider, playerCode, PlayerStatus.Disabled);
-        }
-
-        [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
-        {
-            return SetPlayerBalanceAsync(_serviceProvider, balance);
-        }
-
-        [Given(@"game provider has status set to ""(.*)""")]
-        public Task GivenGameProviderHasStatusSetToAsync(Status status)
-        {
-            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
-        }
-
-        [Given(@"brand has status set to ""(.*)""")]
-        public Task GivenBrandHasStatusSetToAsync(Status status)
-        {
-            return ChangeBrandStatusAsync(_serviceProvider, status);
-        }
-
-        [Given(@"balance now being \$(.*)")]
-        public async Task GivenBalanceNowBeing(decimal balance)
-        {
-            var wallet = await GetPlayerWalletAsync(_serviceProvider);
-            wallet.Balance.Should().Be(balance);
-        }
-
-        [Given(@"I placed bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
-        [When(@"I place bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
-        public Task GivenIPlacedBetForAndSettleItForForGame(
-            decimal betAmount, decimal winAmount,
-            string externalGameId)
-        {
-            return PlaceBetAndSettleAsync(betAmount, winAmount, externalGameId);
-        }
-
-        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
-        [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
-        {
-            return PlaceBetAsync(amount, externalGameId);
-        }
-
-        [When(@"I call authorize endpoint with username=""(.*)"" and passkey=""(.*)"" and brandid=""(.*)""")]
-        public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(
-            string clientId,
-            string secretKey, string habaneroBrandId)
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-
-            var response = await client.AuthorizePlayerAsync(new AuthorizePlayerRequest
-            {
-                Type = "playerdetailrequest",
-                SentOn = DateTimeOffset.Now,
-                Game = new Game
-                {
-                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1", ExternalId = "AcesandEights1Hand"
-                },
-                Authorization = new Authorization
-                {
-                    ClientId = clientId,
-                    SecretKey = secretKey,
-                    HabaneroBrandId = habaneroBrandId,
-                    MachineName = "TESTSERVER"
-                },
-                Detail = new PlayerDetail { Token = encryptedToken, GameLaunch = true }
-            });
-
-            Set(SR.Response, response);
-        }
-
-        [Given(@"I set non-existent game action")]
-        public void GivenISetNonExistentGameAction()
-        {
-            Set(SR.ExternalTransactionId, Guid.NewGuid().ToString());
-            Set(SR.ExternalRoundId, NewRoundId());
-        }
-
-        [Given(@"settle bet for \$(.*)")]
-        [When(@"I settle bet for \$(.*)")]
-        public Task WhenISettleBetFor(decimal winAmount)
-        {
-            return SettleBetAsync(winAmount);
-        }
-
-        [When(@"I got a free bet for \$(.*)")]
-        public Task WhenIGotAFreeBetFor(decimal amount)
-        {
-            return SettleBetAsync(amount, type: FreeBet);
-        }
-
-        [When(@"I retry settle bet for \$(.*)")]
-        public Task WhenIRetrySettleBetFor(decimal winAmount)
-        {
-            return SettleBetAsync(winAmount, true);
-        }
-
-        [When(@"I resend the same bet")]
-        [When(@"I resend the same settle bet")]
-        [When(@"I resend place and settle bet")]
-        public async Task WhenIResendTheSameBet()
-        {
-            var request = Get<FundTransferRequest>(SR.Request);
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-            var response = await client.FundTransferAsync(request);
-
-            Set(SR.Response, response);
-        }
-
-        [Given(@"I cancel transaction")]
-        [When(@"I cancel transaction")]
-        public Task WhenICancelTransaction()
-        {
-            return CancelTransactionAsync();
-        }
-
-        [When(@"I cancel non-existent transaction for game ""(.*)""")]
-        public Task WhenICancelNonExistentTransactionForGame(string externalGameId)
-        {
-            return CancelNonExistentTransactionForGameAsync(externalGameId);
-        }
-
-        [When(@"I place bet for \$(.*) and settle invalid reference Id for game ""(.*)""")]
-        public Task WhenIPlaceBetForAndSettleInvalidReferenceIdForGame(decimal betAmount, string externalGameId)
-        {
-            return PlaceBetAndSettleWithInvalidReferenceIdAsync(betAmount, externalGameId);
-        }
-
-        [When(@"I query bet existence")]
-        public async Task WhenIQueryBetExistence()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var transactionId = Get<string>(SR.ExternalTransactionId);
-            var roundId = Get<int>(SR.ExternalRoundId);
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-
-            var response = await client.QueryGameActionAsync(new QueryRequest
-            {
-                Type = "queryrequest",
-                Authorization = _authorization,
-                Detail = new QueryDetail
-                {
-                    PlayerCode = playerCode,
-                    Token = encryptedToken,
-                    TransactionId = transactionId,
-                    RoundId = DateTimeOffset.UtcNow.ToString(),
-                    ClientRoundId = roundId
-                }
-            });
-
-            Set(SR.Response, response);
-        }
-
-        [When(@"I query bet existence without token")]
-        public async Task WhenIQueryBetExistenceWithoutToken()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-
-            var transactionId = Get<string>(SR.ExternalTransactionId);
-            var roundId = Get<int>(SR.ExternalRoundId);
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-
-            var response = await client.QueryGameActionAsync(new QueryRequest
-            {
-                Type = "queryrequest",
-                Authorization = _authorization,
-                Detail = new QueryDetail
-                {
-                    PlayerCode = playerCode,
-                    Token = string.Empty,
-                    TransactionId = transactionId,
-                    RoundId = Guid.NewGuid().ToString(),
-                    ClientRoundId = roundId
-                }
-            });
-
-            Set(SR.Response, response);
-        }
-
-        [Then(@"I will get authorize response and player balance will be \$(.*)")]
-        public async Task ThenIWillGetAuthorizeResponseAndPlayerBalanceWillBe(decimal balance)
-        {
-            var wallet = await GetPlayerWalletAsync(_serviceProvider);
-
-            var response = Get<AuthorizePlayerResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeTrue();
-            response.Result.Status.HasAuthenticationError.Should().BeFalse();
-            response.Result.Balance.Should().Be(balance);
-            response.Result.CurrencyCode.Should().Be(wallet.CurrencyCode);
-            response.Result.PlayerCode.Should().Be(wallet.PlayerCode);
-            response.Result.PlayerUsername.Should().NotBeNullOrEmpty();
-        }
-
-        [Then(@"I will get error authorize response and no player balance")]
-        public void ThenIWillGetErrorDetailsResponseAndPlayerBalanceWillBe()
-        {
-            var response = Get<AuthorizePlayerResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasAuthenticationError.Should().BeTrue();
-            response.Result.Balance.Should().BeNull();
-            response.Result.CurrencyCode.Should().BeNullOrEmpty();
-            response.Result.PlayerCode.Should().BeNullOrEmpty();
-            response.Result.PlayerUsername.Should().BeNullOrEmpty();
-        }
-
-        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
-        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
-        {
-            var request = Get<FundTransferRequest>(SR.Request);
-
-            var isBetAndSettle = request.Detail.FundTransfer.IsBetAndSettle;
-            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeTrue();
-
-            if (isBetAndSettle)
-            {
-                response.Result.Status.DebitSucceeded.Should().BeTrue();
-                response.Result.Status.CreditSucceeded.Should().BeTrue();
-            }
-            else
-            {
-                response.Result.Status.DebitSucceeded.Should().BeNull();
-                response.Result.Status.CreditSucceeded.Should().BeNull();
-            }
-
-            response.Result.Balance.Should().Be(expectedBalance);
-            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
-        }
-
-        [Then(@"I will receive bet response with authorization error and no balance")]
-        public void ThenIWillReceiveBetResponseWithAuthorizationErrorAndNoBalance()
-        {
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasAuthenticationError.Should().BeTrue();
-            response.Result.Balance.Should().BeNull();
-            response.Result.CurrencyCode.Should().BeNullOrEmpty();
-        }
-
-        [Then(@"I will receive bet response no funds error and balance of \$(.*)")]
-        public void ThenIWillReceiveBetResponseNoFundsErrorAndBalanceOf(decimal expectedBalance)
-        {
-            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasInsufficientFunds.Should().BeTrue();
-            response.Result.Balance.Should().Be(expectedBalance);
-            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
-        }
-
-        [Then(@"I will receive bet response debit/credit error and no balance")]
-        public void ThenIWillReceiveBetResponseDebitCreditErrorAndNoBalance()
-        {
-            var placeBetRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
-            var isBetAndSettle = placeBetRequest.Detail.FundTransfer.IsBetAndSettle;
-
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasAuthenticationError.Should().BeNull();
-
-            if (isBetAndSettle)
-            {
-                response.Result.Status.DebitSucceeded.Should().BeFalse();
-                response.Result.Status.CreditSucceeded.Should().BeFalse();
-            }
-            else
-            {
-                response.Result.Status.DebitSucceeded.Should().BeNull();
-                response.Result.Status.CreditSucceeded.Should().BeNull();
-            }
-
-            response.Result.Balance.Should().BeNull();
-            response.Result.CurrencyCode.Should().BeNullOrEmpty();
-        }
-
-        [Then(@"I will receive bet response debit/credit error and balance of \$(.*)")]
-        public void ThenIWillReceiveBetResponseDebitCreditErrorAndBalanceOf(decimal expectedBalance)
-        {
-            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
-            var placeBetRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
-            var isBetAndSettle = placeBetRequest.Detail.FundTransfer.IsBetAndSettle;
-
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasAuthenticationError.Should().BeNull();
-
-            if (isBetAndSettle)
-            {
-                response.Result.Status.DebitSucceeded.Should().BeFalse();
-                response.Result.Status.CreditSucceeded.Should().BeFalse();
-            }
-            else
-            {
-                response.Result.Status.DebitSucceeded.Should().BeNull();
-                response.Result.Status.CreditSucceeded.Should().BeNull();
-            }
-
-            response.Result.Balance.Should().Be(expectedBalance);
-            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
-        }
-
-        [Then(@"I will receive ""(.*)"" cancel response and balance of \$(.*)")]
-        public void ThenIWillReceiveCancelResponseAndBalanceOf(CancelStatus status, decimal expectedBalance)
-        {
-            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
-            var response = Get<FundTransferResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Result.Status.Success.Should().BeTrue();
-            response.Result.Status.CancelStatus.Should().Be(status);
-            response.Result.Balance.Should().Be(expectedBalance);
-            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
-        }
-
-        [Then(@"player wallet database record will be for \$(.*)")]
-        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
-        {
-            var wallet = await GetPlayerWalletAsync(_serviceProvider);
-
-            wallet.Balance.Should().Be(expectedBalance);
         }
 
         [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
@@ -557,18 +262,328 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Result.Status.Success.Should().Be(expectedResult);
         }
 
+        [Then(@"I will get authorize response and player balance will be \$(.*)")]
+        public async Task ThenIWillGetAuthorizeResponseAndPlayerBalanceWillBe(decimal balance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+
+            var response = Get<AuthorizePlayerResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeTrue();
+            response.Result.Status.HasAuthenticationError.Should().BeFalse();
+            response.Result.Balance.Should().Be(balance);
+            response.Result.CurrencyCode.Should().Be(wallet.CurrencyCode);
+            response.Result.PlayerCode.Should().Be(wallet.PlayerCode);
+            response.Result.PlayerUsername.Should().NotBeNullOrEmpty();
+        }
+
+        [Then(@"I will get error authorize response and no player balance")]
+        public void ThenIWillGetErrorDetailsResponseAndPlayerBalanceWillBe()
+        {
+            var response = Get<AuthorizePlayerResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasAuthenticationError.Should().BeTrue();
+            response.Result.Balance.Should().BeNull();
+            response.Result.CurrencyCode.Should().BeNullOrEmpty();
+            response.Result.PlayerCode.Should().BeNullOrEmpty();
+            response.Result.PlayerUsername.Should().BeNullOrEmpty();
+        }
+
+        [Then(@"I will receive bet response debit/credit error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseDebitCreditErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
+            var placeBetRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
+            var isBetAndSettle = placeBetRequest.Detail.FundTransfer.IsBetAndSettle;
+
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasAuthenticationError.Should().BeNull();
+
+            if (isBetAndSettle)
+            {
+                response.Result.Status.DebitSucceeded.Should().BeFalse();
+                response.Result.Status.CreditSucceeded.Should().BeFalse();
+            }
+            else
+            {
+                response.Result.Status.DebitSucceeded.Should().BeNull();
+                response.Result.Status.CreditSucceeded.Should().BeNull();
+            }
+
+            response.Result.Balance.Should().Be(expectedBalance);
+            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
+        }
+
+        [Then(@"I will receive bet response debit/credit error and no balance")]
+        public void ThenIWillReceiveBetResponseDebitCreditErrorAndNoBalance()
+        {
+            var placeBetRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
+            var isBetAndSettle = placeBetRequest.Detail.FundTransfer.IsBetAndSettle;
+
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasAuthenticationError.Should().BeNull();
+
+            if (isBetAndSettle)
+            {
+                response.Result.Status.DebitSucceeded.Should().BeFalse();
+                response.Result.Status.CreditSucceeded.Should().BeFalse();
+            }
+            else
+            {
+                response.Result.Status.DebitSucceeded.Should().BeNull();
+                response.Result.Status.CreditSucceeded.Should().BeNull();
+            }
+
+            response.Result.Balance.Should().BeNull();
+            response.Result.CurrencyCode.Should().BeNullOrEmpty();
+        }
+
+        [Then(@"I will receive bet response no funds error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseNoFundsErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasInsufficientFunds.Should().BeTrue();
+            response.Result.Balance.Should().Be(expectedBalance);
+            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
+        }
+
+        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var request = Get<FundTransferRequest>(SR.Request);
+
+            var isBetAndSettle = request.Detail.FundTransfer.IsBetAndSettle;
+            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeTrue();
+
+            if (isBetAndSettle)
+            {
+                response.Result.Status.DebitSucceeded.Should().BeTrue();
+                response.Result.Status.CreditSucceeded.Should().BeTrue();
+            }
+            else
+            {
+                response.Result.Status.DebitSucceeded.Should().BeNull();
+                response.Result.Status.CreditSucceeded.Should().BeNull();
+            }
+
+            response.Result.Balance.Should().Be(expectedBalance);
+            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
+        }
+
+        [Then(@"I will receive bet response with authorization error and no balance")]
+        public void ThenIWillReceiveBetResponseWithAuthorizationErrorAndNoBalance()
+        {
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeFalse();
+            response.Result.Status.HasAuthenticationError.Should().BeTrue();
+            response.Result.Balance.Should().BeNull();
+            response.Result.CurrencyCode.Should().BeNullOrEmpty();
+        }
+
+        [Then(@"I will receive ""(.*)"" cancel response and balance of \$(.*)")]
+        public void ThenIWillReceiveCancelResponseAndBalanceOf(CancelStatus status, decimal expectedBalance)
+        {
+            var gameProviderCurrencyCode = Get<string>(SR.GameProviderCurrencyCode);
+            var response = Get<FundTransferResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.Result.Status.Success.Should().BeTrue();
+            response.Result.Status.CancelStatus.Should().Be(status);
+            response.Result.Balance.Should().Be(expectedBalance);
+            response.Result.CurrencyCode.Should().Be(gameProviderCurrencyCode);
+        }
+
+        [Then(@"player wallet database record will be for \$(.*)")]
+        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+
+            wallet.Balance.Should().Be(expectedBalance);
+        }
+
+        [When(@"I call authorize endpoint with username=""(.*)"" and passkey=""(.*)"" and brandid=""(.*)""")]
+        public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(
+            string clientId,
+            string secretKey, string habaneroBrandId)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
+            var response = await client.AuthorizePlayerAsync(new AuthorizePlayerRequest
+            {
+                Type = "playerdetailrequest",
+                SentOn = DateTimeOffset.Now,
+                Game = new Game
+                {
+                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1",
+                    ExternalId = "AcesandEights1Hand"
+                },
+                Authorization = new Authorization
+                {
+                    ClientId = clientId,
+                    SecretKey = secretKey,
+                    HabaneroBrandId = habaneroBrandId,
+                    MachineName = "TESTSERVER"
+                },
+                Detail = new PlayerDetail { Token = encryptedToken, GameLaunch = true }
+            });
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I cancel non-existent transaction for game ""(.*)""")]
+        public Task WhenICancelNonExistentTransactionForGame(string externalGameId)
+        {
+            return CancelNonExistentTransactionForGameAsync(externalGameId);
+        }
+
+        [Given(@"I cancel transaction")]
+        [When(@"I cancel transaction")]
+        public Task WhenICancelTransaction()
+        {
+            return CancelTransactionAsync();
+        }
+
+        [When(@"I got a free bet for \$(.*)")]
+        public Task WhenIGotAFreeBetFor(decimal amount)
+        {
+            return SettleBetAsync(amount, type: FreeBet);
+        }
+
+        [When(@"I place bet for \$(.*) and settle invalid reference Id for game ""(.*)""")]
+        public Task WhenIPlaceBetForAndSettleInvalidReferenceIdForGame(decimal betAmount, string externalGameId)
+        {
+            return PlaceBetAndSettleWithInvalidReferenceIdAsync(betAmount, externalGameId);
+        }
+
+        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
+        [When(@"I place bet of \$(.*) for game ""(.*)""")]
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId);
+        }
+
+        [When(@"I query bet existence")]
+        public async Task WhenIQueryBetExistence()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var transactionId = Get<string>(SR.ExternalTransactionId);
+            var roundId = Get<int>(SR.ExternalRoundId);
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
+            var response = await client.QueryGameActionAsync(new QueryRequest
+            {
+                Type = "queryrequest",
+                Authorization = _authorization,
+                Detail = new QueryDetail
+                {
+                    PlayerCode = playerCode,
+                    Token = encryptedToken,
+                    TransactionId = transactionId,
+                    RoundId = DateTimeOffset.UtcNow.ToString(),
+                    ClientRoundId = roundId
+                }
+            });
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I query bet existence without token")]
+        public async Task WhenIQueryBetExistenceWithoutToken()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+
+            var transactionId = Get<string>(SR.ExternalTransactionId);
+            var roundId = Get<int>(SR.ExternalRoundId);
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
+            var response = await client.QueryGameActionAsync(new QueryRequest
+            {
+                Type = "queryrequest",
+                Authorization = _authorization,
+                Detail = new QueryDetail
+                {
+                    PlayerCode = playerCode,
+                    Token = string.Empty,
+                    TransactionId = transactionId,
+                    RoundId = Guid.NewGuid().ToString(),
+                    ClientRoundId = roundId
+                }
+            });
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I resend the same bet")]
+        [When(@"I resend the same settle bet")]
+        [When(@"I resend place and settle bet")]
+        public async Task WhenIResendTheSameBet()
+        {
+            var request = Get<FundTransferRequest>(SR.Request);
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+            var response = await client.FundTransferAsync(request);
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I retry settle bet for \$(.*)")]
+        public Task WhenIRetrySettleBetFor(decimal winAmount)
+        {
+            return SettleBetAsync(winAmount, true);
+        }
+
+        [Given(@"settle bet for \$(.*)")]
+        [When(@"I settle bet for \$(.*)")]
+        public Task WhenISettleBetFor(decimal winAmount)
+        {
+            return SettleBetAsync(winAmount);
+        }
+
         #region After Scenario
 
         [After]
-        public Task AfterChangeGameProviderStatusScenarioAsync()
+        public Task AfterChangeBrandStatusScenarioAsync()
         {
-            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+            return ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
         }
 
         [After]
         public Task AfterChangeGameProviderConfigurationStatusScenarioAsync()
         {
             return ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
+        }
+
+        [After]
+        public Task AfterChangeGameProviderStatusScenarioAsync()
+        {
+            return ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, Status.Active, true);
         }
 
         [After]
@@ -579,12 +594,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Get<string>(SR.ExternalGameId),
                 GameStatus.Active,
                 true);
-        }
-
-        [After]
-        public Task AfterChangeBrandStatusScenarioAsync()
-        {
-            return ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
         }
 
         [After]
@@ -618,6 +627,117 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
+        private async Task CancelNonExistentTransactionForGameAsync(string externalGameId)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var currencyCode = Get<string>(SR.CurrencyCode);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
+                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
+                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
+
+            var externalRoundId = NewRoundId();
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var now = DateTimeOffset.Now;
+
+            var cancelRequest = new FundTransferRequest
+            {
+                Type = "fundtransferrequest",
+                Authorization = _authorization,
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
+                {
+                    RoundId = externalTransactionId,
+                    ClientRoundId = externalRoundId,
+                    IsCancel = true,
+                    IsRetry = true,
+                    RetryCount = 0,
+                    IsSettlementRetry = false,
+                    FundTransfer = new FundTransfer
+                    {
+                        IsBetAndSettle = false,
+                        CancelTransaction = new CancelTransaction
+                        {
+                            CurrencyCode = gameProviderCurrencyCode,
+                            Amount = 10,
+                            Timestamp = now.ToString(TimeFormat),
+                            GameState = GameState.Completing,
+                            TransactionId = externalTransactionId,
+                            TransactionReferenceId = externalTransactionId
+                        }
+                    },
+                    Token = encryptedToken,
+                    PlayerCode = playerCode
+                }
+            };
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+            var response = await client.FundTransferAsync(cancelRequest);
+
+            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.Request, cancelRequest);
+            Set(SR.Response, response);
+        }
+
+        private async Task CancelTransactionAsync()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var betRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
+            var betTransaction = betRequest.Detail.FundTransfer.Transactions[0];
+
+            var transactionId = Guid.NewGuid().ToString();
+
+            var cancelRequest = new FundTransferRequest
+            {
+                Type = "fundtransferrequest",
+                Authorization = _authorization,
+                Game = new Game { ExternalId = betRequest.Game.ExternalId },
+                Detail = new TransferDetail
+                {
+                    RoundId = betRequest.Detail.RoundId,
+                    ClientRoundId = betRequest.Detail.ClientRoundId,
+                    IsCancel = true,
+                    IsRetry = true,
+                    RetryCount = 0,
+                    IsSettlementRetry = false,
+                    FundTransfer = new FundTransfer
+                    {
+                        IsBetAndSettle = false,
+                        CancelTransaction = new CancelTransaction
+                        {
+                            CurrencyCode = betTransaction.CurrencyCode,
+                            Amount = betTransaction.Amount,
+                            Timestamp = betTransaction.Timestamp,
+                            GameState = GameState.Completing,
+                            TransactionId = transactionId,
+                            TransactionReferenceId = betTransaction.TransactionId
+                        }
+                    },
+                    Token = encryptedToken,
+                    PlayerCode = playerCode
+                }
+            };
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+            var response = await client.FundTransferAsync(cancelRequest);
+
+            Set(SR.ExternalTransactionId, transactionId);
+            Set(SR.Request, cancelRequest);
+            Set(SR.Response, response);
+        }
+
         private async Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
@@ -628,6 +748,154 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             return await tokenProvider.EncryptAsync(loginRecordId)
                 .ConfigureAwait(false);
+        }
+
+        private async Task PlaceBetAndSettleAsync(decimal betAmount, decimal winAmount, string externalGameId)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var currencyCode = Get<string>(SR.CurrencyCode);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
+                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
+                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
+
+            var externalRoundId = NewRoundId();
+            var betExternalTransactionId = Guid.NewGuid().ToString();
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
+            var now = DateTimeOffset.Now;
+
+            var request = new FundTransferRequest
+            {
+                Type = "fundtransferrequest",
+                SentOn = now,
+                Authorization = _authorization,
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
+                {
+                    RoundId = betExternalTransactionId,
+                    ClientRoundId = externalRoundId,
+                    IsCancel = false,
+                    IsRetry = false,
+                    RetryCount = 0,
+                    IsSettlementRetry = false,
+                    FundTransfer = new FundTransfer
+                    {
+                        IsBetAndSettle = true,
+                        Transactions = new Transaction[]
+                        {
+                            new()
+                            {
+                                GameState = GameState.NewGame,
+                                TransactionId = betExternalTransactionId,
+                                CurrencyCode = gameProviderCurrencyCode,
+                                Amount = -betAmount,
+                                TransactionReferenceId = betExternalTransactionId,
+                                Timestamp = now.ToString(TimeFormat)
+                            },
+                            new()
+                            {
+                                GameState = GameState.Completing,
+                                TransactionId = Guid.NewGuid().ToString(),
+                                CurrencyCode = gameProviderCurrencyCode,
+                                Amount = winAmount,
+                                TransactionReferenceId = betExternalTransactionId,
+                                Timestamp = now.ToString(TimeFormat)
+                            }
+                        }
+                    },
+                    Token = encryptedToken,
+                    PlayerCode = playerCode
+                }
+            };
+
+            var response = await client.FundTransferAsync(request);
+
+            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
+            Set(SR.ExternalTransactionId, betExternalTransactionId);
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        private async Task PlaceBetAndSettleWithInvalidReferenceIdAsync(decimal betAmount, string externalGameId)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var currencyCode = Get<string>(SR.CurrencyCode);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var gameProviderCurrencyCode = await db.GameProviderCurrencies
+                .AsQueryable()
+                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
+                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
+
+            var now = DateTimeOffset.Now;
+            var externalRoundId = NewRoundId();
+            var externalTransactionId = Guid.NewGuid().ToString();
+
+            var request = new FundTransferRequest
+            {
+                Type = "fundtransferrequest",
+                Authorization = _authorization,
+                Game = new Game { ExternalId = externalGameId },
+                Detail = new TransferDetail
+                {
+                    RoundId = externalTransactionId,
+                    ClientRoundId = externalRoundId,
+                    IsCancel = false,
+                    IsRetry = false,
+                    RetryCount = 0,
+                    IsSettlementRetry = false,
+                    FundTransfer = new FundTransfer
+                    {
+                        IsBetAndSettle = true,
+                        Transactions = new Transaction[]
+                        {
+                            new()
+                            {
+                                CurrencyCode = gameProviderCurrencyCode,
+                                Amount = -betAmount,
+                                Timestamp = now.ToString(TimeFormat),
+                                GameState = GameState.NewGame,
+                                TransactionId = externalTransactionId,
+                                TransactionReferenceId = externalTransactionId
+                            },
+                            new()
+                            {
+                                CurrencyCode = gameProviderCurrencyCode,
+                                Amount = 100,
+                                Timestamp = now.ToString(TimeFormat),
+                                GameState = GameState.Completing,
+                                TransactionId = Guid.NewGuid().ToString(),
+                                TransactionReferenceId = Guid.NewGuid().ToString()
+                            }
+                        }
+                    },
+                    Token = encryptedToken,
+                    PlayerCode = playerCode
+                }
+            };
+
+            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+            var response = await client.FundTransferAsync(request);
+
+            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
+            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalRoundId, externalRoundId);
+            Set(SR.ExternalGameId, externalGameId);
+            Set(SR.PlaceBetRequest, request);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
         }
 
         private async Task PlaceBetAsync(decimal amount, string externalGameId, int? externalRoundId = null)
@@ -750,265 +1018,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.ExternalTransactionId, transactionId);
             Set(SR.Request, settleRequest);
-            Set(SR.Response, response);
-        }
-
-        private async Task PlaceBetAndSettleAsync(decimal betAmount, decimal winAmount, string externalGameId)
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var currencyCode = Get<string>(SR.CurrencyCode);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var gameProviderCurrencyCode = await db.GameProviderCurrencies
-                .AsQueryable()
-                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
-                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
-
-            var externalRoundId = NewRoundId();
-            var betExternalTransactionId = Guid.NewGuid().ToString();
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-
-            var now = DateTimeOffset.Now;
-
-            var request = new FundTransferRequest
-            {
-                Type = "fundtransferrequest",
-                SentOn = now,
-                Authorization = _authorization,
-                Game = new Game { ExternalId = externalGameId },
-                Detail = new TransferDetail
-                {
-                    RoundId = betExternalTransactionId,
-                    ClientRoundId = externalRoundId,
-                    IsCancel = false,
-                    IsRetry = false,
-                    RetryCount = 0,
-                    IsSettlementRetry = false,
-                    FundTransfer = new FundTransfer
-                    {
-                        IsBetAndSettle = true,
-                        Transactions = new Transaction[]
-                        {
-                            new()
-                            {
-                                GameState = GameState.NewGame,
-                                TransactionId = betExternalTransactionId,
-                                CurrencyCode = gameProviderCurrencyCode,
-                                Amount = -betAmount,
-                                TransactionReferenceId = betExternalTransactionId,
-                                Timestamp = now.ToString(TimeFormat)
-                            },
-                            new()
-                            {
-                                GameState = GameState.Completing,
-                                TransactionId = Guid.NewGuid().ToString(),
-                                CurrencyCode = gameProviderCurrencyCode,
-                                Amount = winAmount,
-                                TransactionReferenceId = betExternalTransactionId,
-                                Timestamp = now.ToString(TimeFormat)
-                            }
-                        }
-                    },
-                    Token = encryptedToken,
-                    PlayerCode = playerCode
-                }
-            };
-
-            var response = await client.FundTransferAsync(request);
-
-            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
-            Set(SR.ExternalTransactionId, betExternalTransactionId);
-            Set(SR.ExternalRoundId, externalRoundId);
-            Set(SR.ExternalGameId, externalGameId);
-            Set(SR.PlaceBetRequest, request);
-            Set(SR.Request, request);
-            Set(SR.Response, response);
-        }
-
-        private async Task CancelTransactionAsync()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var betRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
-            var betTransaction = betRequest.Detail.FundTransfer.Transactions[0];
-
-            var transactionId = Guid.NewGuid().ToString();
-
-            var cancelRequest = new FundTransferRequest
-            {
-                Type = "fundtransferrequest",
-                Authorization = _authorization,
-                Game = new Game { ExternalId = betRequest.Game.ExternalId },
-                Detail = new TransferDetail
-                {
-                    RoundId = betRequest.Detail.RoundId,
-                    ClientRoundId = betRequest.Detail.ClientRoundId,
-                    IsCancel = true,
-                    IsRetry = true,
-                    RetryCount = 0,
-                    IsSettlementRetry = false,
-                    FundTransfer = new FundTransfer
-                    {
-                        IsBetAndSettle = false,
-                        CancelTransaction = new CancelTransaction
-                        {
-                            CurrencyCode = betTransaction.CurrencyCode,
-                            Amount = betTransaction.Amount,
-                            Timestamp = betTransaction.Timestamp,
-                            GameState = GameState.Completing,
-                            TransactionId = transactionId,
-                            TransactionReferenceId = betTransaction.TransactionId
-                        }
-                    },
-                    Token = encryptedToken,
-                    PlayerCode = playerCode
-                }
-            };
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-            var response = await client.FundTransferAsync(cancelRequest);
-
-            Set(SR.ExternalTransactionId, transactionId);
-            Set(SR.Request, cancelRequest);
-            Set(SR.Response, response);
-        }
-
-        private async Task CancelNonExistentTransactionForGameAsync(string externalGameId)
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var currencyCode = Get<string>(SR.CurrencyCode);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var gameProviderCurrencyCode = await db.GameProviderCurrencies
-                .AsQueryable()
-                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
-                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
-
-            var externalRoundId = NewRoundId();
-            var externalTransactionId = Guid.NewGuid().ToString();
-
-            var now = DateTimeOffset.Now;
-
-            var cancelRequest = new FundTransferRequest
-            {
-                Type = "fundtransferrequest",
-                Authorization = _authorization,
-                Game = new Game { ExternalId = externalGameId },
-                Detail = new TransferDetail
-                {
-                    RoundId = externalTransactionId,
-                    ClientRoundId = externalRoundId,
-                    IsCancel = true,
-                    IsRetry = true,
-                    RetryCount = 0,
-                    IsSettlementRetry = false,
-                    FundTransfer = new FundTransfer
-                    {
-                        IsBetAndSettle = false,
-                        CancelTransaction = new CancelTransaction
-                        {
-                            CurrencyCode = gameProviderCurrencyCode,
-                            Amount = 10,
-                            Timestamp = now.ToString(TimeFormat),
-                            GameState = GameState.Completing,
-                            TransactionId = externalTransactionId,
-                            TransactionReferenceId = externalTransactionId
-                        }
-                    },
-                    Token = encryptedToken,
-                    PlayerCode = playerCode
-                }
-            };
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-            var response = await client.FundTransferAsync(cancelRequest);
-
-            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
-            Set(SR.ExternalRoundId, externalRoundId);
-            Set(SR.ExternalGameId, externalGameId);
-            Set(SR.ExternalTransactionId, externalTransactionId);
-            Set(SR.Request, cancelRequest);
-            Set(SR.Response, response);
-        }
-
-        private async Task PlaceBetAndSettleWithInvalidReferenceIdAsync(decimal betAmount, string externalGameId)
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platform = Get<PlatformType>(SR.PlatformType);
-            var currencyCode = Get<string>(SR.CurrencyCode);
-            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var gameProviderCurrencyCode = await db.GameProviderCurrencies
-                .AsQueryable()
-                .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
-                .Select(c => c.GameProviderCurrencyCode).FirstOrDefaultAsync();
-
-            var now = DateTimeOffset.Now;
-            var externalRoundId = NewRoundId();
-            var externalTransactionId = Guid.NewGuid().ToString();
-
-            var request = new FundTransferRequest
-            {
-                Type = "fundtransferrequest",
-                Authorization = _authorization,
-                Game = new Game { ExternalId = externalGameId },
-                Detail = new TransferDetail
-                {
-                    RoundId = externalTransactionId,
-                    ClientRoundId = externalRoundId,
-                    IsCancel = false,
-                    IsRetry = false,
-                    RetryCount = 0,
-                    IsSettlementRetry = false,
-                    FundTransfer = new FundTransfer
-                    {
-                        IsBetAndSettle = true,
-                        Transactions = new Transaction[]
-                        {
-                            new()
-                            {
-                                CurrencyCode = gameProviderCurrencyCode,
-                                Amount = -betAmount,
-                                Timestamp = now.ToString(TimeFormat),
-                                GameState = GameState.NewGame,
-                                TransactionId = externalTransactionId,
-                                TransactionReferenceId = externalTransactionId
-                            },
-                            new()
-                            {
-                                CurrencyCode = gameProviderCurrencyCode,
-                                Amount = 100,
-                                Timestamp = now.ToString(TimeFormat),
-                                GameState = GameState.Completing,
-                                TransactionId = Guid.NewGuid().ToString(),
-                                TransactionReferenceId = Guid.NewGuid().ToString()
-                            }
-                        }
-                    },
-                    Token = encryptedToken,
-                    PlayerCode = playerCode
-                }
-            };
-
-            var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
-            var response = await client.FundTransferAsync(request);
-
-            Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
-            Set(SR.ExternalTransactionId, externalTransactionId);
-            Set(SR.ExternalRoundId, externalRoundId);
-            Set(SR.ExternalGameId, externalGameId);
-            Set(SR.PlaceBetRequest, request);
-            Set(SR.Request, request);
             Set(SR.Response, response);
         }
 

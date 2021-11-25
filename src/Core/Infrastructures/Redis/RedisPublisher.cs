@@ -1,27 +1,24 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json;
+using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
     public class RedisPublisher : IRedisPublisher
     {
-        private readonly IRedisConnection _connectionFactory;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IRedisConnectionFactory _connectionFactory;
 
         public RedisPublisher(
-            IRedisConnection connectionFactory,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IRedisConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
-            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         Task<long> IRedisPublisher.PublishAsync<T>(T message)
         {
             var connection = GetConnection();
 
-            var messageValue = _jsonSerializationProvider.SerializeToString(message);
+            var messageValue = JsonSerializer.Serialize(message);
 
             return connection.GetSubscriber().PublishAsync($"{typeof(T).FullName}", messageValue);
         }

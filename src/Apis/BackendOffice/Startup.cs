@@ -96,7 +96,14 @@ namespace TGS.Apis.BackendOffice
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
                         .ProcessAllSubjects();
                 });
-            ;
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
 
             services.AddPaymentServiceClient((options, sp) =>
             {

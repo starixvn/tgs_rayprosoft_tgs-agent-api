@@ -74,9 +74,16 @@ namespace TGS.Apis.PromotionApi
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddApiClient()
                 .AddPlayerBucketRepositoriesServices();
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
 
             services
                 .AddPromotionCore()

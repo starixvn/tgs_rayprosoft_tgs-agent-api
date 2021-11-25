@@ -10,6 +10,9 @@ namespace Microsoft.Extensions.DependencyInjection
         public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration)
         {
             configuration.Services
+                .AddSingleton<RedisConnectionFactory>();
+
+            configuration.Services
                 .AddSingleton<ISystemClock, DefaultSystemClock>();
 
             return configuration
@@ -17,7 +20,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddStationLetterRepository<StationLetterRepository>()
                 .AddGameProviderRepository<GameProviderRepository>()
                 .AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
-                .AddSysRepository<SysRepository>();
+                .AddSysRepository<SysRepository>()
+                .AddHelp2PayRedisRepository<Help2PayRedisRepository>();
         }
     }
 }

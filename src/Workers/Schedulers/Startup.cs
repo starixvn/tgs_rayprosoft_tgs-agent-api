@@ -82,7 +82,6 @@ namespace TGS.Workers.Schedulers
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
-                .AddRedis()
                 .AddSecurity()
                 .AddTransactions()
                 .AddApiClient()
@@ -100,6 +99,14 @@ namespace TGS.Workers.Schedulers
                     jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes())
                 .AddMail(_configuration);
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -124,6 +131,7 @@ namespace TGS.Workers.Schedulers
 
                 options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
             });
+
             services.AddControllers();
 
             services.AddGameProvidersMognoRepository((options, sp) =>

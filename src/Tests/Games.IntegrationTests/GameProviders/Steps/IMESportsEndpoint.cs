@@ -33,9 +33,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "IMESports")]
     public sealed class IMESportsEndpoint : BaseGameEndpoint
     {
+        private const string Prefix = "IM1CP";
         private const string SessionToken = "asdfgqwer0987";
         private const string Valid = "valid";
-        private const string Prefix = "IM1CP";
         private readonly IIMESportsApiClient _client;
         private readonly ServiceProvider _serviceProvider;
 
@@ -61,8 +61,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddTgsLog()
-                .AddApiClient()
-                .AddRedis();
+                .AddApiClient();
+
+            Action<Apis.TgsApi.RedisOptions, IServiceProvider> action = (options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            };
+
+            services.AddRedis(action);
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -102,39 +110,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _client = _serviceProvider.GetRequiredService<IIMESportsApiClient>();
         }
 
-        [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandLoginViaAsync(
-            string username, string brandCode,
-            string currencyCode, PlatformType platformType)
-        {
-            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
-        }
-
-        [Given(@"player logout")]
-        public Task GivenPlayerLogoutAsync()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-
-            return DeauthorizePlayerAsync(_serviceProvider, playerCode);
-        }
-
-        [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
-        public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
-        {
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var playerCode = await
-                (from p in db.Players.AsQueryable()
-                 join b in db.Brands on p.BrandId equals b.Id
-                 where p.Username == username && b.Code == brandCode
-                 select p.PlayerCode).AsNoTracking().FirstAsync();
-
-            await DeauthorizePlayerAsync(_serviceProvider, playerCode);
-
-            Set(SR.BrandCode, brandCode);
-            Set(SR.PlayerCode, playerCode);
-        }
-
         [Given(@"add (.*) session token in redis for game ""(.*)""")]
         public Task GivenAddValidSessionTokenInRedisForGameAsync(string isValid, string gameId)
         {
@@ -154,23 +129,43 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 new IMSessionToken { SessionToken = SessionToken, TimeToLeave = timeToLeave });
         }
 
-        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
-        [When(@"I place bet of \$(.*) for game ""(.*)""")]
-        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        [Given(@"player having balance of \$(.*)")]
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
         {
-            return PlaceBetAsync(amount, externalGameId);
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
         }
 
-        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid product wallet")]
-        public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId)
+        [Given(@"player logout")]
+        public Task GivenPlayerLogoutAsync()
         {
-            return PlaceBetAsync(amount, externalGameId, validProductWallet: false);
+            var playerCode = Get<string>(SR.PlayerCode);
+
+            return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
-        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid prefix")]
-        public Task WhenIPlaceBetOfForGameWithInvalidPrefix(decimal amount, string externalGameId)
+        [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
+        public Task GivenPlayerOfBrandLoginViaAsync(
+            string username, string brandCode,
+            string currencyCode, PlatformType platformType)
         {
-            return PlaceBetAsync(amount, externalGameId, validPrefix: false);
+            return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
+        }
+
+        [Given(@"player ""(.*)"" of brand ""(.*)"" without login")]
+        public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
+        {
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var playerCode = await
+                (from p in db.Players.AsQueryable()
+                 join b in db.Brands on p.BrandId equals b.Id
+                 where p.Username == username && b.Code == brandCode
+                 select p.PlayerCode).AsNoTracking().FirstAsync();
+
+            await DeauthorizePlayerAsync(_serviceProvider, playerCode);
+
+            Set(SR.BrandCode, brandCode);
+            Set(SR.PlayerCode, playerCode);
         }
 
         [Given(@"players place bets:")]
@@ -195,6 +190,169 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.Requests, betRequests);
             Set(SR.Players, players.ToDictionary(p => p.Username, p => p));
+        }
+
+        [Then(@"all game action related database records will be created")]
+        public async Task ThenAllGameActionRelatedDatabaseRecordsWillBeCreatedAsync()
+        {
+            var request = Get<BetRequest>(SR.Request);
+            var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var gameActions = await db.GameActions
+                .AsQueryable()
+                .Where(ga => txids.Contains(ga.ExternalTransactionId))
+                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
+
+            gameActions.Length.Should().Be(txids.Length);
+        }
+
+        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
+        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAsync(GameActionType type, decimal amount)
+        {
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var ga = await (
+                from act in db.GameActions.AsQueryable()
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
+                select act).AsNoTracking().FirstAsync();
+
+            Set(SR.GameAction, ga);
+
+            ga.Should().NotBeNull();
+            ga.Type.Should().Be(type);
+            ga.Amount.Should().Be(amount);
+        }
+
+        [Then(@"I will receive bet response of error ""(.*)""")]
+        public void ThenIWillReceiveBetResponseOfError(GameApiError error)
+        {
+            var response = Get<BetResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.ErrorCode.Should().Be((int)error);
+            response.Balance.Should().BeNull();
+        }
+
+        [Given(@"balance now being \$(.*)")]
+        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
+        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
+        {
+            var response = Get<BetResponse>(SR.Response);
+            response.Should().NotBeNull();
+            response.ErrorCode.Should().Be((int)GameApiError.Success);
+            response.Results.Length.Should().BeGreaterThan(0);
+
+            var result = response.Results.First();
+            result.ErrorCode.Should().Be((int)GameApiError.Success);
+            result.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"I will receive successful response")]
+        public void ThenIWillReceiveSuccessfulResponse()
+        {
+            var response = Get<BetResponse>(SR.Response);
+            response.ErrorCode.Should().Be((int)GameApiError.Success);
+        }
+
+        [Then(@"player balance response will be for \$(.*)")]
+        public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
+        {
+            var response = Get<GetBalanceResponse>(SR.Response);
+
+            response.Should().NotBeNull();
+            response.ErrorCode.Should().Be((int)GameApiError.Success);
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"player wallet database record will be for \$(.*)")]
+        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+            wallet.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"the balance of each user will be matched")]
+        public void ThenTheBalanceOfEachUserWillBeMatched(Table table)
+        {
+            var balances = table.CreateList<PlayerData>();
+            var request = Get<BetRequest>(SR.Request);
+            var response = Get<BetResponse>(SR.Response);
+            var betPlayers = Get<Dictionary<string, PlayerData>>(SR.Players);
+
+            var results = from result in response.Results
+                          join transaction in request.Transactions
+                              on result.ExternalTransactionId equals transaction.ExternalTransactionId
+                          join player in betPlayers
+                              on transaction.PlayerCode equals player.Value.PlayerCode
+                          select new { player.Value.Username, result.Balance };
+
+            foreach (var result in results)
+            {
+                var balance = balances.First(b => b.Username == result.Username);
+                result.Balance.Should().Be(result.Balance);
+            }
+        }
+
+        [Then(@"there will be (.*) transactions in the response of error ""(.*)""")]
+        public void ThenThereWillBeTransactionsInTheResponseOfError(int transactionsCount, GameApiError errorCode)
+        {
+            var response = Get<BetResponse>(SR.Response);
+            var results = response.Results.Where(r => r.ErrorCode == (int)errorCode);
+            results.Count().Should().Be(transactionsCount);
+        }
+
+        [Then(@"the round will be (.*)")]
+        public Task ThenTheRoundWillBeAsync(RoundStatus status)
+        {
+            return VerifyRoundStatus(_serviceProvider, status);
+        }
+
+        [Given(@"I place bet of \$(.*) for game ""(.*)""")]
+        [When(@"I place bet of \$(.*) for game ""(.*)""")]
+        public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId);
+        }
+
+        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid prefix")]
+        public Task WhenIPlaceBetOfForGameWithInvalidPrefix(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId, validPrefix: false);
+        }
+
+        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid product wallet")]
+        public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId)
+        {
+            return PlaceBetAsync(amount, externalGameId, validProductWallet: false);
+        }
+
+        [When(@"I request the player balance")]
+        public async Task WhenIRequestThePlayerBalanceAsync()
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var currency = Get<string>(SR.CurrencyCode);
+            var config = await GetConfigurationAsync();
+
+            var response = await _client.GetPlayerBalanceAsync(new GetBalanceRequest
+            {
+                ProductWallet = GetProductWallet(config),
+                PlayerCode = $"{Prefix}_{playerCode}",
+                Currency = currency
+            });
+
+            Set(SR.Response, response);
+        }
+
+        [When(@"I resend the settle bet")]
+        public Task WhenIResendTheWinBetAsync()
+        {
+            return ResentSettleBetAsync();
         }
 
         [Given(@"I use action (.*) to bet for \$(.*)")]
@@ -229,156 +387,42 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [When(@"I resend the settle bet")]
-        public Task WhenIResendTheWinBetAsync()
+        private static string NewRoundId()
         {
-            return ResentSettleBetAsync();
+            return Guid.NewGuid().ToString();
         }
 
-        [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        private Task<IMESportsConfiguration> GetConfigurationAsync()
         {
-            return SetPlayerBalanceAsync(_serviceProvider, balance);
+            return GetSettingAsync<IMESportsConfiguration>(_serviceProvider,
+                SettingConsts.GameProviderConfigurations.IMESports);
         }
 
-        [When(@"I request the player balance")]
-        public async Task WhenIRequestThePlayerBalanceAsync()
+        private string GetProductWallet(IMESportsConfiguration config)
         {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var currency = Get<string>(SR.CurrencyCode);
-            var config = await GetConfigurationAsync();
+            return ((ProductWalletType)config.ProductWallet).ToString();
+        }
 
-            var response = await _client.GetPlayerBalanceAsync(new GetBalanceRequest
+        private TransactionRequest GetTransactionRequest(
+            PlayerData playerData, string externalRoundId,
+            string externalTransactionId)
+        {
+            return new()
             {
-                ProductWallet = GetProductWallet(config), PlayerCode = $"{Prefix}_{playerCode}", Currency = currency
-            });
-
-            Set(SR.Response, response);
-        }
-
-        [Then(@"player balance response will be for \$(.*)")]
-        public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
-        {
-            var response = Get<GetBalanceResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int)GameApiError.Success);
-            response.Balance.Should().Be(expectedBalance);
-        }
-
-        [Given(@"balance now being \$(.*)")]
-        [Then(@"I will receive bet response of no error and balance of \$(.*)")]
-        public void ThenIWillReceiveBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
-        {
-            var response = Get<BetResponse>(SR.Response);
-            response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int)GameApiError.Success);
-            response.Results.Length.Should().BeGreaterThan(0);
-
-            var result = response.Results.First();
-            result.ErrorCode.Should().Be((int)GameApiError.Success);
-            result.Balance.Should().Be(expectedBalance);
-        }
-
-        [Then(@"I will receive bet response of error ""(.*)""")]
-        public void ThenIWillReceiveBetResponseOfError(GameApiError error)
-        {
-            var response = Get<BetResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.ErrorCode.Should().Be((int)error);
-            response.Balance.Should().BeNull();
-        }
-
-        [Then(@"I will receive successful response")]
-        public void ThenIWillReceiveSuccessfulResponse()
-        {
-            var response = Get<BetResponse>(SR.Response);
-            response.ErrorCode.Should().Be((int)GameApiError.Success);
-        }
-
-        [Then(@"there will be (.*) transactions in the response of error ""(.*)""")]
-        public void ThenThereWillBeTransactionsInTheResponseOfError(int transactionsCount, GameApiError errorCode)
-        {
-            var response = Get<BetResponse>(SR.Response);
-            var results = response.Results.Where(r => r.ErrorCode == (int)errorCode);
-            results.Count().Should().Be(transactionsCount);
-        }
-
-        [Then(@"player wallet database record will be for \$(.*)")]
-        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
-        {
-            var wallet = await GetPlayerWalletAsync(_serviceProvider);
-            wallet.Balance.Should().Be(expectedBalance);
-        }
-
-        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAsync(GameActionType type, decimal amount)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var ga = await (
-                from act in db.GameActions.AsQueryable()
-                join r in db.Rounds on act.RoundId equals r.Id
-                where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
-                select act).AsNoTracking().FirstAsync();
-
-            Set(SR.GameAction, ga);
-
-            ga.Should().NotBeNull();
-            ga.Type.Should().Be(type);
-            ga.Amount.Should().Be(amount);
-        }
-
-        [Then(@"all game action related database records will be created")]
-        public async Task ThenAllGameActionRelatedDatabaseRecordsWillBeCreatedAsync()
-        {
-            var request = Get<BetRequest>(SR.Request);
-            var txids = request.Transactions.Select(t => t.ExternalTransactionId).ToArray();
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var gameActions = await db.GameActions
-                .AsQueryable()
-                .Where(ga => txids.Contains(ga.ExternalTransactionId))
-                .Select(ga => new { ga.Round.PlayerCode, ga.Id }).ToArrayAsync();
-
-            gameActions.Length.Should().Be(txids.Length);
-        }
-
-        [Then(@"the balance of each user will be matched")]
-        public void ThenTheBalanceOfEachUserWillBeMatched(Table table)
-        {
-            var balances = table.CreateList<PlayerData>();
-            var request = Get<BetRequest>(SR.Request);
-            var response = Get<BetResponse>(SR.Response);
-            var betPlayers = Get<Dictionary<string, PlayerData>>(SR.Players);
-
-            var results = from result in response.Results
-                          join transaction in request.Transactions
-                              on result.ExternalTransactionId equals transaction.ExternalTransactionId
-                          join player in betPlayers
-                              on transaction.PlayerCode equals player.Value.PlayerCode
-                          select new { player.Value.Username, result.Balance };
-
-            foreach (var result in results)
-            {
-                var balance = balances.First(b => b.Username == result.Username);
-                result.Balance.Should().Be(result.Balance);
-            }
-        }
-
-        [Then(@"the round will be (.*)")]
-        public Task ThenTheRoundWillBeAsync(RoundStatus status)
-        {
-            return VerifyRoundStatus(_serviceProvider, status);
+                PlayerCode = playerData.PlayerCode,
+                ActionType = playerData.ActionType,
+                Amount = playerData.Amount,
+                Currency = playerData.CurrencyCode,
+                ExternalGameId = playerData.GameId,
+                ExternalRoundId = externalRoundId,
+                ExternalTransactionId = externalTransactionId,
+                Platform = playerData.Platform.ToString().ToUpper(),
+                Timestamp = DateTimeOffset.Now
+            };
         }
 
         private async Task PlaceBetAsync(
-            decimal amount, string externalGameId, string externalRoundId = null,
+                                            decimal amount, string externalGameId, string externalRoundId = null,
             bool validProductWallet = true, bool validPrefix = true)
         {
             var playerCode = Get<string>(SR.PlayerCode);
@@ -416,6 +460,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalRoundId, externalRoundId);
             Set(SR.ExternalGameId, externalGameId);
             Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
+        private async Task ResentSettleBetAsync()
+        {
+            var request = Get<BetRequest>(SR.Request);
+
+            var response = await _client.SettleAndCancelBetAsync(request);
+
             Set(SR.Response, response);
         }
 
@@ -461,49 +514,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Request, request);
 
             return await _client.SettleAndCancelBetAsync(request);
-        }
-
-        private TransactionRequest GetTransactionRequest(
-            PlayerData playerData, string externalRoundId,
-            string externalTransactionId)
-        {
-            return new()
-            {
-                PlayerCode = playerData.PlayerCode,
-                ActionType = playerData.ActionType,
-                Amount = playerData.Amount,
-                Currency = playerData.CurrencyCode,
-                ExternalGameId = playerData.GameId,
-                ExternalRoundId = externalRoundId,
-                ExternalTransactionId = externalTransactionId,
-                Platform = playerData.Platform.ToString().ToUpper(),
-                Timestamp = DateTimeOffset.Now
-            };
-        }
-
-        private async Task ResentSettleBetAsync()
-        {
-            var request = Get<BetRequest>(SR.Request);
-
-            var response = await _client.SettleAndCancelBetAsync(request);
-
-            Set(SR.Response, response);
-        }
-
-        private static string NewRoundId()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        private Task<IMESportsConfiguration> GetConfigurationAsync()
-        {
-            return GetSettingAsync<IMESportsConfiguration>(_serviceProvider,
-                SettingConsts.GameProviderConfigurations.IMESports);
-        }
-
-        private string GetProductWallet(IMESportsConfiguration config)
-        {
-            return ((ProductWalletType)config.ProductWallet).ToString();
         }
 
         private record PlayerData

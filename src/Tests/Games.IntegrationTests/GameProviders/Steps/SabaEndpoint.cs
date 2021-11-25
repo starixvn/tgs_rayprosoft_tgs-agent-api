@@ -59,8 +59,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
-                .AddRedis()
                 .AddOperations();
+
+            Action<Apis.TgsApi.RedisOptions, IServiceProvider> action = (options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            };
+
+            services.AddRedis(action);
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -98,6 +106,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _serviceProvider = services.BuildServiceProvider();
         }
 
+        [Given(@"player having balance of \$(.*)")]
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
+
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginVia(
             string username, string brandCode,
@@ -106,29 +120,57 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
         }
 
-        [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
+        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
         {
-            return SetPlayerBalanceAsync(_serviceProvider, balance);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+
+            var ga = await (
+                from act in db.GameActions.AsQueryable()
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId &&
+                      act.ExternalTransactionId == externalTransactionId
+                select act).AsNoTracking().FirstAsync();
+
+            Set(SR.GameAction, ga);
+
+            ga.Should().NotBeNull();
+            ga.Type.Should().Be(type);
+            ga.Amount.Should().Be(amount);
         }
 
-        [When(@"I request the player balance")]
-        public async Task WhenIRequestThePlayerBalanceAsync()
+        [Then(@"I will receive place bet response of no error and balance of \$(.*)")]
+        public void ThenIWillReceivePlaceBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
         {
-            var configuration = await GetConfigurationAsync().ConfigureAwait(false);
+            var response = Get<PlaceBetResponse>(SR.Response);
 
-            var playerCode = Get<string>(SR.PlayerCode);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
 
-            var request = new GetBalanceRequest
-            {
-                Key = configuration.SecretKey,
-                Body = new GetBalanceRequest.Data { Action = "getbalance", UserId = playerCode }
-            };
+            response.Should().NotBeNull();
+            response.Status.Should().Be(((int)GameApiError.Success).ToString());
+            response.Message.Should().BeNullOrEmpty();
+            response.ReferenceId.Should().Be(externalRoundId);
+        }
 
-            var client = _serviceProvider.GetRequiredService<ISabaApiClient>();
-            var response = await client.GetBalanceAsync(request).ConfigureAwait(false);
+        [Then(@"player balance response will be for \$(.*)")]
+        public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
+        {
+            var response = Get<GetBalanceResponse>(SR.Response);
 
-            Set(SR.Response, response);
+            response.Should().NotBeNull();
+            response.Status.Should().Be(((int)GameApiError.Success).ToString());
+            response.Message.Should().BeNullOrEmpty();
+            response.Balance.Should().Be(expectedBalance);
+        }
+
+        [Then(@"player wallet database record will be for \$(.*)")]
+        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
+        {
+            var wallet = await GetPlayerWalletAsync(_serviceProvider);
+            wallet.Balance.Should().Be(expectedBalance);
         }
 
         [When(@"bet is placed of \$(.*) for game ""(.*)""")]
@@ -181,57 +223,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [Then(@"player balance response will be for \$(.*)")]
-        public void ThenPlayerBalanceResponseWillBeFor(decimal expectedBalance)
+        [When(@"I request the player balance")]
+        public async Task WhenIRequestThePlayerBalanceAsync()
         {
-            var response = Get<GetBalanceResponse>(SR.Response);
+            var configuration = await GetConfigurationAsync().ConfigureAwait(false);
 
-            response.Should().NotBeNull();
-            response.Status.Should().Be(((int)GameApiError.Success).ToString());
-            response.Message.Should().BeNullOrEmpty();
-            response.Balance.Should().Be(expectedBalance);
-        }
+            var playerCode = Get<string>(SR.PlayerCode);
 
-        [Then(@"I will receive place bet response of no error and balance of \$(.*)")]
-        public void ThenIWillReceivePlaceBetResponseOfNoErrorAndBalanceOf(decimal expectedBalance)
-        {
-            var response = Get<PlaceBetResponse>(SR.Response);
+            var request = new GetBalanceRequest
+            {
+                Key = configuration.SecretKey,
+                Body = new GetBalanceRequest.Data { Action = "getbalance", UserId = playerCode }
+            };
 
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var client = _serviceProvider.GetRequiredService<ISabaApiClient>();
+            var response = await client.GetBalanceAsync(request).ConfigureAwait(false);
 
-            response.Should().NotBeNull();
-            response.Status.Should().Be(((int)GameApiError.Success).ToString());
-            response.Message.Should().BeNullOrEmpty();
-            response.ReferenceId.Should().Be(externalRoundId);
-        }
-
-        [Then(@"player wallet database record will be for \$(.*)")]
-        public async Task ThenPlayerWalletDatabaseRecordWillBeForAsync(decimal expectedBalance)
-        {
-            var wallet = await GetPlayerWalletAsync(_serviceProvider);
-            wallet.Balance.Should().Be(expectedBalance);
-        }
-
-        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-
-            var ga = await (
-                from act in db.GameActions.AsQueryable()
-                join r in db.Rounds on act.RoundId equals r.Id
-                where r.ExternalRoundId == externalRoundId &&
-                      act.ExternalTransactionId == externalTransactionId
-                select act).AsNoTracking().FirstAsync();
-
-            Set(SR.GameAction, ga);
-
-            ga.Should().NotBeNull();
-            ga.Type.Should().Be(type);
-            ga.Amount.Should().Be(amount);
+            Set(SR.Response, response);
         }
 
         #region Private Methods
@@ -250,6 +258,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return tokenData?.LoginRecordId ?? Guid.Empty;
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

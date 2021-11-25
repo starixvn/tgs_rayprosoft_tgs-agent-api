@@ -18,6 +18,14 @@
 
   <ItemGroup>
     <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
+    <Compile Remove="Redis\BaseRedisConnection.cs" />
+    <Compile Remove="Redis\IRedisConfig.cs" />
+    <Compile Remove="Redis\IRedisPublisher.cs" />
+    <Compile Remove="Redis\IRedisSubscriber.cs" />
+    <Compile Remove="Redis\RedisConfig.cs" />
+    <Compile Remove="Redis\RedisCoreConnection.cs" />
+    <Compile Remove="Redis\RedisPublisher.cs" />
+    <Compile Remove="Redis\RedisSubscriber.cs" />
     <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>

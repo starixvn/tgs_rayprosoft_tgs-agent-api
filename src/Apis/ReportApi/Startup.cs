@@ -84,7 +84,6 @@ namespace TGS.Apis.ReportApi
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
@@ -97,6 +96,14 @@ namespace TGS.Apis.ReportApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BaseUrl = config.GetValue<Uri>("Report:CashBaseUrl");
+                });
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
             services.AddNatsMessageQueue(natsConfig =>

@@ -5,22 +5,11 @@ namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisRepository : IRedisRepository
     {
-        private readonly IRedisConnection _connectionFactory;
+        private readonly IRedisConnectionFactory _connectionFactory;
 
-        public RedisRepository(IRedisConnection connectionFactory)
+        public RedisRepository(IRedisConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
-        }
-
-        IDatabase IRedisRepository.GetDb()
-        {
-            return GetDatabase();
-        }
-
-        Task IRedisRepository.DeleteKeyAsync(string key)
-        {
-            var db = GetDatabase();
-            return db.KeyDeleteAsync(key);
         }
 
         void IRedisRepository.DeleteKey(string key)
@@ -29,10 +18,10 @@ namespace TGS.Core.Infrastructures.Redis
             db.KeyDelete(key);
         }
 
-        private IDatabase GetDatabase()
+        Task IRedisRepository.DeleteKeyAsync(string key)
         {
-            var connection = GetConnection();
-            return connection.GetDatabase();
+            var db = GetDatabase();
+            return db.KeyDeleteAsync(key);
         }
 
         string IRedisRepository.GetConnectionStatus()
@@ -41,9 +30,20 @@ namespace TGS.Core.Infrastructures.Redis
             return connection.GetStatus();
         }
 
+        IDatabase IRedisRepository.GetDb()
+        {
+            return GetDatabase();
+        }
+
         private IConnectionMultiplexer GetConnection()
         {
             return _connectionFactory.GetConnection();
+        }
+
+        private IDatabase GetDatabase()
+        {
+            var connection = GetConnection();
+            return connection.GetDatabase();
         }
     }
 }
