@@ -15,8 +15,6 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
-
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
         }
