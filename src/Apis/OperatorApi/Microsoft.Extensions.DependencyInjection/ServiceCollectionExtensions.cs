@@ -1,5 +1,6 @@
 ﻿using System;
 using TGS.Apis.OperatorApi;
+using TGS.Core.Infrastructures.Redis;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             service.AddSingleton(sp =>
             {
-                var connectionFactory = sp.GetRequiredService<RedisConnectionFactory>();
+                var connectionFactory = sp.GetRequiredService<IRedisConnectionFactory>();
                 return connectionFactory.GetConnection();
             });
 
