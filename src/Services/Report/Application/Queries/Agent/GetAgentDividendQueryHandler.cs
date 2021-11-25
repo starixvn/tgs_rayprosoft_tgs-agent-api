@@ -79,7 +79,6 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     .Where(x => x.CreatedOn >= request.From)
                     .Where(x => x.CreatedOn < request.To))
                 .Where(x => agentIds.Contains(x.AgentId))
-                .Include(x => x.AgentDividendMultipleLayers)
                 .GroupBy(x => x.AgentId,
                     (agentId, list) => new
                     {
