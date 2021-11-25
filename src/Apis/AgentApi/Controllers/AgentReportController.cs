@@ -40,9 +40,9 @@ namespace TGS.Apis.AgentApi.Controllers
         [Description("Get account changes")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
-                   [FromQuery] GetAccountChangesRequest request,
-                   [FromQuery] PagingRequest pagingRequest,
-                   [FromQuery] Guid id)
+            [FromQuery] GetAccountChangesRequest request,
+            [FromQuery] PagingRequest pagingRequest,
+            [FromQuery] Guid id)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
@@ -77,18 +77,18 @@ namespace TGS.Apis.AgentApi.Controllers
         [Description("Get account changes transaction types")]
         public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
         {
-            var allowType = new TransactionType[]
-           {
+            var allowType = new[]
+            {
                 TransactionType.Withdrawal,
                 TransactionType.CancelWithdrawal,
                 TransactionType.Adjust,
                 TransactionType.Dividend
-           };
+            };
 
             var dict = Enum.GetValues(typeof(TransactionType))
-                   .Cast<TransactionType>()
-                   .Where(x => allowType.Contains(x))
-                   .ToDictionary(t => (int)t, t => t.ToString());
+                .Cast<TransactionType>()
+                .Where(x => allowType.Contains(x))
+                .ToDictionary(t => (int)t, t => t.ToString());
 
             return Task.FromResult(dict);
         }
@@ -98,7 +98,7 @@ namespace TGS.Apis.AgentApi.Controllers
         [TgsResponseWrapper]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<AgentDividendDetailModel>>
-                    GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+            GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
         {
             var dividendRequest = new GetAgentDividendDetailsRequest
             {
@@ -117,6 +117,33 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 TotalCount = response.TotalCount,
                 Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+            };
+        }
+
+        [HttpGet("dividendTeamDetails")]
+        [Description("Get agent dividend team details")]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentDividendTeamDetailModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetDividendTeamDetailsRequest request)
+        {
+            var dividendRequest = new GetAgentDividendTeamDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+            var response = await _client.GetAgentDividendTeamDetailsAsync(dividendRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendTeamDetailModel>()
             };
         }
 
