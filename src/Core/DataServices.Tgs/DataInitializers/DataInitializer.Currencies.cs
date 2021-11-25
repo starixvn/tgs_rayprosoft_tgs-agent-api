@@ -127,5 +127,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
             }
         }
+
+        internal record PHPCurrency : BaseCodeMapper, ICurrency
+        {
+            public PHPCurrency(string externalCode = null)
+                : base("PHP", externalCode)
+            {
+            }
+        }
     }
 }

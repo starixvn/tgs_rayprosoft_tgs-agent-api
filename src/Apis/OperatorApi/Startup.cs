@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
@@ -39,6 +40,7 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
@@ -185,9 +187,11 @@ namespace TGS.Apis.OperatorApi
                     config.GetSection("Operator").Bind(options);
                 })
                 .UseOperatorRepositories()
-                .ConfigureWallet(config =>
+                .ConfigureWallet((options, sp) =>
                 {
-                    config.AddTgsWalletRepositories();
+                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    options.BaseUrl = operatorOptions.CashBaseUrl;
                 })
                 .AddPaymentServiceClient((options, sp) =>
                 {

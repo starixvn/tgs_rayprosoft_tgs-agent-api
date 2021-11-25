@@ -90,7 +90,13 @@ namespace TGS.Apis.ReportApi
                 .AddPluggableServices()
                 .AddReportServices()
                 .AddTransactions()
-                .AddPlayerBucketRepositoriesServices();
+                .AddPlayerBucketRepositoriesServices()
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:CashBaseUrl");
+                });
 
             services
                 .AddRedis((options, sp) =>

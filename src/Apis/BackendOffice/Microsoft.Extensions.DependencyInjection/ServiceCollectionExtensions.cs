@@ -69,7 +69,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 });
 
             services.AddWallet()
-                .AddTgsWalletRepositories()
                 .AddTgsAgentWalletRepositories();
 
             services

@@ -25,7 +25,6 @@ namespace TGS.Services.Report.Extensions
             services.AddPlayerBucketRepositoriesServices();
 
             services.AddWallet()
-                .AddTgsWalletRepositories()
                 .AddTgsAgentWalletRepositories();
 
             return services;

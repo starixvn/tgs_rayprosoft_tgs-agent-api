@@ -83,10 +83,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 Message = records.Message,
                 TotalCount = records.TotalCount,
                 Items = (from model in records.Items
-                         let gameLocalization = allGames[model.GameId].Localization
-                         let loc = gameLocalization.TryGetValue(currentCulture, out var data)
-                             ? data
-                             : default(GameLocalizationData)
+                         let gameLocalization = allGames.TryGetValue(model.GameId, out var value)
+                             ? value.Localization
+                             : default
+                         let loc = gameLocalization is not null &&
+                             gameLocalization.TryGetValue(currentCulture, out var data)
+                                 ? data
+                                 : default(GameLocalizationData)
                          select new RoundView
                          {
                              Id = model.Id,

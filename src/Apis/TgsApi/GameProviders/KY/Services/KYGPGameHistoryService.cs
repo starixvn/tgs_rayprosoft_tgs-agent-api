@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         {
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
-            var brandMerchant = await _service.GetBrandMerchant(source.BrandCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(source.BrandCode).ConfigureAwait(false);
 
             var agentId = brandMerchant.AgentMappers
                 .Where(x => x.CurrencyCode.IgnoreCaseEquals(source.CurrencyCode) && x.Status).FirstOrDefault()?.AgentId;

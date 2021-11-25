@@ -218,7 +218,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "GameProviderCode": "BC"
       },
-      "applicationUrl": "http://localhost:62330"
+      "applicationUrl": "http://localhost:62330;http://+:62330"
     },
     "Docker-SBO": {
       "commandName": "Docker",

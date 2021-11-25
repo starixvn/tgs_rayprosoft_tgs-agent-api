@@ -282,10 +282,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 x.AvailableCurrencies.Split(",").Any(c => brandCurrencies.Contains(c))).ToArray();
 
             var baseGameIds = baseGames.Select(x => x.Id).ToArray();
-            var brandGameIds = brand.Games.Select(x => x.GameId).ToArray();
 
             var addList = baseGameIds.Except(brand.Games.Select(x => x.GameId)).ToArray();
-            var delList = brandGameIds.Except(baseGameIds).ToArray();
 
             var games = addList.Select(id => new BrandGame
             {
@@ -296,15 +294,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 EffectiveBettingPercentage = 100M
             });
 
-            var delGroupGames =
-                brand.BrandGroups.SelectMany(x => x.BrandGames.Where(g => delList.Contains(g.BrandGame.GameId)));
-            var delBrandGames = brand.Games.Where(x => delList.Contains(x.GameId));
-
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             await CreateEntitiesAsync(games);
-            await DeleteEntitiesAsync(delGroupGames);
-            await DeleteEntitiesAsync(delBrandGames);
-            scope.Complete();
 
             await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brand.Id, true);
         }

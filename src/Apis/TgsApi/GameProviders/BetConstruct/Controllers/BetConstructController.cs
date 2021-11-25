@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Mime;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
+using TGS.Shared.Game.ApiClients.BetConstruct;
 using TGS.Shared.Game.Models.BetConstruct.Enums;
 using TGS.Shared.Game.Models.BetConstruct.Incoming;
 
@@ -27,21 +32,27 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
 
         private readonly IGamePlayActions _actions;
         private readonly IBetConstructActionModelMapper _map;
+        private readonly IBetConstructUtility _utility;
+        private readonly ILogger<BetConstructController> _logger;
         private readonly IBetConstructService _service;
 
         public BetConstructController(
             IGamePlayActions actions,
             IBetConstructService service,
-            IBetConstructActionModelMapper map
+            IBetConstructActionModelMapper map,
+            IBetConstructUtility utility,
+            ILogger<BetConstructController> logger
             )
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _map = map ?? throw new ArgumentNullException(nameof(map));
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("BetConfirm")]
-        public ValueTask BetConfirm(BetConfirmRequest request)
+        public ValueTask BetConfirmAsync(BetConfirmRequest request)
         {
             return ValueTask.CompletedTask;
         }
@@ -53,7 +64,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var platformType = request.Source switch
+            {
+                42 => PlatformType.Desktop,
+                4 => PlatformType.Mobile,
+                16 => PlatformType.Mobile,
+                17 => PlatformType.Mobile,
+                98 => PlatformType.Desktop,
+                99 => PlatformType.Desktop,
+                _  => PlatformType.Desktop
+            };
 
             var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
@@ -70,6 +90,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 };
             }
 
+            _ = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
             return new BetPlacedResponse()
             {
                 ErrorCode = $"{(int)GameApiError.Success}",
@@ -78,7 +100,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("BetResulted")]
-        public async ValueTask<BetResultedResponse> BetResulted(BetResultedRequest request)
+        public async ValueTask<BetResultedResponse> BetResultedAsync(BetResultedRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -112,8 +134,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
 
         [HttpPost("GetClientBalance")]
         public async ValueTask<GetClientBalanceResponse> GetClientBalanceAsync(GetClientBalanceRequest request)
-        {
+        {                        
+            var hashDict = new Dictionary<string, object> 
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp }
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);                                    
+
+            if (IsHashPass(request.Hash, hashDict ,sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
             var r = await _actions
                 .GetBalanceAsync(GameProviderCode, playerCode)
                 .ConfigureAwait(false);
@@ -127,8 +164,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("GetClientDetails")]
-        public async ValueTask<GetClientDetailsResponse> GetClientDetails(GetClientDetailsRequest request)
+        public async ValueTask<GetClientDetailsResponse> GetClientDetailsAsync(GetClientDetailsRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp }
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var player = await _service
@@ -149,7 +200,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("Rollback")]
-        public async ValueTask<RollbackResponse> Rollback(RollbackRequest request)
+        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -181,6 +232,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 ErrorCode = $"{(int)GameApiError.Success}",
                 ErrorText = GameApiError.Success.Description()
             };
+        }
+
+        private bool IsHashPass(string signature,Dictionary<string,object>hashDict, string sharedKey)
+        {
+            var computedSignature = _utility.ComputeSignature(hashDict, sharedKey);
+            _logger.LogInformation($"Hash:{signature}, computedSign:{computedSignature}");
+
+            return signature.NotEquals(computedSignature);
         }
     }
 }

@@ -9,8 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
+
 
 namespace TGS.Apis.TgsApi.GameProviders.BetConstruct
 {
@@ -39,7 +42,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct
             services.AddScoped<AuthorizeBetConstructMiddleware>();
             services.AddScoped<IBetConstructService, BetConstructService>();
             services.AddScoped<IBetConstructActionModelMapper, BetConstructActionModelMapper>();
-
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(BetConstructGameInitializer)
+            }, (provider, _) =>
+                provider.GetRequiredService<BetConstructGameInitializer>());
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)

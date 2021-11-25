@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
     {
         [Consumes("application/x-www-form-urlencoded")]
         [HttpPost("entrance")]
-        public ValueTask<ErrorResponse> Entrance([FromForm] EntranceRequest request)
+        public ValueTask<ErrorResponse> EntranceAsync([FromForm] EntranceRequest request)
             => ValueTask.FromResult(new ErrorResponse());
 
         [Consumes(MediaTypeNames.Application.Json)]

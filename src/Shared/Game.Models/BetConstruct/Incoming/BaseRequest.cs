@@ -4,7 +4,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
 {
     public record BaseRequest
     {
-        [JsonPropertyName("AuthToken")]
+        [JsonPropertyName("AuthToken")]        
         public string AuthToken { get; init; }
         
         [JsonPropertyName("TS")]

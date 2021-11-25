@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         ValueTask<KYConfiguration> GetConfigurationAsync();
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
-        ValueTask<KYBrandMerchant> GetBrandMerchant(string brandCode);
+        ValueTask<KYBrandMerchant> GetBrandMerchantAsync(string brandCode);
         string GetGameProviderCode();
         ClientRoundStatus GetClientRound(decimal playerWinLoss);
     }
@@ -44,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
         }
 
-        async ValueTask<KYBrandMerchant> IKYService.GetBrandMerchant(string brandCode)
+        async ValueTask<KYBrandMerchant> IKYService.GetBrandMerchantAsync(string brandCode)
         {
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts.GameProviderConfigurations.KY);
             var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(brandCode) && x.Status).FirstOrDefault();
