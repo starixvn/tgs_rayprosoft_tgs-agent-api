@@ -37,6 +37,7 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
@@ -187,7 +188,7 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .UseOperatorRepositories()
+                .UseOperatorRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .ConfigureWallet((options, sp) =>
                 {
                     var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
