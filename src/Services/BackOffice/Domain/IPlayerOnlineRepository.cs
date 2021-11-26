@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Application.Models.PlayerOnline;
 
 namespace TGS.Services.BackOffice.Domain
 {
     public interface IPlayerOnlineRepository
     {
-        ValueTask<string[]> GetQueryAsync(Guid BrandId);
+        ValueTask<string[]> GetQueryAsync(Guid brandId);
     }
 }
