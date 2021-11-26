@@ -17,12 +17,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 {
     public sealed class BigGamingStartup : BaseStartup
     {
-        public BigGamingStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "biggaming";
+
+        public BigGamingStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "biggaming";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
                 (provider, key) => key switch
                 {
                     GameProvider.BigGaming => provider.GetRequiredService<BigGamingErrorMapper>(),
-                    _                      => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             services.AddScoped<AuthorizeBigGamingMiddleware>();
@@ -42,7 +42,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
             services.AddScoped<IBigGamingService, BigGamingService>();
             services.AddScoped<IGameProviderDepositWithdrawalService, GameProviderDepositWithdrawalService>();
-            services.AddScoped<IBigGamingGPGameHistoryService, BigGamingGPGameHistoryService>();
             services.AddScoped<IBigGamingModelActionMapper, BigGamingActionModelMapper>();
             services.AddScoped<IBigGamingGameHistoryService, BigGamingGameHistoryService>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();

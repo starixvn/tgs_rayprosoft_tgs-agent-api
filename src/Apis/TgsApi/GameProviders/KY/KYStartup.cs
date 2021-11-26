@@ -13,12 +13,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
 {
     public sealed class KYStartup : BaseStartup
     {
-        public KYStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "ky";
+
+        public KYStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "ky";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -27,7 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
             services.AddTransient<IRequestAnalyzer, RequestAnalyzer>();
             services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
             services.AddTransient<IKYService, KYService>();
-            services.AddTransient<IKYGPGameHistoryService, KYGPGameHistoryService>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(KYGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<KYGameInitializer>());
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(KYGameProviderWalletAction) }, (provider, _) =>

@@ -15,8 +15,8 @@ namespace TGS.Apis.TgsApi.GameProviders.LY
     {
         protected override string LogPrefix => "ly";
 
-        public LYStartup(IConfiguration configuration, IWebHostEnvironment env) :
-                    base(configuration, env)
+        public LYStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
 

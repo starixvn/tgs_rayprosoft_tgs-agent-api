@@ -8,10 +8,9 @@ namespace TGS.Shared.Game.Models.TCG.Incoming
     {
         [Required]
         [JsonPropertyName("username")]
-        public string username { get; init; }
+        public string Username { get; init; }
         [Required]
         [JsonPropertyName("product_type")]
         public int ProductType { get; init; }
-
     }
 }

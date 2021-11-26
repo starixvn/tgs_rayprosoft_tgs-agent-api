@@ -14,7 +14,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.VR;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.VR.Commons;
-using TGS.Shared.Game.Models.VR.Incoming;
 using TGS.Shared.Game.Models.VR.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.VR
@@ -26,8 +25,6 @@ namespace TGS.Shared.Game.ApiClients.VR
         ValueTask<VRFnudResponse> FundAsync(VRBrandMerchant brandMerchant, GPAction action, VRFnudRequest request);
 
         ValueTask<VRFundCheckingResponse> FundCheckingAsync(VRBrandMerchant brandMerchant, VRFundCheckingRequest request);
-
-        ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request);
 
         ValueTask<VRGetBalanceResponse> GetBalanceAsync(VRBrandMerchant brandMerchant, VRGetBalanceRequest request);
 
@@ -62,9 +59,6 @@ namespace TGS.Shared.Game.ApiClients.VR
 
         public ValueTask<VRFundCheckingResponse> FundCheckingAsync(VRBrandMerchant brandMerchant, VRFundCheckingRequest request)
             => GetAPIAsync<VRFundCheckingRequest, VRFundCheckingResponse>(brandMerchant, GPAction.FundChecking, request);
-
-        public ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request) =>
-          ExecuteJsonRequestAsync<VRGPGameRecordRequest, VRGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/vr/GameRecord", request);
 
         public ValueTask<VRGetBalanceResponse> GetBalanceAsync(VRBrandMerchant brandMerchant, VRGetBalanceRequest request)
             => GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, request);
@@ -137,7 +131,7 @@ namespace TGS.Shared.Game.ApiClients.VR
                 Ip = string.Empty,
                 Path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
                 Method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                Prefix = $"{Consts.GameProvider.VR.ToLower()}.{action.ToString()}",
+                Prefix = $"{Consts.GameProvider.VR.ToLower()}.{action}",
                 ServerName = Environment.MachineName.NoLongerThan(128),
                 RequestHeaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
                 RequestContent = JsonSerializer.Serialize(data),
