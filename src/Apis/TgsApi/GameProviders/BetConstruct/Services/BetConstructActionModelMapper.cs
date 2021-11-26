@@ -59,8 +59,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "1",
                 GameActionType = GameActionType.PlaceBet,
-                ExtraData = DateTimeOffset
-                    .FromUnixTimeSeconds(Convert.ToInt64(source.Created))
+                ExtraData =  DateTimeOffset
+                    .FromUnixTimeSeconds(source.Created.ToUnixTimeSeconds())
                     .ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
             };

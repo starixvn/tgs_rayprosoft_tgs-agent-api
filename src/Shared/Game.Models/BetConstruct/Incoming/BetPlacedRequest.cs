@@ -39,7 +39,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// The count of sub-bet counts when System bet is  placed. Only for 'system', how much events were placed in  system 2 (of 3), for example.
         /// </summary>
         [JsonPropertyName("SystemMinCount")]
-        public int SystemMinCount { get; init; }
+        public int? SystemMinCount { get; init; }
 
         /// <summary>
         /// Total price/odds/coefficient of the placed bet.
@@ -57,13 +57,13 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// Bonus amount in User’s currency used to place the bet.  This field may be greater than 0 when bonus is used  on this bet, and some portion of the bet amount is  taken from the bonus amount. The field can be ignored  if Operator does not use Bonuses. See Bonus API for  more details.
         /// </summary>
         [JsonPropertyName("BonusBetAmount")]
-        public decimal BonusBetAmount { get; init; }
+        public decimal? BonusBetAmount { get; init; }
 
         /// <summary>
         /// User’s bonus ID used for this bet. If the User’s bonus  was created by GetBonusDetails API call, the value is  the ExternalBonusId received from GetClientDetails  call.
         /// </summary>
         [JsonPropertyName("BonusId")]
-        public int BonusId { get; init; }
+        public int? BonusId { get; init; }
 
         /// <summary>
         /// 42 - Web, 4 - Mobile, 16 - Android, 17 - iOS, 98 - Betshop, 99 - Terminal. The field is not included in  hash.
