@@ -9,6 +9,7 @@ using Tgs.Payment.Clients;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.SkyPay;
 using Tgs.Payment.UmPay;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -60,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromServices] IHelp2PayRepository redisRepository,
             [FromServices] Help2PaySerializer serializer,
-            [FromBody] SubmitHelp2PayDepositRequest request)
+            [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
@@ -142,7 +143,7 @@ namespace TGS.Apis.OperatorApi.Controllers
            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
            [FromServices] MaticPaySerializer serializer,
-           [FromBody] SubmitMaticPayDepositRequest request
+           [FromBody] SubmitDepositRequest request
            )
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -227,7 +228,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("primepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
-        public async Task<PrimePayDepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
+        public async Task<DepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -290,7 +291,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .ExecuteAsync(updateThirdPartyOrderNoCommand)
                     .ConfigureAwait(false);
 
-                return new PrimePayDepositFormCreatedResponse
+                return new DepositFormCreatedResponse
                 {
                     FormId = createdFormId,
                     PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
@@ -304,6 +305,68 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
+        [HttpPost("skypay")]
+        public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] SkyPaySerializer serializer,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromBody] SubmitDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.GetBrandId().Value;
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.skypay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new SkyPayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
+                        formId)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
+
+            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    applyInfo.Response.TradeNo);
+
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ConfigureAwait(false);
+
+            return new DepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = applyInfo.Response.TradeUrl
+            };
+        }
+
         [HttpPost("umpay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -313,7 +376,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromServices] UmPaySerializer serializer,
-            [FromBody] SubmitUmPayDepositRequest request
+            [FromBody] SubmitDepositRequest request
             )
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
