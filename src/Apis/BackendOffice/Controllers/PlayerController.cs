@@ -59,10 +59,10 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) =>
             _mediator.Send(request);
 
-        [HttpGet("{playerCode}/gameproviderbalances")]
-        [Description("Get Player Game Provider Balance")]
-        public Task<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode) =>
-            _mediator.Send(new GetPlayerGameProviderBalanceRequest(playerCode));
+        [HttpGet("{playerCode}/transferwallet")]
+        [Description("Get Player Transfer Wallet")]
+        public Task<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode)
+            => _mediator.Send(new GetPlayerGameProviderBalanceRequest(playerCode));
 
         [HttpGet("{playerCode}/operations")]
         [Description("Get player operation")]
