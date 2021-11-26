@@ -4,13 +4,7 @@ using Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
-using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
-using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
 using TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET;
-using TGS.Workers.Schedulers.Jobs.GameProviders.TCG;
-using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
-using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
-using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
@@ -55,22 +49,10 @@ namespace TGS.Workers.Schedulers.Services
                 new JobDescription(new("EFB74D1F-355C-4298-9E60-33C003B16ECE"), "0 */20 * * * *", null,
                     typeof(CancelFailedTransactionsJobWorker),
                     TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
-                //new JobDescription(new("FCAD4CED-13A9-DE79-B86F-EBF00E07CE39"), Cron.Minutely(), null,
-                //    typeof(KYGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
-                //new JobDescription(new("F239A243-86CB-3D47-4667-F49A2BF874B4"), Cron.Minutely(), null,
-                //    typeof(VRGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
-                //new JobDescription(new("DBABFBE2-D7A1-9619-86E5-D5B23220EBF1"), Cron.Minutely(), null,
-                //    typeof(BigGamingGameRecordFishingJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
-                //new JobDescription(new("F6284700-B0BC-3F35-5163-006B6E1DD839"), Cron.Minutely(), null,
-                //    typeof(WGSportsGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
-                //new JobDescription(new("F1F7F055-77F6-C46E-2530-AFA692E538FF"), Cron.Minutely(), null,
-                //    typeof(WGHorseGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("321E2BEE-0028-4D82-8CA7-BB1F1B83C4E0"), Cron.Monthly(1, 0, 0), null,
                     typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("8FB79844-E7FA-48FF-91EA-1C3899A0901B"), Cron.Minutely(), null,
                     typeof(WMCasinoGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
-                //new JobDescription(new("F522E7F6-92B2-F2C9-73A9-36429EB9DC86"), Cron.Minutely(), null,
-                //    typeof(TCGGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
             )
 
         {
