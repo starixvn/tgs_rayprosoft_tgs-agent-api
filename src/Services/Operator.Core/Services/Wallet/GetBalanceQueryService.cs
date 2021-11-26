@@ -11,11 +11,15 @@ namespace TGS.Services.Operator.Services.Wallet
     {
         private readonly ICashServiceClient _cashServiceClient;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IPlayerOnlineRepository _playerOnlineRepository;
 
-        public GetBalanceQueryService(ICashServiceClient cashServiceClient, IPlayerOperations playerOperations)
+        public GetBalanceQueryService(ICashServiceClient cashServiceClient,
+            IPlayerOperations playerOperations,
+            IPlayerOnlineRepository playerOnlineRepository)
         {
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _playerOnlineRepository = playerOnlineRepository ?? throw new ArgumentNullException(nameof(playerOnlineRepository));
         }
 
         public async ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
@@ -26,6 +30,9 @@ namespace TGS.Services.Operator.Services.Wallet
             var balance = await _cashServiceClient
                 .GetBalanceAsync(playerData.DefaultWalletId)
                 .ConfigureAwait(false);
+            await _playerOnlineRepository
+                 .SetAsync(playerData.BrandId, playerData.PlayerCode)
+                 .ConfigureAwait(false);
 
             return new BalanceInfo(balance);
         }

@@ -187,7 +187,7 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .UseOperatorRepositories()
+                .UseOperatorRepositories((sp) => sp.GetRequiredService<RedisConnectionFactory>().GetConnection().GetDatabase())
                 .ConfigureWallet((options, sp) =>
                 {
                     var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;

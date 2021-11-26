@@ -83,7 +83,7 @@ namespace TGS.Apis.BackendOffice
         {
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories()
+                .AddBackendOfficeRepositories((sp) => sp.GetRequiredService<RedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddNatsMessageQueue(config =>
                 {
                     config
