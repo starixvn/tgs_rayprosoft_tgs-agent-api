@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 
 namespace TGS.Core.Infrastructures.Utility
@@ -22,7 +23,8 @@ namespace TGS.Core.Infrastructures.Utility
                     if (propertyInfo.PropertyType == typeof(DateTimeOffset)
                         || propertyInfo.PropertyType == typeof(DateTimeOffset?))
                     {
-                        value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                        value = ((DateTimeOffset?)value)?.ToUniversalTime()
+                            .ToString("yyyy-MM-ddTHH:mm:ss.sssZ", new CultureInfo("en-US"));
                     }
 
                     if (propertyInfo.PropertyType.IsArray)
