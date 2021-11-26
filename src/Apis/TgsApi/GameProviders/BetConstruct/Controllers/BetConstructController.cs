@@ -60,6 +60,27 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         [HttpPost("BetPlaced")]
         public async ValueTask<BetPlacedResponse> BetPlacedAsync(BetPlacedRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp },
+                { "TransactionId", request.TransactionId},
+                { "BetId", request.BetId},
+                { "Amount", request.Amount },
+                { "Created", request.Created.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")},
+                { "BetType", request.BetType},
+                { "SystemMinCount", request.SystemMinCount},
+                { "TotalPrice", request.TotalPrice}
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -195,13 +216,31 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 CurrencyId = currencyId,
                 ExternalId = player.PlayerCode,
                 ErrorCode = ((int)GameApiError.Success).ToString(),
-                ErrorText = GameApiError.Success.Description()
+                ErrorText = GameApiError.Success.Description(),
+                Gender = 1,
+                BirthDate = null,
+                ExternalBonusId = null
             };
         }
 
         [HttpPost("Rollback")]
         public async ValueTask<RollbackResponse> Rollback(RollbackRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp },
+                { "TransactionId", request.TransactionId }
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);

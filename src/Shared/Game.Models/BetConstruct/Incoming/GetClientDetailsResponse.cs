@@ -22,7 +22,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         public string Email { get; set; }
 
         [JsonPropertyName("BirthDate")]
-        public DateTimeOffset BirthDate { get; set; }
+        public DateTimeOffset? BirthDate { get; set; }
 
         [JsonPropertyName("Gender")]
         public int Gender { get; set; }
@@ -46,7 +46,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         public string ErrorText { get; set; }
 
         [JsonPropertyName("ExternalBonusId")]
-        public int ExternalBonusId { get; set; }
+        public int? ExternalBonusId { get; set; }
 
         [JsonPropertyName("IsTest")]
         public bool IsTest { get; set; }
