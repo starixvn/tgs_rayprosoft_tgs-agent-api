@@ -2,17 +2,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.DataServices.Tgs;
-using TGS.Core.Models.Enums;
-using TGS.Services.BackOffice.Application.Models.PlayerOnline;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories
 {
     internal class PlayerOnlineRepository : IPlayerOnlineRepository
     {
-        private readonly IDatabase _database;
         private const string _playerOnlineKey = "playeronline";
+        private readonly IDatabase _database;
 
         public PlayerOnlineRepository(
             IDatabase database)
