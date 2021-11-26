@@ -83,7 +83,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 formId => serializer.Serialize(
                     new Help2PayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
-                        playerTokenData.PlayerCode,
                         brandPaymentInfo.RootElement.GetProperty("securityCode").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
