@@ -14,10 +14,7 @@ namespace TGS.Apis.ReportApi.Controllers
     {
         private readonly IMediator _mediator;
 
-        public AgentReportController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public AgentReportController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
@@ -47,6 +44,12 @@ namespace TGS.Apis.ReportApi.Controllers
         [Description("Get agent dividend details report")]
         public Task<PagedResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendDetailsRequest request) =>
+            _mediator.Send(request);
+
+        [HttpGet("dividendTeamDetails")]
+        [Description("Get agent dividend team details report")]
+        public Task<PagedResponse<AgentDividendTeamDetailModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendTeamDetailsRequest request) =>
             _mediator.Send(request);
 
         [HttpGet("{id}/winLoss")]
