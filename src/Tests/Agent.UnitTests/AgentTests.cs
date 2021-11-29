@@ -182,9 +182,9 @@ namespace Agent.UnitTests
 
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-            var sut = new GetCreateAgentQueryService(repository, fakePasswordHandler);
+            var sut = new CreateAgentCommandService(repository, fakePasswordHandler);
 
-            var query = new GetCreateAgentQuery
+            var query = new CreateAgentCommand
             {
                 ParentAgentId = parentAgentId,
                 BrandId = brandId,
@@ -263,6 +263,21 @@ namespace Agent.UnitTests
             var actual = await sut.QueryAsync(query).ToArrayAsync();
 
             Assert.AreEqual(2, actual.Length);
+        }
+
+        [Test]
+        public async Task Get_Agent_Domains_By_Agent_Id()
+        {
+            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+
+            var sut = new GetAgentDomainsQueryService(fakeAgentRepository);
+
+            var query = new GetAgentDomainsQuery(Guid.NewGuid());
+
+            await sut.QueryAsync(query).ToArrayAsync();
+
+            _ = fakeAgentRepository.Received(1)
+                .GetAgentDomainsByIdAsync(Arg.Is(query.AgentId));
         }
     }
 }
