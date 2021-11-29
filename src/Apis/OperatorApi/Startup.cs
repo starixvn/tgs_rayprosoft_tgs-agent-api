@@ -24,6 +24,7 @@ using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.SkyPay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -214,7 +215,8 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
                 .AddSingleton<MaticPaySerializer>()
-                .AddSingleton<Help2PaySerializer>();
+                .AddSingleton<Help2PaySerializer>()
+                .AddSingleton<SkyPaySerializer>();
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -304,6 +306,7 @@ namespace TGS.Apis.OperatorApi
                     new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
 
                 c.AddBrandCertificateSecurityDefinition();
+                c.OperationFilter<SwaggerHeaderFilter>();
                 c.SchemaFilter<SwaggerEnumDescriptionFilter>();
                 c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 
