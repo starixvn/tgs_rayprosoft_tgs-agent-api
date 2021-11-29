@@ -39,7 +39,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 SettleAmount = request.SettleAmount,
                 Turnover = request.Turnover,
                 ValidBetAmount = request.ValidBetAmount,
-                WinLoss = request.WinLoss
+                WinLoss = request.WinLoss,
+                AdjustAmount = request.AdjustAmount,
             };
 
             await _gameProvidersBackofficePluggableClient.GameRoundClosedAsync(roundId, model).ConfigureAwait(false);
