@@ -42,6 +42,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 PlayerCode = playerTokenData.PlayerCode,
                 From = request.From,
                 To = request.To,
+                ClosedFrom = null,
+                ClosedTo = null,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,

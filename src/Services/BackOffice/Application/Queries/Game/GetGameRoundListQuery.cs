@@ -13,7 +13,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
         Guid? GameProviderId,
         ClientRoundStatus? Status,
         GameType? GameType,
-        DateTimeOffset From,
-        DateTimeOffset To,
+        DateTimeOffset? From,
+        DateTimeOffset? To,
+        DateTimeOffset? ClosedFrom,
+        DateTimeOffset? ClosedTo,
         PageableRequest Paging);
 }
