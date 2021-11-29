@@ -14,12 +14,12 @@ using CoreUtility = TGS.Core.Infrastructures.Utility;
 
 namespace TGS.Services.Agent.Services.Agent
 {
-    internal class GetCreateAgentQueryService : IGetService<GetCreateAgentQuery, CreateAgentInfo>
+    internal class CreateAgentCommandService : IGetService<CreateAgentCommand, CreateAgentInfo>
     {
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _tgsRepository;
 
-        public GetCreateAgentQueryService(
+        public CreateAgentCommandService(
             ITgsRepository tgsRepository,
             IPasswordHandler passwordHandler)
         {
@@ -28,7 +28,7 @@ namespace TGS.Services.Agent.Services.Agent
         }
 
         public async ValueTask<CreateAgentInfo> GetAsync(
-            GetCreateAgentQuery query,
+            CreateAgentCommand query,
             CancellationToken cancellationToken = default)
         {
             var parentAgent = await _tgsRepository.Agents.AsQueryable()

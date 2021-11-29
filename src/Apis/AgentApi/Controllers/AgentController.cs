@@ -38,13 +38,13 @@ namespace TGS.Apis.AgentApi.Controllers
         [CheckAgentEnabled]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<CreateAgentResponse> CreateAgentAsync(
-            [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
+            [FromServices] IGetService<CreateAgentCommand, CreateAgentInfo> getCreateAgentQueryService,
             [FromBody] CreateAgentRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var query = new GetCreateAgentQuery
+            var query = new CreateAgentCommand
             {
                 BrandId = brandId,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
@@ -245,7 +245,8 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetAgentResponse> GetLoginAgentInfoAsync(
             [FromServices] IStatusValidator statusValidator,
-            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService)
+            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
+            [FromServices] IQueryService<GetAgentDomainsQuery, string> getAgentDomainsService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
@@ -290,7 +291,10 @@ namespace TGS.Apis.AgentApi.Controllers
                         NetProfit = x.NetProfit,
                         ActiveNumber = x.ActiveNumber,
                         DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray()
+                    }).OrderBy(x => x.Rank).ToArray(),
+                    AgentDomains = await getAgentDomainsService.QueryAsync(new GetAgentDomainsQuery(agentId))
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
                 }
             };
         }

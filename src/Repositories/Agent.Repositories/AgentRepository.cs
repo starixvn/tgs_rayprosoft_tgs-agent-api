@@ -55,6 +55,12 @@ namespace TGS.Agent.Repositories
                 agent.AgentDividendConditions);
         }
 
+        public IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId)
+            => _tgsRepository.AgentDomains.AsQueryable()
+                .Where(ad => ad.AgentId == agentId)
+                .Select(ad => ad.DomainName)
+                .ToAsyncEnumerable();
+
         public async ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id)
         {
             var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
