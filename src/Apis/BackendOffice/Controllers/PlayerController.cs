@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Clients.Report.Client;
@@ -63,6 +64,13 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get Player Transfer Wallet")]
         public Task<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode)
             => _mediator.Send(new GetPlayerGameProviderBalanceRequest(playerCode));
+
+        [HttpGet("{playerCode}/mainwallet")]
+        [Description("Get Player Main wallet")]
+        public ValueTask<decimal> GetPlayerMainWalletBalanceAsync(
+            [FromServices] IGetService<GetPlayerMainWalletBalance, decimal> service,
+            string playerCode)
+            => service.GetAsync(new(playerCode));
 
         [HttpGet("{playerCode}/operations")]
         [Description("Get player operation")]
