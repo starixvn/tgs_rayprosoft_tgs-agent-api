@@ -13,7 +13,7 @@ namespace TGS.Services.Agent.Services.Agent
         public int Rank { get; set; }
     }
 
-    public class GetCreateAgentQuery
+    public class CreateAgentCommand
     {
         public AgentDividendConditionModel[] AgentDividendConditions { get; init; } = default!;
 
