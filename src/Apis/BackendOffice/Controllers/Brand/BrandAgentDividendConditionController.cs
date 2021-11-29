@@ -15,7 +15,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
 
         public BrandAgentDividendConditionController(IMediator mediator) => _mediator = mediator;
 
-        [HttpPost]
+        [HttpPut]
         [Description("Update the brand agent dividend conditions")]
         public Task<MessageResponse> UpdateBrandAgentDividendConditionsAsync(
             UpdateBrandAgentDividendConditionRequest request)
