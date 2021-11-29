@@ -2,26 +2,37 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandAgentDividend;
+using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.BrandAgentDividendHandlers
 {
     public class UpdateBrandAgentDividendHandler : Handler<UpdateBrandAgentDividendConditionRequest, MessageResponse>
     {
+        private readonly IBrandService _brandService;
         private readonly IBrandAgentDividendConditionService _service;
 
-        public UpdateBrandAgentDividendHandler(IBrandAgentDividendConditionService service,
+        public UpdateBrandAgentDividendHandler(IBrandAgentDividendConditionService service, IBrandService brandService,
             IHttpContextAccessor accessor) : base(accessor)
-            => _service = service;
+        {
+            _service = service;
+            _brandService = brandService;
+        }
 
         public override async Task<MessageResponse> Handle(UpdateBrandAgentDividendConditionRequest request,
             CancellationToken cancellationToken)
         {
+            if (!await _brandService.ExistsAsync(x
+                => x.Id == request.BrandId && x.AgentDividendType == AgentDividendType.MultipleLayer))
+            {
+                return CreateInvalidResponse<MessageResponse>(BrandAgentDividendCondition.AgentDividendTypeInvalid);
+            }
+
             var brandAgentDividendConditions = request.BrandAgentDividendConditions.Select(x
-                => new BrandAgentDividendCondition
+                => new Core.DataServices.Tgs.Models.BrandAgentDividendCondition
                 {
                     BrandId = request.BrandId,
                     Rank = x.Rank,
