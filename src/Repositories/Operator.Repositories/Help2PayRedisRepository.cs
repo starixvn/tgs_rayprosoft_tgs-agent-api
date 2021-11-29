@@ -10,23 +10,18 @@ namespace TGS.Operator.Repositories
         private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
         private static readonly string _KeyPrefix = "Help2Pay:DepositHtml";
 
-        private readonly IDatabase _redisDatabase;
+        private readonly IDatabase _database;
 
-        public Help2PayRedisRepository(RedisConnectionFactory connectionFactory)
+        public Help2PayRedisRepository(IDatabase database)
         {
-            if (connectionFactory is null)
-            {
-                throw new ArgumentNullException(nameof(connectionFactory));
-            }
-
-            _redisDatabase = connectionFactory.Database;
+            _database = database ?? throw new ArgumentNullException(nameof(database));
         }
 
         public async ValueTask<string?> GetDepositHtmlAsync(Guid identityId)
         {
             var dataKey = $"{_KeyPrefix}:{identityId}";
 
-            return await _redisDatabase.StringGetAsync(dataKey)
+            return await _database.StringGetAsync(dataKey)
                 .ConfigureAwait(false);
         }
 
@@ -34,7 +29,7 @@ namespace TGS.Operator.Repositories
         {
             var dataKey = $"{_KeyPrefix}:{identityId}";
 
-            return await _redisDatabase.StringSetAsync(dataKey, html, _Expire, When.NotExists)
+            return await _database.StringSetAsync(dataKey, html, _Expire, When.NotExists)
                 .ConfigureAwait(false);
         }
     }

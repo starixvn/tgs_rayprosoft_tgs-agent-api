@@ -54,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("help2pay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<Help2PayDepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
+        public async Task<DepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -123,7 +123,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
                     .ConfigureAwait(false);
 
-                return new Help2PayDepositFormCreatedResponse
+                return new DepositFormCreatedResponse
                 {
                     FormId = createdFormId,
                     PaymentUrl = $"/api/deposit/bank/help2pay/pay/{identityId}"
