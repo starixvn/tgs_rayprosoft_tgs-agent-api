@@ -56,6 +56,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
+            builder.Property(c => c.AgentDividendType)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
             builder.Property(c => c.PreviousSettlementFrom)
                 .IsRequired();
 

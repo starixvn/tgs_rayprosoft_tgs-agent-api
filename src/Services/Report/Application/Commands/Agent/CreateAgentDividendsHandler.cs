@@ -76,7 +76,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 var brands = await _brandService.GetBrandQueries(q
                             =>
                             q.Where(brandCode is not null, x => x.Code == brandCode)
-                                .Where(x => queryDate > x.CurrentSettlementTo),
+                                .Where(x => queryDate > x.CurrentSettlementTo)
+                                .Where(x => x.AgentDividendType == AgentDividendType.OneLayer),
                         true)
                     .ToArrayAsync(cancellationToken);
                 hasBrands = brands.Any();

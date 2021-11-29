@@ -85,5 +85,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<VipLevel> VipLevels { get; set; }
 
         public AgentDividendType AgentDividendType { get; set; }
+
+        public virtual ICollection<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
     }
 }
