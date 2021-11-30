@@ -15,7 +15,9 @@ namespace TGS.Services.Report.Application.Models.Round
         public Guid? GameProviderId { get; set; }
         public ClientRoundStatus? Status { get; set; }
         public GameType? GameType { get; set; }
-        public DateTimeOffset From { get; set; }
-        public DateTimeOffset To { get; set; }
+        public DateTimeOffset? From { get; set; }
+        public DateTimeOffset? To { get; set; }
+        public DateTimeOffset? ClosedFrom { get; set; }
+        public DateTimeOffset? ClosedTo { get; set; }
     }
 }

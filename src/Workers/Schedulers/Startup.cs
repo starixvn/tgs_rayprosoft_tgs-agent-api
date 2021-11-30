@@ -13,7 +13,6 @@ using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -21,12 +20,6 @@ using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
-using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
-using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
-using TGS.Workers.Schedulers.Jobs.GameProviders.TCG;
-using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
-using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
-using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
@@ -169,13 +162,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
 
             // GameProviders Services
-            services.AddTransient<IBigGamingGameProviderFishingService, BigGamingGameProviderFishingService>();
-            services.AddTransient<IKYGameProviderService, KYGameProviderService>();
-            services.AddTransient<IVRGameProviderService, VRGameProviderService>();
-            services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
-            services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
             services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
-            services.AddTransient<ITCGGameProviderService, TCGGameProviderService>();
         }
 
         private static Type[] GetModuleTypes()

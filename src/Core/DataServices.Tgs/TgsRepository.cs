@@ -15,8 +15,6 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
-
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
         }
@@ -225,6 +223,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
 
         public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+        public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);

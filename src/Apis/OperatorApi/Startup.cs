@@ -20,9 +20,11 @@ using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Payment.ApplePay;
+using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.SkyPay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -36,6 +38,7 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
@@ -186,7 +189,7 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .UseOperatorRepositories()
+                .UseOperatorRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .ConfigureWallet((options, sp) =>
                 {
                     var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
@@ -211,7 +214,9 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
-                .AddSingleton<MaticPaySerializer>();
+                .AddSingleton<MaticPaySerializer>()
+                .AddSingleton<Help2PaySerializer>()
+                .AddSingleton<SkyPaySerializer>();
 
             services.AddNatsMessageQueue(natsConfig =>
             {
@@ -301,6 +306,7 @@ namespace TGS.Apis.OperatorApi
                     new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
 
                 c.AddBrandCertificateSecurityDefinition();
+                c.OperationFilter<SwaggerHeaderFilter>();
                 c.SchemaFilter<SwaggerEnumDescriptionFilter>();
                 c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 

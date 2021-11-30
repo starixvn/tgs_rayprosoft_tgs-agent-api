@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
     {
         private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IAgentService _agentService;
-        private readonly IGameProvidersPluggableClient _gameProvidersPluggableClient;
+        private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
         private readonly IPlayerService _service;
 
 
@@ -26,13 +26,13 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerService service,
             IAgentService agentService,
             IHttpContextAccessor accessor,
-            IGameProvidersPluggableClient gameProvidersPluggableClient) :
+            IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient) :
             base(accessor)
         {
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             _service = service;
             _agentService = agentService;
-            _gameProvidersPluggableClient = gameProvidersPluggableClient ?? throw new System.ArgumentNullException(nameof(gameProvidersPluggableClient));
+            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient ?? throw new System.ArgumentNullException(nameof(gameProvidersBackofficePluggableClient));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -101,7 +101,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
                 {
                     _logger.LogInformation("call KickPlayerAsync");
-                    await _gameProvidersPluggableClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+                    await _gameProvidersBackofficePluggableClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
                 }
             }
 

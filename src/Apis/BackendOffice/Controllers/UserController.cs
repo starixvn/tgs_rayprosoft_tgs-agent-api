@@ -79,9 +79,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             }
 
             var usernameExisted = await _userQueries.GetQueries()
-                .Where(role.ResellerId, x => x.Role.ResellerId == role.ResellerId)
-                .Where(role.LicenseeId, x => x.Role.LicenseeId == role.LicenseeId)
-                .Where(role.BrandId, x => x.Role.BrandId == role.BrandId)
                 .AnyAsync(x => x.Username == request.Username);
 
             if (usernameExisted)

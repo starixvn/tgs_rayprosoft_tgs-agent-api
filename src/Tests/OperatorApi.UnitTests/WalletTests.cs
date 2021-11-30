@@ -21,17 +21,19 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqCashServiceClient = new Mock<ICashServiceClient>();
             var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqPlayerOnlineRepository = new Mock<IPlayerOnlineRepository>();
 
-            var sut = new GetBalanceQueryService(moqCashServiceClient.Object, moqPlayerOperations.Object);
+            var sut = new GetBalanceQueryService(moqCashServiceClient.Object, moqPlayerOperations.Object, moqPlayerOnlineRepository.Object);
 
             var playerCode = "ThisIsPlayerCode";
+            var brandId = Guid.NewGuid();
             moqPlayerOperations.Setup(fake => fake.GetCachedPlayerAsync(It.Is<string>(x => x == playerCode)))
                 .Returns(Task.FromResult(new CachedPlayer
                 {
                     PlayerCode = playerCode,
                     Username = "userName",
                     BetLimitId = 0,
-                    BrandId = Guid.NewGuid(),
+                    BrandId = brandId,
                     BrandCode = "BrandCode",
                     DefaultWalletCurrencyCode = "CNY",
                     DefaultWalletId = Guid.NewGuid(),
@@ -44,6 +46,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqCashServiceClient
                 .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>()))
                 .Returns(ValueTask.FromResult(10000M));
+
+            moqPlayerOnlineRepository.Setup(fake => fake.SetAsync(brandId, playerCode));
 
             var actual = await sut.GetAsync(new GetBalanceQuery(playerCode));
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
@@ -26,10 +27,13 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRedisRepository>()
-            where THelp2PayRedisRepository : class, IHelp2PayRepository
+        public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRepository>(
+            Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+            where THelp2PayRepository : class, IHelp2PayRepository
         {
-            Services.AddTransient<IHelp2PayRepository, THelp2PayRedisRepository>();
+            Services.AddTransient<IHelp2PayRepository>(sp =>
+                ActivatorUtilities.CreateInstance<THelp2PayRepository>(sp, redisDatabaseResolver(sp)));
+
             return this;
         }
 

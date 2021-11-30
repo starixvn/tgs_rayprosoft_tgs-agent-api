@@ -57,6 +57,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 request.GameType,
                 request.From,
                 request.To,
+                request.ClosedFrom,
+                request.ClosedTo,
                 request);
 
             var records = await queryService

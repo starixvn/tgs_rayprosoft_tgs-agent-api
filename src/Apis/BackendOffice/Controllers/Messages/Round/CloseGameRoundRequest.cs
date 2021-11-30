@@ -13,8 +13,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Round
 
         public DateTimeOffset ExternalClosedOn { get; init; }
 
-        public Guid OperatorId { get; init; }
-
         public string Remark { get; init; } = default!;
 
         public decimal SettleAmount { get; init; }
@@ -24,5 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Round
         public decimal ValidBetAmount { get; init; }
 
         public decimal WinLoss { get; init; }
+
+        public decimal? AdjustAmount { get; init; }
     }
 }

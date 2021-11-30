@@ -2,12 +2,12 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.GameProviders.Pluggable.Client;
+using Tgs.GameProviders.Pluggable.ViewModels;
 using TGS.Apis.BackendOffice.Controllers.Messages.Round;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models.Messages;
-using Tgs.GameProviders.Pluggable.Client;
-using Tgs.GameProviders.Pluggable.ViewModels;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -16,18 +16,13 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class RoundController : BaseContextController
     {
         private readonly IReportClient _client;
-        private readonly IGameProvidersPluggableClient _gameRoundClient;
+        private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
 
-        public RoundController(IReportClient client, IGameProvidersPluggableClient gameRoundClient)
+        public RoundController(IReportClient client, IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient)
         {
             _client = client;
-            _gameRoundClient = gameRoundClient;
+            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient;
         }
-
-        [HttpGet("openRounds")]
-        [Description("Get open rounds")]
-        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
-            _client.GetOpenRoundsAsync(request);
 
         [HttpPut("{roundId}/CloseGameRound")]
         [Description("Close a game round")]
@@ -44,12 +39,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                 SettleAmount = request.SettleAmount,
                 Turnover = request.Turnover,
                 ValidBetAmount = request.ValidBetAmount,
-                WinLoss = request.WinLoss
+                WinLoss = request.WinLoss,
+                AdjustAmount = request.AdjustAmount,
             };
 
-            await _gameRoundClient.GameRoundClosedAsync(roundId, model).ConfigureAwait(false);
+            await _gameProvidersBackofficePluggableClient.GameRoundClosedAsync(roundId, model).ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
         }
+
+        [HttpGet("openRounds")]
+        [Description("Get open rounds")]
+        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
+            _client.GetOpenRoundsAsync(request);
     }
 }
