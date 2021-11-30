@@ -20,10 +20,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         private readonly IPromotionClient _client;
 
-        public PlayerPromotionController(IPromotionClient client)
-        {
-            _client = client;
-        }
+        public PlayerPromotionController(IPromotionClient client) => _client = client;
 
         [HttpGet("{language}")]
         [Description("Get player's promotions")]
@@ -83,6 +80,41 @@ namespace TGS.Apis.OperatorApi.Controllers
                     UpdatedByUsername = item.UpdatedByUsername,
                     UpdatedOn = item.UpdatedOn,
                     VipLevels = item.VipLevels
+                })
+            };
+        }
+
+        /// <summary>
+        /// Get promotions that the player has already joined in.
+        /// </summary>
+        [HttpGet("joined")]
+        [Description("Get promotions that the player has already joined in")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
+            [FromQuery] PagingRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var joinedPromotionRequest = new GetJoinedPromotionsRequest
+            {
+                PlayerCode = playerTokenData.PlayerCode,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
+
+            return new PagingResponse<JoinedPromotionsResponse>
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items.Select(item => new JoinedPromotionsResponse
+                {
+                    PromotionName = item.PromotionName,
+                    JoinedOn = item.CreatedOn
                 })
             };
         }
