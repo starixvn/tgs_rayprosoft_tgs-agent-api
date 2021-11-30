@@ -37,13 +37,13 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// Bonus amount in User’s currency won from this bet.  When the bet is a wagering bonus bet, the won  amount goes into this field. See Bonus API for more  details.
         /// </summary>
         [JsonPropertyName("BonusAmount")]
-        public decimal BonusAmount { get; set; }
+        public decimal? BonusAmount { get; set; }
 
         /// <summary>
         /// User’s bonus ID used for this bet. If the User’s bonus  was created by GetBonusDetails API call, the value is  the ExternalBonusId received from GetClientDetails  call.
         /// </summary>
         [JsonPropertyName("BonusId")]
-        public int BonusId { get; set; }
+        public int? BonusId { get; set; }
 
         /// <summary>
         /// The UTC time that the bet was settled.
@@ -69,7 +69,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// SelectionId will indicate the selection Id within the  current bet.
         /// </summary>
         [JsonPropertyName("BetSelectionState")]
-        public ResultedSelection BetSelectionState { get; set; }
+        public ResultedSelection[] BetSelectionState { get; set; }
 
         /// <summary>
         /// True - when the bet is cancelled/voided otherwise  False
