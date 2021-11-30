@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             {
                 Amount = Math.Abs(source.Amount),
                 ExternalTransactionId = externalTransactionId,
-                ExternalRoundId = externalRoundId,
+                ExternalRoundId = source.BetId.ToString(),
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "1",
@@ -95,8 +95,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
         async ValueTask<BetData> IBetConstructActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source)
         {
-            //var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.GameCode).ConfigureAwait(false);
-            //var cachedGame = cachedGames.First();
+            //TODO:還需要調整GameID的對應
+
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "1").ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
 
             string externalRoundId = source.BetId.ToString();
 
@@ -120,17 +122,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 return null;
             }
 
+
+            var (roundRecord, gameActionRecord) = await _service
+                .GetGameActionsByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
+                .ConfigureAwait(false);
+
+
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(source.Amount),
                 ExternalTransactionId = externalTransactionId,
-                ExternalRoundId = externalRoundId,
+                ExternalRoundId = source.BetId.ToString(),
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "1",//Temp Fake Data
-                ExternalTransactionReferenceId = source.TransactionId.ToString(),
+                ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,// "49461321883",
                 GameActionType = gameActionType,
-                ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.CalcDate)).ToIso8601String(true),
+                ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
                 RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)                
             };
