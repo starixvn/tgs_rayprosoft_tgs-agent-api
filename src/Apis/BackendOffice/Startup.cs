@@ -187,9 +187,9 @@ namespace TGS.Apis.BackendOffice
 
             services.AddGameProvidersPluggableServerClient((options, sp) =>
             {
-                var configuration = sp.GetRequiredService<IConfiguration>();
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BaseUrl = new(configuration.GetConnectionString("GameProvidersPluggable"));
+                options.BaseUrl = config.GetValue<Uri>("BackOffice:GameProvidersPluggableBaseUrl");
             });
 
             services.AddSwaggerGen(c =>
