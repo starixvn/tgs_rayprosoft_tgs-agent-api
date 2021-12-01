@@ -216,9 +216,9 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
             try
             {
-                var wallet = await _cashServiceClient.GameProviderFundInAsync(
+                var wallet = await _cashServiceClient.GameProviderFundOutAsync(
                     player.DefaultWalletId,
-                    amount * -1,
+                    amount,
                     null,
                     null).ConfigureAwait(false);
 
