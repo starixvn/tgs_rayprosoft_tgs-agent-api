@@ -170,6 +170,12 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+                })
+                .AddGameProvidersPluggableServerClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
                 });
 
             services
@@ -218,17 +224,20 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>();
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
+
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
                     .ConfigQueueOptions((options, sp) =>
                     {
                         var config = sp.GetRequiredService<IConfiguration>();
 
                         options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                    });
+                })
+                .AddNatsGlobPatternExchange("*");
 
             services
                 .AddOptions<ConstValidateCodeOptions>()

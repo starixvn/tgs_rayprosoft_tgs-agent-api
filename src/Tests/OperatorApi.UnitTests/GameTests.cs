@@ -94,7 +94,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task FundInAllGameBalance_Should_Call_All_GP_FundIn()
         {
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
             var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
             var sut = new FundInAllGameBalanceCommandService(
@@ -140,11 +140,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-                .Returns(new GameBalanceInfo
-                {
-                    Balance = 100M,
-                    Error = 0
-                });
+                .Returns(100M);
 
             await sut.ExecuteAsync(command);
 
@@ -156,7 +152,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task FundInAllGameBalance_Should_Call_GP_FundIn_When_Amount_Equals_One_Dollar()
         {
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
             var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
             var sut = new FundInAllGameBalanceCommandService(
@@ -202,11 +198,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-                .Returns(new GameBalanceInfo
-                {
-                    Balance = 1m,
-                    Error = 0
-                });
+                .Returns(1m);
 
             await sut.ExecuteAsync(command);
 
@@ -218,7 +210,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task FundInAllGameBalance_Should_Not_Call_GP_FundIn_When_Amount_LessThan_One_Dollar()
         {
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
             var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
             var sut = new FundInAllGameBalanceCommandService(
@@ -264,11 +256,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }.ToAsyncEnumerable());
 
             fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
-                .Returns(new GameBalanceInfo
-                {
-                    Balance = 0.88m,
-                    Error = 0
-                });
+                .Returns(0.88m);
 
             await sut.ExecuteAsync(command);
 
