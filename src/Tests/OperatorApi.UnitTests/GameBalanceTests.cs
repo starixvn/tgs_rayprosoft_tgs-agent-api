@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.GameProviders.Pluggable.Client;
+using Tgs.GameProviders.Pluggable.ViewModels;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -29,85 +30,57 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Player_Can_Fund_In()
         {
             // arrange
-            var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
-            var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
             var fakeLogger = new NullLogger<FundInGameBalanceCommandService>();
 
             var gameProviderCode = "KY";
             var playerCode = "playerCode";
-            var fakeUri = new Uri("https://www.fake.com");
             int amount = 10000;
-            var request = new GameProviderWalletFundRequest()
-            {
-                GameProviderCode = gameProviderCode,
-                PlayerCode = playerCode,
-                Amount = amount
-            };
-            fakePluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .Returns(fakeUri);
 
-            fakePluggalbeGameProviderApiClient
-                .FundInAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
-                .Returns(new GameProviderWalletFundResponse()
-                {
-                    Error = 0,
-                    ErrorMessage = string.Empty
-                });
+            var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
+                Guid.NewGuid(),
+                Guid.NewGuid().ToString("N"));
 
-            var sut = new FundInGameBalanceCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
+            fakeGameProvidersOperatorPluggableClient
+                .GameProviderFundInAsync(
+                playerCode,
+                gameProviderCode,
+                amount)
+                .Returns(gameProviderFundResultViewModel);
+
+            var sut = new FundInGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
 
             // act
             var command = new FundInGameBalanceCommand(gameProviderCode, playerCode, amount);
             await sut.ExecuteAsync(command, default);
-
-            // assert
-            _ = fakePluggalbeGameProviderApiClient
-                .Received(1)
-                .FundInAsync(Arg.Is(fakeUri), Arg.Is(request));
         }
 
         [Test]
         public async Task Player_Can_Fund_Out()
         {
             // arrange
+            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+            var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
+
             var gameProviderCode = "KY";
             var playerCode = "playerCode";
             int amount = 10000;
-            var fakeUri = new Uri("https://www.fake.com");
 
-            var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
-            var fakePluggableOperations = Substitute.For<IPluggableOperations>();
-            var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
+            var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
+                Guid.NewGuid(),
+                Guid.NewGuid().ToString("N"));
+            fakeGameProvidersOperatorPluggableClient
+                .GameProviderFundOutAsync(
+                playerCode,
+                gameProviderCode,
+                amount)
+                .Returns(gameProviderFundResultViewModel);
 
-            fakePluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .Returns(fakeUri);
-
-            fakePluggalbeGameProviderApiClient
-                .FundOutAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
-                .Returns(new GameProviderWalletFundResponse()
-                {
-                    Error = 0,
-                    ErrorMessage = string.Empty
-                });
-
-            var request = new GameProviderWalletFundRequest()
-            {
-                GameProviderCode = gameProviderCode,
-                PlayerCode = playerCode,
-                Amount = amount
-            };
-            var sut = new FundOutGameBalanceCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
+            var sut = new FundOutGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
 
             // act
             var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
             await sut.ExecuteAsync(command, default);
-
-            // assert
-            _ = fakePluggalbeGameProviderApiClient
-                .Received(1)
-                .FundOutAsync(Arg.Is(fakeUri), Arg.Is(request));
         }
 
         [Test]
