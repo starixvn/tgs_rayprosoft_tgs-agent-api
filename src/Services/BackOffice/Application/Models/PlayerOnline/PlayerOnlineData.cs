@@ -21,6 +21,6 @@ namespace TGS.Services.BackOffice.Application.Models.PlayerOnline
 
         public int VipLevel { get; init; }
 
-        public Guid VipLevelId { get; init; }
+        public Guid VipId { get; init; }
     }
 }
