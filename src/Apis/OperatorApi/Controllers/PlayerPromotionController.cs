@@ -92,13 +92,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
-            [FromQuery] PagingRequest request)
+            [FromQuery] GetPlayerPromotionRecordRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var joinedPromotionRequest = new GetJoinedPromotionsRequest
             {
                 PlayerCode = playerTokenData.PlayerCode,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
