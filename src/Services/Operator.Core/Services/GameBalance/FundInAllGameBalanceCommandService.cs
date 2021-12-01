@@ -12,11 +12,11 @@ namespace TGS.Services.Operator.Services.GameBalance
     {
         private readonly ICommandService<FundInGameBalanceCommand> _fundInService;
         private readonly IGameProviderRepository _gameProviderRepository;
-        private readonly IGetService<GetGameBalanceQuery, GameBalanceInfo> _getGameBalanceService;
+        private readonly IGetService<GetGameBalanceQuery, decimal?> _getGameBalanceService;
 
         public FundInAllGameBalanceCommandService(
             IGameProviderRepository gameProviderRepository,
-            IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
+            IGetService<GetGameBalanceQuery, decimal?> getGameBalanceService,
             ICommandService<FundInGameBalanceCommand> fundInService)
         {
             _gameProviderRepository =
@@ -45,16 +45,16 @@ namespace TGS.Services.Operator.Services.GameBalance
 
                 try
                 {
-                    var balanceInfo = await _getGameBalanceService
+                    var balance = await _getGameBalanceService
                         .GetAsync(
                             new GetGameBalanceQuery(command.PlayerCode, gpCode),
                             cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (balanceInfo.Error != 0)
+                    if (!balance.HasValue)
                         continue;
 
-                    var fundInAmount = (int)Math.Floor(balanceInfo.Balance);
+                    var fundInAmount = (int)Math.Floor(balance.Value);
 
                     if (fundInAmount > 0)
                     {

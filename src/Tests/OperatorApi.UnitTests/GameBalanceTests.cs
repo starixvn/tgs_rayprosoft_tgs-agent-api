@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.GameProviders.Pluggable.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -117,8 +118,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var gameProviderCode = "KY";
             var fakeUri = new Uri("https://www.fake.com");
 
-            var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
-            var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
 
             var request = new GameProviderWalletGetBalanceRequest()
             {
@@ -126,25 +126,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode
             };
 
-            fakePluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .Returns(fakeUri);
-            fakePluggalbeGameProviderApiClient
-                .GetBalanceAsync(fakeUri, request)
-                .Returns(new GameProviderWalletGetBalanceResponse() { Balance = 1000 });
+            fakeGameProvidersOperatorPluggableClient
+                .GetBalanceAsync(playerCode, gameProviderCode)
+                .Returns(1000m);
 
-            var sut = new GetGameBalanceQueryService(
-                fakePluggalbeGameProviderApiClient,
-                fakePluggableOperations);
+            var sut = new GetGameBalanceQueryService(fakeGameProvidersOperatorPluggableClient);
 
             // act
             var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
             await sut.GetAsync(query, default);
 
             // assert
-            _ = fakePluggalbeGameProviderApiClient
+            _ = fakeGameProvidersOperatorPluggableClient
                 .Received(1)
-                .GetBalanceAsync(Arg.Is(fakeUri), Arg.Is(request));
+                .GetBalanceAsync(Arg.Is(playerCode), Arg.Is(gameProviderCode));
         }
 
         [Test]

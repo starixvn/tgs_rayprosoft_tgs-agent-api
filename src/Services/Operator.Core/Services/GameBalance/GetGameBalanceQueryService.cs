@@ -5,39 +5,23 @@ using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.Services.GameBalance;
+using Tgs.GameProviders.Pluggable.Client;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {
-    internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, GameBalanceInfo>
+    internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, decimal?>
     {
-        private readonly IPluggalbeGameProviderApiClient _client;
+        private readonly IGameProvidersOperatorPluggableClient _providersOperatorPluggableClient;
 
-        private readonly IPluggableOperations _pluggableOperations;
-
-        public GetGameBalanceQueryService(IPluggalbeGameProviderApiClient client, IPluggableOperations pluggableOperations)
+        public GetGameBalanceQueryService(IGameProvidersOperatorPluggableClient providersOperatorPluggableClient)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _pluggableOperations = pluggableOperations ?? throw new ArgumentNullException(nameof(pluggableOperations));
+            _providersOperatorPluggableClient = providersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(providersOperatorPluggableClient));
         }
 
-        public async ValueTask<GameBalanceInfo> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
-        {
-            var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(query.GameProviderCode);
-
-            var resp = await _client.GetBalanceAsync(
-                serviceUrl,
-                new GameProviderWalletGetBalanceRequest()
-                {
-                    GameProviderCode = query.GameProviderCode,
-                    PlayerCode = query.PlayerCode
-                });
-
-            return new GameBalanceInfo()
-            {
-                Balance = resp.Balance,
-                Error = resp.Error,
-                ErrorMessage = resp.ErrorMessage
-            };
-        }
+        public ValueTask<decimal?> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
+            => _providersOperatorPluggableClient.GetBalanceAsync(
+                query.PlayerCode,
+                query.GameProviderCode);
     }
 }
