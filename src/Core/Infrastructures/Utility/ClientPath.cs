@@ -22,7 +22,8 @@ namespace TGS.Core.Infrastructures.Utility
                     if (propertyInfo.PropertyType == typeof(DateTimeOffset)
                         || propertyInfo.PropertyType == typeof(DateTimeOffset?))
                     {
-                        value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
+                        value = ((DateTimeOffset?)value)?.ToUniversalTime()
+                            .ToString("u");
                     }
 
                     if (propertyInfo.PropertyType.IsArray)

@@ -1,6 +1,7 @@
 using System;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,6 @@ using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -61,7 +61,7 @@ namespace TGS.Workers.Schedulers
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -71,21 +71,15 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new()
-                    {
-                        Authorization = new[]
-                        {
-                            new IgnoreHangfireAuthorizationFilter()
-                        }
-                    });
+                    new DashboardOptions { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
             });
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTgsRepository(_configuration, "Tgs")
+            services
+                .AddTgsRepository(_configuration, "Tgs")
                 .AddWebApiServices()
-                .AddNats(_configuration)
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
                 .AddRedis()
@@ -125,10 +119,7 @@ namespace TGS.Workers.Schedulers
 
                 options.Queues = new[]
                 {
-                    Consts.Queue.Schedule,
-                    Consts.Queue.GameProvider,
-                    Consts.Queue.Report,
-                    Consts.Queue.ArrearsEmail
+                    Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report, Consts.Queue.ArrearsEmail
                 };
 
                 options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
@@ -144,7 +135,7 @@ namespace TGS.Workers.Schedulers
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
             {
                 var url = _configuration.GetSection("Email:Url");
-                c.BaseAddress = new(url.Value);
+                c.BaseAddress = new Uri(url.Value);
             });
 
             services.AddGameProviderScheduleLockRepository();
@@ -180,11 +171,12 @@ namespace TGS.Workers.Schedulers
         }
 
         private static Type[] GetModuleTypes()
-            => new[]
+        {
+            return new[]
             {
-                typeof(AggregateJobManagement),
-                typeof(RebateAndDividendJobManagement),
+                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
                 typeof(PromotionJobManagement)
             };
+        }
     }
 }

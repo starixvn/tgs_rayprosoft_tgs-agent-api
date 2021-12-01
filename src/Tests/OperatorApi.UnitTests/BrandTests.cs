@@ -24,6 +24,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     new Uri("https://img.org/1.png"),
                     new Uri("https://img.org/2.png"),
                     new Uri("https://img.org/3.png"),
+                    false,
                     false));
 
             var sut = new GetBrandQueryService(fakeSysRepository);

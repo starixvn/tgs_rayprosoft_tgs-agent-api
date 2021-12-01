@@ -6,8 +6,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "RT",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "RT"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -16,8 +16,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "SBO",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SBO"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
     },
@@ -26,8 +26,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "HABA",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "HABA"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -36,8 +36,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "PP",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "PP"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -46,8 +46,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "KY",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "KY"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -56,8 +56,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "AG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "AG"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -66,8 +66,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "SABA",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SABA"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -76,8 +76,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "IMES",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "IMES"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -86,8 +86,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "VR",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "VR"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -96,18 +96,17 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "BG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "BG"
       },
       "applicationUrl": "http://localhost:62330"
     },
     "TgsApi-JDB": {
       "commandName": "Project",
-      "launchBrowser": false,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "JDB",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "JDB"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -116,8 +115,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "SG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SG"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -126,8 +125,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "SW",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SW"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -136,8 +135,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "AB",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "AB"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -146,8 +145,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "EVO",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "EVO"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -156,8 +155,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "WGFM",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "WGFM"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -166,8 +165,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "WGVIA",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "WGVIA"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -176,8 +175,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "WM",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "WM"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -186,8 +185,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "TCG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "TCG"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -196,8 +195,8 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "365",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "365"
       },
       "applicationUrl": "http://localhost:62330"
     },
@@ -206,18 +205,28 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "LY",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "LY"
       },
       "applicationUrl": "http://localhost:62330"
+    },
+    "TgsApi-BetConstruct": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "BC"
+      },
+      "applicationUrl": "http://localhost:62330;http://+:62330"
     },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "SBO",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SBO"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -227,8 +236,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "HABA",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "HABA"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -238,8 +247,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "PP",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "PP"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -249,8 +258,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "KY",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "KY"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -260,8 +269,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "AG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "AG"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -271,8 +280,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "VR",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "VR"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -282,8 +291,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "IMES",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "IMES"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -293,8 +302,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "BG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "BG"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -304,8 +313,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "JDB",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "JDB"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -315,97 +324,20 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "SG",
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "Docker-Skywind": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "SW",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-Evolution": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "EVO",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-WGSports": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "WGFM",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-WGHorse": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "WGVIA",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-WMCasino": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "WM",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-TCG": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "TCG",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-Card365": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "365",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
-      },
-      "Docker-LY": {
-        "commandName": "Docker",
-        "launchBrowser": true,
-        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
-        "environmentVariables": {
-          "GameProviderCode": "LY",
-          "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "publishAllPorts": true,
-        "useSSL": true
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "SG"
       }
+    },
+    "Docker-BetConstruct": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "BC"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

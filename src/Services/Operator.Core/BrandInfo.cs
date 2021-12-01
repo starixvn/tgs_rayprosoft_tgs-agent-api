@@ -8,5 +8,6 @@ namespace TGS.Services.Operator
         Uri DesktopLogoUrl,
         Uri MobileLogoUrl,
         Uri LoadingUrl,
-        bool SmsEnabled);
+        bool SmsEnabled,
+        bool SmsRegisterFlowEnabled);
 }

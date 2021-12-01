@@ -158,17 +158,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
-        public async Task Wallet_Exchange_By_Agent_Should_Call_AgentWalletRepository()
+        public async Task Cancel_Withdraw_By_Agent_Should_Call_AgentWalletRepository()
         {
-            var moqPlayerService = new Mock<IPlayerService>();
+            var moqPlayerWalletExchangeService = new Mock<IPlayerWalletExchangeService>();
             var moqAgentService = new Mock<IAgentService>();
-            var moqWalletRepository = new Mock<IWalletRepository>();
             var moqAgentWalletRepository = new Mock<IAgentWalletRepository>();
 
             var sut = new WalletExchangeService(
-                moqPlayerService.Object,
+                moqPlayerWalletExchangeService.Object,
                 moqAgentService.Object,
-                moqWalletRepository.Object,
                 moqAgentWalletRepository.Object);
 
             var brandId = Guid.NewGuid();
@@ -188,11 +186,10 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     DefaultWalletId = Guid.NewGuid()
                 }));
 
-            await sut.ExchangeAsync(
+            await sut.CancelWithdrawAsync(
                 brandId,
                 userType,
                 agentId.ToString(),
-                transactionType,
                 amount,
                 userId.ToString());
 
@@ -208,50 +205,33 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
-        public async Task Wallet_Exchange_By_Player_Should_Call_WalletRepository()
+        public async Task Cancel_Withdraw_By_Player_Should_Call_WalletRepository()
         {
-            var moqPlayerService = new Mock<IPlayerService>();
+            var moqPlayerWalletExchangeService = new Mock<IPlayerWalletExchangeService>();
             var moqAgentService = new Mock<IAgentService>();
-            var moqWalletRepository = new Mock<IWalletRepository>();
             var moqAgentWalletRepository = new Mock<IAgentWalletRepository>();
 
             var sut = new WalletExchangeService(
-                moqPlayerService.Object,
+                moqPlayerWalletExchangeService.Object,
                 moqAgentService.Object,
-                moqWalletRepository.Object,
                 moqAgentWalletRepository.Object);
 
             var brandId = Guid.NewGuid();
             var userType = UserType.Player;
             var playerCode = "ThisIsPlayerCode";
-            var transactionType = TransactionTypes.CancelWithdrawal;
             var amount = 1000M;
             var userId = Guid.NewGuid();
 
-            moqPlayerService
-                .Setup(fake => fake.GetPlayerAsync(
-                    It.IsAny<Expression<Func<Player, bool>>>(),
-                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
-                .Returns(Task.FromResult(new Player
-                {
-                    PlayerCode = playerCode,
-                    DefaultWalletId = Guid.NewGuid()
-                }));
-
-            await sut.ExchangeAsync(
+            await sut.CancelWithdrawAsync(
                 brandId,
                 userType,
                 playerCode,
-                transactionType,
                 amount,
                 userId.ToString());
 
-            moqWalletRepository.Verify(
-                fake => fake.ExchangeAsync(
-                    It.Is<Guid>(x => x == brandId),
-                    It.IsAny<Guid>(),
+            moqPlayerWalletExchangeService.Verify(
+                fake => fake.CancelWithdrawalAsync(
                     It.Is<string>(x => x == playerCode),
-                    It.Is<TransactionTypes>(x => x == transactionType),
                     It.Is<decimal>(x => x == amount),
                     It.IsAny<string>(),
                     It.IsAny<string>(),

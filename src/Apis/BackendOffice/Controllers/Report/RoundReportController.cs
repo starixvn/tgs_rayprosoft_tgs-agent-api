@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -25,10 +24,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         private readonly IReportClient _client;
 
-        public RoundReportController(IReportClient client)
-        {
-            _client = client;
-        }
+        public RoundReportController(IReportClient client) => _client = client;
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
@@ -71,7 +67,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 .QueryAsync(new GetAllGamesByBrandIdQuery(request.BrandId))
                 .Select(game => new
                 {
-                    GameId = game.GameId,
+                    game.GameId,
                     Localization = jsonSerializationProvider
                         .DeserializeFromString<IDictionary<string, GameLocalizationData>>(
                             game.Localization ?? "{}",
@@ -87,10 +83,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 Message = records.Message,
                 TotalCount = records.TotalCount,
                 Items = (from model in records.Items
-                         let gameLocalization = allGames[model.GameId].Localization
-                         let loc = gameLocalization.TryGetValue(currentCulture, out var data)
-                            ? data
-                            : default(GameLocalizationData)
+                         let gameLocalization = allGames.TryGetValue(model.GameId, out var value)
+                             ? value.Localization
+                             : default
+                         let loc = gameLocalization is not null &&
+                             gameLocalization.TryGetValue(currentCulture, out var data)
+                                 ? data
+                                 : default(GameLocalizationData)
                          select new RoundView
                          {
                              Id = model.Id,
@@ -118,9 +117,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                              TieBetAdjustment = model.TieBetAdjustment,
                              UpdatedOn = model.UpdatedOn,
                              ValidBetAmount = model.ValidBetAmount,
+                             Turnover = model.Turnover,
                              WinLoss = model.WinLoss
                          }).ToArray()
             };
         }
+
+
+        [HttpGet("openRounds")]
+        [Description("Get open rounds")]
+        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
+            _client.GetOpenRoundsAsync(request);
     }
 }

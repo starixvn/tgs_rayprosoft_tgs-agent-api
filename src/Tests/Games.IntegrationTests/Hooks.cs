@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using TechTalk.SpecFlow;
+using Tgs.BrandCertificate.Clients;
 using TGS.Apis.OperatorApi;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Apis.TgsApi.GameProviders.BigGaming;
@@ -37,9 +38,42 @@ namespace TGS.Tests.Games.IntegrationTests
 
         public static HttpClient TgsApiClient { get; private set; }
 
+        [AfterFeature]
+        public static void AfterFeature(FeatureContext featureContext) =>
+            Task.WhenAll(_OpApiHost.StopAsync(), _TgsApiHost.StopAsync());
+
         [BeforeFeature]
         public static void BeforeFeature(FeatureContext featureContext)
         {
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+            var stubBrandCertClient = new StubBrandCertificateClient();
+
+            _OpApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
+                    builder.SetBasePath(Path.GetFullPath(path));
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<Startup>()
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddSingleton<IBrandCertificateClient>(stubBrandCertClient);
+                        });
+                })
+                .Build();
+
+            _OpApiHost.StartAsync();
+            OpApiClient = _OpApiHost.GetTestClient();
+            var brandToken = stubBrandCertClient.MakeJsonWebTokenAsync(Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"));
+            OpApiClient.DefaultRequestHeaders.Add("Brand-Token", brandToken.Result);
+
             if (featureContext.FeatureInfo.Tags.Contains("Habanero"))
             {
                 CreateHabaneroEnv();
@@ -74,12 +108,11 @@ namespace TGS.Tests.Games.IntegrationTests
             {
                 CreateBigGamingEnv();
             }
-            
+
             if (featureContext.FeatureInfo.Tags.Contains("JDB"))
             {
                 CreateJDBEnv();
             }
-
 
             if (featureContext.FeatureInfo.Tags.Contains("SexyGaming"))
             {
@@ -87,9 +120,236 @@ namespace TGS.Tests.Games.IntegrationTests
             }
         }
 
-        [AfterFeature]
-        public static void AfterFeature(FeatureContext featureContext) =>
-            Task.WhenAll(_OpApiHost.StopAsync(), _TgsApiHost.StopAsync());
+        private static void CreateAsiaGamingEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.AsiaGaming);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/AsiaGaming/asiagaming.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<AsiaGamingStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreateBigGamingEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.BigGaming);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/BigGaming/biggaming.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<BigGamingStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreateHabaneroEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.Habanero);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/Habanero/habanero.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<HabaneroStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreateIMESportsEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.IMESports);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/IMESports/imesports.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<IMESportsStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreateJDBEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.JDB);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration(builder =>
+                {
+                    builder
+                        .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
+                            "../../../../../Apis/TgsApi")))
+                        .AddJsonFile("GameProviders/JDB/jdb.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder
+                        .UseStartup<JDBStartup>()
+                        .UseKestrel(options => options.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreatePragmaticPlayEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.PragmaticPlay);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/PragmaticPlay/pragmaticplay.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<PragmaticPlayStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+
+        private static void CreateSabaEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.Saba);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/Saba/saba.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<SabaStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
 
         private static void CreateSbobetEnv()
         {
@@ -99,27 +359,6 @@ namespace TGS.Tests.Games.IntegrationTests
             fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
 
             var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration(builder =>
-                {
-                    builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
-                        "../../../../../Apis/OperatorApi")));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder
-                        .UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
 
             _TgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
                 .ConfigureAppConfiguration(builder =>
@@ -146,325 +385,6 @@ namespace TGS.Tests.Games.IntegrationTests
             TgsApiClient = _TgsApiHost.GetTestClient();
         }
 
-        private static void CreatePragmaticPlayEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.PragmaticPlay);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/PragmaticPlay/pragmaticplay.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<PragmaticPlayStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        private static void CreateHabaneroEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.Habanero);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/Habanero/habanero.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<HabaneroStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        private static void CreateAsiaGamingEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.AsiaGaming);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/AsiaGaming/asiagaming.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<AsiaGamingStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        private static void CreateSabaEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.Saba);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/Saba/saba.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<SabaStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        private static void CreateIMESportsEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.IMESports);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/IMESports/imesports.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<IMESportsStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        private static void CreateBigGamingEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.BigGaming);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/BigGaming/biggaming.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<BigGamingStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-
         private static void CreateSexyGamingEnv()
         {
             Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.SexyGaming);
@@ -473,26 +393,6 @@ namespace TGS.Tests.Games.IntegrationTests
             fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
 
             var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
 
             _TgsApiHost = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration(builder =>
@@ -506,61 +406,6 @@ namespace TGS.Tests.Games.IntegrationTests
                 {
                     builder.UseStartup<SexyGamingStartup>()
                         .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _TgsApiHost.StartAsync();
-            TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-        
-        private static void CreateJDBEnv()
-        {
-            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.JDB);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-            var currentDictionary = Directory.GetCurrentDirectory();
-
-            _OpApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration(builder =>
-                {
-                    builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
-                        "../../../../../Apis/OperatorApi")));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder
-                        .UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            _OpApiHost.StartAsync();
-            OpApiClient = _OpApiHost.GetTestClient();
-
-            _TgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                .ConfigureAppConfiguration(builder =>
-                {
-                    builder
-                        .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
-                            "../../../../../Apis/TgsApi")))
-                        .AddJsonFile("GameProviders/JDB/jdb.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder
-                        .UseStartup<JDBStartup>()
-                        .UseKestrel(options => options.AddServerHeader = false)
                         .UseTestServer()
                         .ConfigureTestServices(srv =>
                         {

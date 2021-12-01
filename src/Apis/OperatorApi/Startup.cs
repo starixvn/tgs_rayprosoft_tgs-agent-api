@@ -1,20 +1,28 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Payment.ApplePay;
+using Tgs.Payment.LeePay;
+using Tgs.Payment.MaticPay;
+using Tgs.Payment.PrimePay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -27,16 +35,10 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using Tgs.Payment.ApplePay;
-using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
-using Tgs.Payment.MaticPay;
-using Tgs.Payment.PrimePay;
-using Tgs.Payment.UmPay;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
@@ -55,8 +57,21 @@ namespace TGS.Apis.OperatorApi
             _env = env;
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
         {
+            app.UseForwardedHeaders();
+            app.Use((httpContext, next) =>
+            {
+                var forwardedIps = string.Join(
+                    ", ",
+                    httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip));
+                logger.LogInformation(
+                    $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
+                    $"Forward-For: {forwardedIps}");
+
+                return next();
+            });
+
             app.UseRequestLocalization(options =>
             {
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
@@ -70,13 +85,12 @@ namespace TGS.Apis.OperatorApi
             });
 
             app.UseTgsErrorHandler();
-
+            app.UseBrandCertificate();
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
             app.UseRouting();
 
             app.UseHttpMetrics();
-
             app.UseCors();
 
             app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
@@ -86,7 +100,7 @@ namespace TGS.Apis.OperatorApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health",
-                    new()
+                    new HealthCheckOptions
                     {
                         ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
                         ResponseWriter = (httpContext, result) =>
@@ -96,18 +110,42 @@ namespace TGS.Apis.OperatorApi
                 endpoints.MapProfileViewer();
             });
 
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+                .AddOptions<ForwardedHeadersOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                    options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
+
+                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
+
+                    foreach (var knownProxie in knownProxies)
+                        options.KnownProxies.Add(IPAddress.Parse(knownProxie));
+
+                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>() ?? Array.Empty<string>();
+
+                    foreach (var cidr in knowNetworks)
+                    {
+                        (string ip, string range) = cidr.Split("/");
+
+                        options.KnownNetworks.Add(
+                            new IPNetwork(
+                                IPAddress.Parse(ip),
+                                string.IsNullOrEmpty(range)
+                                    ? 32
+                                    : int.Parse(range)));
+                    }
+                });
+
             services.AddTgsRepository(_configuration, "Tgs");
 
-            services.AddNats(_configuration)
+            services
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddRedis()
@@ -123,7 +161,13 @@ namespace TGS.Apis.OperatorApi
 
                     config.GetSection("Promotion").Bind(options);
                 })
-                .AddTransactions();
+                .AddTransactions()
+                .AddBrandCertificateClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+                });
 
             services.AddErrorMapper()
                 .AddErrorMapper<OperatorApiErrorMapper>();
@@ -148,10 +192,7 @@ namespace TGS.Apis.OperatorApi
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters =
-                        {
-                            new JsonStringEnumConverter()
-                        }
+                        Converters = { new JsonStringEnumConverter() }
                     };
                 })
                 .Services
@@ -193,6 +234,7 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddControllers(options =>
                 {
+                    options.AddBrandCertificateFilters();
                     options.Filters.Add<CheckPlayerEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
                     options.AddWebApiToolkitFilters();
@@ -210,7 +252,7 @@ namespace TGS.Apis.OperatorApi
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
             {
                 var url = _configuration.GetSection("Email:Url");
-                c.BaseAddress = new(url.Value);
+                c.BaseAddress = new Uri(url.Value);
             });
 
             services.AddHttpContextAccessor();
@@ -243,49 +285,23 @@ namespace TGS.Apis.OperatorApi
                 .AddInterceptionService()
                 .AddServiceUtiltiyInterceptors();
 
-            if (!_env.IsProduction())
+            services.AddSwaggerGen(c =>
             {
-                services.AddSwaggerGen(c =>
+                c.SwaggerDoc("v1",
+                    new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
+
+                c.AddBrandCertificateSecurityDefinition();
+                c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+                c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+
+                var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+                if (File.Exists(path))
                 {
-                    c.SwaggerDoc("v1",
-                        new()
-                        {
-                            Title = "TGS Operator API",
-                            Version = "v1"
-                        });
-
-                    var securityScheme = new OpenApiSecurityScheme
-                    {
-                        Name = "Api Authorization",
-                        Description = "authorized jwt token, get from api/auth/jwt",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "bearer",
-                        Reference = new()
-                        {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
-                        }
-                    };
-
-                    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-
-                    c.OperationFilter<SwaggerHeaderFilter>();
-                    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-                    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
-                    c.ApplyWebApiToolkitSupport();
-
-                    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                    var path = Path.Combine(AppContext.BaseDirectory, xml);
-
-                    if (File.Exists(path))
-                    {
-                        c.IncludeXmlComments(path);
-                    }
-                });
-            }
-
+                    c.IncludeXmlComments(path);
+                }
+            });
             services.AddCors(options =>
             {
                 var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();

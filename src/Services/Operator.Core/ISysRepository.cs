@@ -11,5 +11,7 @@ namespace TGS.Services.Operator
         IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId);
 
         ValueTask<BrandInfo?> GetBrandInfoAsync(Guid brandId);
+
+        IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate);
     }
 }

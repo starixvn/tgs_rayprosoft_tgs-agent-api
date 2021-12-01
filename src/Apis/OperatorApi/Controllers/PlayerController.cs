@@ -112,36 +112,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Create a player
-        /// </summary>
-        [HttpPost("create")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<CreatePlayerResponse> CreateAsync(
-            [FromServices] IRequestAnalyzer requestAnalyzer,
-            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
-            [FromBody] CreatePlayerRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            var ipAddress = requestAnalyzer.GetIp(HttpContext);
-            var query = new CreatePlayerCommand(
-                brandId,
-                request.Username,
-                request.Password,
-                request.CurrencyCode,
-                request.AgentInvitationCode,
-                request.IsTestPlayer,
-                ipAddress);
-
-            var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
-
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
-
-        /// <summary>
         /// Start forgot password flow.
         /// </summary>
         /// <param name="forgotPasswordService">The forgot password service.</param>
@@ -177,7 +147,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -314,6 +284,39 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
 
             return new LogoutResponse { UpdateTime = info.UpdateTime };
+        }
+
+        /// <summary>
+        /// Create a player
+        /// </summary>
+        [HttpPost("create")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async Task<CreatePlayerResponse> RegisterPlayerAsync(
+            [FromServices] IRequestAnalyzer requestAnalyzer,
+            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
+            [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+            [FromBody] CreatePlayerRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var ipAddress = requestAnalyzer.GetIp(HttpContext);
+            var query = new CreatePlayerCommand(
+                brandId,
+                request.Username,
+                request.Password,
+                request.CurrencyCode,
+                string.IsNullOrWhiteSpace(invitationCode)
+                    ? request.AgentInvitationCode
+                    : invitationCode,
+                request.IsTestPlayer,
+                ipAddress);
+
+            var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
+
+            return new CreatePlayerResponse
+            {
+                PlayerCode = info.PlayerCode,
+                IsNew = info.IsNew
+            };
         }
 
         /// <summary>

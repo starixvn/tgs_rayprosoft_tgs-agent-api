@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,6 @@ using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -44,7 +44,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
             services
-                .AddNats(configuration)
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
@@ -62,7 +61,13 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                     config.GetSection("Promotion").Bind(options);
                 })
-                .AddPlayerBucketRepositoriesServices();
+                .AddPlayerBucketRepositoriesServices()
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("BackOffice:CashBaseUrl");
+                });
 
             services.AddWallet()
                 .AddTgsWalletRepositories()

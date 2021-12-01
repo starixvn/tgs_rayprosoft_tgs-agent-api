@@ -34,16 +34,25 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.ValidBetAmount)
                 .HasPrecision(18, 6);
 
+            builder.Property(b => b.OriginalTurnover)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(c => c.Turnover)
                 .HasPrecision(18, 6);
 
             builder.Property(c => c.WinLoss)
                 .HasPrecision(18, 6);
 
-            builder.HasIndex(c => new {c.PlayerCode})
+            builder.HasIndex(c => new { c.PlayerCode })
                 .HasDatabaseName("ix_round_aggregate_player_code");
 
-            builder.HasIndex(c => new {c.ReportDate, c.Hour, c.Minute})
+            builder.HasIndex(c => new
+                {
+                    c.ReportDate,
+                    c.Hour,
+                    c.Minute
+                })
                 .HasDatabaseName("ix_round_aggregate_multiple_keys");
         }
     }

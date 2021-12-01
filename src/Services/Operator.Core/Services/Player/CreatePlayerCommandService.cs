@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -10,7 +11,6 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
@@ -71,35 +71,27 @@ namespace TGS.Services.Operator.Services.Player
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(command.BrandId, currency)
                 .ConfigureAwait(false);
 
-            var playerStatus = brand.Code is "HKJP"
+            var playerStatus = brand.SmsRegisterFlowEnabled
                 ? PlayerStatus.InBlacklist
                 : PlayerStatus.Enabled;
 
-            var resultPlayerCode = default(string);
-
-            if (string.IsNullOrWhiteSpace(command.AgentInvitationCode))
-            {
-                resultPlayerCode = await CreatePlayerAsync(
+            var resultPlayerCode = string.IsNullOrWhiteSpace(command.AgentInvitationCode)
+                ? await CreatePlayerAsync(
+                    command,
+                    salt,
+                    password,
+                    currency,
+                    betLimitId,
+                    playerStatus).ConfigureAwait(false)
+                : await CreatePlayerByAgentAsync(
                     command,
                     salt,
                     password,
                     currency,
                     betLimitId,
                     playerStatus).ConfigureAwait(false);
-            }
-            else
-            {
-                resultPlayerCode = await CreatePlayerByAgentAsync(
-                    command,
-                    salt,
-                    password,
-                    currency,
-                    betLimitId,
-                    playerStatus).ConfigureAwait(false);
-            }
 
-            if (!string.IsNullOrEmpty(resultPlayerCode)
-                && brand.Code is not "HKJP")
+            if (!string.IsNullOrEmpty(resultPlayerCode) && !brand.SmsRegisterFlowEnabled)
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(

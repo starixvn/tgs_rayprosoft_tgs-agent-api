@@ -143,9 +143,9 @@ namespace TGS.Services.Report.Application.Queries.Round
                     ClosedOn = combine.round.ClosedOn,
                     CurrencyCode = combine.round.CurrencyCode,
                     BetAmount = combine.round.BetAmount,
-                    ValidBetAmount =
-                        combine.round.Turnover * (combine.round.EffectiveBettingPercentage ??
-                            (combine.brandGame == null ? 100M : combine.brandGame.EffectiveBettingPercentage)) / 100M,
+                    ValidBetAmount = combine.round.Turnover,
+                    Turnover = combine.round.Turnover * (combine.round.EffectiveBettingPercentage ??
+                        (combine.brandGame == null ? 100M : combine.brandGame.EffectiveBettingPercentage)) / 100M,
                     SettleAmount = combine.round.SettleAmount,
                     WinLoss = -combine.round.WinLoss,
                     AdditionalData = combine.detail.AdditionalData

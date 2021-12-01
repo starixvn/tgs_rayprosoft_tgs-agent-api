@@ -13,16 +13,16 @@ namespace Infrastructures.UnitTests
             var parameter = new
             {
                 Time = (DateTimeOffset?)new DateTimeOffset(
-                    year: 2021,
-                    month: 6,
-                    day: 2,
-                    hour: 0,
-                    minute: 0,
-                    second: 0,
-                    offset: TimeSpan.Zero)
+                    2021,
+                    6,
+                    2,
+                    0,
+                    0,
+                    0,
+                    TimeSpan.Zero)
             };
 
-            var expected = "Time=2021-06-02T00:00:00.00Z";
+            var expected = "Time=2021-06-02 00:00:00Z";
 
             var actual = ClientPath.AppendWithProperties(string.Empty, parameter);
 

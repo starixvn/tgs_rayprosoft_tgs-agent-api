@@ -17,8 +17,8 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Queries.Game;
-using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 {
@@ -73,7 +73,8 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
             return File(
                 fileStream,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Games.xlsx");
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Games.xlsx");
         }
 
         [HttpGet("localization/export")]
@@ -116,7 +117,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                     },
                     new Cell
                     {
-                        CellValue = new CellValue("Name"),
+                        CellValue = new CellValue("Code"),
                         DataType = CellValues.String
                     }
                 );
@@ -145,7 +146,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                         },
                         new Cell
                         {
-                            CellValue = new CellValue(game.GameName),
+                            CellValue = new CellValue(game.GameCode),
                             DataType = CellValues.String
                         }
                     );
@@ -193,17 +194,17 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 .Select(x => new GameLocalizationModel
                 {
                     Id = int.Parse(x.Id),
-                    Name = x.Name,
+                    Code = x.Code,
                     Localization = new Dictionary<string, JsonDocument>
                     {
-                        {"en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }")},
-                        {"zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }")},
-                        {"zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }")},
-                        {"id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }")},
-                        {"th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }")},
-                        {"vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }")},
-                        {"ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }")},
-                        {"ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }")}
+                        { "en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }") },
+                        { "zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }") },
+                        { "zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }") },
+                        { "id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }") },
+                        { "th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }") },
+                        { "vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }") },
+                        { "ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }") },
+                        { "ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }") }
                     }
                 })
                 .ToList();

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
@@ -14,15 +14,14 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
 
         public GetGameLocalizationQueryService(
             ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+            => _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
         public async ValueTask<GameLocalizationInfo> GetAsync(
             GetGameLocalizationQuery query,
             CancellationToken cancellationToken = default)
         {
-            var gameProvider = await _tgsRepository.GameProviders.FirstOrDefaultAsync(x => x.Code == query.GameProviderCode);
+            var gameProvider =
+                await _tgsRepository.GameProviders.FirstOrDefaultAsync(x => x.Code == query.GameProviderCode);
 
             var gpId = gameProvider.Id;
 
@@ -36,13 +35,14 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                 .Where(x => x.GameProviderId == gpId)
                 .ToArrayAsync();
 
-            return new GameLocalizationInfo()
+            return new GameLocalizationInfo
             {
                 Languages = providerLanguages.Select(x => x.CultureCode),
                 Games = games.Select(x =>
-                    new GameData()
+                    new GameData
                     {
                         GameId = x.Id,
+                        GameCode = x.Code,
                         GameName = x.Name,
                         Localization = x.Localization
                     })

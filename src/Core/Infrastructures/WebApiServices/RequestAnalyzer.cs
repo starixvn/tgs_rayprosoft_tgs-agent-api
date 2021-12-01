@@ -36,13 +36,13 @@ namespace TGS.Core.Infrastructures.WebApiServices
                 return userHostAddress;
             }
 
-            return forwardIps.Select(e => e.Trim())
-                       .FirstOrDefault(e =>
-                       {
-                           var ipi = _localIpFinder.GetIpInfo(e);
-                           return ipi.IsValid && !ipi.IsLocal; // valid IP but not local
-                       })
-                   ?? userHostAddress;
+            return forwardIps
+                .Select(e => e.Trim())
+                .FirstOrDefault(e =>
+                {
+                    var ipi = _localIpFinder.GetIpInfo(e);
+                    return ipi.IsValid && !ipi.IsLocal; // valid IP but not local
+                }) ?? userHostAddress;
         }
     }
 }

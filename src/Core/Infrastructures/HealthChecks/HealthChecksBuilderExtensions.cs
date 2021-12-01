@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Amazon.S3;
+using HealthChecks.Aws.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -28,13 +30,6 @@ namespace TGS.Core.Infrastructures.HealthChecks
             return builder;
         }
 
-        public static IHealthChecksBuilder AddNats(this IHealthChecksBuilder builder, string name = "nats",
-            HealthStatus? failureStatus = null, IEnumerable<string> tags = null, TimeSpan? timeout = null)
-        {
-            builder.AddCheck<NatsHealthCheck>(name, failureStatus, tags, timeout);
-            return builder;
-        }
-
         public static IHealthChecksBuilder AddMongoDb(this IHealthChecksBuilder builder, IConfiguration configuration,
             string sectionName, string name = "mongodb", HealthStatus? failureStatus = null,
             IEnumerable<string> tags = null, TimeSpan? timeout = null)
@@ -50,36 +45,44 @@ namespace TGS.Core.Infrastructures.HealthChecks
         {
             name ??= "AwsS3";
             builder.AddS3(sp =>
-            {
-                var setting = sp.GetRequiredService<AwsSettings>();
-                return new()
                 {
-                    BucketName = setting.Project.Bucket,
-                    AccessKey = setting.AccessKeyId,
-                    SecretKey = setting.SecretAccessKey,
-                    S3Config = new()
+                    var setting = sp.GetRequiredService<AwsSettings>();
+                    return new S3BucketOptions
                     {
-                        UseHttp = setting.UseHttp,
-                        ServiceURL = setting.Project.ServiceUrl,
-                        ForcePathStyle = true
-                    }
-                };
-            }, $"{name}_public", failureStatus, tags, timeout);
+                        BucketName = setting.Project.Bucket,
+                        AccessKey = setting.AccessKeyId,
+                        SecretKey = setting.SecretAccessKey,
+                        S3Config = new AmazonS3Config
+                        {
+                            UseHttp = setting.UseHttp,
+                            ServiceURL = setting.Project.ServiceUrl,
+                            ForcePathStyle = true
+                        }
+                    };
+                },
+                $"{name}_public",
+                failureStatus,
+                tags,
+                timeout);
 
             builder.AddS3(sp =>
-            {
-                var setting = sp.GetRequiredService<AwsSettings>();
-                return new()
                 {
-                    BucketName = setting.Secret.Bucket,
-                    AccessKey = setting.AccessKeyId,
-                    SecretKey = setting.SecretAccessKey,
-                    S3Config = new()
+                    var setting = sp.GetRequiredService<AwsSettings>();
+                    return new S3BucketOptions
                     {
-                        UseHttp = setting.UseHttp, ServiceURL = setting.Secret.ServiceUrl, ForcePathStyle = true
-                    }
-                };
-            }, $"{name}_private", failureStatus, tags, timeout);
+                        BucketName = setting.Secret.Bucket,
+                        AccessKey = setting.AccessKeyId,
+                        SecretKey = setting.SecretAccessKey,
+                        S3Config = new AmazonS3Config
+                        {
+                            UseHttp = setting.UseHttp, ServiceURL = setting.Secret.ServiceUrl, ForcePathStyle = true
+                        }
+                    };
+                },
+                $"{name}_private",
+                failureStatus,
+                tags,
+                timeout);
 
             return builder;
         }
