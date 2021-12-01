@@ -109,6 +109,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 AutoSentAgentBonus = true,
                 AutoSentPlayerBonus = true,
                 Status = Status.Active,
+                AgentDividendType = request.AgentDividendType,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
                 SettlementDay = request.SettlementDay,

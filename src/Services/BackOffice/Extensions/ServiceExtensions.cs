@@ -16,7 +16,7 @@ namespace TGS.Services.BackOffice.Extensions
         {
             services.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient);
             services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Scoped);
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
             services.AddTransient<IBetLimitService, BetLimitService>();
             services.AddTransient<IBrandService, BrandService>();
@@ -44,6 +44,7 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IAgentDividendService, AgentDividendService>();
             services.AddTransient<IPlayerIpService, PlayerIpService>();
             services.AddTransient<IPlayerWalletExchangeService, PlayerWalletExchangeService>();
+            services.AddTransient<IBrandAgentDividendConditionService, BrandAgentDividendConditionService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

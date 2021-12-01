@@ -79,6 +79,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Application\Resources\BrandAgentDividendCondition.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BrandAgentDividendCondition.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\BrandGame.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -157,6 +162,10 @@
     <EmbeddedResource Update="Application\Resources\Brand.resx">
       <LastGenOutput>Brand.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\BrandAgentDividendCondition.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BrandAgentDividendCondition.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\BrandGame.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

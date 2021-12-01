@@ -206,6 +206,7 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<WithdrawForm> WithdrawForms { get; set; }
 
+        DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
         DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
     }
 }

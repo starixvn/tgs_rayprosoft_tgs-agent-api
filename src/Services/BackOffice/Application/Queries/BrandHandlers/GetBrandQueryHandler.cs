@@ -14,9 +14,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
         private readonly IBrandService _service;
 
         public GetBrandQueryHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+            => _service = service;
 
         public override async Task<GetBrandResponse> Handle(GetBrandRequest request,
             CancellationToken cancellationToken)
@@ -44,6 +42,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,
+                    AgentDividendType = brand.AgentDividendType,
                     ClientId = brand.ClientId,
                     SecretKey = brand.SecretKey,
                     ApiKey = brand.ApiKey,

@@ -222,6 +222,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
 
+        public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
         public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>

@@ -1178,6 +1178,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<short>("AgentDividendType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("agent_dividend_type");
+
                     b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -1331,6 +1335,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_brands_licensee_id");
 
                     b.ToTable("brands");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAgentDividendCondition", b =>
+                {
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("DividendPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_percentage");
+
+                    b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("net_profit");
+
+                    b.HasKey("Rank", "BrandId")
+                        .HasName("pk_brand_agent_dividend_conditions_rank_brand_id");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_agent_dividend_conditions_brand_id");
+
+                    b.ToTable("brand_agent_dividend_conditions");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandBetLimit", b =>
@@ -6302,6 +6339,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Licensee");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAgentDividendCondition", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany("BrandAgentDividendConditions")
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_brand_agent_dividend_conditions_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandBetLimit", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.BetLimit", "BetLimit")
@@ -7590,6 +7639,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Announcements");
 
                     b.Navigation("BetLimits");
+
+                    b.Navigation("BrandAgentDividendConditions");
 
                     b.Navigation("BrandGroups");
 
