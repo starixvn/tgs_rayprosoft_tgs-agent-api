@@ -36,7 +36,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerOnlineHandlers
 
             var datas = await (_playerService.GetPlayerQueries(
                 x => x.Where(x => playerCodes.Contains(x.PlayerCode))
-                .Where(query.VipLevelId.HasValue, x => x.Vip.Id == query.VipLevelId.Value)
+                .Where(query.VipId.HasValue, x => x.Vip.Id == query.VipId.Value)
                 .Where(query.Status.HasValue, x => x.Status == query.Status.Value)
                 .Where(!string.IsNullOrEmpty(query.PlayerCode), x => x.PlayerCode == query.PlayerCode)))
                 .Join(playerIps,
@@ -49,7 +49,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerOnlineHandlers
                         Username = player.Username,
                         RealName = player.RealName,
                         Status = player.Status,
-                        VipLevelId = player.Vip.Id,
+                        VipId = player.Vip.Id,
                         VipLevel = player.Vip.Level,
                         LoginIp = playerIp.Ip,
                         LoginOn = playerIp.RecordOn
