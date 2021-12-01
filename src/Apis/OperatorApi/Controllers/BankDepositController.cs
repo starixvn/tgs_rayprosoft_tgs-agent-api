@@ -335,6 +335,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 formId => serializer.Serialize(
                     new SkyPayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
                         formId)));
 
             await createDepositFormService
