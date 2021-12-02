@@ -305,7 +305,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
-        [HttpPost("skypay")]
+        [HttpPost("skypay-{fragment}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
@@ -314,6 +314,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] SkyPaySerializer serializer,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            string fragment,
             [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -330,7 +331,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                "tgs.payment.skypay.deposit",
+                $"tgs.payment.skypay.{fragment}.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
                     new SkyPayDepositSettings(
