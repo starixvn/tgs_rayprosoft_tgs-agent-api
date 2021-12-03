@@ -57,9 +57,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalRoundId = source.BetId.ToString(),
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
-                ExternalGameId = "1",
+                ExternalGameId = "sportsbook",
                 GameActionType = GameActionType.PlaceBet,
-                ExtraData =  DateTimeOffset
+                ExtraData = DateTimeOffset
                     .FromUnixTimeSeconds(source.Created.ToUnixTimeSeconds())
                     .ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
@@ -95,9 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
         async ValueTask<BetData> IBetConstructActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source)
         {
-            //TODO:還需要調整GameID的對應
-
-            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "1").ConfigureAwait(false);
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
             var cachedGame = cachedGames.First();
 
             string externalRoundId = source.BetId.ToString();
@@ -122,11 +120,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 return null;
             }
 
-
             var (roundRecord, gameActionRecord) = await _service
                 .GetGameActionsByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
                 .ConfigureAwait(false);
-
 
             var transactions = new TransactionData
             {
@@ -135,19 +131,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalRoundId = source.BetId.ToString(),
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
-                ExternalGameId = "1",//Temp Fake Data
-                ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,// "49461321883",
+                ExternalGameId = "sportsbook",
+                ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
                 GameActionType = gameActionType,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
-                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)                
+                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
             };
 
             return GetBetData(data, playCode, transactions, autoCloseRound);
         }
 
         private BetData GetBetData(
-                            GameProviderConfigurationData data,
+                                    GameProviderConfigurationData data,
             string playerCode,
             TransactionData transactions,
             bool autoCloseRound,
@@ -165,18 +161,5 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
                 Transactions = new[] { transactions }
             };
-
-        private static GameActionType? ProcessingSettlement(BetResultedRequest source)
-        {
-            return source.BetState switch
-            {
-                1 => GameActionType.CancelTransaction,
-                2 => GameActionType.TieBet,
-                3 => GameActionType.LoseBet,
-                4 => GameActionType.WinBet,
-                5 => source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
-                _ => null,
-            };
-        }
     }
 }
