@@ -27,6 +27,28 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
     {
+        [HttpGet("bc")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<ContentResult> BCSportsHtmlAsync(
+            [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
+        {
+            var currentCultureName = CultureInfo.CurrentUICulture.Name;
+
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new GetBetConstructHtmlContentQuery(playerTokenData.PlayerCode, brandId, playerTokenData.PlatformType, currentCultureName);
+
+            var result = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return new ContentResult
+            {
+                Content = result.Html,
+                ContentType = "text/html",
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
+
         [HttpGet("favorite/{gameType}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public IAsyncEnumerable<int> GetFavoriteGamesAsync(
@@ -358,26 +380,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var val = value.GetString();
             return string.IsNullOrEmpty(val) ? defaultValue : val;
-        }
-
-        [HttpGet("bc")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<ContentResult> BCSportsHtmlAsync(
-            [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-            
-            var query = new GetBetConstructHtmlContentQuery(playerTokenData.PlayerCode,brandId, playerTokenData.PlatformType);
-
-            var result = await getService.GetAsync(query).ConfigureAwait(false);
-
-            return new ContentResult
-            {
-                Content = result.Html,
-                ContentType = "text/html",
-                StatusCode = StatusCodes.Status200OK
-            };
         }
     }
 }
