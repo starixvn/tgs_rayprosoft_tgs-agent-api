@@ -27,10 +27,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
     {
         public readonly ITgsRepository _repository;
 
-        public TgsPlayerService(ITgsRepository repository) : base(repository)
-        {
-            _repository = repository;
-        }
+        public TgsPlayerService(ITgsRepository repository) : base(repository) => _repository = repository;
 
         async Task<(PlayerAccountChangeModel[], int)> ITgsPlayerService.GetPlayerAccountChangeAsync(
             GetPlayerAccountChangesRequest request)
@@ -51,6 +48,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AccountChangeType.CancelWithdrawal       => TransactionType.CancelWithdrawal,
                 AccountChangeType.GameProviderDeposit    => TransactionType.GameProviderDeposit,
                 AccountChangeType.GameProviderWithdrawal => TransactionType.GameProviderWithdrawal,
+                AccountChangeType.UnsettledBetManual     => TransactionType.UnsettledBetManual,
                 _                                        => null
             };
 
@@ -69,16 +67,17 @@ namespace TGS.Services.Report.Infrastructure.DataService
             };
 
             var results = await _repository
-                .SqlQueryMultipleAsync<PlayerAccountChangeModel>(spName, parameters:
+                .SqlQueryMultipleAsync<PlayerAccountChangeModel>(spName,
+                    parameters:
                     new Dictionary<string, object>
                     {
-                        {"_from", request.From},
-                        {"_to", request.To},
-                        {"_player_code", request.PlayerCode},
-                        {"_transaction_type", transactionType},
-                        {"_game_action_type", gameActionType},
-                        {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
-                        {"_page_number", request.ShowAll ? 1 : request.Page}
+                        { "_from", request.From },
+                        { "_to", request.To },
+                        { "_player_code", request.PlayerCode },
+                        { "_transaction_type", transactionType },
+                        { "_game_action_type", gameActionType },
+                        { "_page_size", request.ShowAll ? int.MaxValue : request.Rows },
+                        { "_page_number", request.ShowAll ? 1 : request.Page }
                     });
             return (results.ToArray(), results.Any() ? results.First().TotalCount : 0);
             ;

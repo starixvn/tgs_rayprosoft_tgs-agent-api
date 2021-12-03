@@ -14,6 +14,7 @@
         CancelWithdrawal = 9,
         GameProviderDeposit = 10,
         GameProviderWithdrawal = 11,
+        UnsettledBetManual = 12,
         PlaceBet = 100,
         WinBet = 101,
         LoseBet = 102,
