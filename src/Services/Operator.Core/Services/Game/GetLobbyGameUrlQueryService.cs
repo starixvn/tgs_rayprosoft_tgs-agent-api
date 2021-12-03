@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operations;
 using Tgs.ServiceUtility;
+using System.Linq;
 
 namespace TGS.Services.Operator.Services.Game
 {
@@ -40,9 +41,9 @@ namespace TGS.Services.Operator.Services.Game
                 .ConfigureAwait(false);
 
             if (games.Length != 1)
-            {
+            {                
                 throw new InvalidOperationException(
-                    $"Game Provider '{gameProviderCode}' with game type '{gameType}' and platform '{platformType}' should only have 1 lobby but found {games.Length}.");
+                $"Game Provider '{gameProviderCode}' with game type '{gameType}' and platform '{platformType}' should only have 1 lobby but found {games.Length}.");                
             }
 
             var gameId = games[0].Id;
