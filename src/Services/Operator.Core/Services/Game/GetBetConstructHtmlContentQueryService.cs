@@ -77,6 +77,8 @@ namespace TGS.Services.Operator.Services.Game
             {
                 "zh-CN" => "chi",
                 "zh-TW" => "chi",
+                "th-TH" => "tha",
+                "vi-VN" => "vnm",
                 _ => "eng"
             };
 
