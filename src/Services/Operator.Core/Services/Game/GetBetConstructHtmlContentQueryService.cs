@@ -16,15 +16,15 @@ namespace TGS.Services.Operator.Services.Game
     public class GetBetConstructHtmlContentQueryService : IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo>
     {
         private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ITgsRepository _repository;
         private readonly ITokenProvider _tokenProvider;
 
         public GetBetConstructHtmlContentQueryService(
-            ITokenProvider tokenProvider, 
-            ITgsRepository repository, 
+            ITokenProvider tokenProvider,
+            ITgsRepository repository,
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IGameProviderCurrencyCodeMapper currencyCodeMapper,
@@ -73,9 +73,18 @@ namespace TGS.Services.Operator.Services.Game
 
             var authToken = await _tokenProvider.EncryptAsync(query.PlayerCode);
 
+            var lang = query.CultureName switch
+            {
+                "zh-CN" => "chi",
+                "zh-TW" => "chi",
+                "th-TH" => "tha",
+                "vi-VN" => "vnm",
+                _ => "eng"
+            };
+
             var html =
                 "<div id=\"bcsportsbookcontainer\"></div>" +
-                $"<script id=\"bcsportsbook\" src=\"{domain}/js/partnerinit.js?containerID=bcsportsbookcontainer&UserId={userId}&AuthToken={authToken}&lang=eng&sport=1\"></script>";
+                $"<script id=\"bcsportsbook\" src=\"{domain}/js/partnerinit.js?containerID=bcsportsbookcontainer&UserId={userId}&AuthToken={authToken}&lang={lang}&sport=1\"></script>";
 
             return new BetConstructHtmlContentInfo()
             {
