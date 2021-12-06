@@ -89,7 +89,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
                         formId,
                         "https://google.com",
-                        clientIp)));
+                        clientIp,
+                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
