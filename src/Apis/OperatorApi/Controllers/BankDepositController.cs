@@ -339,6 +339,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
                         formId)));
 
             await createDepositFormService

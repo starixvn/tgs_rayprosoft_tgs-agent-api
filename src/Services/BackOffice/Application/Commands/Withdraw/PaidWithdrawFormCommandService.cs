@@ -25,7 +25,11 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 return;
 
             await _paymentServiceClient
-                .SubmitWithdrawFormStatusAsync(formData.Id, PaymentFlowState.Paid)
+                .SubmitWithdrawFormStatusAsync(
+                    formData.Id,
+                    PaymentFlowState.Paid,
+                    paidUserId: command.PaidUserId,
+                    paidUserName: command.PaidUserName)
                 .ConfigureAwait(false);
         }
     }
