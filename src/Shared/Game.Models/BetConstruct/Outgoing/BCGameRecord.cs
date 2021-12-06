@@ -8,6 +8,6 @@ namespace TGS.Shared.Game.Models.BetConstruct.Outgoing
         public long SelectionId { get; init; }
 
         [JsonPropertyName("State")]
-        public int State { get; init; }
+        public BetSelectionState State { get; init; }
     }
 }
