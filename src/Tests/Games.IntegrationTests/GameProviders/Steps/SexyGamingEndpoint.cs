@@ -75,17 +75,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             services.AddRedis(action);
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
 
             services.AddSingleton(new Mock<ITgsLog>().Object);
 
