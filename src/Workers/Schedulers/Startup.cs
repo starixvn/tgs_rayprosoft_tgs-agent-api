@@ -108,17 +108,18 @@ namespace TGS.Workers.Schedulers
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
 
             services.AddHangfireServer((sp, options) =>
             {

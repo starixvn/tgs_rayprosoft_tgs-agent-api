@@ -107,6 +107,17 @@ namespace TGS.Apis.ReportApi
                 });
 
             services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
+            services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
 

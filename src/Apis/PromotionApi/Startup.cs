@@ -118,20 +118,21 @@ namespace TGS.Apis.PromotionApi
                 httpClient.BaseAddress = new Uri(config.GetValue<string>("Promotion:FileServiceBaseUrl"));
             });
 
-            services.AddNatsMessageQueue(config =>
-            {
-                config
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var configuration = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .AddHandler<DepositStatusChangedMessageHandler>(
-                        "tgs.payment.deposit.status",
-                        "tgs.payment.deposit.status")
-                    .ProcessAllSubjects();
-            });
+                            options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                        })
+                        .AddHandler<DepositStatusChangedMessageHandler>(
+                            "tgs.payment.deposit.status",
+                            "tgs.payment.deposit.status");
+                });
 
             services
                 .AddHttpContextAccessor()

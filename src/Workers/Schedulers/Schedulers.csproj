@@ -15,10 +15,10 @@
   <ItemGroup>
     <PackageReference Include="Hangfire.Dashboard.Management" Version="1.7.9" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.1" />
-    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.1" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.2.0" />
     <PackageReference Include="Tgs.ProfitRebate.Client" Version="1.0.12" />
   </ItemGroup>
 

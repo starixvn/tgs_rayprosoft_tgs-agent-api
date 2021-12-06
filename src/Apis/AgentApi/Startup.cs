@@ -179,17 +179,18 @@ namespace TGS.Apis.AgentApi
                 .AddRedis(_configuration)
                 .ForwardToPrometheus();
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
 
             if (!_env.IsProduction())
             {
