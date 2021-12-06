@@ -14,36 +14,37 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
     public class BCGameHistory : BaseBetHistory
     {
         public BCGameHistory(
-            IRoundQueries roundQueries, 
-            IGameProviderOperations gameProviderOperations) 
+            IRoundQueries roundQueries,
+            IGameProviderOperations gameProviderOperations)
             : base(roundQueries, gameProviderOperations)
         {
         }
 
         protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
-            string playerCode, 
-            Round round, 
-            CachedGameProvider cachedGameProvider, 
-            CachedGame cachedGame, 
+            string playerCode,
+            Round round,
+            CachedGameProvider cachedGameProvider,
+            CachedGame cachedGame,
             string language)
         {
-            var gameRecord = JsonSerializer.Deserialize<BCGameRecord>(round.RoundDetail.AdditionalData);
+            var gameRecord = JsonSerializer.Deserialize<BCGameRecord[]>(round.RoundDetail.AdditionalData);
 
-            if(gameRecord == null)
+            if (gameRecord == null)
             {
                 return ValueTask.FromResult<RoundResult>(null);
             }
 
-            return ValueTask.FromResult(new RoundResult { 
+            return ValueTask.FromResult(new RoundResult
+            {
                 BetAmount = round.BetAmount ?? 0,
                 Turnover = round.Turnover ?? 0,
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                 {
-                    new JsonData 
+                    new JsonData
                     {
-                        Value = round.RoundDetail.AdditionalData
+                        Value = JsonSerializer.Serialize(gameRecord)
                     }
                 }
             });
