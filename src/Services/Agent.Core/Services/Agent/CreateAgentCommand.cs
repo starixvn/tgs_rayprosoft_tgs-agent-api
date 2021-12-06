@@ -21,6 +21,8 @@ namespace TGS.Services.Agent.Services.Agent
 
         public decimal CardGameRebatePercentage { get; init; }
 
+        public decimal DividendPercentage { get; init; }
+
         public string Email { get; init; } = default!;
 
         public decimal LiveDealerRebatePercentage { get; init; }

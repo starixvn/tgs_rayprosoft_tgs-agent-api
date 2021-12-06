@@ -106,18 +106,6 @@ namespace TGS.Apis.ReportApi
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
-
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
-
             services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
@@ -143,7 +131,16 @@ namespace TGS.Apis.ReportApi
 
             services
                 .AddMessageQueue()
-                .AddRabbitGlobPatternExchange("*", "amq.direct")
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                })
                 .AddRabbitMessageQueue(config =>
                 {
                     config
@@ -153,7 +150,10 @@ namespace TGS.Apis.ReportApi
 
                             configuration.GetSection("RabbitMQ").Bind(options);
                         });
-                });
+                })
+                .ClearAllExchanges()
+                .AddRabbitGlobPatternExchange("report.error", "amq.direct")
+                .AddNatsGlobPatternExchange("*");
         }
     }
 }

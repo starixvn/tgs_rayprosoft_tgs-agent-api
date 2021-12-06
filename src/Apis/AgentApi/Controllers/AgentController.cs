@@ -47,6 +47,7 @@ namespace TGS.Apis.AgentApi.Controllers
             var query = new CreateAgentCommand
             {
                 BrandId = brandId,
+                DividendPercentage = request.DividendPercentage,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
                 LotteryRebatePercentage = request.LotteryRebatePercentage,

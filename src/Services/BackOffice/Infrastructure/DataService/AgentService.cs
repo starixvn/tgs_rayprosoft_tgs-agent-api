@@ -116,7 +116,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 }
             }.ToHashSet();
 
-            agent.AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendCondition
+            agent.AgentDividendConditions = brand.BrandAgentDividendConditions.Select(x => new AgentDividendCondition
             {
                 Rank = x.Rank,
                 NetProfit = x.NetProfit,
