@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 _ => GameActionType.PlaceBet
             };
 
-            var externalTransactionId = $"{source.TransactionId}_settle";
+            var externalTransactionId = $"{source.TransactionId}";
             var externalGameActionGroupId = source.BetId.ToString();
 
             var gameActionExternal = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId).ConfigureAwait(false);
