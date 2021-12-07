@@ -100,7 +100,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
                     ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo,
-                    OrderNo = formDetail.OrderNo
+                    OrderNo = formDetail.OrderNo,
+                    ReviewedOn = formDetail.ReviewedOn,
+                    ReviewedUserName = formDetail.ReviewedUserName,
+                    PaidOn = formDetail.PaidOn,
+                    PaidUserId = formDetail.PaidUserId,
+                    PaidUserName = formDetail.PaidUserName
                 }
             };
         }
