@@ -332,7 +332,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                $"tgs.payment.skypay.{fragment}.deposit",
+                $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
                     new SkyPayDepositSettings(
