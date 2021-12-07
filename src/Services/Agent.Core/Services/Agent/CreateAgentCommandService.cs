@@ -56,22 +56,6 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new DividendPercentageException(JsonSerializer.Serialize(errorMessage));
             }
 
-            if (brand.AgentDividendType == AgentDividendType.MultipleLayer)
-            {
-                foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
-                {
-                    var previous = query.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
-
-                    if (previous is not null && (condition.NetProfit < previous.NetProfit ||
-                        condition.ActiveNumber < previous.ActiveNumber ||
-                        condition.DividendPercentage < previous.DividendPercentage))
-                    {
-                        var errorMessage = new { previous.Rank };
-                        throw new DividendConditionException(JsonSerializer.Serialize(errorMessage));
-                    }
-                }
-            }
-
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
             while (await _tgsRepository.Agents.AsQueryable()
@@ -93,7 +77,8 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    query.AgentDividendConditions.Length > 0
+                    brand.BrandAgentDividendConditions.Count > 0 ||
+                    brand.AgentDividendType == AgentDividendType.OneLayer
                         ? AgentConfigStatus.DoneForConfigurePercentage
                         : AgentConfigStatus.WaitForConfigurePercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,

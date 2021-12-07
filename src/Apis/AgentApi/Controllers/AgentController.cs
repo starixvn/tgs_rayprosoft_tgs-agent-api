@@ -18,7 +18,6 @@ using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
 using Tgs.ServiceUtility;
-using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -57,14 +56,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 SportsRebatePercentage = request.SportsRebatePercentage,
                 Username = request.UserName,
-                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage,
-                AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendConditionModel
-                {
-                    Rank = x.Rank,
-                    NetProfit = x.NetProfit,
-                    ActiveNumber = x.ActiveNumber,
-                    DividendPercentage = x.DividendPercentage
-                }).ToArray()
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
             };
 
             var info = await getCreateAgentQueryService
