@@ -1,9 +1,8 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Infrastructures.Hangfire.Services;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
-namespace TGS.Core.Infrastructures.Hangfire
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ApplicationBuilderExtensions
     {

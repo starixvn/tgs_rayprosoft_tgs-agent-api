@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Infrastructures.Hangfire.Services
+namespace TGS.Workers.Schedulers.Hangfire.Services
 {
     public abstract class BaseWork<T>
     {

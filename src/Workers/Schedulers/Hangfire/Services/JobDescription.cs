@@ -1,6 +1,7 @@
 ﻿using System;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
-namespace TGS.Core.Infrastructures.Hangfire.Services
+namespace TGS.Workers.Schedulers.Hangfire.Services
 {
     public record JobDescription
     {
