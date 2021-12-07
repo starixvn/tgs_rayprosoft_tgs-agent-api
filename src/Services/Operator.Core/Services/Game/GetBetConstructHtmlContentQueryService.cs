@@ -60,7 +60,7 @@ namespace TGS.Services.Operator.Services.Game
             {
                 PlatformType.Desktop => gameProviderConfiguration.DesktopEndpoint,
                 PlatformType.Mobile => gameProviderConfiguration.MobileEndpoint,
-                _ => brandGameProviderConfiguration.QueryStrings.Desktop
+                _ => gameProviderConfiguration.DesktopEndpoint
             };
 
             var betConstructSetting = _repository.Settings
