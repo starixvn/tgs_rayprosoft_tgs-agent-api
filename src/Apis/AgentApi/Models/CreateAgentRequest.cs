@@ -9,6 +9,7 @@
         public string RealName { get; set; }
 
         public string Email { get; set; }
+
         public string Phone { get; set; }
 
         public decimal DividendPercentage { get; init; }
@@ -26,6 +27,5 @@
         public decimal VirtualSportsRebatePercentage { get; init; }
 
         public string Remarks { get; init; }
-        public AgentDividendConditionModel[] AgentDividendConditions { get; init; }
     }
 }
