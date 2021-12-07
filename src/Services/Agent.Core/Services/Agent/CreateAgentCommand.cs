@@ -15,11 +15,11 @@ namespace TGS.Services.Agent.Services.Agent
 
     public class CreateAgentCommand
     {
-        public AgentDividendConditionModel[] AgentDividendConditions { get; init; } = default!;
-
         public Guid BrandId { get; init; }
 
         public decimal CardGameRebatePercentage { get; init; }
+
+        public decimal DividendPercentage { get; init; }
 
         public string Email { get; init; } = default!;
 

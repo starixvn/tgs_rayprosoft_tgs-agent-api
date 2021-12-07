@@ -79,6 +79,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<CoreModels.AgentDividendCondition>()
                 ));
 
@@ -128,6 +129,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<CoreModels.AgentDividendCondition>()));
 
             var actual = await sut.GetAsync(command);
@@ -190,17 +192,7 @@ namespace Agent.UnitTests
                 BrandId = brandId,
                 Username = "UserName",
                 Password = "Password",
-                Remarks = "Remarks",
-                AgentDividendConditions = new[]
-                {
-                    new AgentDividendConditionModel
-                    {
-                        Rank = 1,
-                        NetProfit = 1,
-                        ActiveNumber = 1,
-                        DividendPercentage = 50
-                    }
-                }
+                Remarks = "Remarks"
             };
 
             var info = await sut.GetAsync(query);
@@ -237,13 +229,13 @@ namespace Agent.UnitTests
             var parentAgentId = Guid.NewGuid();
 
             repository.Agents.AddRange(
-                new CoreModels.Agent()
+                new CoreModels.Agent
                 {
                     BrandId = brandId,
                     ParentAgentId = parentAgentId,
                     Id = Guid.NewGuid()
                 },
-                new CoreModels.Agent()
+                new CoreModels.Agent
                 {
                     BrandId = brandId,
                     ParentAgentId = parentAgentId,

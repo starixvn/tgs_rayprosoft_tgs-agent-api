@@ -31,6 +31,19 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAgentDividendHandler
                 return CreateInvalidResponse<MessageResponse>(BrandAgentDividendCondition.AgentDividendTypeInvalid);
             }
 
+            foreach (var condition in request.BrandAgentDividendConditions.OrderBy(x => x.Rank))
+            {
+                var previous = request.BrandAgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
+
+                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                    condition.ActiveNumber < previous.ActiveNumber ||
+                    condition.DividendPercentage < previous.DividendPercentage))
+                {
+                    return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
+                        condition.Rank));
+                }
+            }
+
             var brandAgentDividendConditions = request.BrandAgentDividendConditions.Select(x
                 => new Core.DataServices.Tgs.Models.BrandAgentDividendCondition
                 {

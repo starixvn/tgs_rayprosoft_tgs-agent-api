@@ -64,7 +64,13 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new DashboardOptions { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
+                    new DashboardOptions
+                    {
+                        Authorization = new[]
+                        {
+                            new IgnoreHangfireAuthorizationFilter()
+                        }
+                    });
             });
         }
 
@@ -91,7 +97,8 @@ namespace TGS.Workers.Schedulers
                     _configuration,
                     jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes())
-                .AddMail(_configuration);
+                .AddMail(_configuration)
+                .AddProfitRebateClient(_configuration);
 
             services
                 .AddRedis((options, sp) =>
@@ -120,7 +127,10 @@ namespace TGS.Workers.Schedulers
 
                 options.Queues = new[]
                 {
-                    Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report, Consts.Queue.ArrearsEmail
+                    Consts.Queue.Schedule,
+                    Consts.Queue.GameProvider,
+                    Consts.Queue.Report,
+                    Consts.Queue.ArrearsEmail
                 };
 
                 options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
@@ -166,13 +176,11 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
         }
 
-        private static Type[] GetModuleTypes()
+        private static Type[] GetModuleTypes() => new[]
         {
-            return new[]
-            {
-                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
-                typeof(PromotionJobManagement)
-            };
-        }
+            typeof(AggregateJobManagement),
+            typeof(RebateAndDividendJobManagement),
+            typeof(PromotionJobManagement)
+        };
     }
 }

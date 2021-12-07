@@ -44,6 +44,7 @@
         MaticPayDepositNeedRealName = 410,
 
         DividendConditionError = 600,
+        DividendPercentageError = 601,
 
         SystemError = 900,
         OperationNotAllowed = 901,

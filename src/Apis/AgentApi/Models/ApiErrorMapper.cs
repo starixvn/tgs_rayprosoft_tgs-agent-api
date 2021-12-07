@@ -47,7 +47,8 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
                 [TgsApiError.UserBanned] = "UserBanned",
                 [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
-                [TgsApiError.DividendConditionError] = "DividendConditionError"
+                [TgsApiError.DividendConditionError] = "DividendConditionError",
+                [TgsApiError.DividendPercentageError] = "DividendPercentageError"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -86,7 +87,8 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest,
-                [TgsApiError.DividendConditionError] = StatusCodes.Status500InternalServerError
+                [TgsApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
+                [TgsApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -118,7 +120,8 @@ namespace TGS.Apis.AgentApi.Models
                 [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
                 [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.AgentNotFound,
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
-                [typeof(DividendConditionException)] = TgsApiError.DividendConditionError
+                [typeof(DividendConditionException)] = TgsApiError.DividendConditionError,
+                [typeof(DividendPercentageException)] = TgsApiError.DividendPercentageError
             };
 
         public bool CanProcess(Exception exception)

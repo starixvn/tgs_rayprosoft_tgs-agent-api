@@ -58,12 +58,6 @@ namespace TGS.Apis.ReportApi.Controllers
             [FromQuery] GetAgentPlayerWinLossRequest request) =>
             _mediator.Send(request);
 
-        [HttpPost("dividends")]
-        [Description("Create agent dividends")]
-        public Task<MessageResponse> CreateAgentDividendsAsync(
-            CreateAgentDividendsRequest request) =>
-            _mediator.Send(request);
-
         [HttpGet("accountChanges")]
         [Description("Get agent account changes")]
         public Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(

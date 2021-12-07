@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.Withdraw;
@@ -60,6 +60,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<AgentDividendCondition>()));
 
             fakeWalletRepository
@@ -149,6 +150,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<AgentDividendCondition>()));
 
             fakeWalletRepository

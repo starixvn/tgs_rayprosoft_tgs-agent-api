@@ -6,7 +6,6 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
@@ -18,7 +17,7 @@ using TGS.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
-using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -29,10 +28,7 @@ namespace TGS.Apis.AgentApi.Controllers
     {
         private readonly IMediator _mediator;
 
-        public AgentController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public AgentController(IMediator mediator) => _mediator = mediator;
 
         [HttpPost("create")]
         [CheckAgentEnabled]
@@ -47,6 +43,7 @@ namespace TGS.Apis.AgentApi.Controllers
             var query = new CreateAgentCommand
             {
                 BrandId = brandId,
+                DividendPercentage = request.DividendPercentage,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
                 LotteryRebatePercentage = request.LotteryRebatePercentage,
@@ -59,14 +56,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 SportsRebatePercentage = request.SportsRebatePercentage,
                 Username = request.UserName,
-                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage,
-                AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendConditionModel
-                {
-                    Rank = x.Rank,
-                    NetProfit = x.NetProfit,
-                    ActiveNumber = x.ActiveNumber,
-                    DividendPercentage = x.DividendPercentage
-                }).ToArray()
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
             };
 
             var info = await getCreateAgentQueryService
@@ -135,6 +125,7 @@ namespace TGS.Apis.AgentApi.Controllers
                     Status = agentInfo.Status.ToString(),
                     Type = agentInfo.Type.ToString(),
                     LevelType = agentInfo.AgentLevelType.ToString(),
+                    AgentDividendType = agentInfo.AgentDividendType.ToString(),
                     DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
                     {
                         Rank = x.Rank,
@@ -321,10 +312,7 @@ namespace TGS.Apis.AgentApi.Controllers
             var query = new CheckAgentExistsQuery(brandId, request.Username);
             var hasExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
-            return new CheckUsernameResponse
-            {
-                Exists = hasExisted
-            };
+            return new CheckUsernameResponse { Exists = hasExisted };
         }
     }
 }
