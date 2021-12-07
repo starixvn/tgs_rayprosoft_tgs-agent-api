@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
@@ -25,7 +26,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
                 return CreateInvalidResponse<MessageResponse>(Brand.NameExisted);
             }
 
-            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
             {
                 return CreateInvalidResponse<MessageResponse>(Brand.CodeExisted);
             }
