@@ -1,6 +1,6 @@
 ﻿using Hangfire.Dashboard;
 
-namespace TGS.Core.Infrastructures.Hangfire.Filters
+namespace TGS.Workers.Schedulers.Hangfire.Filters
 {
     public sealed class IgnoreHangfireAuthorizationFilter : IDashboardAuthorizationFilter
     {

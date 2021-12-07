@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Logging;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs
 {

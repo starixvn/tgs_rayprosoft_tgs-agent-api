@@ -1,4 +1,4 @@
-﻿namespace TGS.Core.Infrastructures.Hangfire
+﻿namespace TGS.Workers.Schedulers.Hangfire
 {
     public record HangfireSettings
     {
