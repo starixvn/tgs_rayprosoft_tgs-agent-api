@@ -192,17 +192,7 @@ namespace Agent.UnitTests
                 BrandId = brandId,
                 Username = "UserName",
                 Password = "Password",
-                Remarks = "Remarks",
-                AgentDividendConditions = new[]
-                {
-                    new AgentDividendConditionModel
-                    {
-                        Rank = 1,
-                        NetProfit = 1,
-                        ActiveNumber = 1,
-                        DividendPercentage = 50
-                    }
-                }
+                Remarks = "Remarks"
             };
 
             var info = await sut.GetAsync(query);

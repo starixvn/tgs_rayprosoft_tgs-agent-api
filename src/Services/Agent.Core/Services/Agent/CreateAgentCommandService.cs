@@ -36,6 +36,7 @@ namespace TGS.Services.Agent.Services.Agent
                 .FirstAsync(x => x.Id == query.ParentAgentId);
 
             var brand = await _tgsRepository.Brands.AsQueryable()
+                .Include(x => x.BrandAgentDividendConditions)
                 .FirstAsync(x => x.Id == query.BrandId)
                 .ConfigureAwait(false);
 
@@ -77,7 +78,7 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    brand.BrandAgentDividendConditions.Count > 0 ||
+                    brand.BrandAgentDividendConditions?.Count > 0 ||
                     brand.AgentDividendType == AgentDividendType.OneLayer
                         ? AgentConfigStatus.DoneForConfigurePercentage
                         : AgentConfigStatus.WaitForConfigurePercentage,

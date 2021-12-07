@@ -8,7 +8,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
-using TGS.Services.BackOffice.Domain.Enums;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
@@ -20,9 +19,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         public UpdateAgentHandler(
             IAgentService service,
             IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+            => _service = service;
 
         public override async Task<MessageResponse> Handle(
             UpdateAgentRequest request,
@@ -35,7 +32,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
 
-            if (request.ParentUsername.IsNotNullOrEmpty() && agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
+            if (request.ParentUsername.IsNotNullOrEmpty())
             {
                 var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
                     x.Username == request.ParentUsername);
@@ -45,14 +42,15 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
 
-                if (parentAgent.DividendPercentage < request.DividendPercentage)
+                if (parentAgent.Brand.AgentDividendType == AgentDividendType.OneLayer &&
+                    parentAgent.DividendPercentage < request.DividendPercentage)
                 {
                     return CreateInvalidResponse<MessageResponse>(Agent
                         .DividendPercentageMustLessThanOrEqualToUpperLayer);
                 }
             }
 
-            if(agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
+            if (agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
             {
                 var childAgentMaxDividendPercentage = await _service.GetAgentQueries()
                     .Where(x => x.ParentAgentId == agent.Id)
@@ -61,7 +59,8 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
                 if (request.DividendPercentage < childAgentMaxDividendPercentage)
                 {
-                    return CreateInvalidResponse<MessageResponse>(Agent.DividendPercentageMustGreaterThanOrEqualToLowerLayer);
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustGreaterThanOrEqualToLowerLayer);
                 }
             }
 
