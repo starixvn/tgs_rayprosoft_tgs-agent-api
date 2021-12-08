@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Games;
 using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
 
 namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
 {
@@ -27,19 +27,19 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
 
     public sealed class GameProviderDepositWithdrawalService : IGameProviderDepositWithdrawalService
     {
+        private readonly ICashServiceClient _cashServiceClient;
         private readonly IGameProviderFundTransferTransactionRepository _gameProviderFundTransferTransactionRepository;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IWalletRepository _walletRepository;
 
         public GameProviderDepositWithdrawalService(
             IPlayerOperations playerOperations,
-            IWalletRepository walletRepository,
+            ICashServiceClient cashServiceClient,
             IGameProviderOperations gameProviderOperations,
             IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
 
             _gameProviderOperations =
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
@@ -83,17 +83,11 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
                     Description = string.Empty
                 });
 
-
-            var wallet = await _walletRepository.ExchangeAsync(
-                request.BrandId,
+            var wallet = await _cashServiceClient.GameProviderDepositAsync(
                 request.PlayerWalletId,
-                request.PlayerCode,
-                TransactionTypes.GameProviderDeposit,
-                amount,
+                request.Amount,
                 gameProvider.Code,
-                transactionGameProviderId.ToString()
-            ).ConfigureAwait(false);
-
+                transactionGameProviderId.ToString()).ConfigureAwait(false);
 
             await _gameProviderFundTransferTransactionRepository.UpdateAsync(
                 new UpdateGameProviderFundTransferTransactionRequest
@@ -102,7 +96,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
                     TransactionId = wallet.TransactionId,
                     GameProviderTransactionId = request.GameProviderTransactionId,
                     Status = FundTransferTransactionStatus.Success,
-                    Balance = wallet.PostBalance,
+                    Balance = wallet.Balance,
                     UpdatedOn = DateTimeOffset.UtcNow
                 });
 
@@ -110,7 +104,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
             {
                 TransactionsId = wallet.TransactionId,
                 TransactionGameProviderId = transactionGameProviderId.Value,
-                Balance = wallet.PostBalance
+                Balance = wallet.Balance
             };
         }
 
@@ -143,17 +137,11 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
                     Description = string.Empty
                 });
 
-
-            var wallet = await _walletRepository.ExchangeAsync(
-                request.BrandId,
+            var wallet = await _cashServiceClient.GameProviderWithdrawalAsync(
                 request.PlayerWalletId,
-                request.PlayerCode,
-                TransactionTypes.GameProviderWithdrawal,
                 amount,
                 gameProvider.Code,
-                transactionGameProviderId.ToString()
-            ).ConfigureAwait(false);
-
+                transactionGameProviderId.ToString()).ConfigureAwait(false);
 
             await _gameProviderFundTransferTransactionRepository.UpdateAsync(
                 new UpdateGameProviderFundTransferTransactionRequest
@@ -162,7 +150,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
                     TransactionId = wallet.TransactionId,
                     GameProviderTransactionId = request.GameProviderTransactionId,
                     Status = FundTransferTransactionStatus.Success,
-                    Balance = wallet.PostBalance,
+                    Balance = wallet.Balance,
                     UpdatedOn = DateTimeOffset.UtcNow
                 });
 
@@ -170,7 +158,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
             {
                 TransactionsId = wallet.TransactionId,
                 TransactionGameProviderId = transactionGameProviderId.Value,
-                Balance = wallet.PostBalance
+                Balance = wallet.Balance
             };
         }
     }

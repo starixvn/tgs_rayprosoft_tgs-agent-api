@@ -13,7 +13,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.KY;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
-using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.KY
@@ -23,8 +22,6 @@ namespace TGS.Shared.Game.ApiClients.KY
         ValueTask<KYApiResponse<KYFnudResponse>> FundAsync(KYBrandMerchant brandMerchant, string agentId, DateTimeOffset dateTimeOffset, GPAction action, KYFnudRequest request);
 
         ValueTask<KYApiResponse<KYFundCheckingResponse>> FundCheckingAsync(KYBrandMerchant brandMerchant, string agentId, KYFundCheckingRequest request);
-
-        ValueTask<KYGPGameRecordResponse> GameRecordAsync(Uri apiUrl, KYGPGameRecordRequest request);
 
         ValueTask<KYApiResponse<KYGetBalanceResponse>> GetBalanceAsync(KYBrandMerchant brandMerchant, string agentId, KYGetBalanceRequest request);
 
@@ -94,9 +91,6 @@ namespace TGS.Shared.Game.ApiClients.KY
             return GetAPIAsync<KYFundCheckingResponse>(brandMerchant.ApiUrl, action, apiKYRequest);
         }
 
-        public ValueTask<KYGPGameRecordResponse> GameRecordAsync(Uri apiUrl, KYGPGameRecordRequest request) =>
-            ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/ky/GameRecord", request);
-
         public ValueTask<KYApiResponse<KYGetBalanceResponse>> GetBalanceAsync(KYBrandMerchant brandMerchant, string agentId, KYGetBalanceRequest request)
         {
             var action = GPAction.GetBalance;
@@ -142,8 +136,8 @@ namespace TGS.Shared.Game.ApiClients.KY
         }
 
         public ValueTask<KYApiResponse<KYGameUrlResponse>> GetGameUrlAsync(
-            KYBrandMerchant brandMerchant, 
-            string agentId, 
+            KYBrandMerchant brandMerchant,
+            string agentId,
             DateTimeOffset dateTimeOffset, KYGameUrlRequest request)
         {
             var action = GPAction.GetGameUrl;
@@ -209,7 +203,7 @@ namespace TGS.Shared.Game.ApiClients.KY
                 Ip = string.Empty,
                 Path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
                 Method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                Prefix = $"{Consts.GameProvider.KY.ToLower()}.{action.ToString()}",
+                Prefix = $"{Consts.GameProvider.KY.ToLower()}.{action}",
                 ServerName = Environment.MachineName.NoLongerThan(128),
                 RequestHeaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
                 RequestContent = JsonSerializer.Serialize(request),

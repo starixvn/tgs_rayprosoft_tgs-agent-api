@@ -6,6 +6,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Operator;
@@ -27,7 +28,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("{gpCode}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
-            [FromServices] IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
+            [FromServices] IGetService<GetGameBalanceQuery, decimal?> getGameBalanceService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
             string gpCode)
         {
@@ -38,13 +39,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var query = new GetGameBalanceQuery(playerTokenData.PlayerCode, gpCode);
 
-            var info = await getGameBalanceService.GetAsync(query).ConfigureAwait(false);
+            var balance = await getGameBalanceService.GetAsync(query).ConfigureAwait(false);
 
             return new GetGameBalanceResponse
             {
-                Balance = info.Balance,
-                Error = info.Error,
-                ErrorMessage = info.ErrorMessage
+                Balance = balance.HasValue ? balance.Value : 0,
+                Error = (int)(balance.HasValue ? TgsApiError.None : TgsApiError.GameBalanceFailed),
+                ErrorMessage = balance.HasValue ? string.Empty : TgsApiError.GameBalanceFailed.ToString()
             };
         }
 

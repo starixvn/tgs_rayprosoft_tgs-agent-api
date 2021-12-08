@@ -5,12 +5,12 @@ namespace TGS.Core.Infrastructures.Redis
 {
     public interface IRedisRepository
     {
-        IDatabase GetDb();
+        void DeleteKey(string key);
 
         Task DeleteKeyAsync(string key);
 
-        void DeleteKey(string key);
-
         string GetConnectionStatus();
+
+        IDatabase GetDb();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
@@ -40,6 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
         ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(
             Guid brandId, Guid gameProviderId);
+
+        ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
     }
 
     public class BetConstructService : IBetConstructService
@@ -126,5 +129,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             Guid brandId, 
             Guid gameProviderId) 
             => await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+
+        public async ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+        {
+            var data = await _gameActionQueries
+                .GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId)
+                .ConfigureAwait(false);
+            var gameAction = data.GameActions.Where(x => x.Type == GameActionType.PlaceBet).FirstOrDefault();
+            return new(data.Round, gameAction);
+        }
     }
 }

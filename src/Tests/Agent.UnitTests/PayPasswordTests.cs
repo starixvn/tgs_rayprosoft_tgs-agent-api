@@ -55,6 +55,7 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
+                AgentDividendType.OneLayer,
                 Array.Empty<AgentDividendCondition>());
 
             var newPassword = "newPassword";
@@ -112,6 +113,7 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
+                AgentDividendType.OneLayer,
                 Array.Empty<AgentDividendCondition>());
 
             var newPassword = "newPassword";
@@ -144,10 +146,7 @@ namespace Agent.UnitTests
         {
             var sut = new ChangePasswordRequestValidator();
 
-            var data = new ChangePasswordRequest
-            {
-                NewPassword = "12345"
-            };
+            var data = new ChangePasswordRequest { NewPassword = "12345" };
 
             var actual = sut.Validate(data);
 
@@ -199,6 +198,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<AgentDividendCondition>()));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
@@ -244,6 +244,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<AgentDividendCondition>()));
 
             await sut.ExecuteAsync(command);
@@ -293,6 +294,7 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
+                AgentDividendType.OneLayer,
                 Array.Empty<AgentDividendCondition>());
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
@@ -353,6 +355,7 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
+                AgentDividendType.OneLayer,
                 Array.Empty<AgentDividendCondition>());
 
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
@@ -375,10 +378,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
 
-            var request = new ChangePayPasswordRequest
-            {
-                NewPassword = "123456789012345678901"
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = "123456789012345678901" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -393,10 +393,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
 
-            var request = new ChangePayPasswordRequest
-            {
-                NewPassword = "12345"
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = "12345" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -411,10 +408,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
 
-            var request = new ChangePayPasswordRequest
-            {
-                NewPassword = string.Empty
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = string.Empty };
 
             // act
             var actual = sut.TestValidate(request);
@@ -429,10 +423,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new SetPayPasswordRequestValidator();
 
-            var request = new SetPayPasswordRequest
-            {
-                Password = "123456789012345678901"
-            };
+            var request = new SetPayPasswordRequest { Password = "123456789012345678901" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -447,10 +438,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new SetPayPasswordRequestValidator();
 
-            var request = new SetPayPasswordRequest
-            {
-                Password = "12345"
-            };
+            var request = new SetPayPasswordRequest { Password = "12345" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -465,10 +453,7 @@ namespace Agent.UnitTests
             // arrange
             var sut = new SetPayPasswordRequestValidator();
 
-            var request = new SetPayPasswordRequest
-            {
-                Password = string.Empty
-            };
+            var request = new SetPayPasswordRequest { Password = string.Empty };
 
             // act
             var actual = sut.TestValidate(request);

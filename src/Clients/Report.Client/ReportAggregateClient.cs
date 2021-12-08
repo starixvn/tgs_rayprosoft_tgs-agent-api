@@ -12,7 +12,6 @@ namespace TGS.Clients.Report.Client
     public interface IReportAggregateClient
     {
         Task<MessageResponse> CreatePlayerRebateAsync(CreatePlayerRebateRequest request);
-        Task<MessageResponse> CreateAgentDividendAsync(CreateAgentDividendsRequest request);
         Task<MessageResponse> CreatePlayerAggregateAsync(CreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> ManualCreatePlayerAggregateAsync(ManualCreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> CreateRoundAggregateAsync(CreateRoundAggregateModel request);
@@ -75,15 +74,6 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<CreatePlayerRebateRequest, MessageResponse>(
                 HttpMethod.Post,
                 "/api/playerReport/rebates", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
-        }
-
-        async Task<MessageResponse> IReportAggregateClient.CreateAgentDividendAsync(CreateAgentDividendsRequest request)
-        {
-            var prefix = "Report.CreateAgentDividend";
-            return await ExecuteJsonRequestAsync<CreateAgentDividendsRequest, MessageResponse>(
-                HttpMethod.Post,
-                "/api/agentReport/dividends", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 

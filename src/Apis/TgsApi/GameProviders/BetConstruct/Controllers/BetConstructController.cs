@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mime;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,10 +30,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         private static readonly string GameProviderCode = Consts.GameProvider.BetConstruct;
 
         private readonly IGamePlayActions _actions;
-        private readonly IBetConstructActionModelMapper _map;
-        private readonly IBetConstructUtility _utility;
         private readonly ILogger<BetConstructController> _logger;
+        private readonly IBetConstructActionModelMapper _map;
         private readonly IBetConstructService _service;
+        private readonly IBetConstructUtility _utility;
 
         public BetConstructController(
             IGamePlayActions actions,
@@ -52,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("BetConfirm")]
-        public ValueTask BetConfirm(BetConfirmRequest request)
+        public ValueTask BetConfirmAsync(BetConfirmRequest request)
         {
             return ValueTask.CompletedTask;
         }
@@ -60,6 +59,27 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         [HttpPost("BetPlaced")]
         public async ValueTask<BetPlacedResponse> BetPlacedAsync(BetPlacedRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp },
+                { "TransactionId", request.TransactionId},
+                { "BetId", request.BetId},
+                { "Amount", request.Amount },
+                { "Created", request.Created.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")},
+                { "BetType", request.BetType},
+                { "SystemMinCount", request.SystemMinCount},
+                { "TotalPrice", request.TotalPrice}
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -72,7 +92,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 17 => PlatformType.Mobile,
                 98 => PlatformType.Desktop,
                 99 => PlatformType.Desktop,
-                _  => PlatformType.Desktop
+                _ => PlatformType.Desktop
             };
 
             var gameProviderConfigurationData = await _service
@@ -100,8 +120,28 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("BetResulted")]
-        public async ValueTask<BetResultedResponse> BetResulted(BetResultedRequest request)
+        public async ValueTask<BetResultedResponse> BetResultedAsync(BetResultedRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp },
+                { "TransactionId", request.TransactionId },
+                { "BetId", request.BetId },
+                { "BetState", request.BetState },
+                { "Amount", request.Amount },
+                { "BonusAmount", request.BonusAmount },
+                { "BonusId", request.BonusId }
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -134,16 +174,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
 
         [HttpPost("GetClientBalance")]
         public async ValueTask<GetClientBalanceResponse> GetClientBalanceAsync(GetClientBalanceRequest request)
-        {                        
-            var hashDict = new Dictionary<string, object> 
+        {
+            var hashDict = new Dictionary<string, object>
             {
                 { "AuthToken" , request.AuthToken },
                 { "TS", request.Timestamp }
             };
 
-            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);                                    
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
 
-            if (IsHashPass(request.Hash, hashDict ,sharedKey))
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
             {
                 throw new InvalidCredentialsException(
                     $"Signature is mismatched. The signature in the request is {request.Hash}.");
@@ -164,7 +204,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
         }
 
         [HttpPost("GetClientDetails")]
-        public async ValueTask<GetClientDetailsResponse> GetClientDetails(GetClientDetailsRequest request)
+        public async ValueTask<GetClientDetailsResponse> GetClientDetailsAsync(GetClientDetailsRequest request)
         {
             var hashDict = new Dictionary<string, object>
             {
@@ -195,13 +235,31 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 CurrencyId = currencyId,
                 ExternalId = player.PlayerCode,
                 ErrorCode = ((int)GameApiError.Success).ToString(),
-                ErrorText = GameApiError.Success.Description()
+                ErrorText = GameApiError.Success.Description(),
+                Gender = 1,
+                BirthDate = null,
+                ExternalBonusId = null
             };
         }
 
         [HttpPost("Rollback")]
-        public async ValueTask<RollbackResponse> Rollback(RollbackRequest request)
+        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , request.AuthToken },
+                { "TS", request.Timestamp },
+                { "TransactionId", request.TransactionId }
+            };
+
+            var sharedKey = HttpContext.Items.Get("sharedKey", string.Empty);
+
+            if (IsHashPass(request.Hash, hashDict, sharedKey))
+            {
+                throw new InvalidCredentialsException(
+                    $"Signature is mismatched. The signature in the request is {request.Hash}.");
+            }
+
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -234,7 +292,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
             };
         }
 
-        private bool IsHashPass(string signature,Dictionary<string,object>hashDict, string sharedKey)
+        private bool IsHashPass(string signature, Dictionary<string, object> hashDict, string sharedKey)
         {
             var computedSignature = _utility.ComputeSignature(hashDict, sharedKey);
             _logger.LogInformation($"Hash:{signature}, computedSign:{computedSignature}");

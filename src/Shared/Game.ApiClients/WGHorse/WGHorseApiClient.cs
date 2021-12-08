@@ -7,18 +7,12 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Shared.Game.Models.WGHorse.Commons;
-using TGS.Shared.Game.Models.WGHorse.Incoming;
 using TGS.Shared.Game.Models.WGHorse.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.WGHorse
 {
     public interface IWGHorseApiClient
     {
-        ValueTask<WGHorsePrepareLoginResponse> GetPrepareLoginAsync(
-            WGHorseConfiguration configuration, WGHorsePrepareLoginRequest source);
-
-        ValueTask<WGHorseLoginResponse> GetLoginAsync(WGHorseConfiguration configuration, WGHorseLoginRequest source);
-
         ValueTask<WGHorseResponse> AccessMoneyAsync(
             WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source);
 
@@ -31,7 +25,10 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseGameRecordResponse> GetGameRecordAsync(
             WGHorseConfiguration configuration, WGHorseGameRecordRequest request);
 
-        ValueTask<WGHorseGPGameRecordResponse> GameRecordAsync(Uri apiUrl, WGHorseGPGameRecordRequest request);
+        ValueTask<WGHorseLoginResponse> GetLoginAsync(WGHorseConfiguration configuration, WGHorseLoginRequest source);
+
+        ValueTask<WGHorsePrepareLoginResponse> GetPrepareLoginAsync(
+                                                    WGHorseConfiguration configuration, WGHorsePrepareLoginRequest source);
     }
 
     public class WGHorseApiClient : BaseApiClient, IWGHorseApiClient
@@ -46,33 +43,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        ValueTask<WGHorsePrepareLoginResponse> IWGHorseApiClient.GetPrepareLoginAsync(
-            WGHorseConfiguration configuration, WGHorsePrepareLoginRequest source)
-        {
-            var data = $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}";
-            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
-
-            var path =
-                $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode}.PrepareLogin";
-
-            return ExecuteJsonRequestAsync<WGHorsePrepareLoginRequest, WGHorsePrepareLoginResponse>(HttpMethod.Get,
-                path,
-                source,
-                logPrefix: prefix);
-        }
-
-        ValueTask<WGHorseLoginResponse> IWGHorseApiClient.GetLoginAsync(
-            WGHorseConfiguration configuration, WGHorseLoginRequest source)
-        {
-            var path =
-                $"{configuration.ApiUrl}?m=api&c=index&a=Login&Token={HttpUtility.UrlEncode(source.Token)}&PartnerCode={configuration.PartnerCode}&Lang={source.Lang}";
-            var prefix = $"{_gameProviderCode}.Login";
-
-            return ExecuteJsonRequestAsync<object, WGHorseLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
-        }
-
-        ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyAsync(
+        public ValueTask<WGHorseResponse> AccessMoneyAsync(
             WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
@@ -88,7 +59,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
                 logPrefix: prefix);
         }
 
-        ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyQueryAsync(
+        public ValueTask<WGHorseResponse> AccessMoneyQueryAsync(
             WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source)
         {
             var data = source.OrderId;
@@ -104,7 +75,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
                 logPrefix: prefix);
         }
 
-        ValueTask<WGHorseGetBalanceResponse> IWGHorseApiClient.GetBalanceAsync(
+        public ValueTask<WGHorseGetBalanceResponse> GetBalanceAsync(
             WGHorseConfiguration configuration, WGHorseGetBalanceRequest source)
         {
             var data = source.PlayerCode;
@@ -120,7 +91,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
                 logPrefix: prefix);
         }
 
-        ValueTask<WGHorseGameRecordResponse> IWGHorseApiClient.GetGameRecordAsync(
+        public ValueTask<WGHorseGameRecordResponse> GetGameRecordAsync(
             WGHorseConfiguration configuration, WGHorseGameRecordRequest request)
         {
             var data =
@@ -137,11 +108,30 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
                 logPrefix: prefix);
         }
 
-        ValueTask<WGHorseGPGameRecordResponse> IWGHorseApiClient.GameRecordAsync(
-            Uri apiUrl, WGHorseGPGameRecordRequest request) =>
-            ExecuteJsonRequestAsync<WGHorseGPGameRecordRequest, WGHorseGPGameRecordResponse>(HttpMethod.Post,
-                apiUrl,
-                "/api/wgvia/gamerecord",
-                request);
+        public ValueTask<WGHorseLoginResponse> GetLoginAsync(
+            WGHorseConfiguration configuration, WGHorseLoginRequest source)
+        {
+            var path =
+                $"{configuration.ApiUrl}?m=api&c=index&a=Login&Token={HttpUtility.UrlEncode(source.Token)}&PartnerCode={configuration.PartnerCode}&Lang={source.Lang}";
+            var prefix = $"{_gameProviderCode}.Login";
+
+            return ExecuteJsonRequestAsync<object, WGHorseLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
+        }
+
+        public ValueTask<WGHorsePrepareLoginResponse> GetPrepareLoginAsync(
+                                                    WGHorseConfiguration configuration, WGHorsePrepareLoginRequest source)
+        {
+            var data = $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}";
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+
+            var path =
+                $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
+            var prefix = $"{_gameProviderCode}.PrepareLogin";
+
+            return ExecuteJsonRequestAsync<WGHorsePrepareLoginRequest, WGHorsePrepareLoginResponse>(HttpMethod.Get,
+                path,
+                source,
+                logPrefix: prefix);
+        }
     }
 }

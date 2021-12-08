@@ -1,31 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
-    public sealed class RedisSortedSet<T> : IRedisSortedSet<T>
+    internal sealed class RedisSortedSet<T> : IRedisSortedSet<T>
     {
         private readonly IRedisSortedSet<T> _interface;
         private readonly IRedisRepository _repository;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private string _keyPrefix;
 
         public RedisSortedSet(
-            IRedisRepository repository,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IRedisRepository repository)
         {
             _interface = this;
             _repository = repository;
-            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        void IRedisSortedSet<T>.SetKeyPrefix(string prefix)
+        Task IRedisSortedSet<T>.AddAsync(double score, T item)
         {
-            _keyPrefix = prefix;
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            var value = JsonSerializer.Serialize(item);
+            return db.SortedSetAddAsync(key, value, score);
+        }
+
+        Task IRedisSortedSet<T>.AddRangeAsync(IEnumerable<ScoredItem<T>> items)
+        {
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            var values = items.Select(x =>
+                {
+                    var value = JsonSerializer.Serialize(x.Item);
+                    return new SortedSetEntry(value, x.Score);
+                })
+                .ToArray();
+
+            return db.SortedSetAddAsync(key, values);
+        }
+
+        async Task<int> IRedisSortedSet<T>.CountAsync()
+        {
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            var length = await db.SortedSetLengthAsync(key);
+            return ToInt(length);
         }
 
         string IRedisSortedSet<T>.GetKey()
@@ -36,20 +61,6 @@ namespace TGS.Core.Infrastructures.Redis
             }
 
             return $"{_keyPrefix}_{GetType().Name}_{typeof(T).Name}";
-        }
-
-        async Task<T> IRedisSortedSet<T>.GetWithMinScoreAsync()
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var items = await db.SortedSetRangeByRankAsync(key, 0, 0, Order.Ascending);
-
-            if (items == null || items.Length != 1)
-            {
-                return default(T);
-            }
-            return DeserializeItem(items[0]);
         }
 
         async Task<T> IRedisSortedSet<T>.GetWithMaxScoreAsync()
@@ -66,53 +77,23 @@ namespace TGS.Core.Infrastructures.Redis
             return DeserializeItem(items[0]);
         }
 
-        Task IRedisSortedSet<T>.TrimLowerAsync(int targetLength)
+        async Task<T> IRedisSortedSet<T>.GetWithMinScoreAsync()
         {
             var key = _interface.GetKey();
             var db = _repository.GetDb();
 
-            return db.SortedSetRemoveRangeByRankAsync(key, 0, -targetLength - 1);
+            var items = await db.SortedSetRangeByRankAsync(key, 0, 0, Order.Ascending);
+
+            if (items == null || items.Length != 1)
+            {
+                return default(T);
+            }
+            return DeserializeItem(items[0]);
         }
 
-        Task IRedisSortedSet<T>.TrimUpperAsync(int targetLength)
+        void IRedisSortedSet<T>.SetKeyPrefix(string prefix)
         {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            return db.SortedSetRemoveRangeByRankAsync(key, targetLength, -1);
-        }
-
-        async Task<int> IRedisSortedSet<T>.CountAsync()
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var length = await db.SortedSetLengthAsync(key);
-            return ToInt(length);
-        }
-
-        Task IRedisSortedSet<T>.AddRangeAsync(IEnumerable<ScoredItem<T>> items)
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var values = items.Select(x =>
-                {
-                    var value = _jsonSerializationProvider.SerializeToString(x.Item);
-                    return new SortedSetEntry(value, x.Score);
-                })
-                .ToArray();
-
-            return db.SortedSetAddAsync(key, values);
-        }
-
-        Task IRedisSortedSet<T>.AddAsync(double score, T item)
-        {
-            var key = _interface.GetKey();
-            var db = _repository.GetDb();
-
-            var value = _jsonSerializationProvider.SerializeToString(item);
-            return db.SortedSetAddAsync(key, value, score);
+            _keyPrefix = prefix;
         }
 
         async Task<T[]> IRedisSortedSet<T>.TakeAsync(int count)
@@ -139,9 +120,25 @@ namespace TGS.Core.Infrastructures.Redis
                 .ToArray();
         }
 
+        Task IRedisSortedSet<T>.TrimLowerAsync(int targetLength)
+        {
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            return db.SortedSetRemoveRangeByRankAsync(key, 0, -targetLength - 1);
+        }
+
+        Task IRedisSortedSet<T>.TrimUpperAsync(int targetLength)
+        {
+            var key = _interface.GetKey();
+            var db = _repository.GetDb();
+
+            return db.SortedSetRemoveRangeByRankAsync(key, targetLength, -1);
+        }
+
         private T DeserializeItem(RedisValue item)
         {
-            return _jsonSerializationProvider.DeserializeFromString<T>(item);
+            return JsonSerializer.Deserialize<T>(item);
         }
 
         private int ToInt(long value)

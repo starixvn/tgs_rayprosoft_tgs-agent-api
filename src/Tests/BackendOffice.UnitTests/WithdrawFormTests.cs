@@ -124,6 +124,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<PaymentFlowState>(x => x == PaymentFlowState.Paid),
                     It.IsAny<string>(),
                     It.IsAny<decimal?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }

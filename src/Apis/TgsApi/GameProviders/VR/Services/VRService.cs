@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
         ValueTask<VRConfiguration> GetConfigurationAsync();
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
-        ValueTask<VRBrandMerchant> GetBrandMerchant(string brandCode);
+        ValueTask<VRBrandMerchant> GetBrandMerchantAsync(string brandCode);
         string GetGameProviderCode();
         RoundStatus GetRoundStatus(int state);
         ClientRoundStatus GetClientRound(int state);
@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
         }
 
-        async ValueTask<VRBrandMerchant> IVRService.GetBrandMerchant(string brandCode)
+        async ValueTask<VRBrandMerchant> IVRService.GetBrandMerchantAsync(string brandCode)
         {
             var configuration =
               await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts

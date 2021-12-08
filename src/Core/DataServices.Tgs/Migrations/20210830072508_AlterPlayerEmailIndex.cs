@@ -20,6 +20,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+                drop index if exists dbo.ux_players_email;
+            ");
         }
     }
 }

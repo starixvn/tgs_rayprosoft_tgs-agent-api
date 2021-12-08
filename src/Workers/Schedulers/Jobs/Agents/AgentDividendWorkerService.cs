@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
+using Tgs.ProfitRebate.Client;
+using Tgs.ProfitRebate.Client.Models;
 
 namespace TGS.Workers.Schedulers.Jobs.Agents
 {
@@ -12,24 +13,23 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
 
     public class AgentDividendWorkerService : IAgentDividendWorkerService
     {
-        private readonly IReportAggregateClient _client;
+        private readonly IProfitRebateClient _client;
 
         public AgentDividendWorkerService(
-            IReportAggregateClient client)
-        {
-            _client = client;
-        }
+            IProfitRebateClient client)
+            => _client = client;
 
         async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
         {
             var response = await _client.CreateAgentDividendAsync(new());
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
         {
-            var response = await _client.CreateAgentDividendAsync(new(brandCode));
-            return new() {ErrorMessage = response.Message};
+            var response =
+                await _client.CreateAgentDividendAsync(new CreateAgentDividendsRequest { BrandCode = brandCode });
+            return new() { ErrorMessage = response.Message };
         }
     }
 }

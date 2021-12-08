@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -18,9 +19,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
         IQueryable<AgentDividend> GetAgentDividendQueries(
             Func<IQueryable<AgentDividend>, IQueryable<AgentDividend>> preQuery = null,
             bool tracking = false);
-
-        Task CreateAgentDividendsAsync(CreateAgentDividendModel[] request, DateTimeOffset? sentOn);
-        Task UpdateAgentDividendsAsync(AgentDividend[] agentDividends);
 
         Task<(List<CreateAgentDividendModel>, List<CreateAgentDividendModel>, List<AgentDividend>)>
             GetAgentDividends(Brand brand, int idNumber);
@@ -94,10 +92,25 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     x.NetProfit
                 }).ToArrayAsync();
 
-            var parentAgentDividends = playerData.SelectMany(x => GetAgentDividends(agents,
-                brand.Id,
-                x.AgentId,
-                x.NetProfit)).ToArray();
+            var agentCurrentConditions = playerData.GroupBy(x => x.AgentId, (agentId, items) => new AgentConditionModel
+            {
+                AgentId = agentId,
+                ActiveCount = items.Distinct().Count(),
+                NetProfit = items.Sum(s => s.NetProfit)
+            }).ToArray();
+
+            var parentAgentDividends = playerData.SelectMany(x =>
+            {
+                return brand.AgentDividendType == AgentDividendType.MultipleLayer
+                    ? GetAgentDividendsByMultipleLayer(agents, agentCurrentConditions,
+                        x.AgentId,
+                        x.NetProfit,
+                        brand.CheckDividendActiveCount)
+                    : GetAgentDividends(agents,
+                        brand.Id,
+                        x.AgentId,
+                        x.NetProfit);
+            }).ToArray();
 
             var agentData = playerData.GroupBy(x => new
                 {
@@ -312,61 +325,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 noSendDividends.Where(x => x.ReferencedAgentDividendId is not null).ToList());
         }
 
-        Task IAgentDividendService.
-            CreateAgentDividendsAsync(CreateAgentDividendModel[] models, DateTimeOffset? sentOn) =>
-            CreateEntitiesAsync(models.Select(model => new AgentDividend
-            {
-                Id = model.Id.Value,
-                BrandId = model.BrandId,
-                AgentId = model.AgentId,
-                From = model.From,
-                To = model.To,
-                AgentDividendPercentage = model.AgentDividendPercentage,
-                PromotionAmount = model.PromotionAmount,
-                RebateAmount = model.RebateAmount,
-                DepositAmount = model.DepositAmount,
-                WithdrawalAmount = model.WithdrawalAmount,
-                AdjustmentAmount = model.AdjustmentAmount,
-                BonusAmount = model.BonusAmount,
-                BetAmount = model.BetAmount,
-                ValidBetAmount = model.ValidBetAmount,
-                OriginalTurnover = model.OriginalTurnover,
-                Turnover = model.Turnover,
-                WinLossAmount = model.WinLossAmount,
-                NetProfit = model.NetProfit,
-                LiveDealerWinLoss = model.LiveDealerWinLoss,
-                SlotWinLoss = model.SlotWinLoss,
-                FishingWinLoss = model.FishingWinLoss,
-                ArcadeWinLoss = model.ArcadeWinLoss,
-                TableGameWinLoss = model.TableGameWinLoss,
-                LotteryWinLoss = model.LotteryWinLoss,
-                CardGameWinLoss = model.CardGameWinLoss,
-                SportsWinLoss = model.SportsWinLoss,
-                ESportsWinLoss = model.ESportsWinLoss,
-                VirtualSportsWinLoss = model.VirtualSportsWinLoss,
-                AgentDividendAmount = model.AgentDividendAmount,
-                CreatedOn = model.CreatedOn,
-                SentOn = sentOn,
-                BeforeDividendAmount = model.BeforeDividendAmount,
-                ReferencedAgentDividendId = model.ReferencedAgentDividendId,
-                AgentDividendMultipleLayers = model.AgentDividendMultipleLayerModels.Select(x
-                    => new AgentDividendMultipleLayer
-                    {
-                        AgentId = x.AgentId,
-                        AgentDividendId = model.Id.Value,
-                        DividendProviderAgentId = x.DividendProviderAgentId,
-                        Layer = x.Layer,
-                        Dividend = x.Dividend
-                    }).ToArray()
-            }).ToArray());
-
         IQueryable<AgentDividend> IAgentDividendService.GetAgentDividendQueries(
             Func<IQueryable<AgentDividend>, IQueryable<AgentDividend>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
-
-        Task IAgentDividendService.UpdateAgentDividendsAsync(AgentDividend[] agentDividends) =>
-            UpdateEntitiesAsync(agentDividends);
 
         private static IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividends(
             Agent[] agents, Guid brandId, Guid agentId,
@@ -411,5 +373,34 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 agent = parentAgent;
             } while (hasParentAgentId);
         }
+
+        private static decimal GetAgentDividendPercentage(AgentDividendCondition[] agentDividendCondition,
+            AgentConditionModel currentCondition, bool checkDividendActiveCount)
+            => agentDividendCondition.OrderByDescending(x => x.Rank).Where(!checkDividendActiveCount,
+                    x => currentCondition.NetProfit >= x.NetProfit)
+                .Where(checkDividendActiveCount, x => currentCondition.ActiveCount >= x.ActiveNumber &&
+                    currentCondition.NetProfit >= x.NetProfit).Select(x => x.DividendPercentage).FirstOrDefault();
+
+        private static IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividendsByMultipleLayer(
+            Agent[] agents, AgentConditionModel[] agentCurrentConditions, Guid agentId,
+            decimal netProfit, bool checkDividendActiveCount)
+        {
+            var agent = agents.First(x => x.Id == agentId);
+            var currentAgentId = agentId;
+            var providerAgentId = agent.Id;
+            var layer = agent.Id.ToString();
+
+            var agentDividendPercentage = GetAgentDividendPercentage(agent.AgentDividendConditions.ToArray(),
+                agentCurrentConditions.First(x => x.AgentId == currentAgentId), checkDividendActiveCount);
+
+            yield return new AgentDividendMultipleLayerModel
+            {
+                AgentId = currentAgentId,
+                DividendProviderAgentId = providerAgentId,
+                Layer = layer,
+                Dividend = netProfit * agentDividendPercentage / 100M
+            };
+        }
+
     }
 }

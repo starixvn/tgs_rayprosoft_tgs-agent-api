@@ -14,14 +14,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Payment.ApplePay;
+using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.SkyPay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -40,6 +43,7 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
@@ -148,7 +152,6 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddOperations()
@@ -167,6 +170,20 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+                })
+                .AddGameProvidersPluggableServerClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
+                });
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
             services.AddErrorMapper()
@@ -178,10 +195,12 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .UseOperatorRepositories()
-                .ConfigureWallet(config =>
+                .UseOperatorRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .ConfigureWallet((options, sp) =>
                 {
-                    config.AddTgsWalletRepositories();
+                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+
+                    options.BaseUrl = operatorOptions.CashBaseUrl;
                 })
                 .AddPaymentServiceClient((options, sp) =>
                 {
@@ -201,19 +220,24 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
-                .AddSingleton<MaticPaySerializer>();
+                .AddSingleton<MaticPaySerializer>()
+                .AddSingleton<Help2PaySerializer>()
+                .AddSingleton<SkyPaySerializer>();
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
+
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
                     .ConfigQueueOptions((options, sp) =>
                     {
                         var config = sp.GetRequiredService<IConfiguration>();
 
                         options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                    });
+                })
+                .AddNatsGlobPatternExchange("*");
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
@@ -291,6 +315,7 @@ namespace TGS.Apis.OperatorApi
                     new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
 
                 c.AddBrandCertificateSecurityDefinition();
+                c.OperationFilter<SwaggerHeaderFilter>();
                 c.SchemaFilter<SwaggerEnumDescriptionFilter>();
                 c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
 

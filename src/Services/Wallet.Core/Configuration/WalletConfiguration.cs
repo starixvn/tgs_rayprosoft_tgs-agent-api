@@ -19,13 +19,5 @@ namespace TGS.Services.WalletService.Configuration
 
             return this;
         }
-
-        public WalletConfiguration AddWalletRepository<TWalletRepository>()
-                    where TWalletRepository : class, IWalletRepository
-        {
-            Services.AddTransient<IWalletRepository, TWalletRepository>();
-
-            return this;
-        }
     }
 }

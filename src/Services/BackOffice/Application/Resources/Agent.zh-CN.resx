@@ -180,4 +180,10 @@
   <data name="RankCountInvaild" xml:space="preserve">
     <value>子代理的层级总数为 {0} ，必须大于它</value>
   </data>
+  <data name="DividendPercentageMustGreaterThanOrEqualToLowerLayer" xml:space="preserve">
+    <value>分红百分比必须大于或等于下层</value>
+  </data>
+  <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
+    <value>分红百分比必须小于或等于上层</value>
+  </data>
 </root>
