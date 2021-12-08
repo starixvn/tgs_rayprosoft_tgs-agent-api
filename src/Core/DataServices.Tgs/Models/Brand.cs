@@ -78,7 +78,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<StationLetter> StationLetters { get; set; }
 
-        public Status Status { get; set; }
+        public BrandStatus Status { get; set; }
 
         public string TimeZoneId { get; set; }
 

@@ -476,7 +476,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Code = brand.Code,
                 Name = brand.Name,
                 OperationalEmail = brand.OperationalEmail,
-                Status = Status.Active,
+                Status = BrandStatus.Active,
                 CreatedByUsername = _AdminUsername,
                 UpdatedByUsername = _AdminUsername,
                 CreatedOn = _Now,
