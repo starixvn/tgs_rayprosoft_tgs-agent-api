@@ -36,8 +36,9 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
-            var query = new GetBetConstructHtmlContentQuery(playerTokenData.PlayerCode, brandId, playerTokenData.PlatformType, currentCultureName);
+            var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
 
             var result = await getService.GetAsync(query).ConfigureAwait(false);
 
