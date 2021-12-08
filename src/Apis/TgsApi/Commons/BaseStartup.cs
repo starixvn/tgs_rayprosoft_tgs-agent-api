@@ -13,7 +13,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -137,17 +136,18 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddRedis(Configuration)
                 .ForwardToPrometheus();
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
         }
 
         #region Abstract and Virtual Methods

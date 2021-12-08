@@ -14,6 +14,7 @@
         CancelWithdrawal = 9,
         GameProviderDeposit = 10,
         GameProviderWithdrawal = 11,
+        UnsettledBetManual = 12,
         Other = 99
     }
 }

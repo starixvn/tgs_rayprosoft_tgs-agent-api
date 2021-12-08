@@ -76,5 +76,8 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("wechat")]
         public string Wechat { get; init; }
+
+        [JsonPropertyName("agentdividendtype")]
+        public string AgentDividendType { get; init; }
     }
 }

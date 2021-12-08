@@ -5670,7 +5670,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_transaction_Promotion_id");
 
                     b.HasIndex("TransactionId")
-                        .IsUnique()
                         .HasDatabaseName("ix_transactions_transaction_id");
 
                     b.ToTable("transaction_promotions");
@@ -7494,16 +7493,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Transaction", "Transaction")
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.TransactionPromotion", "TransactionId")
-                        .HasConstraintName("fk_transaction_promotion_transaction_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Promotion");
-
-                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.User", b =>

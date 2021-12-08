@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
@@ -15,9 +15,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         private readonly IAgentService _service;
 
         public CreateAgentHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+            => _service = service;
 
         public override async Task<MessageResponse> Handle(
             CreateAgentRequest request,
@@ -27,11 +25,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 x.BrandId == request.BrandId && x.Username.ToLower().Equals(request.Username.ToLower())))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
-            }
-
-            if (request.AgentDividendConditions.Length != 1)
-            {
-                return CreateInvalidResponse<MessageResponse>("Can only have one rank.");
             }
 
             if (request.ParentUsername.IsNotNullOrEmpty())
@@ -44,23 +37,11 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
 
-                foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
+                if (parentAgent.Brand.AgentDividendType == AgentDividendType.OneLayer &&
+                    parentAgent.DividendPercentage < request.DividendPercentage)
                 {
-                    var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
-
-                    if (parent is null)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ParentRankNotFound,
-                            condition.Rank));
-                    }
-
-                    if (condition.DividendPercentage > parent.DividendPercentage)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(
-                            Agent.DividendPercentageMustLessThan,
-                            condition.Rank,
-                            parent.DividendPercentage));
-                    }
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
                 }
             }
 

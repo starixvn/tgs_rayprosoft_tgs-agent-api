@@ -89,7 +89,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
                         formId,
                         "https://google.com",
-                        clientIp)));
+                        clientIp,
+                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
@@ -305,7 +306,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
-        [HttpPost("skypay")]
+        [HttpPost("skypay-{fragment}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
@@ -314,6 +315,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] SkyPaySerializer serializer,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            string fragment,
             [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -330,13 +332,14 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                "tgs.payment.skypay.deposit",
+                $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
                     new SkyPayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
                         formId)));
 
             await createDepositFormService

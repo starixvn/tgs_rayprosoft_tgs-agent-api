@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
-using TGS.Services.BackOffice.Domain.Enums;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
@@ -19,9 +19,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         public UpdateAgentHandler(
             IAgentService service,
             IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+            => _service = service;
 
         public override async Task<MessageResponse> Handle(
             UpdateAgentRequest request,
@@ -34,11 +32,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
 
-            if (request.AgentDividendConditions.Length > 1)
-            {
-                return CreateInvalidResponse<MessageResponse>("Can only have one rank.");
-            }
-
             if (request.ParentUsername.IsNotNullOrEmpty())
             {
                 var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
@@ -49,63 +42,42 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
 
+                if (parentAgent.Brand.AgentDividendType == AgentDividendType.OneLayer &&
+                    parentAgent.DividendPercentage < request.DividendPercentage)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
+                }
+            }
+
+            if (agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
+            {
+                var childAgentMaxDividendPercentage = await _service.GetAgentQueries()
+                    .Where(x => x.ParentAgentId == agent.Id)
+                    .MaxAsync(x => (decimal?)x.DividendPercentage, cancellationToken)
+                    .ConfigureAwait(false) ?? 0M;
+
+                if (request.DividendPercentage < childAgentMaxDividendPercentage)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustGreaterThanOrEqualToLowerLayer);
+                }
+            }
+
+            if (agent.Brand.AgentDividendType == AgentDividendType.MultipleLayer)
+            {
                 foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
                 {
-                    var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
+                    var previous = request.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
 
-                    if (parent is null)
+                    if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                        condition.ActiveNumber < previous.ActiveNumber ||
+                        condition.DividendPercentage < previous.DividendPercentage))
                     {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ParentRankNotFound,
+                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
                             condition.Rank));
                     }
-
-                    if (condition.DividendPercentage > parent.DividendPercentage)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(
-                            Agent.DividendPercentageMustLessThan,
-                            condition.Rank,
-                            parent.DividendPercentage));
-                    }
                 }
-            }
-
-            var childCondition = await _service.GetAgentQueries().Where(x => x.ParentAgentId == agent.Id)
-                .SelectMany(x => x.AgentDividendConditions).GroupBy(x => x.Rank,
-                    (groupItem, aggregates) => new
-                    {
-                        Rank = groupItem,
-                        MinNetProfit = aggregates.Min(a => a.NetProfit),
-                        MinActiveNumber = aggregates.Min(a => a.ActiveNumber),
-                        MaxDividendPercentage = aggregates.Max(a => a.DividendPercentage)
-                    }).ToArrayAsync(cancellationToken).ConfigureAwait(false);
-
-            if (childCondition.Length > request.AgentDividendConditions.Length)
-            {
-                return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankCountInvaild,
-                    childCondition.Length));
-            }
-
-            foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
-            {
-                var child = childCondition.FirstOrDefault(x => x.Rank == condition.Rank);
-
-                if (child is not null)
-                {
-                    if (condition.DividendPercentage < child.MaxDividendPercentage)
-                    {
-                        return CreateInvalidResponse<MessageResponse>(string.Format(
-                            Agent.DividendPercentageMustGreaterThan,
-                            condition.Rank,
-                            child.MaxDividendPercentage));
-                    }
-                }
-            }
-
-            if (request.UpdateType == MemberUpdateType.Contact &&
-                request.Email.IsNotNullOrEmpty() &&
-                await _service.ExistsAsync(x => x.Id != agent.Id && EF.Functions.ILike(x.Email, $"%{request.Email}%")))
-            {
-                return CreateInvalidResponse<MessageResponse>(Agent.EmailExisted);
             }
 
             await _service.UpdateAgentAsync(agent, request);

@@ -100,13 +100,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
                     ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo,
-                    OrderNo = formDetail.OrderNo
+                    OrderNo = formDetail.OrderNo,
+                    ReviewedOn = formDetail.ReviewedOn,
+                    ReviewedUserName = formDetail.ReviewedUserName,
+                    PaidOn = formDetail.PaidOn,
+                    PaidUserId = formDetail.PaidUserId,
+                    PaidUserName = formDetail.PaidUserName
                 }
             };
         }
 
         [HttpGet("{brandId}")]
-        public async Task<WithdrawViewModel> QueryWithdrawFormsAsync(
+        public async Task<PagingWithdrawFormViewModel> QueryWithdrawFormsAsync(
             [FromServices] IGetService<WithdrawFormQuery, WithdrawForms> queryService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,
@@ -137,7 +142,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new WithdrawViewModel()
+            var response = new PagingWithdrawFormViewModel()
             {
                 Valid = true,
                 TotalCount = result.TotalCount,
@@ -159,7 +164,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                     UpdatedOn = form.UpdatedOn,
                     ThirdPartyOrderNo = form.ThirdPartyOrderNo,
                     ReviewedUserName = form.ReviewedUserName,
-                    OrderNo = form.OrderNo
+                    ReviewedOn = form.ReviewedOn,
+                    OrderNo = form.OrderNo,
+                    PaidOn = form.PaidOn,
+                    PaidUserId = form.PaidUserId,
+                    PaidUserName = form.PaidUserName
                 })
                 .ToArray(),
                 Sum = result.Sum

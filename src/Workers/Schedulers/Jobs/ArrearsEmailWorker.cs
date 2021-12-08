@@ -5,12 +5,12 @@ using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs
 {

@@ -9,8 +9,6 @@ using Prometheus;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Hangfire;
-using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
@@ -27,6 +25,8 @@ using TGS.Workers.Schedulers.Jobs.Reports;
 using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
 using GlobalConsts = TGS.Core.Models.Consts;
+using TGS.Workers.Schedulers.Hangfire.Filters;
+using TGS.Workers.Schedulers.Hangfire;
 
 namespace TGS.Workers.Schedulers
 {
@@ -64,7 +64,13 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new DashboardOptions { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
+                    new DashboardOptions
+                    {
+                        Authorization = new[]
+                        {
+                            new IgnoreHangfireAuthorizationFilter()
+                        }
+                    });
             });
         }
 
@@ -91,7 +97,8 @@ namespace TGS.Workers.Schedulers
                     _configuration,
                     jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes())
-                .AddMail(_configuration);
+                .AddMail(_configuration)
+                .AddProfitRebateClient(_configuration);
 
             services
                 .AddRedis((options, sp) =>
@@ -101,17 +108,18 @@ namespace TGS.Workers.Schedulers
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
 
             services.AddHangfireServer((sp, options) =>
             {
@@ -119,7 +127,10 @@ namespace TGS.Workers.Schedulers
 
                 options.Queues = new[]
                 {
-                    Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report, Consts.Queue.ArrearsEmail
+                    Consts.Queue.Schedule,
+                    Consts.Queue.GameProvider,
+                    Consts.Queue.Report,
+                    Consts.Queue.ArrearsEmail
                 };
 
                 options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
@@ -165,13 +176,11 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
         }
 
-        private static Type[] GetModuleTypes()
+        private static Type[] GetModuleTypes() => new[]
         {
-            return new[]
-            {
-                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
-                typeof(PromotionJobManagement)
-            };
-        }
+            typeof(AggregateJobManagement),
+            typeof(RebateAndDividendJobManagement),
+            typeof(PromotionJobManagement)
+        };
     }
 }

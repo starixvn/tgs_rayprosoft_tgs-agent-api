@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Hangfire;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Models.Messages;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs.Agents
 {

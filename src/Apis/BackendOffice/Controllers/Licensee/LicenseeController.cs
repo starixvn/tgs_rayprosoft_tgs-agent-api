@@ -117,7 +117,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.NameExists);
             }
 
-            if (await _service.ExistsAsync(x => x.Code == request.Code))
+            if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Licensee.CodeExists);
             }

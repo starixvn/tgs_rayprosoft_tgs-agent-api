@@ -10,13 +10,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             builder.ToTable("transaction_promotions");
 
-            builder.HasKey(e => new {e.TransactionId, e.PromotionId})
+            builder.HasKey(e => new
+                {
+                    e.TransactionId,
+                    e.PromotionId
+                })
                 .HasName("pk_transaction_promotions");
-
-            builder
-                .HasOne(e => e.Transaction)
-                .WithOne()
-                .HasConstraintName("fk_transaction_promotion_transaction_id");
 
             builder.HasIndex(e => e.TransactionId)
                 .HasDatabaseName("ix_transactions_transaction_id");

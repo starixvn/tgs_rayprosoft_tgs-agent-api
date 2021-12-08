@@ -2,8 +2,8 @@
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Models.Messages;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs
 {

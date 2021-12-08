@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using CoreUtility = TGS.Core.Infrastructures.Utility;
 
@@ -35,6 +36,7 @@ namespace TGS.Services.Agent.Services.Agent
                 .FirstAsync(x => x.Id == query.ParentAgentId);
 
             var brand = await _tgsRepository.Brands.AsQueryable()
+                .Include(x => x.BrandAgentDividendConditions)
                 .FirstAsync(x => x.Id == query.BrandId)
                 .ConfigureAwait(false);
 
@@ -48,25 +50,11 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
-            if (query.AgentDividendConditions.Length != 1)
+            if (parentAgent.DividendPercentage < query.DividendPercentage &&
+                brand.AgentDividendType == AgentDividendType.OneLayer)
             {
-                throw new DividendConditionException("Can only have one rank.");
-            }
-
-            foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
-            {
-                var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
-
-                if (parent is null)
-                {
-                    throw new DividendConditionException($"Parent rank {condition.Rank} is not found.");
-                }
-
-                if (condition.DividendPercentage > parent.DividendPercentage)
-                {
-                    throw new DividendConditionException(
-                        $"Rank {condition.Rank} dividend percentage must less than or equal {parent.DividendPercentage}.");
-                }
+                var errorMessage = new { parentAgent.DividendPercentage };
+                throw new DividendPercentageException(JsonSerializer.Serialize(errorMessage));
             }
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
@@ -90,7 +78,8 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    query.AgentDividendConditions.Length > 0
+                    brand.BrandAgentDividendConditions?.Count > 0 ||
+                    brand.AgentDividendType == AgentDividendType.OneLayer
                         ? AgentConfigStatus.DoneForConfigurePercentage
                         : AgentConfigStatus.WaitForConfigurePercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
@@ -111,14 +100,17 @@ namespace TGS.Services.Agent.Services.Agent
                 RegisteredOn = DateTimeOffset.Now
             };
 
-            agent.AgentDividendConditions = query.AgentDividendConditions.Select(x
-                => new CoreModels.AgentDividendCondition
-                {
-                    Rank = x.Rank,
-                    NetProfit = x.NetProfit,
-                    ActiveNumber = x.ActiveNumber,
-                    DividendPercentage = x.DividendPercentage
-                }).ToHashSet();
+            if (brand.AgentDividendType == AgentDividendType.MultipleLayer)
+            {
+                agent.AgentDividendConditions = brand.BrandAgentDividendConditions!.Select(x
+                    => new CoreModels.AgentDividendCondition
+                    {
+                        Rank = x.Rank,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        DividendPercentage = x.DividendPercentage
+                    }).ToHashSet();
+            }
 
             var (salt, pwd) = _passwordHandler.GenerateCredential(query.Password);
 
