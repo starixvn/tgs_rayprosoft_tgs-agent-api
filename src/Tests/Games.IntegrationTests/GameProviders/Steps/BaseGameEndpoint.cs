@@ -327,7 +327,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         protected async Task ChangeBrandStatusAsync(
-            IServiceProvider serviceProvider, Status status,
+            IServiceProvider serviceProvider, BrandStatus status,
             bool hasTag = false)
         {
             if (hasTag && !HasTag("ChangeBrandStatus"))
