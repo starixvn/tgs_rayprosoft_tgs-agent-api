@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operator.Services.Game
 {
@@ -32,6 +33,11 @@ namespace TGS.Services.Operator.Services.Game
                     query.IP,
                     null)
                 .ConfigureAwait(false);
+
+            if(bcUri == null)
+            {
+                throw new GameProviderUnderMaintenanceException();
+            }
 
             var html =
                 "<div id=\"bcsportsbookcontainer\"></div>" +
