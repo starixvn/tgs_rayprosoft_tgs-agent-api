@@ -1,7 +1,7 @@
 ﻿using System;
-using TGS.Core.Models.Enums;
+using TGS.Core.Models.Tokens;
 
 namespace TGS.Services.Operator.Services.Game
 {
-    public record GetBetConstructHtmlContentQuery(string PlayerCode, Guid BrandId, PlatformType PlatformType, string CultureName);
+    public record GetBetConstructHtmlContentQuery(PlayerTokenData PlayerTokenData, Guid BrandId, string IP, string CultureName);
 }
