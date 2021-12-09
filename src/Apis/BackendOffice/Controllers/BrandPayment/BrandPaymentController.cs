@@ -100,7 +100,12 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(request.TransferType, x => x.TransferType == request.TransferType)
                 .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
-                .Where(request.Keyword, row => row.ChannelName.Contains(request.Keyword.Trim()))
+                .Where(
+                    request.Keyword,
+                    row => row.ChannelName.Contains(request.Keyword.Trim())
+                        || row.PaymentMethodChannel.Payment.Code == request.Keyword.Trim()
+                        || row.PaymentMethodChannel.Method.Code == request.Keyword.Trim()
+                        || row.PaymentMethodChannel.Channel.Code == request.Keyword.Trim())
                 .Select(x => new BrandPaymentModel
                 {
                     Id = x.Id,
