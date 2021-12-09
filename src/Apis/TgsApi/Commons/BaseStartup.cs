@@ -41,7 +41,8 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix,
+            app.UseGameApiLogger(
+                LogPrefix,
                 new[] { "/health", "/favicon.ico", "/metrics" });
 
             UseCustomMiddlewaresBeforeRouting(app);
