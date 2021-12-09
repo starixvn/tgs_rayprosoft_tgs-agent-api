@@ -71,16 +71,16 @@ namespace TGS.Workers.Schedulers.Jobs
                 var brandGameProviders = brandGameProvidersToBeMaintenance
                     .Union(brandGameProvidersToBeActivated).ToArray();
 
-                var cacheKeys = brandGameProviders
-                    .Select(x => new CacheKey
-                    {
-                        CacheType = RedisCacheType.BrandGameProviders,
-                        Key = x.BrandId
-                    }).Distinct().ToArray();
+                //var cacheKeys = brandGameProviders
+                //    .Select(x => new CacheKey
+                //    {
+                //        CacheType = RedisCacheType.BrandGameProviders,
+                //        Key = x.BrandId
+                //    }).Distinct().ToArray();
 
-                await _service.UpdateBrandGameProvidersAsync(brandGameProviders);
+                //await _service.UpdateBrandGameProvidersAsync(brandGameProviders);
 
-                await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
+                //await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
 
                 return new();
             }
@@ -96,7 +96,7 @@ namespace TGS.Workers.Schedulers.Jobs
             }
         }
 
-        private async Task<BrandGameProvider[]> GetBrandGameProviders(
+        private async ValueTask<string> GetBrandGameProviders(
             Status sourceStatus, Status targetStatus,
             Func<BrandGameProviderSchedule, bool> predicate)
         {
@@ -108,12 +108,7 @@ namespace TGS.Workers.Schedulers.Jobs
                 .Where(x => !x.Schedules.Any(predicate) && targetStatus == Status.Active ||
                     x.Schedules.Any(predicate) && targetStatus == Status.Maintenance).ToArray();
 
-            foreach (var brandGameProvider in brandGameProvidersToUpdate)
-            {
-                brandGameProvider.Status = targetStatus;
-            }
-
-            return brandGameProvidersToUpdate;
+            return string.Join(",", brandGameProvidersToUpdate.Select(x => x.Id).ToArray());
         }
     }
 }

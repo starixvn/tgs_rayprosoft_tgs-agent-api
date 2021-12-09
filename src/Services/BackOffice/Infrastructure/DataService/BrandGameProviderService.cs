@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -20,15 +23,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking = false);
 
         Task UpdateBrandGameProviderAsync(BrandGameProvider brandGameProvider);
-        Task UpdateBrandGameProvidersAsync(BrandGameProvider[] brandGameProviders);
+        Task<bool> UpdateBrandGameProvidersAsync(string brandGameProviderIdsString, Status status);
     }
 
     public class BrandGameProviderService : BaseRepositoryOperations<ITgsRepository>,
         IBrandGameProviderService
     {
+        private readonly ITgsRepository _repository;
+
         public BrandGameProviderService(ITgsRepository tgsRepository) : base(tgsRepository)
-        {
-        }
+            => _repository = tgsRepository;
 
         Task<BrandGameProvider> IBrandGameProviderService.GetBrandGameProviderAsync(
             Expression<Func<BrandGameProvider, bool>> predicate,
@@ -44,7 +48,18 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             BrandGameProvider brandGameProvider) =>
             UpdateEntityAsync(brandGameProvider);
 
-        Task IBrandGameProviderService.UpdateBrandGameProvidersAsync(BrandGameProvider[] brandGameProviders) =>
-            UpdateEntitiesAsync(brandGameProviders);
+        Task<bool> IBrandGameProviderService.UpdateBrandGameProvidersAsync(string brandGameProviderIdsString,
+            Status status)
+        {
+            const string spName = "dbo.update_brand_game_provider_status";
+            return _repository
+                .SqlQuerySingleAsync<bool>(spName,
+                    parameters:
+                    new Dictionary<string, object>
+                    {
+                        { "_ids", brandGameProviderIdsString },
+                        { "_status", status }
+                    });
+        }
     }
 }
