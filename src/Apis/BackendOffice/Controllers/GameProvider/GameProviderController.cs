@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using TGS.Apis.BackendOffice.Controllers.Messages.GameProvider;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
@@ -20,7 +17,6 @@ using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
 using TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
 using TGS.Services.BackOffice.Application.Queries.GameProviders;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 {
@@ -37,28 +33,10 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             _uploadService = uploadService;
         }
 
-        [HttpGet]
-        [Description("Get game providers")]
-        public Task<PagedResponse<GameProviderBaseModel>>
-            GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) => _mediator.Send(request);
-
-        [HttpGet("{id}")]
-        [Description("Get a game provider")]
-        public Task<GetGameProviderResponse> GetGameProviderAsync(Guid id) =>
-            _mediator.Send(new GetGameProviderRequest(id));
-
         [HttpPost]
         [Description("Create a game provider")]
         public Task<MessageResponse> CreateGameProviderAsync(CreateGameProviderRequest request) =>
             _mediator.Send(request);
-
-        [HttpPut("{id}")]
-        [Description("Update a game provider")]
-        public Task<MessageResponse> UpdateGameProviderAsync(Guid id, UpdateGameProviderRequest request)
-        {
-            request.Id = id;
-            return _mediator.Send(request);
-        }
 
         [HttpGet("localization/export")]
         [Description("Export game providers localization for example")]
@@ -79,6 +57,33 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             return new FileStreamResult(
                 fileStream,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
+
+        [HttpGet("{id}")]
+        [Description("Get a game provider")]
+        public Task<GetGameProviderResponse> GetGameProviderAsync(Guid id) =>
+            _mediator.Send(new GetGameProviderRequest(id));
+
+        [HttpGet("brands")]
+        [Description("Get game provider Brands")]
+        public ValueTask<GameProvidersBrandQueryResult>
+           GetGameProviderBrandsAsync(
+            [FromServices] IGetService<GameProvidersBrandQueryQuery, GameProvidersBrandQueryResult> getService,
+            [FromQuery] Guid? gameProviderId,
+            [FromQuery] Guid? brand)
+            => getService.GetAsync(new(gameProviderId, brand));
+
+        [HttpGet]
+        [Description("Get game providers")]
+        public Task<PagedResponse<GameProviderBaseModel>>
+            GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) => _mediator.Send(request);
+
+        [HttpPut("{id}")]
+        [Description("Update a game provider")]
+        public Task<MessageResponse> UpdateGameProviderAsync(Guid id, UpdateGameProviderRequest request)
+        {
+            request.Id = id;
+            return _mediator.Send(request);
         }
 
         [HttpPost("localization/upload")]
