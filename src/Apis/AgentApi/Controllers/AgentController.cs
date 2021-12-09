@@ -276,6 +276,7 @@ namespace TGS.Apis.AgentApi.Controllers
                     Status = agentInfo.Status.ToString(),
                     Type = agentInfo.Type.ToString(),
                     LevelType = agentInfo.AgentLevelType.ToString(),
+                    AgentDividendType = agentInfo.AgentDividendType.ToString(),
                     DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
                     {
                         Rank = x.Rank,
