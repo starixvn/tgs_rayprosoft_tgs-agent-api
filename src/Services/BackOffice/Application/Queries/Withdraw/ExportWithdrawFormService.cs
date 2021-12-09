@@ -8,17 +8,27 @@ using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Utility;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Withdraw;
+using ClosedXML.Excel;
+using ClosedXML.Report;
+using System.Collections.Generic;
+using TGS.Services.BackOffice.Application.Models.Deposit;
+using Microsoft.Extensions.FileProviders;
+using System.Reflection;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
     internal class ExportWithdrawFormService : IGetService<ExportWithdrawForm, MemoryStream>
     {
+        private static readonly EmbeddedFileProvider _EmbeddedFileProvider =
+            new EmbeddedFileProvider(Assembly.GetExecutingAssembly());
         private readonly IPaymentServiceClient _paymentServiceClient;
+        private readonly IFileInfo _templateFileInfo;
 
         public ExportWithdrawFormService(IPaymentServiceClient paymentServiceClient)
         {
             _paymentServiceClient =
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _templateFileInfo = _EmbeddedFileProvider.GetFileInfo("/Assets/withdraw_forms_template.xlsx");
         }
 
         public async ValueTask<MemoryStream> GetAsync(ExportWithdrawForm query, CancellationToken cancellationToken)
@@ -52,25 +62,48 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 
             var exportData = result.Items?.Select((x, index) => new ExportWithdrawModel
             {
-                Sequence = index + 1,
+                SerialNumber = index + 1,
                 Username = x.UserName,
-                UseType = resource.GetString(x.UserType.ToString()) ?? x.UserType.ToString(),
+                UserType = resource.GetString(x.UserType.ToString()) ?? x.UserType.ToString(),
                 Id = x.Id.ToString(),
+                OrderNo = x.OrderNo,
                 ThirdPartyOrderNo = x.ThirdPartyOrderNo,
                 Amount = x.Amount,
-                ApplicationTime = x.CreatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
-                UpdateTime = x.UpdatedOn.ToOffset(new(8, 0, 0)).ToString("d"),
+                ApplicationTime = x.CreatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
+                UpdateTime = x.UpdatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),
                 Remark = x.Remark
             });
 
-            var xlsx = exportData.ExportWithdrawLocalization("Withdraw", result.Sum, resource);
+            using var workbook = new XLWorkbook();
 
-            await using var stream = new MemoryStream();
+            GenerateWorkSheet(workbook, exportData, result.Sum);
 
-            xlsx.SaveAs(stream);
+            var ms = new MemoryStream();
 
-            return new MemoryStream(stream.ToArray());
+            workbook.SaveAs(ms);
+            ms.Position = 0;
+
+            return ms;
+        }
+
+        private void GenerateWorkSheet(
+            XLWorkbook target,
+            IEnumerable<ExportWithdrawModel> data,
+            decimal totalAmount)
+        {
+            using var fs = _templateFileInfo.CreateReadStream();
+            using var template = new XLTemplate(fs);
+
+            template.AddVariable(new
+            {
+                Rows = data,
+                TotalAmount = totalAmount
+            });
+
+            template.Generate();
+
+            template.Workbook.Worksheet("template").CopyTo(target, "Withdraw");
         }
     }
 }
