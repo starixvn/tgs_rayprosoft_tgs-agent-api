@@ -107,7 +107,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new TCGGameProvider(env),
                 new Card365GameProvider(env),
                 new LYGameProvider(env),
-                new BetConstructProvider(env)
+                new BetConstructProvider(env),
+                new AviaGameProvider(env)
             };
         }
 

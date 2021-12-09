@@ -37,6 +37,7 @@ namespace TGS.Core.Models
             public static readonly string Card365 = string.Format(Template, Consts.GameProvider.Card365);
             public static readonly string LY = string.Format(Template, Consts.GameProvider.LY);
             public static readonly string BetConstruct = string.Format(Template, Consts.GameProvider.BetConstruct);
+            public static readonly string Avia = string.Format(Template, Consts.GameProvider.Avia);
         }
     }
 }
