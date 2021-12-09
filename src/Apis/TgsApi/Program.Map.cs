@@ -9,6 +9,7 @@ using TGS.Apis.TgsApi.GameProviders.Evolution;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.IMESports;
 using TGS.Apis.TgsApi.GameProviders.JDB;
+using TGS.Apis.TgsApi.GameProviders.Jili;
 using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.LY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
@@ -27,31 +28,6 @@ namespace TGS.Apis.TgsApi
 {
     public partial class Program
     {
-        private static readonly IReadOnlyDictionary<string, Type> _StartupMap = new Dictionary<string, Type>
-        {
-            { SBOBET, typeof(SBOBETStartup) },
-            { Habanero, typeof(HabaneroStartup) },
-            { PragmaticPlay, typeof(PragmaticPlayStartup) },
-            { AsiaGaming, typeof(AsiaGamingStartup) },
-            { JDB, typeof(JDBStartup) },
-            { Saba, typeof(SabaStartup) },
-            { KY, typeof(KYStartup) },
-            { VR, typeof(VRStartup) },
-            { IMESports, typeof(IMESportsStartup) },
-            { BigGaming, typeof(BigGamingStartup) },
-            { SexyGaming, typeof(SexyGamingStartup) },
-            { Skywind, typeof(SkywindStartup) },
-            { AllBet, typeof(AllBetStartup) },
-            { Evolution, typeof(EvolutionStartup) },
-            { WGSports, typeof(WGSportsStartup) },
-            { WGHorse, typeof(WGHorseStartup) },
-            { WMCasino, typeof(WMCasinoStartup) },
-            { TCG, typeof(TCGStartup) },
-            { Card365, typeof(Card365Startup) },
-            { LY, typeof(LYStartup) },
-            { BetConstruct, typeof(BetConstructStartup)}
-        };
-
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
         {
             { SBOBET, "SBOBET/sbobet.json" },
@@ -74,7 +50,34 @@ namespace TGS.Apis.TgsApi
             { TCG, "TCG/tcg.json" },
             { Card365, "Card365/card365.json" },
             { LY, "LY/ly.json" },
-            { BetConstruct, "BetConstruct/betconstruct.json" }
+            { BetConstruct, "BetConstruct/betconstruct.json" },
+            { Jili, "Jili/jili.json" }
+        };
+
+        private static readonly IReadOnlyDictionary<string, Type> _StartupMap = new Dictionary<string, Type>
+        {
+            { SBOBET, typeof(SBOBETStartup) },
+            { Habanero, typeof(HabaneroStartup) },
+            { PragmaticPlay, typeof(PragmaticPlayStartup) },
+            { AsiaGaming, typeof(AsiaGamingStartup) },
+            { JDB, typeof(JDBStartup) },
+            { Saba, typeof(SabaStartup) },
+            { KY, typeof(KYStartup) },
+            { VR, typeof(VRStartup) },
+            { IMESports, typeof(IMESportsStartup) },
+            { BigGaming, typeof(BigGamingStartup) },
+            { SexyGaming, typeof(SexyGamingStartup) },
+            { Skywind, typeof(SkywindStartup) },
+            { AllBet, typeof(AllBetStartup) },
+            { Evolution, typeof(EvolutionStartup) },
+            { WGSports, typeof(WGSportsStartup) },
+            { WGHorse, typeof(WGHorseStartup) },
+            { WMCasino, typeof(WMCasinoStartup) },
+            { TCG, typeof(TCGStartup) },
+            { Card365, typeof(Card365Startup) },
+            { LY, typeof(LYStartup) },
+            { BetConstruct, typeof(BetConstructStartup) },
+            { Jili, typeof(JiliStartup) }
         };
     }
 }
