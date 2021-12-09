@@ -71,7 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
         async ValueTask<BetData> IBetConstructActionModelMapper.RollbackBetAsync(
             GameProviderConfigurationData data, string playerCode, RollbackRequest source)
         {
-            var transaction = new TransactionData();
+            var transaction = default(TransactionData);
 
             var externalTransactionId = source.TransactionId.ToString();
 
