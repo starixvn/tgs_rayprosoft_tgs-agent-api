@@ -590,6 +590,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("Update")
                             }
                         },
+                        new MenuSetting("PlatformGameProvider")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
+                        },
                         new MenuSetting("Language")
                         {
                             SubMenus = new[]
