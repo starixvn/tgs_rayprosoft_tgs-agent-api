@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE FUNCTION DBO.BRAND_GAME_PROVIDERS_STATUS_CHANGES(_to_maintenance_text text, _to_active_text text) RETURNS VOID LANGUAGE PLPGSQL AS $$
+﻿CREATE OR REPLACE FUNCTION dbo.brand_game_providers_status_changes(_to_maintenance_text text, _to_active_text text) RETURNS VOID LANGUAGE PLPGSQL AS $$
 declare
 	to_maintenance_ids uuid[];
 	to_active_ids uuid[];
