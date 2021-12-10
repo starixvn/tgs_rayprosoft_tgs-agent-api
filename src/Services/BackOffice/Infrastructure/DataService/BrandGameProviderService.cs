@@ -7,7 +7,6 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -23,7 +22,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking = false);
 
         Task UpdateBrandGameProviderAsync(BrandGameProvider brandGameProvider);
-        Task<bool> UpdateBrandGameProvidersAsync(string brandGameProviderIdsString, Status status);
+        Task UpdateBrandGameProvidersAsync(string toMaintenanceIds, string toActiveIds);
     }
 
     public class BrandGameProviderService : BaseRepositoryOperations<ITgsRepository>,
@@ -48,17 +47,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             BrandGameProvider brandGameProvider) =>
             UpdateEntityAsync(brandGameProvider);
 
-        Task<bool> IBrandGameProviderService.UpdateBrandGameProvidersAsync(string brandGameProviderIdsString,
-            Status status)
+        Task IBrandGameProviderService.UpdateBrandGameProvidersAsync(string toMaintenanceIds, string toActiveIds)
         {
-            const string spName = "dbo.update_brand_game_provider_status";
+            const string spName = "dbo.brand_game_providers_status_changes";
             return _repository
-                .SqlQuerySingleAsync<bool>(spName,
+                .SqlQuerySingleAsync<object>(spName,
                     parameters:
                     new Dictionary<string, object>
                     {
-                        { "_ids", brandGameProviderIdsString },
-                        { "_status", status }
+                        { "_to_maintenance_text", toMaintenanceIds },
+                        { "_to_active_text", toActiveIds }
                     });
         }
     }
