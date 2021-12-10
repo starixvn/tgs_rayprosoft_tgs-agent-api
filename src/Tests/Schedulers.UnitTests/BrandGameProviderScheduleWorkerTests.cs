@@ -52,22 +52,36 @@ namespace TGS.Tests.Schedulers.UnitTests
                 {
                     new BrandGameProviderSchedule
                     {
+                        Id = Guid.NewGuid(),
+                        BrandGameProviderId = brandGameProvider.Id,
+                        BrandGameProvider = brandGameProvider,
                         From = now.AddMinutes(addFromMinutes),
                         To = now.AddMinutes(addToMinutes),
                         DayOfWeek = now.DayOfWeek,
-                        IsDefault = true
+                        IsDefault = true,
+                        Status = SwitchStatus.Enabled
                     }
                 };
             }
 
-            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, true))
+            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, false))
                 .Returns(brandGameProviders);
 
             await _service.ExecuteAsync(It.IsAny<object>());
 
-            //_serviceMock.Verify(p =>
-            //    p.UpdateBrandGameProvidersAsync(It.Is<BrandGameProvider[]>(b =>
-            //        b.Length > 0 && b.All(x => x.Status == targetStatus))));
+            if (targetStatus == Status.Maintenance)
+            {
+                _serviceMock.Verify(p =>
+                    p.UpdateBrandGameProvidersAsync(
+                        It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id))),
+                        ""));
+            }
+            else
+            {
+                _serviceMock.Verify(p =>
+                    p.UpdateBrandGameProvidersAsync("",
+                        It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id)))));
+            }
         }
 
         private Fixture CreateBrandGameProviderFixture()
