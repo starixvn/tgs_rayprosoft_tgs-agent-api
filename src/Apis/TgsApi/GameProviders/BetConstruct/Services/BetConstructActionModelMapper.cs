@@ -71,7 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
         async ValueTask<BetData> IBetConstructActionModelMapper.RollbackBetAsync(
             GameProviderConfigurationData data, string playerCode, RollbackRequest source)
         {
-            var transaction = new TransactionData();
+            var transaction = default(TransactionData);
 
             var externalTransactionId = source.TransactionId.ToString();
 
@@ -84,7 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                     ExternalGameId = bet.ExternalGameId,
                     ExternalBetId = bet.ExternalBetId.ToString(),
                     ExternalRoundId = bet.ExternalRoundId.ToString(),
-                    ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
+                    ExternalTransactionId = $"{bet.ExternalTransactionId}",
                     ExternalTransactionReferenceId = bet.ExternalTransactionId,
                     GameActionType = GameActionType.CancelTransaction,
                     RoundClosed = true
