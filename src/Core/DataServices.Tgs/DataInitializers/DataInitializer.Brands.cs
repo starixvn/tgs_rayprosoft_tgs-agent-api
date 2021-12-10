@@ -4,22 +4,26 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal interface IBrand
         {
-            Guid Id { get; }
-            string Code { get; }
-            string Name { get; }
-            string OperationalEmail { get; }
-            string TimeZoneId { get; }
-            string ClientId { get; }
-            string SecretKey { get; }
             string ApiKey { get; }
-            SettlementIntervalType Type { get; }
-            int? SettlementDay { get; }
+
+            string ClientId { get; }
+
+            string Code { get; }
 
             ICurrency[] Currencies { get; }
+
+            string[] GameProviders => Array.Empty<string>();
+
+            string[] Groups => new[]
+            {
+                "Normal"
+            };
+
+            Guid Id { get; }
 
             ILanguage[] Languages => new ILanguage[]
             {
@@ -33,12 +37,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new KRLanguage()
             };
 
-            string[] GameProviders => Array.Empty<string>();
+            string Name { get; }
 
-            string[] Groups => new[]
-            {
-                "Normal"
-            };
+            string OperationalEmail { get; }
+
+            string SecretKey { get; }
+
+            int? SettlementDay { get; }
+
+            string TimeZoneId { get; }
+
+            SettlementIntervalType Type { get; }
         }
 
         internal record TgsBrand : IBrand

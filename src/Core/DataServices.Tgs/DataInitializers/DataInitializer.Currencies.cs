@@ -2,7 +2,7 @@
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal interface ICurrency : ICodeMapper
         {

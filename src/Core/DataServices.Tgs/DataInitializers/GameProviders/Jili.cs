@@ -5,13 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.GameProviders.Settings.AllBet;
 using TGS.Core.Models.GameProviders.Settings.Jili;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
@@ -28,28 +25,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             public JiliGameProvider(IWebHostEnvironment env)
             {
-                //_games = LoadGamesFromCsv(GameProviderConst.Jili)
-                //    .Select(g =>
-                //    {
-                //        if (g.EndpointPath.IsNotNullOrEmpty())
-                //        {
-                //            return g;
-                //        }
+                _games = LoadGamesFromCsv(GameProviderConst.Jili)
+                    .Select(g =>
+                    {
+                        if (g.EndpointPath.IsNotNullOrEmpty())
+                        {
+                            return g;
+                        }
 
-                //        return (Game)g with { EndpointPath = string.Empty };
-                //    })
-                //    .ToArray();
-
-                _games = Array.Empty<IGame>();
+                        return (Game)g with { EndpointPath = string.Empty };
+                    })
+                    .ToArray();
 
                 _env = env;
             }
 
-            Guid IGameProvider.Id => new("579D6DA3-B0ED-4E3F-BD4A-434A98EFBD68");
+            Guid IGameProvider.Id => new("B957E28C-0E94-40AF-9D37-AB48CDEB5D29");
 
             string IGameProvider.Code => GameProviderConst.Jili;
 
-            string IGameProvider.Name => "Jili";
+            string IGameProvider.Name => nameof(GameProviderConst.Jili);
 
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations => new IGameProviderConfiguration[]
             {
@@ -60,25 +55,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 new CNYCurrency("CNY"),
                 new USDCurrency("USD"),
-                new VND1000Currency("VND2"),
-                new IDR1000Currency("IDR2"),
+                new VNDCurrency("VND"),
+                new VND1000Currency("kVND"),
+                new IDRCurrency("IDR"),
+                new IDR1000Currency("kIDR"),
+                new HKDCurrency("HKD"),
                 new JPYCurrency("JPY"),
                 new KRWCurrency("KRW"),
                 new MYRCurrency("MYR"),
                 new THBCurrency("THB"),
-                new GBPCurrency("GBP")
+                new PHPCurrency("PHP"),
+                new INRCurrency("INR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"),
-                new CNLanguage("zh_CN"),
-                new IDLanguage("id"),
-                new JPLanguage("ja"),
-                new KRLanguage("ko"),
-                new THLanguage("th"),
-                new VNLanguage("vi"),
-                new TWLanguage("zh_TW")
+                new USLanguage("en-US"),
+                new CNLanguage("zh-CN"),
+                new IDLanguage("id-ID"),
+                new THLanguage("th-TH"),
+                new VNLanguage("vi-VN"),
+                new TWLanguage("zh-TW")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -112,14 +109,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
             {
-                new(GameProviderConst.AllBet, "AllBet")
+                new(GameProviderConst.Jili, "Jili")
             };
         }
 
         internal record JiliGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _endpoint = string.Empty;
-
             Guid IGameProviderConfiguration.Id => new("C16E67AB-797C-4CBE-8400-DDB5466568E8");
 
             string IGameProviderConfiguration.Name => "Configuration Jili";

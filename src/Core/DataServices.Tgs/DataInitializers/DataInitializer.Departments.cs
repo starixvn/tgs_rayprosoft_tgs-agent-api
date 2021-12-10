@@ -7,15 +7,15 @@ using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         private const string MarketDepartment = "市場";
         private const string ProductDepartment = "產品";
 
         private static readonly Dictionary<string, Guid> AdminDepartments = new()
         {
-            {MarketDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB")},
-            {ProductDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}
+            { MarketDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB") },
+            { ProductDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA") }
         };
 
         private static Department[] Departments;

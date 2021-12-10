@@ -9,45 +9,8 @@ using TGS.Core.Models.Settings;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
-        private async Task GenerateSettingsAsync()
-        {
-            var options = new JsonSerializerOptions {WriteIndented = false};
-
-            var commonSettings = new[]
-            {
-                CreateSetting(SettingConsts.Menus,
-                    _jsonSerializationProvider.SerializeToString(GetMenuSettings(), options),
-                    "For menus used"),
-                CreateSetting(SettingConsts.SuperLicenseeCodes,
-                    _jsonSerializationProvider.SerializeToString(new[]
-                    {
-                        "TGS"
-                    }, options),
-                    "Super Licensee Codes"),
-                CreateSetting(SettingConsts.PromotionType,
-                    _jsonSerializationProvider.SerializeToString(GetPromotionTypes(), options),
-                    "Promotion Types"),
-                CreateSetting(SettingConsts.ArrearsEmail,
-                    _jsonSerializationProvider.SerializeToString(GetArrearsEmail(), options),
-                    "Arrears Email")
-            };
-
-            var gameProviderSettings = _gameProviders.Select(gp =>
-            {
-                var configuration = gp.GetConfiguration();
-                return CreateSetting(SettingConsts.GameProviderConfigurations.Template.Args(gp.Code),
-                    _jsonSerializationProvider.SerializeToString(configuration, configuration.GetType(), options),
-                    $"JSON based configuration of {gp.Code}");
-            }).ToArray();
-
-            var settings = commonSettings.Concat(gameProviderSettings).ToArray();
-
-            await _repository.Settings.AddRangeAsync(settings);
-            await _repository.SaveChangesAsync();
-        }
-
         private static Setting CreateSetting(string key, string value, string description) =>
             new()
             {
@@ -108,117 +71,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         SendPercentage = 90.0M,
                         Content =
                             "90% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
-                    }
-                }
-            };
-
-        private static PromotionTypeGroup[] GetPromotionTypes() =>
-            new[]
-            {
-                new PromotionTypeGroup
-                {
-                    Name = "Deposit",
-                    Trans = new()
-                    {
-                        Zh = "充值送",
-                        En = "Deposit"
-                    },
-                    Types = new[]
-                    {
-                        new PromotionType
-                        {
-                            Name = "FirstDeposit",
-                            SettlementIntervalType = "Instantly",
-                            Trans = new()
-                            {
-                                Zh = "帳號首充",
-                                En = "Account First Deposit"
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "DailyFirstDeposit",
-                            SettlementIntervalType = "Instantly",
-                            Trans = new()
-                            {
-                                Zh = "每日首充",
-                                En = "Daily First Deposit"
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "DailySecondDeposit",
-                            SettlementIntervalType = "Instantly",
-                            Trans = new()
-                            {
-                                Zh = "每日再充",
-                                En = "Daily Re-Deposit"
-                            }
-                        }
-                    }
-                },
-                new PromotionTypeGroup
-                {
-                    Name = "Turnover",
-                    Trans = new()
-                    {
-                        Zh = "流水",
-                        En = "Turnover"
-                    },
-                    Types = new[]
-                    {
-                        new PromotionType
-                        {
-                            Name = "TurnoverRebate",
-                            SettlementIntervalType = "Daily",
-                            Trans = new()
-                            {
-                                Zh = "流水反水",
-                                En = "Turnover Rebate"
-                            }
-                        }
-                    }
-                },
-                new PromotionTypeGroup
-                {
-                    Name = "ReliefMoney",
-                    Trans = new()
-                    {
-                        Zh = "救援金",
-                        En = "SOS"
-                    },
-                    Types = new[]
-                    {
-                        new PromotionType
-                        {
-                            Name = "ReliefMoneyDaily",
-                            SettlementIntervalType = "Daily",
-                            Trans = new()
-                            {
-                                Zh = "每日救援金",
-                                En = "Daily SOS"
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "ReliefMoneyWeekly",
-                            SettlementIntervalType = "Weekly",
-                            Trans = new()
-                            {
-                                Zh = "每周救援金",
-                                En = "Weekly SOS"
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "ReliefMoneyMonthly",
-                            SettlementIntervalType = "Monthly",
-                            Trans = new()
-                            {
-                                Zh = "每月救援金",
-                                En = "Monthly SOS"
-                            }
-                        }
                     }
                 }
             };
@@ -661,6 +513,157 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
 
             return menus;
+        }
+
+        private static PromotionTypeGroup[] GetPromotionTypes() =>
+            new[]
+            {
+                new PromotionTypeGroup
+                {
+                    Name = "Deposit",
+                    Trans = new()
+                    {
+                        Zh = "充值送",
+                        En = "Deposit"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "FirstDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new()
+                            {
+                                Zh = "帳號首充",
+                                En = "Account First Deposit"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "DailyFirstDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new()
+                            {
+                                Zh = "每日首充",
+                                En = "Daily First Deposit"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "DailySecondDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new()
+                            {
+                                Zh = "每日再充",
+                                En = "Daily Re-Deposit"
+                            }
+                        }
+                    }
+                },
+                new PromotionTypeGroup
+                {
+                    Name = "Turnover",
+                    Trans = new()
+                    {
+                        Zh = "流水",
+                        En = "Turnover"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "TurnoverRebate",
+                            SettlementIntervalType = "Daily",
+                            Trans = new()
+                            {
+                                Zh = "流水反水",
+                                En = "Turnover Rebate"
+                            }
+                        }
+                    }
+                },
+                new PromotionTypeGroup
+                {
+                    Name = "ReliefMoney",
+                    Trans = new()
+                    {
+                        Zh = "救援金",
+                        En = "SOS"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyDaily",
+                            SettlementIntervalType = "Daily",
+                            Trans = new()
+                            {
+                                Zh = "每日救援金",
+                                En = "Daily SOS"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyWeekly",
+                            SettlementIntervalType = "Weekly",
+                            Trans = new()
+                            {
+                                Zh = "每周救援金",
+                                En = "Weekly SOS"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyMonthly",
+                            SettlementIntervalType = "Monthly",
+                            Trans = new()
+                            {
+                                Zh = "每月救援金",
+                                En = "Monthly SOS"
+                            }
+                        }
+                    }
+                }
+            };
+
+        private async Task GenerateSettingsAsync()
+        {
+            var options = new JsonSerializerOptions { WriteIndented = false };
+
+            var commonSettings = new[]
+            {
+                CreateSetting(SettingConsts.Menus,
+                    _jsonSerializationProvider.SerializeToString(GetMenuSettings(), options),
+                    "For menus used"),
+                CreateSetting(SettingConsts.SuperLicenseeCodes,
+                    _jsonSerializationProvider.SerializeToString(new[]
+                    {
+                        "TGS"
+                    }, options),
+                    "Super Licensee Codes"),
+                CreateSetting(SettingConsts.PromotionType,
+                    _jsonSerializationProvider.SerializeToString(GetPromotionTypes(), options),
+                    "Promotion Types"),
+                CreateSetting(SettingConsts.ArrearsEmail,
+                    _jsonSerializationProvider.SerializeToString(GetArrearsEmail(), options),
+                    "Arrears Email")
+            };
+
+            var gameProviderSettings = _gameProviders.Select(gp =>
+            {
+                var configuration = gp.GetConfiguration();
+                var key = SettingConsts.GameProviderConfigurations.Template.Args(gp.Code);
+                var value = _jsonSerializationProvider.SerializeToString(configuration,
+                    configuration.GetType(),
+                    options);
+
+                return CreateSetting(key, value, $"JSON based configuration of {gp.Code}");
+            }).ToArray();
+
+            var settings = commonSettings.Concat(gameProviderSettings).ToArray();
+
+            await _repository.Settings.AddRangeAsync(settings);
+            await _repository.SaveChangesAsync();
         }
     }
 }

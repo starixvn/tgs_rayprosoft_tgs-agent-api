@@ -2,15 +2,13 @@
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal interface ILicensee
         {
-            Guid Id { get; }
-            string Code { get; }
-            string Name { get; }
-            string OperationalEmail { get; }
             IBrand[] Brands { get; }
+
+            string Code { get; }
 
             ICurrency[] Currencies => new ICurrency[]
             {
@@ -20,13 +18,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new KRWCurrency(), new JPYCurrency()
             };
 
+            string[] GameProviders => Array.Empty<string>();
+
+            Guid Id { get; }
+
             ILanguage[] Languages => new ILanguage[]
             {
                 new CNLanguage(), new USLanguage(), new IDLanguage(),
                 new VNLanguage(), new THLanguage()
             };
 
-            string[] GameProviders => Array.Empty<string>();
+            string Name { get; }
+
+            string OperationalEmail { get; }
         }
 
         internal record TgsLicensee : ILicensee

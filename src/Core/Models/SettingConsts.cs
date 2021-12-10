@@ -14,6 +14,8 @@ namespace TGS.Core.Models
 
         public static class GameProviderConfigurations
         {
+            public const string Template = "{0}Configuration";
+
             public static readonly string AllBet = string.Format(Template, Consts.GameProvider.AllBet);
             public static readonly string AsiaGaming = string.Format(Template, Consts.GameProvider.AsiaGaming);
             public static readonly string Avia = string.Format(Template, Consts.GameProvider.Avia);
@@ -33,7 +35,6 @@ namespace TGS.Core.Models
             public static readonly string SexyGaming = string.Format(Template, Consts.GameProvider.SexyGaming);
             public static readonly string Skywind = string.Format(Template, Consts.GameProvider.Skywind);
             public static readonly string TCG = string.Format(Template, Consts.GameProvider.TCG);
-            public static readonly string Template = "{0}Configuration";
             public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
             public static readonly string WGHorse = string.Format(Template, Consts.GameProvider.WGHorse);
             public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
