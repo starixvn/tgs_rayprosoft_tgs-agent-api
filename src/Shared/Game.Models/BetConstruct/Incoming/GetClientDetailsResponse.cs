@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BetConstruct.Incoming
 {
-    public class GetClientDetailsResponse
+    public record GetClientDetailsResponse : ErrorResponse
     {
         [JsonPropertyName("Login")]
         public string Login { get; set; }
-        
+
         [JsonPropertyName("CurrencyId")]
         public string CurrencyId { get; set; }
-        
+
         [JsonPropertyName("LanguageId")]
         public string LanguageId { get; set; }
 
@@ -38,12 +34,6 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
 
         [JsonPropertyName("Address")]
         public string Address { get; set; }
-
-        [JsonPropertyName("ErrorCode")]
-        public string ErrorCode { get; set; }
-
-        [JsonPropertyName("ErrorText")]
-        public string ErrorText { get; set; }
 
         [JsonPropertyName("ExternalBonusId")]
         public int? ExternalBonusId { get; set; }

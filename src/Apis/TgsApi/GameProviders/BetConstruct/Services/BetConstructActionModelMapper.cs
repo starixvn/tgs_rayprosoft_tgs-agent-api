@@ -15,6 +15,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
     {
         ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playerCode, BetPlacedRequest source);
 
+        ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
+
+        ValueTask<BetData> ReSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
+
         ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source);
 
         ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
@@ -66,6 +70,83 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             };
 
             return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
+        }
+
+        async ValueTask<BetData> IBetConstructActionModelMapper.CancelSettleAsync(GameProviderConfigurationData data, string playerCode, BetResultedRequest source)
+        {
+            var transaction = default(TransactionData);
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
+            var externalRoundId = source.BetId.ToString();
+            var externalTransactionId = source.TransactionId.ToString();
+
+            var (roundRecord, gameActionRecord) = await _service
+                .GetSettleGameActionByBetAsync(data.GameProviderId, playerCode, source.BetId.ToString(), cachedGame.Id)
+                .ConfigureAwait(false);
+
+            if (gameActionRecord != null)
+            {
+                transaction = new TransactionData
+                {
+                    Amount = Math.Abs(source.Amount),
+                    ExternalTransactionId = $"{externalTransactionId}_settle_cancel",
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = "sportsbook",
+                    ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = false,
+                    RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+                };
+            }
+
+            return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
+        }
+
+        async ValueTask<BetData> IBetConstructActionModelMapper.ReSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source)
+        {
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
+
+            string externalRoundId = source.BetId.ToString();
+
+            var autoCloseRound = data.AutoCloseRound;
+            var gameActionType = source.BetState switch
+            {
+                1 => GameActionType.CancelTransaction,
+                2 => GameActionType.TieBet,
+                3 => GameActionType.LoseBet,
+                4 => GameActionType.WinBet,
+                5 => source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                _ => GameActionType.PlaceBet
+            };
+
+            var externalTransactionId = $"{source.TransactionId}";
+
+            var (roundRecord, gameActionRecord) = await _service
+                .GetGameActionByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
+                .ConfigureAwait(false);
+
+            var transaction = new TransactionData
+            {
+                Amount = Math.Abs(source.Amount),
+                ExternalTransactionId = externalTransactionId,
+                ExternalRoundId = externalRoundId,
+                ExternalBetId = externalRoundId,
+                ExternalGameActionGroupId = externalRoundId,
+                ExternalGameId = "sportsbook",
+                ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
+                GameActionType = gameActionType,
+                ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundClosed = true,
+                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+            };
+
+            return GetBetData(data, playCode, transaction, autoCloseRound);
         }
 
         async ValueTask<BetData> IBetConstructActionModelMapper.RollbackBetAsync(
@@ -121,10 +202,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             }
 
             var (roundRecord, gameActionRecord) = await _service
-                .GetGameActionsByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
+                .GetGameActionByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
                 .ConfigureAwait(false);
 
-            var transactions = new TransactionData
+            var transaction = new TransactionData
             {
                 Amount = Math.Abs(source.Amount),
                 ExternalTransactionId = externalTransactionId,
@@ -139,11 +220,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
             };
 
-            return GetBetData(data, playCode, transactions, autoCloseRound);
+            return GetBetData(data, playCode, transaction, autoCloseRound);
         }
 
         private BetData GetBetData(
-                                    GameProviderConfigurationData data,
+            GameProviderConfigurationData data,
             string playerCode,
             TransactionData transactions,
             bool autoCloseRound,
