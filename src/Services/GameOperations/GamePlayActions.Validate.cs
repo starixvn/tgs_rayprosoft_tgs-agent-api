@@ -21,6 +21,7 @@ namespace TGS.Services.GameOperations
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
         private readonly IExpirationValidator _expirationValidator;
+        private readonly IGameAccessor _gameAccessor;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameActionDataOperations _operations;
         private readonly IPlayerOperations _playerOperations;
@@ -37,7 +38,8 @@ namespace TGS.Services.GameOperations
             IStatusValidator statusValidator,
             IExpirationValidator expirationValidator,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus,
+            IGameAccessor gameAccessor)
         {
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
@@ -47,6 +49,7 @@ namespace TGS.Services.GameOperations
             _expirationValidator = expirationValidator;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
+            _gameAccessor = gameAccessor;
             _operations = operations;
         }
 
@@ -88,6 +91,25 @@ namespace TGS.Services.GameOperations
             };
         }
 
+        private async ValueTask ValidatePlayerStatusAsync(CachedPlayer player, Guid gameProviderId)
+        {
+            _statusValidator.ThrowIfPlayerDisabled(player.Status);
+
+            if (!player.IsTestPlayer)
+            {
+                return;
+            }
+
+            var gameProviderSupportTestPlayer =
+                await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId)
+                    .ConfigureAwait(false);
+
+            if (!gameProviderSupportTestPlayer)
+            {
+                throw new InvalidOperationException("Test player is not supported.");
+            }
+        }
+
         /// <summary>
         /// Validate statuses on betting if needed.
         /// </summary>
@@ -106,25 +128,6 @@ namespace TGS.Services.GameOperations
                 status).ConfigureAwait(false);
 
             await ValidatePlayerStatusAsync(player, gameProviderId).ConfigureAwait(false);
-        }
-
-        private async ValueTask ValidatePlayerStatusAsync(CachedPlayer player, Guid gameProviderId)
-        {
-            _statusValidator.ThrowIfPlayerDisabled(player.Status);
-
-            if (!player.IsTestPlayer)
-            {
-                return;
-            }
-
-            var gameProviderSupportTestPlayer =
-                await _gameProviderOperations.GetGameProviderSupportTestPlayerAsync(gameProviderId)
-                    .ConfigureAwait(false);
-
-            if (!gameProviderSupportTestPlayer)
-            {
-                throw new InvalidOperationException("Test player is not supported.");
-            }
         }
     }
 }
