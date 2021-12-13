@@ -5,6 +5,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class BrandAllAgentGameTypeCondition
     {
+        public AllAgentGameType GameType { get; set; }
+
         public AllAgentRebateType RebateType { get; set; }
 
         public int Rank { get; set; }

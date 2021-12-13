@@ -14,7 +14,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasKey(bc => new
                 {
-                    BrandAllAgentGameTypeId = bc.BrandId,
+                    bc.BrandId,
+                    bc.GameType,
                     bc.Rank,
                     bc.RebateType
                 })

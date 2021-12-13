@@ -11,8 +11,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool Switch { get; set; }
 
-        public bool ValidBet { get; set; }
+        public bool HasValidBet { get; set; }
 
-        public bool WinLoss { get; set; }
+        public bool HasWinLoss { get; set; }
     }
 }

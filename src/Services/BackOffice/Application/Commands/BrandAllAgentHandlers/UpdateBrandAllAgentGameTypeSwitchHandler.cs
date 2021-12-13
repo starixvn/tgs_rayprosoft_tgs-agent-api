@@ -34,17 +34,29 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeHand
                 return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
             }
 
-            var brandAllAgent = await _service.GetBrandAllAgentGameTypeAsync(x => x.BrandId == request.BrandId);
+            var brandAllAgentGameType =
+                await _service.GetBrandAllAgentGameTypeAsync(x
+                    => x.BrandId == request.BrandId && x.GameType == request.GameType);
 
-            switch (request.Switch)
+            if (brandAllAgentGameType is null)
             {
-                case true when brandAllAgent is null:
-                    await _service.CreateBrandAllAgentGameTypeAsync(
-                        new BrandAllAgentGameType { BrandId = request.BrandId });
-                    break;
-                case false when brandAllAgent is not null:
-                    await _service.DeleteBrandAllAgentGameTypeAsync(brandAllAgent);
-                    break;
+                await _service.CreateBrandAllAgentGameTypeAsync(
+                    new BrandAllAgentGameType
+                    {
+                        BrandId = request.BrandId,
+                        GameType = request.GameType,
+                        Switch = request.Switch,
+                        HasWinLoss = request.HasWinLoss,
+                        HasValidBet = request.HasValidBet
+                    });
+            }
+            else
+            {
+                brandAllAgentGameType.Switch = request.Switch;
+                brandAllAgentGameType.HasValidBet = request.HasValidBet;
+                brandAllAgentGameType.HasWinLoss = request.HasWinLoss;
+
+                await _service.UpdateBrandAllAgentGameTypeSwitchAsync(brandAllAgentGameType);
             }
 
             return CreateValidResponse<MessageResponse>();

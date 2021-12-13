@@ -1,0 +1,7 @@
+﻿using TGS.Core.Models.Enums;
+
+namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
+{
+    public record BrandAllAgentGameTypeModel(bool Switch, bool HasValidBet, bool HasWinLoss,
+        AllAgentGameType GameType);
+}

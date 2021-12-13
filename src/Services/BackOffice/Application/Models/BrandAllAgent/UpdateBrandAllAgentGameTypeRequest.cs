@@ -5,6 +5,6 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 {
-    public record UpdateBrandAllAgentGameTypeRequest(Guid BrandId, bool Switch, bool ValidBet, bool WinLoss,
+    public record UpdateBrandAllAgentGameTypeRequest(Guid BrandId, bool Switch, bool HasValidBet, bool HasWinLoss,
         AllAgentGameType GameType) : IRequest<MessageResponse>;
 }
