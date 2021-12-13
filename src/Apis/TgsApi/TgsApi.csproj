@@ -62,8 +62,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="GameProviders\Jili\Middlewares\" />
-  </ItemGroup>
-
 </Project>

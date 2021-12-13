@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.Jili.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Jili.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -35,6 +37,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
 
             services.AddSingleton<IJiliMerchantMapper, JiliMerchantMapper>();
             services.AddSingleton<IJiliPlayerService, JiliPlayerService>();
+            services.AddSingleton<IJiliActionModelMapper, JiliActionModelMapper>();
+
+            services.AddScoped<IJiliService, JiliService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
@@ -46,6 +51,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
+            const string Route = "/api/jili";
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleJiliExceptionMiddleware>();
+                });
         }
     }
 }

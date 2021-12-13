@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="BetConstruct\Commons\BetConstructGameUrl\" />
-    <Folder Include="Jili\Incoming\" />
   </ItemGroup>
 
 </Project>
