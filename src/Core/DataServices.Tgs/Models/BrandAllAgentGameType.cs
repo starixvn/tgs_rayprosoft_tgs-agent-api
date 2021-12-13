@@ -1,0 +1,18 @@
+﻿using System;
+using TGS.Core.Models.Enums;
+
+namespace TGS.Core.DataServices.Tgs.Models
+{
+    public class BrandAllAgentGameType
+    {
+        public Guid BrandId { get; set; }
+
+        public AllAgentGameType GameType { get; set; }
+
+        public bool Switch { get; set; }
+
+        public bool ValidBet { get; set; }
+
+        public bool WinLoss { get; set; }
+    }
+}
