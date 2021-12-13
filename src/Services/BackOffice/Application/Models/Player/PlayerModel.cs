@@ -46,6 +46,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string WeChat { get; init; }
 
+        public string IdNumber { get; set; }
+
         public class BankModel
         {
             public string BankType { get; init; }
