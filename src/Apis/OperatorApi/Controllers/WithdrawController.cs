@@ -26,7 +26,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [PlayerCheckEnabled]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
-            [FromServices] ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
             CreateWithdrawRequest request)
         {
             try
