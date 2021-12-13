@@ -3,43 +3,39 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
-using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.ValidateCode;
+using TGS.Core.Models.Exceptions;
+using TGS.Services.Agent.Services.Withdraw;
 
 namespace TGS.Services.Agent.Services.PayPassowrd
 {
     internal class ChangePayPasswordCommandService : ICommandService<ChangePayPasswordCommand>
     {
         private readonly IAgentRepository _agentRepository;
+        private readonly ICommandService<CheckWithdrawPayPasswordCommand> _checkPasswordService;
         private readonly IPasswordHandler _passwordHandler;
-        private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ChangePayPasswordCommandService(
-            IAgentRepository agentRepository,
+            ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
             IPasswordHandler passwordHandler,
-            IValidateCodeOperator validateCodeOperator)
+            IAgentRepository agentRepository)
         {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+            _checkPasswordService = checkPasswordService ?? throw new ArgumentNullException(nameof(checkPasswordService));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-
-            _validateCodeOperator =
-                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         }
 
-        public async ValueTask ExecuteAsync(
-            ChangePayPasswordCommand command,
-            CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
         {
-            var agent = await _agentRepository
-                .GetAgentByIdAsync(command.AgentId)
-                .ConfigureAwait(false);
+            var checkCommand = new CheckWithdrawPayPasswordCommand(
+                command.AgentId,
+                command.OldPassword);
 
-            var result = await _validateCodeOperator
-                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
-                .ConfigureAwait(false);
+            await _checkPasswordService.ExecuteAsync(checkCommand).ConfigureAwait(false);
 
-            if (result == null)
-                throw new ValidateCodeNotVerifyException();
+            var checkResult = await checkCommand.ReturnSource.Task.ConfigureAwait(false);
+
+            if (!checkResult)
+                throw new OperationNotAllowedException();
 
             var updatedOn = DateTimeOffset.UtcNow;
 

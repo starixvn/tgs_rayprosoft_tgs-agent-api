@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.PayPassowrd;
+using TGS.Services.Agent.Services.Withdraw;
 using TGS.Services.Agent.ValidateCode;
 
 namespace Agent.UnitTests
@@ -20,13 +23,13 @@ namespace Agent.UnitTests
     public class PayPasswordTests
     {
         [Test]
-        public void Change_Pay_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        public async Task Change_Pay_Password_By_ValidateCode_Should_Success()
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-            var sut = new ChangePayPasswordCommandService(
+            var sut = new ChangePayPasswordByValidateCodeCommandService(
                 fakeAgentRepository,
                 fakePasswordHandler,
                 fakeValidateCodeOperator);
@@ -62,65 +65,7 @@ namespace Agent.UnitTests
             var validateCode = "123456";
             var token = "99CFACE4-03FE-42A2-B1DB-57C93A7BCD2E";
 
-            var command = new ChangePayPasswordCommand(
-                agent.Id,
-                newPassword,
-                validateCode,
-                token);
-
-            fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
-
-            fakeValidateCodeOperator
-                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
-                .Returns((ValidateCodeData)null);
-
-            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-        }
-
-        [Test]
-        public async Task Change_Pay_Password_Should_Success()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-
-            var sut = new ChangePayPasswordCommandService(
-                fakeAgentRepository,
-                fakePasswordHandler,
-                fakeValidateCodeOperator);
-
-            var agent = new AgentInfo(
-                Guid.NewGuid(),
-                "TestAgent",
-                null,
-                null,
-                Guid.NewGuid(),
-                "test@gmail.com",
-                null,
-                null,
-                "aaabbb",
-                null,
-                1,
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                0M,
-                10M,
-                "ParentUserName",
-                DateTimeOffset.Now,
-                0M,
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Agent,
-                AgentDividendType.OneLayer,
-                Array.Empty<AgentDividendCondition>());
-
-            var newPassword = "newPassword";
-            var validateCode = "123456";
-            var token = "99CFACE4-03FE-42A2-B1DB-57C93A7BCD2E";
-
-            var command = new ChangePayPasswordCommand(
+            var command = new ChangePayPasswordByValidateCodeCommand(
                 agent.Id,
                 newPassword,
                 validateCode,
@@ -142,15 +87,101 @@ namespace Agent.UnitTests
         }
 
         [Test]
-        public void ChangePasswordRequestValidator_LengthCheck()
+        public async Task Change_Pay_Password_Should_Success()
         {
-            var sut = new ChangePasswordRequestValidator();
+            var fakeCheckPayPasswordService = Substitute.For<ICommandService<CheckWithdrawPayPasswordCommand>>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-            var data = new ChangePasswordRequest { NewPassword = "12345" };
+            var sut = new ChangePayPasswordCommandService(
+                fakeCheckPayPasswordService,
+                fakePasswordHandler,
+                fakeAgentRepository);
 
-            var actual = sut.Validate(data);
+            var command = new ChangePayPasswordCommand(
+                Guid.NewGuid(),
+                "oldPassword",
+                "newPassword");
 
-            Assert.IsFalse(actual.IsValid);
+            fakeCheckPayPasswordService
+                .ExecuteAsync(
+                    Arg.Any<CheckWithdrawPayPasswordCommand>(),
+                    Arg.Any<CancellationToken>())
+                .Returns(callInfo =>
+                {
+                    var cmd = callInfo.Arg<CheckWithdrawPayPasswordCommand>();
+
+                    cmd.ReturnSource.SetResult(true);
+
+                    return ValueTask.CompletedTask;
+                });
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeAgentRepository.Received(1)
+                .SetPayPasswordAsync(
+                    Arg.Is(command.AgentId),
+                    Arg.Any<byte[]>(),
+                    Arg.Any<byte[]>(),
+                    Arg.Any<DateTimeOffset>());
+        }
+
+        [Test]
+        public void Change_Pay_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+            var sut = new ChangePayPasswordByValidateCodeCommandService(
+                fakeAgentRepository,
+                fakePasswordHandler,
+                fakeValidateCodeOperator);
+
+            var agent = new AgentInfo(
+                Guid.NewGuid(),
+                "TestAgent",
+                null,
+                null,
+                Guid.NewGuid(),
+                "test@gmail.com",
+                null,
+                null,
+                "aaabbb",
+                null,
+                1,
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                0M,
+                10M,
+                "ParentUserName",
+                DateTimeOffset.Now,
+                0M,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                AgentDividendType.OneLayer,
+                Array.Empty<AgentDividendCondition>());
+
+            var newPassword = "newPassword";
+            var validateCode = "123456";
+            var token = "99CFACE4-03FE-42A2-B1DB-57C93A7BCD2E";
+
+            var command = new ChangePayPasswordByValidateCodeCommand(
+                agent.Id,
+                newPassword,
+                validateCode,
+                token);
+
+            fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
+                .Returns((ValidateCodeData)null);
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
 
         [Test]
@@ -205,7 +236,7 @@ namespace Agent.UnitTests
         }
 
         [Test]
-        public async Task Set_Pay_Password_Should_Success()
+        public async Task Set_Pay_Password_By_ValidateCode_Should_Success()
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
@@ -370,6 +401,51 @@ namespace Agent.UnitTests
                 fakeValidateCodeOperator);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_By_ValidateCode_Input_Max_Length()
+        {
+            // arrange
+            var sut = new ChangePayPasswordByValidateCodeRequestValidator();
+
+            var request = new ChangePayPasswordByValidateCodeRequest { NewPassword = "123456789012345678901" };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_By_ValidateCode_Input_Min_Length()
+        {
+            // arrange
+            var sut = new ChangePayPasswordByValidateCodeRequestValidator();
+
+            var request = new ChangePayPasswordByValidateCodeRequest { NewPassword = "12345" };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_By_ValidateCode_Input_With_Empty()
+        {
+            // arrange
+            var sut = new ChangePayPasswordByValidateCodeRequestValidator();
+
+            var request = new ChangePayPasswordByValidateCodeRequest { NewPassword = string.Empty };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
         }
 
         [Test]
