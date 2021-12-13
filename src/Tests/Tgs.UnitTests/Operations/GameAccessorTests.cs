@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -7,6 +6,7 @@ using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.GameOperations;
+using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
 
 namespace TGS.UnitTests.Operations
@@ -19,16 +19,22 @@ namespace TGS.UnitTests.Operations
         {
             var brandId = Guid.NewGuid();
             var gameProviderId = Guid.NewGuid();
-            var gameExternalIds = new[] { "1_1" };
             var gamePlatformTypes = new[] { GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile };
+
+            var gameInfo = new GameInfo(11, "1_1", GameStatus.Active);
+
+            var expected = new GameInfo[]
+            {
+                gameInfo
+            };
 
             var brandGames = new CachedBrandGame[]
             {
                 new CachedBrandGame
                 {
-                    GameId = 11,
-                    BrandGameStatus = GameStatus.Active,
-                    ExternalGameId = "1_1",
+                    GameId = gameInfo.Id,
+                    BrandGameStatus = gameInfo.Status,
+                    ExternalGameId = gameInfo.ExternalId,
                     PlatformType = GamePlatformType.DesktopAndMobile,
                     GameProviderId = gameProviderId
                 },
@@ -46,9 +52,9 @@ namespace TGS.UnitTests.Operations
             {
                 new CachedGame
                 {
-                    Id = 11,
-                    Status = GameStatus.Active,
-                    ExternalId = "1_1",
+                    Id = gameInfo.Id,
+                    Status = gameInfo.Status,
+                    ExternalId = gameInfo.ExternalId,
                     PlatformType = GamePlatformType.DesktopAndMobile
                 },
                 new CachedGame
@@ -61,25 +67,11 @@ namespace TGS.UnitTests.Operations
                 new CachedGame
                 {
                     Id = 13,
-                    Status = GameStatus.Active,
+                    Status = GameStatus.Inactive,
                     ExternalId = "1_3",
+                    SubGame = true,
+                    AvailableToBrand = true,
                     PlatformType = GamePlatformType.DesktopAndMobile
-                }
-            };
-
-            var subGames = new CachedSubGame[]
-            {
-                new CachedSubGame
-                {
-                    Id = 71,
-                    ExternalId = "7_1",
-                    PlatformType = GamePlatformType.DesktopAndMobile
-                },
-                new CachedSubGame
-                {
-                    Id = 91,
-                    ExternalId = "9_1",
-                    PlatformType = GamePlatformType.Desktop
                 }
             };
 
@@ -96,20 +88,13 @@ namespace TGS.UnitTests.Operations
                     => x.GetCachedGamesAsync(gameProviderId, gamePlatformTypes))
                 .Returns(Task.FromResult(games));
 
-            gameProviderOperationsMock
-                .Setup(x
-                    => x.GetSubGamesAsync(gameProviderId, gamePlatformTypes))
-                .Returns(Task.FromResult(subGames));
-
             var sut = new GameAccessor(brandOperationsMock.Object, gameProviderOperationsMock.Object);
 
-            var availableGames = await sut
-                .GetBrandAvailableGamesAsync(brandId, gameProviderId, gameExternalIds, gamePlatformTypes)
-                .ConfigureAwait(false);
+            var actual = (await sut
+                .GetBrandAvailableGamesAsync(brandId, gameProviderId, new[] { gameInfo.ExternalId }, gamePlatformTypes)
+                .ConfigureAwait(false)).ToArray();
 
-            var assert = gameExternalIds.All(id => availableGames.Any(ag => ag.ExternalId == id));
-
-            Assert.AreEqual(true, assert);
+            CollectionAssert.AreEqual(expected, actual);
         }
     }
 }

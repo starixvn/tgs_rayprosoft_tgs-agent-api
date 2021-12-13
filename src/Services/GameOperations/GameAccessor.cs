@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
@@ -48,28 +47,22 @@ namespace TGS.Services.GameOperations
                 .GetCachedGamesAsync(gameProviderId, platformTypes)
                 .ConfigureAwait(false);
 
-            var subGames = await _gameProviderOperations
-                .GetSubGamesAsync(gameProviderId, platformTypes)
-                .ConfigureAwait(false);
+            var games = cachedGames
+                .Where(g => externalIds.Contains(g.ExternalId))
+                .Select(game =>
+                {
+                    var brandGame = brandGames.FirstOrDefault(bg => bg.GameId == game.Id);
+                    var status = brandGame != null ?
+                        GetGameStatus(brandGame.BrandGameStatus, game.Status)
+                        : game.Status;
 
-            var gameInfo = from bg in brandGames
-                           from g in cachedGames
-                           where bg.GameId == g.Id
-                           let gameStatus = GetGameStatus(bg.BrandGameStatus, g.Status)
-                           select new GameInfo(g.Id, g.ExternalId, gameStatus, g.SubGame, g.AvailableToBrand);
-
-            var subGameInfo = from sg in subGames
-                              from g in cachedGames
-                              where sg.Id == g.Id
-                              select new GameInfo(g.Id, g.ExternalId, g.Status, g.SubGame, g.AvailableToBrand);
-
-            var games = gameInfo.Concat(subGameInfo).Distinct().
-                Where(g => externalIds.Contains(g.ExternalId)).ToArray();
+                    return new GameInfo(game.Id, game.ExternalId, status);
+                }).ToArray();
 
             if (games.Length == 0)
             {
                 throw new InvalidOperationException(
-                    $"Brand '{brandId}' doesn't have games '{externalIds.JoinAsStringByComma()}'");
+                    $"Brand '{brandId}' doesn't have games '{string.Join(",", externalIds)}'");
             }
 
             return games;
