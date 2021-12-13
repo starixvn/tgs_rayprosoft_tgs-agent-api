@@ -74,7 +74,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new THLanguage("TH"),
                 new KRLanguage("KR"),
                 new VNLanguage("VN"),
-                
+
 
             };
 
@@ -96,7 +96,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     AmountMaximum = 10000000m,
                     AmountFormat = "10,2",
                     ApiUrl = new Uri("https://api.aviaapi.vip"),
-                    Authorization= "81e2d1a24c684a76a710a70f4900a353"
+                    Authorization = "81e2d1a24c684a76a710a70f4900a353",
+                    PlayerPassword = "TgsP@ssw0rd"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
