@@ -2,10 +2,8 @@
 
 namespace TGS.Services.GameOperations.Models.Data
 {
-    internal record GameInfo(
+    public record GameInfo(
         int Id,
         string ExternalId,
-        GameStatus Status,
-        bool SubGame,
-        bool AvailableToBrand);
+        GameStatus Status);
 }
