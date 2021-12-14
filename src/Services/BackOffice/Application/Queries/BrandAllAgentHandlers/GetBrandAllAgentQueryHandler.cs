@@ -9,7 +9,7 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
 {
-    public class GetBrandAllAgentQueryHandler : Handler<GetBrandAllAgentRequest, BrandAllAgentModel>
+    public class GetBrandAllAgentQueryHandler : Handler<GetBrandAllAgentRequest, GetBrandAllAgentResponse>
     {
         private readonly IBrandAllAgentGameTypeService _brandAllAgentGameTypeService;
         private readonly IBrandAllAgentService _service;
@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             _brandAllAgentGameTypeService = brandAllAgentGameTypeService;
         }
 
-        public override async Task<BrandAllAgentModel> Handle(GetBrandAllAgentRequest request,
+        public override async Task<GetBrandAllAgentResponse> Handle(GetBrandAllAgentRequest request,
             CancellationToken cancellationToken)
         {
             var brandSwitch = _service.GetBrandAllAgentQueries().Any(x => x.BrandId == request.BrandId);
@@ -29,7 +29,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             var gameTypes = _brandAllAgentGameTypeService.GetBrandAllAgentGameTypeQueries()
                 .Where(x => x.BrandId == request.BrandId);
 
-            return new BrandAllAgentModel
+            return new GetBrandAllAgentResponse
             {
                 Switch = brandSwitch,
                 BrandAllAgentGameTypes = Enum.GetValues(typeof(AllAgentGameType)).Cast<AllAgentGameType>().GroupJoin(

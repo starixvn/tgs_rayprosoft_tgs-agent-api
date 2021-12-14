@@ -1,6 +1,6 @@
 ﻿namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 {
-    public record BrandAllAgentModel
+    public record GetBrandAllAgentResponse
     {
         public bool Switch { get; set; }
 
