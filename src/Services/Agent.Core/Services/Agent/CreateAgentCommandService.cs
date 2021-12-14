@@ -78,8 +78,9 @@ namespace TGS.Services.Agent.Services.Agent
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
+                    brand.AgentDividendType == AgentDividendType.MultipleLayer &&
                     brand.BrandAgentDividendConditions?.Count > 0 ||
-                    brand.AgentDividendType == AgentDividendType.OneLayer
+                    brand.AgentDividendType == AgentDividendType.OneLayer && query.DividendPercentage > 0
                         ? AgentConfigStatus.DoneForConfigurePercentage
                         : AgentConfigStatus.WaitForConfigurePercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
