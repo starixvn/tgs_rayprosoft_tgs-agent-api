@@ -18,7 +18,9 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
         public override async Task<GetAgentDividendSettingResponse> Handle(GetAgentDividendSettingRequest request,
             CancellationToken cancellationToken)
         {
-            var agent = await _service.GetAgentAsync(x => x.Username == request.Username).ConfigureAwait(false);
+            var agent = await _service
+                .GetAgentAsync(x => x.BrandId == request.BrandId && x.Username == request.Username)
+                .ConfigureAwait(false);
 
             return new GetAgentDividendSettingResponse
             {
