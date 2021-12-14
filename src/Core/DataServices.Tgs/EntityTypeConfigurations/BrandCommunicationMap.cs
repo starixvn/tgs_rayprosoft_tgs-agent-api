@@ -18,7 +18,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasConstraintName("fk_brand_communications_brands_brand_id");
 
             builder.Property(e => e.Type)
-                .HasMaxLength(64);
+                .HasMaxLength(64)
+                .IsRequired();
 
             builder.Property(e => e.Phone)
                 .HasMaxLength(32);
