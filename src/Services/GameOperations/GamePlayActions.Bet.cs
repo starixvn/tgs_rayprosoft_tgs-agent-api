@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
@@ -14,21 +15,24 @@ namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
+        ValueTask<BetResult> CancelTransactionAsync(BetData data);
+
         ValueTask<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
 
         ValueTask<BetResult> LockAmountAsync(BetData data);
 
+        ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data);
+
         ValueTask<BetResult> PlaceBetAsync(BetData data);
 
         ValueTask<BetResult> SettleBetAsync(BetData data);
-
-        ValueTask<BetResult> CancelTransactionAsync(BetData data);
-
-        ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data);
     }
 
     public sealed partial class GamePlayActions : IGamePlayActions
     {
+        public ValueTask<BetResult> CancelTransactionAsync(BetData data)
+            => ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
+
         public async ValueTask<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
@@ -50,147 +54,18 @@ namespace TGS.Services.GameOperations
                 _operations.PlaceAndSettleBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
-        public ValueTask<BetResult> PlaceBetAsync(BetData data)
-            => ExecuteGamePlayActionAsync(data,
-                _operations.PlaceAndSettleBetAsync,
-                player => ValidateRequiredStatusOnBettingAsync(data, player));
-
-        public ValueTask<BetResult> SettleBetAsync(BetData data)
-            => ExecuteGamePlayActionAsync(data, _operations.SettleBetAsync);
-
-        public ValueTask<BetResult> CancelTransactionAsync(BetData data)
-            => ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
-
         public ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data)
             => ExecuteGamePlayActionAsync(data,
                 _operations.PlaceAndSettleBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
-        private async ValueTask ValidateRequiredStatusOnBettingAsync(BetData data, CachedPlayer player)
-        {
-            if (data.IgnorePlaceBetValidation)
-            {
-                return;
-            }
+        public ValueTask<BetResult> PlaceBetAsync(BetData data)
+                    => ExecuteGamePlayActionAsync(data,
+                _operations.PlaceAndSettleBetAsync,
+                player => ValidateRequiredStatusOnBettingAsync(data, player));
 
-            await ValidateRequiredStatusAsync(player, data.GameProviderId, data.GameProviderConfigurationId)
-                .ConfigureAwait(false);
-
-            await ValidateGameProviderSupportedCurrencyAsync(data.GameProviderId, player.DefaultWalletCurrencyCode);
-
-            var gamePlatformTypes = data.AllowPlaceBetWithDifferentPlatformToken || !data.PlatformType.HasValue
-                ? Consts.AllGamePlatformTypes
-                : data.PlatformType!.Value.ToGamePlatformTypes();
-
-            var games = await GetBrandAvailableGamesAsync(
-                player.BrandId,
-                data.GameProviderId,
-                data.Transactions,
-                gamePlatformTypes).ConfigureAwait(false);
-
-            ValidateGameStatus(player.BrandId, games, player.Type);
-        }
-
-        private async ValueTask<GameInfo[]> GetBrandAvailableGamesAsync(
-            Guid brandId,
-            Guid gameProviderId,
-            TransactionData[] transactions,
-            GamePlatformType[] gamePlatformTypes)
-        {
-            var placeBetExternalGameIds = transactions.Select(t => t.ExternalGameId).Distinct().ToArray();
-
-            if (placeBetExternalGameIds.Length == 0)
-            {
-                throw new InvalidOperationException("No transaction is found when getting brand available games");
-            }
-
-            var brandGames =
-                await _brandOperations.GetBrandGamesAsync(brandId, gameProviderId, gamePlatformTypes)
-                    .ConfigureAwait(false);
-
-            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
-
-            var subGames = await _gameProviderOperations.GetSubGamesAsync(gameProviderId, gamePlatformTypes)
-                .ConfigureAwait(false);
-
-            var gameInfo = from bg in brandGames
-                           from g in cachedGames
-                           where bg.GameId == g.Id && placeBetExternalGameIds.Contains(g.ExternalId)
-                           let gameStatus = GetGameStatus(bg.BrandGameStatus, g.Status)
-                           select new GameInfo(g.Id, g.ExternalId, gameStatus, g.SubGame, g.AvailableToBrand);
-
-            var subGameInfo = from sg in subGames
-                              from g in cachedGames
-                              where sg.Id == g.Id
-                              select new GameInfo(g.Id, g.ExternalId, g.Status, g.SubGame, g.AvailableToBrand);
-
-            var games = gameInfo.Concat(subGameInfo).Distinct().ToArray();
-
-            if (games.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    $"Brand '{brandId}' doesn't have games '{placeBetExternalGameIds.JoinAsStringByComma()}'");
-            }
-
-            return games;
-        }
-
-        private void ValidateGameStatus(
-            Guid brandId,
-            GameInfo[] games,
-            PlayerType playerType)
-        {
-            var gameStatuses = _validGameStatus.GetStatus(playerType);
-
-            foreach (var game in games)
-            {
-                if (gameStatuses.Contains(game.Status))
-                {
-                    continue;
-                }
-
-                if (game.Status == GameStatus.Maintenance)
-                {
-                    throw new GameUnderMaintenanceException(game.ExternalId);
-                }
-
-                throw new InvalidOperationException(
-                    $"Brand '{brandId}' doesn't have game '{game.ExternalId}' with status '{gameStatuses.JoinAsStringByComma()}' but game status is '{game.Status}'");
-            }
-        }
-
-        private static GameStatus GetGameStatus(GameStatus brandGameStatus, GameStatus gameStatus)
-        {
-            if (brandGameStatus == GameStatus.Inactive || gameStatus == GameStatus.Inactive)
-            {
-                return GameStatus.Inactive;
-            }
-
-            if (brandGameStatus == GameStatus.Testing || gameStatus == GameStatus.Testing)
-            {
-                return GameStatus.Testing;
-            }
-
-            if (brandGameStatus == GameStatus.Maintenance || gameStatus == GameStatus.Maintenance)
-            {
-                return GameStatus.Maintenance;
-            }
-
-            return GameStatus.Active;
-        }
-
-        private async ValueTask ValidateGameProviderSupportedCurrencyAsync(
-            Guid gameProviderId, string playerCurrencyCode)
-        {
-            var supported =
-                await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, playerCurrencyCode);
-
-            if (!supported)
-            {
-                throw new InvalidOperationException(
-                    $"GameProvider '{gameProviderId}' doesn't support currency '{playerCurrencyCode}'");
-            }
-        }
+        public ValueTask<BetResult> SettleBetAsync(BetData data)
+            => ExecuteGamePlayActionAsync(data, _operations.SettleBetAsync);
 
         private async ValueTask<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)
         {
@@ -237,6 +112,73 @@ namespace TGS.Services.GameOperations
             var r = await execute(data).ConfigureAwait(false);
 
             return await EnsureMappingsAsync(data.GameProviderId, r);
+        }
+
+        private async ValueTask ValidateGameProviderSupportedCurrencyAsync(
+            Guid gameProviderId, string playerCurrencyCode)
+        {
+            var supported =
+                await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, playerCurrencyCode);
+
+            if (!supported)
+            {
+                throw new InvalidOperationException(
+                    $"GameProvider '{gameProviderId}' doesn't support currency '{playerCurrencyCode}'");
+            }
+        }
+
+        private void ValidateGameStatus(
+            Guid brandId,
+            IEnumerable<GameInfo> games,
+            PlayerType playerType)
+        {
+            var gameStatuses = _validGameStatus.GetStatus(playerType);
+
+            foreach (var game in games)
+            {
+                if (gameStatuses.Contains(game.Status))
+                {
+                    continue;
+                }
+
+                if (game.Status == GameStatus.Maintenance)
+                {
+                    throw new GameUnderMaintenanceException(game.ExternalId);
+                }
+
+                throw new InvalidOperationException(
+                    $"Brand '{brandId}' doesn't have game '{game.ExternalId}' with status '{gameStatuses.JoinAsStringByComma()}' but game status is '{game.Status}'");
+            }
+        }
+
+        private async ValueTask ValidateRequiredStatusOnBettingAsync(BetData data, CachedPlayer player)
+        {
+            if (data.IgnorePlaceBetValidation)
+            {
+                return;
+            }
+
+            await ValidateRequiredStatusAsync(player, data.GameProviderId, data.GameProviderConfigurationId)
+                .ConfigureAwait(false);
+
+            await ValidateGameProviderSupportedCurrencyAsync(data.GameProviderId, player.DefaultWalletCurrencyCode);
+
+            var gamePlatformTypes = data.AllowPlaceBetWithDifferentPlatformToken || !data.PlatformType.HasValue
+                ? Consts.AllGamePlatformTypes
+                : data.PlatformType!.Value.ToGamePlatformTypes();
+
+            var placeBetExternalGameIds = data.Transactions
+                .Select(t => t.ExternalGameId).Distinct().ToArray();
+
+            var games = await _gameAccessor
+                .GetBrandAvailableGamesAsync(
+                    player.BrandId,
+                    data.GameProviderId,
+                    placeBetExternalGameIds,
+                    gamePlatformTypes
+                ).ConfigureAwait(false);
+
+            ValidateGameStatus(player.BrandId, games, player.Type);
         }
     }
 }
