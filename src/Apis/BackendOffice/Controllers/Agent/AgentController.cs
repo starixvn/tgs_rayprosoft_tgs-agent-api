@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         public Task<GetAgentResponse> GetAgentAsync(Guid id) => _mediator.Send(new GetAgentRequest(id));
 
         [HttpGet("dividendPercentage/{username}")]
-        [Description("Get an agent by username")]
+        [Description("Get an agent dividend percentage by username")]
         public Task<GetAgentDividendSettingResponse> GetAgentDividendPercentageAsync(string username)
             => _mediator.Send(new GetAgentDividendSettingRequest(username));
 
