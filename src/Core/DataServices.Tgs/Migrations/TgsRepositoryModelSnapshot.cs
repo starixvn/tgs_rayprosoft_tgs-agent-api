@@ -1370,6 +1370,85 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_agent_dividend_conditions");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgent", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.HasKey("BrandId")
+                        .HasName("pk_brand_all_agents");
+
+                    b.ToTable("brand_all_agents");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgentGameType", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<bool>("HasValidBet")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_valid_bet");
+
+                    b.Property<bool>("HasWinLoss")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_win_loss");
+
+                    b.Property<bool>("Switch")
+                        .HasColumnType("boolean")
+                        .HasColumnName("switch");
+
+                    b.HasKey("BrandId", "GameType")
+                        .HasName("pk_brand_all_agent_game_types");
+
+                    b.ToTable("brand_all_agent_game_types");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgentGameTypeCondition", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("GameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_type");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<short>("RebateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("rebate_type");
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("DividendPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_percentage");
+
+                    b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("net_profit");
+
+                    b.HasKey("BrandId", "GameType", "Rank", "RebateType")
+                        .HasName("pk_brand_all_agent_game_type_conditions");
+
+                    b.ToTable("brand_all_agent_game_type_conditions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandBetLimit", b =>
                 {
                     b.Property<Guid>("BrandId")

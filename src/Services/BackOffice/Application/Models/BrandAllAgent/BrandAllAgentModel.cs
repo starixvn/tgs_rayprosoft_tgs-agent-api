@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
+﻿namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 {
-    public record BrandAllAgentModel(Guid BrandId, IEnumerable<BrandAllAgentGameTypeModel> BrandAllAgentGameTypes);
+    public record BrandAllAgentModel
+    {
+        public bool Switch { get; set; }
+
+        public BrandAllAgentGameTypeModel[] BrandAllAgentGameTypes { get; set; }
+    }
 }

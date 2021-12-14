@@ -19,7 +19,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     bc.Rank,
                     bc.RebateType
                 })
-                .HasName("pk_brand_all_agent_game_types");
+                .HasName("pk_brand_all_agent_game_type_conditions");
 
             builder.Property(c => c.RebateType)
                 .HasColumnType(ColumnTypes.SmallInt)

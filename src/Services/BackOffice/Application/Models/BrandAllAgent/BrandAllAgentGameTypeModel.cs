@@ -2,6 +2,14 @@
 
 namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 {
-    public record BrandAllAgentGameTypeModel(bool Switch, bool HasValidBet, bool HasWinLoss,
-        AllAgentGameType GameType);
+    public record BrandAllAgentGameTypeModel
+    {
+        public bool Switch { get; set; }
+
+        public bool HasValidBet { get; set; }
+
+        public bool HasWinLoss { get; set; }
+
+        public AllAgentGameType GameType { get; set; }
+    }
 }

@@ -1,30 +1,54 @@
-﻿//using System.Threading;
-//using System.Threading.Tasks;
-//using Microsoft.AspNetCore.Http;
-//using TGS.Core.DataServices.Base.Extensions;
-//using TGS.Core.Models.Messages;
-//using TGS.Services.BackOffice.Application.Models.Agent;
-//using TGS.Services.BackOffice.Application.Models.BrandAllAgent;
-//using TGS.Services.BackOffice.Infrastructure.DataService;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Application.Models.BrandAllAgent;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 
-//namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
-//{
-//    public class GetBrandAllAgentQueryHandler : Handler<GetBrandAllAgentRequest, BrandAllAgentModel>
-//    {
-//        private readonly IAgentService _service;
+namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
+{
+    public class GetBrandAllAgentQueryHandler : Handler<GetBrandAllAgentRequest, BrandAllAgentModel>
+    {
+        private readonly IBrandAllAgentGameTypeService _brandAllAgentGameTypeService;
+        private readonly IBrandAllAgentService _service;
 
-//        public GetBrandAllAgentQueryHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
-//        {
-//            _service = service;
-//        }
+        public GetBrandAllAgentQueryHandler(IBrandAllAgentService service,
+            IBrandAllAgentGameTypeService brandAllAgentGameTypeService, IHttpContextAccessor accessor) : base(accessor)
+        {
+            _service = service;
+            _brandAllAgentGameTypeService = brandAllAgentGameTypeService;
+        }
 
-//        public override async Task<BrandAllAgentModel> Handle(GetBrandAllAgentRequest request,
-//            CancellationToken cancellationToken)
-//        {
-//            var (agents, totalCount) = await _service.GetAgentsAsync(request);
+        public override async Task<BrandAllAgentModel> Handle(GetBrandAllAgentRequest request,
+            CancellationToken cancellationToken)
+        {
+            var brandSwitch = _service.GetBrandAllAgentQueries().Any(x => x.BrandId == request.BrandId);
 
-//            return await agents.CreatePagedResponseAsync(totalCount);
-//        }
-//    }
-//}
+            var gameTypes = _brandAllAgentGameTypeService.GetBrandAllAgentGameTypeQueries()
+                .Where(x => x.BrandId == request.BrandId);
 
+            return new BrandAllAgentModel
+            {
+                Switch = brandSwitch,
+                BrandAllAgentGameTypes = Enum.GetValues(typeof(AllAgentGameType)).Cast<AllAgentGameType>().GroupJoin(
+                        gameTypes,
+                        t => t,
+                        g => g.GameType,
+                        (t, g) => new
+                        {
+                            AllAgentGameType = t,
+                            BrandAllAgentGameTypes = g
+                        })
+                    .Select(x => new BrandAllAgentGameTypeModel
+                    {
+                        GameType = x.AllAgentGameType,
+                        Switch = x.BrandAllAgentGameTypes.FirstOrDefault()?.Switch ?? false,
+                        HasValidBet = x.BrandAllAgentGameTypes.FirstOrDefault()?.HasValidBet ?? false,
+                        HasWinLoss = x.BrandAllAgentGameTypes.FirstOrDefault()?.HasWinLoss ?? false
+                    }).ToArray()
+            };
+        }
+    }
+}
