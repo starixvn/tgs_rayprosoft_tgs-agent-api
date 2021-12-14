@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TGS.Apis.TgsApi.GameProviders.AllBet;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
+using TGS.Apis.TgsApi.GameProviders.Avia;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct;
 using TGS.Apis.TgsApi.GameProviders.BigGaming;
 using TGS.Apis.TgsApi.GameProviders.Card365;
@@ -49,7 +50,8 @@ namespace TGS.Apis.TgsApi
             { TCG, typeof(TCGStartup) },
             { Card365, typeof(Card365Startup) },
             { LY, typeof(LYStartup) },
-            { BetConstruct, typeof(BetConstructStartup)}
+            { BetConstruct, typeof(BetConstructStartup)},
+            { Avia, typeof(AviaStartup)}
         };
 
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
@@ -74,7 +76,8 @@ namespace TGS.Apis.TgsApi
             { TCG, "TCG/tcg.json" },
             { Card365, "Card365/card365.json" },
             { LY, "LY/ly.json" },
-            { BetConstruct, "BetConstruct/betconstruct.json" }
+            { BetConstruct, "BetConstruct/betconstruct.json" },
+            { Avia, "Avia/avia.json" }
         };
     }
 }
