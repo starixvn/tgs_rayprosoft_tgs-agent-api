@@ -33,6 +33,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         [Description("Get an agent")]
         public Task<GetAgentResponse> GetAgentAsync(Guid id) => _mediator.Send(new GetAgentRequest(id));
 
+        [HttpGet("dividendPercentage/{username}")]
+        [Description("Get an agent by username")]
+        public Task<GetAgentDividendSettingResponse> GetAgentDividendPercentageAsync(string username)
+            => _mediator.Send(new GetAgentDividendSettingRequest(username));
+
         [HttpGet("{id}/operations")]
         [Description("Get agent operations")]
         public Task<PagedResponse<AgentOperationModel>> GetAgentOperationsAsync(Guid id) =>
