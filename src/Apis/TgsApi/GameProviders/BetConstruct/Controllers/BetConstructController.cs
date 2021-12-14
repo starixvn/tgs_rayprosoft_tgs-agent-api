@@ -152,18 +152,47 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                .ConfigureAwait(false);
 
-            var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
-
-            if (betData == null)
+            if (request.IsResettled == false)
             {
-                return new BetResultedResponse()
-                {
-                    ErrorCode = $"{(int)GameApiError.InternalError}",
-                    ErrorText = GameApiError.InternalError.Description()
-                };
-            }
+                var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
 
-            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+                if (betData == null)
+                {
+                    return new BetResultedResponse()
+                    {
+                        ErrorCode = $"{(int)GameApiError.InternalError}",
+                        ErrorText = GameApiError.InternalError.Description()
+                    };
+                }
+
+                var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+            }
+            else
+            {
+                var betDataCancelSettle = await _map.CancelSettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
+                if (betDataCancelSettle == null)
+                {
+                    return new BetResultedResponse()
+                    {
+                        ErrorCode = $"{(int)GameApiError.InternalError}",
+                        ErrorText = GameApiError.InternalError.Description()
+                    };
+                }
+                var betResultCancelSettle = await _actions.CancelTransactionAsync(betDataCancelSettle).ConfigureAwait(false);
+
+                var betDataSettle = await _map.ReSettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
+
+                if (betDataSettle == null)
+                {
+                    return new BetResultedResponse()
+                    {
+                        ErrorCode = $"{(int)GameApiError.InternalError}",
+                        ErrorText = GameApiError.InternalError.Description()
+                    };
+                }
+
+                var betResult = await _actions.SettleBetAsync(betDataSettle).ConfigureAwait(false);
+            }
 
             return new BetResultedResponse()
             {

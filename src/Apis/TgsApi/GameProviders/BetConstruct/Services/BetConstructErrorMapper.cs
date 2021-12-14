@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -17,29 +15,29 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
-                //{typeof(InvalidCredentialsException), InvalidSignature},
+                {typeof(InvalidCredentialsException), PasswordOrAuthTokenError},
                 {typeof(MissingTokenException), PasswordOrAuthTokenError},
                 {typeof(PlayerLoginExpiredException), UserIsDismissed},
                 {typeof(PlayerNotFoundException), UserIsDismissed},
                 {typeof(PlayerDisabledException), UserIsBlocked},
-                //{typeof(PlayerHasInsufficientFundsException), InsufficientMerchantCreditToFundIn},
+                {typeof(PlayerHasInsufficientFundsException), ClientBalanceIsLess},
                 //{typeof(InvalidGameActionException), MethodNotFound},
-                //{typeof(InvalidAmountException), InsufficientMerchantCreditToFundIn},
+                {typeof(InvalidAmountException), InternalError},
                 //{typeof(ArgumentException), InvalidParametersFailedToDecryptTheParameters},
-                //{typeof(ModelBindingException), MissingRequiredParameter},
-                //{typeof(InvalidStatusException), UnknownSystemErrorPleaseContactTCGCustomerSupport},
-                //{typeof(InvalidOperationException), MethodNotFound}
+                {typeof(ModelBindingException), InternalError},
+                {typeof(InvalidStatusException), InternalError},
+                {typeof(InvalidOperationException), ApiWrongAccessException}
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {TransactionNotFound, InternalError}//TODO:需修改對應的InvalidGameActionErrorCode
-                    //{TransactionBeingCancelledNotFound, BetSlipDoesNotExist},
-                    //{TransactionBeingReferencedNotFound, BetSlipDoesNotExist},
-                    //{RoundNotFound, BetSlipDoesNotExist},
-                    //{GameNotFound, BetSlipDoesNotExist}
+                    {TransactionNotFound, InternalError},
+                    {TransactionBeingCancelledNotFound, InternalError},
+                    {TransactionBeingReferencedNotFound, InternalError},
+                    {RoundNotFound, InternalError},
+                    {GameNotFound, InternalError}
                 };
 
         public int GetApiErrorByException(Exception exception)
@@ -61,6 +59,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
 
         public int GetHttpStatusByException(Exception exception) =>
             StatusCodes.Status200OK;
+
         public string GetMessageByException(Exception exception) =>
             exception.Message;
     }

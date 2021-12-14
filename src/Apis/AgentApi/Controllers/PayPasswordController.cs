@@ -1,12 +1,15 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Controllers.Contraints;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.Services.PayPassowrd;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -14,6 +17,57 @@ namespace TGS.Apis.AgentApi.Controllers
     [ApiController]
     public class PayPasswordController : ControllerBase
     {
+        private readonly ILogger<PayPasswordController> _logger;
+
+        public PayPasswordController(ILogger<PayPasswordController> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        [HttpPatch, HK28CheckContraint]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public ValueTask ChangePayPasswordAsync(
+            [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
+            ChangePayPasswordRequest request)
+        {
+            try
+            {
+                var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+                var command = new ChangePayPasswordCommand(
+                    agentTokenData.AgentId,
+                    request.Password,
+                    request.NewPassword);
+
+                return changePayPasswordService.ExecuteAsync(command);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Change PayPassword occur error.");
+
+                throw new InvalidOperationException();
+            }
+        }
+
+        [HttpPatch(Order = 1)]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public ValueTask ChangePayPasswordByValidateCodeAsync(
+            [FromServices] ICommandService<ChangePayPasswordByValidateCodeCommand> changePayPasswordService,
+            ChangePayPasswordByValidateCodeRequest request)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+            var command = new ChangePayPasswordByValidateCodeCommand(
+                agentTokenData.AgentId,
+                request.NewPassword,
+                request.ValidateCode,
+                request.SecurityKey);
+
+            return changePayPasswordService.ExecuteAsync(command);
+        }
+
         [HttpPost]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
@@ -39,24 +93,6 @@ namespace TGS.Apis.AgentApi.Controllers
             var command = new StartChangePayPasswordCommand(agentTokenData.AgentId, CultureInfo.CurrentUICulture);
 
             return startChangePayPasswordService.GetAsync(command);
-        }
-
-        [HttpPatch]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask ChangePayPasswordAsync(
-            [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
-            ChangePayPasswordRequest request)
-        {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-
-            var command = new ChangePayPasswordCommand(
-                agentTokenData.AgentId,
-                request.NewPassword,
-                request.ValidateCode,
-                request.SecurityKey);
-
-            return changePayPasswordService.ExecuteAsync(command);
         }
     }
 }

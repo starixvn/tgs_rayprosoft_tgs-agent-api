@@ -2,15 +2,12 @@
 
 namespace TGS.Apis.AgentApi.Models.Messages
 {
-    public record ChangePayPasswordRequest
+    public class ChangePayPasswordRequest
     {
         [JsonPropertyName("newpwd")]
         public string NewPassword { get; init; }
 
-        [JsonPropertyName("validatecode")]
-        public string ValidateCode { get; init; }
-
-        [JsonPropertyName("securitykey")]
-        public string SecurityKey { get; init; }
+        [JsonPropertyName("password")]
+        public string Password { get; init; }
     }
 }

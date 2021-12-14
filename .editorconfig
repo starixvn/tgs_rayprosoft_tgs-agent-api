@@ -267,3 +267,4 @@ dotnet_naming_style.begins_with_underscore_camlcase.capitalization = camel_case
 
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = true
+dotnet_diagnostic.VSTHRD002.severity=silent

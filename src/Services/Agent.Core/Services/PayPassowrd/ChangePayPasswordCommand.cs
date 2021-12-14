@@ -4,7 +4,6 @@ namespace TGS.Services.Agent.Services.PayPassowrd
 {
     public record ChangePayPasswordCommand(
         Guid AgentId,
-        string NewPassword,
-        string ValidateCode,
-        string SecurityKey);
+        string OldPassword,
+        string NewPassword);
 }
