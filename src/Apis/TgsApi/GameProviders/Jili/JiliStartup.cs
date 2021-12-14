@@ -41,6 +41,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
 
             services.AddScoped<IJiliService, JiliService>();
 
+            services.AddScoped<HandleJiliExceptionMiddleware>();
+            services.AddScoped<AuthorizeJiliMiddleware>();
+
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
                 typeof(JiliGameInitializer)
@@ -57,6 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
                 builder =>
                 {
                     builder.UseMiddleware<HandleJiliExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeJiliMiddleware>();
                 });
         }
     }

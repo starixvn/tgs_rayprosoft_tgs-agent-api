@@ -4,7 +4,7 @@
     {
         public static class ContextItems
         {
-            public static readonly string Agent = "Agent";
+            public const string JiliPlayerId = "JiliPlayerId";
         }
     }
 }

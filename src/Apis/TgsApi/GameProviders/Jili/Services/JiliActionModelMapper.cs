@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Numerics;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
@@ -9,6 +10,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
 {
     internal class JiliActionModelMapper : IJiliActionModelMapper
     {
+        private static readonly string _GameProviderCode = Consts.GameProvider.Jili;
         private readonly IJiliPlayerService _playerService;
 
         public JiliActionModelMapper(
@@ -26,6 +28,114 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 JiliPlayerId = _playerService.ToJiliPlayerId(result.BrandCode, playerCode),
                 CurrencyCode = result.GameProviderCurrencyCode
             };
+
+        public BetData BetAndSettleRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            JiliPlaceBetAndSettleRequest request)
+        {
+            var externalGameId = request.ExternalGameId.ToString();
+            var externalRoundId = request.ExternalRoundId.ToString();
+
+            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(request.WagersTime);
+
+            var settleActionType = request.WinloseAmount > 0 ?
+                    GameActionType.WinBet :
+                    GameActionType.LoseBet;
+
+            var transactions = new TransactionData[]
+            {
+                new TransactionData
+                {
+                    ExternalTransactionId = externalRoundId,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = GameActionType.PlaceBet,
+                    Amount = request.BetAmount,
+                    TimeStamp = timestamp
+                },
+                new TransactionData
+                {
+                    ExternalTransactionId = $"{externalRoundId}_settle",
+                    ExternalTransactionReferenceId = externalRoundId,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = settleActionType,
+                    Amount = request.WinloseAmount,
+                    TimeStamp = timestamp,
+                    RoundClosed = true
+                }
+            };
+
+            return new BetData
+            {
+                GameProviderId = data.GameProviderId,
+                GameProviderConfigurationId = data.GameProviderConfigurationId,
+                GameProviderCode = _GameProviderCode,
+                AutoCloseRound = data.AutoCloseRound,
+                PlayerCode = playerCode,
+                PlatformType = data.PlatformType,
+                HasCurrencyFromGameProvider = false,
+                Transactions = transactions
+            };
+        }
+
+        public JiliPlaceBetAndSettleResponse BetAndSettleResponse(string jiliPlayerId, BetResult result)
+        {
+            var roundId = result.Transactions.Select(t => t.RoundId).FirstOrDefault();
+            var transactionId = new BigInteger(roundId.ToByteArray(), true, false);
+
+            return new JiliPlaceBetAndSettleResponse
+            {
+                ErrorCode = 0,
+                ErrorMessage = string.Empty,
+                Balance = result.Balance,
+                JiliPlayerId = jiliPlayerId,
+                CurrencyCode = result.GameProviderCurrencyCode,
+                TransactionId = transactionId
+            };
+        }
+
+        public BetData FreeBetRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request)
+        {
+            var externalGameId = request.ExternalGameId.ToString();
+            var externalRoundId = request.ExternalRoundId.ToString();
+            var referencedRoundId = request.ReferencedExternalRoundId!.ToString();
+
+            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(request.WagersTime);
+
+            var transactions = new TransactionData[]
+            {
+                new TransactionData
+                {
+                    ExternalTransactionId = externalRoundId,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = referencedRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = GameActionType.FreeBet,
+                    Amount = request.WinloseAmount,
+                    TimeStamp = timestamp
+                }
+            };
+
+            return new BetData
+            {
+                GameProviderId = data.GameProviderId,
+                GameProviderConfigurationId = data.GameProviderConfigurationId,
+                GameProviderCode = _GameProviderCode,
+                AutoCloseRound = data.AutoCloseRound,
+                PlayerCode = playerCode,
+                PlatformType = data.PlatformType,
+                HasCurrencyFromGameProvider = false,
+                FreeBetAsSingleRound = true,
+                Transactions = transactions
+            };
+        }
 
         public PlayerValidationData ValidateRequest(string playerCode, PlatformType platformType)
             => new PlayerValidationData

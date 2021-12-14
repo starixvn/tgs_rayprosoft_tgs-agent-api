@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
         public async ValueTask<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request)
         {
             var tokenData = request.Token;
-            var token = $"{tokenData.PlayerCode},{tokenData.LoginRecordId}";
+            var token = $"{tokenData.PlayerCode},{tokenData.LoginRecordId},{tokenData.PlatformType}";
             var encryptedToken = await _tokenProvider.EncryptAsync(token).ConfigureAwait(false);
 
             var player = await _playerOperations.GetCachedPlayerAsync(tokenData.PlayerCode).ConfigureAwait(false);

@@ -9,6 +9,10 @@ namespace TGS.Core.Models.GameProviders
     {
         public Uri ApiUrl { get; init; }
 
+        public string ClientId { get; init; }
+
+        public string SecretKey { get; init; }
+
         public IEnumerable<JiliMerchant> Merchants { get; init; }
     }
 }

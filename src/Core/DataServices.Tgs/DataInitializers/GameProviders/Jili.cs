@@ -92,6 +92,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-jili") : new("http://localhost:62330"),
                     ApiUrl = new("https://uat-wb-api.jlfafafa2.com/singleWallet"),
+                    ClientId = "Jili-staging",
+                    SecretKey = "iJXZopyrQl",
                     Merchants = new JiliMerchant[]
                     {
                         new()

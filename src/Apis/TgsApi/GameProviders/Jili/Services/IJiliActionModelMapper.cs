@@ -8,6 +8,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
     {
         JiliAuthorizePlayerResponse AuthorizePlayerResponse(string playerCode, PlayerValidationResult result);
 
+        BetData BetAndSettleRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request);
+
+        JiliPlaceBetAndSettleResponse BetAndSettleResponse(string jiliPlayerId, BetResult result);
+
+        BetData FreeBetRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request);
+
         PlayerValidationData ValidateRequest(string playerCode, PlatformType platformType);
     }
 }
