@@ -118,7 +118,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var data = new TCGLaunchGameByLOTTOVNRequest()
             {
                 UserName = source.UserName,
-                Platform = "WEB",
+                Platform = IsMobile ? "MOBILE" : "WEB",
                 GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
                 GameCode = "lobby",
                 Language = source.Language,
