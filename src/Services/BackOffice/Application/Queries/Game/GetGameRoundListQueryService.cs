@@ -24,20 +24,22 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
             var reportRequest = new GetRoundsRequest
             {
                 BrandId = query.BrandId,
-                ExternalRoundId = query.ExternalRoundId,
-                From = query.From,
-                GameProviderId = query.GameProviderId,
-                GameType = query.GameType,
-                OrderBy = query.Paging.OrderBy,
-                Page = query.Paging.Page,
+                Username = query.Username,
                 PlayerCode = query.PlayerCode,
                 RoundId = query.RoundId,
-                Rows = query.Paging.Rows,
-                ShowAll = query.Paging.ShowAll,
-                SortBy = query.Paging.SortBy,
+                ExternalRoundId = query.ExternalRoundId,
+                GameProviderId = query.GameProviderId,
                 Status = query.Status,
+                GameType = query.GameType,
+                From = query.From,
                 To = query.To,
-                Username = query.Username
+                ClosedFrom = query.ClosedFrom,
+                ClosedTo = query.ClosedTo,
+                Page = query.Paging.Page,
+                Rows = query.Paging.Rows,
+                OrderBy = query.Paging.OrderBy,
+                SortBy = query.Paging.SortBy,
+                ShowAll = query.Paging.ShowAll,
             };
 
             return await _reportClient

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Shared.Game.ApiClients.BetConstruct
 {
@@ -14,10 +16,12 @@ namespace TGS.Shared.Game.ApiClients.BetConstruct
     internal class BetConstructUtility : IBetConstructUtility
     {
         private readonly MD5 _md5;
+        private readonly ILogger<BetConstructUtility> _logger;
 
-        public BetConstructUtility()
+        public BetConstructUtility(ILogger<BetConstructUtility> logger)
         {
             _md5 = MD5.Create();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         string MD5Hash(string plainText)
@@ -31,6 +35,8 @@ namespace TGS.Shared.Game.ApiClients.BetConstruct
 
         string IBetConstructUtility.ComputeSignature(Dictionary<string, object> hashDict, string sharedKey)
         {
+            _logger.LogInformation($"ComputeSignature hashDict:{JsonSerializer.Serialize(hashDict)}");
+
             var content = string.Join(
                 "",
                 hashDict.Where(x => x.Value != null && x.Value.ToString() != "")
@@ -40,8 +46,9 @@ namespace TGS.Shared.Game.ApiClients.BetConstruct
                     }));
 
             var plainText = $"{content}{sharedKey}";
-
-            var hash = MD5Hash(plainText);
+            _logger.LogInformation($"ComputeSignature plainText:{plainText}");
+            var hash = MD5Hash(plainText);            
+            _logger.LogInformation($"ComputeSignature hash:{hash}");
 
             return hash;
         }

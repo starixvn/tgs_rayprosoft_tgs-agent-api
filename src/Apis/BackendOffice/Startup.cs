@@ -22,6 +22,7 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice
@@ -81,9 +82,21 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
+
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
+
+
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories()
+                .AddBackendOfficeRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .AddMessageQueue()
                 .AddNatsMessageQueue(config =>
                 {
                     config
@@ -93,10 +106,9 @@ namespace TGS.Apis.BackendOffice
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .ProcessAllSubjects();
-                });
-            ;
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                })
+                .AddNatsGlobPatternExchange("*");
 
             services.AddPaymentServiceClient((options, sp) =>
             {
@@ -175,9 +187,9 @@ namespace TGS.Apis.BackendOffice
 
             services.AddGameProvidersPluggableServerClient((options, sp) =>
             {
-                var configuration = sp.GetRequiredService<IConfiguration>();
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                options.BaseUrl = new(configuration.GetConnectionString("GameProvidersPluggable"));
+                options.BaseUrl = config.GetValue<Uri>("BackOffice:GameProvidersPluggableBaseUrl");
             });
 
             services.AddSwaggerGen(c =>

@@ -8,19 +8,12 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Shared.Game.Models.WGSports.Commons;
-using TGS.Shared.Game.Models.WGSports.Incoming;
 using TGS.Shared.Game.Models.WGSports.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.WGSports
 {
     public interface IWGSportsApiClient
     {
-        ValueTask<WGSportsPrepareLoginResponse> GetPrepareLoginAsync(
-            WGSportsConfiguration configuration, WGSportsPrepareLoginRequest source);
-
-        ValueTask<WGSportsLoginResponse> GetLoginAsync(
-            WGSportsConfiguration configuration, WGSportsLoginRequest source);
-
         ValueTask<WGSportsResponse> AccessMoneyAsync(
             WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source);
 
@@ -33,7 +26,11 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsGameRecordResponse> GetGameRecordAsync(
             WGSportsConfiguration configuration, WGSportsGameRecordRequest request);
 
-        ValueTask<WGSportsGPGameRecordResponse> GameRecordAsync(Uri apiUrl, WGSportsGPGameRecordRequest request);
+        ValueTask<WGSportsLoginResponse> GetLoginAsync(
+            WGSportsConfiguration configuration, WGSportsLoginRequest source);
+
+        ValueTask<WGSportsPrepareLoginResponse> GetPrepareLoginAsync(
+                                                    WGSportsConfiguration configuration, WGSportsPrepareLoginRequest source);
     }
 
     public class WGSportsApiClient : BaseApiClient, IWGSportsApiClient
@@ -48,37 +45,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        ValueTask<WGSportsPrepareLoginResponse> IWGSportsApiClient.GetPrepareLoginAsync(
-            WGSportsConfiguration configuration, WGSportsPrepareLoginRequest source)
-        {
-            var data =
-                $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}|{source.Handicap}";
-            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
-
-            var path =
-                $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode}.PrepareLogin";
-
-            return ExecuteJsonRequestAsync<object, WGSportsPrepareLoginResponse>(HttpMethod.Get,
-                path,
-                null,
-                logPrefix: prefix);
-        }
-
-        ValueTask<WGSportsLoginResponse> IWGSportsApiClient.GetLoginAsync(
-            WGSportsConfiguration configuration, WGSportsLoginRequest source)
-        {
-            var path =
-                $"{configuration.ApiUrl}?m=api&c=index&a=Login&Token={HttpUtility.UrlEncode(source.Token)}&PartnerCode={configuration.PartnerCode}&Lang={source.Lang}";
-            var prefix = $"{_gameProviderCode}.Login";
-
-            return ExecuteJsonRequestAsync<object, WGSportsLoginResponse>(HttpMethod.Get,
-                path,
-                null,
-                logPrefix: prefix);
-        }
-
-        ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyAsync(
+        public ValueTask<WGSportsResponse> AccessMoneyAsync(
             WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
@@ -91,7 +58,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
             return ExecuteJsonRequestAsync<object, WGSportsResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyQueryAsync(
+        public ValueTask<WGSportsResponse> AccessMoneyQueryAsync(
             WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source)
         {
             var data = source.OrderId;
@@ -104,7 +71,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
             return ExecuteJsonRequestAsync<object, WGSportsResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGSportsGetBalanceResponse> IWGSportsApiClient.GetBalanceAsync(
+        public ValueTask<WGSportsGetBalanceResponse> GetBalanceAsync(
             WGSportsConfiguration configuration, WGSportsGetBalanceRequest source)
         {
             var data = source.PlayerCode;
@@ -120,7 +87,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
                 logPrefix: prefix);
         }
 
-        ValueTask<WGSportsGameRecordResponse> IWGSportsApiClient.GetGameRecordAsync(
+        public ValueTask<WGSportsGameRecordResponse> GetGameRecordAsync(
             WGSportsConfiguration configuration, WGSportsGameRecordRequest request)
         {
             var data =
@@ -137,11 +104,34 @@ namespace TGS.Shared.Game.ApiClients.WGSports
                 logPrefix: prefix);
         }
 
-        ValueTask<WGSportsGPGameRecordResponse> IWGSportsApiClient.GameRecordAsync(
-            Uri apiUrl, WGSportsGPGameRecordRequest request) =>
-            ExecuteJsonRequestAsync<WGSportsGPGameRecordRequest, WGSportsGPGameRecordResponse>(HttpMethod.Post,
-                apiUrl,
-                "/api/wgfm/gamerecord",
-                request);
+        public ValueTask<WGSportsLoginResponse> GetLoginAsync(
+            WGSportsConfiguration configuration, WGSportsLoginRequest source)
+        {
+            var path =
+                $"{configuration.ApiUrl}?m=api&c=index&a=Login&Token={HttpUtility.UrlEncode(source.Token)}&PartnerCode={configuration.PartnerCode}&Lang={source.Lang}";
+            var prefix = $"{_gameProviderCode}.Login";
+
+            return ExecuteJsonRequestAsync<object, WGSportsLoginResponse>(HttpMethod.Get,
+                path,
+                null,
+                logPrefix: prefix);
+        }
+
+        public ValueTask<WGSportsPrepareLoginResponse> GetPrepareLoginAsync(
+                                                    WGSportsConfiguration configuration, WGSportsPrepareLoginRequest source)
+        {
+            var data =
+                $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}|{source.Handicap}";
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+
+            var path =
+                $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
+            var prefix = $"{_gameProviderCode}.PrepareLogin";
+
+            return ExecuteJsonRequestAsync<object, WGSportsPrepareLoginResponse>(HttpMethod.Get,
+                path,
+                null,
+                logPrefix: prefix);
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -8,7 +9,6 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.GameProviders.Repositories;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.ApiClients.VR;
 using TGS.Shared.Game.Models.VR.Outgoing;
@@ -18,9 +18,9 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
     public class VRGameProviderWalletAction : BaseGameProviderWalletAction
     {
         private readonly IVRApiClient _client;
-        private readonly ISettingOperations _settingOperations;
         private readonly IVRGamePlayerCreate _gamePlayerCreate;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ISettingOperations _settingOperations;
 
         public VRGameProviderWalletAction(
             IVRApiClient client,
@@ -28,9 +28,13 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
-            IWalletRepository walletRepository,
-            IVRGamePlayerCreate gamePlayerCreate
-            ) : base(playerOperations, gameProviderOperations, gameProviderFundTransferTransactionRepository, walletRepository)
+            ICashServiceClient cashServiceClient,
+            IVRGamePlayerCreate gamePlayerCreate)
+            : base(
+                  playerOperations,
+                  gameProviderOperations,
+                  gameProviderFundTransferTransactionRepository,
+                  cashServiceClient)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
@@ -63,7 +67,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             return true;
         }
 
-        public async override ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
               await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
@@ -94,7 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             return (true, response.SerialNumber, response.Balance);
         }
 
-        public async override ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
               await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
@@ -160,7 +164,6 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             if (string.IsNullOrEmpty(response.PlayerName) || response.Balance == -1)
             {
                 return new(false, 0);
-
             }
 
             return new(true, response.Balance);

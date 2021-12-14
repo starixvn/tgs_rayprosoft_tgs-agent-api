@@ -15,6 +15,10 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
+
         public DbSet<AdminLog> AdminLogs { get; set; }
 
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
@@ -24,8 +28,6 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<AgentDividend> AgentDividends { get; set; }
 
         public DbSet<AgentDomain> AgentDomains { get; set; }
-
-        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
 
         public DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
 
@@ -220,9 +222,8 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
 
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
+        public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+        public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);

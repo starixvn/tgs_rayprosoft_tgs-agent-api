@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
 
         [HttpPost]
         [Route("history/round")]
-        public async ValueTask<GetRoundHistoryResponse> GetRoundHistory(
+        public async ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(
             [FromServices] Func<string, IGameHistory> historyFactory,
             GetRoundHistoryRequest request) =>
             await historyFactory(request.GameProviderCode).GetRoundHistoryAsync(request)

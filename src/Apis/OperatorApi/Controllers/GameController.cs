@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
@@ -26,6 +27,29 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameController : ControllerBase
     {
+        [HttpGet("bc")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<ContentResult> BCSportsHtmlAsync(
+            [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
+        {
+            var currentCultureName = CultureInfo.CurrentUICulture.Name;
+
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+            var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
+
+            var result = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return new ContentResult
+            {
+                Content = result.Html,
+                ContentType = "text/html",
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
+
         [HttpGet("favorite/{gameType}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public IAsyncEnumerable<int> GetFavoriteGamesAsync(

@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Logging;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs
 {
@@ -34,51 +34,56 @@ namespace TGS.Workers.Schedulers.Jobs
         {
             var offset = new TimeSpan(8, 0, 0);
             var dayOfWeek = DateTimeOffset.Now.ToOffset(offset).DayOfWeek;
-            var utcNow = DateTimeOffset.Now.ToOffset(offset).DateTime;
+            var now = DateTimeOffset.Now.ToOffset(offset);
 
             bool Predicate(BrandGameProviderSchedule s)
             {
-                var src = DateTimeOffset.Now.ToOffset(offset).DateTime;
+                var src = DateTimeOffset.Now.ToOffset(offset);
+                var from = s.From.ToOffset(offset);
+                var to = s.To.ToOffset(offset);
 
-                var fromHM = new DateTime(src.Year,
+                var fromHM = new DateTimeOffset(src.Year,
                     src.Month,
                     src.Day,
-                    s.From.Hour,
-                    s.From.Minute,
-                    0);
+                    from.Hour,
+                    from.Minute,
+                    0,
+                    offset);
 
-                var toHM = new DateTime(src.Year,
+                var toHM = new DateTimeOffset(src.Year,
                     src.Month,
                     src.Day,
-                    s.To.Hour,
-                    s.To.Minute,
-                    0);
+                    to.Hour,
+                    to.Minute,
+                    0,
+                    offset);
 
-                return s.Status == SwitchStatus.Enabled && s.IsDefault && dayOfWeek == s.DayOfWeek &&
-                    fromHM <= utcNow && toHM >= utcNow || !s.IsDefault &&
+                return s.Status == SwitchStatus.Enabled && (s.IsDefault && dayOfWeek == s.DayOfWeek &&
+                    fromHM <= now && toHM >= now || !s.IsDefault &&
                     s.From <= DateTimeOffset.Now &&
-                    s.To >= DateTimeOffset.Now;
+                    s.To >= DateTimeOffset.Now);
             }
 
             try
             {
-                var brandGameProvidersToBeMaintenance =
+                var brandGameProvidersToBeMaintenanceIds =
                     await GetBrandGameProviders(Status.Active, Status.Maintenance, Predicate);
 
-                var brandGameProvidersToBeActivated =
+                var brandGameProvidersToBeActivatedIds =
                     await GetBrandGameProviders(Status.Maintenance, Status.Active, Predicate);
 
-                var brandGameProviders = brandGameProvidersToBeMaintenance
-                    .Union(brandGameProvidersToBeActivated).ToArray();
+                var brandGameProviders = brandGameProvidersToBeMaintenanceIds
+                    .Union(brandGameProvidersToBeActivatedIds).ToArray();
 
                 var cacheKeys = brandGameProviders
-                    .Select(x => new CacheKey
+                    .Select(id => new CacheKey
                     {
                         CacheType = RedisCacheType.BrandGameProviders,
-                        Key = x.BrandId
+                        Key = id
                     }).Distinct().ToArray();
 
-                await _service.UpdateBrandGameProvidersAsync(brandGameProviders);
+                await _service.UpdateBrandGameProvidersAsync(string.Join(",", brandGameProvidersToBeMaintenanceIds),
+                    string.Join(",", brandGameProvidersToBeActivatedIds));
 
                 await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
 
@@ -96,24 +101,20 @@ namespace TGS.Workers.Schedulers.Jobs
             }
         }
 
-        private async Task<BrandGameProvider[]> GetBrandGameProviders(
+        private async ValueTask<Guid[]> GetBrandGameProviders(
             Status sourceStatus, Status targetStatus,
             Func<BrandGameProviderSchedule, bool> predicate)
         {
-            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries(tracking: true)
+            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries()
                 .Where(x => x.Status == sourceStatus && !x.IsManualChangeStatus)
+                .Include(x => x.Schedules)
                 .ToArrayAsync();
 
             var brandGameProvidersToUpdate = sourceBrandGameProviders
                 .Where(x => !x.Schedules.Any(predicate) && targetStatus == Status.Active ||
                     x.Schedules.Any(predicate) && targetStatus == Status.Maintenance).ToArray();
 
-            foreach (var brandGameProvider in brandGameProvidersToUpdate)
-            {
-                brandGameProvider.Status = targetStatus;
-            }
-
-            return brandGameProvidersToUpdate;
+            return brandGameProvidersToUpdate.Select(x => x.Id).ToArray();
         }
     }
 }

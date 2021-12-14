@@ -97,11 +97,29 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dividend percentage must greater than or equal to lower layer..
+        /// </summary>
+        public static string DividendPercentageMustGreaterThanOrEqualToLowerLayer {
+            get {
+                return ResourceManager.GetString("DividendPercentageMustGreaterThanOrEqualToLowerLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rank {0} dividend percentage must less than or equal {1}..
         /// </summary>
         public static string DividendPercentageMustLessThan {
             get {
                 return ResourceManager.GetString("DividendPercentageMustLessThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dividend percentage must less than or equal to upper layer..
+        /// </summary>
+        public static string DividendPercentageMustLessThanOrEqualToUpperLayer {
+            get {
+                return ResourceManager.GetString("DividendPercentageMustLessThanOrEqualToUpperLayer", resourceCulture);
             }
         }
         

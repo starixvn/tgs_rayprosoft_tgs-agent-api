@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
+using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.GameProviders;
@@ -21,6 +23,16 @@ namespace TGS.Services.Operator.Configuration
             where TGameProviderRepository : class, IGameProviderRepository
         {
             Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRepository>(
+            Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+            where THelp2PayRepository : class, IHelp2PayRepository
+        {
+            Services.AddTransient<IHelp2PayRepository>(sp =>
+                ActivatorUtilities.CreateInstance<THelp2PayRepository>(sp, redisDatabaseResolver(sp)));
 
             return this;
         }
@@ -86,9 +98,9 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
+        public OperatorConfiguration ConfigureWallet(Action<CashServiceClientOptions, IServiceProvider> configure)
         {
-            configure(Services.AddWallet());
+            Services.AddCashServiceClient(configure);
 
             return this;
         }

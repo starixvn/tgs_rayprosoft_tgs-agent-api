@@ -37,15 +37,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
         private readonly IBigGamingService _service;
         private readonly ISettingOperations _settingOperations;
-        private readonly IBigGamingGPGameHistoryService _bigGamingGPGameHistoryService;
 
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
             IBigGamingService services,
             IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations,
-            IBigGamingGPGameHistoryService bigGamingGPGameHistoryService
+            ISettingOperations settingOperations
         )
         {
             _map = map ?? throw new ArgumentNullException(nameof(map));
@@ -54,7 +52,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             _jsonSerializationProvider = jsonSerializationProvider ??
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _bigGamingGPGameHistoryService = bigGamingGPGameHistoryService ?? throw new ArgumentNullException(nameof(bigGamingGPGameHistoryService));
+
             _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
                 {"open.operator.user.balance", GetBalanceAsync},
@@ -70,45 +68,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 WriteIndented = true,
                 //略過所有預設值屬性
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            };
-        }
-
-        [HttpPost("entrance")]
-        public async Task<BigGamingResponse> EntranceAsync(
-            BigGamingRequest baseRequest)
-        {
-            if (!_methodMapper.TryGetValue(baseRequest.Method.ToLower(), out var execute))
-            {
-                return new()
-                {
-                    Id = baseRequest.Id,
-                    Error = new()
-                    {
-                        Code = GameApiError.TargetNotFound.ToString(),
-                        Message = GameApiError.TargetNotFound.Description(),
-                        Action = baseRequest.Method.ToLower()
-                    },
-                    Jsonrpc = baseRequest.Jsonrpc
-                };
-            }
-
-            return await execute(baseRequest).ConfigureAwait(false);
-        }
-
-        [HttpPost("balance")]
-        public async Task<BigGamingResponse> GetBalanceAsync(
-            BigGamingRequest baseRequest)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
-
-            return new()
-            {
-                Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
-                Error = null,
-                Jsonrpc = baseRequest.Jsonrpc
             };
         }
 
@@ -151,6 +110,90 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };
+        }
+
+        [HttpPost("entrance")]
+        public async Task<BigGamingResponse> EntranceAsync(
+            BigGamingRequest baseRequest)
+        {
+            if (!_methodMapper.TryGetValue(baseRequest.Method.ToLower(), out var execute))
+            {
+                return new()
+                {
+                    Id = baseRequest.Id,
+                    Error = new()
+                    {
+                        Code = GameApiError.TargetNotFound.ToString(),
+                        Message = GameApiError.TargetNotFound.Description(),
+                        Action = baseRequest.Method.ToLower()
+                    },
+                    Jsonrpc = baseRequest.Jsonrpc
+                };
+            }
+
+            return await execute(baseRequest).ConfigureAwait(false);
+        }
+
+        [HttpPost("balance")]
+        public async Task<BigGamingResponse> GetBalanceAsync(
+            BigGamingRequest baseRequest)
+        {
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+
+            return new()
+            {
+                Id = baseRequest.Id,
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
+                Error = null,
+                Jsonrpc = baseRequest.Jsonrpc
+            };
+        }
+
+        [HttpPost("orderstatus")]
+        public async Task<BigGamingResponse> OrderStatusAsync(
+            BigGamingRequest baseRequest)
+        {
+            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(
+                _jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
+            var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var orderStatusResultResponse = new List<BigGamingOrderStatusResultResponse>();
+
+            foreach (var order in data.OrderMap)
+            {
+                orderStatusResultResponse.Add(new()
+                {
+                    OrderId = order.OrderId,
+                    Status = (int)await _service
+                        .GetOrderStatusAsync(gameProviderId, order.LoginId, order.OrderId.ToString())
+                        .ConfigureAwait(false)
+                });
+            }
+
+            var result = new BigGamingOrderStatusResponse { Result = orderStatusResultResponse.ToArray() };
+
+            return new()
+            {
+                Id = baseRequest.Id,
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
+                Error = null,
+                Jsonrpc = baseRequest.Jsonrpc
+            };
+        }
+
+        [HttpPost("ping")]
+        public Task<BigGamingResponse> PingAsync(
+            BigGamingRequest baseRequest)
+        {
+            return Task.FromResult(new BigGamingResponse()
+            {
+                Id = baseRequest.Id,
+                Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
+                Error = null,
+                Jsonrpc = baseRequest.Jsonrpc
+            });
         }
 
         [HttpPost("settle")]
@@ -235,39 +278,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             };
         }
 
-        [HttpPost("orderstatus")]
-        public async Task<BigGamingResponse> OrderStatusAsync(
-            BigGamingRequest baseRequest)
-        {
-            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(
-                _jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var orderStatusResultResponse = new List<BigGamingOrderStatusResultResponse>();
-
-            foreach (var order in data.OrderMap)
-            {
-                orderStatusResultResponse.Add(new()
-                {
-                    OrderId = order.OrderId,
-                    Status = (int)await _service
-                        .GetOrderStatusAsync(gameProviderId, order.LoginId, order.OrderId.ToString())
-                        .ConfigureAwait(false)
-                });
-            }
-
-
-            var result = new BigGamingOrderStatusResponse { Result = orderStatusResultResponse.ToArray() };
-
-            return new()
-            {
-                Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = null,
-                Jsonrpc = baseRequest.Jsonrpc
-            };
-        }
-
         [HttpPost("transfer")]
         public async Task<BigGamingResponse> TransferAsync(
            BigGamingRequest baseRequest)
@@ -288,25 +298,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };
-        }
-
-        [HttpPost("ping")]
-        public Task<BigGamingResponse> PingAsync(
-            BigGamingRequest baseRequest)
-        {
-            return Task.FromResult((new BigGamingResponse()
-            {
-                Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
-                Error = null,
-                Jsonrpc = baseRequest.Jsonrpc
-            }));
-        }
-
-        [HttpPost("gamerecordfishing")]
-        public async Task<BigGamingGPGameRecordResponse> GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
-        {
-            return await _bigGamingGPGameHistoryService.GameRecordFishingAsync(source).ConfigureAwait(false);
         }
     }
 }

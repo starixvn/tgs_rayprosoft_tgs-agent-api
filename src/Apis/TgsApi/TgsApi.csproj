@@ -32,11 +32,16 @@
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.1" />
-    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.1" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.0.14" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,11 +49,9 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\..\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj" />
-    <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
-    <ProjectReference Include="..\..\Services\Wallet.Core\Wallet.Core.csproj" />
     <ProjectReference Include="..\..\Shared\Game.ApiClients\Game.ApiClients.csproj" />
     <ProjectReference Include="..\..\Shared\Game.Models\Game.Models.csproj" />
   </ItemGroup>

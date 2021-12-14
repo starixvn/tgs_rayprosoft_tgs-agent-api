@@ -27,7 +27,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
     {
         [Consumes("application/x-www-form-urlencoded")]
         [HttpPost("entrance")]
-        public ValueTask<ErrorResponse> Entrance([FromForm] BaseRequest request)
+        public ValueTask<ErrorResponse> EntranceAsync([FromForm] BaseRequest request)
             => ValueTask.FromResult(new ErrorResponse());
 
         [Consumes(MediaTypeNames.Application.Json)]

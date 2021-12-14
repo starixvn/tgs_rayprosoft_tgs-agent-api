@@ -37,7 +37,7 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
                 var statusCode = ErrorMapper.GetHttpStatusByException(exception);
 
                 var message =
-                    await GetErrorMessage(context, $"{LoggerName} Api Error", errorCode.ToString(), statusCode);
+                    await GetErrorMessageAsync(context, $"{LoggerName} Api Error", errorCode.ToString(), statusCode);
                 Log.LogError(message, exception);
 
                 await CreateResponseAsync(context, statusCode, errorCode, exception);
@@ -47,7 +47,10 @@ namespace TGS.Apis.TgsApi.Commons.Middlewares
         protected abstract Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
             Exception exception);
 
-        private static async Task<string> GetErrorMessage(HttpContext context, string type, string errorMessage,
+        private static async Task<string> GetErrorMessageAsync(
+            HttpContext context,
+            string type,
+            string errorMessage,
             int statusCode)
         {
             string body;

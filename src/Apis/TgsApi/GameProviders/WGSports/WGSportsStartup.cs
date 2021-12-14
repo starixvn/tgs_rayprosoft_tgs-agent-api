@@ -12,12 +12,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
 {
     public sealed class WGSportsStartup : BaseStartup
     {
-        public WGSportsStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "wgsports";
+
+        public WGSportsStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "wgsports";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -25,7 +25,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
 
             services.AddTransient<IWGSportsService, WGSportsService>();
             services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
-            services.AddTransient<IWGSportsGPGameHistoryService, WGSportsGPGameHistoryService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(WGSportsGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<WGSportsGameInitializer>());

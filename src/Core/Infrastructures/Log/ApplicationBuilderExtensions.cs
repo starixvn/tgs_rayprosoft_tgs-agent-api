@@ -10,8 +10,20 @@ namespace TGS.Core.Infrastructures.Log
             string[] bypassRouting = null)
         {
             app.UseWhen(context => bypassRouting == null ||
-                bypassRouting.All(r => !context.Request.Path.StartsWithSegments(r)), builder =>
-                builder.UseMiddleware<ApiLoggerMiddleware>(logPrefix));
+                bypassRouting.All(
+                    r => !context.Request.Path.StartsWithSegments(r)),
+                builder => builder.UseMiddleware<ApiLoggerMiddleware>(logPrefix));
+
+            return app;
+        }
+
+        public static IApplicationBuilder UseGameApiLogger(this IApplicationBuilder app, string logPrefix = "",
+            string[] bypassRouting = null)
+        {
+            app.UseWhen(context => bypassRouting == null ||
+                    bypassRouting.All(
+                        r => !context.Request.Path.StartsWithSegments(r)),
+                        builder => builder.UseMiddleware<GameApiLoggerMiddleware>(logPrefix));
 
             return app;
         }

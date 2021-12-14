@@ -84,7 +84,6 @@ namespace TGS.Apis.ReportApi
                 .AddSecurity()
                 .AddWebApiServices()
                 .AddTgsLog()
-                .AddRedis()
                 .AddOperations()
                 .AddErrorMappers()
                 .AddApiClient()
@@ -99,18 +98,25 @@ namespace TGS.Apis.ReportApi
                     options.BaseUrl = config.GetValue<Uri>("Report:CashBaseUrl");
                 });
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
 
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
             services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
@@ -136,7 +142,16 @@ namespace TGS.Apis.ReportApi
 
             services
                 .AddMessageQueue()
-                .AddRabbitGlobPatternExchange("*", "amq.direct")
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                })
                 .AddRabbitMessageQueue(config =>
                 {
                     config
@@ -146,7 +161,10 @@ namespace TGS.Apis.ReportApi
 
                             configuration.GetSection("RabbitMQ").Bind(options);
                         });
-                });
+                })
+                .ClearAllExchanges()
+                .AddRabbitGlobPatternExchange("report.error", "amq.direct")
+                .AddNatsGlobPatternExchange("*");
         }
     }
 }

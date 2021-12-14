@@ -14,10 +14,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         private readonly IReportClient _client;
 
-        public AgentReportController(IReportClient client)
-        {
-            _client = client;
-        }
+        public AgentReportController(IReportClient client) => _client = client;
 
         [HttpGet("contributions")]
         [Description("Get agent contributions")]
@@ -47,6 +44,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         public Task<PagedResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendDetailsRequest request) =>
             _client.GetAgentDividendDetailsAsync(request);
+
+        [HttpGet("dividendTeamDetails")]
+        [Description("Get agent dividend team details report")]
+        public Task<PagedResponse<AgentDividendTeamDetailModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendTeamDetailsRequest request) =>
+            _client.GetAgentDividendTeamDetailsAsync(request);
 
         [HttpGet("{id}/winLoss")]
         [Description("Get agent player Win/Loss report")]

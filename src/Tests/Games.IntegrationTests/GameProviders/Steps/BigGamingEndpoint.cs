@@ -62,20 +62,29 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddSecurity()
                 .AddTgsLog()
                 .AddApiClient()
-                .AddRedis()
                 .AddOperations();
 
-            services.AddNatsMessageQueue(natsConfig =>
+            Action<Apis.TgsApi.RedisOptions, IServiceProvider> action = (options, sp) =>
             {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            };
+
+            services.AddRedis(action);
+
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
 
             services.AddSingleton(new Mock<ITgsLog>().Object);
 
@@ -103,19 +112,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _hashProvider = _serviceProvider.GetRequiredService<IHashProvider>();
         }
 
+        [Given(@"player having balance of \$(.*)")]
+        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
+        {
+            return SetPlayerBalanceAsync(_serviceProvider, balance);
+        }
+
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
         public Task GivenPlayerOfBrandWithLoginViaAsync(
             string username, string brandCode,
             string currencyCode, PlatformType platformType)
         {
             return PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
-        }
-
-
-        [Given(@"player having balance of \$(.*)")]
-        public Task GivenPlayerHavingBalanceOfAsync(decimal balance)
-        {
-            return SetPlayerBalanceAsync(_serviceProvider, balance);
         }
 
         [Then(@"player balance response will be for \$(.*)")]
@@ -127,7 +135,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Error.Should().BeNull();
             balance.Should().Be(expectedBalance);
         }
-
 
         [When(@"I request the player balance")]
         public async Task WhenIRequestThePlayerBalanceAsync()
@@ -163,6 +170,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Methods
 
+        private async ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode)
+        {
+            var configuration =
+                await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
+                    SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
+
+            return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status)
+                .First();
+        }
+
         private async ValueTask<BigGamingConfiguration> GetConfigurationAsync()
         {
             return await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
@@ -177,16 +194,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             return tokenData?.LoginRecordId ?? Guid.Empty;
         }
 
-        private async ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode)
-        {
-            var configuration =
-                await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
-                    SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
-
-            return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status)
-                .First();
-        }
-
-        #endregion
+        #endregion Private Methods
     }
 }

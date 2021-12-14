@@ -43,10 +43,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct
             services.AddScoped<IBetConstructService, BetConstructService>();
             services.AddScoped<IBetConstructActionModelMapper, BetConstructActionModelMapper>();
             services.AddScopedWithResolver<IGameInitializer>(new[]
-            {
-                typeof(BetConstructGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<BetConstructGameInitializer>());
+                {
+                    typeof(BetConstructGameInitializer)
+                }, 
+                (provider, _) => provider.GetRequiredService<BetConstructGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] 
+                { 
+                    typeof(BCGameHistory) 
+                }, 
+                (provider, _) => provider.GetRequiredService<BCGameHistory>());
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)

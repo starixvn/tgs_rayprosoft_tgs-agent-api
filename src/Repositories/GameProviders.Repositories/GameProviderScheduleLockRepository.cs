@@ -13,17 +13,25 @@ namespace TGS.GameProviders.Repositories
 {
     public sealed class GameProviderScheduleLockRepository : IGameProviderScheduleLockRepository
     {
-        private readonly IRedisConnection _connectionFactory;
+        private readonly IRedisConnectionFactory _connectionFactory;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly string _prefix = "GameProviderScheduleLock";
 
         public GameProviderScheduleLockRepository(
-            IRedisConnection connectionFactory,
+            IRedisConnectionFactory connectionFactory,
             IJsonSerializationProvider jsonSerializationProvider
             )
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        }
+
+        async ValueTask<GameProviderScheduleLockData> IGameProviderScheduleLockRepository.GetAsync(string gameProviderCode, string key)
+        {
+            var connection = _connectionFactory.GetConnection();
+            var db = connection.GetDatabase();
+            var value = await db.StringGetAsync(Format(gameProviderCode, key)).ConfigureAwait(false);
+            return _jsonSerializationProvider.DeserializeFromString<GameProviderScheduleLockData>(value);
         }
 
         async ValueTask<bool> IGameProviderScheduleLockRepository.IsLockAsync(string gameProviderCode, string key)
@@ -39,21 +47,6 @@ namespace TGS.GameProviders.Repositories
             var connection = _connectionFactory.GetConnection();
             var db = connection.GetDatabase();
             return await db.KeyDeleteAsync(Format(gameProviderCode, key)).ConfigureAwait(false);
-        }
-
-        async ValueTask<bool> IGameProviderScheduleLockRepository.SetAsync(string gameProviderCode, string key, GameProviderScheduleLockData date)
-        {
-            var connection = _connectionFactory.GetConnection();
-            var db = connection.GetDatabase();
-            return await db.StringSetAsync(Format(gameProviderCode, key), _jsonSerializationProvider.SerializeToString(date)).ConfigureAwait(false);
-        }
-
-        async ValueTask<GameProviderScheduleLockData> IGameProviderScheduleLockRepository.GetAsync(string gameProviderCode, string key)
-        {
-            var connection = _connectionFactory.GetConnection();
-            var db = connection.GetDatabase();
-            var value = await db.StringGetAsync(Format(gameProviderCode, key)).ConfigureAwait(false);
-            return _jsonSerializationProvider.DeserializeFromString<GameProviderScheduleLockData>(value);
         }
 
         async ValueTask IGameProviderScheduleLockRepository.RemoveGameProviderCodeAsync(string gameProviderCode)
@@ -72,10 +65,16 @@ namespace TGS.GameProviders.Repositories
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
+        async ValueTask<bool> IGameProviderScheduleLockRepository.SetAsync(string gameProviderCode, string key, GameProviderScheduleLockData date)
+        {
+            var connection = _connectionFactory.GetConnection();
+            var db = connection.GetDatabase();
+            return await db.StringSetAsync(Format(gameProviderCode, key), _jsonSerializationProvider.SerializeToString(date)).ConfigureAwait(false);
+        }
+
         private string Format(string gameProviderCode, string key)
         {
             return string.Format("{0}:{1}:{2}", _prefix, gameProviderCode, key);
         }
-
     }
 }

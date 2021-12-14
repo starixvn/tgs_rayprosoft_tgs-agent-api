@@ -1,21 +1,18 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Json;
 
 namespace TGS.Core.Infrastructures.Redis
 {
     public class RedisSubscriber : IRedisSubscriber
     {
-        private readonly IRedisConnection _connectionFactory;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IRedisConnectionFactory _connectionFactory;
 
         public RedisSubscriber(
-            IRedisConnection connectionFactory,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IRedisConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
-            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         Task IRedisSubscriber.SubscribeAsync<T>(Action<T> handler)
@@ -24,7 +21,7 @@ namespace TGS.Core.Infrastructures.Redis
 
             return connection.GetSubscriber().SubscribeAsync($"{typeof(T).FullName}", (channel, message) =>
             {
-                handler(_jsonSerializationProvider.DeserializeFromString<T>(message));
+                handler(JsonSerializer.Deserialize<T>(message));
             });
         }
 

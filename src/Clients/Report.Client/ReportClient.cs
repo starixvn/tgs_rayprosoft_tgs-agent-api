@@ -45,6 +45,9 @@ namespace TGS.Clients.Report.Client
         Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
             GetAgentDividendDetailsRequest request);
 
+        Task<PagedResponse<AgentDividendTeamDetailModel>> GetAgentDividendTeamDetailsAsync(
+            GetAgentDividendTeamDetailsRequest request);
+
         Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             GetPlayerAccountChangesRequest request);
 
@@ -496,6 +499,22 @@ namespace TGS.Clients.Report.Client
                 path,
                 request,
                 logPrefix: "Report.GetGameProviderReport",
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<AgentDividendTeamDetailModel>> GetAgentDividendTeamDetailsAsync(
+            GetAgentDividendTeamDetailsRequest request)
+        {
+            var prefix = $"Report.AgentId.{request.AgentId}.GetAgentDividendTeamDetails";
+            var path = ClientPath.AppendWithProperties("/api/agentReport/dividendTeamDetails?", request);
+
+            return await ExecuteJsonRequestAsync<GetAgentDividendTeamDetailsRequest,
+                PagedResponse<AgentDividendTeamDetailModel>
+            >(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
         }
     }

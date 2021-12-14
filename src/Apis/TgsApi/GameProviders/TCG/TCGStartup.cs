@@ -10,19 +10,18 @@ using TGS.Apis.TgsApi.GameProviders.TCG.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Shared.Game.ApiClients.TCG;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG
 {
     public sealed class TCGStartup : BaseStartup
     {
-        public TCGStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "tcg";
+
+        public TCGStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "tcg";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -45,8 +44,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 config.GetSection("TCGFtpApi").Bind(options);
             });
 
-            services.AddTransient<ITCGGPGameHistoryService, TCGGPGameHistoryService>();
-
             services.AddScoped<AuthorizeTCGMiddleware>();
             services.AddScoped<HandleTCGExceptionMiddleware>();
             services.AddScoped<DispatcherTCGMiddleware>();
@@ -58,7 +55,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 => provider.GetRequiredService<TCGGameInitializer>());
             services.AddScopedWithResolver<IGameHistory>(new[] { typeof(TCGGameHistory) }, (provider, _)
                 => provider.GetRequiredService<TCGGameHistory>());
+        }
 
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        {
+            const string Route = "/api/tcg";
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<AuthorizeTCGMiddleware>();
+                });
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
@@ -73,18 +80,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 {
                     builder.UseMiddleware<HandleTCGExceptionMiddleware>();
                     builder.UseMiddleware<DispatcherTCGMiddleware>();
-                });
-        }
-
-
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
-        {
-            const string Route = "/api/tcg";
-
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<AuthorizeTCGMiddleware>();
                 });
         }
     }

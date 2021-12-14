@@ -11,15 +11,12 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.GameProviders.Settings.TCG;
 using TGS.Shared.Game.Models.TCG.Common;
-using TGS.Shared.Game.Models.TCG.Incoming;
 using TGS.Shared.Game.Models.TCG.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.TCG
 {
     public interface ITCGApiClient
     {
-        ValueTask<TCGGPGameRecordResponse> GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request);
-
         ValueTask<TCGKickOutLottoPlayerResponse> KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request);
 
         ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByELOTTORequest request);
@@ -54,25 +51,22 @@ namespace TGS.Shared.Game.ApiClients.TCG
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        ValueTask<TCGGPGameRecordResponse> ITCGApiClient.GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request) =>
-         ExecuteJsonRequestAsync<TCGGPGameRecordRequest, TCGGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/tcg/GameRecord", request, logPrefix: _utility.GetPrefix("GameRecord"));
-
-        ValueTask<TCGKickOutLottoPlayerResponse> ITCGApiClient.KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request)
+        public ValueTask<TCGKickOutLottoPlayerResponse> KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request)
        => GetAPIAsync<TCGKickOutLottoPlayerRequest, TCGKickOutLottoPlayerResponse>(ApiUrl, merchant, request, "KickOutLottoPlayer");
 
-        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByELOTTORequest request)
+        public ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByELOTTORequest request)
          => GetAPIAsync<TCGLaunchGameByELOTTORequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameByELOTTO");
 
-        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameBySEARequest request)
+        public ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameBySEARequest request)
          => GetAPIAsync<TCGLaunchGameBySEARequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameBySEA");
 
-        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request)
+        public ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request)
          => GetAPIAsync<TCGLaunchGameByLOTTOVNRequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameByLOTTOVN");
 
-        ValueTask<TCGRegisterPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request)
+        public ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request)
                                                     => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
 
-        ValueTask<TCGUpdatePasswordPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request)
+        public ValueTask<TCGUpdatePasswordPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request)
             => GetAPIAsync<TCGUpdatePasswordPlayerRequest, TCGUpdatePasswordPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
 
         private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TCGMerchant merchant, TRequest request, string prefix) where TResponse : TCGBaseResponse

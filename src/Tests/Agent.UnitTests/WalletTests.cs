@@ -51,6 +51,7 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
+                    AgentDividendType.OneLayer,
                     Array.Empty<AgentDividendCondition>())));
 
             var expected = new BalanceInfo(10000M).ToExpectedObject();

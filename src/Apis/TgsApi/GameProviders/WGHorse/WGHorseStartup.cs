@@ -12,12 +12,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse
 {
     public sealed class WGHorseStartup : BaseStartup
     {
-        public WGHorseStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "wghorse";
+
+        public WGHorseStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "wghorse";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -25,7 +25,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse
 
             services.AddTransient<IWGHorseService, WGHorseService>();
             services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
-            services.AddTransient<IWGHorseGPGameHistoryService, WGHorseGPGameHistoryService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(WGHorseGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<WGHorseGameInitializer>());

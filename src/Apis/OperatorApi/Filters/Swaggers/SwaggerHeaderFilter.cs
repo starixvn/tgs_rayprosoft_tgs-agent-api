@@ -17,30 +17,6 @@ namespace TGS.Apis.OperatorApi.Filters.Swaggers
 
             var meta = context.ApiDescription.ActionDescriptor.EndpointMetadata;
 
-            if (meta.All(m => m.GetType() != typeof(AllowAnonymousAttribute)))
-            {
-                var securityScheme = new OpenApiSecurityScheme
-                {
-                    Name = "Api Authorization",
-                    Description = "authorized jwt token, get from api/auth/jwt",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                    Scheme = "bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
-                };
-
-                operation.Security ??= new List<OpenApiSecurityRequirement>();
-                operation.Security.Add(new OpenApiSecurityRequirement
-                {
-                    {securityScheme, Array.Empty<string>()}
-                });
-            }
-
             var attribute = (AuthorizePlayerTokenAttribute) meta
                 .FirstOrDefault(o => o is AuthorizePlayerTokenAttribute);
 

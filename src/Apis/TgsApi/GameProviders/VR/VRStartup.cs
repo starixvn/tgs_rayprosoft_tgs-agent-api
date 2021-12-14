@@ -12,12 +12,12 @@ namespace TGS.Apis.TgsApi.GameProviders.VR
 {
     public sealed class VRStartup : BaseStartup
     {
-        public VRStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "vr";
+
+        public VRStartup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "vr";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -25,7 +25,6 @@ namespace TGS.Apis.TgsApi.GameProviders.VR
 
             services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
             services.AddTransient<IVRService, VRService>();
-            services.AddTransient<IVRGPGameHistoryService, VRGPGameHistoryService>();
             services.AddTransient<IVRGamePlayerCreate, VRGamePlayerCreate>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(VRGameInitializer) }, (provider, _) =>

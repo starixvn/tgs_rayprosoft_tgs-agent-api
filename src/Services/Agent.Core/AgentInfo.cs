@@ -29,5 +29,6 @@ namespace TGS.Services.Agent
         AgentStatus Status,
         AgentType Type,
         AgentLevelType AgentLevelType,
+        AgentDividendType AgentDividendType,
         IEnumerable<AgentDividendCondition> AgentDividendConditions);
 }

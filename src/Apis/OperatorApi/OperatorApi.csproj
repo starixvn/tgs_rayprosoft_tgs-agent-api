@@ -36,13 +36,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.4" />
+    <Content Remove="appsettings.Debug.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+    <PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -54,19 +62,21 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc7" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc7" />
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.10-beta" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.1" />
-    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.1" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
     <PackageReference Include="Tgs.Interceptors" Version="0.1.0" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.2.0" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />    
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.1-alpha" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
+    <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.8" />
   </ItemGroup>
@@ -94,6 +104,12 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <TransformOnBuild>true</TransformOnBuild>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

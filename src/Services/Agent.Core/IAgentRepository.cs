@@ -9,6 +9,8 @@ namespace TGS.Services.Agent
     {
         ValueTask<AgentInfo> GetAgentByIdAsync(Guid id);
 
+        IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId);
+
         ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id);
 
         IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);

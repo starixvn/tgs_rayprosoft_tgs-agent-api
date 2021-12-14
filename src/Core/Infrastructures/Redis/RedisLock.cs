@@ -5,7 +5,7 @@ using StackExchange.Redis;
 
 namespace TGS.Core.Infrastructures.Redis
 {
-    public sealed class RedisLock : IRedisLock
+    internal sealed class RedisLock : IRedisLock
     {
         private readonly IRedisRepository _redisRepository;
 
@@ -14,21 +14,12 @@ namespace TGS.Core.Infrastructures.Redis
             _redisRepository = redisRepository;
         }
 
-        private async Task<IRedisLockSummary> CreateLockAsync(string resource, TimeSpan expiryTime)
-        {
-            var token = Guid.NewGuid().ToString();
-            var key = $"RedisLock:{resource}";
-            var locker = new InternalLock(key, token, expiryTime, _redisRepository.GetDb());
-            await locker.LockAsync();
-            return locker;
-        }
-
         async Task<TResult> IRedisLock.ExecuteLockAsync<TResult>(string resource, TimeSpan expiryTime,
-            Func<IRedisLockSummary, Task<TResult>> execFunc, Func<IRedisLockSummary, TResult> handleFailureFunc,
+            Func<IRedisLockSummary, Task<TResult>> execFunc,
+            Func<IRedisLockSummary, TResult> handleFailureFunc,
             TimeSpan? waitTime, TimeSpan? retryInterval)
         {
             if (execFunc == null || handleFailureFunc == null)
-
                 throw new ArgumentNullException();
 
             var needRetry = waitTime.HasValue && retryInterval.HasValue && waitTime.Value.TotalMilliseconds > 0 &&
@@ -54,16 +45,20 @@ namespace TGS.Core.Infrastructures.Redis
             } while (stopwatch.Elapsed <= waitTime.Value);
 
             return res;
+
             async Task<(IRedisLockSummary summary, TResult result)> AcquireAsync()
             {
-                using (var locker = await CreateLockAsync(resource, expiryTime))
-                {
-                    return locker.IsAcquired ? (locker, await execFunc(locker)) : (locker, handleFailureFunc(locker));
-                }
+                using var locker = await CreateLockAsync(resource, expiryTime);
+                return locker.IsAcquired ? (locker, await execFunc(locker)) : (locker, handleFailureFunc(locker));
             }
         }
 
-        async Task IRedisLock.ExecuteLockAsync(string resource, TimeSpan expiryTime, Func<Task> execFunc, Func<Task> handleFailedFunc, TimeSpan? waitTime, TimeSpan? retryInterval)
+        async Task IRedisLock.ExecuteLockAsync(
+            string resource, TimeSpan expiryTime,
+            Func<Task> execFunc,
+            Func<Task> handleFailedFunc,
+            TimeSpan? waitTime,
+            TimeSpan? retryInterval)
         {
             if (execFunc == null)
                 throw new ArgumentNullException();
@@ -90,27 +85,37 @@ namespace TGS.Core.Infrastructures.Redis
 
             async Task<IRedisLockSummary> AcquireAsync()
             {
-                using (var locker = await CreateLockAsync(resource, expiryTime))
+                using var locker = await CreateLockAsync(resource, expiryTime);
+                if (!locker.IsAcquired)
                 {
-                    if (!locker.IsAcquired)
-                    {
-                        if (handleFailedFunc != null)
-                            await handleFailedFunc();
-                        return locker;
-                    }
-
-                    await execFunc();
+                    if (handleFailedFunc != null)
+                        await handleFailedFunc();
                     return locker;
                 }
+
+                await execFunc();
+                return locker;
             }
+        }
+
+        private async Task<IRedisLockSummary> CreateLockAsync(string resource, TimeSpan expiryTime)
+        {
+            var token = Guid.NewGuid().ToString();
+            var key = $"RedisLock:{resource}";
+            var locker = new InternalLock(key, token, expiryTime, _redisRepository.GetDb());
+            await locker.LockAsync();
+            return locker;
         }
 
         private class InternalLock : IRedisLockSummary
         {
             private readonly IDatabase _database;
+            private readonly TimeSpan _expiryTime;
             private readonly string _key;
             private readonly string _token;
-            private readonly TimeSpan _expiryTime;
+            public bool IsAcquired { get; private set; }
+
+            public bool IsReleased { get; private set; }
 
             public InternalLock(string key, string token, TimeSpan expiryTime, IDatabase database)
             {
@@ -120,19 +125,15 @@ namespace TGS.Core.Infrastructures.Redis
                 _expiryTime = expiryTime;
             }
 
-            public async Task LockAsync()
-            {
-                IsAcquired = await _database.LockTakeAsync(_key, _token, _expiryTime);
-            }
-
             public void Dispose()
             {
                 IsReleased = _database.LockRelease(_key, _token);
             }
 
-            public bool IsAcquired { get; private set; }
-
-            public bool IsReleased { get; private set; }
+            public async Task LockAsync()
+            {
+                IsAcquired = await _database.LockTakeAsync(_key, _token, _expiryTime);
+            }
         }
     }
 }

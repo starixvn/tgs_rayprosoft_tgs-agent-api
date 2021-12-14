@@ -23,7 +23,8 @@ namespace TGS.Services.Report.Application.Queries.Round
             GetRoundsRequest request,
             CancellationToken cancellationToken) =>
             _service.GetRoundQueries(q => q.Where(x => x.BrandId == request.BrandId)
-                    .Where(x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
+                    .Where(request.From.HasValue && request.To.HasValue, x => x.CreatedOn >= request.From && x.CreatedOn <= request.To)
+                    .Where(request.ClosedFrom.HasValue && request.ClosedTo.HasValue, x => x.ClosedOn >= request.ClosedFrom && x.ClosedOn <= request.ClosedTo)
                     .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
                     .Where(request.Status, x => request.Status == x.ClientStatus)
                     .Where(request.RoundId, x => x.Id == request.RoundId)

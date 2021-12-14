@@ -12,13 +12,13 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Controllers
     [FeatureGate(GameProvider.RedTiger)]
     [AllowAnonymous]
     [Route("api")]
-    [ApiController] 
+    [ApiController]
     [TypeFilter(typeof(HandleRedTigerErrorFilter))]
     public class RedTigerGameController : ControllerBase
     {
         [HttpPost]
-        public IActionResult CommomEntrance() 
-        { 
+        public IActionResult CommomEntrance()
+        {
             var obj = new { Error = TgsApiError.None, Action = "CommomEntrance" };
             return new JsonResult(obj) { StatusCode = (int)HttpStatusCode.OK };
         }
@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Controllers
         [HttpPost]
         [Route("bet/places")]
         [Consumes("application/json")]
-        public JsonResult PlaceBetAsync()
+        public JsonResult PlaceBet()
         {
             var obj = new { Error = TgsApiError.None, Action = "bet" };
             return new JsonResult(obj) { StatusCode = (int)HttpStatusCode.OK };
@@ -35,14 +35,14 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger.Controllers
         [HttpPost]
         [Route("bet/error")]
         [Consumes("application/json")]
-        public JsonResult ErrorAsync(Model model)
+        public JsonResult Error(Model model)
         {
             throw new InvalidOperationException(model.Value.ToString());
         }
 
         public class Model
         {
-            public int Value { get;set; }
+            public int Value { get; set; }
         }
     }
 }

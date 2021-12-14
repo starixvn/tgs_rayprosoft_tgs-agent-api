@@ -37,6 +37,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 null,
                 DateTimeOffset.UtcNow.AddDays(-1),
                 DateTimeOffset.UtcNow,
+                null,
+                null,
                 new PageableRequest
                 {
                     Page = 1,

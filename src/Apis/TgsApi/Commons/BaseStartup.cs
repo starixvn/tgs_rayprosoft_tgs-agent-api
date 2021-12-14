@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -12,7 +13,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -24,69 +24,16 @@ namespace TGS.Apis.TgsApi.Commons
 {
     public abstract class BaseStartup
     {
-        protected BaseStartup(IConfiguration configuration, IWebHostEnvironment env)
-        {
-            Environment = env;
-            Configuration = configuration;
-        }
-
         protected IConfiguration Configuration { get; }
 
         protected IWebHostEnvironment Environment { get; }
 
         protected abstract string LogPrefix { get; }
 
-        public void ConfigureServices(IServiceCollection services)
+        protected BaseStartup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            services.AddTgsRepository(Configuration, "Tgs");
-
-            services
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddSystemJsonSerializer()
-                .AddRedis()
-                .AddSecurity()
-                .AddTransactions()
-                .AddOperations()
-                .AddTimeZone()
-                .AddApiClient()
-                .AddGameApiClients()
-                .AddGameOperations()
-                .AddGameProvidersoRepository()
-                .AddWallet()
-                .AddTgsWalletRepositories();
-
-            services.AddHttpContextAccessor();
-
-            AddCustomDependencyServices(services);
-
-            services.AddFeatureManagement();
-
-            services.AddControllers(options =>
-            {
-                options.Filters.Add<ValidateModelFilter>();
-                AddCustomFilters(options);
-            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = false;
-            });
-
-            services.AddHealthChecks()
-                .AddPostgres(Configuration, "Tgs", "tgs-db")
-                .AddRedis(Configuration)
-                .ForwardToPrometheus();
-
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
-
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+            Environment = env;
+            Configuration = configuration;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,7 +41,8 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix,
+            app.UseGameApiLogger(
+                LogPrefix,
                 new[] { "/health", "/favicon.ico", "/metrics" });
 
             UseCustomMiddlewaresBeforeRouting(app);
@@ -138,6 +86,70 @@ namespace TGS.Apis.TgsApi.Commons
             });
         }
 
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddTgsRepository(Configuration, "Tgs");
+
+            services
+                .AddWebApiServices()
+                .AddTgsLog()
+                .AddSystemJsonSerializer()
+                .AddSecurity()
+                .AddTransactions()
+                .AddOperations()
+                .AddTimeZone()
+                .AddApiClient()
+                .AddGameApiClients()
+                .AddGameOperations()
+                .AddGameProvidersoRepository()
+                .AddCashServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
+                });
+
+            services
+                .AddRedis((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                });
+
+            services.AddHttpContextAccessor();
+
+            AddCustomDependencyServices(services);
+
+            services.AddFeatureManagement();
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add<ValidateModelFilter>();
+                AddCustomFilters(options);
+            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = false;
+            });
+
+            services.AddHealthChecks()
+                .AddPostgres(Configuration, "Tgs", "tgs-db")
+                .AddRedis(Configuration)
+                .ForwardToPrometheus();
+
+            services
+                .AddMessageQueue()
+                .AddNatsMessageQueue(natsConfig =>
+                {
+                    natsConfig
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
+                });
+        }
 
         #region Abstract and Virtual Methods
 
@@ -145,7 +157,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
         }
 
-        protected virtual void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        protected virtual void AddCustomFilters(MvcOptions options)
         {
         }
 
@@ -153,7 +165,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
         }
 
-        protected virtual void AddCustomFilters(MvcOptions options)
+        protected virtual void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
         {
         }
 

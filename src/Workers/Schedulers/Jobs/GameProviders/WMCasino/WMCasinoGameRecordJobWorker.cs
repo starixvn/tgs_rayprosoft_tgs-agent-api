@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Tgs.Logging;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -17,6 +16,7 @@ using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.WMCasino;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
+using TGS.Workers.Schedulers.Hangfire.Services;
 
 namespace TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino
 {
