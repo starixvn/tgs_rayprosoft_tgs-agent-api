@@ -1,19 +1,14 @@
 ﻿using System;
+using TGS.Core.Models.GameProviders.Settings.Avia;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
     public record AviaConfiguration : PluggableConfigurationBase
     {
-
         public decimal AmountMaximum { get; set; }
 
         public string AmountFormat { get; set; }
 
-
-        public Uri ApiUrl { get; init; }
-
-        public string Authorization { get; set; }
-
-        public string PlayerPassword { get; init; }
+        public AviaBrandMerchant[] BrandMerchants { get; set; }
     }
 }
