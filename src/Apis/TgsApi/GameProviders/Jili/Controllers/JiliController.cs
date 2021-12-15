@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Amazon.Runtime.Internal.Util;
@@ -13,6 +14,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.Jili.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
@@ -77,6 +79,54 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
             }
 
             return map.BetAndSettleResponse(jiliPlayerId, result);
+        }
+
+        [Route("cancelBet")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public async ValueTask<JiliCancelTransactionResponse> CancelTransactionAsync(
+            [FromServices] IGamePlayActions actions,
+            [FromServices] IJiliService service,
+            [FromServices] IJiliActionModelMapper map,
+            [FromServices] IGameActionQueries gameActionQueries,
+            JiliCancelTransactionRequest request)
+        {
+            var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
+
+            var externalRoundId = request.ExternalRoundId.ToString();
+            var externalGameId = request.ExternalGameId.ToString();
+
+            var balanceResult = await actions.GetBalanceAsync(Consts.GameProvider.Jili, playerCode)
+                .ConfigureAwait(false);
+
+            var gameActionData = await service
+                .GetGameActionsByExternalRoundIdAsync(
+                    gameProviderId,
+                    playerCode,
+                    externalRoundId,
+                    externalGameId)
+                .ConfigureAwait(false);
+
+            if (gameActionData == null)
+            {
+                // TODO: add pending game action to redis
+
+                return map.FailCancelTransactionResponse(2, "Round Not Found", jiliPlayerId, balanceResult);
+            }
+
+            var cancelledExternalTransactionId = $"{externalRoundId}_cancel";
+            var gameActionCancelled = gameActionData.GameActions.FirstOrDefault(ga
+                => ga.ExternalTransactionId == cancelledExternalTransactionId);
+
+            if (gameActionCancelled != null)
+            {
+                return map.SuccessCancelTransactionResponse(jiliPlayerId, balanceResult, gameActionCancelled.Id);
+            }
+
+            return map.FailCancelTransactionResponse(6, "Already accepted and can't be canceled",
+                jiliPlayerId, balanceResult);
         }
     }
 }

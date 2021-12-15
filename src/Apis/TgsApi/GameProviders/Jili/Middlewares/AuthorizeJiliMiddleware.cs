@@ -3,10 +3,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.GameProviders.Jili.Services;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -58,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Middlewares
             {
                 var request = await context.Request.ReadAsObjectFromJsonAsync<JiliAuthorizePlayerRequest>();
 
-                var (playerCode, loginTokenId, platformType) = await ParseTokenAsync(request.Token);
+                var (playerCode, _, platformType) = await ParseTokenAsync(request.Token);
 
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, platformType);
@@ -70,7 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Middlewares
 
                 var request = await context.Request.ReadAsObjectFromJsonAsync<JiliPlaceBetAndSettleRequest>();
 
-                var (playerCode, loginTokenId, platformType) = await ParseTokenAsync(request.Token);
+                var (playerCode, _, platformType) = await ParseTokenAsync(request.Token);
 
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, platformType);
@@ -90,6 +89,28 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Middlewares
             }
             else if (path.Contains("cancelBet"))
             {
+                var gameProviderId = await _service.GetGameProviderIdAsync();
+                context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
+
+                var request = await context.Request.ReadAsObjectFromJsonAsync<JiliCancelTransactionRequest>();
+
+                var (playerCode, _, platformType) = await ParseTokenAsync(request.Token);
+
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+
+                var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerCode);
+                var brandId = cachedPlayer.BrandId;
+                var gameProviderConfigurationId = await _brandOperations
+                    .GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
+
+                var jiliPlayerId = string.IsNullOrEmpty(request.JiliPlayerId)
+                    ? _playerService.ToJiliPlayerId(cachedPlayer.BrandCode, playerCode)
+                    : request.JiliPlayerId;
+
+                context.Items.Add(Consts.ContextItems.BrandId, brandId);
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
+                context.Items.Add(JiliConsts.ContextItems.JiliPlayerId, jiliPlayerId);
             }
 
             await next(context);

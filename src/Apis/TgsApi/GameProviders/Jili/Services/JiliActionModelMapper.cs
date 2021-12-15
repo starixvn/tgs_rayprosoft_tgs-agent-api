@@ -100,6 +100,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             };
         }
 
+        public JiliCancelTransactionResponse FailCancelTransactionResponse(
+            int errorCode,
+            string errorMessage,
+            string jiliPlayerId,
+            GetBalanceResult balanceResult)
+            => new JiliCancelTransactionResponse
+            {
+                ErrorCode = errorCode,
+                ErrorMessage = errorMessage,
+                JiliPlayerId = jiliPlayerId,
+                CurrencyCode = balanceResult.GameProviderCurrencyCode,
+                Balance = balanceResult.Balance
+            };
+
         public BetData FreeBetRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request)
         {
             var externalGameId = request.ExternalGameId.ToString();
@@ -119,7 +133,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                     ExternalBetId = externalRoundId,
                     GameActionType = GameActionType.FreeBet,
                     Amount = request.WinloseAmount,
-                    TimeStamp = timestamp
+                    TimeStamp = timestamp,
+                    RoundClosed = true,
                 }
             };
 
@@ -134,6 +149,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 HasCurrencyFromGameProvider = false,
                 FreeBetAsSingleRound = true,
                 Transactions = transactions
+            };
+        }
+
+        public JiliCancelTransactionResponse SuccessCancelTransactionResponse(
+            string jiliPlayerId,
+            GetBalanceResult balanceResult,
+            Guid cancelledGameActionId)
+        {
+            var transactionId = new BigInteger(cancelledGameActionId.ToByteArray(), true, false);
+
+            return new JiliCancelTransactionResponse
+            {
+                ErrorCode = 0,
+                ErrorMessage = string.Empty,
+                JiliPlayerId = jiliPlayerId,
+                CurrencyCode = balanceResult.GameProviderCurrencyCode,
+                Balance = balanceResult.Balance,
+                TransactionId = transactionId
             };
         }
 

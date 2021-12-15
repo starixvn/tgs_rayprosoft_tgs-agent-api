@@ -16,6 +16,7 @@ namespace TGS.Shared.Game.Models.Jili.Incoming
 
         [JsonPropertyName("txId")]
         [JsonConverter(typeof(BigIntegerConvertor))]
-        public BigInteger TransactionId { get; init; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public BigInteger? TransactionId { get; init; }
     }
 }

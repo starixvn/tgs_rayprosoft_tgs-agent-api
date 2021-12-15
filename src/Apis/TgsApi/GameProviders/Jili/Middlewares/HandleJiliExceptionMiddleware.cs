@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
-using Tgs.Logging;
-using TGS.Services.GameOperations;
-using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Jili.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Jili.Middlewares
