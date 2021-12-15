@@ -4,12 +4,12 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent.Exceptions;
-using Tgs.ServiceUtility;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using CoreUtility = TGS.Core.Infrastructures.Utility;
 
@@ -92,7 +92,7 @@ namespace TGS.Services.Agent.Services.Agent
                 VirtualSportsRebatePercentage = query.VirtualSportsRebatePercentage,
                 InvitationCode = invitationCode,
                 Remarks = query.Remarks,
-                Email = query.Email,
+                Email = string.IsNullOrWhiteSpace(query.Email) ? null : query.Email,
                 Phone = query.Phone,
                 RealName = query.RealName,
                 CreatedByUsername = parentAgent!.Username,
