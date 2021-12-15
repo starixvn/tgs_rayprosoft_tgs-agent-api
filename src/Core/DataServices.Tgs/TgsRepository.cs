@@ -19,6 +19,12 @@ namespace TGS.Core.DataServices.Tgs
         {
         }
 
+        public DbSet<BrandAllAgent> BrandAllAgents { get; set; }
+
+        public DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
+
+        public DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
+
         public DbSet<AdminLog> AdminLogs { get; set; }
 
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
@@ -225,12 +231,6 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
 
         public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
-
-        public DbSet<BrandAllAgent> BrandAllAgents { get; set; }
-
-        public DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
-
-        public DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
 
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>

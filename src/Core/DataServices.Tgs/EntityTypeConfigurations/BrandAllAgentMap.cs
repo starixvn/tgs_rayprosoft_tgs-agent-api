@@ -4,7 +4,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class BrandAllAgentMap : IEntityTypeConfiguration<BrandAllAgent>
+    public class BrandAllAgentMap : IEntityTypeConfiguration<BrandAllAgent>
     {
         void IEntityTypeConfiguration<BrandAllAgent>.Configure(EntityTypeBuilder<BrandAllAgent> builder)
         {

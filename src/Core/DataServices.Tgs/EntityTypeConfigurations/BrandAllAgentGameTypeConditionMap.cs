@@ -5,7 +5,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class BrandAllAgentGameTypeConditionMap : IEntityTypeConfiguration<BrandAllAgentGameTypeCondition>
+    public class BrandAllAgentGameTypeConditionMap : IEntityTypeConfiguration<BrandAllAgentGameTypeCondition>
     {
         void IEntityTypeConfiguration<BrandAllAgentGameTypeCondition>.Configure(
             EntityTypeBuilder<BrandAllAgentGameTypeCondition> builder)
@@ -15,13 +15,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(bc => new
                 {
                     bc.BrandId,
-                    bc.GameType,
+                    GameType = bc.AllAgentGameType,
                     bc.Rank,
-                    bc.RebateType
+                    RebateType = bc.AllAgentRebateType
                 })
                 .HasName("pk_brand_all_agent_game_type_conditions");
 
-            builder.Property(c => c.RebateType)
+            builder.Property(c => c.AllAgentRebateType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.DividendPercentage)
+            builder.Property(b => b.RebatePercentage)
                 .HasPrecision(18, 6)
                 .IsRequired();
         }

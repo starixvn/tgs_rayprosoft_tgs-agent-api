@@ -12,17 +12,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 columns: table => new
                 {
-                    game_type = table.Column<int>(type: "integer", nullable: false),
-                    rebate_type = table.Column<short>(type: "smallint", nullable: false),
+                    all_agent_game_type = table.Column<int>(type: "integer", nullable: false),
+                    all_agent_rebate_type = table.Column<short>(type: "smallint", nullable: false),
                     rank = table.Column<int>(type: "integer", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     net_profit = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
                     active_number = table.Column<int>(type: "integer", nullable: false),
-                    dividend_percentage = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false)
+                    rebate_percentage = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_brand_all_agent_game_type_conditions", x => new { x.brand_id, x.game_type, x.rank, x.rebate_type });
+                    table.PrimaryKey("pk_brand_all_agent_game_type_conditions", x => new { x.brand_id, x.all_agent_game_type, x.rank, x.all_agent_rebate_type });
                 });
 
             migrationBuilder.CreateTable(
@@ -31,14 +31,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    game_type = table.Column<short>(type: "smallint", nullable: false),
+                    all_agent_game_type = table.Column<short>(type: "smallint", nullable: false),
                     @switch = table.Column<bool>(name: "switch", type: "boolean", nullable: false),
                     has_valid_bet = table.Column<bool>(type: "boolean", nullable: false),
                     has_win_loss = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_brand_all_agent_game_types", x => new { x.brand_id, x.game_type });
+                    table.PrimaryKey("pk_brand_all_agent_game_types", x => new { x.brand_id, x.all_agent_game_type });
                 });
 
             migrationBuilder.CreateTable(

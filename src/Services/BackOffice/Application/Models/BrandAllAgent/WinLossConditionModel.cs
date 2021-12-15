@@ -8,6 +8,6 @@
 
         public int ActiveNumber { get; set; }
 
-        public decimal DividendPercentage { get; set; }
+        public decimal RebatePercentage { get; set; }
     }
 }

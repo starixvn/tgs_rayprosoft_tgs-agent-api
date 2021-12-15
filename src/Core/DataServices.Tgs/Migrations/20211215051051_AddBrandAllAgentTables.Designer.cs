@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20211213104319_AddBrandAllAgentTables")]
+    [Migration("20211215051051_AddBrandAllAgentTables")]
     partial class AddBrandAllAgentTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1391,9 +1391,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<short>("GameType")
+                    b.Property<short>("AllAgentGameType")
                         .HasColumnType("smallint")
-                        .HasColumnName("game_type");
+                        .HasColumnName("all_agent_game_type");
 
                     b.Property<bool>("HasValidBet")
                         .HasColumnType("boolean")
@@ -1407,7 +1407,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("switch");
 
-                    b.HasKey("BrandId", "GameType")
+                    b.HasKey("BrandId", "AllAgentGameType")
                         .HasName("pk_brand_all_agent_game_types");
 
                     b.ToTable("brand_all_agent_game_types");
@@ -1419,33 +1419,33 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<int>("GameType")
+                    b.Property<int>("AllAgentGameType")
                         .HasColumnType("integer")
-                        .HasColumnName("game_type");
+                        .HasColumnName("all_agent_game_type");
 
                     b.Property<int>("Rank")
                         .HasColumnType("integer")
                         .HasColumnName("rank");
 
-                    b.Property<short>("RebateType")
+                    b.Property<short>("AllAgentRebateType")
                         .HasColumnType("smallint")
-                        .HasColumnName("rebate_type");
+                        .HasColumnName("all_agent_rebate_type");
 
                     b.Property<int>("ActiveNumber")
                         .HasColumnType("integer")
                         .HasColumnName("active_number");
-
-                    b.Property<decimal>("DividendPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("dividend_percentage");
 
                     b.Property<decimal>("NetProfit")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
-                    b.HasKey("BrandId", "GameType", "Rank", "RebateType")
+                    b.Property<decimal>("RebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_percentage");
+
+                    b.HasKey("BrandId", "AllAgentGameType", "Rank", "AllAgentRebateType")
                         .HasName("pk_brand_all_agent_game_type_conditions");
 
                     b.ToTable("brand_all_agent_game_type_conditions");

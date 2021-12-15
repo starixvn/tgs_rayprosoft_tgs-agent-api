@@ -6,5 +6,5 @@ using TGS.Core.Models.Messages;
 namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 {
     public record UpdateBrandAllAgentValidBetConditionRequest(Guid BrandId, ValidBetConditionModel[] Conditions,
-        AllAgentGameType GameType) : IRequest<MessageResponse>;
+        AllAgentGameType AllAgentGameType) : IRequest<MessageResponse>;
 }

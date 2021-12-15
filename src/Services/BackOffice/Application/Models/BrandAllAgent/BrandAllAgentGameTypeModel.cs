@@ -10,6 +10,6 @@ namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
 
         public bool HasWinLoss { get; set; }
 
-        public AllAgentGameType GameType { get; set; }
+        public AllAgentGameType AllAgentGameType { get; set; }
     }
 }

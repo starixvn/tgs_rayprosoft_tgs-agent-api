@@ -11,7 +11,7 @@ using TGS.Services.BackOffice.Application.Models.BrandAllAgent;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using Brand = TGS.Services.BackOffice.Application.Resources.Brand;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeConditionHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentHandlers
 {
     public class
         UpdateBrandAllAgentWinLossConditionHandler : Handler<UpdateBrandAllAgentWinLossConditionRequest,
@@ -41,8 +41,8 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeCond
 
             var conditions =
                 await _service.GetBrandAllAgentGameTypeConditionQueries().Where(x
-                    => x.BrandId == request.BrandId && x.GameType == request.GameType &&
-                    x.RebateType == AllAgentRebateType.WinLoss).ToArrayAsync(cancellationToken);
+                    => x.BrandId == request.BrandId && x.AllAgentGameType == request.AllAgentGameType &&
+                    x.AllAgentRebateType == AllAgentRebateType.WinLoss).ToArrayAsync(cancellationToken);
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -54,9 +54,9 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeCond
                     BrandId = request.BrandId,
                     NetProfit = x.NetProfit,
                     ActiveNumber = x.ActiveNumber,
-                    DividendPercentage = x.DividendPercentage,
-                    GameType = request.GameType,
-                    RebateType = AllAgentRebateType.WinLoss
+                    RebatePercentage = x.RebatePercentage,
+                    AllAgentGameType = request.AllAgentGameType,
+                    AllAgentRebateType = AllAgentRebateType.WinLoss
                 }).ToArray());
 
             scope.Complete();

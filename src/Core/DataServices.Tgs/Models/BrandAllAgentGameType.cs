@@ -7,7 +7,7 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid BrandId { get; set; }
 
-        public AllAgentGameType GameType { get; set; }
+        public AllAgentGameType AllAgentGameType { get; set; }
 
         public bool Switch { get; set; }
 

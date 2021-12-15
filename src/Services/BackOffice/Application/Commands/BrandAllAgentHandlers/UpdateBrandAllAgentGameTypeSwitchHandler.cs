@@ -7,7 +7,7 @@ using TGS.Services.BackOffice.Application.Models.BrandAllAgent;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using Brand = TGS.Services.BackOffice.Application.Resources.Brand;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentHandlers
 {
     public class
         UpdateBrandAllAgentGameTypeGameTypeSwitchHandler : Handler<UpdateBrandAllAgentGameTypeRequest, MessageResponse>
@@ -36,7 +36,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeHand
 
             var brandAllAgentGameType =
                 await _service.GetBrandAllAgentGameTypeAsync(x
-                    => x.BrandId == request.BrandId && x.GameType == request.GameType);
+                    => x.BrandId == request.BrandId && x.AllAgentGameType == request.AllAgentGameType);
 
             if (brandAllAgentGameType is null)
             {
@@ -44,7 +44,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentGameTypeHand
                     new BrandAllAgentGameType
                     {
                         BrandId = request.BrandId,
-                        GameType = request.GameType,
+                        AllAgentGameType = request.AllAgentGameType,
                         Switch = request.Switch,
                         HasWinLoss = request.HasWinLoss,
                         HasValidBet = request.HasValidBet

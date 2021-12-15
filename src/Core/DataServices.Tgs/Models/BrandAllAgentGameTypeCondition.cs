@@ -5,9 +5,9 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class BrandAllAgentGameTypeCondition
     {
-        public AllAgentGameType GameType { get; set; }
+        public AllAgentGameType AllAgentGameType { get; set; }
 
-        public AllAgentRebateType RebateType { get; set; }
+        public AllAgentRebateType AllAgentRebateType { get; set; }
 
         public int Rank { get; set; }
 
@@ -17,6 +17,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int ActiveNumber { get; set; }
 
-        public decimal DividendPercentage { get; set; }
+        public decimal RebatePercentage { get; set; }
     }
 }

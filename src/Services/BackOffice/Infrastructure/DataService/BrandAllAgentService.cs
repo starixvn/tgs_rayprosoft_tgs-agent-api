@@ -17,6 +17,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<BrandAllAgent>, IQueryable<BrandAllAgent>> preQuery = null,
             bool tracking = false);
 
+        Task<bool> ExistsAsync(Expression<Func<BrandAllAgent, bool>> predicate);
+
         Task UpdateBrandAllAgentSwitchAsync(BrandAllAgent brandAllAgent);
 
         Task CreateBrandAllAgentAsync(BrandAllAgent brandAllAgent);
@@ -46,5 +48,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         public Task DeleteBrandAllAgentAsync(BrandAllAgent brandAllAgent) => DeleteEntityAsync(brandAllAgent);
+        public Task<bool> ExistsAsync(Expression<Func<BrandAllAgent, bool>> predicate) => base.ExistsAsync(predicate);
     }
 }
