@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.Jili;
 
-namespace TGS.Core.Models.GameProviders
+namespace TGS.Core.Models.GameProviders.Settings
 {
     public record JiliConfiguration : PluggableConfigurationBase
     {
