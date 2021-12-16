@@ -4,7 +4,7 @@ using System;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal record CurrencyDefined(string Code, string Name, string NativeName, string Symbol);
 

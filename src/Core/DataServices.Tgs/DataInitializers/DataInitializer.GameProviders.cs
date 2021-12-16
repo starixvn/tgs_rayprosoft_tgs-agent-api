@@ -14,7 +14,7 @@ using TGS.Core.Models.GameProviders.Settings;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         #region Private Method
 
@@ -44,60 +44,96 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         #region Interfaces and Base Models
 
+        internal interface ICodeMapper
+        {
+            string Code { get; }
+
+            string ExternalCode { get; }
+        }
+
+        internal interface IGame
+        {
+            string AvailableCurrencies { get; init; }
+
+            bool AvailableToBrand { get; init; }
+
+            string Code { get; init; }
+
+            string Description { get; init; }
+
+            string EndpointPath { get; init; }
+
+            string ExternalId { get; init; }
+
+            string GameRuleUrl { get; init; }
+
+            GameType GameTypeCode { get; init; }
+
+            bool HasTurnoverOnTieBet { get; init; }
+
+            bool Html5 { get; init; }
+
+            string Name { get; init; }
+
+            GamePlatformType PlatformType { get; init; }
+
+            bool SubGame { get; init; }
+
+            string SubGameProviderCode { get; init; }
+        }
+
         internal interface IGameProvider
         {
-            Guid Id { get; }
-            string Code { get; }
-            string Name { get; }
-            IGameProviderConfiguration[] GameProviderConfigurations { get; }
-            ICurrency[] Currencies { get; }
-            ILanguage[] Languages { get; }
-            IGame[] Games { get; }
-            bool AutoClosedRound => true;
-            bool SupportTestPlayer => true;
             bool AllowKickPlayer => false;
-            ushort UniqueId { get; }
+
+            bool AutoClosedRound => true;
+
             GameProviderBetLimit[] BetLimits { get; }
-            Dictionary<string, string> SportTypes => new();
+
+            string Code { get; }
+
+            ICurrency[] Currencies { get; }
+
+            IGameProviderConfiguration[] GameProviderConfigurations { get; }
+
+            IGame[] Games { get; }
+
+            Guid Id { get; }
+
+            ILanguage[] Languages { get; }
+
             Dictionary<string, string> MarketTypes => new();
-            bool TransferWallet => false;
+
+            string Name { get; }
+
+            Dictionary<string, string> SportTypes => new();
+
             SubGameProvider[] SubGameProviders { get; }
+
+            bool SupportTestPlayer => true;
+
+            bool TransferWallet => false;
+
+            ushort UniqueId { get; }
+
             PluggableConfigurationBase GetConfiguration();
         }
 
         internal interface IGameProviderConfiguration
         {
-            Guid Id { get; }
-            string Name { get; }
             string ClientId { get; }
-            string SecretKey { get; }
-            string DesktopEndpoint { get; }
-            string MobileEndpoint { get; }
+
             string ConfigurationData => string.Empty;
-        }
 
-        internal interface IGame
-        {
-            string Name { get; init; }
-            string Code { get; init; }
-            string ExternalId { get; init; }
-            string EndpointPath { get; init; }
-            string GameRuleUrl { get; init; }
-            string Description { get; init; }
-            GameType GameTypeCode { get; init; }
-            GamePlatformType PlatformType { get; init; }
-            bool HasTurnoverOnTieBet { get; init; }
-            bool SubGame { get; init; }
-            bool AvailableToBrand { get; init; }
-            bool Html5 { get; init; }
-            string AvailableCurrencies { get; init; }
-            string SubGameProviderCode { get; init; }
-        }
+            string DesktopEndpoint { get; }
 
-        internal interface ICodeMapper
-        {
-            string Code { get; }
-            string ExternalCode { get; }
+            Guid Id { get; }
+
+            string MobileEndpoint { get; }
+
+            string Name { get; }
+
+            string SecretKey { get; }
         }
 
         internal record BaseCodeMapper : ICodeMapper

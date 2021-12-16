@@ -12,6 +12,7 @@
     <None Remove="DataInitializers\Games\Avia.csv" />
     <None Remove="DataInitializers\Games\BC.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
+    <None Remove="DataInitializers\Games\JILI.csv" />
     <None Remove="DataInitializers\Games\LY.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
     <None Remove="DataInitializers\Games\TCG.csv" />
@@ -47,6 +48,7 @@
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\LY.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\JILI.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\KY.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BC.csv" />

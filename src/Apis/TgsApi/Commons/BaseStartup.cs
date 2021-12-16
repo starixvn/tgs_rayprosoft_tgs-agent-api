@@ -18,7 +18,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
-using TGS.Shared.Game.ApiClients.Extensions;
 
 namespace TGS.Apis.TgsApi.Commons
 {
