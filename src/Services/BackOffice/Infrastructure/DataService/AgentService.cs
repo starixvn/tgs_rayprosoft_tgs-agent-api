@@ -77,7 +77,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 ParentAgentId = parentAgent?.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
-                    brand.BrandAgentDividendConditions?.Count > 0
+                    brand.AgentDividendType == AgentDividendType.MultipleLayer &&
+                    brand.BrandAgentDividendConditions?.Count > 0 ||
+                    brand.AgentDividendType == AgentDividendType.OneLayer && request.DividendPercentage > 0
                         ? AgentConfigStatus.DoneForConfigurePercentage
                         : AgentConfigStatus.WaitForConfigurePercentage,
                 CommissionPercentage = request.CommissionPercentage,

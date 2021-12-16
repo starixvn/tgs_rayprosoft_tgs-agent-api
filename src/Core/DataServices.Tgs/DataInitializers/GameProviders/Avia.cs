@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.Avia;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -74,7 +75,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new THLanguage("TH"),
                 new KRLanguage("KR"),
                 new VNLanguage("VN"),
-                
+
 
             };
 
@@ -95,8 +96,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new Uri("http://game-avia") : new("http://localhost:62330"),
                     AmountMaximum = 10000000m,
                     AmountFormat = "10,2",
-                    ApiUrl = new Uri("https://api.aviaapi.vip"),
-                    Authorization= "81e2d1a24c684a76a710a70f4900a353"
+                    BrandMerchants = new[]  {new AviaBrandMerchant
+                    {
+                        BrandCode = "Default",
+                        ApiUrl = new Uri("https://api.aviaapi.vip"),
+                        Authorization = "81e2d1a24c684a76a710a70f4900a353",
+                        PlayerPassword = "TgsP@ssw0rd",
+                        Status = true,
+                    } }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

@@ -1420,6 +1420,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("qr_code_url");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("type");
