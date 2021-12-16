@@ -76,7 +76,8 @@ namespace TGS.Services.Promotion.MessageQueue
                             .CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                             .ConfigureAwait(false);
 
-                    if (depositForm.PromotionId.HasValue)
+                    if (depositForm.PromotionId.HasValue && !await _promotionParticipantService.ExistsAsync(x
+                        => x.PlayerCode == depositForm.PlayerCode && x.PromotionId == depositForm.PromotionId))
                     {
                         await _promotionParticipantService
                             .CreatePromotionParticipantAsync(depositForm.PromotionId.Value, depositForm.PlayerCode)
