@@ -19,7 +19,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
     {
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
         private readonly ILogger<JiliService> _logger;
         private readonly ISettingOperations _settingOperations;
 
@@ -27,14 +26,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             ILogger<JiliService> logger,
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries,
-            IHttpContextAccessor httpContextAccessor)
+            IGameActionQueries gameActionQueries)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
-            _httpContext = httpContextAccessor?.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         public async ValueTask<JiliConfiguration> GetConfigurationAsync()
@@ -46,13 +43,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             Guid gameProviderId,
             string playerCode,
             string externalRoundId,
-            string externalGameId)
+            string externalGameId,
+            PlatformType platformType)
         {
-            var items = _httpContext?.Items ??
-                        throw new InvalidOperationException("Can not get http context items");
-
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
             var games = await _gameProviderOperations
                 .GetCachedGamesAsync(gameProviderId, externalGameId)
                 .ConfigureAwait(false);
@@ -70,15 +63,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 .ConfigureAwait(false);
         }
 
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync()
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+            Guid gameProviderId,
+            Guid gameProviderConfigurationId,
+            PlatformType platformType)
         {
-            var items = _httpContext?.Items ??
-                           throw new InvalidOperationException("Can not get http context items");
-
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
                 .ConfigureAwait(false);
 

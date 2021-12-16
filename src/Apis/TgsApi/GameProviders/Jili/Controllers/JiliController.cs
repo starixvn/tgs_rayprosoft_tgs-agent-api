@@ -71,6 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
             var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
 
             var externalRoundId = request.ExternalRoundId.ToString();
@@ -84,7 +85,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
                     gameProviderId,
                     playerCode,
                     externalRoundId,
-                    externalGameId)
+                    externalGameId,
+                    platformType)
                 .ConfigureAwait(false);
 
             if (gameActionData == null)
@@ -115,10 +117,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
             JiliPlaceBetAndSettleRequest request)
         {
             var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
 
-            var data = await service.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+            var data = await service
+                .GetGameProviderConfigurationDataAsync(
+                    gameProviderId,
+                    gameProviderConfigurationId,
+                    platformType)
+                .ConfigureAwait(false);
 
             var (betData, externalRoundId) = map.FreeBetRequest(playerCode, data, request);
             var betResult = await actions.SettleBetAsync(betData).ConfigureAwait(false);
@@ -148,10 +158,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
             JiliPlaceBetAndSettleRequest request)
         {
             var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
 
-            var data = await service.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+            var data = await service
+                .GetGameProviderConfigurationDataAsync(
+                    gameProviderId,
+                    gameProviderConfigurationId,
+                    platformType)
+                .ConfigureAwait(false);
 
             var (betData, externalRoundId) = map.BetAndSettleRequest(playerCode, data, request);
             var betResult = await actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);

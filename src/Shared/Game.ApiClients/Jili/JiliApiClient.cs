@@ -107,13 +107,8 @@ namespace TGS.Shared.Game.ApiClients.Jili
             return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
         }
 
-        private static string GenerateString(int length)
+        private string GenerateString(int length)
         {
-            if (length <= 0)
-            {
-                throw new ArgumentException("Length should be greater then zero");
-            }
-
             var result = Enumerable
                 .Range(1, length)
                 .Select(n => AlphanumericCharacters[_Random.Next(0, AlphanumericCharacters.Length)])
