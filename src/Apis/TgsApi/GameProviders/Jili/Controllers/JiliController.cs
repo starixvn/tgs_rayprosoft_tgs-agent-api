@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using Amazon.Runtime.Internal.Util;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Mvc;
@@ -12,9 +10,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Jili.Services;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
-using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.Jili.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
@@ -53,33 +49,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
 
         [Route("bet")]
         [Consumes(MediaTypeNames.Application.Json)]
-        public async ValueTask<JiliPlaceBetAndSettleResponse> AuthorizePlayerAsync(
+        public ValueTask<JiliPlaceBetAndSettleResponse> AuthorizePlayerAsync(
             [FromServices] IGamePlayActions actions,
             [FromServices] IJiliService service,
             [FromServices] IJiliActionModelMapper map,
+            [FromServices] IJiliDataStore store,
             JiliPlaceBetAndSettleRequest request)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
-
-            var data = await service.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
-
-            BetResult result;
-
-            if (request.IsFreeRound is true)
-            {
-                var betData = map.FreeBetRequest(playerCode, data, request);
-                result = await actions.SettleBetAsync(betData).ConfigureAwait(false);
-            }
-            else
-            {
-                var betData = map.BetAndSettleRequest(playerCode, data, request);
-                result = await actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
-            }
-
-            return map.BetAndSettleResponse(jiliPlayerId, result);
-        }
+            => request.IsFreeRound is true
+                ? ExecuteFreeBetAsync(actions, service, map, store, request)
+                : ExecutePlaceAndSettleBetAsync(actions, service, map, store, request);
 
         [Route("cancelBet")]
         [Consumes(MediaTypeNames.Application.Json)]
@@ -87,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
             [FromServices] IGamePlayActions actions,
             [FromServices] IJiliService service,
             [FromServices] IJiliActionModelMapper map,
-            [FromServices] IGameActionQueries gameActionQueries,
+            [FromServices] IJiliDataStore store,
             JiliCancelTransactionRequest request)
         {
             var items = HttpContext.Items;
@@ -111,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
 
             if (gameActionData == null)
             {
-                // TODO: add pending game action to redis
+                await store.SetCancelledRoundAsync(externalRoundId, request).ConfigureAwait(false);
 
                 return map.FailCancelTransactionResponse(2, "Round Not Found", jiliPlayerId, balanceResult);
             }
@@ -127,6 +105,72 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Controllers
 
             return map.FailCancelTransactionResponse(6, "Already accepted and can't be canceled",
                 jiliPlayerId, balanceResult);
+        }
+
+        private async ValueTask<JiliPlaceBetAndSettleResponse> ExecuteFreeBetAsync(
+            IGamePlayActions actions,
+            IJiliService service,
+            IJiliActionModelMapper map,
+            IJiliDataStore store,
+            JiliPlaceBetAndSettleRequest request)
+        {
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
+
+            var data = await service.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+
+            var (betData, externalRoundId) = map.FreeBetRequest(playerCode, data, request);
+            var betResult = await actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            var isRoundCancelled = await store.CheckCancelledRoundAsync(externalRoundId);
+
+            if (!isRoundCancelled)
+            {
+                return map.SuccessBetAndSettleResponse(jiliPlayerId, betResult);
+            }
+
+            var cancelBetData = map.CancelFreeBetRequest(betData);
+            var cancelResult = await actions.CancelTransactionAsync(cancelBetData).ConfigureAwait(false);
+
+            return map.FailBetAndSettleResponse(
+                5,
+                "Already canceled",
+                jiliPlayerId,
+                cancelResult);
+        }
+
+        private async ValueTask<JiliPlaceBetAndSettleResponse> ExecutePlaceAndSettleBetAsync(
+            IGamePlayActions actions,
+            IJiliService service,
+            IJiliActionModelMapper map,
+            IJiliDataStore store,
+            JiliPlaceBetAndSettleRequest request)
+        {
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var jiliPlayerId = items.Get(JiliConsts.ContextItems.JiliPlayerId, string.Empty);
+
+            var data = await service.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+
+            var (betData, externalRoundId) = map.BetAndSettleRequest(playerCode, data, request);
+            var betResult = await actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
+
+            var isRoundCancelled = await store.CheckCancelledRoundAsync(externalRoundId);
+
+            if (!isRoundCancelled)
+            {
+                return map.SuccessBetAndSettleResponse(jiliPlayerId, betResult);
+            }
+
+            var cancelBetData = map.CancelPlaceAndSettleBetRequest(betData);
+            var cancelResult = await actions.CancelTransactionAsync(cancelBetData).ConfigureAwait(false);
+
+            return map.FailBetAndSettleResponse(
+                5,
+                "Already canceled",
+                jiliPlayerId,
+                cancelResult);
         }
     }
 }

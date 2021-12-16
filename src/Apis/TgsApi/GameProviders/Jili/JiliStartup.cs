@@ -9,6 +9,7 @@ using TGS.Apis.TgsApi.GameProviders.Jili.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Jili
@@ -43,6 +44,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
 
             services.AddScoped<HandleJiliExceptionMiddleware>();
             services.AddScoped<AuthorizeJiliMiddleware>();
+
+            services.AddTransient<IJiliDataStore>(sp
+                => ActivatorUtilities.CreateInstance<JiliRedisDataStore>(
+                    sp,
+                    sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {

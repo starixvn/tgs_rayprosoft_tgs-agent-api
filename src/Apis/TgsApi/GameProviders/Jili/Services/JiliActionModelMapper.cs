@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 CurrencyCode = result.GameProviderCurrencyCode
             };
 
-        public BetData BetAndSettleRequest(
+        public (BetData BetData, string ExternalRoundId) BetAndSettleRequest(
             string playerCode,
             GameProviderConfigurationData data,
             JiliPlaceBetAndSettleRequest request)
@@ -71,7 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 }
             };
 
-            return new BetData
+            var betData = new BetData
             {
                 GameProviderId = data.GameProviderId,
                 GameProviderConfigurationId = data.GameProviderConfigurationId,
@@ -82,23 +82,91 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 HasCurrencyFromGameProvider = false,
                 Transactions = transactions
             };
+
+            return (betData, externalRoundId);
         }
 
-        public JiliPlaceBetAndSettleResponse BetAndSettleResponse(string jiliPlayerId, BetResult result)
+        public BetData CancelFreeBetRequest(BetData freeBetData)
         {
-            var roundId = result.Transactions.Select(t => t.RoundId).FirstOrDefault();
-            var transactionId = new BigInteger(roundId.ToByteArray(), true, false);
+            var freeBetTransaction = freeBetData.Transactions[0];
 
-            return new JiliPlaceBetAndSettleResponse
+            var cancelTransactions = new TransactionData[]
             {
-                ErrorCode = 0,
-                ErrorMessage = string.Empty,
-                Balance = result.Balance,
-                JiliPlayerId = jiliPlayerId,
-                CurrencyCode = result.GameProviderCurrencyCode,
-                TransactionId = transactionId
+                new TransactionData
+                {
+                    ExternalTransactionId = $"{freeBetTransaction.ExternalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = freeBetTransaction.ExternalTransactionId,
+                    ExternalGameId = freeBetTransaction.ExternalGameId,
+                    ExternalRoundId = freeBetTransaction.ExternalRoundId,
+                    ExternalGameActionGroupId = freeBetTransaction.ExternalGameActionGroupId,
+                    ExternalBetId = freeBetTransaction.ExternalBetId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = false
+                }
+            };
+
+            return new BetData
+            {
+                GameProviderId = freeBetData.GameProviderId,
+                GameProviderConfigurationId = freeBetData.GameProviderConfigurationId,
+                GameProviderCode = freeBetData.GameProviderCode,
+                AutoCloseRound = freeBetData.AutoCloseRound,
+                PlayerCode = freeBetData.PlayerCode,
+                PlatformType = freeBetData.PlatformType,
+                HasCurrencyFromGameProvider = false,
+                Transactions = cancelTransactions
             };
         }
+
+        public BetData CancelPlaceAndSettleBetRequest(BetData placeAndSettleBetData)
+        {
+            var transactions = placeAndSettleBetData.Transactions
+                .OrderByDescending(t => t.GameActionType)
+                .ThenByDescending(t => t.TimeStamp).ToArray();
+
+            var cancelTransactions = transactions
+                .Select((t, idx)
+                    =>
+                    new TransactionData
+                    {
+                        ExternalTransactionId = $"{t.ExternalTransactionId}_cancel",
+                        ExternalTransactionReferenceId = t.ExternalTransactionId,
+                        ExternalGameId = t.ExternalGameId,
+                        ExternalRoundId = t.ExternalRoundId,
+                        ExternalGameActionGroupId = t.ExternalGameActionGroupId,
+                        ExternalBetId = t.ExternalBetId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        TimeStamp = DateTimeOffset.UtcNow,
+                        RoundClosed = idx == transactions.Length - 1
+                    }).ToArray();
+
+            return new BetData
+            {
+                GameProviderId = placeAndSettleBetData.GameProviderId,
+                GameProviderConfigurationId = placeAndSettleBetData.GameProviderConfigurationId,
+                GameProviderCode = placeAndSettleBetData.GameProviderCode,
+                AutoCloseRound = placeAndSettleBetData.AutoCloseRound,
+                PlayerCode = placeAndSettleBetData.PlayerCode,
+                PlatformType = placeAndSettleBetData.PlatformType,
+                HasCurrencyFromGameProvider = false,
+                Transactions = cancelTransactions
+            };
+        }
+
+        public JiliPlaceBetAndSettleResponse FailBetAndSettleResponse(
+            int errorCode,
+            string errorMessage,
+            string jiliPlayerId,
+            BetResult result)
+            => new JiliPlaceBetAndSettleResponse
+            {
+                ErrorCode = errorCode,
+                ErrorMessage = errorMessage,
+                JiliPlayerId = jiliPlayerId,
+                CurrencyCode = result.GameProviderCurrencyCode,
+                Balance = result.Balance
+            };
 
         public JiliCancelTransactionResponse FailCancelTransactionResponse(
             int errorCode,
@@ -114,7 +182,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 Balance = balanceResult.Balance
             };
 
-        public BetData FreeBetRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request)
+        public (BetData BetData, string ExternalRoundId) FreeBetRequest(string playerCode, GameProviderConfigurationData data, JiliPlaceBetAndSettleRequest request)
         {
             var externalGameId = request.ExternalGameId.ToString();
             var externalRoundId = request.ExternalRoundId.ToString();
@@ -138,7 +206,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 }
             };
 
-            return new BetData
+            var betData = new BetData
             {
                 GameProviderId = data.GameProviderId,
                 GameProviderConfigurationId = data.GameProviderConfigurationId,
@@ -149,6 +217,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 HasCurrencyFromGameProvider = false,
                 FreeBetAsSingleRound = true,
                 Transactions = transactions
+            };
+
+            return (betData, externalRoundId);
+        }
+
+        public JiliPlaceBetAndSettleResponse SuccessBetAndSettleResponse(string jiliPlayerId, BetResult result)
+        {
+            var roundId = result.Transactions.Select(t => t.RoundId).FirstOrDefault();
+            var transactionId = new BigInteger(roundId.ToByteArray(), true, false);
+
+            return new JiliPlaceBetAndSettleResponse
+            {
+                ErrorCode = 0,
+                ErrorMessage = string.Empty,
+                Balance = result.Balance,
+                JiliPlayerId = jiliPlayerId,
+                CurrencyCode = result.GameProviderCurrencyCode,
+                TransactionId = transactionId
             };
         }
 

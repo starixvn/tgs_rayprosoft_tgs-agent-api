@@ -11,12 +11,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             string playerCode,
             PlayerValidationResult result);
 
-        BetData BetAndSettleRequest(
+        (BetData BetData, string ExternalRoundId) BetAndSettleRequest(
             string playerCode,
             GameProviderConfigurationData data,
             JiliPlaceBetAndSettleRequest request);
 
-        JiliPlaceBetAndSettleResponse BetAndSettleResponse(
+        BetData CancelFreeBetRequest(BetData freeBetData);
+
+        BetData CancelPlaceAndSettleBetRequest(BetData placeAndSettleBetData);
+
+        JiliPlaceBetAndSettleResponse FailBetAndSettleResponse(
+                    int errorCode,
+            string errorMessage,
             string jiliPlayerId,
             BetResult result);
 
@@ -26,10 +32,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             string jiliPlayerId,
             GetBalanceResult balanceResult);
 
-        BetData FreeBetRequest(
+        (BetData BetData, string ExternalRoundId) FreeBetRequest(
             string playerCode,
             GameProviderConfigurationData data,
             JiliPlaceBetAndSettleRequest request);
+
+        JiliPlaceBetAndSettleResponse SuccessBetAndSettleResponse(
+            string jiliPlayerId,
+            BetResult result);
 
         JiliCancelTransactionResponse SuccessCancelTransactionResponse(
             string jiliPlayerId,
@@ -37,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             Guid cancelledGameActionId);
 
         PlayerValidationData ValidateRequest(
-                    string playerCode,
+            string playerCode,
             PlatformType platformType);
     }
 }
