@@ -17,8 +17,15 @@ namespace TGS.Shared.Game.ApiClients.Jili
 {
     public interface IJiliApiClient
     {
-        ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
+        ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
             Uri apiUrl,
+            string agentId,
+            string agentKey,
+            string language,
+            string externalRoundId);
+
+        ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
+                    Uri apiUrl,
             string agentId,
             string agentKey,
             JiliLoginWithoutRedirectRequest request);
@@ -35,6 +42,41 @@ namespace TGS.Shared.Game.ApiClients.Jili
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
+        }
+
+        public async ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
+            Uri apiUrl,
+            string agentId,
+            string agentKey,
+            string language,
+            string externalRoundId)
+        {
+            var parameters = new Dictionary<string, string>
+            {
+                ["WagersId"] = externalRoundId,
+                ["AgentId"] = agentId
+            };
+
+            var keyGen = GetKeyGen(agentId, agentKey);
+            var key = GetKey(keyGen, parameters);
+            parameters["Key"] = key;
+            parameters["Lang"] = language;
+
+            var prefix = $"{Consts.GameProvider.Jili}.GetGameDetailUrl";
+
+            var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
+            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/GetGameDetailUrl?{queryString}";
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriString)
+            {
+                Content = new FormUrlEncodedContent(parameters)
+            };
+
+            var response = await SendAsync(httpRequestMessage, prefix).ConfigureAwait(false);
+
+            var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
         }
 
         public async ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
