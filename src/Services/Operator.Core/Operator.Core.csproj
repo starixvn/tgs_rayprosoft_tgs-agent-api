@@ -27,9 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
-    <ProjectReference Include="..\Operations\Operations.csproj" />
     <ProjectReference Include="..\PluggableServices\PluggableServices.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
