@@ -47,6 +47,23 @@ namespace TGS.Services.Operator.Services.Game
                     "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" +
                     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                     "<title>BetConstruct</title>" +
+                    "<style>" +
+                        "#bcsportsbookcontainer {" +
+                            "float: left;" +
+                            "width: 100%;" +
+                            "height: 700px;" +
+                            "position: relative;" +
+                            "overflow: hidden;" +
+                        "}" +
+
+                        "#bcsportsbookcontainer iframe {" +
+                            "height: 800px;" +
+                            "position: absolute;" +
+                            "top: ­100px;" +
+                            "width: 100%;" +
+                            "left: 0;" +
+                        "}" +
+                    "</style>" +
                 "</head>" +
                 "<body>" +
                     "<div id=\"bcsportsbookcontainer\"></div>" +
