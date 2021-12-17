@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
-using Tgs.Payment.Clients;
-using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
@@ -97,6 +97,10 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 await _playerService
                     .TopUpAccumulatedDepositAsync(form.PlayerCode, form.Amount)
                     .ConfigureAwait(false);
+
+                if (form.PromotionId != null)
+                    await _promotionClient.DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
+                        .ConfigureAwait(false);
             }
             else
             {
