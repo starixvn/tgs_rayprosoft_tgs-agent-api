@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.PromotionApi.ViewModels;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.PromotionApi.Controllers
 {
@@ -21,14 +21,17 @@ namespace TGS.Apis.PromotionApi.Controllers
         private readonly IMediator _mediator;
 
         public PromotionController(IMediator mediator)
-        {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        }
+            => _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         [HttpPost("{promotionId}/addPlayer/{playerCode}")]
         [Description("Add player to promotion")]
         public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode)
             => _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
+
+        [HttpPost("{promotionId}/depositAddPlayer/{playerCode}")]
+        [Description("Add player to deposit promotion")]
+        public Task<MessageResponse> AddPlayerToDepositPromotionAsync(Guid promotionId, string playerCode)
+            => _mediator.Send(new CreateDepositPromotionParticipantRequest(promotionId, playerCode));
 
         [HttpPut("{promotionId}/{status}")]
         [Description("Change promotion status")]

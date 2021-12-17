@@ -20,6 +20,7 @@ namespace TGS.Clients.Promotion.Client
         Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request);
 
         Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
+        Task<MessageResponse> DepositJoinAsync(Guid promotionId, string playerCode);
 
         Task RevertPromotionAsync(Guid promotionId, decimal amount);
 
