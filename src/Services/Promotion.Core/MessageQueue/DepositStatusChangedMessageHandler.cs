@@ -16,13 +16,11 @@ namespace TGS.Services.Promotion.MessageQueue
         private readonly ILogger<DepositStatusChangedMessageHandler> _logger;
         private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerService _playerService;
-        private readonly IPromotionParticipantRepository _promotionParticipantService;
 
         public DepositStatusChangedMessageHandler(
             IPaymentServiceClient paymentServiceClient,
             IPromotionCheckerFactory promotionCheckerFactory,
             IPlayerService playerService,
-            IPromotionParticipantRepository promotionParticipantService,
             ILogger<DepositStatusChangedMessageHandler> logger)
         {
             if (promotionCheckerFactory is null)
@@ -34,8 +32,6 @@ namespace TGS.Services.Promotion.MessageQueue
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _promotionParticipantService = promotionParticipantService ??
-                throw new ArgumentNullException(nameof(promotionParticipantService));
             _firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
             _dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
         }
@@ -75,14 +71,6 @@ namespace TGS.Services.Promotion.MessageQueue
                         await _dailyFirstDepositChecker
                             .CommitTagAsync(depositForm.PlayerCode, depositForm.PromotionId)
                             .ConfigureAwait(false);
-
-                    if (depositForm.PromotionId.HasValue && !await _promotionParticipantService.ExistsAsync(x
-                        => x.PlayerCode == depositForm.PlayerCode && x.PromotionId == depositForm.PromotionId))
-                    {
-                        await _promotionParticipantService
-                            .CreatePromotionParticipantAsync(depositForm.PromotionId.Value, depositForm.PlayerCode)
-                            .ConfigureAwait(false);
-                    }
 
                     break;
 

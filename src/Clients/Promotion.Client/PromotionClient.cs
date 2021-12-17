@@ -86,6 +86,21 @@ namespace TGS.Clients.Promotion.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
+        public async Task<MessageResponse> DepositJoinAsync(Guid promotionId, string playerCode)
+        {
+            var prefix = $"Promotion.PromotionId.{promotionId}.DepositJoinPromotion";
+
+            return await ExecuteJsonRequestAsync<object, MessageResponse>(HttpMethod.Post,
+                $"/api/promotion/{promotionId}/depositAddPlayer/{playerCode}",
+                new
+                {
+                    promotionId,
+                    playerCode
+                },
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
         public async Task RevertPromotionAsync(Guid promotionId, decimal amount)
         {
             var prefix = $"Promotion.Revert.{promotionId}";
