@@ -22,7 +22,6 @@ namespace Promotion.UnitTests
 
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var fakePromotionChecker = Substitute.For<IPromotionChecker>();
-            var fakePromotionParticipantRepository = Substitute.For<IPromotionParticipantRepository>();
 
             fakeServiceProvider.GetService(Arg.Any<Type>())
                 .Returns(fakePromotionChecker);
@@ -41,7 +40,6 @@ namespace Promotion.UnitTests
                 fakePaymentServiceClient,
                 fakeCheckFactory,
                 fakePlayerService,
-                fakePromotionParticipantRepository,
                 NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
@@ -94,7 +92,6 @@ namespace Promotion.UnitTests
                 fakePaymentServiceClient,
                 fakeCheckFactory,
                 fakePlayerService,
-                fakePromotionParticipantRepository,
                 NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
