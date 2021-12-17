@@ -34,14 +34,25 @@ namespace TGS.Services.Operator.Services.Game
                     null)
                 .ConfigureAwait(false);
 
-            if(bcUri == null)
+            if (bcUri == null)
             {
                 throw new GameProviderUnderMaintenanceException();
             }
 
             var html =
-                "<div id=\"bcsportsbookcontainer\"></div>" +
-                $"<script id=\"bcsportsbook\" src=\"{bcUri}\"></script>";
+                "<!DOCTYPE html>" +
+                "<html lang=\"en\">" +
+                "<head>" +
+                    "<meta charset=\"UTF-8\">" +
+                    "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" +
+                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+                    "<title>BetConstruct</title>" +
+                "</head>" +
+                "<body>" +
+                    "<div id=\"bcsportsbookcontainer\"></div>" +
+                    $"<script id=\"bcsportsbook\" src=\"{bcUri}\"></script>" +
+                "</body>" +
+                "</html>";
 
             return new BetConstructHtmlContentInfo()
             {
