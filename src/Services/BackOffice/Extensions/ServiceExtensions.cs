@@ -45,6 +45,9 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IPlayerIpService, PlayerIpService>();
             services.AddTransient<IPlayerWalletExchangeService, PlayerWalletExchangeService>();
             services.AddTransient<IBrandAgentDividendConditionService, BrandAgentDividendConditionService>();
+            services.AddTransient<IBrandAllAgentService, BrandAllAgentService>();
+            services.AddTransient<IBrandAllAgentGameTypeService, BrandAllAgentGameTypeService>();
+            services.AddTransient<IBrandAllAgentGameTypeConditionService, BrandAllAgentGameTypeConditionService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;
