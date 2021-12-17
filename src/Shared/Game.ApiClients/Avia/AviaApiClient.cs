@@ -30,7 +30,7 @@ namespace TGS.Shared.Game.ApiClients.Avia
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask<(bool IsPlayer, Uri? GameUrl)> GetGameUrlAsync(Uri apiUrl, string authorization, string playerCode, string lang, int? cateId, int? matchId)
+        public async ValueTask<(bool IsPlayer, Uri GameUrl)> GetGameUrlAsync(Uri apiUrl, string authorization, string playerCode, string lang, int? cateId, int? matchId)
         {
             var request = new
             {
