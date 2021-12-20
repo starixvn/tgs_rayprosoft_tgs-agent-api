@@ -14,9 +14,5 @@ namespace TGS.Shared.Game.Models.Jili.Outgoing
 
         [JsonPropertyName("Lang")]
         public string Language { get; init; }
-
-        [JsonPropertyName("isJPEnabled")]
-        [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
-        public int JackpotEnable { get; init; }
     }
 }

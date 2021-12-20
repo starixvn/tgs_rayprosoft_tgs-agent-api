@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.GameProviders;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.Jili;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
@@ -98,10 +97,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new()
                         {
-                            BrandCode = "GPI",
+                            BrandCode = "Default",
                             AgentId = "PG_Seamless",
-                            AgentKey = "0d90dda822b6df548460da8f551c1a76c01b6a9e",
-                            JackpotEnable = false
+                            AgentKey = "0d90dda822b6df548460da8f551c1a76c01b6a9e"
                         }
                     }
                 };

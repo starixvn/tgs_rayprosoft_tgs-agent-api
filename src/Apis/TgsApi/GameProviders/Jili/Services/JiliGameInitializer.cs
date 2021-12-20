@@ -75,8 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
                 {
                     GameExternalId = game.ExternalId,
                     Language = cultureCode,
-                    Token = encryptedToken,
-                    JackpotEnable = merchant.JackpotEnable ? 1 : 0
+                    Token = encryptedToken
                 }).ConfigureAwait(false);
 
             if (response.ErrorCode != 0)

@@ -7,7 +7,5 @@
         public string AgentId { get; init; }
 
         public string AgentKey { get; init; }
-
-        public bool JackpotEnable { get; init; }
     }
 }
