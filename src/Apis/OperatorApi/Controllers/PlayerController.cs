@@ -203,7 +203,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("login")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
-            [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
@@ -211,25 +210,27 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
 
             var isBanned = await getService
-                    .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
-                    .ConfigureAwait(false);
+                .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
+                .ConfigureAwait(false);
 
             if (isBanned)
                 throw new UserBannedException();
 
             try
             {
-                var ipAddress = requestAnalyzer.GetIp(HttpContext);
+                var ipAddress = HttpContext.Connection.RemoteIpAddress;
+                var hostName = Request.Host.Host;
 
-                var query = new LoginCommand(
+                var command = new LoginCommand(
                     brandId,
                     request.Username,
                     request.Password,
-                    ipAddress,
+                    ipAddress.ToString(),
+                    hostName,
                     request.PlatformType, Consts.Site);
 
                 var info = await loginService
-                    .GetAsync(query)
+                    .GetAsync(command)
                     .ConfigureAwait(false);
 
                 return new LoginResponse
@@ -289,7 +290,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Create a player
         /// </summary>
-        [HttpPost("create")]
+        [HttpPost("create", Name = "RegisterPlayer")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> RegisterPlayerAsync(
             [FromServices] IRequestAnalyzer requestAnalyzer,
@@ -298,7 +299,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromBody] CreatePlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-            var ipAddress = requestAnalyzer.GetIp(HttpContext);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress;
+            var hostName = Request.Host.Host;
+
             var query = new CreatePlayerCommand(
                 brandId,
                 request.Username,
@@ -308,7 +311,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     ? request.AgentInvitationCode
                     : invitationCode,
                 request.IsTestPlayer,
-                ipAddress);
+                ipAddress.ToString(),
+                hostName);
 
             var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
 
@@ -550,12 +554,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromBody] SubmitInitPhoneRequest request)
         {
-            var ipAddress = requestAnalyzer.GetIp(HttpContext);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress;
+            var hostName = Request.Host.Host;
 
             var command = new CommitPlayerInitPhoneCommand(
                 request.SecurityKey,
                 request.ValidateCode,
-                ipAddress);
+                ipAddress.ToString(),
+                hostName);
 
             return commitPlayerInitPhoneService.ExecuteAsync(command);
         }

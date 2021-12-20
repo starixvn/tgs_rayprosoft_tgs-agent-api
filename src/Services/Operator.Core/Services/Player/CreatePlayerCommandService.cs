@@ -97,6 +97,7 @@ namespace TGS.Services.Operator.Services.Player
                     .PlayerRegisterIpAsync(
                         resultPlayerCode,
                         command.IpAddress,
+                        command.HostName,
                         DateTimeOffset.UtcNow)
                     .ConfigureAwait(false);
             }
