@@ -26,6 +26,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(64)
                 .IsRequired();
 
+            builder.Property(b => b.Host)
+                .HasMaxLength(250);
+
             builder.Property(b => b.RecordOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");

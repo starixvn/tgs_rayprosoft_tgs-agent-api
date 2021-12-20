@@ -4285,6 +4285,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("ip_type");
 
+                    b.Property<string>("Host")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("host");
+
                     b.Property<string>("Ip")
                         .IsRequired()
                         .HasMaxLength(64)
