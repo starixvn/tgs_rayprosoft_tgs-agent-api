@@ -65,7 +65,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
             var prefix = $"{Consts.GameProvider.Jili}.GetGameDetailUrl";
 
             var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/GetGameDetailUrl?{queryString}";
+            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/api1/GetGameDetailUrl?{queryString}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriString)
             {
@@ -96,7 +96,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
             var prefix = $"{Consts.GameProvider.Jili}.LoginWithoutRedirect";
 
             var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/LoginWithoutRedirect?{queryString}";
+            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/singleWallet/LoginWithoutRedirect?{queryString}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uriString);
 
