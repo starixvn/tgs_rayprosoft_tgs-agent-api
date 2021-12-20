@@ -219,6 +219,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
                 .ConfigureAwait(false);
 
+            await fundInAllService
+                .ExecuteAsync(new FundInAllGameBalanceCommand(
+                    cachedPlayer.BrandId,
+                    playerTokenData.PlayerCode,
+                    subGp.Code))
+                .ConfigureAwait(false);
+
             var query = new GetGameUrlQuery(
                 cachedPlayer.BrandId,
                 playerTokenData,
@@ -230,13 +237,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var info = await getGameUrlQueryService
                 .GetAsync(query)
-                .ConfigureAwait(false);
-
-            await fundInAllService
-                .ExecuteAsync(new FundInAllGameBalanceCommand(
-                    cachedPlayer.BrandId,
-                    playerTokenData.PlayerCode,
-                    subGp.Code))
                 .ConfigureAwait(false);
 
             if (subGp.IsTransferWallet)
