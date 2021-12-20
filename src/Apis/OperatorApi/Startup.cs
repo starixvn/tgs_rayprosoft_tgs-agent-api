@@ -126,6 +126,7 @@ namespace TGS.Apis.OperatorApi
                 {
                     options.ForwardedHeaders = ForwardedHeaders.All;
                     options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
+                    options.ForwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
 
                     var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
 
