@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.GameProviders;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.Jili;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
@@ -91,16 +90,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-jili") : new("http://localhost:62330"),
-                    ApiUrl = new("https://uat-wb-api.jlfafafa2.com/singleWallet"),
+                    ApiUrl = new("https://uat-wb-api.jlfafafa2.com"),
                     ClientId = "Jili-staging",
                     SecretKey = "iJXZopyrQl",
                     Merchants = new JiliMerchant[]
                     {
                         new()
                         {
-                            Brands = new [] { "GPI" },
+                            BrandCode = "Default",
                             AgentId = "PG_Seamless",
-                            AgentKey = "ed7c0450d69bcec7ddf42124ecb7493ef9597083"
+                            AgentKey = "0d90dda822b6df548460da8f551c1a76c01b6a9e"
                         }
                     }
                 };

@@ -17,7 +17,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
 {
     public interface IJiliApiClient
     {
-        ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
+        ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
             Uri apiUrl,
             string agentId,
             string agentKey,
@@ -44,7 +44,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
         {
         }
 
-        public async ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
+        public async ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
             Uri apiUrl,
             string agentId,
             string agentKey,
@@ -65,7 +65,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
             var prefix = $"{Consts.GameProvider.Jili}.GetGameDetailUrl";
 
             var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/GetGameDetailUrl?{queryString}";
+            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/api1/GetGameDetailUrl?{queryString}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriString)
             {
@@ -76,7 +76,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
 
             var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
+            return JsonSerializer.Deserialize<JiliGetGameDetailUrlResponse>(responseMessage);
         }
 
         public async ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
@@ -96,7 +96,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
             var prefix = $"{Consts.GameProvider.Jili}.LoginWithoutRedirect";
 
             var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/LoginWithoutRedirect?{queryString}";
+            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/singleWallet/LoginWithoutRedirect?{queryString}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uriString);
 

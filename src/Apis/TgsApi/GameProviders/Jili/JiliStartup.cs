@@ -56,6 +56,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili
             },
                 (provider, _)
                     => provider.GetRequiredService<JiliGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(JiliGameHistory)
+                },
+                (provider, _) => provider.GetRequiredService<JiliGameHistory>());
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
