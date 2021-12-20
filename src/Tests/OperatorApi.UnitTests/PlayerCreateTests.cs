@@ -71,7 +71,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 null,
                 false,
-                "192.168.50.123");
+                "192.168.50.123",
+                "localhost");
 
             // act
             var actual = await sut.GetAsync(command);
@@ -81,6 +82,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .PlayerRegisterIpAsync(
                     Arg.Any<string>(),
                     Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
                     Arg.Any<DateTimeOffset>());
         }
 
@@ -136,7 +138,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 null,
                 false,
-                "192.168.50.123");
+                "192.168.50.123",
+                "localhost");
 
             // act
             var actual = await sut.GetAsync(command);
@@ -146,6 +149,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .PlayerRegisterIpAsync(
                     Arg.Any<string>(),
                     Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
                     Arg.Any<DateTimeOffset>());
         }
 
@@ -199,7 +203,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 invitationCode,
                 false,
-                "::1");
+                "::1",
+                "localhost");
 
             // act
             var actual = await sut.GetAsync(query);
@@ -247,7 +252,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var password = "password";
 
-            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", null, false, "::1");
+            var query = new CreatePlayerCommand(
+                brandId,
+                "username",
+                password,
+                "CNY",
+                null,
+                false,
+                "::1",
+                "localhost");
 
             // act
             var actual = await sut.GetAsync(query);
@@ -294,7 +307,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var password = "password";
             var invitationCode = "NonExistentCode";
 
-            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", invitationCode, false, "::1");
+            var query = new CreatePlayerCommand(
+                brandId,
+                "username",
+                password,
+                "CNY",
+                invitationCode,
+                false,
+                "::1",
+                "localhost");
 
             Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
         }
@@ -348,7 +369,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 invitationCode,
                 false,
-                "::1");
+                "::1",
+                "localhost");
 
             // act
             Assert.ThrowsAsync<InvalidInvitationCodeException>(

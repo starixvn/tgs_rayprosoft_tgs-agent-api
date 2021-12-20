@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             _brandAllAgentGameTypeService = brandAllAgentGameTypeService;
         }
 
-        public override async Task<GetBrandAllAgentResponse> Handle(GetBrandAllAgentRequest request,
+        public override Task<GetBrandAllAgentResponse> Handle(GetBrandAllAgentRequest request,
             CancellationToken cancellationToken)
         {
             var brandSwitch = false;
@@ -29,10 +29,12 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             var gameTypes = _brandAllAgentGameTypeService.GetBrandAllAgentGameTypeQueries()
                 .Where(x => x.BrandId == request.BrandId);
 
-            return new GetBrandAllAgentResponse
+            return Task.FromResult(new GetBrandAllAgentResponse
             {
                 Switch = brandSwitch,
-                BrandAllAgentGameTypes = Enum.GetValues(typeof(AllAgentGameType)).Cast<AllAgentGameType>().GroupJoin(
+                BrandAllAgentGameTypes = Enum.GetValues(typeof(AllAgentGameType))
+                    .Cast<AllAgentGameType>()
+                    .GroupJoin(
                         gameTypes,
                         t => t,
                         g => g.AllAgentGameType,
@@ -47,8 +49,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
                         Switch = x.BrandAllAgentGameTypes.FirstOrDefault()?.Switch ?? false,
                         HasValidBet = x.BrandAllAgentGameTypes.FirstOrDefault()?.HasValidBet ?? false,
                         HasWinLoss = x.BrandAllAgentGameTypes.FirstOrDefault()?.HasWinLoss ?? false
-                    }).ToArray()
-            };
+                    })
+                    .ToArray()
+            });
         }
     }
 }
