@@ -17,7 +17,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
 {
     public interface IJiliApiClient
     {
-        ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
+        ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
             Uri apiUrl,
             string agentId,
             string agentKey,
@@ -44,7 +44,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
         {
         }
 
-        public async ValueTask<JiliLoginWithoutRedirectResponse> GetGameDetailUrlAsync(
+        public async ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
             Uri apiUrl,
             string agentId,
             string agentKey,
@@ -76,7 +76,7 @@ namespace TGS.Shared.Game.ApiClients.Jili
 
             var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
+            return JsonSerializer.Deserialize<JiliGetGameDetailUrlResponse>(responseMessage);
         }
 
         public async ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
