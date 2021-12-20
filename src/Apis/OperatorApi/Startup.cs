@@ -126,7 +126,10 @@ namespace TGS.Apis.OperatorApi
                 {
                     options.ForwardedHeaders = ForwardedHeaders.All;
                     options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
-                    options.ForwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
+
+                    var forwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
+                    if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
+                        options.ForwardedForHeaderName = forwardedForHeaderName;
 
                     var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
 
@@ -224,7 +227,6 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>();
-
 
             services
                 .AddMessageQueue()
