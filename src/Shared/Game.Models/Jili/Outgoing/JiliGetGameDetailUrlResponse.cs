@@ -10,7 +10,7 @@ namespace TGS.Shared.Game.Models.Jili.Outgoing
         [JsonPropertyName("Message")]
         public string ErrorMessage { get; init; }
 
-        [JsonPropertyName("Url")]
-        public string Url { get; init; }
+        [JsonPropertyName("Data")]
+        public JiliGetGameDetailUrlData Data { get; init; }
     }
 }
