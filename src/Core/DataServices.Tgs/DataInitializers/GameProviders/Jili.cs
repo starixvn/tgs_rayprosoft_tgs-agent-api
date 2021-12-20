@@ -100,7 +100,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             BrandCode = "GPI",
                             AgentId = "PG_Seamless",
-                            AgentKey = "ed7c0450d69bcec7ddf42124ecb7493ef9597083",
+                            AgentKey = "0d90dda822b6df548460da8f551c1a76c01b6a9e",
                             JackpotEnable = false
                         }
                     }
