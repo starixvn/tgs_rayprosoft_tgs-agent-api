@@ -73,6 +73,7 @@ namespace TGS.Tests.Games.IntegrationTests
             OpApiClient = _OpApiHost.GetTestClient();
             var brandToken = stubBrandCertClient.MakeJsonWebTokenAsync(Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"));
             OpApiClient.DefaultRequestHeaders.Add("Brand-Token", brandToken.Result);
+            OpApiClient.DefaultRequestHeaders.Add("X-Forwarded-For", "127.0.0.1");
 
             if (featureContext.FeatureInfo.Tags.Contains("Habanero"))
             {
