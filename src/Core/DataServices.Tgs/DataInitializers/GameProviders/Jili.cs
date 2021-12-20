@@ -91,16 +91,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-jili") : new("http://localhost:62330"),
-                    ApiUrl = new("https://uat-wb-api.jlfafafa2.com/singleWallet"),
+                    ApiUrl = new("https://uat-wb-api.jlfafafa2.com"),
                     ClientId = "Jili-staging",
                     SecretKey = "iJXZopyrQl",
                     Merchants = new JiliMerchant[]
                     {
                         new()
                         {
-                            Brands = new [] { "GPI" },
+                            BrandCode = "GPI",
                             AgentId = "PG_Seamless",
-                            AgentKey = "ed7c0450d69bcec7ddf42124ecb7493ef9597083"
+                            AgentKey = "ed7c0450d69bcec7ddf42124ecb7493ef9597083",
+                            JackpotEnable = false
                         }
                     }
                 };

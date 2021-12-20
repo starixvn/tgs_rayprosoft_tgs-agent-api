@@ -7,6 +7,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
     internal class JiliMerchantMapper : IJiliMerchantMapper
     {
         public JiliMerchant GetMerchant(IEnumerable<JiliMerchant> merchants, string brandCode)
-            => merchants.FirstOrDefault(m => m.Brands.Contains(brandCode));
+            => merchants.FirstOrDefault(m => m.BrandCode == brandCode);
     }
 }
