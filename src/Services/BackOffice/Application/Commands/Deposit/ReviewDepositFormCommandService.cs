@@ -82,7 +82,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             form.PromotionId,
                             player.PlayerCode,
                             player.DefaultWalletId,
-                            form.Amount,
+                            command.ActualAmount ?? form.Amount,
                             command.Remark,
                             command.FormId,
                             string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
@@ -96,7 +96,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                     .ConfigureAwait(false);
 
                 await _playerService
-                    .TopUpAccumulatedDepositAsync(form.PlayerCode, form.Amount)
+                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount)
                     .ConfigureAwait(false);
 
                 if (form.PromotionId != null)
