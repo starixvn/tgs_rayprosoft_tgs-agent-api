@@ -3692,6 +3692,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_active_on");
 
+                    b.Property<string>("ParentPlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("parent_player_code");
+
                     b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("bytea")
