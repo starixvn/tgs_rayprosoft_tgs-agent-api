@@ -3693,7 +3693,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("last_active_on");
 
                     b.Property<string>("ParentPlayerCode")
-                        .HasColumnType("text")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("parent_player_code");
 
                     b.Property<byte[]>("Password")

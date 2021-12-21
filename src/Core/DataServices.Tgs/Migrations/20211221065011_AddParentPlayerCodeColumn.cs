@@ -10,7 +10,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "parent_player_code",
                 schema: "dbo",
                 table: "players",
-                type: "text",
+                type: "character varying(16)",
+                maxLength: 16,
                 nullable: true);
         }
 

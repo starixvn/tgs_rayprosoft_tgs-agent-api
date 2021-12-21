@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20211221025450_AddParentPlayerCodeColumn")]
+    [Migration("20211221065011_AddParentPlayerCodeColumn")]
     partial class AddParentPlayerCodeColumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3695,7 +3695,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("last_active_on");
 
                     b.Property<string>("ParentPlayerCode")
-                        .HasColumnType("text")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("parent_player_code");
 
                     b.Property<byte[]>("Password")
