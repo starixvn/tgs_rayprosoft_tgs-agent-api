@@ -44,20 +44,37 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandAllAgentHandlers
                     => x.BrandId == request.BrandId && x.AllAgentGameType == request.AllAgentGameType &&
                     x.AllAgentRebateType == AllAgentRebateType.WinLoss).ToArrayAsync(cancellationToken);
 
+            foreach (var condition in conditions)
+            {
+                var rank = request.Conditions.FirstOrDefault(x => x.Rank == condition.Rank);
+                if (rank != null)
+                {
+                    condition.ActiveNumber = rank.ActiveNumber;
+                    condition.NetProfit = rank.NetProfit;
+                    condition.RebatePercentage = rank.RebatePercentage;
+                }
+            }
+
+            var deleteConditions = conditions.Select(x => x.Rank).Except(request.Conditions.Select(x => x.Rank));
+            var createConditions = request.Conditions.Select(x => x.Rank).Except(conditions.Select(x => x.Rank));
+
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _service.DeleteBrandAllAgentGameTypeConditionsAsync(conditions);
-            await _service.CreateBrandAllAgentGameTypeConditionsAsync(request.Conditions.Select(x
-                => new BrandAllAgentGameTypeCondition
-                {
-                    Rank = x.Rank,
-                    BrandId = request.BrandId,
-                    NetProfit = x.NetProfit,
-                    ActiveNumber = x.ActiveNumber,
-                    RebatePercentage = x.RebatePercentage,
-                    AllAgentGameType = request.AllAgentGameType,
-                    AllAgentRebateType = AllAgentRebateType.WinLoss
-                }).ToArray());
+            await _service.UpdateBrandAllAgentGameTypeConditionsAsync(conditions);
+            await _service.DeleteBrandAllAgentGameTypeConditionsAsync(conditions
+                .Where(x => deleteConditions.Contains(x.Rank)).ToArray());
+            await _service.CreateBrandAllAgentGameTypeConditionsAsync(request.Conditions
+                .Where(x => createConditions.Contains(x.Rank)).Select(x
+                    => new BrandAllAgentGameTypeCondition
+                    {
+                        Rank = x.Rank,
+                        BrandId = request.BrandId,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        RebatePercentage = x.RebatePercentage,
+                        AllAgentGameType = request.AllAgentGameType,
+                        AllAgentRebateType = AllAgentRebateType.WinLoss
+                    }).ToArray());
 
             scope.Complete();
 

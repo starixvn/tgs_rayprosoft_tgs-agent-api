@@ -20,6 +20,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 null,
             bool tracking = false);
 
+        Task UpdateBrandAllAgentGameTypeConditionsAsync(BrandAllAgentGameTypeCondition[] brandAllAgents);
         Task CreateBrandAllAgentGameTypeConditionsAsync(BrandAllAgentGameTypeCondition[] brandAllAgents);
         Task DeleteBrandAllAgentGameTypeConditionsAsync(BrandAllAgentGameTypeCondition[] brandAllAgents);
     }
@@ -47,5 +48,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         public Task DeleteBrandAllAgentGameTypeConditionsAsync(BrandAllAgentGameTypeCondition[] brandAllAgents)
             => DeleteEntitiesAsync(brandAllAgents);
+
+        public Task UpdateBrandAllAgentGameTypeConditionsAsync(BrandAllAgentGameTypeCondition[] brandAllAgents)
+            => UpdateEntitiesAsync(brandAllAgents);
     }
 }

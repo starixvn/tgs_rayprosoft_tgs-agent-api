@@ -24,7 +24,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             CancellationToken cancellationToken)
             => _brandAllAgentGameTypeConditionService.GetBrandAllAgentGameTypeConditionQueries()
                 .Where(x => x.BrandId == request.BrandId && x.AllAgentGameType == request.AllAgentGameType &&
-                    x.AllAgentRebateType == AllAgentRebateType.ValidBet).Select(x => new WinLossConditionModel
+                    x.AllAgentRebateType == AllAgentRebateType.WinLoss).Select(x => new WinLossConditionModel
                 {
                     Rank = x.Rank,
                     ActiveNumber = x.ActiveNumber,

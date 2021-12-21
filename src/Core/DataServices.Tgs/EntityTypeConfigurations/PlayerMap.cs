@@ -86,6 +86,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(p => p.FirstPromotionOn);
 
+            builder.Property(c => c.ParentPlayerCode)
+                .HasMaxLength(16);
+
             builder.HasOne(p => p.Brand)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.BrandId)
@@ -114,7 +117,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasIndex(p => p.BetLimitId)
                 .HasDatabaseName("ix_players_bet_limit_id");
 
-            builder.HasIndex(p => new { p.BrandId, p.AreaCode, p.Phone })
+            builder.HasIndex(p => new
+                {
+                    p.BrandId,
+                    p.AreaCode,
+                    p.Phone
+                })
                 .IsUnique()
                 .HasDatabaseName("ux_players_brand_phone");
         }
