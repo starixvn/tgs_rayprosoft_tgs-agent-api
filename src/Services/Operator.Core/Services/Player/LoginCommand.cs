@@ -8,6 +8,7 @@ namespace TGS.Services.Operator.Services.Player
         string UserName,
         string Password,
         string IpAddress,
+        string HostName,
         PlatformType PlatformType,
         string Site);
 }

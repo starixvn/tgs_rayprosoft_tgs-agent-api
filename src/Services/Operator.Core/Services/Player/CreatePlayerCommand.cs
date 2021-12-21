@@ -9,5 +9,6 @@ namespace TGS.Services.Operator.Services.Player
         string CurrencyCode,
         string AgentInvitationCode,
         bool IsTestPlayer,
-        string IpAddress);
+        string IpAddress,
+        string? HostName);
 }

@@ -4357,6 +4357,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_login_records");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerParent", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_parent_code");
+
+                    b.ToTable("player_parents");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerRebate", b =>
                 {
                     b.Property<int>("Id")

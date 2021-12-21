@@ -52,6 +52,7 @@ namespace TGS.Services.Operator.Services.Player
                 .PlayerRegisterIpAsync(
                     result.PlayerCode,
                     command.IpAddress,
+                    command.HostName,
                     DateTimeOffset.UtcNow)
                 .ConfigureAwait(false);
 
