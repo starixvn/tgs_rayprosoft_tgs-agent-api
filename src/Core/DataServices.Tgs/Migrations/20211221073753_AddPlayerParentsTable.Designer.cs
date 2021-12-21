@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20211221065011_AddParentPlayerCodeColumn")]
-    partial class AddParentPlayerCodeColumn
+    [Migration("20211221073753_AddPlayerParentsTable")]
+    partial class AddPlayerParentsTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -3694,11 +3694,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_active_on");
 
-                    b.Property<string>("ParentPlayerCode")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("parent_player_code");
-
                     b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("bytea")
@@ -4362,6 +4357,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_login_records_player_code");
 
                     b.ToTable("player_login_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerParent", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_code");
+
+                    b.ToTable("player_parents");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerRebate", b =>

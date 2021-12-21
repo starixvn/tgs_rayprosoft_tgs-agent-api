@@ -89,7 +89,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public byte[] WithdrawPassword { get; set; }
 
         public byte[] WithdrawSalt { get; set; }
-
-        public string ParentPlayerCode { get; set; }
     }
 }

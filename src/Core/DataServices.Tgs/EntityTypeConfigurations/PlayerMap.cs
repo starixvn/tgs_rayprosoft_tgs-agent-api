@@ -86,9 +86,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(p => p.FirstPromotionOn);
 
-            builder.Property(c => c.ParentPlayerCode)
-                .HasMaxLength(16);
-
             builder.HasOne(p => p.Brand)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.BrandId)
