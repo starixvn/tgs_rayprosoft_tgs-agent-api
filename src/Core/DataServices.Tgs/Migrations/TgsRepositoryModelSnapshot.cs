@@ -3375,6 +3375,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("market_types");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ParentPlayer", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_code");
+
+                    b.ToTable("parent_players");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")

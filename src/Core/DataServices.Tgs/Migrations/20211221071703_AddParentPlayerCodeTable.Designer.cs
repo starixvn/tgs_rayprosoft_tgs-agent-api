@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20211221065011_AddParentPlayerCodeColumn")]
-    partial class AddParentPlayerCodeColumn
+    [Migration("20211221071703_AddParentPlayerCodeTable")]
+    partial class AddParentPlayerCodeTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -3375,6 +3375,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("ak_market_types_game_provider_id_code");
 
                     b.ToTable("market_types");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ParentPlayer", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_code");
+
+                    b.ToTable("parent_players");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Payment", b =>
