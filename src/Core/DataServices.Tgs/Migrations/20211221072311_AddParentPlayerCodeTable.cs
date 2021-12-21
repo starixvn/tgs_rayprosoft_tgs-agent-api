@@ -6,14 +6,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "parent_player_code",
-                schema: "dbo",
-                table: "players",
-                type: "character varying(16)",
-                maxLength: 16,
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "parent_players",
                 schema: "dbo",
@@ -33,11 +25,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.DropTable(
                 name: "parent_players",
                 schema: "dbo");
-
-            migrationBuilder.DropColumn(
-                name: "parent_player_code",
-                schema: "dbo",
-                table: "players");
         }
     }
 }
