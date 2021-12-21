@@ -22,7 +22,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             _brandAllAgentGameTypeService = brandAllAgentGameTypeService;
         }
 
-        public override Task<GetBrandAllAgentResponse> Handle(GetBrandAllAgentRequest request,
+        public override async Task<GetBrandAllAgentResponse> Handle(GetBrandAllAgentRequest request,
             CancellationToken cancellationToken)
         {
             var brandSwitch = await _service.GetBrandAllAgentQueries()
@@ -31,7 +31,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
             var gameTypes = _brandAllAgentGameTypeService.GetBrandAllAgentGameTypeQueries()
                 .Where(x => x.BrandId == request.BrandId);
 
-            return Task.FromResult(new GetBrandAllAgentResponse
+            return new GetBrandAllAgentResponse
             {
                 Switch = brandSwitch,
                 BrandAllAgentGameTypes = Enum.GetValues(typeof(AllAgentGameType))
@@ -53,7 +53,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandAllAgentHandlers
                         HasWinLoss = x.BrandAllAgentGameTypes.FirstOrDefault()?.HasWinLoss ?? false
                     })
                     .ToArray()
-            });
+            };
         }
     }
 }
