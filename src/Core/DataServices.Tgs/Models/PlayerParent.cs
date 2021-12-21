@@ -1,6 +1,6 @@
 ﻿namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class ParentPlayer
+    public class PlayerParent
     {
         public string PlayerCode { get; set; }
 

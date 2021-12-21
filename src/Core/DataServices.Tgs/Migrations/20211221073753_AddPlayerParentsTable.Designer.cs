@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20211221072311_AddParentPlayerCodeTable")]
-    partial class AddParentPlayerCodeTable
+    [Migration("20211221073753_AddPlayerParentsTable")]
+    partial class AddPlayerParentsTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -3377,25 +3377,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("market_types");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ParentPlayer", b =>
-                {
-                    b.Property<string>("PlayerCode")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code");
-
-                    b.Property<string>("ParentPlayerCode")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("parent_player_code");
-
-                    b.HasKey("PlayerCode")
-                        .HasName("pk_player_code");
-
-                    b.ToTable("parent_players");
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4376,6 +4357,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_login_records_player_code");
 
                     b.ToTable("player_login_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerParent", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_code");
+
+                    b.ToTable("player_parents");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerRebate", b =>

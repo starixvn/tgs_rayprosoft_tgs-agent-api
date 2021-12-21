@@ -4,14 +4,14 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class ParentPlayerMap : IEntityTypeConfiguration<ParentPlayer>
+    internal class PlayerParentMap : IEntityTypeConfiguration<PlayerParent>
     {
-        void IEntityTypeConfiguration<ParentPlayer>.Configure(EntityTypeBuilder<ParentPlayer> builder)
+        void IEntityTypeConfiguration<PlayerParent>.Configure(EntityTypeBuilder<PlayerParent> builder)
         {
-            builder.ToTable("parent_players");
+            builder.ToTable("player_parents");
 
             builder.HasKey(bc => bc.PlayerCode)
-                .HasName("pk_player_code");
+                .HasName("pk_player_parent_code");
 
             builder.Property(c => c.PlayerCode)
                 .HasMaxLength(16)

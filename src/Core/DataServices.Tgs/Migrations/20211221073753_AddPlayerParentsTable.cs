@@ -2,12 +2,12 @@
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class AddParentPlayerCodeTable : Migration
+    public partial class AddPlayerParentsTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "parent_players",
+                name: "player_parents",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -16,14 +16,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_player_code", x => x.player_code);
+                    table.PrimaryKey("pk_player_parent_code", x => x.player_code);
                 });
+
+            migrationBuilder.CreateIndex("ix_parent_player_code", "player_parents", "parent_player_code","dbo");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "parent_players",
+                name: "player_parents",
                 schema: "dbo");
         }
     }
