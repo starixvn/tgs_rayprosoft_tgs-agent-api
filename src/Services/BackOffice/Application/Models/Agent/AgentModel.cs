@@ -32,6 +32,7 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public string Wechat { get; set; }
         public string Remarks { get; set; }
         public int TeamNumber { get; set; }
+        public int PlayerNumber { get; set; }
         public AgentBankModel[] Banks { get; set; }
         public int TotalCount { get; set; }
         public AgentDividendConditionModel[] AgentDividendConditions { get; set; }
