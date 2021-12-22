@@ -57,7 +57,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             if (status is Status.Active or Status.Maintenance)
             {
                 var reseller = _repository.Resellers.AsQueryable().Where(x => x.Id == licensee.ResellerId).First();
-                var brands = _repository.Brands.AsQueryable().Where(x => x.LicenseeId == licensee.Id && x.Status == Status.Active);
+                var brands = _repository.Brands.AsQueryable().Where(x => x.LicenseeId == licensee.Id && x.Status == BrandStatus.Active);
                 var isMaintenance = reseller.Status is Status.Active && status is Status.Active;
                 if (isMaintenance)
                 {

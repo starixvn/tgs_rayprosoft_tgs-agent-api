@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
 
         public string Code { get; set; }
 
-        public Status Status { get; set; }
+        public BrandStatus Status { get; set; }
 
         public AgentDividendType AgentDividendType { get; set; }
 

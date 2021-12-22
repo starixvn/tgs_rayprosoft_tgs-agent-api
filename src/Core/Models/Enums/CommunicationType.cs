@@ -8,6 +8,7 @@
         KakaoTalk,
         Line,
         Skype,
-        Viber
+        Viber,
+        Zalo
     }
 }

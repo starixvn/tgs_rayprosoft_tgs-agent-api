@@ -63,6 +63,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 SerialNumber = index + 1,
                 UserName = row.UserName,
                 Id = row.Id.ToString(),
+                OrderNo = row.OrderNo,
                 ThirdPartyOrderNo = row.ThirdPartyOrderNo,
                 PaymentMethod = resource.GetString(resultPaymentMethods[row.PaymentMethodId].Name),
                 PaymentName = row.ChannelName,

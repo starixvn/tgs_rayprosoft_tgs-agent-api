@@ -7,13 +7,13 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
 {
     public class UpdateBrandStatusRequest : BaseRequest, IRequest<MessageResponse>
     {
-        public UpdateBrandStatusRequest(Guid brandId, Status status)
+        public UpdateBrandStatusRequest(Guid brandId, BrandStatus status)
         {
             BrandId = brandId;
             Status = status;
         }
 
         public Guid BrandId { get; set; }
-        public Status Status { get; set; }
+        public BrandStatus Status { get; set; }
     }
 }

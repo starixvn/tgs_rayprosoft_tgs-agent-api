@@ -4,11 +4,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandCommunication;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.BrandCommunication;
 using TGS.Services.BackOffice.Application.Queries.BrandCommunication;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
@@ -16,6 +17,39 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     [ApiController]
     public class BrandCommunicationController : BaseContextController
     {
+        [HttpPost]
+        [Description("Create a brand communication")]
+        public async Task<MessageResponse> CreateBrandCommunicationAsync(
+            [FromServices] ICommandService<CreateBrandCommunicationCommand> createService,
+            [FromBody] CreateBrandCommunicationRequest request)
+        {
+            var command = new CreateBrandCommunicationCommand()
+            {
+                BrandId = request.BrandId,
+                CommunicationType = Enum.TryParse<CommunicationType>(request.Type, out var result)
+                    ? result.ToString()
+                    : request.Type,
+                Phone = request.Phone,
+                AppId = request.AppId,
+                QRCodeUrl = request.QRCodeUrl
+            };
+            await createService.ExecuteAsync(command).ConfigureAwait(false);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpDelete("{id}")]
+        [Description("Delete a brand communication")]
+        public async Task<MessageResponse> DeleteAsync(
+            Guid id,
+            [FromServices] ICommandService<DeleteBrandCommunicationCommand> deleteService)
+        {
+            var command = new DeleteBrandCommunicationCommand(id);
+            await deleteService.ExecuteAsync(command).ConfigureAwait(false);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
         [HttpGet("{brandId}")]
         [Description("Get a brand's communications")]
         public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
@@ -36,53 +70,24 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
                 });
         }
 
-        [HttpPost]
-        [Description("Create a brand communication")]
-        public async Task<MessageResponse> CreateBrandCommunicationAsync(
-            [FromServices] ICommandService<CreateBrandCommunicationCommand> createService,
-            [FromBody] CreateBrandCommunicationRequest request)
-        {
-            var command = new CreateBrandCommunicationCommand()
-            {
-                BrandId = request.BrandId,
-                CommunicationType = request.Type.ToString(),
-                Phone = request.Phone,
-                AppId = request.AppId,
-                QRCodeUrl = request.QRCodeUrl
-            };
-            await createService.ExecuteAsync(command).ConfigureAwait(false);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
         [HttpPut("{id}")]
         [Description("Update a brand communication")]
         public async Task<MessageResponse> UpdateBrandCommAsync(
+            [FromServices] ICommandService<UpdateBrandCommunicationCommand> updateService,
             Guid id,
-            [FromBody] UpdateBrandCommunicationRequest request,
-            [FromServices] ICommandService<UpdateBrandCommunicationCommand> updateService)
+            [FromBody] UpdateBrandCommunicationRequest request)
         {
             var command = new UpdateBrandCommunicationCommand()
             {
                 Id = id,
-                CommunicationType = request.Type.ToString(),
+                CommunicationType = Enum.TryParse<CommunicationType>(request.Type, out var result)
+                    ? result.ToString()
+                    : request.Type,
                 Phone = request.Phone,
                 AppdId = request.AppId,
                 QRCodeUrl = request.QRCodeUrl
             };
             await updateService.ExecuteAsync(command).ConfigureAwait(false);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpDelete("{id}")]
-        [Description("Delete a brand communication")]
-        public async Task<MessageResponse> DeleteAsync(
-            Guid id,
-            [FromServices] ICommandService<DeleteBrandCommunicationCommand> deleteService)
-        {
-            var command = new DeleteBrandCommunicationCommand(id);
-            await deleteService.ExecuteAsync(command).ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
         }

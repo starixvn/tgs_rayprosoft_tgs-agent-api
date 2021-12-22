@@ -16,7 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Prometheus;
-using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
@@ -82,8 +81,6 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services
                 .AddRedis((options, sp) =>
                 {
@@ -91,7 +88,6 @@ namespace TGS.Apis.BackendOffice
 
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
-
 
             services
                 .AddBackendOfficeServices(_configuration)
@@ -106,7 +102,8 @@ namespace TGS.Apis.BackendOffice
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject");
                 })
                 .AddNatsGlobPatternExchange("*");
 

@@ -7,15 +7,8 @@ namespace TGS.Core.Models
 {
     public static class Consts
     {
-        public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
-
-        public static readonly GameType[] Sports =
-        {
-            GameType.Sportsbook,
-            GameType.VirtualSports,
-            GameType.ESports
-        };
+        public const string DefaultCultureCode = "en-US";
 
         public static readonly GamePlatformType[] AllGamePlatformTypes =
         {
@@ -32,9 +25,10 @@ namespace TGS.Core.Models
                 {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
             };
 
-        public static GameType[] SportsGroup =
-        {
+        public static readonly GameType[] Sports =
+                        {
             GameType.Sportsbook,
+            GameType.VirtualSports,
             GameType.ESports
         };
 
@@ -46,30 +40,11 @@ namespace TGS.Core.Models
             GameType.TableGame
         };
 
-        public static class CachePrefix
-        {
-            public const string GameProviderToTgsMap = "GameProviderToTgsMap";
-            public const string TgsToGameProviderMap = "TgsToGameProviderMap";
-            public const string BrandToTgsMap = "BrandToTgsMap";
-            public const string TgsToBrandMap = "TgsToBrandMap";
-        }
-
-        public static class Nats
-        {
-            public const string NatsTgsLogQueueName = "TgsLogQueue";
-        }
-
-        public static class Db
-        {
-            public const string MigrationsHistoryTable = "__migrations_history";
-            public const string Schema = "dbo";
-        }
-
-        public static class TokenExpireSeconds
-        {
-            public const int PlayerLogin = 3600 * 12; // 12 hours
-            public const int Jwt = 60 * 60;           // 1 hours
-        }
+        public static GameType[] SportsGroup =
+                {
+            GameType.Sportsbook,
+            GameType.ESports
+        };
 
         public static class AgentTokenExpireSeconds
         {
@@ -77,30 +52,47 @@ namespace TGS.Core.Models
             public const int Jwt = 60 * 60;          // 1 hours
         }
 
-        public static class GameProvider
+        public static class BackendOffice
         {
-            public const string RedTiger = "RT";
-            public const string SBOBET = "SBO";
-            public const string Habanero = "HABA";
-            public const string PragmaticPlay = "PP";
-            public const string KY = "KY";
-            public const string JDB = "JDB";
-            public const string AsiaGaming = "AG";
-            public const string Saba = "SABA";
-            public const string VR = "VR";
-            public const string IMESports = "IMES";
-            public const string BigGaming = "BG";
-            public const string SexyGaming = "SG";
-            public const string Skywind = "SW";
-            public const string AllBet = "AB";
-            public const string Evolution = "EVO";
-            public const string WGSports = "WGFM";
-            public const string WGHorse = "WGVIA";
-            public const string WMCasino = "WM";
-            public const string TCG = "TCG";
-            public const string Card365 = "365";
-            public const string LY = "LY";
-            public const string BetConstruct = "BC";
+            public const string CsrfTokenName = "X-CSRF-TOKEN";
+
+            public static class UserInfo
+            {
+                public static string BrandKey = "Brand";
+                public static string LicenseeKey = "Licensee";
+                public static string PortalKey = "Portal";
+                public static string ResellerKey = "Reseller";
+                public static string RolenameKey = "Rolename";
+                public static string RoleTypeKey = "RoleType";
+                public static string UserIdKey = "UserId";
+                public static string UsernameKey = "Username";
+            }
+        }
+
+        public static class CachePrefix
+        {
+            public const string BrandToTgsMap = "BrandToTgsMap";
+            public const string GameProviderToTgsMap = "GameProviderToTgsMap";
+            public const string TgsToBrandMap = "TgsToBrandMap";
+            public const string TgsToGameProviderMap = "TgsToGameProviderMap";
+        }
+
+        public static class ContextItems
+        {
+            public static readonly string AgentToken = "agentToken";
+            public static readonly string BrandId = "brandId";
+            public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
+            public static readonly string GameProviderId = "gameProviderId";
+            public static readonly string PlatformType = "platformType";
+            public static readonly string PlayerCode = "playerCode";
+            public static readonly string PlayerToken = "playerToken";
+            public static readonly string RequestType = "requestType";
+        }
+
+        public static class Db
+        {
+            public const string MigrationsHistoryTable = "__migrations_history";
+            public const string Schema = "dbo";
         }
 
         public static class EnvironmentVariable
@@ -110,51 +102,68 @@ namespace TGS.Core.Models
             public const string GameProviderName = "GameProviderName";
         }
 
-        public static class ContextItems
+        public static class GameProvider
         {
-            public static readonly string BrandId = "brandId";
-            public static readonly string GameProviderId = "gameProviderId";
-            public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
-            public static readonly string PlatformType = "platformType";
-            public static readonly string AgentToken = "agentToken";
-            public static readonly string PlayerToken = "playerToken";
-            public static readonly string PlayerCode = "playerCode";
-            public static readonly string RequestType = "requestType";
+            public const string AllBet = "AB";
+            public const string AsiaGaming = "AG";
+            public const string Avia = "AVIA";
+            public const string BetConstruct = "BC";
+            public const string BigGaming = "BG";
+            public const string Card365 = "365";
+            public const string Evolution = "EVO";
+            public const string Habanero = "HABA";
+            public const string IMESports = "IMES";
+            public const string JDB = "JDB";
+            public const string Jili = "JILI";
+            public const string KY = "KY";
+            public const string LY = "LY";
+            public const string PragmaticPlay = "PP";
+            public const string Saba = "SABA";
+            public const string SBOBET = "SBO";
+            public const string SexyGaming = "SG";
+            public const string Skywind = "SW";
+            public const string TCG = "TCG";
+            public const string VR = "VR";
+            public const string WGHorse = "WGVIA";
+            public const string WGSports = "WGFM";
+            public const string WMCasino = "WM";
         }
 
         public static class LocalizationContext
         {
-            public const string GameProviderName = "GameProvider.Name";
-            public const string GameProviderDescription = "GameProvider.Description";
-            public const string GameName = "Game.Name";
             public const string GameDescription = "Game.Description";
+            public const string GameName = "Game.Name";
+            public const string GameProviderDescription = "GameProvider.Description";
+            public const string GameProviderName = "GameProvider.Name";
         }
 
-        public static class BackendOffice
+        public static class Nats
         {
-            public const string CsrfTokenName = "X-CSRF-TOKEN";
+            public const string NatsTgsLogQueueName = "TgsLogQueue";
+        }
 
-            public static class UserInfo
-            {
-                public static string UserIdKey = "UserId";
-                public static string UsernameKey = "Username";
-                public static string RolenameKey = "Rolename";
-                public static string RoleTypeKey = "RoleType";
-                public static string ResellerKey = "Reseller";
-                public static string LicenseeKey = "Licensee";
-                public static string BrandKey = "Brand";
-                public static string PortalKey = "Portal";
-            }
+        public static class PromotionGroupType
+        {
+            public const string Deposit = "Deposit";
+            public const string ReliefMoney = "ReliefMoney";
+            public const string Turnover = "Turnover";
+        }
+
+        public static class TokenExpireSeconds
+        {
+            public const int Jwt = 60 * 60;
+            public const int PlayerLogin = 3600 * 12; // 12 hours
+                                                      // 1 hours
         }
 
         public static class UploadFile
         {
-            public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
-            public const string StationLetter = "stationLetter";
-            public const string Promotion = "promotion";
-            public const string MessengerQRCode = "messengerQRCode";
             public const string Banner = "banner";
+            public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
+            public const string MessengerQRCode = "messengerQRCode";
             public const string Payment = "payment";
+            public const string Promotion = "promotion";
+            public const string StationLetter = "stationLetter";
 
             public static readonly string[] Types =
             {
@@ -164,13 +173,6 @@ namespace TGS.Core.Models
                 Banner,
                 Payment
             };
-        }
-
-        public static class PromotionGroupType
-        {
-            public const string Deposit = "Deposit";
-            public const string Turnover = "Turnover";
-            public const string ReliefMoney = "ReliefMoney";
         }
     }
 }

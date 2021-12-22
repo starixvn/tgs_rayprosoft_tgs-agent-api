@@ -16,6 +16,37 @@ namespace TGS.Tests.BackendOffice.UnitTests
     public class BrandCommunicationTests
     {
         [Test]
+        public async Task Create_Brand_Communication_Should_Success()
+        {
+            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandCommunication>>();
+
+            var sut = new CreateBrandCommunicationCommandService(fakeTgsCommand);
+
+            var command = new CreateBrandCommunicationCommand();
+            await sut.ExecuteAsync(command);
+
+            _ = fakeTgsCommand
+                .Received(1)
+                .CreateAsync(Arg.Any<CoreModels.BrandCommunication>());
+        }
+
+        [Test]
+        public async Task Delete_Brand_Communication_Should_Success()
+        {
+            var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandCommunication>>();
+            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandCommunication>>();
+
+            var sut = new DeleteBrandCommunicationCommandService(fakeTgsQueries, fakeTgsCommand);
+
+            var command = new DeleteBrandCommunicationCommand(Guid.NewGuid());
+            await sut.ExecuteAsync(command);
+
+            _ = fakeTgsCommand
+                .Received(1)
+                .DeleteAsync(Arg.Any<CoreModels.BrandCommunication>());
+        }
+
+        [Test]
         public async Task Get_Brand_Communications_Should_Success()
         {
             var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandCommunication>>();
@@ -33,18 +64,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
-        public async Task Create_Brand_Communication_Should_Success()
+        public void String_To_CommunicationType_If_Not_Match_Parse_Fail()
         {
-            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandCommunication>>();
+            var text = "AAAA";
 
-            var sut = new CreateBrandCommunicationCommandService(fakeTgsCommand);
+            var actual = Enum.TryParse(typeof(CommunicationType), text, out var result);
 
-            var command = new CreateBrandCommunicationCommand();
-            await sut.ExecuteAsync(command);
-
-            _ = fakeTgsCommand
-                .Received(1)
-                .CreateAsync(Arg.Any<CoreModels.BrandCommunication>());
+            Assert.IsFalse(actual);
         }
 
         [Test]
@@ -73,22 +99,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
             _ = fakeTgsCommand
                 .Received(1)
                 .UpdateAsync(Arg.Any<CoreModels.BrandCommunication>());
-        }
-
-        [Test]
-        public async Task Delete_Brand_Communication_Should_Success()
-        {
-            var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandCommunication>>();
-            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandCommunication>>();
-
-            var sut = new DeleteBrandCommunicationCommandService(fakeTgsQueries, fakeTgsCommand);
-
-            var command = new DeleteBrandCommunicationCommand(Guid.NewGuid());
-            await sut.ExecuteAsync(command);
-
-            _ = fakeTgsCommand
-                .Received(1)
-                .DeleteAsync(Arg.Any<CoreModels.BrandCommunication>());
         }
     }
 }

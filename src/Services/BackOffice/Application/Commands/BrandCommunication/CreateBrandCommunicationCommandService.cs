@@ -30,6 +30,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandCommunication
                 AppId = command.AppId,
                 QRCodeUrl = command.QRCodeUrl
             };
+
             await _commands.CreateAsync(brandCommunication);
         }
     }

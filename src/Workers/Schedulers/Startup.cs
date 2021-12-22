@@ -15,7 +15,8 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Operations.Extensions;
-using TGS.Shared.Game.ApiClients.Extensions;
+using TGS.Workers.Schedulers.Hangfire;
+using TGS.Workers.Schedulers.Hangfire.Filters;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
@@ -25,8 +26,6 @@ using TGS.Workers.Schedulers.Jobs.Reports;
 using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
 using GlobalConsts = TGS.Core.Models.Consts;
-using TGS.Workers.Schedulers.Hangfire.Filters;
-using TGS.Workers.Schedulers.Hangfire;
 
 namespace TGS.Workers.Schedulers
 {

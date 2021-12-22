@@ -51,11 +51,11 @@ namespace TGS.Services.Operator.Services.Player
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
-        public async ValueTask<LoginInfo> GetAsync(LoginCommand query, CancellationToken cancellationToken = default)
+        public async ValueTask<LoginInfo> GetAsync(LoginCommand command, CancellationToken cancellationToken = default)
         {
-            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
+            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(command.BrandId, ValidStatus.Default);
 
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName);
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(command.BrandId, command.UserName);
 
             if (playerCode.IsNullOrEmpty())
             {
@@ -64,7 +64,7 @@ namespace TGS.Services.Operator.Services.Player
 
             var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
 
-            if (!_passwordHandler.Verify(password, salt, query.Password))
+            if (!_passwordHandler.Verify(password, salt, command.Password))
             {
                 throw new InvalidCredentialsException("");
             }
@@ -72,21 +72,21 @@ namespace TGS.Services.Operator.Services.Player
             _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
 
             var createdOn = DateTimeOffset.UtcNow;
-            var ipAddress = query.IpAddress;
+            var ipAddress = command.IpAddress;
 
             var record = await _playerOperations.PlayerLoginAsync(new()
             {
-                BrandId = query.BrandId,
-                Username = query.UserName,
+                BrandId = command.BrandId,
+                Username = command.UserName,
                 PlayerCode = playerCode,
-                PlatformType = query.PlatformType,
+                PlatformType = command.PlatformType,
                 IpAddress = ipAddress,
                 CreatedOn = createdOn,
                 ExpiredOn = createdOn.AddSeconds(Consts.TokenExpireSeconds.PlayerLogin)
             });
 
             var token = await GeneratePlayerJwtTokenAsync(
-                query.BrandId,
+                command.BrandId,
                 new PlayerTokenData
                 {
                     PlayerCode = playerCode,
@@ -94,9 +94,9 @@ namespace TGS.Services.Operator.Services.Player
                     PlatformType = record.PlatformType,
                     ExpiredOn = record.ExpiredOn
                 },
-                query.Site);
+                command.Site);
 
-            await _playerRepository.PlayerLoginIpAsync(playerCode, query.IpAddress);
+            await _playerRepository.PlayerLoginIpAsync(playerCode, command.IpAddress, command.HostName);
 
             return new LoginInfo
             {

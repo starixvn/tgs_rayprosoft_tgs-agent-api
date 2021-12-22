@@ -5,38 +5,40 @@ namespace TGS.Core.Models
 {
     public static class SettingConsts
     {
-        public const string Menus = "Menus";
-        public const string Vip = "Vip";
-        public const string SuperLicenseeCodes = "SuperLicenseeCodes";
-        public const string PromotionType = "PromotionTypes";
-        public const string CurrencyNetProfit = "CurrencyNetProfit";
         public const string ArrearsEmail = "ArrearsEmail";
+        public const string CurrencyNetProfit = "CurrencyNetProfit";
+        public const string Menus = "Menus";
+        public const string PromotionType = "PromotionTypes";
+        public const string SuperLicenseeCodes = "SuperLicenseeCodes";
+        public const string Vip = "Vip";
 
         public static class GameProviderConfigurations
         {
-            public static readonly string Template = "{0}Configuration";
+            public const string Template = "{0}Configuration";
 
-            public static readonly string SBOBET = string.Format(Template, Consts.GameProvider.SBOBET);
-            public static readonly string Habanero = string.Format(Template, Consts.GameProvider.Habanero);
-            public static readonly string PragmaticPlay = string.Format(Template, Consts.GameProvider.PragmaticPlay);
+            public static readonly string AllBet = string.Format(Template, Consts.GameProvider.AllBet);
             public static readonly string AsiaGaming = string.Format(Template, Consts.GameProvider.AsiaGaming);
-            public static readonly string JDB = string.Format(Template, Consts.GameProvider.JDB);
-            public static readonly string Saba = string.Format(Template, Consts.GameProvider.Saba);
-            public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
-            public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
-            public static readonly string IMESports = string.Format(Template, Consts.GameProvider.IMESports);
+            public static readonly string Avia = string.Format(Template, Consts.GameProvider.Avia);
+            public static readonly string BetConstruct = string.Format(Template, Consts.GameProvider.BetConstruct);
             public static readonly string BigGaming = string.Format(Template, Consts.GameProvider.BigGaming);
+            public static readonly string Card365 = string.Format(Template, Consts.GameProvider.Card365);
+            public static readonly string Evolution = string.Format(Template, Consts.GameProvider.Evolution);
+            public static readonly string Habanero = string.Format(Template, Consts.GameProvider.Habanero);
+            public static readonly string IMESports = string.Format(Template, Consts.GameProvider.IMESports);
+            public static readonly string JDB = string.Format(Template, Consts.GameProvider.JDB);
+            public static readonly string Jili = string.Format(Template, Consts.GameProvider.Jili);
+            public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
+            public static readonly string LY = string.Format(Template, Consts.GameProvider.LY);
+            public static readonly string PragmaticPlay = string.Format(Template, Consts.GameProvider.PragmaticPlay);
+            public static readonly string Saba = string.Format(Template, Consts.GameProvider.Saba);
+            public static readonly string SBOBET = string.Format(Template, Consts.GameProvider.SBOBET);
             public static readonly string SexyGaming = string.Format(Template, Consts.GameProvider.SexyGaming);
             public static readonly string Skywind = string.Format(Template, Consts.GameProvider.Skywind);
-            public static readonly string AllBet = string.Format(Template, Consts.GameProvider.AllBet);
-            public static readonly string Evolution = string.Format(Template, Consts.GameProvider.Evolution);
-            public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
-            public static readonly string WGHorse = string.Format(Template, Consts.GameProvider.WGHorse);
-            public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
             public static readonly string TCG = string.Format(Template, Consts.GameProvider.TCG);
-            public static readonly string Card365 = string.Format(Template, Consts.GameProvider.Card365);
-            public static readonly string LY = string.Format(Template, Consts.GameProvider.LY);
-            public static readonly string BetConstruct = string.Format(Template, Consts.GameProvider.BetConstruct);
+            public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
+            public static readonly string WGHorse = string.Format(Template, Consts.GameProvider.WGHorse);
+            public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
+            public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
         }
     }
 }

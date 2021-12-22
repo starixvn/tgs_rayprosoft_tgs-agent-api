@@ -123,7 +123,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"brand has status set to ""(.*)""")]
-        public Task GivenBrandHasStatusSetToAsync(Status status)
+        public Task GivenBrandHasStatusSetToAsync(BrandStatus status)
         {
             return ChangeBrandStatusAsync(_serviceProvider, status);
         }
@@ -837,7 +837,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         [After]
         public Task AfterChangeBrandStatusScenarioAsync()
         {
-            return ChangeBrandStatusAsync(_serviceProvider, Status.Active, true);
+            return ChangeBrandStatusAsync(_serviceProvider, BrandStatus.Active, true);
         }
 
         [After]

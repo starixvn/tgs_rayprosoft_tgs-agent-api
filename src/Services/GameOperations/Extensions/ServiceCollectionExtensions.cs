@@ -24,6 +24,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IGamePlayActions, GamePlayActions>();
             services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
 
+            services.AddScoped<IGameAccessor, GameAccessor>();
+
             services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
             services.AddSingleton<IRoundStatusManager, RoundStatusManager>();

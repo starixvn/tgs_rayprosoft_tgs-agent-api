@@ -3,16 +3,13 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal interface IReseller
         {
-            Guid Id { get; }
-            string Code { get; }
-            string Name { get; }
-            string OperationalEmail { get; }
             BusinessType BusinessType { get; }
-            ILicensee[] Licensees { get; }
+
+            string Code { get; }
 
             ICurrency[] Currencies => new ICurrency[]
             {
@@ -29,16 +26,24 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new JPYCurrency()
             };
 
+            string[] GameProviders => Array.Empty<string>();
+
+            Guid Id { get; }
+
             ILanguage[] Languages => new ILanguage[]
             {
-                new CNLanguage(), 
-                new USLanguage(), 
+                new CNLanguage(),
+                new USLanguage(),
                 new IDLanguage(),
-                new VNLanguage(), 
+                new VNLanguage(),
                 new THLanguage()
             };
 
-            string[] GameProviders => Array.Empty<string>();
+            ILicensee[] Licensees { get; }
+
+            string Name { get; }
+
+            string OperationalEmail { get; }
         }
 
         internal record TgsReseller : IReseller
