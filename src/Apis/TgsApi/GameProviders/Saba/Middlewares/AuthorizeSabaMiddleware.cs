@@ -12,7 +12,8 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Saba.Incoming;
 
@@ -24,6 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         private readonly IRedisCacheManager _cacheManger;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
 
         private readonly IReadOnlyDictionary<Type, Func<string, bool, ValueTask<(string, string, PlatformType)>>>
@@ -39,7 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
             IRedisCacheManager cacheManger,
-            ISabaServices services)
+            ISabaServices services,
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _json = json;
             _gameProviderOperations = gameProviderOperations;
@@ -48,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             _settingOperations = settingOperations;
             _cacheManger = cacheManger;
             _services = services;
-
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
             _resolver = new Dictionary<Type, Func<string, bool, ValueTask<(string, string, PlatformType)>>>
             {
                 {typeof(GetBalanceRequest), ResolveGetBalanceRequestAsync},
@@ -106,47 +109,36 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             await next(context);
         }
 
-        private ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
-            ResolveGetBalanceRequestAsync(string value, bool isTestEnv)
+        private async ValueTask CachedLoginRecordAsync(string playerCode, PlayerLoginRecordModel loginRecord)
         {
-            var r = _json.DeserializeFromString<GetBalanceRequest>(value);
-            var playerCode = _services.GetPlayerCode(r.Body.UserId, isTestEnv);
-
-            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+            var expiresOn = loginRecord.ExpiredOn - DateTimeOffset.Now;
+            await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
         }
 
-        private async ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
-            ResolvePlaceBetRequestAsync(string value, bool isTestEnv)
+        private async Task<PlayerLoginRecordModel> DecryptTokenAsync(string token)
         {
-            var r = _json.DeserializeFromString<PlaceBetRequest>(value);
-            var loginRecord = await DecryptTokenAsync(r.Body.Token);
-            var playerCode = loginRecord.PlayerCode;
+            if (token.IsNullOrEmpty())
+            {
+                throw new MissingTokenException("empty token");
+            }
 
-            await CachedLoginRecordAsync(playerCode, loginRecord);
+            var loginRecordId = Guid.Parse(token);
+            var loginRecord = await _playerLoginRecordService.GetAsync(loginRecordId);
 
-            return (r.Key, playerCode, loginRecord.PlatformType);
+            if (loginRecord == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+
+            return loginRecord;
         }
 
-        private async ValueTask<(string, string, PlatformType)> ResolvePlaceBetParlayRequestAsync(string value,
-            bool isTestEnv)
+        private async ValueTask<PlatformType> GetPlatformTypeFromCachedLoginRecordAsync(string playerCode)
         {
-            var r = _json.DeserializeFromString<PlaceBetParlayRequest>(value);
-            var loginRecord = await DecryptTokenAsync(r.Body.Token);
-            var playerCode = loginRecord.PlayerCode;
+            var loginRecord = await _cacheManger.SafeGetAsync(SabaConsts.RedisKey.Token,
+                playerCode, () => Task.FromResult((PlayerLoginRecordModel)null));
 
-            await CachedLoginRecordAsync(playerCode, loginRecord);
-
-            return (r.Key, playerCode, loginRecord.PlatformType);
-        }
-
-        private async ValueTask<(string, string, PlatformType)> ResolveConfirmBetRequestAsync(string value,
-            bool isTestEnv)
-        {
-            var r = _json.DeserializeFromString<ConfirmBetRequest>(value);
-            var playerCode = _services.GetPlayerCode(r.Body.UserId, isTestEnv);
-
-            var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);
-            return (r.Key, playerCode, platformType);
+            return loginRecord?.PlatformType ?? PlatformType.Desktop;
         }
 
         private async ValueTask<(string, string, PlatformType)> ResolveCancelBetRequestAsync(string value,
@@ -169,6 +161,59 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             return (r.Key, playerCode, platformType);
         }
 
+        private async ValueTask<(string, string, PlatformType)> ResolveConfirmBetRequestAsync(string value,
+            bool isTestEnv)
+        {
+            var r = _json.DeserializeFromString<ConfirmBetRequest>(value);
+            var playerCode = _services.GetPlayerCode(r.Body.UserId, isTestEnv);
+
+            var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);
+            return (r.Key, playerCode, platformType);
+        }
+
+        private ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
+                                                            ResolveGetBalanceRequestAsync(string value, bool isTestEnv)
+        {
+            var r = _json.DeserializeFromString<GetBalanceRequest>(value);
+            var playerCode = _services.GetPlayerCode(r.Body.UserId, isTestEnv);
+
+            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+        }
+
+        private async ValueTask<(string, string, PlatformType)> ResolvePlaceBetParlayRequestAsync(string value,
+            bool isTestEnv)
+        {
+            var r = _json.DeserializeFromString<PlaceBetParlayRequest>(value);
+            var loginRecord = await DecryptTokenAsync(r.Body.Token);
+            var playerCode = loginRecord.PlayerCode;
+
+            await CachedLoginRecordAsync(playerCode, loginRecord);
+
+            return (r.Key, playerCode, loginRecord.PlatformType);
+        }
+
+        private async ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
+                    ResolvePlaceBetRequestAsync(string value, bool isTestEnv)
+        {
+            var r = _json.DeserializeFromString<PlaceBetRequest>(value);
+            var loginRecord = await DecryptTokenAsync(r.Body.Token);
+            var playerCode = loginRecord.PlayerCode;
+
+            await CachedLoginRecordAsync(playerCode, loginRecord);
+
+            return (r.Key, playerCode, loginRecord.PlatformType);
+        }
+
+        private ValueTask<(string, string, PlatformType)> ResolveResettleBetRequestAsync(string value, bool isTestEnv)
+        {
+            var r = _json.DeserializeFromString<ResettleBetRequest>(value);
+
+            // as resettle bet might have multiple players, get the first for finding the game provider configuration
+            var playerCode = _services.GetPlayerCode(r.Body.Transactions.FirstOrDefault()?.UserId, isTestEnv);
+
+            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+        }
+
         private ValueTask<(string, string, PlatformType)> ResolveSettleBetRequestAsync(string value, bool isTestEnv)
         {
             var r = _json.DeserializeFromString<SettleBetRequest>(value);
@@ -187,48 +232,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var playerCode = _services.GetPlayerCode(r.Body.Transactions.FirstOrDefault()?.UserId, isTestEnv);
 
             return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
-        }
-
-        private ValueTask<(string, string, PlatformType)> ResolveResettleBetRequestAsync(string value, bool isTestEnv)
-        {
-            var r = _json.DeserializeFromString<ResettleBetRequest>(value);
-
-            // as resettle bet might have multiple players, get the first for finding the game provider configuration
-            var playerCode = _services.GetPlayerCode(r.Body.Transactions.FirstOrDefault()?.UserId, isTestEnv);
-
-            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
-        }
-
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
-        {
-            if (token.IsNullOrEmpty())
-            {
-                throw new MissingTokenException("empty token");
-            }
-
-            var loginRecordId = Guid.Parse(token);
-            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
-
-            if (loginRecord == null)
-            {
-                throw new PlayerLoginExpiredException();
-            }
-
-            return loginRecord;
-        }
-
-        private async ValueTask<PlatformType> GetPlatformTypeFromCachedLoginRecordAsync(string playerCode)
-        {
-            var loginRecord = await _cacheManger.SafeGetAsync(SabaConsts.RedisKey.Token,
-                playerCode, () => Task.FromResult((CachedPlayerLoginRecord)null));
-
-            return loginRecord?.PlatformType ?? PlatformType.Desktop;
-        }
-
-        private async ValueTask CachedLoginRecordAsync(string playerCode, CachedPlayerLoginRecord loginRecord)
-        {
-            var expiresOn = loginRecord.ExpiredOn - DateTimeOffset.Now;
-            await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
         }
     }
 }

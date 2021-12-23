@@ -8,7 +8,8 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.AsiaGaming.Enums;
 
@@ -18,6 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -25,12 +27,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            ISettingOperations settingOperations)
+            ISettingOperations settingOperations,
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _settingOperations = settingOperations;
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -65,7 +69,29 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             await next(context);
         }
 
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string tokenId, TransactionType transactionType)
+        private static IReadOnlyDictionary<string, string> GetElements(string xml)
+        {
+            var xDoc = XDocument.Parse(xml);
+
+            if (xDoc.Root != null && xDoc.Root.Elements().Any(e => e.Name.LocalName.Contains("betResponse")))
+            {
+                return xDoc.Root.Elements().Where(e => !e.Name.LocalName.Contains("record"))
+                    .ToDictionary(a => a.Name.LocalName, a => a.Value);
+            }
+
+            return xDoc.Root?.Elements().First(e => e.Name.LocalName.Contains("Record"))
+                    .Elements().Where(e => !e.Name.LocalName.Contains("transactionID"))
+                    .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
+                new Dictionary<string, string>();
+        }
+
+        private static string GetElementValue(IReadOnlyDictionary<string, string> elements, string name) =>
+            elements.TryGetValue(name, out var value) ? value : string.Empty;
+
+        private static string GetPlayerCode(string agentCode, string playerName) =>
+            playerName.IsNullOrEmpty() ? playerName : playerName.Replace(agentCode, "");
+
+        private async Task<PlayerLoginRecordModel> DecryptTokenAsync(string tokenId, TransactionType transactionType)
         {
             if (tokenId.IsNullOrEmpty())
             {
@@ -73,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             }
 
             var loginRecordId = Guid.Parse(tokenId);
-            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+            var loginRecord = await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
             var isPlaceBet = transactionType == TransactionType.BET;
 
             if (isPlaceBet && loginRecord == null)
@@ -108,27 +134,5 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             Enum.TryParse<TransactionType>(GetElementValue(elements, "transactionType"), true, out var transactionType);
             return transactionType;
         }
-
-        private static IReadOnlyDictionary<string, string> GetElements(string xml)
-        {
-            var xDoc = XDocument.Parse(xml);
-
-            if (xDoc.Root != null && xDoc.Root.Elements().Any(e => e.Name.LocalName.Contains("betResponse")))
-            {
-                return xDoc.Root.Elements().Where(e => !e.Name.LocalName.Contains("record"))
-                    .ToDictionary(a => a.Name.LocalName, a => a.Value);
-            }
-
-            return xDoc.Root?.Elements().First(e => e.Name.LocalName.Contains("Record"))
-                    .Elements().Where(e => !e.Name.LocalName.Contains("transactionID"))
-                    .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
-                new Dictionary<string, string>();
-        }
-
-        private static string GetElementValue(IReadOnlyDictionary<string, string> elements, string name) =>
-            elements.TryGetValue(name, out var value) ? value : string.Empty;
-
-        private static string GetPlayerCode(string agentCode, string playerName) =>
-            playerName.IsNullOrEmpty() ? playerName : playerName.Replace(agentCode, "");
     }
 }

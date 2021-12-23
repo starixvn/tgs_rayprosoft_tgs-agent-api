@@ -37,13 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                }
                );
 
-            services.AddGameProviderTCGFtpClientRepository((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
-
-                config.GetSection("TCGFtpApi").Bind(options);
-            });
-
             services.AddScoped<AuthorizeTCGMiddleware>();
             services.AddScoped<HandleTCGExceptionMiddleware>();
             services.AddScoped<DispatcherTCGMiddleware>();

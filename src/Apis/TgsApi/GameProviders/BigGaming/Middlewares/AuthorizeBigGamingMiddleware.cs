@@ -3,13 +3,14 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
@@ -22,6 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly IBigGamingService _service;
 
@@ -30,15 +32,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             IBrandOperations brandOperations,
             IHashProvider hashProvider,
             IBigGamingService service,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IJsonSerializationProvider jsonSerializationProvider,
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _service = service ?? throw new ArgumentNullException(nameof(service));
-
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -58,7 +60,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                     "open.operator.ping" => "/api/bg/ping",
                     _ => context.Request.Path.Value
                 };
-
             }
             */
             if (request.Method != null)
@@ -81,7 +82,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                         _jsonSerializationProvider.DeserializeFromString<BigGamingTransferRequest>(
                             _jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
                     "open.operator.ping" => new(true, default, null, default),
-                    _                    => new(false, default, null, default)
+                    _ => new(false, default, null, default)
                 };
 
                 var gameProviderId = await _service.GetGameProviderIdAsync();
@@ -118,8 +119,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 _hashProvider.Hash(
                     $"{request.Random}{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}",
                     HashAlgorithmKind.Md5));
-
-            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(request.LoginId)
+            var loginRecord = await _playerLoginRecordService.GetLastAsync(request.LoginId)
                 .ConfigureAwait(false);
 
             return new(true, player.BrandId, player.PlayerCode, loginRecord.PlatformType);
@@ -143,15 +143,36 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                     $"{request.Random}{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}",
                     HashAlgorithmKind.Md5));
 
-
-            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(request.LoginId)
+            var loginRecord = await _playerLoginRecordService.GetLastAsync(request.LoginId)
                 .ConfigureAwait(false);
 
             return new(true, player.BrandId, player.PlayerCode, loginRecord.PlatformType);
         }
 
         private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)>
-            CheckingSignSettleAsync(BigGamingSettleRequest request)
+            CheckingSignOrderStatusAsync(BigGamingOrderStatusRequest request)
+        {
+            var loginId = request.OrderMap.Last().LoginId;
+
+            var player = await _service.GetPlayerByCodeAsync(loginId);
+
+            if (player == null)
+            {
+                throw new MissingTokenException(request.Sign);
+            }
+
+            var brandMerchant =
+                await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+
+            _service.CheckingSign(request.Sign,
+                _hashProvider.Hash($"{request.Random}{brandMerchant.SecretCode}{brandMerchant.SecretKey}",
+                    HashAlgorithmKind.Md5));
+
+            return new(true, player.BrandId, player.PlayerCode, PlatformType.Desktop);
+        }
+
+        private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)>
+                    CheckingSignSettleAsync(BigGamingSettleRequest request)
         {
             var player = await _service.GetPlayerByCodeAsync(request.LoginId);
 
@@ -170,7 +191,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(player.PlayerCode);
 
-            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(player.PlayerCode);
+            var loginRecord = await _playerLoginRecordService.GetLastAsync(request.LoginId)
+                .ConfigureAwait(false);
 
             return new(true, brandId, player.PlayerCode, loginRecord.PlatformType);
         }
@@ -192,7 +214,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 {
                     throw new PlayerNotFoundException($"{request.LoginId}");
                 }
-
 
                 brandId = player.BrandId;
                 playerCode = player.PlayerCode;
@@ -218,32 +239,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 _hashProvider.Hash($"{request.Random}{request.Sn}{playerCode}{request.Amount}{brandMerchant.SecretKey}",
                     HashAlgorithmKind.Md5));
 
-            var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode);
+            var loginRecord = await _playerLoginRecordService.GetLastAsync(request.LoginId)
+                .ConfigureAwait(false);
 
             return new(true, brandId, playerCode, loginRecord.PlatformType);
-        }
-
-        private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)>
-            CheckingSignOrderStatusAsync(BigGamingOrderStatusRequest request)
-        {
-            var loginId = request.OrderMap.Last().LoginId;
-
-            var player = await _service.GetPlayerByCodeAsync(loginId);
-
-            if (player == null)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
-
-            var brandMerchant =
-                await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
-
-            _service.CheckingSign(request.Sign,
-                _hashProvider.Hash($"{request.Random}{brandMerchant.SecretCode}{brandMerchant.SecretKey}",
-                    HashAlgorithmKind.Md5));
-
-
-            return new(true, player.BrandId, player.PlayerCode, PlatformType.Desktop);
         }
     }
 }
