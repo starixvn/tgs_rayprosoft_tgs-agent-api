@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -28,7 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;

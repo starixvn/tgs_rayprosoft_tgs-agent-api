@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     {
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
 
@@ -65,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             ITokenProvider tokenProvider,
             IGameActionQueries gameActionQueries,
             ISettingOperations settingOperations,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations =
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));

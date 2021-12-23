@@ -5,7 +5,7 @@ using TGS.GameProviders.Repositories.Models;
 
 namespace TGS.Services.GameOperations
 {
-    public interface IPlayerLoginRecordService
+    public interface IRedisPlayerLoginRecordService
     {
         Task<PlayerLoginRecordModel> GetAsync(Guid loginRecordId);
 

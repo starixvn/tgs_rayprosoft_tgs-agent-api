@@ -44,14 +44,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IRoundQueries _roundQueries;
 
         public SBOBETServices(
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
             IRoundQueries roundQueries,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;

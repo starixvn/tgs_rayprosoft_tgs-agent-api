@@ -23,7 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly IBigGamingService _service;
 
@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             IHashProvider hashProvider,
             IBigGamingService service,
             IJsonSerializationProvider jsonSerializationProvider,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));

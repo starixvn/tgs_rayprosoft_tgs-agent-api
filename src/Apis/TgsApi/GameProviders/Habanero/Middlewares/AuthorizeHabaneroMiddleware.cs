@@ -22,7 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _json = json;
             _gameProviderOperations = gameProviderOperations;

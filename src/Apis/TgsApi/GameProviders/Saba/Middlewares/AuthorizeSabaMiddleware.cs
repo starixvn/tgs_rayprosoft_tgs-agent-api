@@ -25,7 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         private readonly IRedisCacheManager _cacheManger;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
 
         private readonly IReadOnlyDictionary<Type, Func<string, bool, ValueTask<(string, string, PlatformType)>>>
@@ -42,7 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             ISettingOperations settingOperations,
             IRedisCacheManager cacheManger,
             ISabaServices services,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _json = json;
             _gameProviderOperations = gameProviderOperations;

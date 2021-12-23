@@ -9,13 +9,13 @@ using TGS.GameProviders.Repositories.Models;
 
 namespace TGS.Services.GameOperations
 {
-    internal class PlayerLoginRecordService : IPlayerLoginRecordService
+    internal class RedisPlayerLoginRecordService : IRedisPlayerLoginRecordService
     {
         private readonly IDatabase _database;
         private readonly IPlayerLoginRecordRepository _playerLoginRecordRepository;
         private readonly string _redisKey = "GameProvider:PlayerLoginRecords:{0}";
 
-        public PlayerLoginRecordService(
+        public RedisPlayerLoginRecordService(
             IDatabase database,
             IPlayerLoginRecordRepository playerLoginRecordRepository
             )

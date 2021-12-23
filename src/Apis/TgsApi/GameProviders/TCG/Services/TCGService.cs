@@ -65,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly IRoundQueries _roundQueries;
         private readonly ISettingOperations _settingOperations;
@@ -79,7 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             IBrandOperations brandOperations,
             IGameActionQueries gameActionQueries,
             IRoundQueries roundQueries,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));

@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -30,7 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ITokenProvider tokenProvider,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
 

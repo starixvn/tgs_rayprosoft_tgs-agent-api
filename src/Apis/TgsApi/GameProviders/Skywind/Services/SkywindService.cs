@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             ISettingOperations settingOperations,
             IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
             IBrandOperations brandOperations,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations =
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));

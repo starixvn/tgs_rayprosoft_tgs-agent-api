@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPragmaticPlayHashProvider _hashProvider;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
             IPragmaticPlayHashProvider hashProvider,
-            IPlayerLoginRecordService playerLoginRecordService)
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;

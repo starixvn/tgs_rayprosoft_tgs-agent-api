@@ -49,7 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ILogger<SexyGamingServices> _logger;
-        private readonly IPlayerLoginRecordService _playerLoginRecordService;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ITokenProvider _tokenProvider;
 
@@ -62,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             ISexyGamingApiClient client,
             ILogger<SexyGamingServices> logger,
             IJsonSerializationProvider jsonSerializationProvider,
-            IPlayerLoginRecordService playerLoginRecordService
+            IRedisPlayerLoginRecordService playerLoginRecordService
         )
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
