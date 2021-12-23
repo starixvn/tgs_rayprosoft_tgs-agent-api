@@ -36,7 +36,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var player = await db.Players.AsQueryable()
-                .FirstOrDefaultAsync(p => p.Brand.Code == brandCode 
+                .FirstOrDefaultAsync(p => p.Brand.Code == brandCode
                     && p.Username.ToLower() == username.ToLower());
 
             var playerCode = string.Empty;
@@ -103,12 +103,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             if (player == null)
             {
-                var createResponse = await apiClient.CreatePlayerAsync(new()
+                var createResponse = await apiClient.CreatePlayerAsync(
+                    new()
                     {
-                        Username = username,
+                        UserName = username,
                         Password = password,
-                        ConfirmPassword = password,
-                        CurrencyCode = currencyCode,
                         IsTestPlayer = !username.StartsWith("RP", StringComparison.OrdinalIgnoreCase)
                     },
                     headers);
@@ -117,11 +116,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             var res = await apiClient.PlayerLoginAsync(new()
-                {
-                    Username = username,
-                    Password = password,
-                    PlatformType = platformType
-                },
+            {
+                Username = username,
+                Password = password,
+                PlatformType = platformType
+            },
                 headers);
 
             var handler = serviceProvider.GetRequiredService<IJwtTokenHandler>();

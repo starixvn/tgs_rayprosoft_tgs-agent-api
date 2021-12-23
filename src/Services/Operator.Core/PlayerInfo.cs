@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
@@ -10,5 +11,6 @@ namespace TGS.Services.Operator
         bool PhoneAuthentication,
         string? Phone,
         string? AreaCode,
-        Guid? VipLevel);
+        Guid? VipLevel,
+        PlayerStatus Status);
 }

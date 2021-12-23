@@ -12,7 +12,7 @@ namespace TGS.Core.DataServices.Base.DataInitializers
 
         Task IDataInitializer.SetInitialDataAsync() => SetInitialDataAsync();
 
-        protected abstract Task SetInitialDataAsync();
+        public abstract Task SetInitialDataAsync();
 
         protected static async Task LogSeedingTimeAsync(Func<Task> getFunc,
             StringBuilder builder)

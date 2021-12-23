@@ -113,7 +113,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
         }
 
-        protected override async Task SetInitialDataAsync()
+        public override async Task SetInitialDataAsync()
         {
             if (_repository.Currencies.Any())
             {

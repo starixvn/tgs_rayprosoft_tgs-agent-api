@@ -53,7 +53,9 @@ namespace TGS.Services.Operator.Services.BrandPayments
                 .ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
                 .ConfigureAwait(false);
 
-            var playerInfo = await _playerRepository.GetPlayerInfoAsync(query.PlayerCode).ConfigureAwait(false);
+            var playerInfo = await _playerRepository
+                .GetPlayerInfoAsync(query.PlayerCode)
+                .ConfigureAwait(false)!;
 
             var blockListCondition = new BlockListCondition(blockList);
             var whiteListCondition = new WhiteListCondition(whiteList);
@@ -87,7 +89,7 @@ namespace TGS.Services.Operator.Services.BrandPayments
                             phoneCondition,
                             vipCondition));
 
-                if (filterCondition.IsValid(bp, playerInfo))
+                if (filterCondition.IsValid(bp, playerInfo!))
                     yield return bp;
             }
         }

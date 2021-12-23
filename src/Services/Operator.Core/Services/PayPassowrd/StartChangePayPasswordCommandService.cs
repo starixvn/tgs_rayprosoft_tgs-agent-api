@@ -17,7 +17,7 @@ namespace TGS.Services.Operator.Services.PayPassowrd
         private readonly IEmailClient _emailClient;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISmsServiceClient _smsServiceClient;
-        private readonly ISysRepository _sysRepository;
+        private readonly IBrandRepository _brandRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public StartChangePayPasswordCommandService(
@@ -26,14 +26,14 @@ namespace TGS.Services.Operator.Services.PayPassowrd
             IValidateCodeOperator validateCodeOperator,
             IEmailClient emailClient,
             ISmsServiceClient smsServiceClient,
-            ISysRepository sysRepository)
+            IBrandRepository brandRepository)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         }
 
         public async ValueTask<string> GetAsync(
@@ -68,7 +68,7 @@ namespace TGS.Services.Operator.Services.PayPassowrd
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var brandInfo = await _sysRepository
+            var brandInfo = await _brandRepository
                 .GetBrandInfoAsync(player.BrandId)
                 .ConfigureAwait(false);
 
