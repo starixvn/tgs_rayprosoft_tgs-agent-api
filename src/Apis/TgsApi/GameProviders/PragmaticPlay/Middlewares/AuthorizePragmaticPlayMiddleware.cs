@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Attributes;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
@@ -19,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPragmaticPlayHashProvider _hashProvider;
+        private readonly IPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -29,7 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
-            IPragmaticPlayHashProvider hashProvider)
+            IPragmaticPlayHashProvider hashProvider,
+            IPlayerLoginRecordService playerLoginRecordService)
         {
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
@@ -37,6 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             _settingOperations = settingOperations;
             _tokenProvider = tokenProvider;
             _hashProvider = hashProvider;
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -99,7 +103,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             await next(context);
         }
 
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
+        private async Task<PlayerLoginRecordModel> DecryptTokenAsync(string token)
         {
             if (token.IsNullOrEmpty())
             {
@@ -108,7 +112,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
 
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+            return await _playerLoginRecordService.GetAsync(loginRecordId);
         }
     }
 }

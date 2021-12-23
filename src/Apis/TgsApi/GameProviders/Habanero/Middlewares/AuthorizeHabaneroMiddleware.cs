@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
@@ -21,6 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
+        private readonly IPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -31,7 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-            ITokenProvider tokenProvider)
+            ITokenProvider tokenProvider,
+            IPlayerLoginRecordService playerLoginRecordService)
         {
             _json = json;
             _gameProviderOperations = gameProviderOperations;
@@ -39,6 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             _brandOperations = brandOperations;
             _settingOperations = settingOperations;
             _tokenProvider = tokenProvider;
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -135,7 +139,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             await next(context);
         }
 
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(
+        private async Task<PlayerLoginRecordModel> DecryptTokenAsync(
             string token, bool throwExceptionIfFailToDecrypt = true)
         {
             if (token.IsNullOrEmpty())
@@ -159,7 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 return null;
             }
 
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+            return await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
         }
     }
 }

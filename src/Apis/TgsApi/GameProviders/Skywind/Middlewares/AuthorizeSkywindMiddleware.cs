@@ -8,23 +8,24 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Caches;
-using TGS.Services.Operations;
+using TGS.GameProviders.Repositories.Models;
 using TGS.Shared.Game.Models.Skywind.Enums;
+
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
 {
     public sealed class AuthorizeSkywindMiddleware : IMiddleware
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IReadOnlyDictionary<string, Func<Dictionary<string, object>, ValueTask<PlayerLoginRecordModel>>> _methodMapper;
         private readonly ISkywindService _services;
-        private readonly IReadOnlyDictionary<string, Func<Dictionary<string, object>, ValueTask<CachedPlayerLoginRecord>>> _methodMapper;
+
         public AuthorizeSkywindMiddleware(
             IJsonSerializationProvider jsonSerializationProvider,
             ISkywindService services)
         {
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            _methodMapper = new Dictionary<string, Func<Dictionary<string, object>, ValueTask<CachedPlayerLoginRecord>>>()
+            _methodMapper = new Dictionary<string, Func<Dictionary<string, object>, ValueTask<PlayerLoginRecordModel>>>()
             {
                 { "/sw/api/validate_ticket",ValidateTicketAsync},
                 { "/sw/api/validate_terminal_ticket",ValidateTicketAsync},
@@ -41,7 +42,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             var gameProviderId = await _services.GetGameProviderIdByCodeAsync().ConfigureAwait(false);
 
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
-
 
             var value = await context.Request.ReadAsStringAsync();
             var parameters = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString((JsonDocument.Parse(value))));
@@ -70,13 +70,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             await next(context);
         }
 
-        private async ValueTask<CachedPlayerLoginRecord> ValidateTicketAsync(Dictionary<string, object> parameters)
-            => await _services.DecryptTokenAsync(parameters["ticket"].ToString()).ConfigureAwait(false);
-
-        private async ValueTask<CachedPlayerLoginRecord> ValidateBalanceAsync(Dictionary<string, object> parameters)
+        private async ValueTask<PlayerLoginRecordModel> ValidateBalanceAsync(Dictionary<string, object> parameters)
             => await _services.DecryptTokenAsync(parameters["cust_session_id"].ToString()).ConfigureAwait(false);
 
-        private async ValueTask<CachedPlayerLoginRecord> ValidateBetAsync(Dictionary<string, object> parameters)
+        private async ValueTask<PlayerLoginRecordModel> ValidateBetAsync(Dictionary<string, object> parameters)
         {
             if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
             {
@@ -89,7 +86,22 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             return await _services.DecryptTokenAsync(parameters["cust_session_id"].ToString()).ConfigureAwait(false);
         }
 
-        private ValueTask<CachedPlayerLoginRecord> ValidateSettleAsync(Dictionary<string, object> parameters)
+        private ValueTask<PlayerLoginRecordModel> ValidateRollbackAsync(Dictionary<string, object> parameters)
+        {
+            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
+            {
+                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
+            }
+
+            return ValueTask.FromResult(new PlayerLoginRecordModel()
+            {
+                PlayerCode = parameters["cust_id"].ToString(),
+                PlatformType = PlatformType.Desktop,
+                Status = LoginStatus.Enabled
+            });
+        }
+
+        private ValueTask<PlayerLoginRecordModel> ValidateSettleAsync(Dictionary<string, object> parameters)
         {
             if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
             {
@@ -99,26 +111,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
-            return ValueTask.FromResult(new CachedPlayerLoginRecord()
+            return ValueTask.FromResult(new PlayerLoginRecordModel()
             {
                 PlayerCode = parameters["cust_id"].ToString(),
                 PlatformType = PlatformType.Desktop,
                 Status = LoginStatus.Enabled
             });
         }
-        private ValueTask<CachedPlayerLoginRecord> ValidateRollbackAsync(Dictionary<string, object> parameters)
-        {
-            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
-            {
-                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
-            }
 
-            return ValueTask.FromResult(new CachedPlayerLoginRecord()
-            {
-                PlayerCode = parameters["cust_id"].ToString(),
-                PlatformType = PlatformType.Desktop,
-                Status = LoginStatus.Enabled
-            });
-        }
+        private async ValueTask<PlayerLoginRecordModel> ValidateTicketAsync(Dictionary<string, object> parameters)
+                                            => await _services.DecryptTokenAsync(parameters["ticket"].ToString()).ConfigureAwait(false);
     }
 }
