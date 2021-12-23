@@ -7,7 +7,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
-using TGS.Shared.Game.Models.JDB.Outgoing;
 using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
@@ -28,20 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBActionModelMapper : IJDBActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.JDB;
-
-        BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
-            new()
-            {
-                Status = GameApiStatus.Succeed.Description(),
-                Balance = result.Balance
-            };
-
-        BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
-            new()
-            {
-                Status = GameApiStatus.Succeed.Description(),
-                Balance = result.Balance
-            };
 
         BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request,
             PlatformType platformType, int timezoneHour)
@@ -84,7 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         }
 
         BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request,
-            string externalRoundId)
+string externalRoundId)
         {
             var externalTransactionId = request.TransferId.ToString();
 
@@ -113,25 +98,39 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     RoundClosed = true
                 }
             };
-            
+
             return GetBetData(request.UserId, null, data, transactions, null, false);
         }
+
+        BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
+                    new()
+                    {
+                        Status = GameApiStatus.Succeed.Description(),
+                        Balance = result.Balance
+                    };
+
+        BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
+            new()
+            {
+                Status = GameApiStatus.Succeed.Description(),
+                Balance = result.Balance
+            };
 
         #region Private Methods
 
         private static BetData GetBetData(string playerCode, string currencyCode, GameProviderConfigurationData data,
             TransactionData[] transactions, PlatformType? platform, bool hasCurrencyFromGameProvider = true) => new()
-        {
-            GameProviderId = data.GameProviderId,
-            GameProviderConfigurationId = data.GameProviderConfigurationId,
-            GameProviderCode = GameProviderCode,
-            AutoCloseRound = data.AutoCloseRound,
-            PlayerCode = playerCode,
-            PlatformType = platform,
-            HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
-            CurrencyCode = currencyCode,
-            Transactions = transactions
-        };
+            {
+                GameProviderId = data.GameProviderId,
+                GameProviderConfigurationId = data.GameProviderConfigurationId,
+                GameProviderCode = GameProviderCode,
+                AutoCloseRound = data.AutoCloseRound,
+                PlayerCode = playerCode,
+                PlatformType = platform,
+                HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
+                CurrencyCode = currencyCode,
+                Transactions = transactions
+            };
 
         private static DateTimeOffset GetTimestamp(string timeStamp, int hour)
         {
@@ -140,6 +139,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             return new(dateTime, offset);
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

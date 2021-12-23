@@ -17,7 +17,6 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
-using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 {
@@ -60,8 +59,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         public async Task<BaseActionResponse> ExecuteGameActionAsync(
             [FromForm(Name = "action")] ActionType actionType,
             [FromForm(Name = "value")] string json,
-            string currency) =>
-            actionType switch
+            string currency)
+            => actionType switch
             {
                 ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
                     .DeserializeFromString<GetBalanceRequest>(json)),

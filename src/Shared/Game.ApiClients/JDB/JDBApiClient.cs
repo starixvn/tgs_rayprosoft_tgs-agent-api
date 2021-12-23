@@ -63,10 +63,13 @@ namespace TGS.Shared.Game.ApiClients.JDB
             var jsonString = Json.SerializeToString(data);
 
             var encryptedString =
-                await _cryptoProvider.EncryptStringAsync(jsonString,
-                    agent.AESIv,
-                    agent.AESKey,
-                    encoding: Encoding.UTF8);
+                await _cryptoProvider
+                    .EncryptStringAsync(
+                        jsonString,
+                        agent.AESIv,
+                        agent.AESKey,
+                        encoding: Encoding.UTF8)
+                    .ConfigureAwait(false);
 
             var parameters = new Dictionary<string, string>
             {
@@ -74,10 +77,12 @@ namespace TGS.Shared.Game.ApiClients.JDB
                 ["x"] = encryptedString
             };
 
-            return await ExecuteFormRequestAsync<TResponse>(apiUrl,
-                "apiRequest.do",
-                parameters,
-                logPrefix: logPrefix);
+            return await ExecuteFormRequestAsync<TResponse>(
+                    apiUrl,
+                    "apiRequest.do",
+                    parameters,
+                    logPrefix: logPrefix)
+                .ConfigureAwait(false);
         }
 
         #endregion Game Provider Client Api
