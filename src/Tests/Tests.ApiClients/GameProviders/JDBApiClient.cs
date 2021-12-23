@@ -3,28 +3,30 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
-using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Json;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
+using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.JDB.Incoming;
-using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Tests.ApiClients.GameProviders
 {
     public interface IJDBApiClient
     {
-        ValueTask<BaseActionResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
-        ValueTask<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request);
-        ValueTask<BaseActionResponse> CancelTransactionsAsync(CancelTransactionRequest request);
+        ValueTask<BaseActionResponse> CancelTransactionsAsync(CancelTransactionRequest request, string currencyCode);
+
+        ValueTask<BaseActionResponse> GetPlayerBalanceAsync(GetBalanceRequest request, string currencyCode);
+
+        ValueTask<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request, string currencyCode);
     }
 
     public sealed class JDBApiClient : BaseApiClient, IJDBApiClient
@@ -44,29 +46,44 @@ namespace TGS.Tests.ApiClients.GameProviders
             _settingOperations = settingOperations;
         }
 
-        ValueTask<BaseActionResponse> IJDBApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
+        ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(
+            CancelTransactionRequest request,
+            string currencyCode)
+            => SendRequestAsync(Json.SerializeToString(request), currencyCode);
 
-        ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
+        ValueTask<BaseActionResponse> IJDBApiClient.GetPlayerBalanceAsync(
+            GetBalanceRequest request,
+            string currencyCode)
+            => SendRequestAsync(Json.SerializeToString(request), currencyCode);
 
-        ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(CancelTransactionRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
+        ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(
+            PlaceAndSettleBetRequest request,
+            string currencyCode)
+            => SendRequestAsync(Json.SerializeToString(request), currencyCode);
 
-        private async ValueTask<BaseActionResponse> SendRequestAsync(string jsonString)
+        private static string ToUrlSafeAesEncryptedString(string encryptedString)
+        {
+            var base64 = Convert.FromBase64String(encryptedString);
+
+            return WebEncoders.Base64UrlEncode(base64);
+        }
+
+        private async ValueTask<BaseActionResponse> SendRequestAsync(string jsonString, string currencyCode)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
                     .GameProviderConfigurations.JDB);
 
+            var agent = configuration.Agents.FirstOrDefault(a => a.CurrencyCode == currencyCode)!;
+
             var encryptedString = await _cryptoProvider.EncryptStringAsync(
                 jsonString,
-                configuration.AESIv,
-                configuration.AESKey,
+                agent.AESIv,
+                agent.AESKey,
                 padding: PaddingMode.Zeros,
                 encoding: Encoding.UTF8);
 
-            const string path = "api/jdb/entrance";
+            var path = $"api/jdb/entrance/{currencyCode.ToLower()}";
 
             return await ExecuteFormRequestAsync<BaseActionResponse>(
                 path,
@@ -76,13 +93,6 @@ namespace TGS.Tests.ApiClients.GameProviders
                         "x", ToUrlSafeAesEncryptedString(encryptedString)
                     }
                 });
-        }
-
-        private static string ToUrlSafeAesEncryptedString(string encryptedString)
-        {
-            var base64 = Convert.FromBase64String(encryptedString);
-
-            return WebEncoders.Base64UrlEncode(base64);
         }
     }
 }

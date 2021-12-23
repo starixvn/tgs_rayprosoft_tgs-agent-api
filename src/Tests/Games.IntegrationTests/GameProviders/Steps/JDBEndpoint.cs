@@ -11,20 +11,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Redis;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using Tgs.Logging;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
-using TGS.Shared.Game.Models.JDB.Outgoing;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
@@ -268,13 +266,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var client = _serviceProvider.GetRequiredService<IJDBApiClient>();
 
-            var response = await client.GetPlayerBalanceAsync(new GetBalanceRequest
-            {
-                ActionType = ActionType.GetBalance,
-                SystemTime = DateTime.UtcNow.Ticks,
-                UserId = playerCode,
-                Currency = "RB"
-            });
+            var response = await client.GetPlayerBalanceAsync(
+                new GetBalanceRequest
+                {
+                    ActionType = ActionType.GetBalance,
+                    SystemTime = DateTime.UtcNow.Ticks,
+                    UserId = playerCode,
+                    Currency = "RB"
+                }, "CNY");
 
             Set(SR.Response, response);
         }
@@ -284,7 +283,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var request = Get<PlaceAndSettleBetRequest>(SR.PlaceBetRequest);
             var client = _serviceProvider.GetRequiredService<IJDBApiClient>();
-            var response = await client.PlaceAndSettleBetAsync(request);
+            var response = await client.PlaceAndSettleBetAsync(request, "CNY");
             Set(SR.Response, response);
         }
 
@@ -307,7 +306,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 UserId = playerCode
             };
 
-            var response = await client.CancelTransactionsAsync(request);
+            var response = await client.CancelTransactionsAsync(request, "CNY");
 
             Set(SR.Request, request);
             Set(SR.Response, response);
@@ -379,7 +378,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 RoomType = 0
             };
 
-            var response = await client.PlaceAndSettleBetAsync(request);
+            var response = await client.PlaceAndSettleBetAsync(request, "CNY");
 
             Set(SR.ExternalTransactionId, request.TransferId.ToString());
             Set(SR.ExternalRoundId, request.GameSequenceNo.ToString());
