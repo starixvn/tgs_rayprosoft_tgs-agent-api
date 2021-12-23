@@ -28,6 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddGameProviderRepository<GameProviderRepository>()
                 .AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
                 .AddSysRepository<SysRepository>()
+                .AddBrandRepository<BrandRepository>()
                 .AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver);
         }
     }

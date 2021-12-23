@@ -44,7 +44,7 @@ namespace TGS.Services.Operations.Commands
         {
             var retries = 0;
 
-            var username = data.Username;
+            var username = data.UserName;
             var walletId = GuidExtensions.NewSequentialGuid();
             var createdOn = DateTimeOffset.UtcNow;
             var playerCode = default(string);
@@ -83,7 +83,7 @@ namespace TGS.Services.Operations.Commands
                                 Id = walletId,
                                 PlayerCode = playerCode,
                                 CurrencyCode = data.CurrencyCode,
-                                ExternalCurrencyCode = data.ExternalCurrencyCode,
+                                ExternalCurrencyCode = data.CurrencyCode,
                                 Balance = 0,
                                 CreatedOn = createdOn,
                                 UpdatedOn = createdOn

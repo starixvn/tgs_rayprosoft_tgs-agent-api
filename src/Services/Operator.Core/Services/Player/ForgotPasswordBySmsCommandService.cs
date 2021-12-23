@@ -14,20 +14,20 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IPlayerRepository _playerRepository;
         private readonly ISmsServiceClient _smsServiceClient;
-        private readonly ISysRepository _sysRepository;
+        private readonly IBrandRepository _brandRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ForgotPasswordBySmsCommandService(
             IPlayerRepository playerRepository,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
-            ISysRepository sysRepository,
+            IBrandRepository brandRepository,
             ISmsServiceClient smsServiceClient)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
         }
 
@@ -59,7 +59,7 @@ namespace TGS.Services.Operator.Services.Player
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var brandInfo = await _sysRepository
+            var brandInfo = await _brandRepository
                 .GetBrandInfoAsync(command.BrandId)
                 .ConfigureAwait(false);
 

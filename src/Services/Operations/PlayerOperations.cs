@@ -55,7 +55,7 @@ namespace TGS.Services.Operations
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.UsernameToPlayerCode, data.BrandId,
                 new HashEntry[]
                 {
-                    new(data.Username, playerCode)
+                    new(data.UserName, playerCode)
                 }, TimeSpan.FromHours(12), true);
 
             return playerCode;

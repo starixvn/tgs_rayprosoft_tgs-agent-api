@@ -12,10 +12,13 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
+
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -35,7 +38,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Player changes password, player login is needed when use this
         /// </summary>
-        [HttpPut("password")]
+        [HttpPut("password", Name = "ChangePassword")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(
@@ -77,7 +80,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="playerOperations">The player operations.</param>
         /// <param name="id">The identify number.</param>
         /// <returns></returns>
-        [HttpGet("identity/check/{id}")]
+        [HttpGet("identity/check/{id}", Name = "CheckIdentityIsValid")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<bool> CheckIdentityIsValidAsync(
             [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
@@ -98,7 +101,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Check username exists
         /// </summary>
-        [HttpGet("checkUsername")]
+        [HttpGet("checkUsername", Name = "CheckUserNameExists")]
         public async Task<CheckUsernameResponse> CheckUsernameAsync(
             [FromServices] IGetService<GetUserNameQuery, bool> getUserNameQueryService,
             [FromQuery] CheckUsernameRequest request)
@@ -119,7 +122,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <response code="200">Return the token, when reset password, must input to verify.</response>
-        [HttpPost("password/forgot")]
+        [HttpPost("password/forgot", Name = "ForgotPassword")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         public ValueTask<string> ForgotPasswordAsync(
@@ -144,7 +147,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Email));
         }
 
-        [HttpGet("game/auto-transfer")]
+        [HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<bool> GetAutoTransferToGameFlagAsync(
                     [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
@@ -159,7 +162,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get player information
         /// </summary>
-        [HttpGet("info")]
+        [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerQueryService,
@@ -200,7 +203,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Player login
         /// </summary>
-        [HttpPost("login")]
+        [HttpPost("login", Name = "Login")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
@@ -263,7 +266,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Player logout, player login is needed when use this
         /// </summary>
-        [HttpDelete("logout")]
+        [HttpDelete("logout", Name = "Logout")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<LogoutResponse> LogoutAsync(
             [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
@@ -293,34 +296,96 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create", Name = "RegisterPlayer")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> RegisterPlayerAsync(
-            [FromServices] IRequestAnalyzer requestAnalyzer,
-            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
+            [FromServices] IBrandRepository brandRepository,
+            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
+            [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
+            [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
             [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
             [FromBody] CreatePlayerRequest request)
         {
-            var brandId = HttpContext.Items.GetBrandId();
+            var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+
+            var brand = await brandRepository.GetBrandInfoAsync(brandId).ConfigureAwait(false);
+
+            if (brand == null)
+                throw new InvalidStatusException("Brand doesn't exist");
+
+            if (brand.Status == BrandStatus.Maintenance)
+                throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+
+            if (brand.Status != BrandStatus.Active)
+                throw new InvalidStatusException("Brand is not active");
+
             var ipAddress = HttpContext.Connection.RemoteIpAddress;
             var hostName = Request.Host.Host;
 
-            var query = new CreatePlayerCommand(
-                brandId,
-                request.Username,
-                request.Password,
-                request.CurrencyCode,
-                string.IsNullOrWhiteSpace(invitationCode)
-                    ? request.AgentInvitationCode
-                    : invitationCode,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+            var agentInvitationCode = string.IsNullOrWhiteSpace(invitationCode)
+                ? request.AgentInvitationCode
+                : invitationCode;
 
-            var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
-
-            return new CreatePlayerResponse
+            if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
             {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
+                var command = new CreatePlayerWithPlayerInvitationCommand(
+                    brandId,
+                    request.UserName,
+                    request.Password,
+                    brand.Currency,
+                    request.UpperPlayerCode,
+                    request.IsTestPlayer,
+                    ipAddress.ToString(),
+                    hostName);
+
+                var info = await createPlayerInvitationPlayerService
+                    .GetAsync(command)
+                    .ConfigureAwait(false);
+
+                return new CreatePlayerResponse
+                {
+                    PlayerCode = info.PlayerCode,
+                    IsNew = info.IsNew
+                };
+            }
+            else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
+            {
+                var command = new CreatePlayerWithAgentInvitationCodeCommand(
+                    brandId,
+                    request.UserName,
+                    request.Password,
+                    brand.Currency,
+                    agentInvitationCode,
+                    request.IsTestPlayer,
+                    ipAddress.ToString(),
+                    hostName);
+
+                var info = await createAgentInvitationPlayerService
+                    .GetAsync(command)
+                    .ConfigureAwait(false);
+
+                return new CreatePlayerResponse
+                {
+                    PlayerCode = info.PlayerCode,
+                    IsNew = info.IsNew
+                };
+            }
+            else
+            {
+                var query = new CreatePlayerCommand(
+                    brandId,
+                    request.UserName,
+                    request.Password,
+                    brand.Currency,
+                    request.IsTestPlayer,
+                    ipAddress.ToString(),
+                    hostName);
+
+                var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
+
+                return new CreatePlayerResponse
+                {
+                    PlayerCode = info.PlayerCode,
+                    IsNew = info.IsNew
+                };
+            }
         }
 
         /// <summary>
@@ -329,7 +394,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="resetService">The reset service.</param>
         /// <param name="request">The request.</param>
         /// <response code="406">Reset password not accept, maybe validate code not match.</response>
-        [HttpPost("password/reset")]
+        [HttpPost("password/reset", Name = "ResetPassword")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
@@ -346,7 +411,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="setIdentityService">The set identity service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        [HttpPatch("identity")]
+        [HttpPatch("identity", Name = "SetPlayerIdentity")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask SetPlayerIdentityAsync(
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
@@ -364,7 +429,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="setQqService">The set qq service.</param>
         /// <param name="request">The request.</param>
-        [HttpPatch("qq")]
+        [HttpPatch("qq", Name = "SetQqId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task SetQqIdAsync(
             [FromServices] ICommandService<SetQqCommand> setQqService,
@@ -382,7 +447,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="setWeChatService">The set we chat service.</param>
         /// <param name="request">The request.</param>
-        [HttpPatch("wechat")]
+        [HttpPatch("wechat", Name = "SetWeChatId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task SetWeChatIdAsync(
             [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
@@ -401,7 +466,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="setPlayerEmailService">The set player email service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        [HttpPost("email")]
+        [HttpPost("email", Name = "StartChangeEmail")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<string> StartChangeEmailAsync(
             [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
@@ -422,7 +487,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
-        [HttpPost("phone")]
+        [HttpPost("phone", Name = "StartChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
@@ -453,7 +518,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns>
         /// security code
         /// </returns>
-        [HttpPost("init-phone")]
+        [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
         public async ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
@@ -501,7 +566,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="commitPlayerEmailService">The commit player email service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        [HttpPut("email")]
+        [HttpPut("email", Name = "SubmitChangeEmail")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask SubmitChangeEmailAsync(
             [FromServices] ICommandService<CommitSetPlayerEmailCommand> commitPlayerEmailService,
@@ -525,7 +590,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        [HttpPut("phone")]
+        [HttpPut("phone", Name = "SubmitChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask SubmitChangePhoneAsync(
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
@@ -548,7 +613,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="requestAnalyzer">The request analyzer.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        [HttpPut("init-phone")]
+        [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
         public ValueTask SubmitInitPhoneAsync(
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
             [FromServices] IRequestAnalyzer requestAnalyzer,
@@ -566,7 +631,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             return commitPlayerInitPhoneService.ExecuteAsync(command);
         }
 
-        [HttpPost("game/auto-transfer")]
+        [HttpPost("game/auto-transfer", Name = "ToggleAutoTransferToGameFlag")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask ToggleAutoTransferToGameFlagAsync(
             [FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
