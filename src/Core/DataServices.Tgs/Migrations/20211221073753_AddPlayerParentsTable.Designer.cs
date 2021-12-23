@@ -4373,7 +4373,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("parent_player_code");
 
                     b.HasKey("PlayerCode")
-                        .HasName("pk_player_code");
+                        .HasName("pk_player_parent_code");
 
                     b.ToTable("player_parents");
                 });

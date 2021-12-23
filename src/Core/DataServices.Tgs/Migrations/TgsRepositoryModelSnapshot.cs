@@ -639,8 +639,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("active_number");
 
                     b.Property<decimal>("DividendPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
                         .HasColumnName("dividend_percentage");
 
                     b.Property<decimal>("NetProfit")
@@ -1352,8 +1352,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("active_number");
 
                     b.Property<decimal>("DividendPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
                         .HasColumnName("dividend_percentage");
 
                     b.Property<decimal>("NetProfit")
@@ -3901,6 +3901,89 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
                     b.ToTable("player_aggregates", "report");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAllAgentRebate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("ActualConditionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_condition_amount");
+
+                    b.Property<int>("ActualPlayerNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("actual_player_number");
+
+                    b.Property<short>("AllAgentGameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_game_type");
+
+                    b.Property<short>("AllAgentRebateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_rebate_type");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<decimal>("ConditionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("condition_amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
+
+                    b.Property<decimal>("RebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("rebate_percentage");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_all_agent_rebates_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_all_agent_rebates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_all_agent_rebates");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAuditLog", b =>
