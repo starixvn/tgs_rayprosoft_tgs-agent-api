@@ -15,12 +15,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
 {
     public sealed class JDBStartup : BaseStartup
     {
+        protected override string LogPrefix => "jdb";
+
         public JDBStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
+                    : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "jdb";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 (provider, key) => key switch
                 {
                     GameProvider.JDB => provider.GetRequiredService<JDBErrorMapper>(),
-                    _                => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 

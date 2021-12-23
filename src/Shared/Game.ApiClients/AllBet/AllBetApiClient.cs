@@ -6,11 +6,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Shared.Game.Models.AllBet.Outgoing;
 
@@ -18,13 +18,17 @@ namespace TGS.Shared.Game.ApiClients.AllBet
 {
     public interface IAllBetApiClient
     {
-        ValueTask<LoginResponse> LoginAsync(
-            Uri apiUrl, string propertyId, string apiKey,
-            LoginRequest request);
-
         ValueTask<CheckOrCreateMemberResponse> CheckOrCreateMemberAsync(
-            Uri apiUrl, string propertyId,
-            string apiKey, CheckOrCreateMemberRequest request);
+            Uri apiUrl,
+            string propertyId,
+            string apiKey,
+            CheckOrCreateMemberRequest request);
+
+        ValueTask<LoginResponse> LoginAsync(
+            Uri apiUrl,
+            string propertyId,
+            string apiKey,
+            LoginRequest request);
     }
 
     public class AllBetApiClient : BaseApiClient, IAllBetApiClient
@@ -46,26 +50,6 @@ namespace TGS.Shared.Game.ApiClients.AllBet
             _hashProvider = hashProvider;
         }
 
-        ValueTask<LoginResponse> IAllBetApiClient.LoginAsync(
-            Uri apiUrl, string propertyId, string apiKey,
-            LoginRequest request)
-        {
-            var method = HttpMethod.Post;
-            var path = "/Login";
-            var (headers, contentHeaders) = GetHeaders(method, propertyId, apiKey, path, request);
-
-            var prefix = $"{Consts.GameProvider.AllBet}.Login";
-
-            return ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(method,
-                apiUrl,
-                path,
-                request,
-                headers,
-                contentHeaders,
-                options: _options,
-                logPrefix: prefix);
-        }
-
         ValueTask<CheckOrCreateMemberResponse> IAllBetApiClient.CheckOrCreateMemberAsync(
             Uri apiUrl, string propertyId,
             string apiKey, CheckOrCreateMemberRequest request)
@@ -78,6 +62,26 @@ namespace TGS.Shared.Game.ApiClients.AllBet
 
             return ExecuteJsonRequestAsync<CheckOrCreateMemberRequest, CheckOrCreateMemberResponse>(
                 method,
+                apiUrl,
+                path,
+                request,
+                headers,
+                contentHeaders,
+                options: _options,
+                logPrefix: prefix);
+        }
+
+        ValueTask<LoginResponse> IAllBetApiClient.LoginAsync(
+                    Uri apiUrl, string propertyId, string apiKey,
+            LoginRequest request)
+        {
+            var method = HttpMethod.Post;
+            var path = "/Login";
+            var (headers, contentHeaders) = GetHeaders(method, propertyId, apiKey, path, request);
+
+            var prefix = $"{Consts.GameProvider.AllBet}.Login";
+
+            return ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(method,
                 apiUrl,
                 path,
                 request,
