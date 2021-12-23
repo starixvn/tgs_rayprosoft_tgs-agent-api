@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.JDB.Outgoing
+namespace TGS.Shared.Game.Models.JDB.Incoming
 {
     public record BaseActionResponse : BaseResponse
     {

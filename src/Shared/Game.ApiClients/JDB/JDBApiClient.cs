@@ -1,5 +1,6 @@
 ﻿// unset
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -10,78 +11,75 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.JDB;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.JDB
 {
-    public interface IJDBApiClient
-    {
-        ValueTask<GetTokenResponse> GetTokenAsync(GetTokenRequest request);
-
-        ValueTask<BetHistoryResponse> GetBetHistoryUrlAsync(BetHistoryRequest request);
-    }
-
     public class JDBApiClient : BaseApiClient, IJDBApiClient
     {
         private readonly ISymmetricCryptoProvider _cryptoProvider;
-        private readonly ISettingOperations _settingOperations;
 
         public JDBApiClient(
             ISymmetricCryptoProviderFactory cryptoProviderFactory,
-            ISettingOperations settingOperations,
             HttpClient client,
             IApiClientLogger logger,
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
-            _settingOperations = settingOperations;
         }
 
         #region Game Provider Client Api
 
-        ValueTask<GetTokenResponse> IJDBApiClient.GetTokenAsync(GetTokenRequest request)
-        {
-            var prefix = $"{Consts.GameProvider.JDB}.GetToken";
-
-            return ExecuteRequestAsync<GetTokenRequest, GetTokenResponse>(request, prefix);
-        }
-
-        ValueTask<BetHistoryResponse> IJDBApiClient.GetBetHistoryUrlAsync(BetHistoryRequest request)
+        ValueTask<BetHistoryResponse> IJDBApiClient.GetBetHistoryUrlAsync(
+            Uri apiUrl,
+            JDBAgent agent,
+            BetHistoryRequest request)
         {
             var prefix = $"{Consts.GameProvider.JDB}.BetHistory";
 
-            return ExecuteRequestAsync<BetHistoryRequest, BetHistoryResponse>(request, prefix);
+            return ExecuteRequestAsync<BetHistoryRequest, BetHistoryResponse>(apiUrl, agent, request, prefix);
         }
 
-        private async ValueTask<TResponse> ExecuteRequestAsync<TRequest, TResponse>(TRequest data, string logPrefix)
+        ValueTask<GetTokenResponse> IJDBApiClient.GetTokenAsync(
+            Uri apiUrl,
+            JDBAgent agent,
+            GetTokenRequest request)
+        {
+            var prefix = $"{Consts.GameProvider.JDB}.GetToken";
+
+            return ExecuteRequestAsync<GetTokenRequest, GetTokenResponse>(apiUrl, agent, request, prefix);
+        }
+
+        private async ValueTask<TResponse> ExecuteRequestAsync<TRequest, TResponse>(
+            Uri apiUrl,
+            JDBAgent agent,
+            TRequest data,
+            string logPrefix)
         {
             var jsonString = Json.SerializeToString(data);
 
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
-
             var encryptedString =
                 await _cryptoProvider.EncryptStringAsync(jsonString,
-                    configuration.AESIv,
-                    configuration.AESKey,
+                    agent.AESIv,
+                    agent.AESKey,
                     encoding: Encoding.UTF8);
 
             var parameters = new Dictionary<string, string>
             {
-                ["dc"] = configuration.ClientDomain,
+                ["dc"] = agent.ClientDomain,
                 ["x"] = encryptedString
             };
 
-            return await ExecuteFormRequestAsync<TResponse>(configuration.ApiUrl,
+            return await ExecuteFormRequestAsync<TResponse>(apiUrl,
                 "apiRequest.do",
                 parameters,
                 logPrefix: logPrefix);
         }
 
-        #endregion
+        #endregion Game Provider Client Api
     }
 }

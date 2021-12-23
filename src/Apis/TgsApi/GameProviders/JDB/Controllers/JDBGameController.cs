@@ -56,10 +56,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         }
 
         [HttpPost]
-        [Route("entrance")]
+        [Route("entrance/{currency}")]
         public async Task<BaseActionResponse> ExecuteGameActionAsync(
             [FromForm(Name = "action")] ActionType actionType,
-            [FromForm(Name = "value")] string json) =>
+            [FromForm(Name = "value")] string json,
+            string currency) =>
             actionType switch
             {
                 ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
@@ -77,6 +78,29 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                     ErrorMessage = "Invalid action"
                 }
             };
+
+        private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
+        {
+            Request.Path = new($"{Request.Path}/cancel");
+
+            var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
+            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
+                request.UserId,
+                request.TransferId.ToString());
+
+            if (gameActionExternalIds == null)
+            {
+                return new()
+                {
+                    Status = GameApiStatus.DataDoesNotExist.Description(),
+                    ErrorMessage = "Transfer id not found."
+                };
+            }
+
+            var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
+            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+            return _map.Response(betResult);
+        }
 
         private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
         {
@@ -134,29 +158,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             var betData = _map.Request(data, request, platformType, configuration.TimezoneHour);
 
             var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
-            return _map.Response(betResult);
-        }
-
-        private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
-        {
-            Request.Path = new($"{Request.Path}/cancel");
-
-            var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
-            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
-                request.UserId,
-                request.TransferId.ToString());
-
-            if (gameActionExternalIds == null)
-            {
-                return new()
-                {
-                    Status = GameApiStatus.DataDoesNotExist.Description(),
-                    ErrorMessage = "Transfer id not found."
-                };
-            }
-
-            var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(betResult);
         }
     }

@@ -2,9 +2,10 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Json;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
+using TGS.Apis.TgsApi.GameProviders.JDB.Services;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
@@ -19,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IJDBServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public AuthorizeJDBMiddleware(
@@ -27,13 +29,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             IBrandOperations brandOperations,
             IJsonSerializationProvider json,
             ISettingOperations settingOperations,
-            ISymmetricCryptoProviderFactory cryptoProviderFactory)
+            ISymmetricCryptoProviderFactory cryptoProviderFactory,
+            IJDBServices services)
         {
             _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
             _json = json;
             _settingOperations = settingOperations;
+            _services = services ?? throw new ArgumentNullException(nameof(services));
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
         }
 
@@ -44,17 +48,41 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
                 throw new ArgumentException("Invalid argument 'x'");
             }
 
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
+            if (!context.Request.Path.HasValue)
+            {
+                throw new ArgumentException("Invalid path");
+            }
 
-            var jsonValue = await DecryptRequestStringToJsonAsync(encrypted, configuration.AESIv, configuration.AESKey);
+            var segments = context.Request.Path.Value!.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length != 4)
+            {
+                throw new ArgumentException("Invalid path segments");
+            }
+
+            var currencyCode = segments[3].ToUpper();
+
+            var configuration =
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB)
+                    .ConfigureAwait(false);
+
+            var agent = _services.GetAgent(configuration.Agents, currencyCode);
+
+            var jsonValue = await DecryptRequestStringToJsonAsync(encrypted, agent.AESIv, agent.AESKey);
             var baseRequest = _json.DeserializeFromString<BaseActionRequest>(jsonValue);
 
             var gameProviderId =
-                await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.JDB);
-            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(baseRequest.UserId);
-            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                await _gameProviderOperations
+                    .GetGameProviderIdByCodeAsync(Consts.GameProvider.JDB)
+                    .ConfigureAwait(false);
+
+            var brandId = await _playerOperations
+                .GetBrandIdByPlayerCodeAsync(baseRequest.UserId)
+                .ConfigureAwait(false);
+
+            var bgpc = await _brandOperations
+                .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
+                .ConfigureAwait(false);
 
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
             context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
@@ -81,10 +109,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
                 value += "=";
             }
 
-            var json = await _cryptoProvider.DecryptStringAsync(value,
-                aseIv,
-                aesKey,
-                padding: PaddingMode.None);
+            var json = await _cryptoProvider
+                .DecryptStringAsync(
+                    value,
+                    aseIv,
+                    aesKey,
+                    padding: PaddingMode.None)
+                .ConfigureAwait(false);
 
             return json.Replace("\0", string.Empty);
         }

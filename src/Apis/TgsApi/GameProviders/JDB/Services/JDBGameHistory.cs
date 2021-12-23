@@ -21,8 +21,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IJDBApiClient _jdbApiClient;
-        private readonly IJDBServices _jdbServices;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IJDBServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public JDBGameHistory(
@@ -32,27 +32,31 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IJDBApiClient jdbApiClient,
             IBrandGameProviderOperations brandGameProviderOperations,
             IPlayerOperations playerOperations,
-            IJDBServices jdbServices)
+            IJDBServices services)
             : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _jdbApiClient = jdbApiClient;
             _brandGameProviderOperations = brandGameProviderOperations;
             _playerOperations = playerOperations;
-            _jdbServices = jdbServices;
+            _services = services;
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
-            var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
+                    .GameProviderConfigurations.JDB)
+                    .ConfigureAwait(false);
 
-            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, round.BrandId,
-                language);
+            var agent = _services.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
+
+            var cultureCode = await _brandGameProviderOperations
+                .MapCultureAsync(cachedGameProvider.Id, round.BrandId, language)
+                .ConfigureAwait(false);
 
             if (!long.TryParse(round.ExternalRoundId, out var externalRoundId))
             {
@@ -75,14 +79,17 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 SequenceNo = externalRoundId
             };
 
-            var response = await _jdbApiClient.GetBetHistoryUrlAsync(request);
+            var response = await _jdbApiClient
+                .GetBetHistoryUrlAsync(configuration.ApiUrl, agent, request)
+                .ConfigureAwait(false);
+
             var url = string.Empty;
             if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
             {
                 url = response.Data.FirstOrDefault()?.Path;
             }
 
-            return new()
+            return new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
                 Winloss = (round.WinLoss ?? 0).Negate(),
