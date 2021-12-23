@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Models.GameProviders.Settings.JDB;
-using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.JDB

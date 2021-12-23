@@ -5,15 +5,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Json;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
+using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.JDB;
-using TGS.Services.Operations;
-using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.JDB
