@@ -16,19 +16,22 @@ namespace TGS.Workers.Schedulers.Jobs
     public class RebateAndDividendJobManagement
     {
         private readonly IAgentDividendWorkerService _agentDividendWorker;
+        private readonly IPlayerAllAgentRebateWorkerService _playerAllAgentRebateWorker;
         private readonly IPlayerRebateWorkerService _playerRebateWorker;
 
         public RebateAndDividendJobManagement(IPlayerRebateWorkerService playerRebateWorker,
-            IAgentDividendWorkerService agentDividendWorker)
+            IAgentDividendWorkerService agentDividendWorker,
+            IPlayerAllAgentRebateWorkerService playerAllAgentRebateWorker)
         {
             _playerRebateWorker = playerRebateWorker;
             _agentDividendWorker = agentDividendWorker;
+            _playerAllAgentRebateWorker = playerAllAgentRebateWorker;
         }
 
         [Queue(Consts.Queue.Schedule)]
         [Job]
-        [DisplayName("create player rebates")]
-        [Description("返水指定的時間")]
+        [DisplayName("create player vip rebates")]
+        [Description("vip返水指定的時間")]
         [AutomaticRetry(Attempts = 3)]
         [DisableConcurrentExecution(90)]
         public async Task<TgsResponse> CreatePlayerRebateAsync(
@@ -45,7 +48,30 @@ namespace TGS.Workers.Schedulers.Jobs
                 return await _playerRebateWorker.ManualExecutionAsync(dateTime);
             }
 
-            return new() {ErrorMessage = "DateTime invalided"};
+            return new() { ErrorMessage = "DateTime invalided" };
+        }
+
+        [Queue(Consts.Queue.Schedule)]
+        [Job]
+        [DisplayName("create player all agent rebates")]
+        [Description("全民代理返水指定的時間")]
+        [AutomaticRetry(Attempts = 3)]
+        [DisableConcurrentExecution(90)]
+        public async Task<TgsResponse> CreatePlayerAllAgentRebateAsync(
+            [DisplayData("指定日期",
+                "2021/02/18",
+                "Default offset +08:00")]
+            string dateTime = "",
+            PerformContext context = null)
+        {
+            context.WriteLine($"Start time:{DateTime.Now}");
+
+            if (DateTimeOffset.TryParse($"{dateTime} +8:00", out _))
+            {
+                return await _playerAllAgentRebateWorker.ManualExecutionAsync(dateTime);
+            }
+
+            return new() { ErrorMessage = "DateTime invalided" };
         }
 
         [Queue(Consts.Queue.Schedule)]
