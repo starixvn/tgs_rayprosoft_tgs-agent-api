@@ -3,13 +3,14 @@ using System.Security.Authentication;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Extensions;
 using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
@@ -18,6 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -27,7 +29,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            ITokenProvider tokenProvider)
+            ITokenProvider tokenProvider,
+            IRedisPlayerLoginRecordService playerLoginRecordService)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
 
@@ -36,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -101,7 +105,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             await next(context);
         }
 
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
+        private async Task<PlayerLoginRecordModel> DecryptTokenAsync(string token)
         {
             if (token.IsNullOrEmpty())
             {
@@ -110,7 +114,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
 
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+            return await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
         }
     }
 }

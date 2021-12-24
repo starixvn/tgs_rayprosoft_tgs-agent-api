@@ -2,7 +2,16 @@
 {
     public record JDBAgent
     {
-        public string Id { get; init; }
+        public string AESIv { get; init; }
+
+        public string AESKey { get; init; }
+
+        public string ClientDomain { get; init; }
+
         public string CurrencyCode { get; init; }
+
+        public string Id { get; init; }
+
+        public bool MoreGame { get; init; }
     }
 }

@@ -6,7 +6,7 @@ using TGS.GameProviders.Repositories.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class GameProvidersServiceConfigurationExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddGameProvidersMognoRepository(
             this IServiceCollection services,
@@ -20,27 +20,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IGameProviderScheduleRepository, GameProviderScheduleRepository>();
         }
 
-        public static IServiceCollection AddGameProviderTCGFtpClientRepository(
-            this IServiceCollection services,
-            Action<TCGFtpApiOption, IServiceProvider> configure)
-        {
-            services
-                .AddOptions<TCGFtpApiOption>()
-                .Configure(configure);
-            services
-                  .AddHttpClient<GameProviderTCGFtpClientRepository>((sp, c) =>
-                  {
-                      var options = sp.GetRequiredService<IOptions<TCGFtpApiOption>>().Value;
-
-                      c.BaseAddress = options.Url;
-                  });
-            return services
-                .AddTransient<IGameProviderTCGFtpClientRepository>(sp => sp.GetRequiredService<GameProviderTCGFtpClientRepository>());
-        }
 
         public static IServiceCollection AddGameProvidersoRepository(this IServiceCollection services)
             => services
-                .AddTransient<IGameProviderFundTransferTransactionRepository, GameProviderFundTransferTransactionRepository>();
+            .AddTransient<IGameProviderFundTransferTransactionRepository, GameProviderFundTransferTransactionRepository>()
+            .AddTransient<IPlayerLoginRecordRepository, PlayerLoginRecordRepository>();
 
         public static IServiceCollection AddGameProviderScheduleLockRepository(
             this IServiceCollection services

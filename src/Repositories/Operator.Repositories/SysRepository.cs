@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
@@ -29,6 +30,11 @@ namespace TGS.Operator.Repositories
             if (brand == null)
                 return null;
 
+            var brandCurrency = await _tgsRepository.BrandCurrencies.AsQueryable()
+                .Where(bc => bc.BrandId == brand.Id)
+                .FirstAsync()
+                .ConfigureAwait(false);
+
             if (string.IsNullOrWhiteSpace(brand.LogoInfo))
             {
                 return new BrandInfo(
@@ -37,6 +43,8 @@ namespace TGS.Operator.Repositories
                     default!,
                     default!,
                     default!,
+                    brand.Status,
+                    brandCurrency.CurrencyCode,
                     brand.EnableSms,
                     brand.EnableSmsRegisterFlow);
             }
@@ -49,6 +57,8 @@ namespace TGS.Operator.Repositories
                 logo.DesktopLogoUrl,
                 logo.MobileLogoUrl,
                 logo.LoadingUrl,
+                brand.Status,
+                brandCurrency.CurrencyCode,
                 brand.EnableSms,
                 brand.EnableSmsRegisterFlow);
         }

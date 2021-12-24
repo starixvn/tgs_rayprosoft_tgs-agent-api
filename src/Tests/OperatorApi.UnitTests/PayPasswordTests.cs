@@ -186,7 +186,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
@@ -194,7 +194,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeOperator,
                 fakeEmailClient,
                 fakeSmsServiceClient,
-                fakeSysRepository);
+                fakeBrandRepository);
 
             var email = "email@test.com";
 
@@ -246,13 +246,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }))
                 .Returns(ValueTask.FromResult(new SendEmailResponse()));
 
-            fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
+            fakeBrandRepository.GetBrandInfoAsync(Arg.Any<Guid>())
                 .Returns(new BrandInfo(
                     player.BrandId,
                     "brandCode",
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),
+                    Core.Models.Enums.BrandStatus.Active,
+                    "CNY",
                     false,
                     false));
 
@@ -284,7 +286,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
             var command = new StartChangePayPasswordCommand(
                 player.PlayerCode,
@@ -296,7 +298,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeOperator,
                 fakeEmailClient,
                 fakeSmsServiceClient,
-                fakeSysRepository);
+                fakeBrandRepository);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
         }

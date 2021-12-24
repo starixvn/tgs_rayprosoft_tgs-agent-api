@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Tgs;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Brand
 {
     internal class GetBrandQueryService : IGetService<BrandQuery, BrandInfo>
     {
-        private readonly ISysRepository _sysRepository;
+        private readonly IBrandRepository _brandRepository;
 
-        public GetBrandQueryService(ISysRepository sysRepository)
+        public GetBrandQueryService(IBrandRepository brandRepository)
         {
-            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         }
 
         public async ValueTask<BrandInfo> GetAsync(
             BrandQuery query,
             CancellationToken cancellationToken = default)
         {
-            var brandInfo = await _sysRepository
+            var brandInfo = await _brandRepository
                 .GetBrandInfoAsync(query.BrandId)
                 .ConfigureAwait(false);
 
