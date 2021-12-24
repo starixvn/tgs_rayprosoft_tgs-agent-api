@@ -19,6 +19,7 @@ using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
 using TGS.Apis.TgsApi.GameProviders.TCG;
+using TGS.Apis.TgsApi.GameProviders.TF;
 using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Apis.TgsApi.GameProviders.WGHorse;
 using TGS.Apis.TgsApi.GameProviders.WGSports;
@@ -53,7 +54,8 @@ namespace TGS.Apis.TgsApi
             { LY, "LY/ly.json" },
             { BetConstruct, "BetConstruct/betconstruct.json" },
             { Avia, "Avia/avia.json" },
-            { Jili, "Jili/jili.json" }
+            { Jili, "Jili/jili.json" },
+            { TFGaming, "TF/tf.json" }
         };
 
         private static readonly IReadOnlyDictionary<string, Type> _StartupMap = new Dictionary<string, Type>
@@ -80,7 +82,8 @@ namespace TGS.Apis.TgsApi
             { LY, typeof(LYStartup) },
             { BetConstruct, typeof(BetConstructStartup) },
             { Avia, typeof(AviaStartup) },
-            { Jili, typeof(JiliStartup) }
+            { Jili, typeof(JiliStartup) },
+            { TFGaming, typeof(TFStartup) }
         };
     }
 }

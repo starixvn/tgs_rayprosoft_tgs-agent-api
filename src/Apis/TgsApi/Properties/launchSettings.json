@@ -230,6 +230,16 @@
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
     },
+    "TgsApi-TFGaming": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "TF"
+      },
+      "applicationUrl": "http://localhost:62330;http://+:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -365,6 +375,17 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "GameProviderCode": "JILI"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "Docker-TFGaming": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "TF"
       },
       "publishAllPorts": true,
       "useSSL": true
