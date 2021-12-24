@@ -232,6 +232,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
+        public DbSet<PlayerParent> PlayerParents { get; set; }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);
