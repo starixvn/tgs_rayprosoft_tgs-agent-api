@@ -6,6 +6,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class Brand : BaseEntity<Guid>
     {
+        public AgentDividendType AgentDividendType { get; set; }
+
         public virtual ICollection<Announcement> Announcements { get; set; }
 
         public string ApiKey { get; set; }
@@ -15,6 +17,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public bool AutoSentPlayerBonus { get; set; }
 
         public virtual ICollection<BrandBetLimit> BetLimits { get; set; }
+
+        public virtual ICollection<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
 
         public virtual ICollection<BrandGroup> BrandGroups { get; set; }
 
@@ -33,6 +37,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string Description { get; set; }
 
         public virtual ICollection<BrandDomain> Domains { get; set; }
+
+        public bool EnableAgentSms { get; set; }
 
         public bool EnableSms { get; set; }
 
@@ -83,9 +89,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string TimeZoneId { get; set; }
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
-
-        public AgentDividendType AgentDividendType { get; set; }
-
-        public virtual ICollection<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
     }
 }
