@@ -1235,6 +1235,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("EnableAgentSms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_agent_sms");
+
                     b.Property<bool>("EnableSms")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
