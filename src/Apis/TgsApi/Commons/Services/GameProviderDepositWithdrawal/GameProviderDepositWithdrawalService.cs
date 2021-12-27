@@ -54,11 +54,11 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
         public async ValueTask<GameProviderDepositWithdrawalResponse> GameProviderDepositAsync(
             GameProviderDepositWithdrawalRequest request)
         {
-            var amount = Math.Abs(request.Amount) * -1;
+            var amount = Math.Abs(request.Amount);
             var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(request.GameProviderId);
             var playerBalance = await _playerOperations.GetPlayerBalanceAsync(request.PlayerWalletId, false);
 
-            if (playerBalance + amount < 0)
+            if (playerBalance - amount < 0)
             {
                 throw new PlayerHasInsufficientFundsException();
             }
@@ -77,7 +77,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
                     FundSource = FundSource.FundOut,
                     FromWallet = "Default",
                     ToWallet = gameProvider.Code,
-                    Amount = amount,
+                    Amount = -amount,
                     Balance = 0,
                     CreatedOn = DateTimeOffset.UtcNow,
                     Description = string.Empty
@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal
 
             var wallet = await _cashServiceClient.GameProviderDepositAsync(
                 request.PlayerWalletId,
-                request.Amount,
+                amount,
                 gameProvider.Code,
                 transactionGameProviderId.ToString()).ConfigureAwait(false);
 
