@@ -4,6 +4,7 @@ using Hangfire;
 using TGS.Workers.Schedulers.Hangfire.Services;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
+using TGS.Workers.Schedulers.Jobs.ArrearsEmail;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
