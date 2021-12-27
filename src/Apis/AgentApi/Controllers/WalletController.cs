@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.Wallet;
-using Tgs.ServiceUtility;
+using TGS.Services.Agent.ApplicationServices.Wallet;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

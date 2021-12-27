@@ -6,8 +6,8 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.Wallet;
 using TGS.Services.WalletService;
+using TGS.Services.Agent.ApplicationServices.Wallet;
 
 namespace Agent.UnitTests
 {
@@ -37,22 +37,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "aaabbb",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>())));
+                    0M)));
 
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 

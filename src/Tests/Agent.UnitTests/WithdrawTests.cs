@@ -8,8 +8,8 @@ using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.Services.Withdraw;
 using TGS.Services.WalletService;
+using TGS.Services.Agent.ApplicationServices.Withdraw;
 
 namespace Agent.UnitTests
 {
@@ -46,22 +46,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "aaabbb",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>()));
+                    0M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -136,22 +130,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "aaabbb",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>()));
+                    0M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))

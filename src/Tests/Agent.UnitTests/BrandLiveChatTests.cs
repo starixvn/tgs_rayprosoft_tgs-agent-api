@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using TGS.Services.Agent.Services.BrandLiveChat;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.Agent.ApplicationServices.BrandLiveChat;
 
 namespace Agent.UnitTests
 {

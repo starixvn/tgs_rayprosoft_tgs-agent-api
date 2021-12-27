@@ -9,7 +9,7 @@ namespace TGS.Apis.AgentApi.Extensions
         public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
             string[] bypassRouting)
         {
-            var bypass = bypassRouting.Concat(new[] {"/api/auth"}).Distinct().ToArray();
+            var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
 
             app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
                 builder => builder

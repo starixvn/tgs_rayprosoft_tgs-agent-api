@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
-using Tgs.Payment.Clients;
+using TGS.Services.Agent.ApplicationServices.BrandPayments;
+using TGS.Services.Agent.ApplicationServices.Withdraw;
 using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.Services.BrandPayments;
-using TGS.Services.Agent.Services.Withdraw;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

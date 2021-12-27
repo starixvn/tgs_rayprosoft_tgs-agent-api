@@ -9,7 +9,7 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Controllers.Contraints;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
-using TGS.Services.Agent.Services.PayPassowrd;
+using TGS.Services.Agent.ApplicationServices.PayPassowrd;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

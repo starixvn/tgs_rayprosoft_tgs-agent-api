@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent
@@ -15,20 +13,14 @@ namespace TGS.Services.Agent
         string? QQ,
         string? Wechat,
         string InvitationCode,
-        string? BrandUrl,
-        int AgentLevel,
         byte[] PayPassword,
         byte[] PaySalt,
         byte[] Password,
         byte[] Salt,
-        decimal AccumulatedProfitSharing,
-        decimal DividendPercentage,
-        string? ParentUserName,
+        Guid? ParentAgentId,
         DateTimeOffset RegisteredOn,
-        decimal Balance,
         AgentStatus Status,
         AgentType Type,
         AgentLevelType AgentLevelType,
-        AgentDividendType AgentDividendType,
-        IEnumerable<AgentDividendCondition> AgentDividendConditions);
+        decimal DividendPercentage);
 }

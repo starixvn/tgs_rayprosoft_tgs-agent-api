@@ -3,12 +3,12 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.BrandLiveChat;
-using Tgs.ServiceUtility;
+using TGS.Services.Agent.ApplicationServices.BrandLiveChat;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
