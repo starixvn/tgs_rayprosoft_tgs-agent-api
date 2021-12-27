@@ -59,48 +59,23 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             _gameProviderOperations = gameProviderOperations;
         }
 
-        [HttpPost]
-        [Route("getbalance")]
-        [ResolveRequest(Type = typeof(GetBalanceRequest))]
-        public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var r = await _actions.GetBalanceAsync(GameProviderCode, playerCode)
-                .ConfigureAwait(false);
-
-            return _map.Response(request.Body.UserId, r);
-        }
-
-        [HttpPost]
-        [Route("placebet")]
-        [ResolveRequest(Type = typeof(PlaceBetRequest))]
-        public async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
+        /// <summary>
+        ///     This action is to cancel place bet / place bet parlay
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Route("cancelbet")]
+        [ResolveRequest(Type = typeof(CancelBetRequest))]
+        public async ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
             var betData = _map.Request(playerCode, data, request);
-            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
-            await CacheLockAmountAsync(betData.Transactions);
-
-            return _map.Response(request.Body, r);
-        }
-
-        [HttpPost]
-        [Route("placebetparlay")]
-        [ResolveRequest(Type = typeof(PlaceBetParlayRequest))]
-        public async ValueTask<PlaceBetParlayResponse> PlaceBetParlayAsync(PlaceBetParlayRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync()
-                .ConfigureAwait(false);
-
-            var betData = _map.Request(playerCode, data, request);
-            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
-
-            await CacheLockAmountAsync(betData.Transactions);
+            await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
 
             return _map.Response(request.Body, r);
         }
@@ -161,25 +136,106 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             return _map.Response(request.Body, r);
         }
 
-        /// <summary>
-        ///     This action is to cancel place bet / place bet parlay
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [Route("cancelbet")]
-        [ResolveRequest(Type = typeof(CancelBetRequest))]
-        public async ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
+        [HttpPost]
+        [Route("getbalance")]
+        [ResolveRequest(Type = typeof(GetBalanceRequest))]
+        public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var r = await _actions.GetBalanceAsync(GameProviderCode, playerCode)
+                .ConfigureAwait(false);
+
+            return _map.Response(request.Body.UserId, r);
+        }
+
+        [HttpPost]
+        [Route("placebet")]
+        [ResolveRequest(Type = typeof(PlaceBetRequest))]
+        public async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
             var betData = _map.Request(playerCode, data, request);
-            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
 
-            await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
+            await CacheLockAmountAsync(betData.Transactions);
 
             return _map.Response(request.Body, r);
+        }
+
+        [HttpPost]
+        [Route("placebetparlay")]
+        [ResolveRequest(Type = typeof(PlaceBetParlayRequest))]
+        public async ValueTask<PlaceBetParlayResponse> PlaceBetParlayAsync(PlaceBetParlayRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
+
+            await CacheLockAmountAsync(betData.Transactions);
+
+            return _map.Response(request.Body, r);
+        }
+
+        [Route("resettle")]
+        [ResolveRequest(Type = typeof(ResettleBetRequest))]
+        public async ValueTask<ResettleBetResponse> ResettleBetAsync(ResettleBetRequest request)
+        {
+            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var autoCloseRound =
+                await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
+
+            var isTestEnv = HttpContext.Items.Get(SabaConsts.ContextItems.IsTestEnvironment, false);
+
+            var transactions = request.Body.Transactions.Select(t =>
+            {
+                var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
+
+                var gameActionType = _services.GetSettleTransactionGameActionType(t.Status, t.Payout);
+
+                return new SettleTransaction(
+                    playerCode, t.ExternalTransactionId.ToString(),
+                    t.UpdateTime, t.SettleDate, gameActionType,
+                    t.Payout);
+            }).ToArray();
+
+            var playerConfigurationIds = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, transactions)
+                .ConfigureAwait(false);
+
+            var externalRoundIds = await GetExternalRoundIdMapCacheAsync(gameProviderId, transactions)
+                .ConfigureAwait(false);
+
+            var grouping = (from t in transactions
+                            let type = t.GameActionType switch
+                            {
+                                GameActionType.CancelTransaction => "cancel",
+                                _ => "settle"
+                            }
+                            select new
+                            {
+                                Type = type,
+                                Data = t
+                            }).ToLookup(v => v.Type, v => v.Data);
+
+            var cancelTransactions = grouping.Contains("cancel")
+                ? grouping["cancel"].ToArray()
+                : Array.Empty<SettleTransaction>();
+
+            var settleTransactions = grouping.Contains("settle")
+                ? grouping["settle"].ToArray()
+                : Array.Empty<SettleTransaction>();
+
+            var results = await ExecuteSettleAndVoidRoundAsync(gameProviderId, playerConfigurationIds,
+                externalRoundIds, autoCloseRound, settleTransactions, cancelTransactions, true).ConfigureAwait(false);
+
+            await RemoveExternalRoundIdMapCacheAsync(transactions).ConfigureAwait(false);
+
+            return _map.Response(request, results);
         }
 
         [Route("settle")]
@@ -196,9 +252,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             {
                 var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
 
+                var gameActionType = _services.GetSettleTransactionGameActionType(t.Status, t.Payout);
+
                 return new SettleTransaction(
                     playerCode, t.ExternalTransactionId.ToString(),
-                    t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
+                    t.UpdateTime, t.SettleDate, gameActionType,
                     t.Payout);
             }).ToArray();
 
@@ -212,7 +270,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                             let type = t.GameActionType switch
                             {
                                 GameActionType.CancelTransaction => "cancel",
-                                _                                => "settle"
+                                _ => "settle"
                             }
                             select new
                             {
@@ -268,70 +326,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             return _map.Response(request, result);
         }
 
-        [Route("resettle")]
-        [ResolveRequest(Type = typeof(ResettleBetRequest))]
-        public async ValueTask<ResettleBetResponse> ResettleBetAsync(ResettleBetRequest request)
-        {
-            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var autoCloseRound =
-                await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
-
-            var isTestEnv = HttpContext.Items.Get(SabaConsts.ContextItems.IsTestEnvironment, false);
-
-            var transactions = request.Body.Transactions.Select(t =>
-            {
-                var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
-
-                return new SettleTransaction(
-                    playerCode, t.ExternalTransactionId.ToString(),
-                    t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
-                    t.Payout);
-            }).ToArray();
-
-            var playerConfigurationIds = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, transactions)
-                .ConfigureAwait(false);
-
-            var externalRoundIds = await GetExternalRoundIdMapCacheAsync(gameProviderId, transactions)
-                .ConfigureAwait(false);
-
-            var grouping = (from t in transactions
-                            let type = t.GameActionType switch
-                            {
-                                GameActionType.CancelTransaction => "cancel",
-                                _                                => "settle"
-                            }
-                            select new
-                            {
-                                Type = type,
-                                Data = t
-                            }).ToLookup(v => v.Type, v => v.Data);
-
-            var cancelTransactions = grouping.Contains("cancel")
-                ? grouping["cancel"].ToArray()
-                : Array.Empty<SettleTransaction>();
-
-            var settleTransactions = grouping.Contains("settle")
-                ? grouping["settle"].ToArray()
-                : Array.Empty<SettleTransaction>();
-
-            var results = await ExecuteSettleAndVoidRoundAsync(gameProviderId, playerConfigurationIds,
-                externalRoundIds, autoCloseRound, settleTransactions, cancelTransactions, true).ConfigureAwait(false);
-
-            await RemoveExternalRoundIdMapCacheAsync(transactions).ConfigureAwait(false);
-
-            return _map.Response(request, results);
-        }
-
         #region Private Methods
-
-        private async ValueTask CacheLockAmountAsync(TransactionData[] transactions)
-        {
-            foreach (var t in transactions)
-            {
-                await _cacheManager.SafeCacheAsync(SabaConsts.RedisKey.LockAmount, t.ExternalRoundId,
-                    TimeSpan.FromHours(12), t.Amount);
-            }
-        }
 
         private async ValueTask CacheExternalRoundIdMapAsync(TransactionData[] transactions)
         {
@@ -342,79 +337,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             }
         }
 
-        private async ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
-            string externalRoundId) =>
-            await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.LockAmount, externalRoundId,
-                async () => await _services.GetLockAmountAsync(playerCode, gameProviderId, externalRoundId)
-                    .ConfigureAwait(false));
-
-        private async ValueTask RemoveLockAmountCacheAsync(TransactionData[] transactions)
+        private async ValueTask CacheLockAmountAsync(TransactionData[] transactions)
         {
-            var cacheKeys = transactions.Select(t => new CacheKey
-            {
-                CacheType = SabaConsts.RedisKey.LockAmount,
-                Key = t.ExternalRoundId
-            }).ToArray();
-
-            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
-        }
-
-        private async ValueTask<Dictionary<string, string>> GetExternalRoundIdMapCacheAsync(Guid gameProviderId,
-            IEnumerable<TransactionInfo> transactions)
-        {
-            var map = new Dictionary<string, string>();
-
             foreach (var t in transactions)
             {
-                var externalTransactionId = t.ExternalTransactionId;
-                var externalRoundId =
-                    await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.SabaTxIdMap, externalTransactionId,
-                        async () => await _services
-                            .GetExternalRoundIdAsync(gameProviderId, t.PlayerCode, externalTransactionId)
-                            .ConfigureAwait(false));
-
-                map[externalTransactionId] = externalRoundId;
+                await _cacheManager.SafeCacheAsync(SabaConsts.RedisKey.LockAmount, t.ExternalRoundId,
+                    TimeSpan.FromHours(12), t.Amount);
             }
-
-            return map;
         }
-
-        private async ValueTask RemoveExternalRoundIdMapCacheAsync(IEnumerable<TransactionInfo> transactions)
-        {
-            var cacheKeys = transactions.Select(t => new CacheKey
-            {
-                CacheType = SabaConsts.RedisKey.SabaTxIdMap,
-                Key = t.ExternalTransactionId
-            }).ToArray();
-
-            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
-        }
-
-        private async ValueTask<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(
-            Guid gameProviderId, IEnumerable<TransactionInfo> transactions)
-        {
-            var map = new Dictionary<string, Guid>();
-
-            foreach (var playerCode in transactions.GroupBy(t => t.PlayerCode).Select(g => g.Key))
-            {
-                if (map.ContainsKey(playerCode))
-                {
-                    continue;
-                }
-
-                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
-                    .ConfigureAwait(false);
-
-                var gameProviderConfigurationId =
-                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
-                        .ConfigureAwait(false);
-
-                map.Add(playerCode, gameProviderConfigurationId);
-            }
-
-            return map;
-        }
-
 
         private async ValueTask<BatchBetResult[]> ExecuteSettleAndVoidRoundAsync(Guid gameProviderId,
             Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
@@ -448,6 +378,79 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             }
 
             return betResults.ToArray();
+        }
+
+        private async ValueTask<Dictionary<string, string>> GetExternalRoundIdMapCacheAsync(Guid gameProviderId,
+            IEnumerable<TransactionInfo> transactions)
+        {
+            var map = new Dictionary<string, string>();
+
+            foreach (var t in transactions)
+            {
+                var externalTransactionId = t.ExternalTransactionId;
+                var externalRoundId =
+                    await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.SabaTxIdMap, externalTransactionId,
+                        async () => await _services
+                            .GetExternalRoundIdAsync(gameProviderId, t.PlayerCode, externalTransactionId)
+                            .ConfigureAwait(false));
+
+                map[externalTransactionId] = externalRoundId;
+            }
+
+            return map;
+        }
+
+        private async ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
+                            string externalRoundId) =>
+            await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.LockAmount, externalRoundId,
+                async () => await _services.GetLockAmountAsync(playerCode, gameProviderId, externalRoundId)
+                    .ConfigureAwait(false));
+
+        private async ValueTask<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(
+            Guid gameProviderId, IEnumerable<TransactionInfo> transactions)
+        {
+            var map = new Dictionary<string, Guid>();
+
+            foreach (var playerCode in transactions.GroupBy(t => t.PlayerCode).Select(g => g.Key))
+            {
+                if (map.ContainsKey(playerCode))
+                {
+                    continue;
+                }
+
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
+                    .ConfigureAwait(false);
+
+                var gameProviderConfigurationId =
+                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
+                        .ConfigureAwait(false);
+
+                map.Add(playerCode, gameProviderConfigurationId);
+            }
+
+            return map;
+        }
+
+        private async ValueTask RemoveExternalRoundIdMapCacheAsync(IEnumerable<TransactionInfo> transactions)
+        {
+            var cacheKeys = transactions.Select(t => new CacheKey
+            {
+                CacheType = SabaConsts.RedisKey.SabaTxIdMap,
+                Key = t.ExternalTransactionId
+            }).ToArray();
+
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
+        }
+
+        private async ValueTask RemoveLockAmountCacheAsync(TransactionData[] transactions)
+        {
+            var cacheKeys = transactions.Select(t => new CacheKey
+            {
+                CacheType = SabaConsts.RedisKey.LockAmount,
+                Key = t.ExternalRoundId
+            }).ToArray();
+
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
         }
 
         private ValueTask<BatchBetResult> SettleBatchAsync(Guid gameProviderId, bool autoCloseRound,
@@ -512,6 +515,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             return await _actions.CancelBatchAsync(batchBetData).ConfigureAwait(false);
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }
