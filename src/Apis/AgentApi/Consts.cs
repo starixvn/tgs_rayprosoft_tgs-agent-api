@@ -9,7 +9,7 @@
 
         public const string Site = "agent-api";
 
-        public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger"};
+        public static readonly string[] DefaultBypassRouting = { "/health", "/metrics", "/favicon.ico", "/swagger" };
 
         public static class ClaimName
         {

@@ -4,8 +4,8 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
-using TGS.Services.Agent.Services.Localization;
 using Tgs.ServiceUtility;
+using TGS.Services.Agent.ApplicationServices.Localization;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -13,7 +13,7 @@ namespace TGS.Apis.AgentApi.Controllers
     [ApiController]
     public class LocalizationController : ControllerBase
     {
-        private readonly static PhysicalFileProvider _FileProvider =
+        private static readonly PhysicalFileProvider _FileProvider =
             new PhysicalFileProvider(Environment.CurrentDirectory);
 
         [HttpGet]

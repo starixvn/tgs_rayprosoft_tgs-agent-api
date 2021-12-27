@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
-using TGS.Services.Agent.Services.BrandPayments;
+using TGS.Services.Agent.ApplicationServices.BrandPayments;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace Agent.UnitTests
 {
     [TestFixture]
     public class PaymentTests

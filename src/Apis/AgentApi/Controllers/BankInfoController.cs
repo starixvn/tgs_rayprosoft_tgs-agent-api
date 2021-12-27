@@ -11,7 +11,7 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Agent.Services.BankInfos;
+using TGS.Services.Agent.ApplicationServices.BankInfos;
 
 namespace TGS.Apis.AgentApi.Controllers
 {

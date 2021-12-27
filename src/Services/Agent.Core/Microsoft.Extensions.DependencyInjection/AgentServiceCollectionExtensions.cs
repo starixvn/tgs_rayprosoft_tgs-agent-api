@@ -26,11 +26,17 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
-                .AddMail();
+                .AddMail()
+                .AddSmsClient((sp, httpClient) =>
+                {
+                    var options = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
 
-            var opConfiguration = new AgentConfiguration(services);
+                    httpClient.BaseAddress = options.SmsBaseUrl;
+                });
 
-            return opConfiguration;
+            var agentConfiguration = new AgentConfiguration(services);
+
+            return agentConfiguration;
         }
     }
 }

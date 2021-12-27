@@ -30,7 +30,8 @@ namespace TGS.Services.Operator.Services.Player
                 validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command,
+        public async ValueTask<string> GetAsync(
+            StartSetPlayerPhoneCommand command,
             CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations

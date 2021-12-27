@@ -6,18 +6,19 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.Agent;
+using TGS.Services.Agent.ApplicationServices;
+using TGS.Services.Agent.ApplicationServices.Agent;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Operations.Validators;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -29,6 +30,22 @@ namespace TGS.Apis.AgentApi.Controllers
         private readonly IMediator _mediator;
 
         public AgentController(IMediator mediator) => _mediator = mediator;
+
+        /// <summary>
+        /// Check username existed
+        /// </summary>
+        [HttpGet("checkUsername")]
+        public async Task<CheckUsernameResponse> CheckUsernameAsync(
+            [FromServices] IGetService<CheckAgentExistsQuery, bool> getUserNameQueryService,
+            [FromQuery] CheckUsernameRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new CheckAgentExistsQuery(brandId, request.Username);
+            var hasExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
+
+            return new CheckUsernameResponse { Exists = hasExisted };
+        }
 
         [HttpPost("create")]
         [CheckAgentEnabled]
@@ -90,17 +107,27 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<GetAgentResponse> GetAgentInfoByIdAsync(
             [FromServices] IStatusValidator statusValidator,
             [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
+            [FromServices] IGetService<GetBrandInfoQuery, BrandInfo> getBrandService,
+            [FromServices] IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition> queryDividendsService,
             Guid agentId)
         {
             var brandId = HttpContext.Items.GetBrandId();
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
-            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
+            var brand = await getBrandService
+                .GetAsync(new GetBrandInfoQuery(brandId))
+                .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
-            if (agentInfo == null)
-            {
-                throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
-            }
+            var agentInfo = await getAgentService
+                .GetAsync(new GetAgentInfoQuery(agentId))
+                .ConfigureAwait(false)
+                ?? throw new Core.Models.Exceptions.AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+
+            var parentAgentInfo = agentInfo.ParentAgentId == null
+                ? null
+                : await getAgentService
+                    .GetAsync(new GetAgentInfoQuery(agentInfo.ParentAgentId.Value))
+                    .ConfigureAwait(false);
 
             return new GetAgentResponse
             {
@@ -114,25 +141,27 @@ namespace TGS.Apis.AgentApi.Controllers
                     QQ = agentInfo.QQ,
                     Wechat = agentInfo.Wechat,
                     InvitationCode = agentInfo.InvitationCode,
-                    BrandUrl = agentInfo.BrandUrl,
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
-                    AgentLevel = agentInfo.AgentLevel,
-                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
+                    AgentLevel = (int)agentInfo.AgentLevelType,
                     DividendPercentage = agentInfo.DividendPercentage,
-                    ParentUsername = agentInfo.ParentUserName,
+                    ParentUsername = parentAgentInfo?.Username,
                     RegisteredOn = agentInfo.RegisteredOn,
-                    Balance = agentInfo.Balance,
                     Status = agentInfo.Status.ToString(),
                     Type = agentInfo.Type.ToString(),
                     LevelType = agentInfo.AgentLevelType.ToString(),
-                    AgentDividendType = agentInfo.AgentDividendType.ToString(),
-                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
-                    {
-                        Rank = x.Rank,
-                        NetProfit = x.NetProfit,
-                        ActiveNumber = x.ActiveNumber,
-                        DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray()
+                    AgentDividendType = brand.AgentDividendType.ToString(),
+                    DividendConditions = await queryDividendsService
+                        .QueryAsync(new GetAgentDividendConditionsByIdQuery(brandId, agentId))
+                        .OrderBy(dc => dc.Rank)
+                        .Select(x => new DividendConditionModel
+                        {
+                            Rank = x.Rank,
+                            NetProfit = x.NetProfit,
+                            ActiveNumber = x.ActiveNumber,
+                            DividendPercentage = x.DividendPercentage
+                        })
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
                 }
             };
         }
@@ -236,22 +265,33 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetAgentResponse> GetLoginAgentInfoAsync(
             [FromServices] IStatusValidator statusValidator,
+            [FromServices] IGetService<GetBrandInfoQuery, BrandInfo> getBrandService,
             [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
-            [FromServices] IQueryService<GetAgentDomainsQuery, string> getAgentDomainsService)
+            [FromServices] IGetService<GetAgentBalanceQuery, decimal> getAgentBalanceService,
+            [FromServices] IQueryService<GetAgentDomainsQuery, string> getAgentDomainsService,
+            [FromServices] IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition> queryDividendsService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+
+            var brand = await getBrandService
+                .GetAsync(new GetBrandInfoQuery(brandId))
+                .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
             var agentId = agentTokenData.AgentId;
 
-            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
+            var agentInfo = await getAgentService
+                .GetAsync(new GetAgentInfoQuery(agentId))
+                .ConfigureAwait(false)
+                ?? throw new Core.Models.Exceptions.AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
 
-            if (agentInfo == null)
-            {
-                throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
-            }
+            var parentAgentInfo = agentInfo.ParentAgentId == null
+                ? null
+                : await getAgentService
+                    .GetAsync(new GetAgentInfoQuery(agentInfo.ParentAgentId.Value))
+                    .ConfigureAwait(false);
 
             return new GetAgentResponse
             {
@@ -265,25 +305,30 @@ namespace TGS.Apis.AgentApi.Controllers
                     QQ = agentInfo.QQ,
                     Wechat = agentInfo.Wechat,
                     InvitationCode = agentInfo.InvitationCode,
-                    BrandUrl = agentInfo.BrandUrl,
+                    BrandUrl = brand.DomainUrl,
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
-                    AgentLevel = agentInfo.AgentLevel,
-                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
                     DividendPercentage = agentInfo.DividendPercentage,
-                    ParentUsername = agentInfo.ParentUserName,
+                    ParentUsername = parentAgentInfo?.Username,
                     RegisteredOn = agentInfo.RegisteredOn,
-                    Balance = agentInfo.Balance,
+                    Balance = await getAgentBalanceService
+                        .GetAsync(new GetAgentBalanceQuery(agentInfo.DefaultWalletId, agentInfo.Id))
+                        .ConfigureAwait(false),
                     Status = agentInfo.Status.ToString(),
                     Type = agentInfo.Type.ToString(),
                     LevelType = agentInfo.AgentLevelType.ToString(),
-                    AgentDividendType = agentInfo.AgentDividendType.ToString(),
-                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
-                    {
-                        Rank = x.Rank,
-                        NetProfit = x.NetProfit,
-                        ActiveNumber = x.ActiveNumber,
-                        DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray(),
+                    AgentDividendType = brand.AgentDividendType.ToString(),
+                    DividendConditions = await queryDividendsService
+                        .QueryAsync(new GetAgentDividendConditionsByIdQuery(brandId, agentId))
+                        .OrderBy(dc => dc.Rank)
+                        .Select(x => new DividendConditionModel
+                        {
+                            Rank = x.Rank,
+                            NetProfit = x.NetProfit,
+                            ActiveNumber = x.ActiveNumber,
+                            DividendPercentage = x.DividendPercentage
+                        })
+                        .ToArrayAsync()
+                        .ConfigureAwait(false),
                     AgentDomains = await getAgentDomainsService.QueryAsync(new GetAgentDomainsQuery(agentId))
                         .ToArrayAsync()
                         .ConfigureAwait(false)
@@ -299,21 +344,5 @@ namespace TGS.Apis.AgentApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public Task<LoginResponse> LoginAsync(LoginRequest request) =>
             _mediator.Send(request);
-
-        /// <summary>
-        /// Check username existed
-        /// </summary>
-        [HttpGet("checkUsername")]
-        public async Task<CheckUsernameResponse> CheckUsernameAsync(
-            [FromServices] IGetService<CheckAgentExistsQuery, bool> getUserNameQueryService,
-            [FromQuery] CheckUsernameRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new CheckAgentExistsQuery(brandId, request.Username);
-            var hasExisted = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
-
-            return new CheckUsernameResponse { Exists = hasExisted };
-        }
     }
 }

@@ -8,6 +8,9 @@ namespace TGS.Apis.AgentApi.Models
         [JsonPropertyName("accumulatedprofitsharing")]
         public decimal AccumulatedProfitSharing { get; init; }
 
+        [JsonPropertyName("agentdividendtype")]
+        public string AgentDividendType { get; init; }
+
         [JsonPropertyName("agentdomains")]
         public string[] AgentDomains { get; init; }
 
@@ -76,8 +79,5 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("wechat")]
         public string Wechat { get; init; }
-
-        [JsonPropertyName("agentdividendtype")]
-        public string AgentDividendType { get; init; }
     }
 }
