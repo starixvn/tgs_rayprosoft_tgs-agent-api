@@ -15,6 +15,7 @@
         GameProviderDeposit = 10,
         GameProviderWithdrawal = 11,
         UnsettledBetManual = 12,
+        AllAgentRebate = 1000,
         Other = 99
     }
 }

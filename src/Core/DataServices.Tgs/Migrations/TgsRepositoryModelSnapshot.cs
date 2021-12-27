@@ -3808,6 +3808,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<decimal>("AllAgentRebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("all_agent_rebate_amount");
+
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
