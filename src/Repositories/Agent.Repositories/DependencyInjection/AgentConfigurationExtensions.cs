@@ -6,6 +6,8 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class AgentConfigurationExtensions
     {
         public static AgentConfiguration AddTgsAgentRepository(this AgentConfiguration configuration)
-            => configuration.AddAgentRepository<AgentRepository>();
+            => configuration
+                .AddAgentRepository<AgentRepository>()
+                .AddBrandRepository<BrandRepository>();
     }
 }

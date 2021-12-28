@@ -22,6 +22,13 @@ namespace TGS.Services.Agent.Configuration
             return this;
         }
 
+        public AgentConfiguration AddBrandRepository<TBrandRepository>() where TBrandRepository : class, IBrandRepository
+        {
+            Services.AddTransient<IBrandRepository, TBrandRepository>();
+
+            return this;
+        }
+
         public AgentConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
             Services.AddPaymentServiceClient(configure);
