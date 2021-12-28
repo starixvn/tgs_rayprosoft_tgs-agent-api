@@ -40,12 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[5.0.13, 6.0)" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="Microsoft.VisualStudio.SlowCheetah" Version="4.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -77,7 +73,7 @@
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.1-alpha" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.8" />
   </ItemGroup>

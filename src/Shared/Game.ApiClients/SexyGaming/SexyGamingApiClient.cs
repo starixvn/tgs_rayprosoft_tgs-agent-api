@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using TGS.Core.Infrastructures.ApiClient;
@@ -15,7 +12,6 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
 {
     public interface ISexyGamingApiClient
     {
-
         Task<SexyGamingCreateMemberResponse> CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request);
 
         Task<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingGameUrlRequest request);
@@ -25,14 +21,12 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
 
     public sealed class SexyGamingApiClient : BaseApiClient, ISexyGamingApiClient
     {
-
         private readonly string _gameProvider = Consts.GameProvider.SexyGaming;
 
         public SexyGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
            : base(client, logger, json)
         {
         }
-
 
         async Task<SexyGamingCreateMemberResponse> ISexyGamingApiClient.CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request)
         {
@@ -60,7 +54,6 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
             var jsonString = System.Text.Json.JsonSerializer.Serialize(source);
             var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString);
             return ExecuteFormRequestAsync<TResult>(configuration.ApiUrl, path, data, logPrefix: prefix);
-
         }
     }
 }
