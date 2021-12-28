@@ -295,6 +295,10 @@ namespace TGS.Apis.OperatorApi
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, conifg) =>
                 {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
                     conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
             services.AddOpenTelemetryTracing(
