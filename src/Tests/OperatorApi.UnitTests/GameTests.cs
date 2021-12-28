@@ -18,12 +18,12 @@ using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Services.Game;
-using TGS.Services.Operator.Services.GameBalance;
-using TGS.Services.Operator.Services.Wallet;
 using TGS.Services.PluggableServices;
 using Tgs.ServiceUtility;
 using PluggableModels = TGS.Services.PluggableServices.Models;
+using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Services.Operator.ApplicationServices.GameBalance;
+using TGS.Services.Operator.ApplicationServices.Wallet;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

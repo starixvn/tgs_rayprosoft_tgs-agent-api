@@ -37,19 +37,15 @@
     <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="5.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="5.0.2" />
-    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.1.80" />
+    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.2.3" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.1" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.1" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.5" />
     <PackageReference Include="ClosedXML" Version="0.95.4" />
     <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
-    <PackageReference Include="FluentValidation" Version="10.3.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="5.0.11" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="[5.0.0,6.0)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="[5.0.0,6.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[5.0.0,6.0)" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Include="prometheus-net.DotNetRuntime" Version="4.2.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />

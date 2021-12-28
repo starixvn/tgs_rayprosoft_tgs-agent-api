@@ -12,8 +12,8 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.Operator.Services.BrandPayments;
-using TGS.Services.Operator.Services.Withdraw;
+using TGS.Services.Operator.ApplicationServices.BrandPayments;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

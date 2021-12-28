@@ -10,7 +10,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Banner;
+using TGS.Services.Operator.ApplicationServices.Banner;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

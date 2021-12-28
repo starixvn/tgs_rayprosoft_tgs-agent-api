@@ -104,8 +104,8 @@ namespace TGS.Services.Agent.ApplicationServices.Agent
 
             if (brand.AgentDividendType == AgentDividendType.MultipleLayer)
             {
-                agent.AgentDividendConditions = brand.BrandAgentDividendConditions!.Select(x
-                    => new CoreModels.AgentDividendCondition
+                agent.AgentDividendConditions = brand.BrandAgentDividendConditions!.Select(
+                    x => new CoreModels.AgentDividendCondition
                     {
                         Rank = x.Rank,
                         NetProfit = x.NetProfit,

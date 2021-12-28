@@ -18,8 +18,8 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Deposit;
-using TGS.Services.Operator.Services.Player;
+using TGS.Services.Operator.ApplicationServices.Deposit;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

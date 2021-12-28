@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Validations.Rules;
 using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Controllers.Contraints;
@@ -24,7 +25,8 @@ namespace TGS.Apis.AgentApi.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpPatch, HK28CheckContraint]
+        [HttpPatch(Name = "ChangePayPassword"), HK28CheckContraint]
+        [ApiExplorerSettings(GroupName = "HK28")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public ValueTask ChangePayPasswordAsync(

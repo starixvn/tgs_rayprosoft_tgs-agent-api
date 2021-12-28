@@ -3,7 +3,7 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -10,7 +10,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Operator.Services.Withdraw;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

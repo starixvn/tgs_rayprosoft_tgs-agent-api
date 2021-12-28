@@ -3,7 +3,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.Payment.UmPay;
-using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
