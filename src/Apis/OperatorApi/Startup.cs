@@ -297,7 +297,8 @@ namespace TGS.Apis.OperatorApi
                 {
                     var nodeIp = conifg.GetValue<string>("NODE_IP");
 
-                    options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
 
                     conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
