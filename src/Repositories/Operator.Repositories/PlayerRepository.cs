@@ -68,8 +68,8 @@ namespace TGS.Operator.Repositories
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
         {
             var playerData = await _tgsRepository.Players.AsQueryable()
-                .FirstOrDefaultAsync(p => p.BrandId == brandId &&
-                    p.Username.ToLower() == userName.ToLower())
+                .FirstOrDefaultAsync(p => p.BrandId == brandId
+                    && p.Username.ToLower() == userName.ToLower())
                 .ConfigureAwait(false);
 
             if (playerData == null)
@@ -97,12 +97,11 @@ namespace TGS.Operator.Repositories
                 playerData.Salt);
         }
 
-        public async ValueTask PlayerLoginIpAsync(string playerCode, string ip)
+        public async ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host)
         {
-            var ipType = (int)IpType.LoginIp;
             var data = _tgsRepository.PlayerIpRecords
                 .AsQueryable()
-                .Where(x => x.PlayerCode == playerCode && x.IpType == ipType)
+                .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
                 .FirstOrDefault();
 
             if (data == null)
@@ -110,23 +109,27 @@ namespace TGS.Operator.Repositories
                 data = new PlayerIpRecord
                 {
                     PlayerCode = playerCode,
-                    IpType = ipType,
+                    IpType = 2,
                     Ip = ip,
+                    Host = host,
                     RecordOn = DateTimeOffset.UtcNow
                 };
+
                 _tgsRepository.PlayerIpRecords.Add(data);
             }
             else
             {
                 data.Ip = ip;
+                data.Host = host;
                 data.RecordOn = DateTimeOffset.UtcNow;
+
                 _tgsRepository.PlayerIpRecords.Update(data);
             }
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
+        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn)
         {
             var player = await _tgsRepository.Players
                 .FindAsync(playerCode)
@@ -141,6 +144,7 @@ namespace TGS.Operator.Repositories
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
+                    Host = host,
                     RecordOn = registeredOn
                 } ,
                 new()
@@ -148,6 +152,7 @@ namespace TGS.Operator.Repositories
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
+                    Host = host,
                     RecordOn = registeredOn
                 } };
 

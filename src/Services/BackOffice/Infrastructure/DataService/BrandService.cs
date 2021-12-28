@@ -65,12 +65,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await UpdateEntityAsync(brand);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
-            if (request.Status is Status.Active or Status.Maintenance)
+            if (request.Status is BrandStatus.Active or BrandStatus.Maintenance)
             {
                 var licensee = _repository.Licensees.AsQueryable().First(x => x.Id == brand.LicenseeId);
                 var reseller = _repository.Resellers.AsQueryable().First(x => x.Id == licensee.ResellerId);
                 var isActive = reseller.Status is Status.Active && licensee.Status is Status.Active &&
-                    request.Status is Status.Active;
+                    request.Status is BrandStatus.Active;
                 if (isActive)
                 {
                     await _maintenanceRedisService.CleartBrandMaintenanceAsync(brand.Id).ConfigureAwait(false);
@@ -108,7 +108,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 NextSettlementTo = nextToDate,
                 AutoSentAgentBonus = true,
                 AutoSentPlayerBonus = true,
-                Status = Status.Active,
+                Status = BrandStatus.Active,
                 AgentDividendType = request.AgentDividendType,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,

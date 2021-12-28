@@ -6,6 +6,12 @@ namespace TGS.Core.DataServices.Tgs
 {
     public interface ITgsRepository : IBaseRepository
     {
+        DbSet<BrandAllAgent> BrandAllAgents { get; set; }
+
+        DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
+
+        DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
+
         DbSet<AdminLog> AdminLogs { get; set; }
 
         DbSet<AgentBankInfo> AgentBankInfos { get; set; }
@@ -207,6 +213,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<WithdrawForm> WithdrawForms { get; set; }
 
         DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+
         DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
     }
 }

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -18,7 +20,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
-using TGS.Shared.Game.ApiClients.Extensions;
 
 namespace TGS.Apis.TgsApi.Commons
 {
@@ -83,6 +84,7 @@ namespace TGS.Apis.TgsApi.Commons
                     });
 
                 endpoints.MapMetrics();
+                endpoints.MapProfileViewer();
             });
         }
 
@@ -149,6 +151,25 @@ namespace TGS.Apis.TgsApi.Commons
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
                 });
+
+            services
+                .AddOpenTelemetryTracing(builder
+                    => builder
+                        .AddSource("TGS.*")
+                        .AddSource("Tgs.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddProfileViewExporter(profileViewBuilder =>
+                        {
+                            profileViewBuilder
+                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+                                .AddFilter(new UrlPathFilter("/health"));
+                        }))
+                .AddProfileViewer();
         }
 
         #region Abstract and Virtual Methods

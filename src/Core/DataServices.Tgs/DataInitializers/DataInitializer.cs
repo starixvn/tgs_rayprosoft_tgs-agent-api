@@ -107,7 +107,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new TCGGameProvider(env),
                 new Card365GameProvider(env),
                 new LYGameProvider(env),
-                new BetConstructProvider(env)
+                new BetConstructProvider(env),
+                new AviaGameProvider(env),
+                new JiliGameProvider(env)
             };
         }
 
@@ -476,7 +478,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Code = brand.Code,
                 Name = brand.Name,
                 OperationalEmail = brand.OperationalEmail,
-                Status = Status.Active,
+                Status = BrandStatus.Active,
                 CreatedByUsername = _AdminUsername,
                 UpdatedByUsername = _AdminUsername,
                 CreatedOn = _Now,

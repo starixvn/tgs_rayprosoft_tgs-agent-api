@@ -165,7 +165,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode, "127.0.0.1");
+            var command = new CommitPlayerInitPhoneCommand(
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost");
 
             moqValidateCodeOperator
                 .Setup(
@@ -196,7 +200,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var phone = "0988123456";
             var areaCode = "886";
 
-            var command = new CommitPlayerInitPhoneCommand(securityKey, validateCode, "127.0.0.1");
+            var command = new CommitPlayerInitPhoneCommand(
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost");
 
             moqValidateCodeOperator
                 .Setup(
@@ -251,9 +259,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var areaCode = "886";
 
             var command = new CommitPlayerInitPhoneCommand(
-                securityKey, 
-                validateCode, 
-                "127.0.0.1");
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost");
 
             moqValidateCodeOperator
                 .Setup(
@@ -271,6 +280,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.PlayerRegisterIpAsync(
                     It.Is<string>(x => x == playerCode),
                     It.Is<string>(x => x == command.IpAddress),
+                    It.Is<string>(x => x == command.HostName),
                     It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
         }

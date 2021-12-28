@@ -1370,6 +1370,85 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_agent_dividend_conditions");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgent", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.HasKey("BrandId")
+                        .HasName("pk_brand_all_agents");
+
+                    b.ToTable("brand_all_agents");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgentGameType", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<short>("AllAgentGameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_game_type");
+
+                    b.Property<bool>("HasValidBet")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_valid_bet");
+
+                    b.Property<bool>("HasWinLoss")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_win_loss");
+
+                    b.Property<bool>("Switch")
+                        .HasColumnType("boolean")
+                        .HasColumnName("switch");
+
+                    b.HasKey("BrandId", "AllAgentGameType")
+                        .HasName("pk_brand_all_agent_game_types");
+
+                    b.ToTable("brand_all_agent_game_types");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandAllAgentGameTypeCondition", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("AllAgentGameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("all_agent_game_type");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<short>("AllAgentRebateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_rebate_type");
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("net_profit");
+
+                    b.Property<decimal>("RebatePercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_percentage");
+
+                    b.HasKey("BrandId", "AllAgentGameType", "Rank", "AllAgentRebateType")
+                        .HasName("pk_brand_all_agent_game_type_conditions");
+
+                    b.ToTable("brand_all_agent_game_type_conditions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandBetLimit", b =>
                 {
                     b.Property<Guid>("BrandId")
@@ -1420,6 +1499,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("qr_code_url");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("type");
@@ -4205,6 +4285,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("ip_type");
 
+                    b.Property<string>("Host")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("host");
+
                     b.Property<string>("Ip")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -4270,6 +4355,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_login_records_player_code");
 
                     b.ToTable("player_login_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerParent", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("ParentPlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("parent_player_code");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_parent_code");
+
+                    b.ToTable("player_parents");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerRebate", b =>

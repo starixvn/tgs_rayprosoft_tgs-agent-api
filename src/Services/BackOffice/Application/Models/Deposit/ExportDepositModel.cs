@@ -10,6 +10,8 @@ namespace TGS.Services.BackOffice.Application.Models.Deposit
 
         public string Id { get; init; }
 
+        public string OrderNo { get; init; }
+
         public string PaymentMethod { get; init; }
 
         public string PaymentName { get; init; }

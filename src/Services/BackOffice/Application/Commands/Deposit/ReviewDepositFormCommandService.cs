@@ -55,7 +55,6 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         form.Id,
-                        form.Status,
                         actualAmount: command.ActualAmount)
                     .ConfigureAwait(false);
 
