@@ -4644,6 +4644,54 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_sports_bet_limits");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelAggregate", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("FromOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from_on");
+
+                    b.Property<DateTimeOffset>("ToOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to_on");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deposit_amount");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Turnover")
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover");
+
+                    b.Property<DateTimeOffset>("UpdateOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_on");
+
+                    b.HasKey("BrandId", "PlayerCode", "FromOn", "ToOn")
+                        .HasName("pk_player_vip_level_aggregates");
+
+                    b.HasIndex("PlayerCode", "FromOn", "ToOn")
+                        .HasDatabaseName("ix_player_vip_level_aggregates_player_code");
+
+                    b.ToTable("player_vip_level_aggregates");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Property<Guid>("Id")
