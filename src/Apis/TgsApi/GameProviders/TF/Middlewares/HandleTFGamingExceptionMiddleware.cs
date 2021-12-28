@@ -16,7 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
         public HandleTFGamingExceptionMiddleware(
            Func<string, IErrorMapper> mapper,
            ITgsLog log)
-           : base(mapper, Consts.GameProvider.TFGaming, log, "tfgaming")
+           : base(mapper, Consts.GameProvider.TFGaming, log, "tf")
         {
         }
 
@@ -27,11 +27,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
             var message = ErrorMapper.GetMessageByException(exception);
             var desc = error.Description(message);
 
-            //var res = new ErrorResponse
-            //{
-            //    ErrorCode = errorCode.ToString(),
-            //    ErrorText = desc
-            //};
+            var res = new ErrorResponse
+            {
+                ErrorCode = errorCode.ToString(),
+                ErrorText = desc
+            };
 
             context.Response.StatusCode = statusCode;
             return context.Response.WriteAsJsonAsync("");

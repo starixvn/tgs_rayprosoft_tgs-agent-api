@@ -38,7 +38,9 @@ namespace TGS.Shared.Game.ApiClients.TF
                 .SendAsync(request)
                 .ConfigureAwait(false);
 
-            var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var bodyJson = await response.Content
+                .ReadAsStringAsync()
+                .ConfigureAwait(false);
 
             var result = JsonSerializer.Deserialize<LaunchResponse>(bodyJson);
 

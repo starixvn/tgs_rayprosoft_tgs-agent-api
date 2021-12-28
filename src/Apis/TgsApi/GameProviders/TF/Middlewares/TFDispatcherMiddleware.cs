@@ -6,12 +6,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IO;
-using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
 {
     public class TFDispatcherMiddleware : IMiddleware
     {
+        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager =
+            new RecyclableMemoryStreamManager();
+
         private static readonly IReadOnlyDictionary<string, string> _Routes = new Dictionary<string, string>
         {
             { "Place bet", "/tf/api/placebet" },
@@ -20,15 +22,13 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
             { "Place bet rollback","/tf/api/rollback" },
             { "Loss", "/tf/api/settle" }
         };
-        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager =
-            new RecyclableMemoryStreamManager();
 
         public TFDispatcherMiddleware()
         {
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
-        {            
+        {
             context.Request.EnableBuffering();
 
             var streamReader = new StreamReader(context.Request.Body);

@@ -8,7 +8,6 @@ using TGS.Shared.Game.Models.TF.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.TF.Enums.GameApiError;
 
-
 namespace TGS.Apis.TgsApi.GameProviders.TF.Services
 {
     public sealed class TFErrorMapper : IErrorMapper
@@ -17,16 +16,16 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
            new Dictionary<Type, GameApiError>
            {
                 {typeof(InvalidCredentialsException), InvalidAuthenticationCredential},
-                //{typeof(MissingTokenException), PasswordOrAuthTokenError},
-                //{typeof(PlayerLoginExpiredException), UserIsDismissed},
-                //{typeof(PlayerNotFoundException), UserIsDismissed},
+                {typeof(MissingTokenException), InvalidAuthenticationCredential},
+                {typeof(PlayerLoginExpiredException), InvalidAuthenticationCredential},
+                {typeof(PlayerNotFoundException), UnknownOrInvalidMemberId},
                 {typeof(PlayerDisabledException), AccountIsFrozen},
                 {typeof(PlayerHasInsufficientFundsException), TryingToWithdrawMoreThanCurrentBalance},
                 {typeof(InvalidGameActionException), Undefined},
-                //{typeof(InvalidAmountException), InternalError},
+                {typeof(InvalidAmountException), InvalidAmountForWithdrawalDeposit},
                 {typeof(ArgumentException), MissingRequiredFields},
                 {typeof(ModelBindingException), Undefined},
-                //{typeof(InvalidStatusException), InternalError},
+                {typeof(InvalidStatusException), Undefined},
                 {typeof(InvalidOperationException), Undefined}
            };
 
@@ -34,11 +33,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    //{TransactionNotFound, InternalError},
-                    //{TransactionBeingCancelledNotFound, InternalError},
-                    //{TransactionBeingReferencedNotFound, InternalError},
-                    //{RoundNotFound, InternalError},
-                    //{GameNotFound, InternalError}
+                    {TransactionNotFound, Undefined},
+                    {TransactionBeingCancelledNotFound, Undefined},
+                    {TransactionBeingReferencedNotFound, Undefined},
+                    {RoundNotFound, Undefined},
+                    {GameNotFound, Undefined}
                 };
 
         public int GetApiErrorByException(Exception exception)
