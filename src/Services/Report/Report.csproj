@@ -9,13 +9,10 @@
   <ItemGroup>
     <Compile Remove="Application\Queries\Promotion\**" />
     <Compile Remove="Application\Queries\ReportHandlers\**" />
-    <Compile Remove="Domain\**" />
     <EmbeddedResource Remove="Application\Queries\Promotion\**" />
     <EmbeddedResource Remove="Application\Queries\ReportHandlers\**" />
-    <EmbeddedResource Remove="Domain\**" />
     <None Remove="Application\Queries\Promotion\**" />
     <None Remove="Application\Queries\ReportHandlers\**" />
-    <None Remove="Domain\**" />
   </ItemGroup>
 
   <ItemGroup>
