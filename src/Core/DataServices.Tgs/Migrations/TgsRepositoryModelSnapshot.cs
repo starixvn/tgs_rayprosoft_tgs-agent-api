@@ -4668,7 +4668,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on");
 
                     b.Property<decimal>("DepositAmount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
                     b.Property<Guid>("Id")
@@ -4676,7 +4677,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id");
 
                     b.Property<decimal>("Turnover")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("turnover");
 
                     b.Property<DateTimeOffset>("UpdateOn")

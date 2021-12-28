@@ -27,15 +27,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.ToOn)
                 .IsRequired();
             builder.Property(b => b.DepositAmount)
+                .HasPrecision(18, 6)
                 .IsRequired();
             builder.Property(b => b.Turnover)
+                .HasPrecision(18, 6)
                 .IsRequired();
             builder.Property(b => b.CreatedOn)
                 .IsRequired();
             builder.Property(b => b.UpdateOn)
                 .IsRequired();
 
-            builder.HasIndex(b =>new { b.PlayerCode, b.FromOn, b.ToOn })
+            builder.HasIndex(b => new { b.PlayerCode, b.FromOn, b.ToOn })
                 .HasDatabaseName("ix_player_vip_level_aggregates_player_code");
         }
     }
