@@ -9,11 +9,11 @@ namespace TGS.Services.Operator.ApplicationServices.Banner
 {
     internal class GetBannersQueryService : IQueryService<GetBannersQuery, BannerInfo>
     {
-        private readonly ISysRepository _sysRepository;
+        private readonly IBrandRepository _sysRepository;
 
-        public GetBannersQueryService(ISysRepository sysRepository)
+        public GetBannersQueryService(IBrandRepository brandRepository)
         {
-            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+            _sysRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         }
 
         public IAsyncEnumerable<BannerInfo> QueryAsync(GetBannersQuery query, CancellationToken cancellationToken = default)

@@ -9,17 +9,17 @@ namespace TGS.Services.Operator.ApplicationServices.Announcement
 {
     internal class GetAnnouncementQueryService : IQueryService<GetAnnouncementQuery, AnnouncementInfo>
     {
-        private readonly ISysRepository _sysRepository;
+        private readonly IBrandRepository _brandRepository;
 
-        public GetAnnouncementQueryService(ISysRepository sysRepository)
+        public GetAnnouncementQueryService(IBrandRepository brandRepository)
         {
-            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         }
 
         public IAsyncEnumerable<AnnouncementInfo> QueryAsync(
             GetAnnouncementQuery query,
             CancellationToken cancellationToken = default)
-            => _sysRepository
+            => _brandRepository
                 .QueryAnnouncementInfosAsync(query.BrandId, DateTimeOffset.Now)
                 .OrderBy(a => a.DisplayOrder);
     }
