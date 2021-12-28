@@ -299,7 +299,8 @@ namespace TGS.Apis.OperatorApi
                 });
             services.AddOpenTelemetryTracing(
                 builder => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Operator-API"))
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                        .AddEnvironmentVariableDetector())
                     .AddSource("Tgs.*")
                     .AddSource("TGS.*")
                     .AddAspNetCoreInstrumentation()
