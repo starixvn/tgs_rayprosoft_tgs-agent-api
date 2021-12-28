@@ -7,7 +7,7 @@ using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
-using TGS.Shared.Game.Models.BetConstruct.Outgoing;
+using TGS.Shared.Game.Models.TF.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Services
 {
@@ -27,7 +27,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             CachedGame cachedGame,
             string language)
         {
-            var gameRecord = JsonSerializer.Deserialize<BCGameRecord[]>(round.RoundDetail.AdditionalData);
+            var gameRecord = JsonSerializer.Deserialize<TFGameRecord>(round.RoundDetail.AdditionalData);
 
             if (gameRecord == null)
             {

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="BetConstruct\Commons\BetConstructGameUrl\" />
+    <Folder Include="TF\Commons\" />
   </ItemGroup>
 
 </Project>

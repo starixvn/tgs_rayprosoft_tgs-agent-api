@@ -1,10 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace TGS.Shared.Game.Models.TF.Incoming
 {
     public record GetClientBalanceRequest
     {
-        [JsonPropertyName("loginName")]
+        [FromQuery(Name = "loginName")]
         public string LoginName { get; set; }
     }
 }

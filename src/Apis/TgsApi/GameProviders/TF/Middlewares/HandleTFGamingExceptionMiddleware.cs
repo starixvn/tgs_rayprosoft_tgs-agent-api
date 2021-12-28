@@ -6,8 +6,8 @@ using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
-using TGS.Shared.Game.Models.BetConstruct.Enums;
-using TGS.Shared.Game.Models.BetConstruct.Incoming;
+using TGS.Shared.Game.Models.TF.Enums;
+using TGS.Shared.Game.Models.TF.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
 {
@@ -16,7 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
         public HandleTFGamingExceptionMiddleware(
            Func<string, IErrorMapper> mapper,
            ITgsLog log)
-           : base(mapper, Consts.GameProvider.TFGaming, log, "tfgaming")
+           : base(mapper, Consts.GameProvider.TFGaming, log, "tf")
         {
         }
 
@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
             };
 
             context.Response.StatusCode = statusCode;
-            return context.Response.WriteAsJsonAsync(res);
+            return context.Response.WriteAsJsonAsync("");
         }
     }
 }
