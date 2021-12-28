@@ -2,9 +2,13 @@
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.PluggableServices.Models;
+using System.Linq;
+using TGS.Shared.Game.ApiClients.TF;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Services
 {
@@ -12,6 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IBrandOperations _brandOperations;
+        private readonly ITFApiClient _client;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
@@ -27,7 +32,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             IGameProviderCurrencyCodeMapper currencyCodeMapper,
             ITokenProvider tokenProvider,
             IGameProviderOperations gameProviderOperations,
-            IBrandOperations brandOperations)
+            IBrandOperations brandOperations,
+            ITFApiClient client)
         {
             _brandGameProviderOperations = brandGameProviderOperations
                 ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
@@ -38,17 +44,39 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var url = "/api/game/bc";
+            var player = await _playerOperations
+                .GetCachedPlayerAsync(request.Token.PlayerCode)
+                .ConfigureAwait(false);
 
-            return new ValueTask<GetGameUrlResponse>(
-                new GetGameUrlResponse()
-                {
-                    Url = url
-                });
+            var gameProviderId = await _service
+                .GetGameProviderIdAsync()
+                .ConfigureAwait(false);
+
+            var configuration = await _settingOperations
+                .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
+                .ConfigureAwait(false);
+
+            var currencyCode = await _service
+                .GetGameProviderCurrencyCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode)
+                .ConfigureAwait(false);
+
+            var brandMerchant = configuration.BrandMerchants
+                .Where(brand => brand.BrandCurrency == currencyCode)
+                .First();            
+
+            var url = await _client
+                .GetGameUrlAsync(configuration.LaunchUrl, brandMerchant.PublicToken, player.PlayerCode)
+                .ConfigureAwait(false);
+
+            return new GetGameUrlResponse
+            {                
+                Url = url
+            };
         }
     }
 }

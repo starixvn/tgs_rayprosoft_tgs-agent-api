@@ -49,7 +49,7 @@ namespace TGS.Shared.Game.Models.TF.Incoming
         /// 下注时间
         /// </summary>
         [JsonPropertyName("date_created")]
-        public DateTime DateCreated { get; set; }
+        public DateTimeOffset DateCreated { get; set; }
         /// <summary>
         /// 输赢额
         /// WIN (赢) = 本金 (bet amount) + 盈利 (winnings)
@@ -161,7 +161,7 @@ namespace TGS.Shared.Game.Models.TF.Incoming
         /// 更改时间
         /// </summary>
         [JsonPropertyName("modified_datetime")]
-        public DateTime ModifiedDatetime { get; set; }
+        public DateTimeOffset ModifiedDatetime { get; set; }
         /// <summary>
         /// 赔率
         /// Note: If it is combo, OR, 1x2, SPOR, it will be euro odds.Else it is malay odds
@@ -197,7 +197,7 @@ namespace TGS.Shared.Game.Models.TF.Incoming
         /// 结算时间
         /// </summary>
         [JsonPropertyName("settlement_datetime")]
-        public DateTime? SettlementDatetime { get; set; }
+        public DateTimeOffset? SettlementDatetime { get; set; }
         /// <summary>
         /// 注单状况
         /// confirmed = 确定

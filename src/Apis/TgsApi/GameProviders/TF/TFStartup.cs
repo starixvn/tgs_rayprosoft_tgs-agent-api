@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -18,12 +15,12 @@ namespace TGS.Apis.TgsApi.GameProviders.TF
 {
     public sealed class TFStartup : BaseStartup
     {
+        protected override string LogPrefix => "tf";
+
         public TFStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
+                    : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "tf";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -39,8 +36,12 @@ namespace TGS.Apis.TgsApi.GameProviders.TF
                 });
 
             services.AddScoped<AuthorizeTFMiddleware>();
-            services.AddScoped<ITFService, TFService>();
+            services.AddScoped<HandleTFGamingExceptionMiddleware>();
+            services.AddScoped<TFDispatcherMiddleware>();
+
             services.AddScoped<ITFActionModelMapper, TFActionModelMapper>();
+            services.AddScoped<ITFService, TFService>();
+
             services.AddScopedWithResolver<IGameInitializer>(new[]
                 {
                     typeof(TFGameInitializer)
@@ -61,8 +62,22 @@ namespace TGS.Apis.TgsApi.GameProviders.TF
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                builder =>
                {
-                   builder.UseMiddleware<AuthorizeTFMiddleware>();
+                   builder.UseMiddleware<HandleTFGamingExceptionMiddleware>();
                });
+        }
+
+        protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/tf/api", StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<AuthorizeTFMiddleware>();
+                });
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/tf/api/transfer", StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<TFDispatcherMiddleware>();
+                });
         }
     }
 }

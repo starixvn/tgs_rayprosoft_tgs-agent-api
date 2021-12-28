@@ -1,6 +1,6 @@
 ﻿namespace TGS.Shared.Game.Models.TF.Incoming
 {
-    public record RollbackResponse
+    public class UnSettleRequest : TransferRequest
     {
     }
 }

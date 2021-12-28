@@ -16,18 +16,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
            new Dictionary<Type, GameApiError>
            {
-                //{typeof(InvalidCredentialsException), PasswordOrAuthTokenError},
+                {typeof(InvalidCredentialsException), InvalidAuthenticationCredential},
                 //{typeof(MissingTokenException), PasswordOrAuthTokenError},
                 //{typeof(PlayerLoginExpiredException), UserIsDismissed},
                 //{typeof(PlayerNotFoundException), UserIsDismissed},
-                //{typeof(PlayerDisabledException), UserIsBlocked},
-                //{typeof(PlayerHasInsufficientFundsException), ClientBalanceIsLess},
-                //{typeof(InvalidGameActionException), MethodNotFound},
+                {typeof(PlayerDisabledException), AccountIsFrozen},
+                {typeof(PlayerHasInsufficientFundsException), TryingToWithdrawMoreThanCurrentBalance},
+                {typeof(InvalidGameActionException), Undefined},
                 //{typeof(InvalidAmountException), InternalError},
-                //{typeof(ArgumentException), InvalidParametersFailedToDecryptTheParameters},
-                //{typeof(ModelBindingException), InternalError},
+                {typeof(ArgumentException), MissingRequiredFields},
+                {typeof(ModelBindingException), Undefined},
                 //{typeof(InvalidStatusException), InternalError},
-                //{typeof(InvalidOperationException), ApiWrongAccessException}
+                {typeof(InvalidOperationException), Undefined}
            };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>

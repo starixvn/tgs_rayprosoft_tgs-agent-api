@@ -1,6 +1,6 @@
 ﻿namespace TGS.Shared.Game.Models.TF.Incoming
 {
-    public class BetResultedResponse
+    public class SettleRequest : TransferRequest
     {
     }
 }

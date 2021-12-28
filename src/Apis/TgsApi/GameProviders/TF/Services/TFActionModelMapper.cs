@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -12,20 +13,21 @@ using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
+using TGS.Shared.Game.Models.TF.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Services
 {
     public interface ITFActionModelMapper
     {
-        //ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playerCode, BetPlacedRequest source);
+        ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playerCode, BetPlacedRequest source);
 
-        //ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
+        ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playCode, UnSettleRequest source);
 
         //ValueTask<BetData> ReSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
 
-        //ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source);
+        ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source);
 
-        //ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source);
+        ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SettleRequest source);
     }
     public class TFActionModelMapper : ITFActionModelMapper
     {
@@ -40,74 +42,77 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        //async ValueTask<BetData> ITFActionModelMapper.BetAsync(
-        //    GameProviderConfigurationData data,
-        //    string playerCode,
-        //    BetPlacedRequest source)
-        //{
-        //    var externalRoundId = source.BetId.ToString();
-        //    var externalTransactionId = source.TransactionId.ToString();
+        async ValueTask<BetData> ITFActionModelMapper.BetAsync(
+            GameProviderConfigurationData data,
+            string playerCode,
+            BetPlacedRequest source)
+        {
+            var externalRoundId = source.TicketNum; 
+            var externalTransactionId = source.TicketDetail.Id;
 
-        //    var gameActionExternal = await _service
-        //        .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId)
-        //        .ConfigureAwait(false);
+            var gameActionExternal = await _service
+                .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId)
+                .ConfigureAwait(false);
 
-        //    if (gameActionExternal != null)
-        //    {
-        //        return null;
-        //    }
+            if (gameActionExternal != null)
+            {
+                return null;
+            }
 
-        //    var transactions = new TransactionData
-        //    {
-        //        Amount = Math.Abs(source.Amount),
-        //        ExternalTransactionId = externalTransactionId,
-        //        ExternalRoundId = source.BetId.ToString(),
-        //        ExternalBetId = source.BetId.ToString(),
-        //        ExternalGameActionGroupId = externalRoundId,
-        //        ExternalGameId = "sportsbook",
-        //        GameActionType = GameActionType.PlaceBet,
-        //        ExtraData = DateTimeOffset
-        //            .FromUnixTimeSeconds(source.Created.ToUnixTimeSeconds())
-        //            .ToIso8601String(true),
-        //        TimeStamp = DateTimeOffset.UtcNow,
-        //    };
+            var transactions = new TransactionData
+            {
+                Amount = Math.Abs(source.Amount),
+                ExternalTransactionId = externalTransactionId,
+                ExternalRoundId = externalRoundId,
+                ExternalBetId = externalRoundId,
+                ExternalGameActionGroupId = externalRoundId,
+                ExternalGameId = "4",
+                GameActionType = GameActionType.PlaceBet,
+                ExtraData = DateTimeOffset
+                    .FromUnixTimeSeconds(source.TicketDetail.DateCreated.ToUnixTimeSeconds())
+                    .ToIso8601String(true),
+                TimeStamp = DateTimeOffset.UtcNow,
+            };
 
-        //    return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
-        //}
+            return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
+        }
 
-        //async ValueTask<BetData> ITFActionModelMapper.CancelSettleAsync(GameProviderConfigurationData data, string playerCode, BetResultedRequest source)
-        //{
-        //    var transaction = default(TransactionData);
-        //    var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
-        //    var cachedGame = cachedGames.First();
-        //    var externalRoundId = source.BetId.ToString();
-        //    var externalTransactionId = source.TransactionId.ToString();
+        async ValueTask<BetData> ITFActionModelMapper.CancelSettleAsync(GameProviderConfigurationData data, string playerCode, UnSettleRequest source)
+        {
+            var transaction = default(TransactionData);
+            var cachedGames = await _gameProviderOperations
+                .GetCachedGamesAsync(data.GameProviderId, "4")
+                .ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
 
-        //    var (roundRecord, gameActionRecord) = await _service
-        //        .GetSettleGameActionByBetAsync(data.GameProviderId, playerCode, source.BetId.ToString(), cachedGame.Id)
-        //        .ConfigureAwait(false);
+            var externalRoundId = source.TicketNum.Split("_")[0];
+            var externalTransactionId = source.TicketDetail.Id;
 
-        //    if (gameActionRecord != null)
-        //    {
-        //        transaction = new TransactionData
-        //        {
-        //            Amount = Math.Abs(source.Amount),
-        //            ExternalTransactionId = $"{externalTransactionId}_settle_cancel",
-        //            ExternalRoundId = externalRoundId,
-        //            ExternalBetId = externalRoundId,
-        //            ExternalGameActionGroupId = externalRoundId,
-        //            ExternalGameId = "sportsbook",
-        //            ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
-        //            GameActionType = GameActionType.CancelTransaction,
-        //            ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
-        //            TimeStamp = DateTimeOffset.UtcNow,
-        //            RoundClosed = false,
-        //            RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
-        //        };
-        //    }
+            var (roundRecord, gameActionRecord) = await _service
+                .GetSettleGameActionByBetAsync(data.GameProviderId, playerCode, externalRoundId, cachedGame.Id)
+                .ConfigureAwait(false);
 
-        //    return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
-        //}
+            if (gameActionRecord != null)
+            {
+                transaction = new TransactionData
+                {
+                    Amount = Math.Abs(source.Amount),
+                    ExternalTransactionId = $"{externalTransactionId}_settle_cancel",
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = "4",
+                    ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.TicketDetail.ModifiedDatetime.ToUnixTimeSeconds()).ToIso8601String(true),
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = false,
+                    RoundDetail = JsonSerializer.Serialize(source.TicketDetail)
+                };
+            }
+
+            return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
+        }
 
         //async ValueTask<BetData> ITFActionModelMapper.ReSettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source)
         //{
@@ -140,7 +145,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
         //        ExternalRoundId = externalRoundId,
         //        ExternalBetId = externalRoundId,
         //        ExternalGameActionGroupId = externalRoundId,
-        //        ExternalGameId = "sportsbook",
+        //        ExternalGameId = "4",
         //        ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
         //        GameActionType = gameActionType,
         //        ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
@@ -152,79 +157,76 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
         //    return GetBetData(data, playCode, transaction, autoCloseRound);
         //}
 
-        //async ValueTask<BetData> ITFActionModelMapper.RollbackBetAsync(
-        //    GameProviderConfigurationData data, string playerCode, RollbackRequest source)
-        //{
-        //    var transaction = default(TransactionData);
+        async ValueTask<BetData> ITFActionModelMapper.RollbackBetAsync(
+            GameProviderConfigurationData data, string playerCode, RollbackRequest source)
+        {
+            var transaction = default(TransactionData);
 
-        //    var externalTransactionId = source.TransactionId.ToString();
+            var externalRoundId = source.TicketNum;
+            var externalTransactionId = source.TicketDetail.Id;
 
-        //    var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId);
+            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId);
 
-        //    if (bet != null)
-        //    {
-        //        transaction = new TransactionData()
-        //        {
-        //            ExternalGameId = bet.ExternalGameId,
-        //            ExternalBetId = bet.ExternalBetId.ToString(),
-        //            ExternalRoundId = bet.ExternalRoundId.ToString(),
-        //            ExternalTransactionId = $"{bet.ExternalTransactionId}",
-        //            ExternalTransactionReferenceId = bet.ExternalTransactionId,
-        //            GameActionType = GameActionType.CancelTransaction,
-        //            RoundClosed = true
-        //        };
-        //    }
-        //    return transaction == null ? null : GetBetData(data, playerCode, transaction, data.AutoCloseRound);
-        //}
+            if (bet != null)
+            {
+                transaction = new TransactionData()
+                {
+                    ExternalGameId = "4",
+                    ExternalBetId = externalRoundId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalTransactionReferenceId = externalTransactionId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    RoundClosed = true
+                };
+            }
+            return transaction == null ? null : GetBetData(data, playerCode, transaction, data.AutoCloseRound);
+        }
 
-        //async ValueTask<BetData> ITFActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, BetResultedRequest source)
-        //{
-        //    var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
-        //    var cachedGame = cachedGames.First();
+        async ValueTask<BetData> ITFActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, SettleRequest source)
+        {
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "4").ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
 
-        //    string externalRoundId = source.BetId.ToString();
+            var externalRoundId = source.TicketNum.Split("_")[0];
 
-        //    var autoCloseRound = data.AutoCloseRound;
-        //    var gameActionType = source.BetState switch
-        //    {
-        //        1 => GameActionType.CancelTransaction,
-        //        2 => GameActionType.TieBet,
-        //        3 => GameActionType.LoseBet,
-        //        4 => GameActionType.WinBet,
-        //        5 => source.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
-        //        _ => GameActionType.PlaceBet
-        //    };
+            var autoCloseRound = data.AutoCloseRound;
+           
+            var gameActionType = source.TicketDetail.ResultStatus switch
+            {
+                "CANCELLED" => GameActionType.CancelTransaction,
+                "DRAW" => GameActionType.TieBet,
+                "LOSS" => GameActionType.LoseBet,
+                "WIN" => GameActionType.WinBet,                
+                _ => GameActionType.PlaceBet
+            };
 
-        //    var externalTransactionId = $"{source.TransactionId}";
-        //    var externalGameActionGroupId = source.BetId.ToString();
+            var externalTransactionId = source.TicketDetail.Id;            
 
-        //    var gameActionExternal = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId).ConfigureAwait(false);
-        //    if (gameActionExternal != null)
-        //    {
-        //        return null;
-        //    }
+            var gameActionExternal = await _service
+                .GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId)
+                .ConfigureAwait(false);
 
-        //    var (roundRecord, gameActionRecord) = await _service
-        //        .GetGameActionByBetAsync(data.GameProviderId, playCode, source.BetId.ToString(), cachedGame.Id)
-        //        .ConfigureAwait(false);
+            if (gameActionExternal == null)
+                return null;
 
-        //    var transaction = new TransactionData
-        //    {
-        //        Amount = Math.Abs(source.Amount),
-        //        ExternalTransactionId = externalTransactionId,
-        //        ExternalRoundId = source.BetId.ToString(),
-        //        ExternalBetId = source.BetId.ToString(),
-        //        ExternalGameActionGroupId = externalRoundId,
-        //        ExternalGameId = "sportsbook",
-        //        ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
-        //        GameActionType = gameActionType,
-        //        ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
-        //        TimeStamp = DateTimeOffset.UtcNow,
-        //        RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
-        //    };
+            var transaction = new TransactionData
+            {
+                Amount = Math.Abs(source.Amount),
+                ExternalTransactionId = source.TicketNum,
+                ExternalRoundId = externalRoundId,
+                ExternalBetId = externalRoundId,
+                ExternalGameActionGroupId = externalRoundId,
+                ExternalGameId = "4",
+                ExternalTransactionReferenceId = gameActionExternal.ExternalTransactionId,
+                GameActionType = gameActionType,
+                ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.TicketDetail.SettlementDatetime.Value.ToUnixTimeSeconds()).ToIso8601String(true),
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(source.TicketDetail)
+            };
 
-        //    return GetBetData(data, playCode, transaction, autoCloseRound);
-        //}
+            return GetBetData(data, playCode, transaction, autoCloseRound);
+        }
 
         private BetData GetBetData(
             GameProviderConfigurationData data,

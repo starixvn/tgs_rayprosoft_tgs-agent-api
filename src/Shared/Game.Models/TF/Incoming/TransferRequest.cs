@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.TF.Incoming
 {
-    public class BetResultedRequest
+    public class TransferRequest
     {
         [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
@@ -11,13 +11,13 @@ namespace TGS.Shared.Game.Models.TF.Incoming
         public string Description { get; set; }
 
         [JsonPropertyName("loginName")]
-        public string LoginNmae { get; set; }
+        public string LoginName { get; set; }
 
         [JsonPropertyName("placeBet")]
         public bool PlaceBet { get; set; }
 
         [JsonPropertyName("ticketDetail")]
-        public TicketObject[] TicketDetail { get; set; }
+        public TicketObject TicketDetail { get; set; }
 
         [JsonPropertyName("ticketNum")]
         public string TicketNum { get; set; }

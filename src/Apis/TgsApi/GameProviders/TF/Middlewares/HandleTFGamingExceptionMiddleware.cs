@@ -6,8 +6,8 @@ using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
-using TGS.Shared.Game.Models.BetConstruct.Enums;
-using TGS.Shared.Game.Models.BetConstruct.Incoming;
+using TGS.Shared.Game.Models.TF.Enums;
+using TGS.Shared.Game.Models.TF.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
 {
@@ -27,14 +27,14 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
             var message = ErrorMapper.GetMessageByException(exception);
             var desc = error.Description(message);
 
-            var res = new ErrorResponse
-            {
-                ErrorCode = errorCode.ToString(),
-                ErrorText = desc
-            };
+            //var res = new ErrorResponse
+            //{
+            //    ErrorCode = errorCode.ToString(),
+            //    ErrorText = desc
+            //};
 
             context.Response.StatusCode = statusCode;
-            return context.Response.WriteAsJsonAsync(res);
+            return context.Response.WriteAsJsonAsync("");
         }
     }
 }
