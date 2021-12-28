@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using TGS.Services.Operator.Services.BrandLanguage;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.Operator.ApplicationServices.BrandLanguage;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

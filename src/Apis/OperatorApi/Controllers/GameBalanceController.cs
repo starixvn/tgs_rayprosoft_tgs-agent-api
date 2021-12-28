@@ -10,7 +10,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.GameBalance;
+using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

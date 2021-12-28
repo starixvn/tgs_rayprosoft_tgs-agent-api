@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Banner;
+using TGS.Services.Operator.ApplicationServices.Banner;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

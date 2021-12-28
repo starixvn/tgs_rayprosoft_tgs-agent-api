@@ -15,9 +15,9 @@ using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -7,9 +7,9 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Models
 {

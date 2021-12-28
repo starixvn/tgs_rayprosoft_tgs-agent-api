@@ -9,9 +9,9 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using Tgs.ServiceUtility;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

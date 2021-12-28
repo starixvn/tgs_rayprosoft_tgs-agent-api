@@ -16,11 +16,11 @@ using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.Operator.Services.Withdraw;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using Tgs.CashService.Client;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
