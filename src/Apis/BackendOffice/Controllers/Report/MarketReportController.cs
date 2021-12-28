@@ -13,19 +13,23 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         private readonly IReportClient _client;
 
-        public MarketReportController(IReportClient client)
-        {
-            _client = client;
-        }
+        public MarketReportController(IReportClient client) => _client = client;
 
         [HttpGet]
         [Description("Get market report")]
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _client.GetMarketsAsync(request);
 
+        [HttpGet("additionalExpenses")]
+        [Description("Get Additional Expenses")]
+        public Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(
+            [FromQuery] GetAdditionalExpensesRequest request) =>
+            _client.GetAdditionalExpensesAsync(request);
+
         [HttpGet("exportMarkets")]
         public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportMarketsRequest request) => File(
             await _client.ExportMarketsAsync(request).ConfigureAwait(false),
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Markets.xlsx");
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Markets.xlsx");
     }
 }

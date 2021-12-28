@@ -13,14 +13,17 @@ namespace TGS.Apis.ReportApi.Controllers
     {
         private readonly IMediator _mediator;
 
-        public MarketReportController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        public MarketReportController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]
         [Description("Get markets")]
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
+            _mediator.Send(request);
+
+        [HttpGet("additionalExpenses")]
+        [Description("Get Additional Expenses")]
+        public Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(
+            [FromQuery] GetAdditionalExpensesRequest request) =>
             _mediator.Send(request);
 
         [HttpGet("exportMarkets")]
