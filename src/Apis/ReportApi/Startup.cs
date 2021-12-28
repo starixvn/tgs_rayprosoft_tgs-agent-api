@@ -14,7 +14,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -28,10 +27,7 @@ namespace TGS.Apis.ReportApi
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => _configuration = configuration;
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -45,7 +41,13 @@ namespace TGS.Apis.ReportApi
                 config.GetSection("RequestLocalization").Bind(options);
             });
 
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -116,7 +118,10 @@ namespace TGS.Apis.ReportApi
                             var config = sp.GetRequiredService<IConfiguration>();
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
-                });
+                })
+                .ClearAllExchanges()
+                .AddNatsGlobPatternExchange("tgs.viplevel.aggregate.server")
+                .AddNatsGlobPatternExchange("*");
             services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
@@ -127,7 +132,11 @@ namespace TGS.Apis.ReportApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new OpenApiInfo { Title = "TGS Report API", Version = "v1" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS Report API",
+                        Version = "v1"
+                    });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
