@@ -166,6 +166,7 @@ namespace TGS.Apis.TgsApi.Commons
                         .AddProfileViewExporter(profileViewBuilder =>
                         {
                             profileViewBuilder
+                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
                                 .AddFilter(new UrlPathFilter("/health"));
                         }))
                 .AddProfileViewer();
