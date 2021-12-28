@@ -44,14 +44,14 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
                 .ConfigureAwait(false);
 
-            var currencyCode = player.DefaultWalletCurrencyCode;
+            var brandCode = player.BrandCode;
 
             var brandMerchant = configuration.BrandMerchants
-                .Where(brand => brand.BrandCurrency == currencyCode)
+                .Where(brand => brand.BrandCurrency == brandCode)
                 .First();
 
             var url = await _client
-                .GetGameUrlAsync(configuration.LaunchUrl, brandMerchant.PublicToken, player.PlayerCode)
+                .GetGameUrlAsync(brandMerchant.LaunchUrl, brandMerchant.PublicToken, player.PlayerCode)
                 .ConfigureAwait(false);
 
             return new GetGameUrlResponse

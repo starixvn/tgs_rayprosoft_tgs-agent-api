@@ -95,13 +95,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-tf") : new("http://localhost:62330"),
-                ApiUrl = new Uri("https://spi-test.r4espt.com"),
-                LaunchUrl = new Uri("https://api-test-v4.diaoq.com"),
                 BrandMerchants = new TFBrandMerchant[]
                 {
                     new ()
                     {
-                        BrandCode = "pgmaster",
+                        LaunchUrl = new Uri("https://api-test-v4.diaoq.com"),
+                        ApiUrl = new Uri("https://spi-test.r4espt.com"),
+                        BrandCode = "GPI",
                         BrandCurrency = "CNY",
                         PublicToken = "84778f10a5b147a4baf1db8d334ff266",
                         PrivateToken = "00023b230443b2b95ec3750ff324f04f7ff30dfc69c2dde6b4f0563ea8de135c412fc3645d2cb09ecaa3971fdf8ddde90f6b86fc4bbdade18863113de24d42e5b02c3440c339a3893611eefda81e92b8b3f504cedd44963c419f1691bd439927cb1b075700c1d4b9d09dbdef6022a4f196c6438cf1e90107a263309f7ea06072f6aa",

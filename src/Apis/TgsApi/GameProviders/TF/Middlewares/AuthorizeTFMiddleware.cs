@@ -48,6 +48,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
 
             var authorization = context.Request.Headers["Authorization"];
 
+            var configuration = await _settingOperations
+                .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
+                .ConfigureAwait(false);
+
+            var brandMerchant = configuration.BrandMerchants.FirstOrDefault(bm => bm.PrivateToken == authorization);
+
+            if (brandMerchant == null)
+            {
+                throw new InvalidCredentialsException("");
+            }
+
             var playerCode = string.Empty;
             var internalCurrencyCode = string.Empty;
             if (HttpMethods.IsGet(method) && path.StartsWithSegments($"{_Route}/wallet"))
@@ -92,23 +103,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
 
                 context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
                 context.Items.Add(ContextItems.PlayerCode, playerCode);
-            }
-
-            var player = await _playerOperations
-                .GetPlayerByCodeAsync(playerCode)
-                .ConfigureAwait(false);
-
-            internalCurrencyCode = player.DefaultWalletCurrencyCode;
-
-            var configuration = await _settingOperations
-                .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
-                .ConfigureAwait(false);
-
-            var brandMerchant = configuration.BrandMerchants.FirstOrDefault(bm => bm.BrandCurrency == internalCurrencyCode);
-
-            if (brandMerchant == null || brandMerchant.PrivateToken != authorization)
-            {
-                throw new InvalidCredentialsException("");
             }
 
             await next(context);
