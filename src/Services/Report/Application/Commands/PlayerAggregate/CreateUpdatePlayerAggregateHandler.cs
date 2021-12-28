@@ -101,14 +101,14 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 
                 scope.Complete();
 
-                var sendForVip = new
+                var sendForVipLevelUpCalculation = new
                 {
                     ReportOn = reportDate,
                     PlayerCodes = aggregates.Select(x => x.PlayerCode).ToArray()
                 };
 
                 await _messageSender.PublishAsync("tgs.viplevel.aggregate.server",
-                        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendForVip)))
+                        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendForVipLevelUpCalculation)))
                     .ConfigureAwait(false);
             }
 
