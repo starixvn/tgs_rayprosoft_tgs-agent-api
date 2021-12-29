@@ -3,96 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.WMCasino.Common;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
-using BetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
-    public interface IWMCasinoActionModelMapper
-    {
-        BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, WalletTransferRequest request);
-
-        BetData CancelLockAmountRequest(
-            string playerCode, GameProviderConfigurationData data,
-            CancelWalletTransferRequest request);
-
-        BetData PlaceAndSettleBetRequest(
-            GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool fromSchedule);
-
-        (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
-            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
-            GameActionExternalIds[] externalIds);
-
-        BetData VoidRoundRequest(
-            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
-            GameActionExternalIds[] externalIds);
-
-        GetBalanceResponse Response(string playerCode, GetBalanceResult r);
-
-        WalletTransferResponse Response(WalletTransferRequest request, decimal balance);
-
-        CancelWalletTransferResponse Response(CancelWalletTransferRequest request, decimal balance);
-
-        ErrorResponse Response(GameApiError error, string message);
-    }
-
     public class WMCasinoActionModelMapper : IWMCasinoActionModelMapper
     {
-        private const string _GameProviderCode = Consts.GameProvider.WMCasino;
+        private static readonly string _GameProviderCode = Consts.GameProvider.WMCasino;
 
-        private static readonly JsonSerializerOptions _SerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = false
-        };
-
-        private readonly IJsonSerializationProvider _json;
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IWMCasinoUtility _utility;
 
         public WMCasinoActionModelMapper(
-            IWMCasinoUtility utility,
-            IJsonSerializationProvider json)
+            IWMCasinoUtility utility)
         {
             _utility = utility;
-            _json = json;
-        }
 
-        public BetData LockAmountRequest(
-            string playerCode, GameProviderConfigurationData data,
-            WalletTransferRequest request)
-        {
-            var externalGameId = request.ExternalGameId;
-            var externalRoundId = _utility.GetExternalRoundIdByGameNumber(request.GameNo, externalGameId);
-
-            var transaction = new TransactionData
+            _jsonSerializerOptions = new JsonSerializerOptions
             {
-                Amount = Math.Abs(request.Amount),
-                ExternalGameId = externalGameId,
-                ExternalRoundId = externalRoundId,
-                ExternalTransactionId = $"{request.DealId}_lock",
-                ExternalGameActionGroupId = externalRoundId,
-                ExternalBetId = externalRoundId,
-                GameActionType = GameActionType.LockAmount,
-                TimeStamp = _utility.ParseDateTimeOffset(request.Timestamp)
+                WriteIndented = false
             };
-
-            return GetBetData(playerCode,
-                data,
-                new[]
-                {
-                    transaction
-                });
         }
 
         public BetData CancelLockAmountRequest(
-            string playerCode, GameProviderConfigurationData data,
+            string playerCode,
+            GameProviderConfigurationData data,
             CancelWalletTransferRequest request)
         {
             var externalGameId = request.ExternalGameId;
@@ -120,9 +62,40 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 });
         }
 
+        public BetData LockAmountRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            WalletTransferRequest request)
+        {
+            var externalGameId = request.ExternalGameId;
+            var externalRoundId = _utility.GetExternalRoundIdByGameNumber(request.GameNo, externalGameId);
+
+            var transaction = new TransactionData
+            {
+                Amount = Math.Abs(request.Amount),
+                ExternalGameId = externalGameId,
+                ExternalRoundId = externalRoundId,
+                ExternalTransactionId = $"{request.DealId}_lock",
+                ExternalGameActionGroupId = externalRoundId,
+                ExternalBetId = externalRoundId,
+                GameActionType = GameActionType.LockAmount,
+                TimeStamp = _utility.ParseDateTimeOffset(request.Timestamp)
+            };
+
+            return GetBetData(playerCode,
+                data,
+                new[]
+                {
+                    transaction
+                });
+        }
+
         public BetData PlaceAndSettleBetRequest(
-            GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool fromSchedule)
+            GameProviderConfigurationData data,
+            string playerCode,
+            GameBetResult[] results,
+            GameActionExternalIds[] externalIds,
+            bool fromSchedule)
         {
             var bets = new List<TransactionData>();
             var settles = new List<TransactionData>();
@@ -177,12 +150,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                         GameActionType = GameActionType.PlaceBet,
                         BetType = betTypeCode,
                         TimeStamp = betTime,
-                        ExtraData = _json.SerializeToString(
+                        ExtraData = JsonSerializer.Serialize(
                             new
                             {
                                 BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
                             },
-                            _SerializerOptions)
+                            _jsonSerializerOptions)
                     }
                 });
 
@@ -199,12 +172,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     TimeStamp = _utility.ParseDateTimeOffset(r.SettleTime),
                     RoundDetail = r.GameResult,
                     RoundClosed = lockedAmount == 0,
-                    ExtraData = _json.SerializeToString(
+                    ExtraData = JsonSerializer.Serialize(
                         new
                         {
                             BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
                         },
-                        _SerializerOptions),
+                        _jsonSerializerOptions),
                     CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
                     AllowLoseBetNegativeAmount = true
                 });
@@ -217,7 +190,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
             GameProviderConfigurationData data,
-            string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds)
+            string playerCode, GameBetResult[] betResults, GameActionExternalIds[] externalIds)
         {
             var cancels = new List<TransactionData>();
             var settles = new List<TransactionData>();
@@ -266,12 +239,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     TimeStamp = _utility.ParseDateTimeOffset(r.SettleTime),
                     RoundDetail = r.GameResult,
                     RoundClosed = remainingLockAmount == 0,
-                    ExtraData = _json.SerializeToString(
+                    ExtraData = JsonSerializer.Serialize(
                         new
                         {
                             BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries)
                         },
-                        _SerializerOptions),
+                        _jsonSerializerOptions),
                     CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
                     AllowLoseBetNegativeAmount = true
                 });
@@ -283,8 +256,55 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             return (cancelBetData, settleBetData);
         }
 
+        public GetBalanceResponse Response(string playerCode, GetBalanceResult r)
+            => new GetBalanceResponse
+            {
+                ErrorCode = (int)GameApiError.Success,
+                Data = new GetBalanceResponse.Result
+                {
+                    PlayerCode = playerCode,
+                    Balance = r.Balance,
+                    Timestamp = _utility.GetTimestamp()
+                }
+            };
+
+        public WalletTransferResponse Response(WalletTransferRequest request, decimal balance)
+            => new WalletTransferResponse
+            {
+                ErrorCode = (int)GameApiError.Success,
+                Data = new WalletTransferResponse.Result
+                {
+                    Amount = request.Amount,
+                    Balance = balance,
+                    DealId = request.DealId,
+                    Timestamp = _utility.GetTimestamp()
+                }
+            };
+
+        public CancelWalletTransferResponse Response(CancelWalletTransferRequest request, decimal balance)
+            => new CancelWalletTransferResponse
+            {
+                ErrorCode = (int)GameApiError.Success,
+                Data = new CancelWalletTransferResponse.Result
+                {
+                    Amount = request.Amount,
+                    Balance = balance,
+                    DealId = request.DealId,
+                    Timestamp = _utility.GetTimestamp()
+                }
+            };
+
+        public ErrorResponse Response(GameApiError error, string message)
+            => new ErrorResponse
+            {
+                ErrorCode = (int)error,
+                ErrorMessage = message
+            };
+
         public BetData VoidRoundRequest(
-            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
+            GameProviderConfigurationData data,
+            string playerCode,
+            GameBetResult[] betResults,
             GameActionExternalIds[] externalIds)
         {
             var existBetResults = betResults
@@ -343,51 +363,19 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             return GetBetData(playerCode, data, transactions, true);
         }
 
-        public GetBalanceResponse Response(string playerCode, GetBalanceResult r)
-            => new GetBalanceResponse
-            {
-                ErrorCode = (int)GameApiError.Success,
-                Data = new GetBalanceResponse.Result
-                {
-                    PlayerCode = playerCode,
-                    Balance = r.Balance,
-                    Timestamp = _utility.GetTimestamp()
-                }
-            };
+        private static decimal CalculateRemainingLockAmount(GameActionExternalIds[] externalIds)
+        {
+            var cancellationReferenceIds = externalIds
+                .Where(t => t.GameActionType == GameActionType.CancelTransaction)
+                .Select(t => t.ExternalReferencedTransactionId)
+                .ToArray();
 
-        public WalletTransferResponse Response(WalletTransferRequest request, decimal balance)
-            => new WalletTransferResponse
-            {
-                ErrorCode = (int)GameApiError.Success,
-                Data = new WalletTransferResponse.Result
-                {
-                    Amount = request.Amount,
-                    Balance = balance,
-                    DealId = request.DealId,
-                    Timestamp = _utility.GetTimestamp()
-                }
-            };
-
-        public CancelWalletTransferResponse Response(CancelWalletTransferRequest request, decimal balance)
-            => new CancelWalletTransferResponse
-            {
-                ErrorCode = (int)GameApiError.Success,
-                Data = new CancelWalletTransferResponse.Result
-                {
-                    Amount = request.Amount,
-                    Balance = balance,
-                    DealId = request.DealId,
-                    Timestamp = _utility.GetTimestamp()
-                }
-            };
-
-        public ErrorResponse Response(GameApiError error, string message)
-            => new ErrorResponse
-            {
-                ErrorCode = (int)error,
-                ErrorMessage = message
-            };
-
+            return externalIds
+                .Where(t =>
+                    t.GameActionType.IsOneOf(GameActionType.LockAmount, GameActionType.UnlockAmount) &&
+                    !cancellationReferenceIds.Contains(t.ExternalTransactionId))
+                .Sum(t => t.Amount);
+        }
 
         private static BetData GetBetData(
             string playerCode,
@@ -410,26 +398,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 WithCustomBetValues = true
             };
 
-        private static string GetBetTypeCode(bool fromSchedule, BetResult r)
+        private static string GetBetTypeCode(bool fromSchedule, GameBetResult r)
             => fromSchedule ? r.BetTypeCode : r.BetType;
-
-        private static decimal CalculateRemainingLockAmount(GameActionExternalIds[] externalIds)
-        {
-            var cancellationReferenceIds = externalIds
-                .Where(t => t.GameActionType == GameActionType.CancelTransaction)
-                .Select(t => t.ExternalReferencedTransactionId)
-                .ToArray();
-
-            return externalIds
-                .Where(t =>
-                    t.GameActionType.IsOneOf(GameActionType.LockAmount, GameActionType.UnlockAmount) &&
-                    !cancellationReferenceIds.Contains(t.ExternalTransactionId))
-                .Sum(t => t.Amount);
-        }
 
         private static GameActionType GetSettleGameActionType(
             string externalGameId,
-            decimal betAmount, decimal winAmount)
+            decimal betAmount,
+            decimal winAmount)
         {
             if (winAmount == betAmount)
             {

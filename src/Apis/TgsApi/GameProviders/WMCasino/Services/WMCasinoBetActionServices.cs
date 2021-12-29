@@ -6,25 +6,11 @@ using TGS.Core.Models;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Shared.Game.Models.WMCasino.Common;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
-using GameBetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
-    public interface IWMCasinoBetActionServices
-    {
-        ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode);
-
-        ValueTask<BetResult> LockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
-            string playerCode, WalletTransferRequest request);
-
-        ValueTask<BetResult> CancelLockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
-            string playerCode, CancelWalletTransferRequest request);
-
-        ValueTask ExecuteBetResultsByRoundAsync(Guid gameProviderId,
-            Guid gameProviderConfigurationId, string playerCode, GameBetResult[] betResults, bool fromSchedule);
-    }
-
     public class WMCasinoBetActionServices : IWMCasinoBetActionServices
     {
         private static readonly string _GameProviderCode = Consts.GameProvider.WMCasino;
@@ -40,24 +26,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             IWMCasinoUtility utility,
             IWMCasinoActionModelMapper map)
         {
-            _actions = actions;
-            _services = services;
-            _utility = utility;
-            _map = map;
-        }
-
-        public ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode)
-            => _actions.GetBalanceAsync(_GameProviderCode, playerCode);
-
-        public async ValueTask<BetResult> LockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
-            string playerCode, WalletTransferRequest request)
-        {
-            var data = await _services.GetGameProviderConfigurationDataAsync(
-                    gameProviderId, gameProviderConfigurationId, playerCode, request.ExternalGameId)
-                .ConfigureAwait(false);
-
-            var betData = _map.LockAmountRequest(playerCode, data, request);
-            return await _actions.LockAmountAsync(betData).ConfigureAwait(false);
+            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
+            _map = map ?? throw new ArgumentNullException(nameof(map));
         }
 
         public async ValueTask<BetResult> CancelLockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
@@ -72,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         }
 
         public async ValueTask ExecuteBetResultsByRoundAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
-            string playerCode, GameBetResult[] betResults, bool fromSchedule = false)
+            string playerCode, GameBetResult[] betResults, bool fromSchedule)
         {
             var data = await _services
                 .GetGameProviderConfigurationDataWithDesktopPlatformAsync(gameProviderId, gameProviderConfigurationId)
@@ -86,6 +58,20 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             {
                 await ResettleOrVoidRoundAsync(data, playerCode, results, fromSchedule);
             }
+        }
+
+        public ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode)
+              => _actions.GetBalanceAsync(_GameProviderCode, playerCode);
+
+        public async ValueTask<BetResult> LockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
+            string playerCode, WalletTransferRequest request)
+        {
+            var data = await _services.GetGameProviderConfigurationDataAsync(
+                    gameProviderId, gameProviderConfigurationId, playerCode, request.ExternalGameId)
+                .ConfigureAwait(false);
+
+            var betData = _map.LockAmountRequest(playerCode, data, request);
+            return await _actions.LockAmountAsync(betData).ConfigureAwait(false);
         }
 
         private async ValueTask PlaceAndSettleBetAsync(GameProviderConfigurationData data,
@@ -107,8 +93,24 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             }
         }
 
+        private async ValueTask ResettleAsync(GameProviderConfigurationData data, string playerCode,
+            GameBetResult[] betResults, GameActionExternalIds[] externalIds)
+        {
+            var (cancelData, settleData) = _map.ResettleRequest(data, playerCode, betResults, externalIds);
+
+            if (cancelData != null)
+            {
+                await _actions.CancelTransactionAsync(cancelData).ConfigureAwait(false);
+            }
+
+            if (settleData != null)
+            {
+                await _actions.SettleBetAsync(settleData).ConfigureAwait(false);
+            }
+        }
+
         private async ValueTask ResettleOrVoidRoundAsync(GameProviderConfigurationData data,
-            string playerCode, GameBetResult[] betResults, bool fromSchedule)
+                    string playerCode, GameBetResult[] betResults, bool fromSchedule)
         {
             var betResult = betResults.First();
             var externalGameActionGroupId =
@@ -131,22 +133,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             if (groupResults.TryGetValue(true, out var voidResults) && voidResults.Length > 0)
             {
                 await VoidRoundAsync(data, playerCode, betResults, externalIds);
-            }
-        }
-
-        private async ValueTask ResettleAsync(GameProviderConfigurationData data, string playerCode,
-            GameBetResult[] betResults, GameActionExternalIds[] externalIds)
-        {
-            var (cancelData, settleData) = _map.ResettleRequest(data, playerCode, betResults, externalIds);
-
-            if (cancelData != null)
-            {
-                await _actions.CancelTransactionAsync(cancelData).ConfigureAwait(false);
-            }
-
-            if (settleData != null)
-            {
-                await _actions.SettleBetAsync(settleData).ConfigureAwait(false);
             }
         }
 

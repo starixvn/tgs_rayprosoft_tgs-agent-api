@@ -1,0 +1,72 @@
+﻿using System;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Tgs.Logging;
+
+namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
+{
+    public class WMCasinoBetResultHandlerService : BackgroundService
+    {
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly ITgsLog _log;
+        private readonly ILogger<WMCasinoBetResultHandlerService> _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IWMDataStore _store;
+
+        public WMCasinoBetResultHandlerService(
+            ILogger<WMCasinoBetResultHandlerService> logger,
+            IServiceProvider serviceProvider,
+            IWMDataStore store,
+            ITgsLog log)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _log = log?.SetLogger(nameof(WMCasinoBetResultHandlerService)) ?? throw new ArgumentNullException(nameof(log));
+
+            _jsonSerializerOptions = new JsonSerializerOptions
+            {
+                WriteIndented = false
+            };
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var betDetail = await _store.GetBetResultFromQueueAsync().ConfigureAwait(false);
+                if (betDetail == null)
+                {
+                    await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
+                    continue;
+                }
+
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
+
+                    var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
+
+                    await service.ExecuteBetResultsByRoundAsync(
+                            betDetail.GameProviderId,
+                            betDetail.GameProviderConfigurationId,
+                            betDetail.PlayerCode,
+                            new[] { betDetail.GameBetResult },
+                            false)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    var value = JsonSerializer.Serialize(betDetail, _jsonSerializerOptions);
+
+                    _log.LogError($"Fail to execute wmcasino bet result: {value}", ex);
+                    _logger.LogError(new EventId(1000), ex, $"Fail to execute wmcasino bet result: {value}");
+                }
+            }
+        }
+    }
+}
