@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             var brandCode = player.BrandCode;
 
             var brandMerchant = configuration.BrandMerchants
-                .Where(brand => brand.BrandCurrency == brandCode)
+                .Where(brand => brand.BrandCode == brandCode)
                 .First();
 
             var url = await _client
