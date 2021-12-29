@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Messages;
+using Tgs.MessageQueue;
 using TGS.Services.Report.Application.Models.Aggregate;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -15,6 +18,7 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
         CreateUpdatePlayerAggregateHandler : Handler<CreateUpdatePlayerAggregateModel,
             MessageResponse>
     {
+        private readonly IMessageSender _messageSender;
         private readonly IPlayerAggregateService _playerAggregateService;
         private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
@@ -22,18 +26,25 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
         public CreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
             IPlayerGameAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
+            IMessageSender messageSender,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _playerAggregateService = playerAggregateService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
             _roundAggregateService = roundAggregateService;
+            _messageSender = messageSender;
         }
 
         public override async Task<MessageResponse> Handle(CreateUpdatePlayerAggregateModel request,
             CancellationToken cancellationToken)
         {
             var previousHour = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddHours(-1);
-            var reportDate = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, 0, 0, 0,
+            var reportDate = new DateTimeOffset(previousHour.Year,
+                previousHour.Month,
+                previousHour.Day,
+                0,
+                0,
+                0,
                 previousHour.Offset);
 
             var marketsOfDay = await _playerAggregateService.GetPlayerAggregateQueries()
@@ -51,13 +62,23 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 
             foreach (var doHour in doHours)
             {
-                var start = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, doHour,
-                    0, 0, previousHour.Offset);
-                var end = new DateTimeOffset(previousHour.Year, previousHour.Month, previousHour.Day, doHour,
-                    0, 0, previousHour.Offset).AddHours(1);
+                var start = new DateTimeOffset(previousHour.Year,
+                    previousHour.Month,
+                    previousHour.Day,
+                    doHour,
+                    0,
+                    0,
+                    previousHour.Offset);
+                var end = new DateTimeOffset(previousHour.Year,
+                    previousHour.Month,
+                    previousHour.Day,
+                    doHour,
+                    0,
+                    0,
+                    previousHour.Offset).AddHours(1);
 
                 if (await _playerAggregateService.ExistsAsync(x =>
-                    x.ReportDate == reportDate && x.Hour == start.Hour))
+                        x.ReportDate == reportDate && x.Hour == start.Hour))
                 {
                     return CreateInvalidResponse<MessageResponse>(
                         $"{reportDate.Date} {start.Hour} is already existed.");
@@ -79,9 +100,19 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 }
 
                 scope.Complete();
+
+                var sendForVipLevelUpCalculation = new
+                {
+                    ReportOn = reportDate,
+                    PlayerCodes = aggregates.Select(x => x.PlayerCode).ToArray()
+                };
+
+                await _messageSender.PublishAsync("tgs.viplevel.aggregate.server",
+                        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendForVipLevelUpCalculation)))
+                    .ConfigureAwait(false);
             }
 
-            return new() {Valid = true};
+            return new() { Valid = true };
         }
     }
 }
