@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -154,8 +156,24 @@ namespace TGS.Apis.TgsApi.Commons
                 });
 
             services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    var nodeIp = config.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                    {
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                    }
+
+                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
+                });
+
+            services
                 .AddOpenTelemetryTracing(builder
                     => builder
+                        .SetResourceBuilder(
+                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
                         .AddSource("TGS.*")
                         .AddSource("Tgs.*")
                         .AddAspNetCoreInstrumentation()
@@ -164,6 +182,7 @@ namespace TGS.Apis.TgsApi.Commons
                         {
                             options.SetDbStatementForText = true;
                         })
+                        .AddOtlpExporter()
                         .AddProfileViewExporter(profileViewBuilder =>
                         {
                             profileViewBuilder
