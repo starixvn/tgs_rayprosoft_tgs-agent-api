@@ -4699,6 +4699,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_vip_level_aggregates");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.Property<DateTimeOffset>("SnapshotOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_snapshots");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_pk_player_vip_level_snapshots_player_code");
+
+                    b.ToTable("player_vip_level_snapshots");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Property<Guid>("Id")
