@@ -12,8 +12,8 @@ using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operator.Services.Player;
 using Tgs.ServiceUtility;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

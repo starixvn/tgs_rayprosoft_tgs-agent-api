@@ -12,9 +12,9 @@ using TGS.Core.Infrastructures.Mail;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.PayPassowrd;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
+using TGS.Services.Operator.ApplicationServices.PayPassowrd;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -18,22 +18,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 {
     public interface ISabaServices
     {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
-
-        ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
-            string externalRoundId);
-
         ValueTask<string> GetExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
 
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByRoundIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId);
 
-        bool IsTestEnvironment(string[] acceptEnvironments);
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+
+        ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
+            string externalRoundId);
 
         string GetPlayerCode(string userId, bool isTestEnv);
+
+        GameActionType GetSettleTransactionGameActionType(string ticketStatus, decimal payout);
+
+        bool IsTestEnvironment(string[] acceptEnvironments);
     }
 
-    public sealed class SabaServices : ISabaServices
+    public class SabaServices : ISabaServices
     {
         private readonly IWebHostEnvironment _env;
         private readonly IGameActionQueries _gameActionQueries;
@@ -52,7 +54,35 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             _env = env;
         }
 
-        async ValueTask<GameProviderConfigurationData> ISabaServices.GetGameProviderConfigurationDataAsync()
+        public async ValueTask<string> GetExternalRoundIdAsync(Guid gameProviderId, string playerCode,
+            string externalTransactionId)
+        {
+            var gameActionExternalId =
+                await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode,
+                    externalTransactionId).ConfigureAwait(false);
+
+            if (gameActionExternalId == null)
+            {
+                throw new InvalidGameActionException($"No transaction of id '{externalTransactionId}' is found",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            return gameActionExternalId.ExternalRoundId;
+        }
+
+        public async ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByRoundIdAsync(
+            Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+        {
+            var gameActions = await _gameActionQueries
+                .GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, false)
+                .ConfigureAwait(false);
+
+            return gameActions
+                .Where(t => t.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.UnlockAmount))
+                .ToArray();
+        }
+
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync()
         {
             var items = _httpContext?.Items ??
                 throw new InvalidOperationException("Can not get http context items");
@@ -73,7 +103,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             };
         }
 
-        async ValueTask<decimal> ISabaServices.GetLockAmountAsync(string playerCode, Guid gameProviderId,
+        public async ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
             string externalRoundId)
         {
             var game = (await _gameProviderOperations
@@ -82,7 +112,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
             var gameActionExternalId =
                 (await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId
-                    , game!.Id, new[] {GameActionType.LockAmount}).ConfigureAwait(false))
+                    , game!.Id, new[] { GameActionType.LockAmount }).ConfigureAwait(false))
                 .FirstOrDefault();
 
             if (gameActionExternalId == null)
@@ -94,38 +124,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return gameActionExternalId.Amount;
         }
 
-        async ValueTask<string> ISabaServices.GetExternalRoundIdAsync(Guid gameProviderId, string playerCode,
-            string externalTransactionId)
-        {
-            var gameActionExternalId =
-                await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode,
-                    externalTransactionId).ConfigureAwait(false);
-
-            if (gameActionExternalId == null)
-            {
-                throw new InvalidGameActionException($"No transaction of id '{externalTransactionId}' is found",
-                    InvalidGameActionErrorCode.TransactionNotFound);
-            }
-
-            return gameActionExternalId.ExternalRoundId;
-        }
-
-        async ValueTask<GameActionExternalIds[]> ISabaServices.GetGameActionExternalIdsByRoundIdAsync(
-            Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-        {
-            var gameActions = await _gameActionQueries
-                .GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, false)
-                .ConfigureAwait(false);
-
-            return gameActions
-                .Where(t => t.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.UnlockAmount))
-                .ToArray();
-        }
-
-        bool ISabaServices.IsTestEnvironment(string[] acceptEnvironments) =>
-            acceptEnvironments.IgnoreCaseContains(_env.EnvironmentName);
-
-        string ISabaServices.GetPlayerCode(string userId, bool isTestEnv) =>
+        public string GetPlayerCode(string userId, bool isTestEnv) =>
             !isTestEnv ? userId : userId?.Replace("_test", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        public GameActionType GetSettleTransactionGameActionType(string ticketStatus, decimal payout) => ticketStatus switch
+        {
+            "half won" => GameActionType.WinBet,
+            "half lose" => GameActionType.WinBet,
+            "won" => GameActionType.WinBet,
+            "lose" when payout > 0 => GameActionType.WinBet,
+            "lose" => GameActionType.LoseBet,
+            "draw" => GameActionType.TieBet,
+            "void" => GameActionType.CancelTransaction,
+            "refund" => GameActionType.CancelTransaction,
+            "reject" => GameActionType.CancelTransaction,
+            _ => throw new ArgumentException("Undefined ticket status")
+        };
+
+        public bool IsTestEnvironment(string[] acceptEnvironments) =>
+                            acceptEnvironments.IgnoreCaseContains(_env.EnvironmentName);
     }
 }

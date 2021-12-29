@@ -32,6 +32,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request);
 
+        Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(GetAdditionalExpensesRequest request);
         Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(GetAgentContributionsRequest request);
 
         Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(GetPlayerContributionsRequest request);
@@ -294,10 +295,11 @@ namespace TGS.Clients.Report.Client
 
             var keyValues = new Dictionary<string, string>();
             foreach (var propertyInfo in request
-                .GetType()
-                .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
-                .ToArray())
+                         .GetType()
+                         .GetProperties()
+                         .Where(x => x != null && !x.Name.Contains("CurrencyCodes",
+                             StringComparison.InvariantCultureIgnoreCase))
+                         .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -444,10 +446,11 @@ namespace TGS.Clients.Report.Client
 
             var keyValues = new Dictionary<string, string>();
             foreach (var propertyInfo in request
-                .GetType()
-                .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
-                .ToArray())
+                         .GetType()
+                         .GetProperties()
+                         .Where(x => x != null && !x.Name.Contains("CurrencyCodes",
+                             StringComparison.InvariantCultureIgnoreCase))
+                         .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -511,6 +514,20 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<GetAgentDividendTeamDetailsRequest,
                 PagedResponse<AgentDividendTeamDetailModel>
             >(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(
+            GetAdditionalExpensesRequest request)
+        {
+            var prefix = $"Report.BrandId.{request.BrandId}.GetAdditionalExpenses";
+            var path = ClientPath.AppendWithProperties("/api/marketReport/additionalExpenses?", request);
+
+            return await ExecuteJsonRequestAsync<GetAdditionalExpensesRequest, GetAdditionalExpensesResponse>(
                 HttpMethod.Get,
                 path,
                 request,

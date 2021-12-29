@@ -64,7 +64,7 @@ namespace TGS.GameProviders.Repositories
         public async ValueTask<GetGameProviderFundTransferTransactionResponse> GetAsync(
             Guid gameProviderFundTransferTransactionId)
         {
-            var data = await _repository.GameProviderFundTransferTransactions
+            var data = await _repository.GameProviderFundTransferTransactions.AsQueryable()
                 .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);

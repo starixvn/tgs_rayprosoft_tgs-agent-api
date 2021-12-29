@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.Agent;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace Agent.UnitTests
 {
@@ -65,23 +65,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "Invitation",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    0M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<CoreModels.AgentDividendCondition>()
-                ));
+                    0));
 
             await sut.GetAsync(command);
 
@@ -115,22 +108,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "Invitation",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    0M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<CoreModels.AgentDividendCondition>()));
+                    0M));
 
             var actual = await sut.GetAsync(command);
 

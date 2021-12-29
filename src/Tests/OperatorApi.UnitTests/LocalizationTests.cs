@@ -2,7 +2,7 @@
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Localization;
+using TGS.Services.Operator.ApplicationServices.Localization;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

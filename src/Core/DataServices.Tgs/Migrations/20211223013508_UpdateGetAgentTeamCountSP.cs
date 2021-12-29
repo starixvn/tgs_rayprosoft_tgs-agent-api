@@ -12,7 +12,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "agent_get_agents_with_team_counts"));
-
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

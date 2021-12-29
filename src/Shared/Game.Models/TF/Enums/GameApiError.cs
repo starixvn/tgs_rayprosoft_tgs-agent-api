@@ -26,6 +26,18 @@ namespace TGS.Shared.Game.Models.TF.Enums
         ValueRequestedIsMoreOrLessThanTheAllowedRange = 7,
 
         [Description("Post-data currency and Partner's currency is not matched")]
-        PostDataCurrencyAndPartnerCurrencyIsNotMatched = 8
+        PostDataCurrencyAndPartnerCurrencyIsNotMatched = 8,
+
+        [Description("Invalid authentication credential")]
+        InvalidAuthenticationCredential = 9,
+
+        [Description("Account is frozen")]
+        AccountIsFrozen = 10,
+
+        [Description("Missing required fields")]
+        MissingRequiredFields = 11,
+
+        [Description("Authentication credentials were not provided")]
+        AuthenticationCredentialsWereNotProvided = 12
     }
 }

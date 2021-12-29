@@ -17,8 +17,8 @@ using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.BrandPayments;
-using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.ApplicationServices.BrandPayments;
+using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -13,8 +13,8 @@ using TGS.Apis.AgentApi.Filters;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Agent.Services.Agent;
 using Tgs.ServiceUtility;
+using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace Agent.UnitTests
 {

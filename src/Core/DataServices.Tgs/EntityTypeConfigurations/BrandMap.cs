@@ -43,6 +43,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(false)
                 .IsRequired();
 
+            builder.Property(c => c.EnableAgentSms)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(b => b.EnableSmsRegisterFlow)
                 .HasDefaultValue(false)
                 .IsRequired();

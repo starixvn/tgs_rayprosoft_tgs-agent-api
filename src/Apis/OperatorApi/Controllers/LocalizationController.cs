@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.Services.Localization;
+using TGS.Services.Operator.ApplicationServices.Localization;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

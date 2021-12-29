@@ -5,7 +5,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
-using TGS.Services.Operator.Services.Withdraw;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

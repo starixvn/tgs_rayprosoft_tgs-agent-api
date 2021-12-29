@@ -17,9 +17,9 @@ using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -179,7 +179,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 var player = await getPlayerQueryService.GetAsync(query).ConfigureAwait(false);
 
-                playerData.Username = player.Username;
+                playerData.PlayerCode = player.PlayerCode;
+                playerData.Username = player.UserName;
                 playerData.RealName = player.RealName;
                 playerData.Email = player.Email;
                 playerData.Phone = player.Phone;

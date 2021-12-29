@@ -13,9 +13,9 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.Services.PayPassowrd;
-using TGS.Services.Agent.Services.Withdraw;
 using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Agent.ApplicationServices.PayPassowrd;
+using TGS.Services.Agent.ApplicationServices.Withdraw;
 
 namespace Agent.UnitTests
 {
@@ -44,22 +44,16 @@ namespace Agent.UnitTests
                 null,
                 null,
                 "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
                 null,
-                1,
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                0M,
-                10M,
-                "ParentUserName",
                 DateTimeOffset.Now,
-                0M,
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                AgentDividendType.OneLayer,
-                Array.Empty<AgentDividendCondition>());
+                0M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -148,22 +142,16 @@ namespace Agent.UnitTests
                 null,
                 null,
                 "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
                 null,
-                1,
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                0M,
-                10M,
-                "ParentUserName",
                 DateTimeOffset.Now,
-                0M,
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                AgentDividendType.OneLayer,
-                Array.Empty<AgentDividendCondition>());
+                0M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -210,8 +198,6 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "aaabbb",
-                    null,
-                    1,
                     new byte[]
                     {
                         1,
@@ -221,16 +207,12 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
+                    null,
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>()));
+                    0M));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -261,22 +243,16 @@ namespace Agent.UnitTests
                     null,
                     null,
                     "aaabbb",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>()));
+                    0M));
 
             await sut.ExecuteAsync(command);
 
@@ -311,22 +287,16 @@ namespace Agent.UnitTests
                 null,
                 null,
                 "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
                 null,
-                1,
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                0M,
-                10M,
-                "ParentUserName",
                 DateTimeOffset.Now,
-                0M,
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                AgentDividendType.OneLayer,
-                Array.Empty<AgentDividendCondition>());
+                0M);
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -372,22 +342,16 @@ namespace Agent.UnitTests
                 null,
                 null,
                 "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
                 null,
-                1,
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                0M,
-                10M,
-                "ParentUserName",
                 DateTimeOffset.Now,
-                0M,
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                AgentDividendType.OneLayer,
-                Array.Empty<AgentDividendCondition>());
+                0M);
 
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();

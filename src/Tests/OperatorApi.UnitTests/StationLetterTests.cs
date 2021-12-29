@@ -12,8 +12,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Paging;
-using TGS.Services.Operator.Services.StationLetters;
 using TGS.Services.Operator.StationLetters;
+using TGS.Services.Operator.ApplicationServices.StationLetters;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

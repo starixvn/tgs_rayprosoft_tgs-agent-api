@@ -18,6 +18,7 @@ using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.ApiClients.SexyGaming;
 using TGS.Shared.Game.ApiClients.Skywind;
 using TGS.Shared.Game.ApiClients.TCG;
+using TGS.Shared.Game.ApiClients.TF;
 using TGS.Shared.Game.ApiClients.VR;
 using TGS.Shared.Game.ApiClients.WGHorse;
 using TGS.Shared.Game.ApiClients.WGSports;
@@ -82,6 +83,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IAviaApiClient, AviaApiClient>();
 
             services.AddHttpClient<IJiliApiClient, JiliApiClient>();
+
+            services.AddHttpClient<ITFApiClient, TFApiClient>();
 
             return services;
         }

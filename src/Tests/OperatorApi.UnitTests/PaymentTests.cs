@@ -7,7 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.BrandPayments;
+using TGS.Services.Operator.ApplicationServices.BrandPayments;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
