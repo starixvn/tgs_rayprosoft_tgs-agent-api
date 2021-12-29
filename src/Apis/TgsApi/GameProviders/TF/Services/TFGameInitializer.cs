@@ -45,10 +45,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 .ConfigureAwait(false);
 
             var brandCode = player.BrandCode;
+            var currencyCode = player.DefaultWalletCurrencyCode;
 
             var brandMerchant = configuration.BrandMerchants
-                .Where(brand => brand.BrandCurrency == brandCode)
-                .First();
+                .Where(brand => brand.BrandCode == player.BrandCode && brand.BrandCurrency == currencyCode)
+                .FirstOrDefault();
+
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants
+                    .Where(brand => brand.BrandCode == "Default" && brand.BrandCurrency == currencyCode)
+                    .FirstOrDefault();
+            }
 
             var url = await _client
                 .GetGameUrlAsync(brandMerchant.LaunchUrl, brandMerchant.PublicToken, player.PlayerCode)
