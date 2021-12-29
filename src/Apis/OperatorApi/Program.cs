@@ -24,7 +24,6 @@ namespace TGS.Apis.OperatorApi
 
         public static async Task Main(string[] args)
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             PrometheusService.StartCollecting();
 
             var host = CreateHostBuilder(args).Build();
