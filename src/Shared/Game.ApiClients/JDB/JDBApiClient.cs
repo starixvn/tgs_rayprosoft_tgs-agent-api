@@ -33,27 +33,44 @@ namespace TGS.Shared.Game.ApiClients.JDB
 
         ValueTask<BetHistoryResponse> IJDBApiClient.GetBetHistoryUrlAsync(
             Uri apiUrl,
-            JDBAgent agent,
+            string clientDomain,
+            string aesIv,
+            string aesKey,
             BetHistoryRequest request)
         {
             var prefix = $"{Consts.GameProvider.JDB}.BetHistory";
 
-            return ExecuteRequestAsync<BetHistoryRequest, BetHistoryResponse>(apiUrl, agent, request, prefix);
+            return ExecuteRequestAsync<BetHistoryRequest, BetHistoryResponse>(
+                apiUrl,
+                clientDomain,
+                aesIv,
+                aesKey,
+                request, prefix);
         }
 
         ValueTask<GetTokenResponse> IJDBApiClient.GetTokenAsync(
             Uri apiUrl,
-            JDBAgent agent,
+            string clientDomain,
+            string aesIv,
+            string aesKey,
             GetTokenRequest request)
         {
             var prefix = $"{Consts.GameProvider.JDB}.GetToken";
 
-            return ExecuteRequestAsync<GetTokenRequest, GetTokenResponse>(apiUrl, agent, request, prefix);
+            return ExecuteRequestAsync<GetTokenRequest, GetTokenResponse>(
+                apiUrl,
+                clientDomain,
+                aesIv,
+                aesKey,
+                request,
+                prefix);
         }
 
         private async ValueTask<TResponse> ExecuteRequestAsync<TRequest, TResponse>(
             Uri apiUrl,
-            JDBAgent agent,
+            string clientDomain,
+            string aesIv,
+            string aesKey,
             TRequest data,
             string logPrefix)
         {
@@ -63,14 +80,14 @@ namespace TGS.Shared.Game.ApiClients.JDB
                 await _cryptoProvider
                     .EncryptStringAsync(
                         jsonString,
-                        agent.AESIv,
-                        agent.AESKey,
+                        aesIv,
+                        aesKey,
                         encoding: Encoding.UTF8)
                     .ConfigureAwait(false);
 
             var parameters = new Dictionary<string, string>
             {
-                ["dc"] = agent.ClientDomain,
+                ["dc"] = clientDomain,
                 ["x"] = encryptedString
             };
 
