@@ -33,6 +33,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             }
 
             return new PlayerDataInfo(
+                player.PlayerCode,
                 player.Username,
                 player.RealName,
                 player.Phone,
