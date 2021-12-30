@@ -38,8 +38,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var sw = new Stopwatch();
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 var batchId = await _store.GetBatchIdAsync().ConfigureAwait(false);
@@ -60,8 +58,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
                     continue;
                 }
-
-                sw.Restart();
 
                 using var scope = _serviceProvider.CreateScope();
 
@@ -86,9 +82,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                         _logger.LogError(new EventId(1000), ex, $"Fail to execute wmcasino bet result: {value}");
                     }
                 }
-
-                sw.Stop();
-                Console.WriteLine("Elapsed: {0}", sw.ElapsedMilliseconds);
             }
         }
     }
