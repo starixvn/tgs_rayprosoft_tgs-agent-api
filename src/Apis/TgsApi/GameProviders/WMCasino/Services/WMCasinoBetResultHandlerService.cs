@@ -55,7 +55,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
                 if (betDetails.Length == 0)
                 {
-                    await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
                     continue;
                 }
 
