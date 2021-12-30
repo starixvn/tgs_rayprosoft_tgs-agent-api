@@ -42,6 +42,8 @@ namespace TGS.Shared.Game.ApiClients.TF
                 .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
+            response.EnsureSuccessStatusCode();
+
             var result = JsonSerializer.Deserialize<LaunchResponse>(bodyJson);
 
             var launchUrl = result.LaunchUrl;
