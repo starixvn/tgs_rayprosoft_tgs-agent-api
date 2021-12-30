@@ -6,8 +6,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public interface IWMDataStore
     {
-        ValueTask AddBetResultsToQueueAsync(IEnumerable<BetDetail> betDetails);
+        ValueTask AddBetResultsToQueueAsync(string batchId, IEnumerable<BetDetail> betDetails);
 
-        ValueTask<BetDetail> GetBetResultFromQueueAsync();
+        ValueTask AddPlayerCodeByRoundNumberAsync(string roundNumber, string playerCode);
+
+        ValueTask ApplyBetResultBatchesAsync(string roundNumber);
+
+        ValueTask<string> GetBatchIdAsync();
+
+        ValueTask<IEnumerable<BetDetail>> GetBetResultsByBatchIdAsync(string batchId);
     }
 }

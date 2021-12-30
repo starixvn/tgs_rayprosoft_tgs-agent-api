@@ -24,15 +24,18 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             };
         }
 
-        public async ValueTask AddBetResultsToQueueAsync(IEnumerable<BetDetail> betDetails)
+        public async ValueTask AddBetResultsToQueueAsync(
+            string batchId,
+            IEnumerable<BetDetail> betDetails)
         {
-            var dataKey = "WM:BetResult";
+            var key = $"WM:BetResult:{batchId}";
+
             var batch = _database.CreateBatch();
 
             var tasks = betDetails.Select(detail =>
             {
                 var value = JsonSerializer.Serialize(detail, _jsonSerializerOptions);
-                return _database.ListRightPushAsync(dataKey, value);
+                return _database.ListRightPushAsync(key, value);
             }).Cast<Task>().ToArray();
 
             batch.Execute();
@@ -40,15 +43,56 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        public async ValueTask<BetDetail> GetBetResultFromQueueAsync()
+        public async ValueTask AddPlayerCodeByRoundNumberAsync(string roundNumber, string playerCode)
         {
-            var dataKey = "WM:BetResult";
+            var key = $"WM:Round:{roundNumber}";
 
-            var value = await _database.ListLeftPopAsync(dataKey).ConfigureAwait(false);
+            await _database.ListRightPushAsync(key, playerCode).ConfigureAwait(false);
+            await _database.KeyExpireAsync(key, TimeSpan.FromHours(2));
+        }
 
-            return value.HasValue ?
-                JsonSerializer.Deserialize<BetDetail>(value) :
-                null;
+        public async ValueTask ApplyBetResultBatchesAsync(string roundNumber)
+        {
+            var values = await GetPlayerCodesByRoundNumberAsync(roundNumber)
+                .ConfigureAwait(false);
+
+            var key = "WM:BetResult:BatchId";
+            var batch = _database.CreateBatch();
+
+            var tasks = values.Select(v =>
+            {
+                var batchId = $"{v}:{roundNumber}";
+                return _database.ListRightPushAsync(key, batchId);
+            }).Cast<Task>().ToArray();
+
+            batch.Execute();
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        public async ValueTask<string> GetBatchIdAsync()
+        {
+            var key = "WM:BetResult:BatchId";
+            var value = await _database.ListLeftPopAsync(key).ConfigureAwait(false);
+            return value.HasValue ? value.ToString() : null;
+        }
+
+        public async ValueTask<IEnumerable<BetDetail>> GetBetResultsByBatchIdAsync(string batchId)
+        {
+            var key = $"WM:BetResult:{batchId}";
+
+            var value = await _database.ListRangeAsync(key).ConfigureAwait(false);
+
+            return value.Length == 0 ?
+                Array.Empty<BetDetail>() :
+                value.Select(v => JsonSerializer.Deserialize<BetDetail>(v));
+        }
+
+        private async ValueTask<IEnumerable<string>> GetPlayerCodesByRoundNumberAsync(string roundNumber)
+        {
+            var key = $"WM:Round:{roundNumber}";
+            var values = await _database.ListRangeAsync(key).ConfigureAwait(false);
+            return values.ToStringArray().Distinct();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public interface IWMCasinoBetActionServices
     {
-        ValueTask<Core.Models.Services.Games.BetResult> CancelLockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
+        ValueTask<BetResult> CancelLockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
             string playerCode, CancelWalletTransferRequest request);
 
         ValueTask ExecuteBetResultsByRoundAsync(Guid gameProviderId,
@@ -16,7 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode);
 
-        ValueTask<Core.Models.Services.Games.BetResult> LockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
+        ValueTask<BetResult> LockAmountAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
             string playerCode, WalletTransferRequest request);
     }
 }

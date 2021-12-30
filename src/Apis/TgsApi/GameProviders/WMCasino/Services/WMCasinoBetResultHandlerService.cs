@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,36 +38,57 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var sw = new Stopwatch();
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                var betDetail = await _store.GetBetResultFromQueueAsync().ConfigureAwait(false);
-                if (betDetail == null)
+                var batchId = await _store.GetBatchIdAsync().ConfigureAwait(false);
+                if (string.IsNullOrEmpty(batchId))
                 {
                     await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
                     continue;
                 }
 
-                try
+                var betDetails =
+                    (await _store
+                        .GetBetResultsByBatchIdAsync(batchId)
+                        .ConfigureAwait(false))
+                    .ToArray();
+
+                if (betDetails.Length == 0)
                 {
-                    using var scope = _serviceProvider.CreateScope();
-
-                    var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
-
-                    await service.ExecuteBetResultsByRoundAsync(
-                            betDetail.GameProviderId,
-                            betDetail.GameProviderConfigurationId,
-                            betDetail.PlayerCode,
-                            new[] { betDetail.GameBetResult },
-                            false)
-                        .ConfigureAwait(false);
+                    await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
+                    continue;
                 }
-                catch (Exception ex)
+
+                sw.Restart();
+
+                using var scope = _serviceProvider.CreateScope();
+
+                var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
+
+                foreach (var betDetail in betDetails)
                 {
-                    var value = JsonSerializer.Serialize(betDetail, _jsonSerializerOptions);
+                    try
+                    {
+                        await service.ExecuteBetResultsByRoundAsync(
+                                betDetail.GameProviderId,
+                                betDetail.GameProviderConfigurationId,
+                                betDetail.PlayerCode,
+                                new[] { betDetail.GameBetResult })
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        var value = JsonSerializer.Serialize(betDetail, _jsonSerializerOptions);
 
-                    _log.LogError($"Fail to execute wmcasino bet result: {value}", ex);
-                    _logger.LogError(new EventId(1000), ex, $"Fail to execute wmcasino bet result: {value}");
+                        _log.LogError($"Fail to execute wmcasino bet result: {value}", ex);
+                        _logger.LogError(new EventId(1000), ex, $"Fail to execute wmcasino bet result: {value}");
+                    }
                 }
+
+                sw.Stop();
+                Console.WriteLine("Elapsed: {0}", sw.ElapsedMilliseconds);
             }
         }
     }

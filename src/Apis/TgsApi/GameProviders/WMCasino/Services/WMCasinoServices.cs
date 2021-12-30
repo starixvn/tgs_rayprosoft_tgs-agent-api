@@ -10,20 +10,6 @@ using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
-    public interface IWMCasinoServices
-    {
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
-            Guid gameProviderId,
-            string playerCode, string externalGameActionGroupId);
-
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
-                    Guid gameProviderId,
-            Guid gameProviderConfigurationId, string playerCode, string externalGameId);
-
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataWithDesktopPlatformAsync(
-            Guid gameProviderId, Guid gameProviderConfigurationId);
-    }
-
     public class WMCasinoServices : IWMCasinoServices
     {
         private readonly IGameActionQueries _gameActionQueries;

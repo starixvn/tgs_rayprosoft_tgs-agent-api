@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.WMCasino;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.WMCasino.Enums;
@@ -27,6 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("betdetail")]
         public async Task<ErrorResponse> BetDetailsAsync(
+            [FromServices] ISettingOperations settingOperations,
             [FromServices] IBrandOperations brandOperations,
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IWMCasinoPlayerServices playerServices,
@@ -37,12 +40,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             var agent = HttpContext.Items.Get<WMCasinoAgent>(WMCasinoConsts.ContextItems.Agent, null);
             var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
-            var configurationIds = new ConcurrentDictionary<string, Guid>();
-            var betDetails = new List<BetDetail>();
+            var gameResults = request.Results;
+            var roundNumber = $"{gameResults[0].ExternalGameId}_{gameResults[0].RoundId}_{gameResults[0].SubRoundId}";
 
-            foreach (var r in request.Results)
+            var results =
+                (from r in gameResults
+                 group r by new { r.User } into g
+                 select g)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.ToArray());
+
+            var configurationIds = new ConcurrentDictionary<string, Guid>();
+
+            foreach (var r in results)
             {
-                var playerCode = playerServices.GetPlayerCode(r.User, agent!.Prefix, agent!.Suffix);
+                var playerCode = playerServices.GetPlayerCode(r.Key.User, agent!.Prefix, agent!.Suffix);
 
                 if (!configurationIds.TryGetValue(playerCode, out var gameProviderConfigurationId))
                 {
@@ -54,18 +67,36 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
                     configurationIds[playerCode] = gameProviderConfigurationId;
                 }
 
-                var betDetail = new BetDetail(
-                    gameProviderId,
-                    gameProviderConfigurationId,
-                    playerCode,
-                    r);
+                var betDetails = r.Value
+                    .Select(betResult =>
+                        new BetDetail(
+                            gameProviderId,
+                            gameProviderConfigurationId,
+                            playerCode,
+                            betResult))
+                    .ToArray();
 
-                betDetails.Add(betDetail);
+                await store
+                    .AddBetResultsToQueueAsync($"{playerCode}:{roundNumber}", betDetails)
+                    .ConfigureAwait(false);
+
+                await store
+                    .AddPlayerCodeByRoundNumberAsync(roundNumber, playerCode)
+                    .ConfigureAwait(false);
             }
 
-            await store
-                .AddBetResultsToQueueAsync(betDetails)
-                .ConfigureAwait(false);
+            var setting =
+                await settingOperations
+                    .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>
+                        (SettingConsts.GameProviderConfigurations.WMCasino)
+                    .ConfigureAwait(false);
+
+            var totalCount = setting.MaxResultCount * (request.Page - 1) + gameResults.Length;
+            if (totalCount == request.TotalCount)
+            {
+                await store.ApplyBetResultBatchesAsync(roundNumber)
+                    .ConfigureAwait(false);
+            }
 
             return map.Response(GameApiError.Success, string.Empty);
         }
