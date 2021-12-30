@@ -24,11 +24,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             };
         }
 
+        public async ValueTask AddBetDetailRequestInfoAsync(
+            string agentId,
+            string roundNumber,
+            BetDetailRequestInfo info)
+        {
+            var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
+            var value = JsonSerializer.Serialize(info, _jsonSerializerOptions);
+
+            await _database.ListRightPushAsync(key, value).ConfigureAwait(false);
+        }
+
         public async ValueTask AddBetResultsToQueueAsync(
             string batchId,
             IEnumerable<BetDetail> betDetails)
         {
-            var key = $"WM:BetResult:{batchId}";
+            var key = GetBetResultKey(batchId);
 
             var batch = _database.CreateBatch();
 
@@ -43,27 +54,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        public async ValueTask AddPlayerCodeByRoundNumberAsync(string roundNumber, string playerCode)
+        public async ValueTask ApplyBetResultBatchesAsync(IEnumerable<string> batchIds)
         {
-            var key = $"WM:Round:{roundNumber}";
-
-            await _database.ListRightPushAsync(key, playerCode).ConfigureAwait(false);
-            await _database.KeyExpireAsync(key, TimeSpan.FromHours(2));
-        }
-
-        public async ValueTask ApplyBetResultBatchesAsync(string roundNumber)
-        {
-            var values = await GetPlayerCodesByRoundNumberAsync(roundNumber)
-                .ConfigureAwait(false);
-
             var key = "WM:BetResult:BatchId";
             var batch = _database.CreateBatch();
 
-            var tasks = values.Select(v =>
-            {
-                var batchId = $"{v}:{roundNumber}";
-                return _database.ListRightPushAsync(key, batchId);
-            }).Cast<Task>().ToArray();
+            var tasks = batchIds
+                .Select(id => _database.ListRightPushAsync(key, id))
+                .Cast<Task>()
+                .ToArray();
 
             batch.Execute();
 
@@ -77,9 +76,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             return value.HasValue ? value.ToString() : null;
         }
 
+        public async ValueTask<IEnumerable<BetDetailRequestInfo>> GetBetDetailRequestInfosAsync(
+            string agentId,
+            string roundNumber)
+        {
+            var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
+
+            var value = await _database.ListRangeAsync(key).ConfigureAwait(false);
+
+            return value.Length == 0 ?
+                Array.Empty<BetDetailRequestInfo>() :
+                value.Select(v => JsonSerializer.Deserialize<BetDetailRequestInfo>(v));
+        }
+
         public async ValueTask<IEnumerable<BetDetail>> GetBetResultsByBatchIdAsync(string batchId)
         {
-            var key = $"WM:BetResult:{batchId}";
+            var key = GetBetResultKey(batchId);
 
             var value = await _database.ListRangeAsync(key).ConfigureAwait(false);
 
@@ -88,11 +100,25 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 value.Select(v => JsonSerializer.Deserialize<BetDetail>(v));
         }
 
-        private async ValueTask<IEnumerable<string>> GetPlayerCodesByRoundNumberAsync(string roundNumber)
+        public async ValueTask RemoveBetDetailRequestInfosAsync(string agentId, string roundNumber)
         {
-            var key = $"WM:Round:{roundNumber}";
-            var values = await _database.ListRangeAsync(key).ConfigureAwait(false);
-            return values.ToStringArray().Distinct();
+            var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
+
+            await _database.KeyDeleteAsync(key).ConfigureAwait(false);
         }
+
+        public async ValueTask RemoveBetResultsByBatchIdAsync(string batchId)
+        {
+            var key = GetBetResultKey(batchId);
+            await _database.KeyDeleteAsync(key).ConfigureAwait(false);
+        }
+
+        private static string GetBetDetailRequestInfoKey(
+            string agentId,
+            string roundNumber)
+            => $"WM.BetDetailRequestInfo:{agentId}:{roundNumber}";
+
+        private static string GetBetResultKey(string batchId)
+            => $"WM:BetResult:{batchId}";
     }
 }

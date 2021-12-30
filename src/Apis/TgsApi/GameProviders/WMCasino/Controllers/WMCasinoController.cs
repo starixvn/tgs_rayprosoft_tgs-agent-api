@@ -3,10 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using Tgs.MessageQueue;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
@@ -30,11 +33,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         [HttpPost("betdetail")]
         public async Task<ErrorResponse> BetDetailsAsync(
             [FromServices] ISettingOperations settingOperations,
-            [FromServices] IBrandOperations brandOperations,
-            [FromServices] IPlayerOperations playerOperations,
-            [FromServices] IWMCasinoPlayerServices playerServices,
             [FromServices] IWMDataStore store,
             [FromServices] IWMCasinoActionModelMapper map,
+            [FromServices] IMessageSender messageSender,
             BetDetailRequest request)
         {
             var agent = HttpContext.Items.Get<WMCasinoAgent>(WMCasinoConsts.ContextItems.Agent, null);
@@ -43,47 +44,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             var gameResults = request.Results;
             var roundNumber = $"{gameResults[0].ExternalGameId}_{gameResults[0].RoundId}_{gameResults[0].SubRoundId}";
 
-            var results =
-                (from r in gameResults
-                 group r by new { r.User } into g
-                 select g)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.ToArray());
-
-            var configurationIds = new ConcurrentDictionary<string, Guid>();
-
-            foreach (var r in results)
-            {
-                var playerCode = playerServices.GetPlayerCode(r.Key.User, agent!.Prefix, agent!.Suffix);
-
-                if (!configurationIds.TryGetValue(playerCode, out var gameProviderConfigurationId))
-                {
-                    var brandId = await playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-                    var bgpc = await brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
-                        .ConfigureAwait(false);
-
-                    gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
-                    configurationIds[playerCode] = gameProviderConfigurationId;
-                }
-
-                var betDetails = r.Value
-                    .Select(betResult =>
-                        new BetDetail(
-                            gameProviderId,
-                            gameProviderConfigurationId,
-                            playerCode,
-                            betResult))
-                    .ToArray();
-
-                await store
-                    .AddBetResultsToQueueAsync($"{playerCode}:{roundNumber}", betDetails)
-                    .ConfigureAwait(false);
-
-                await store
-                    .AddPlayerCodeByRoundNumberAsync(roundNumber, playerCode)
-                    .ConfigureAwait(false);
-            }
+            var requestInfo = new BetDetailRequestInfo(gameProviderId, agent, request);
+            await store.AddBetDetailRequestInfoAsync(agent.AgentId, roundNumber, requestInfo).ConfigureAwait(false);
 
             var setting =
                 await settingOperations
@@ -94,8 +56,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             var totalCount = setting.MaxResultCount * (request.Page - 1) + gameResults.Length;
             if (totalCount == request.TotalCount)
             {
-                await store.ApplyBetResultBatchesAsync(roundNumber)
-                    .ConfigureAwait(false);
+                var keyRequest = new BetDetailRequestInfoKey(agent.AgentId, roundNumber);
+                var bytes = JsonSerializer.SerializeToUtf8Bytes(
+                    keyRequest,
+                    new JsonSerializerOptions { WriteIndented = false });
+
+                await messageSender
+                    .SendAsync("tgs.gameprovider.wm.betdetailrequest.process", bytes)
+                    .ConfigureAwait(true);
             }
 
             return map.Response(GameApiError.Success, string.Empty);

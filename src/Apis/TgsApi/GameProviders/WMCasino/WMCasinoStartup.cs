@@ -13,6 +13,7 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
+using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Services.GameOperations.Calculators;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino
@@ -67,6 +68,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 ActivatorUtilities.CreateInstance<WMRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
             services.AddHostedService<WMCasinoBetResultHandlerService>();
+        }
+
+        protected override void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
+        {
+            configuration.AddReplyHandler<WMCasinoBetRequestInfoHandler>(
+                "tgs.gameprovider.wm.betdetailrequest.process",
+                "tgs.gameprovider.wm.betdetailrequest.process");
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)

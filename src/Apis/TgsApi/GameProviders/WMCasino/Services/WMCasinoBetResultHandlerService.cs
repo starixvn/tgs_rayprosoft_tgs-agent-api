@@ -62,24 +62,27 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
                 var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
 
-                foreach (var betDetail in betDetails)
+                try
                 {
-                    try
+                    foreach (var betDetail in betDetails)
                     {
-                        await service.ExecuteBetResultsByRoundAsync(
+                        await service
+                            .ExecuteBetResultsByRoundAsync(
                                 betDetail.GameProviderId,
                                 betDetail.GameProviderConfigurationId,
                                 betDetail.PlayerCode,
                                 new[] { betDetail.GameBetResult })
                             .ConfigureAwait(false);
                     }
-                    catch (Exception ex)
-                    {
-                        var value = JsonSerializer.Serialize(betDetail, _jsonSerializerOptions);
 
-                        _log.LogError($"Fail to execute wmcasino bet result: {value}", ex);
-                        _logger.LogError(new EventId(1000), ex, $"Fail to execute wmcasino bet result: {value}");
-                    }
+                    await _store.RemoveBetResultsByBatchIdAsync(batchId).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    var value = JsonSerializer.Serialize(betDetails, _jsonSerializerOptions);
+
+                    _log.LogError($"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}", ex);
+                    _logger.LogError(new EventId(1000), ex, $"Fail to execute WMCasino bet result: BatchId: {batchId}, BetDetails: {value}");
                 }
             }
         }

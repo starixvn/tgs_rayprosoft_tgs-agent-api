@@ -12,6 +12,7 @@ using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
@@ -153,6 +154,8 @@ namespace TGS.Apis.TgsApi.Commons
 
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
+
+                    AddCustomNatsMessageQueueHandler(natsConfig);
                 });
 
             services
@@ -199,6 +202,10 @@ namespace TGS.Apis.TgsApi.Commons
         }
 
         protected virtual void AddCustomFilters(MvcOptions options)
+        {
+        }
+
+        protected virtual void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
         {
         }
 
