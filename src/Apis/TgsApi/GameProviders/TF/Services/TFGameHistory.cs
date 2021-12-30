@@ -27,7 +27,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             CachedGame cachedGame,
             string language)
         {
-            var gameRecord = JsonSerializer.Deserialize<TFGameRecord>(round.RoundDetail.AdditionalData);
+            var gameRecord = string.IsNullOrEmpty(round.RoundDetail.AdditionalData)
+                ? null
+                : JsonSerializer.Deserialize<TFGameRecord>(round.RoundDetail.AdditionalData);
 
             if (gameRecord == null)
             {
