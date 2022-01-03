@@ -27,5 +27,7 @@ namespace TGS.Clients.Report.Client.Models.Market
         public decimal WinLossAmount { get; set; }
 
         public decimal NetProfit { get; set; }
+
+        public decimal AdditionalExpenses { get; set; }
     }
 }
