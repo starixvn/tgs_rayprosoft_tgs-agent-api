@@ -5,7 +5,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Report.Application.Models.GameProvider
 {
-    public class GetGameProviderRoundsRequest : PageableRequest, IRequest<PagedResponse<GameProviderRoundsModel>>
+    public class GetGameProviderRoundsRequest : PageableRequest, IRequest<GetGameProviderRoundsResponse>
     {
         public DateTimeOffset From { get; set; }
 
