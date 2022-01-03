@@ -4727,9 +4727,48 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_vip_level_snapshots");
 
                     b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_pk_player_vip_level_snapshots_player_code");
+                        .HasDatabaseName("ix_player_vip_level_snapshots_brand_id");
 
                     b.ToTable("player_vip_level_snapshots");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelUpgradeRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("ExecutionOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("execution_on");
+
+                    b.Property<Guid>("PlayerVipLevelSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_vip_level_snapshot_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_upgrade_records");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_records_brand_id");
+
+                    b.HasIndex("PlayerVipLevelSnapshotId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_records_player_vip_level_snapshot_id");
+
+                    b.ToTable("player_vip_level_upgrade_records");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
