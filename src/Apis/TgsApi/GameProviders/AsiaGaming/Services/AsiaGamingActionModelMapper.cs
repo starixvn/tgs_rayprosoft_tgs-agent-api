@@ -181,9 +181,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 var transactionId = GetTransactionId(r.Record, isLockGame, tId);
                 var transactionReferenceId = GetTransactionReferenceId(r.Record, isLockGame, tId);
 
+                var settleAmount = amount;
+
+                if (transactionType == TransactionType.WIN)
+                {
+                    settleAmount = index == 0 ? amount : 0m; // only first bet will pay the settle amount
+                }
+
                 return new TransactionData
                 {
-                    Amount = amount,
+                    Amount = settleAmount,
                     ExternalTransactionId = transactionId,
                     ExternalTransactionReferenceId = transactionReferenceId,
                     ExternalRoundId = r.Record.RoundId,
@@ -192,8 +199,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                     GameActionType = gameActionType,
                     TimeStamp = GetTimestamp(r.Record.SettleTime),
                     RoundClosed = index == count - 1 ? null : false,
-                    RoundDetail = GetRoundHistory(isRoundFinish, r.Record.GameResult),
-                    BetType = r.Record.PlayType
+                    RoundDetail = GetRoundHistory(isRoundFinish, r.Record.GameResult)
                 };
             }).ToArray();
 
