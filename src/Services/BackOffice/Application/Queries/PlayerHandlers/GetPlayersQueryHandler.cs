@@ -78,7 +78,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             on player.BrandId equals brand.Id
                         join ipRecord in playerIpQuery
                             on player.PlayerCode equals ipRecord.PlayerCode into gj
-                        from ipRecord in gj
+                        from ipRecord in gj.DefaultIfEmpty()
                         select new PlayersModel
                         {
                             PlayerCode = player.PlayerCode,
