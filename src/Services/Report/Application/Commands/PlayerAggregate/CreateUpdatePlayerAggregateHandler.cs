@@ -60,6 +60,7 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 return CreateInvalidResponse<MessageResponse>("Not any hours to generate player aggregate.");
             }
 
+            var playerCodes = Array.Empty<string>();
             foreach (var doHour in doHours)
             {
                 var start = new DateTimeOffset(previousHour.Year,
@@ -99,18 +100,20 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                     await _playerGameTypeAggregateService.CreatePlayerGameAggregatesAsync(aggregatesByGameType);
                 }
 
+                playerCodes = playerCodes.Union(aggregates.Select(x => x.PlayerCode)).ToArray();
+
                 scope.Complete();
-
-                var sendForVipLevelUpCalculation = new
-                {
-                    ReportOn = reportDate,
-                    PlayerCodes = aggregates.Select(x => x.PlayerCode).ToArray()
-                };
-
-                await _messageSender.PublishAsync("tgs.viplevel.aggregate.server",
-                        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendForVipLevelUpCalculation)))
-                    .ConfigureAwait(false);
             }
+
+            var sendForVipLevelUpCalculation = new
+            {
+                ReportOn = reportDate,
+                PlayerCodes = playerCodes
+            };
+
+            await _messageSender.PublishAsync("tgs.viplevel.aggregate.server",
+                    Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendForVipLevelUpCalculation)))
+                .ConfigureAwait(false);
 
             return new() { Valid = true };
         }
