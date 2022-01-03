@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -14,21 +13,21 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
     public class WMCasinoBetResultHandlerService : BackgroundService
     {
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-        private readonly ITgsLog _log;
         private readonly ILogger<WMCasinoBetResultHandlerService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IWMDataStore _store;
+        private readonly ITgsLog _tgsLog;
 
         public WMCasinoBetResultHandlerService(
             ILogger<WMCasinoBetResultHandlerService> logger,
             IServiceProvider serviceProvider,
             IWMDataStore store,
-            ITgsLog log)
+            ITgsLog tgsLog)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _store = store ?? throw new ArgumentNullException(nameof(store));
-            _log = log?.SetLogger(nameof(WMCasinoBetResultHandlerService)) ?? throw new ArgumentNullException(nameof(log));
+            _tgsLog = tgsLog?.SetLogger(nameof(WMCasinoBetResultHandlerService)) ?? throw new ArgumentNullException(nameof(tgsLog));
 
             _jsonSerializerOptions = new JsonSerializerOptions
             {
@@ -81,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 {
                     var value = JsonSerializer.Serialize(betDetails, _jsonSerializerOptions);
 
-                    _log.LogError($"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}", ex);
+                    _tgsLog.LogError($"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}", ex);
                     _logger.LogError(new EventId(1000), ex, $"Fail to execute WMCasino bet result: BatchId: {batchId}, BetDetails: {value}");
                 }
             }

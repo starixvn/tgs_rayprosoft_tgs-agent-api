@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
-using NATS.Client;
-using System.Text.Json;
-using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
 using Tgs.Logging;
 using Tgs.MessageQueue;
+using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
 using TGS.Services.Operations;
-using System.Collections.Generic;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
