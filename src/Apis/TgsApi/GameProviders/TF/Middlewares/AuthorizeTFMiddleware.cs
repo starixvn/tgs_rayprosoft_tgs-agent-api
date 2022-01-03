@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -19,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
         private static readonly string _Route = "/tf/api";
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ILogger<AuthorizeTFMiddleware> _logger;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -26,12 +28,14 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
-            IBrandOperations brandOperations)
+            IBrandOperations brandOperations,
+            ILogger<AuthorizeTFMiddleware> logger)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -70,6 +74,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
                     || path.StartsWithSegments($"{_Route}/rollback")))
             {
                 var value = await context.Request.ReadAsStringAsync();
+
+                _logger.LogInformation($"request: {value}");
+
                 var transferRequest = JsonSerializer.Deserialize<TransferRequest>(value);
                 var ticketDetail = transferRequest.TicketDetail;
 

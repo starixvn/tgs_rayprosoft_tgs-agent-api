@@ -113,6 +113,7 @@ namespace TGS.Shared.Game.Models.TF.Incoming
         /// 让分数
         /// </summary>
         [JsonPropertyName("handicap")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public decimal? Handicap { get; init; }
 
         /// <summary>
