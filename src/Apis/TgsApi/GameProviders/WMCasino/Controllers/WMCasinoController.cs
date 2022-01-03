@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Mvc;
+using Tgs.Logging;
 using Tgs.MessageQueue;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
@@ -29,6 +28,20 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
     [FeatureGate(Consts.GameProvider.WMCasino)]
     public class WMCasinoController : ControllerBase
     {
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly ILogger<WMCasinoController> _logger;
+
+        public WMCasinoController(
+            ILogger<WMCasinoController> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            _jsonSerializerOptions = new JsonSerializerOptions
+            {
+                WriteIndented = false
+            };
+        }
+
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("betdetail")]
         public async Task<ErrorResponse> BetDetailsAsync(
@@ -111,11 +124,80 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             => services.GetGameRecordAsync(request);
 
         [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("gamerecord/manual")]
+        public async Task<ManuelRoundRecordResponse> ManualExecutePlayerRoundRecordAsync(
+            [FromServices] IWMDataStore store,
+            [FromServices] IWMCasinoBetActionServices service,
+            [FromServices] ITgsLog tgsLog,
+            ManuelRoundRecordRequest request)
+        {
+            tgsLog = tgsLog.SetLogger("wmcasino");
+
+            var gameNumber = $"{request.ExternalGameId}_{request.ExternalRoundId}";
+            var batchId = $"{request.PlayerCode}:{gameNumber}";
+
+            var betDetails = (await store
+                    .GetBetResultsByBatchIdAsync(batchId)
+                    .ConfigureAwait(false))
+                .ToArray();
+
+            if (betDetails.Length == 0)
+            {
+                var message = $"Can't find batch with id: {batchId}";
+
+                tgsLog.LogError(message);
+                _logger.LogError(new EventId(1000), message);
+
+                return new ManuelRoundRecordResponse
+                {
+                    ErrorCode = 1000,
+                    ErrorMessage = message
+                };
+            }
+
+            try
+            {
+                foreach (var betDetail in betDetails)
+                {
+                    await service
+                        .ExecuteBetResultsByRoundAsync(
+                            betDetail.GameProviderId,
+                            betDetail.GameProviderConfigurationId,
+                            betDetail.PlayerCode,
+                            new[] { betDetail.GameBetResult })
+                        .ConfigureAwait(false);
+                }
+
+                await store.RemoveBetResultsByBatchIdAsync(batchId).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var value = JsonSerializer.Serialize(betDetails, _jsonSerializerOptions);
+                var message = $"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}";
+
+                tgsLog.LogError(message, ex);
+                _logger.LogError(new EventId(1100), ex, message);
+
+                return new ManuelRoundRecordResponse
+                {
+                    ErrorCode = 1100,
+                    ErrorMessage = message
+                };
+            }
+
+            return new ManuelRoundRecordResponse
+            {
+                ErrorCode = 0,
+                ErrorMessage = string.Empty
+            };
+        }
+
+        [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("balance")]
         public async ValueTask<GetBalanceResponse> PlayersBalanceAsync(
-            [FromServices] IWMCasinoBetActionServices services,
-            [FromServices] IWMCasinoActionModelMapper map,
-            GetBalanceRequest request)
+                [FromServices] IWMCasinoBetActionServices services,
+                [FromServices] IWMCasinoActionModelMapper map,
+                GetBalanceRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var r = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
