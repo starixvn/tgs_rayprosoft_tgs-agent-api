@@ -16,23 +16,6 @@ using TransactionType = TGS.Shared.Game.Models.AsiaGaming.Enums.TransactionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 {
-    public interface IAsiaGamingActionModelMapper
-    {
-        BetData Request(string playerCode, GameProviderConfigurationData data, PostTransferRequest r,
-            TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings);
-
-        BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r);
-
-        BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data, BetResponseRequest r,
-            GameActionExternalIds lockGameActionExternalIds, OppositeBetSetting[] oppositeBetSettings);
-
-        TransferResponse Response(GameApiError error);
-
-        TransferResponse Response(GameApiError error, GetBalanceResult result);
-
-        TransferResponse Response(BetResult result);
-    }
-
     public sealed class AsiaGamingActionModelMapper : IAsiaGamingActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.AsiaGaming;
@@ -43,47 +26,35 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             _jsonSerialization = jsonSerialization;
         }
 
-        BetData IAsiaGamingActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
-            PostTransferRequest r, TransactionType transactionType, bool isLockGame,
-            OppositeBetSetting[] oppositeBetSettings)
+        public BetData CancelTransactionRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings)
         {
-            var isPlaceBet = transactionType == TransactionType.BET;
-            var isPlaceBetOrCancel = isPlaceBet || transactionType == TransactionType.REFUND;
-            var gameActionType = GetGameActionType(transactionType);
             var currencyCode = r.Record.Currency;
-
-            var timestamp = isPlaceBetOrCancel ? r.Record.BetTime : r.Record.SettleTime;
-            var amount = isPlaceBetOrCancel ? Math.Abs(r.Record.Amount) : r.Record.BetAmount + r.Record.WinAmount;
-
-            var isRoundFinish = bool.TryParse(r.Record.RoundFinish, out var finish) && finish;
 
             var count = r.Record.TransactionIds.Length;
             var transactions = r.Record.TransactionIds.Select((tId, index) =>
             {
                 var transactionId = GetTransactionId(r.Record, isLockGame, tId);
+                var transactionReferenceId = GetTransactionReferenceId(r.Record, isLockGame, tId);
+
                 return new TransactionData
                 {
-                    Amount = amount,
+                    Amount = Math.Abs(r.Record.Amount),
                     ExternalTransactionId = transactionId,
-                    ExternalTransactionReferenceId =
-                        isPlaceBet ? string.Empty : GetTransactionReferenceId(r.Record, isLockGame, tId),
+                    ExternalTransactionReferenceId = transactionReferenceId,
                     ExternalRoundId = r.Record.RoundId,
-                    ExternalBetId = transactionId,
+                    ExternalBetId = transactionReferenceId,
                     ExternalGameId = GetGameId(r),
-                    GameActionType = gameActionType,
-                    TimeStamp = GetTimestamp(timestamp),
-                    RoundClosed = index == count - 1 ? null : false,
-                    RoundDetail = GetRoundHistory(isRoundFinish, r.Record.GameResult),
-                    BetType = r.Record.PlayType
+                    GameActionType = GameActionType.CancelTransaction,
+                    TimeStamp = GetTimestamp(r.Record.BetTime),
+                    RoundClosed = index == count - 1 ? null : false
                 };
             }).ToArray();
 
-            return GetBetData(playerCode, data, transactions, currencyCode,
-                oppositeBetSettings: oppositeBetSettings);
+            return GetBetData(playerCode, data, transactions, currencyCode, oppositeBetSettings: oppositeBetSettings);
         }
 
-        BetData IAsiaGamingActionModelMapper.LockAmountRequest(string playerCode, GameProviderConfigurationData data,
-            PostTransferRequest r)
+        public BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data,
+                    PostTransferRequest r)
         {
             var currencyCode = r.Record.Currency;
             var transactionId = r.Record.TransactionId;
@@ -109,7 +80,36 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return GetBetData(playerCode, data, transactions, currencyCode);
         }
 
-        BetData IAsiaGamingActionModelMapper.PlaceBetRequest(string playerCode, GameProviderConfigurationData data,
+        public BetData PlaceBetRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            PostTransferRequest r,
+            OppositeBetSetting[] oppositeBetSettings)
+        {
+            var currencyCode = r.Record.Currency;
+
+            var count = r.Record.TransactionIds.Length;
+            var transactions = r.Record.TransactionIds.Select((tId, index) =>
+            {
+                var transactionId = GetTransactionId(r.Record, false, tId);
+                return new TransactionData
+                {
+                    Amount = Math.Abs(r.Record.Amount),
+                    ExternalTransactionId = transactionId,
+                    ExternalRoundId = r.Record.RoundId,
+                    ExternalBetId = transactionId,
+                    ExternalGameId = GetGameId(r),
+                    GameActionType = GameActionType.PlaceBet,
+                    TimeStamp = GetTimestamp(r.Record.BetTime),
+                    RoundClosed = index == count - 1 ? null : false,
+                    BetType = r.Record.PlayType
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, data, transactions, currencyCode, oppositeBetSettings: oppositeBetSettings);
+        }
+
+        public BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data,
             BetResponseRequest r, GameActionExternalIds lockGameActionExternalIds,
             OppositeBetSetting[] oppositeBetSettings)
         {
@@ -145,37 +145,101 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 hasCurrencyFromGameProvider: false, oppositeBetSettings: oppositeBetSettings);
         }
 
-        TransferResponse IAsiaGamingActionModelMapper.Response(GameApiError error) =>
+        public TransferResponse Response(GameApiError error) =>
             new()
             {
                 ResponseCode = error,
                 Balance = 0
             };
 
-        TransferResponse IAsiaGamingActionModelMapper.Response(GameApiError error, GetBalanceResult result) =>
+        public TransferResponse Response(GameApiError error, GetBalanceResult result) =>
             new()
             {
                 ResponseCode = error,
-                Balance = result == null ? 0 : result.Balance
+                Balance = result?.Balance ?? 0
             };
 
-        TransferResponse IAsiaGamingActionModelMapper.Response(BetResult result) =>
+        public TransferResponse Response(BetResult result) =>
             new()
             {
                 ResponseCode = GameApiError.OK,
                 Balance = result.Balance
             };
 
+        public BetData SettleBetRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings)
+        {
+            var gameActionType = GetGameActionType(transactionType);
+            var currencyCode = r.Record.Currency;
+
+            var amount = r.Record.BetAmount + r.Record.WinAmount;
+
+            var isRoundFinish = bool.TryParse(r.Record.RoundFinish, out var finish) && finish;
+
+            var count = r.Record.TransactionIds.Length;
+            var transactions = r.Record.TransactionIds.Select((tId, index) =>
+            {
+                var transactionId = GetTransactionId(r.Record, isLockGame, tId);
+                var transactionReferenceId = GetTransactionReferenceId(r.Record, isLockGame, tId);
+
+                return new TransactionData
+                {
+                    Amount = amount,
+                    ExternalTransactionId = transactionId,
+                    ExternalTransactionReferenceId = transactionReferenceId,
+                    ExternalRoundId = r.Record.RoundId,
+                    ExternalBetId = transactionReferenceId,
+                    ExternalGameId = GetGameId(r),
+                    GameActionType = gameActionType,
+                    TimeStamp = GetTimestamp(r.Record.SettleTime),
+                    RoundClosed = index == count - 1 ? null : false,
+                    RoundDetail = GetRoundHistory(isRoundFinish, r.Record.GameResult),
+                    BetType = r.Record.PlayType
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, data, transactions, currencyCode, oppositeBetSettings: oppositeBetSettings);
+        }
+
         #region Private Methods
+
+        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
+                                    TransactionData[] transactions, string currencyCode = null,
+                    bool hasCurrencyFromGameProvider = true, OppositeBetSetting[] oppositeBetSettings = null) => new()
+                    {
+                        GameProviderId = data.GameProviderId,
+                        GameProviderConfigurationId = data.GameProviderConfigurationId,
+                        GameProviderCode = GameProviderCode,
+                        AutoCloseRound = data.AutoCloseRound,
+                        PlayerCode = playerCode,
+                        PlatformType = data.PlatformType,
+                        HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
+                        CurrencyCode = currencyCode,
+                        Transactions = transactions,
+                        OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
+                        {
+                            ExternalGameIds = o.Games,
+                            Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
+                        }).ToArray()
+                    };
 
         private static GameActionType GetGameActionType(TransactionType transactionType) =>
             transactionType switch
             {
-                TransactionType.WIN    => GameActionType.WinBet,
-                TransactionType.LOSE   => GameActionType.LoseBet,
+                TransactionType.WIN => GameActionType.WinBet,
+                TransactionType.LOSE => GameActionType.LoseBet,
                 TransactionType.REFUND => GameActionType.CancelTransaction,
-                _                      => GameActionType.PlaceBet
+                _ => GameActionType.PlaceBet
             };
+
+        private static string GetGameId(PostTransferRequest r) =>
+            $"{r.Record.GamePlatformType}_{r.Record.GameRound}_{r.Record.GameType}";
+
+        private static DateTimeOffset GetTimestamp(string betTime)
+        {
+            var offset = TimeSpan.FromHours(-4);
+            var dateTime = DateTime.ParseExact(betTime, "MM/dd/yyyy HH:mm:sss", null, DateTimeStyles.AllowWhiteSpaces);
+            return new(dateTime, offset);
+        }
 
         private static string GetTransactionId(TransferRecord record, bool isLockGame, string transactionId)
         {
@@ -183,7 +247,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             return transactionType switch
             {
-                TransactionType.BET    => transactionId,
+                TransactionType.BET => transactionId,
                 TransactionType.REFUND => $"{transactionId}_{transactionType}",
                 _ => isLockGame
                     ? $"{transactionId}_{record.BillNo}_{transactionType}"
@@ -201,41 +265,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return isLockGame ? $"{transactionId}_{record.BillNo}" : transactionId;
         }
 
-        private static string GetGameId(PostTransferRequest r) =>
-            $"{r.Record.GamePlatformType}_{r.Record.GameRound}_{r.Record.GameType}";
-
-        private static DateTimeOffset GetTimestamp(string betTime)
-        {
-            var offset = TimeSpan.FromHours(-4);
-            var dateTime = DateTime.ParseExact(betTime, "MM/dd/yyyy HH:mm:sss", null, DateTimeStyles.AllowWhiteSpaces);
-            return new(dateTime, offset);
-        }
-
         private string GetRoundHistory(bool isRoundFinish, string roundResult) =>
             isRoundFinish && roundResult.IsNotNullOrEmpty()
-                ? _jsonSerialization.SerializeToString(new GameHistory {RoundResult = roundResult})
+                ? _jsonSerialization.SerializeToString(new GameHistory { RoundResult = roundResult })
                 : string.Empty;
 
-        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
-            TransactionData[] transactions, string currencyCode = null,
-            bool hasCurrencyFromGameProvider = true, OppositeBetSetting[] oppositeBetSettings = null) => new()
-        {
-            GameProviderId = data.GameProviderId,
-            GameProviderConfigurationId = data.GameProviderConfigurationId,
-            GameProviderCode = GameProviderCode,
-            AutoCloseRound = data.AutoCloseRound,
-            PlayerCode = playerCode,
-            PlatformType = data.PlatformType,
-            HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
-            CurrencyCode = currencyCode,
-            Transactions = transactions,
-            OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
-            {
-                ExternalGameIds = o.Games,
-                Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
-            }).ToArray()
-        };
-
-        #endregion
+        #endregion Private Methods
     }
 }
