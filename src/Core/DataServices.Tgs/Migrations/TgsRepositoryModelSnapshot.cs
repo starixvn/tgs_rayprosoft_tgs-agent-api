@@ -4649,6 +4649,53 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_sports_bet_limits");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelAdjustRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid>("NewVipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("new_vip_id");
+
+                    b.Property<Guid>("OldVipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("old_vip_id");
+
+                    b.Property<Guid>("OperatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operator_id");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Remark")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("remark");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_adjust_records");
+
+                    b.HasIndex("CreatedOn")
+                        .HasDatabaseName("ix_player_vip_level_adjust_records_created_on");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_vip_level_adjust_records_player_code");
+
+                    b.ToTable("player_vip_level_adjust_records");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelAggregate", b =>
                 {
                     b.Property<Guid>("BrandId")
