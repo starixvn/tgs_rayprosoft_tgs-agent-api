@@ -37,7 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             var externalGameId = request.ExternalGameId.ToString();
             var externalRoundId = request.ExternalRoundId.ToString();
 
-            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(request.WagersTime);
+            var timestamp = DateTimeOffset.FromUnixTimeSeconds(request.WagersTime);
 
             var settleActionType = request.WinloseAmount > 0 ?
                     GameActionType.WinBet :
@@ -188,7 +188,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             var externalRoundId = request.ExternalRoundId.ToString();
             var referencedRoundId = request.ReferencedExternalRoundId!.ToString();
 
-            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(request.WagersTime);
+            var timestamp = DateTimeOffset.FromUnixTimeSeconds(request.WagersTime);
 
             var transactions = new TransactionData[]
             {
