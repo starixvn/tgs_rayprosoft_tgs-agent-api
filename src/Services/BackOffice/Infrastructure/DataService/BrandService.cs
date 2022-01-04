@@ -398,6 +398,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BrandId = brand.Id,
                     GameId = x.Id,
                     Game = x,
+                    Status = GameStatus.Active,
+                    Tag = GameTag.None,
                     DisplayOrder = 99,
                     Rebate = true,
                     EffectiveBettingPercentage = 100M
@@ -456,7 +458,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 {
                     BrandId = brand.Id,
                     GameId = x.Id,
-                    Game = x
+                    Game = x,
+                    Status = GameStatus.Active,
+                    Tag = GameTag.None,
+                    DisplayOrder = 99,
+                    Rebate = true,
+                    EffectiveBettingPercentage = 100M
                 };
 
                 if (originBrandGame == null)
