@@ -541,7 +541,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                                 From = DateTimeOffset.Now,
                                 To = DateTimeOffset.Now.AddDays(7),
                                 DayOfWeek = DayOfWeek.Monday,
-                                IsDefault = true
+                                IsDefault = true,
+                                Status = SwitchStatus.Disabled
                             }
                         }.ToHashSet()
                     };
