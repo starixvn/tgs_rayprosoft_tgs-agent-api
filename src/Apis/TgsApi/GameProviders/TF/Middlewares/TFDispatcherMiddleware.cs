@@ -18,8 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
         {
             { "Place bet", "/tf/api/placebet" },
             { "Settlement", "/tf/api/settle" },
-            { "Unsettlement", "/tf/api/unsettle"},
-            { "Place bet rollback","/tf/api/rollback" },
+            { "Unsettlement", "/tf/api/unsettle"},            
             { "Loss", "/tf/api/settle" }
         };
 

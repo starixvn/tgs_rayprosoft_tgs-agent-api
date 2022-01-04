@@ -113,19 +113,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             var transaction = default(TransactionData);
 
             var externalRoundId = source.TicketNum;
-            var externalTransactionId = source.TicketDetail.Id;
 
-            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId);
+            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalRoundId);
 
             if (bet != null)
             {
                 transaction = new TransactionData()
                 {
-                    ExternalGameId = "4",
-                    ExternalBetId = externalRoundId,
-                    ExternalRoundId = externalRoundId,
-                    ExternalTransactionId = externalTransactionId,
-                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalGameId = bet.ExternalGameId,
+                    ExternalBetId = bet.ExternalBetId,
+                    ExternalRoundId = bet.ExternalRoundId,
+                    ExternalTransactionId = $"{bet.ExternalTransactionId}_cancel_bet",
+                    ExternalTransactionReferenceId = bet.ExternalTransactionId.ToString(),
                     GameActionType = GameActionType.CancelTransaction,
                     RoundClosed = true
                 };
