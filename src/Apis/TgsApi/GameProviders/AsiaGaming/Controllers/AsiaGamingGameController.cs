@@ -59,11 +59,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 
             if (!(request.Records?.Length > 0))
             {
-                return new() { ResponseCode = GameApiError.OK };
+                return new TransferResponse
+                {
+                    ResponseCode = GameApiError.OK
+                };
             }
 
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
+
             var lockGameActionExternalIds =
                 await _services.GetLockGameActionExternalIdsAsync(playerCode, request.TransactionId);
 
@@ -74,9 +78,12 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             var betData = _map.PlaceBetRequest(playerCode, data, request,
                 lockGameActionExternalIds, configuration.OppositeBets);
 
-            await _actions.PlaceBetAsync(betData);
+            _ = await _actions.PlaceBetAsync(betData);
 
-            return new() { ResponseCode = GameApiError.OK };
+            return new TransferResponse
+            {
+                ResponseCode = GameApiError.OK
+            };
         }
 
         [HttpPost("posttransfer")]
@@ -90,8 +97,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 
         private async ValueTask<TransferResponse> CancelTransactionAsync(PostTransferRequest request)
         {
-            var transactionType = request.Record.TransactionType;
-
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
@@ -101,8 +106,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
             var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
-            var betData = _map.CancelTransactionRequest(playerCode, data, request, transactionType,
-                isLockGame, configuration.OppositeBets);
+            var betData = _map.CancelTransactionRequest(playerCode, data, request, isLockGame, configuration.OppositeBets);
 
             var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 

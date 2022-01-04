@@ -12,7 +12,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             string playerCode,
             GameProviderConfigurationData data,
             PostTransferRequest r,
-            TransactionType transactionType,
             bool isLockGame,
             OppositeBetSetting[] oppositeBetSettings);
 
@@ -32,7 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             BetResponseRequest r,
             GameActionExternalIds lockGameActionExternalIds,
             OppositeBetSetting[] oppositeBetSettings);
-        
+
         TransferResponse Response(GameApiError error);
 
         TransferResponse Response(GameApiError error, GetBalanceResult result);

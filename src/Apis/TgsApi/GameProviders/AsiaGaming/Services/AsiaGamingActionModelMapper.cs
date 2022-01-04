@@ -26,7 +26,12 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             _jsonSerialization = jsonSerialization;
         }
 
-        public BetData CancelTransactionRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings)
+        public BetData CancelTransactionRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            PostTransferRequest r,
+            bool isLockGame,
+            OppositeBetSetting[] oppositeBetSettings)
         {
             var currencyCode = r.Record.Currency;
 
@@ -53,8 +58,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return GetBetData(playerCode, data, transactions, currencyCode, oppositeBetSettings: oppositeBetSettings);
         }
 
-        public BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data,
-                    PostTransferRequest r)
+        public BetData LockAmountRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            PostTransferRequest r)
         {
             var currencyCode = r.Record.Currency;
             var transactionId = r.Record.TransactionId;
@@ -109,8 +116,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return GetBetData(playerCode, data, transactions, currencyCode, oppositeBetSettings: oppositeBetSettings);
         }
 
-        public BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data,
-            BetResponseRequest r, GameActionExternalIds lockGameActionExternalIds,
+        public BetData PlaceBetRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            BetResponseRequest r,
+            GameActionExternalIds lockGameActionExternalIds,
             OppositeBetSetting[] oppositeBetSettings)
         {
             var transactionId = r.TransactionId;
@@ -166,7 +176,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 Balance = result.Balance
             };
 
-        public BetData SettleBetRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings)
+        public BetData SettleBetRequest(
+            string playerCode,
+            GameProviderConfigurationData data,
+            PostTransferRequest r,
+            TransactionType transactionType,
+            bool isLockGame,
+            OppositeBetSetting[] oppositeBetSettings)
         {
             var gameActionType = GetGameActionType(transactionType);
             var currencyCode = r.Record.Currency;
@@ -208,28 +224,33 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
         #region Private Methods
 
-        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
-                                    TransactionData[] transactions, string currencyCode = null,
-                    bool hasCurrencyFromGameProvider = true, OppositeBetSetting[] oppositeBetSettings = null) => new()
-                    {
-                        GameProviderId = data.GameProviderId,
-                        GameProviderConfigurationId = data.GameProviderConfigurationId,
-                        GameProviderCode = GameProviderCode,
-                        AutoCloseRound = data.AutoCloseRound,
-                        PlayerCode = playerCode,
-                        PlatformType = data.PlatformType,
-                        HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
-                        CurrencyCode = currencyCode,
-                        Transactions = transactions,
-                        OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
-                        {
-                            ExternalGameIds = o.Games,
-                            Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
-                        }).ToArray()
-                    };
+        private BetData GetBetData(
+            string playerCode,
+            GameProviderConfigurationData data,
+            TransactionData[] transactions,
+            string currencyCode = null,
+            bool hasCurrencyFromGameProvider = true,
+            OppositeBetSetting[] oppositeBetSettings = null)
+            => new()
+            {
+                GameProviderId = data.GameProviderId,
+                GameProviderConfigurationId = data.GameProviderConfigurationId,
+                GameProviderCode = GameProviderCode,
+                AutoCloseRound = data.AutoCloseRound,
+                PlayerCode = playerCode,
+                PlatformType = data.PlatformType,
+                HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
+                CurrencyCode = currencyCode,
+                Transactions = transactions,
+                OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
+                {
+                    ExternalGameIds = o.Games,
+                    Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
+                }).ToArray()
+            };
 
-        private static GameActionType GetGameActionType(TransactionType transactionType) =>
-            transactionType switch
+        private GameActionType GetGameActionType(TransactionType transactionType)
+            => transactionType switch
             {
                 TransactionType.WIN => GameActionType.WinBet,
                 TransactionType.LOSE => GameActionType.LoseBet,
@@ -237,17 +258,22 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 _ => GameActionType.PlaceBet
             };
 
-        private static string GetGameId(PostTransferRequest r) =>
+        private string GetGameId(PostTransferRequest r) =>
             $"{r.Record.GamePlatformType}_{r.Record.GameRound}_{r.Record.GameType}";
 
-        private static DateTimeOffset GetTimestamp(string betTime)
+        private string GetRoundHistory(bool isRoundFinish, string roundResult) =>
+            isRoundFinish && roundResult.IsNotNullOrEmpty()
+                ? _jsonSerialization.SerializeToString(new GameHistory { RoundResult = roundResult })
+                : string.Empty;
+
+        private DateTimeOffset GetTimestamp(string betTime)
         {
             var offset = TimeSpan.FromHours(-4);
             var dateTime = DateTime.ParseExact(betTime, "MM/dd/yyyy HH:mm:sss", null, DateTimeStyles.AllowWhiteSpaces);
             return new(dateTime, offset);
         }
 
-        private static string GetTransactionId(TransferRecord record, bool isLockGame, string transactionId)
+        private string GetTransactionId(TransferRecord record, bool isLockGame, string transactionId)
         {
             var transactionType = record.TransactionType;
 
@@ -261,7 +287,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             };
         }
 
-        private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame, string transactionId)
+        private string GetTransactionReferenceId(TransferRecord record, bool isLockGame, string transactionId)
         {
             if (record.TransactionType == TransactionType.REFUND)
             {
@@ -270,11 +296,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             return isLockGame ? $"{transactionId}_{record.BillNo}" : transactionId;
         }
-
-        private string GetRoundHistory(bool isRoundFinish, string roundResult) =>
-            isRoundFinish && roundResult.IsNotNullOrEmpty()
-                ? _jsonSerialization.SerializeToString(new GameHistory { RoundResult = roundResult })
-                : string.Empty;
 
         #endregion Private Methods
     }
