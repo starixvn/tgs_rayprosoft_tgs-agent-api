@@ -53,7 +53,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
         }
 
         [HttpPost("betresponse")]
-        public async ValueTask<TransferResponse> BetResponseAsync(BetResponseRequest request)
+        public async ValueTask<TransferResponse> BetResponseAsync(
+            [FromServices] IAsiaGamingDataStore store,
+            BetResponseRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
 
@@ -65,20 +67,43 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                 };
             }
 
-            var data = await _services.GetGameProviderConfigurationDataAsync()
+            var transactionId = request.TransactionId;
+
+            var isExist = await store
+                .ExistBetResponseTransactionIdAsync(transactionId)
+                .ConfigureAwait(false);
+
+            if (isExist)
+            {
+                return new TransferResponse
+                {
+                    ResponseCode = GameApiError.OK
+                };
+            }
+
+            _ = await store
+                .StoreBetResponseTransactionIdAsync(transactionId)
+                .ConfigureAwait(false);
+
+            var data = await _services
+                .GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
             var lockGameActionExternalIds =
-                await _services.GetLockGameActionExternalIdsAsync(playerCode, request.TransactionId);
+                await _services.GetLockGameActionExternalIdsAsync(playerCode, transactionId);
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
-            var betData = _map.PlaceBetRequest(playerCode, data, request,
+            var betData = _map.PlaceBetForLockGameRequest(playerCode, data, request,
                 lockGameActionExternalIds, configuration.OppositeBets);
 
             _ = await _actions.PlaceBetAsync(betData);
+
+            await store
+                .RemoveBetResponseTransactionIdAsync(transactionId)
+                .ConfigureAwait(false);
 
             return new TransferResponse
             {

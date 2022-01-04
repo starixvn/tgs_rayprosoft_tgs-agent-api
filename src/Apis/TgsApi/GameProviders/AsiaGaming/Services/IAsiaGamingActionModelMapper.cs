@@ -20,16 +20,17 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             GameProviderConfigurationData data,
             PostTransferRequest r);
 
-        BetData PlaceBetRequest(
+        BetData PlaceBetForLockGameRequest(
             string playerCode,
-            GameProviderConfigurationData data,
-            PostTransferRequest r,
-            OppositeBetSetting[] oppositeBetSettings);
-
-        BetData PlaceBetRequest(string playerCode,
             GameProviderConfigurationData data,
             BetResponseRequest r,
             GameActionExternalIds lockGameActionExternalIds,
+            OppositeBetSetting[] oppositeBetSettings);
+
+        BetData PlaceBetRequest(
+                    string playerCode,
+            GameProviderConfigurationData data,
+            PostTransferRequest r,
             OppositeBetSetting[] oppositeBetSettings);
 
         TransferResponse Response(GameApiError error);
