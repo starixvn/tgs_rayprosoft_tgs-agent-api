@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
     [FeatureGate(Consts.GameProvider.AsiaGaming)]
     public sealed class AsiaGamingGameController : ControllerBase
     {
-        private readonly IReadOnlyDictionary<TransactionType, Func<BetData, ValueTask<BetResult>>> _actionMapper;
+        private readonly IReadOnlyDictionary<TransactionType, Func<PostTransferRequest, ValueTask<TransferResponse>>> _actionMapper;
         private readonly IGamePlayActions _actions;
         private readonly IAsiaGamingActionModelMapper _map;
         private readonly IAsiaGamingServices _services;
@@ -43,74 +43,149 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             _map = map;
             _settingOperations = settingOperations;
 
-            _actionMapper = new Dictionary<TransactionType, Func<BetData, ValueTask<BetResult>>>
+            _actionMapper = new Dictionary<TransactionType, Func<PostTransferRequest, ValueTask<TransferResponse>>>
             {
-                {TransactionType.BET, actions.PlaceBetAsync},
-                {TransactionType.WIN, actions.SettleBetAsync},
-                {TransactionType.LOSE, actions.SettleBetAsync},
-                {TransactionType.REFUND, actions.CancelTransactionAsync}
+                {TransactionType.BET, PlaceBetAsync},
+                {TransactionType.WIN, SettleBetAsync},
+                {TransactionType.LOSE, SettleBetAsync},
+                {TransactionType.REFUND, CancelTransactionAsync}
             };
         }
 
-        [HttpPost("posttransfer")]
-        public async ValueTask<TransferResponse> PostTransferAsync(PostTransferRequest request)
-        {
-            var transactionType = request.Record.TransactionType;
-            Request.Path = new($"{Request.Path}/{transactionType.ToString().ToLower()}");
-
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync()
-                .ConfigureAwait(false);
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
-                    SettingConsts.GameProviderConfigurations.AsiaGaming);
-
-            BetData betData;
-            var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
-
-            BetResult r;
-            if (isLockGame && transactionType == TransactionType.BET)
-            {
-                betData = _map.LockAmountRequest(playerCode, data, request);
-                r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
-            }
-            else
-            {
-                betData = _map.Request(playerCode, data, request, transactionType,
-                    isLockGame, configuration.OppositeBets);
-                var execute = _actionMapper[transactionType];
-                r = await execute(betData).ConfigureAwait(false);
-            }
-
-            return _map.Response(r);
-        }
-
         [HttpPost("betresponse")]
-        public async ValueTask<TransferResponse> BetResponseAsync(BetResponseRequest request)
+        public async ValueTask<TransferResponse> BetResponseAsync(
+            [FromServices] IAsiaGamingDataStore store,
+            BetResponseRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
 
             if (!(request.Records?.Length > 0))
             {
-                return new() {ResponseCode = GameApiError.OK};
+                return new TransferResponse
+                {
+                    ResponseCode = GameApiError.OK
+                };
             }
 
-            var data = await _services.GetGameProviderConfigurationDataAsync()
+            var transactionId = request.TransactionId;
+
+            var isExist = await store
+                .ExistBetResponseTransactionIdAsync(transactionId)
                 .ConfigureAwait(false);
+
+            if (isExist)
+            {
+                return new TransferResponse
+                {
+                    ResponseCode = GameApiError.OK
+                };
+            }
+
+            _ = await store
+                .StoreBetResponseTransactionIdAsync(transactionId)
+                .ConfigureAwait(false);
+
+            var data = await _services
+                .GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
             var lockGameActionExternalIds =
-                await _services.GetLockGameActionExternalIdsAsync(playerCode, request.TransactionId);
+                await _services.GetLockGameActionExternalIdsAsync(playerCode, transactionId);
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
-            var betData = _map.PlaceBetRequest(playerCode, data, request,
+            var betData = _map.PlaceBetForLockGameRequest(playerCode, data, request,
                 lockGameActionExternalIds, configuration.OppositeBets);
 
-            await _actions.PlaceBetAsync(betData);
+            _ = await _actions.PlaceBetAsync(betData);
 
-            return new() {ResponseCode = GameApiError.OK};
+            await store
+                .RemoveBetResponseTransactionIdAsync(transactionId)
+                .ConfigureAwait(false);
+
+            return new TransferResponse
+            {
+                ResponseCode = GameApiError.OK
+            };
+        }
+
+        [HttpPost("posttransfer")]
+        public ValueTask<TransferResponse> PostTransferAsync(PostTransferRequest request)
+        {
+            var transactionType = request.Record.TransactionType;
+            Request.Path = new($"{Request.Path}/{transactionType.ToString().ToLower()}");
+
+            return _actionMapper[transactionType](request);
+        }
+
+        private async ValueTask<TransferResponse> CancelTransactionAsync(PostTransferRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                    SettingConsts.GameProviderConfigurations.AsiaGaming);
+
+            var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
+            var betData = _map.CancelTransactionRequest(playerCode, data, request, isLockGame, configuration.OppositeBets);
+
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
+            return _map.Response(r);
+        }
+
+        private async ValueTask<TransferResponse> PlaceBetAsync(PostTransferRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                    SettingConsts.GameProviderConfigurations.AsiaGaming);
+
+            var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
+
+            BetResult r;
+
+            if (isLockGame)
+            {
+                var betData = _map.LockAmountRequest(playerCode, data, request);
+                r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
+            }
+            else
+            {
+                var betData = _map.PlaceBetRequest(playerCode, data, request, configuration.OppositeBets);
+                r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            }
+
+            return _map.Response(r);
+        }
+
+        private async ValueTask<TransferResponse> SettleBetAsync(PostTransferRequest request)
+        {
+            var transactionType = request.Record.TransactionType;
+
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                    SettingConsts.GameProviderConfigurations.AsiaGaming);
+
+            var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
+
+            var betData = _map.SettleBetRequest(playerCode, data, request, transactionType,
+                    isLockGame, configuration.OppositeBets);
+
+            var result = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            return _map.Response(result);
         }
     }
 }
