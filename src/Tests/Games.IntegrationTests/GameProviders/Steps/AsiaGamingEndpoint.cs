@@ -370,7 +370,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             else
             {
                 var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
-                transactionId = betRequest.Record.TransactionId;
+                transactionId = betRequest.Record.TransactionIds[0];
                 roundId = betRequest.Record.RoundId;
                 gamePlatformType = betRequest.Record.GamePlatformType;
                 gameRound = betRequest.Record.GameRound;
@@ -520,7 +520,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private async Task SendBetResponse(BetRecord[] records)
         {
             var lockRequest = Get<PostTransferRequest>(SR.Request);
-            var transactionId = lockRequest.Record.TransactionId;
+            var transactionId = lockRequest.Record.TransactionIds[0];
 
             if (records != null)
             {
@@ -560,7 +560,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
 
             var transactionIds = isLockGame
-                ? new List<string> { betRequest.Record.TransactionId }
+                ? new List<string> { betRequest.Record.TransactionIds[0] }
                 : Get<List<string>>(SR.ExternalTransactionId);
             var gamePlatformType = betRequest.Record.GamePlatformType;
             var gameRound = betRequest.Record.GameRound;

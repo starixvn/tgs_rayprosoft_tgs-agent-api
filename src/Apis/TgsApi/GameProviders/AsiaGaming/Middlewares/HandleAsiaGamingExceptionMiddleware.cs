@@ -11,10 +11,8 @@ using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
-using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.AsiaGaming.Enums;
 using TGS.Shared.Game.Models.AsiaGaming.Incoming;
@@ -23,10 +21,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
 {
     public sealed class HandleAsiaGamingExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
     {
-        private readonly XmlSerializer _xml;
         private readonly IGamePlayActions _action;
         private readonly IAsiaGamingActionModelMapper _map;
-        
+        private readonly XmlSerializer _xml;
+
         public HandleAsiaGamingExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
             ITgsLog log,
@@ -60,7 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             {
                 return _map.Response(error);
             }
-            
+
             var playerCode = context.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             if (playerCode.IsNullOrEmpty())
             {
@@ -80,16 +78,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             _xml.Serialize(writer, response, emptyNamespaces);
             return sw.ToString();
         }
-        
+
         private class Utf8StringWriter : StringWriter
         {
             // Use UTF8 encoding but write no BOM to the wire
             public override Encoding Encoding
-            {
-                get { return new UTF8Encoding(false); } // in real code I'll cache this encoding.
-            }
+                => new UTF8Encoding(false);
         }
 
-        #endregion
+        #endregion Private Method
     }
 }
