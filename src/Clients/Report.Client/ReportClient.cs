@@ -56,7 +56,7 @@ namespace TGS.Clients.Report.Client
             GetPlayersAccountChangesRequest request);
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
-        Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
+        Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
@@ -492,12 +492,12 @@ namespace TGS.Clients.Report.Client
             return stream;
         }
 
-        public async Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+        public async Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(
             GetGameProviderRoundsRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/gameProviderReport?", request);
 
-            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, PagedResponse<GameProviderRoundsModel>>(
+            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, GetGameProviderRoundsResponse>(
                 HttpMethod.Get,
                 path,
                 request,

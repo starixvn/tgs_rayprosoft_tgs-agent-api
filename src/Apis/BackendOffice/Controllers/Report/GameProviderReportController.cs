@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.GameProvider;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -17,7 +16,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get game provider round aggregate")]
-        public Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+        public Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(
             [FromQuery] GetGameProviderRoundsRequest request) =>
             _client.GetGameProviderRoundsAsync(request);
     }
