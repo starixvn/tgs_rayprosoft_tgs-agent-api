@@ -398,6 +398,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BrandId = brand.Id,
                     GameId = x.Id,
                     Game = x,
+                    Status = GameStatus.Active,
+                    Tag = GameTag.None,
                     DisplayOrder = 99,
                     Rebate = true,
                     EffectiveBettingPercentage = 100M
@@ -456,7 +458,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 {
                     BrandId = brand.Id,
                     GameId = x.Id,
-                    Game = x
+                    Game = x,
+                    Status = GameStatus.Active,
+                    Tag = GameTag.None,
+                    DisplayOrder = 99,
+                    Rebate = true,
+                    EffectiveBettingPercentage = 100M
                 };
 
                 if (originBrandGame == null)
@@ -534,7 +541,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                                 From = DateTimeOffset.Now,
                                 To = DateTimeOffset.Now.AddDays(7),
                                 DayOfWeek = DayOfWeek.Monday,
-                                IsDefault = true
+                                IsDefault = true,
+                                Status = SwitchStatus.Disabled
                             }
                         }.ToHashSet()
                     };
