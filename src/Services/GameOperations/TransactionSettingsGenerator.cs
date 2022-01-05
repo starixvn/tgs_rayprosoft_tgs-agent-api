@@ -23,33 +23,15 @@ namespace TGS.Services.GameOperations
 
             _map = new Dictionary<GameActionType, Func<TransactionData, TransactionSettings>>
             {
-                {
-                    GameActionType.PlaceBet, GetPlaceBetTransactionSettings
-                },
-                {
-                    GameActionType.WinBet, GetWinBetTransactionSettings
-                },
-                {
-                    GameActionType.LoseBet, GetLoseBetTransactionSettings
-                },
-                {
-                    GameActionType.FreeBet, GetFreeBetTransactionSettings
-                },
-                {
-                    GameActionType.TieBet, GetTieBetTransactionSettings
-                },
-                {
-                    GameActionType.CancelTransaction, GetCancelTransactionSettings
-                },
-                {
-                    GameActionType.LockAmount, GetLockAmountTransactionSettings
-                },
-                {
-                    GameActionType.UnlockAmount, GetUnlockAmountTransactionSettings
-                },
-                {
-                    GameActionType.WinJackpot, GetWinJackpotTransactionSettings
-                }
+                [GameActionType.PlaceBet] = GetPlaceBetTransactionSettings,
+                [GameActionType.WinBet] = GetWinBetTransactionSettings,
+                [GameActionType.LoseBet] = GetLoseBetTransactionSettings,
+                [GameActionType.FreeBet] = GetFreeBetTransactionSettings,
+                [GameActionType.TieBet] = GetTieBetTransactionSettings,
+                [GameActionType.CancelTransaction] = GetCancelTransactionSettings,
+                [GameActionType.LockAmount] = GetLockAmountTransactionSettings,
+                [GameActionType.UnlockAmount] = GetUnlockAmountTransactionSettings,
+                [GameActionType.WinJackpot] = GetWinJackpotTransactionSettings
             };
         }
 
@@ -64,24 +46,35 @@ namespace TGS.Services.GameOperations
             return func(transaction);
         }
 
-        private TransactionSettings GetPlaceBetTransactionSettings(TransactionData trx) => new()
+        private TransactionSettings GetCancelTransactionSettings(TransactionData trx) => new()
         {
-            GameActionType = GameActionType.PlaceBet,
+            GameActionType = GameActionType.CancelTransaction,
+            ValidateAmount = _amountValidator.IgnoreAmount,
+            HasWalletUpdate = true,
+            MustHaveExistingRound = true,
+            MustHaveReferencedTransaction = true,
+            GetTransactionAmount =
+                a => -a // Get Transaction Amount - inverse the sign (it will be set by the referenced amount)
+        };
+
+        private TransactionSettings GetFreeBetTransactionSettings(TransactionData trx) => new()
+        {
+            GameActionType = GameActionType.FreeBet,
             ValidateAmount = _amountValidator.ThrowIfAmountIsNegative,
             HasWalletUpdate = trx.Amount > 0,
             MustHaveExistingRound = false,
             MustHaveReferencedTransaction = false,
-            GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
+            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings GetWinBetTransactionSettings(TransactionData trx) => new()
+        private TransactionSettings GetLockAmountTransactionSettings(TransactionData trx) => new()
         {
-            GameActionType = GameActionType.WinBet,
+            GameActionType = GameActionType.LockAmount,
             ValidateAmount = _amountValidator.ThrowIfAmountIsNotPositive,
             HasWalletUpdate = true,
-            MustHaveExistingRound = true,
-            MustHaveReferencedTransaction = true,
-            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
+            MustHaveExistingRound = false,
+            MustHaveReferencedTransaction = false,
+            GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
         };
 
         private TransactionSettings GetLoseBetTransactionSettings(TransactionData trx) => new()
@@ -100,14 +93,14 @@ namespace TGS.Services.GameOperations
                     : _ => 0 // Get Transaction Amount - set parameter by AllowLoseBetNegativeAmount setting
         };
 
-        private TransactionSettings GetFreeBetTransactionSettings(TransactionData trx) => new()
+        private TransactionSettings GetPlaceBetTransactionSettings(TransactionData trx) => new()
         {
-            GameActionType = GameActionType.FreeBet,
+            GameActionType = GameActionType.PlaceBet,
             ValidateAmount = _amountValidator.ThrowIfAmountIsNegative,
             HasWalletUpdate = trx.Amount > 0,
             MustHaveExistingRound = false,
             MustHaveReferencedTransaction = false,
-            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
+            GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
         };
 
         private TransactionSettings GetTieBetTransactionSettings(TransactionData trx) => new()
@@ -120,27 +113,6 @@ namespace TGS.Services.GameOperations
             GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };
 
-        private TransactionSettings GetCancelTransactionSettings(TransactionData trx) => new()
-        {
-            GameActionType = GameActionType.CancelTransaction,
-            ValidateAmount = _amountValidator.IgnoreAmount,
-            HasWalletUpdate = true,
-            MustHaveExistingRound = true,
-            MustHaveReferencedTransaction = true,
-            GetTransactionAmount =
-                a => -a // Get Transaction Amount - inverse the sign (it will be set by the referenced amount)
-        };
-
-        private TransactionSettings GetLockAmountTransactionSettings(TransactionData trx) => new()
-        {
-            GameActionType = GameActionType.LockAmount,
-            ValidateAmount = _amountValidator.ThrowIfAmountIsNotPositive,
-            HasWalletUpdate = true,
-            MustHaveExistingRound = false,
-            MustHaveReferencedTransaction = false,
-            GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
-        };
-
         private TransactionSettings GetUnlockAmountTransactionSettings(TransactionData trx) => new()
         {
             GameActionType = GameActionType.UnlockAmount,
@@ -148,6 +120,16 @@ namespace TGS.Services.GameOperations
             HasWalletUpdate = true,
             MustHaveExistingRound = true,
             MustHaveReferencedTransaction = false,
+            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
+        };
+
+        private TransactionSettings GetWinBetTransactionSettings(TransactionData trx) => new()
+        {
+            GameActionType = GameActionType.WinBet,
+            ValidateAmount = _amountValidator.ThrowIfAmountIsNegative,
+            HasWalletUpdate = trx.Amount > 0,
+            MustHaveExistingRound = true,
+            MustHaveReferencedTransaction = true,
             GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };
 

@@ -9,18 +9,19 @@ using TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
 {
     public sealed class AsiaGamingStartup : BaseStartup
     {
+        protected override string LogPrefix => "asiagaming";
+
         public AsiaGamingStartup(IConfiguration configuration, IWebHostEnvironment env)
             : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "asiagaming";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -32,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
                 (provider, key) => key switch
                 {
                     GameProvider.AsiaGaming => provider.GetRequiredService<AsiaGamingErrorMapper>(),
-                    _                       => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 
@@ -53,6 +54,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
                 typeof(AsiaGamingGameInitializer)
             }, (provider, _) =>
                 provider.GetRequiredService<AsiaGamingGameInitializer>());
+
+            services.AddTransient<IAsiaGamingDataStore>(sp =>
+                ActivatorUtilities.CreateInstance<AsiaGamingRedisDataStore>(
+                    sp,
+                    sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
