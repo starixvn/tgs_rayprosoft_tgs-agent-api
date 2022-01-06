@@ -15,11 +15,15 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
     {
         ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playerCode, BetPlacedRequest source);
 
-        ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playCode, UnSettleRequest source);
+        ValueTask<BetData> CancelRoundBetAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source);
+
+        ValueTask<BetData> CancelRoundSettleAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source);
+
+        ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playerCode, UnSettleRequest source);
 
         ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source);
 
-        ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SettleRequest source);
+        ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source);
     }
 
     public class TFActionModelMapper : ITFActionModelMapper
@@ -70,6 +74,65 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
         }
 
+        async ValueTask<BetData> ITFActionModelMapper.CancelRoundBetAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source)
+        {
+            var transaction = default(TransactionData);
+
+            var externalRoundId = source.TicketNum.Split("_")[0];
+
+            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalRoundId);
+
+            if (bet != null)
+            {
+                transaction = new TransactionData()
+                {
+                    ExternalGameId = bet.ExternalGameId,
+                    ExternalBetId = bet.ExternalBetId,
+                    ExternalRoundId = bet.ExternalRoundId,
+                    ExternalTransactionId = $"{source.TicketNum}_round_bet_cancel",
+                    ExternalTransactionReferenceId = bet.ExternalTransactionId.ToString(),
+                    GameActionType = GameActionType.CancelTransaction,
+                    RoundClosed = true
+                };
+            }
+            return transaction == null ? null : GetBetData(data, playerCode, transaction, data.AutoCloseRound);
+        }
+
+        async ValueTask<BetData> ITFActionModelMapper.CancelRoundSettleAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source)
+        {
+            var transaction = default(TransactionData);
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "4").ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
+
+            var externalRoundId = source.TicketNum.Split('_')[0];
+            var externalTransactionId = source.TicketNum;
+
+            var (roundRecord, gameActionRecord) = await _service
+                .GetSettleGameActionByBetAsync(data.GameProviderId, playerCode, externalRoundId, cachedGame.Id)
+                .ConfigureAwait(false);
+
+            if (gameActionRecord != null)
+            {
+                transaction = new TransactionData
+                {
+                    Amount = Math.Abs(source.Amount),
+                    ExternalTransactionId = $"{externalTransactionId}_round_settle_cancel",
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = "4",
+                    ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.TicketDetail.ModifiedDatetime.ToUnixTimeSeconds()).ToIso8601String(true),
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = false,
+                    RoundDetail = JsonSerializer.Serialize(source.TicketDetail)
+                };
+            }
+
+            return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
+        }
+
         async ValueTask<BetData> ITFActionModelMapper.CancelSettleAsync(GameProviderConfigurationData data, string playerCode, UnSettleRequest source)
         {
             var transaction = default(TransactionData);
@@ -107,8 +170,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
         }
 
-        async ValueTask<BetData> ITFActionModelMapper.RollbackBetAsync(
-            GameProviderConfigurationData data, string playerCode, RollbackRequest source)
+        async ValueTask<BetData> ITFActionModelMapper.RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source)
         {
             var transaction = default(TransactionData);
 
@@ -123,7 +185,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                     ExternalGameId = bet.ExternalGameId,
                     ExternalBetId = bet.ExternalBetId,
                     ExternalRoundId = bet.ExternalRoundId,
-                    ExternalTransactionId = $"{bet.ExternalTransactionId}_cancel_bet",
+                    ExternalTransactionId = $"{bet.ExternalTransactionId}_bet_cancel",
                     ExternalTransactionReferenceId = bet.ExternalTransactionId.ToString(),
                     GameActionType = GameActionType.CancelTransaction,
                     RoundClosed = true
@@ -132,7 +194,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             return transaction == null ? null : GetBetData(data, playerCode, transaction, data.AutoCloseRound);
         }
 
-        async ValueTask<BetData> ITFActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, SettleRequest source)
+        async ValueTask<BetData> ITFActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source)
         {
             var externalRoundId = source.TicketNum.Split("_")[0];
 
@@ -150,7 +212,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
             var externalTransactionId = source.TicketDetail.Id;
 
             var gameActionExternal = await _service
-                .GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId)
+                .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, externalTransactionId)
                 .ConfigureAwait(false);
 
             if (gameActionExternal == null)
@@ -171,7 +233,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 RoundDetail = JsonSerializer.Serialize(source.TicketDetail)
             };
 
-            return GetBetData(data, playCode, transaction, autoCloseRound);
+            return GetBetData(data, playerCode, transaction, autoCloseRound);
         }
 
         private BetData GetBetData(
