@@ -13,7 +13,7 @@ using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    public partial class DataInitializer
+    partial class DataInitializer
     {
         internal record JDBGameProvider : IGameProvider
         {
@@ -32,7 +32,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = string.Empty };
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -89,17 +89,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
                     ApiUrl = new("http://api.jdb711.com"),
+                    MoreGame = false,
+                    AESIv = "756edb2fc85fe908",
+                    AESKey = "4f09f467e6a8fb9f",
+                    ClientDomain = "VB3",
                     TimezoneHour = +8,
                     Agents = new JDBAgent[]
                     {
                         new()
                         {
                             CurrencyCode = "CNY",
-                            Id = "wgvb3rmb",
-                            MoreGame = false,
-                            AESIv = "756edb2fc85fe908",
-                            AESKey = "4f09f467e6a8fb9f",
-                            ClientDomain = "VB3",
+                            Id = "wgvb3rmb"
                         }
                     }
                 };

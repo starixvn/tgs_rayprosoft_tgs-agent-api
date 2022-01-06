@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -12,13 +13,19 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
     public class GetAgentQueryHandler : Handler<GetAgentRequest, GetAgentResponse>
     {
         private readonly IAgentDividendService _agentDividendService;
+        private readonly ITgsRepository _tgsRepository;
         private readonly IAgentService _service;
 
-        public GetAgentQueryHandler(IAgentService service, IAgentDividendService agentDividendService,
+
+        public GetAgentQueryHandler(
+            IAgentService service,
+            IAgentDividendService agentDividendService,
+            ITgsRepository tgsRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
             _agentDividendService = agentDividendService;
+            _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
         }
 
         public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
@@ -30,6 +37,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                 .Where(x => x.AgentId == request.Id && x.SentOn == null)
                 .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
 
+            var playerNumber = (await _tgsRepository.Players.AsQueryable().Where(x => x.AgentId == request.Id).ToArrayAsync().ConfigureAwait(false)).Length;
             if (agent == null)
             {
                 return CreateInvalidResponse<GetAgentResponse>(Agent.NotFound);
@@ -72,6 +80,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                         BankAccount = b.BankAccount
                     }).ToArray(),
                     AccumulatedProfitSharing = dividend,
+                    PlayerNumber = playerNumber,
                     AgentDividendConditions = agent.AgentDividendConditions.Select(x => new AgentDividendConditionModel
                     {
                         Rank = x.Rank,
