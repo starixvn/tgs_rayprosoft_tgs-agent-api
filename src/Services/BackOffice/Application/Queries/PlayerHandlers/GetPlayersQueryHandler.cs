@@ -70,8 +70,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                                 where record.IpType == 1
                                 select record;
 
-            if (!string.IsNullOrWhiteSpace(request.RegisterHost))
-                playerIpQuery = playerIpQuery.Where(record => record.Host.ToLower() == request.RegisterHost.ToLower());
+            
 
             var query = from player in playerQuery
                         join brand in queryableBrands
@@ -90,6 +89,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             RegisterHost = ipRecord.Host,
                             AgentName = player.Agent.Username
                         };
+
+            if (!string.IsNullOrWhiteSpace(request.RegisterHost))
+                query = query.Where(row => row.RegisterHost.ToLower() == request.RegisterHost.ToLower());
 
             if (request.BeginRegisteredOn != null && request.EndRegisteredOn != null)
                 query = query.Where(pm => pm.RegisteredTime > request.BeginRegisteredOn
