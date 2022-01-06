@@ -1,5 +1,7 @@
 ﻿// ReSharper disable CheckNamespace
 
+using System;
+using StackExchange.Redis;
 using TGS.Services.GameOperations;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Data;
@@ -16,7 +18,8 @@ namespace Microsoft.Extensions.DependencyInjection
         ///     3. AddOperations() in Operations project
         ///     4. AddTransactions() in Infrastructures.Transactions
         /// </summary>
-        public static IServiceCollection AddGameOperations(this IServiceCollection services)
+        public static IServiceCollection AddGameOperations(this IServiceCollection services,
+            Func<IServiceProvider, IDatabase> redisDatabaseResolver)
         {
             services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
             services.AddScoped<IGameActionProcessor, GameActionProcessor>();
@@ -31,6 +34,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
 
             services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
+
+            services
+                .AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(sp, redisDatabaseResolver(sp)));
 
             return services;
         }

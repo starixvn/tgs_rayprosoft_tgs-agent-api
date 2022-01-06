@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -102,7 +103,7 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
-                .AddGameOperations()
+                .AddGameOperations((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddGameProvidersoRepository()
                 .AddCashServiceClient((options, sp) =>
                 {

@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Http;
 using Tgs.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.JDB.Enums;
-using TGS.Shared.Game.Models.JDB.Outgoing;
+using TGS.Shared.Game.Models.JDB.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
 {
@@ -32,7 +31,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             };
             context.Response.StatusCode = statusCode;
             await context.Response.WriteAsJsonAsync(response);
-            
         }
     }
 }

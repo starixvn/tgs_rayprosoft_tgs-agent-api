@@ -33,7 +33,7 @@ Scenario: 02.b - Place mobile bet
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 
 Scenario: 02.c - Player cannot place bet without login
-	Given player "TP01cny" of brand "GPI" without login
+	Given player "4ucmqplxb029" of brand "GPI" without login
 		And player having balance of $100
 	When I place bet of $10 for game "1_1"
 	Then I will receive bet response of error "PlayerNotLogin"

@@ -38,7 +38,8 @@ namespace TGS.Operator.Repositories
                 player.PhoneAuthentication,
                 player.Phone,
                 player.AreaCode,
-                player.VipId);
+                player.VipId,
+                player.Status);
         }
 
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
@@ -50,19 +51,22 @@ namespace TGS.Operator.Repositories
             return settingData?.IsAutoTransferToGame ?? true;
         }
 
-        public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
+        public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
         {
             var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            return new PlayerInfo(
-                playerData.PlayerCode,
-                playerData.BrandId,
-                playerData.AccumulatedDeposit,
-                playerData.IdentityAuthentication,
-                playerData.PhoneAuthentication,
-                playerData.Phone,
-                playerData.AreaCode,
-                playerData.VipId);
+            return playerData == null
+                ? null
+                : new PlayerInfo(
+                    playerData.PlayerCode,
+                    playerData.BrandId,
+                    playerData.AccumulatedDeposit,
+                    playerData.IdentityAuthentication,
+                    playerData.PhoneAuthentication,
+                    playerData.Phone,
+                    playerData.AreaCode,
+                    playerData.VipId,
+                    playerData.Status);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
@@ -83,7 +87,8 @@ namespace TGS.Operator.Repositories
                 playerData.PhoneAuthentication,
                 playerData.Phone,
                 playerData.AreaCode,
-                playerData.VipId);
+                playerData.VipId,
+                playerData.Status);
         }
 
         public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)

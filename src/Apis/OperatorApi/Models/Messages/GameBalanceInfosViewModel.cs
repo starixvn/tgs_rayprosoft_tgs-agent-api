@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using TGS.Services.Operator.Services.GameBalance;
+using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {

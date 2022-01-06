@@ -215,5 +215,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
 
         DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
+
+        DbSet<PlayerParent> PlayerParents { get; set; }
     }
 }

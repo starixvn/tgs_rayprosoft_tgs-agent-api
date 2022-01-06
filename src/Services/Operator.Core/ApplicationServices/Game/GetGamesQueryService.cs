@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Tgs.ServiceUtility;
+using TGS.Services.Operator.ApplicationServices.Game;
+
+namespace TGS.Services.Operator.ApplicationServices.Game
+{
+    internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameInfo>
+    {
+        private readonly IQueryService<GetAllGamesByGameTypeQuery, GameInfo> _queryService;
+
+        public GetGamesQueryService(
+            IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryService)
+        {
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+        }
+
+        public IAsyncEnumerable<GameInfo> QueryAsync(
+            GetGamesQuery query,
+            CancellationToken cancellationToken = default)
+        {
+            var allQuery = new GetAllGamesByGameTypeQuery(
+                query.BrandId,
+                query.PlayerType,
+                query.PlatformType,
+                query.Types);
+
+            var allGames = _queryService.QueryAsync(allQuery, cancellationToken);
+
+            return allGames.Where(
+                gameInfo => gameInfo.GameProviderCode == query.SubGameProviderCode);
+        }
+    }
+}

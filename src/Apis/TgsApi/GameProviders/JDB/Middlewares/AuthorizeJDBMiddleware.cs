@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Json;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly ISymmetricCryptoProvider _cryptoProvider;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJsonSerializationProvider _json;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
@@ -25,14 +24,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            IJsonSerializationProvider json,
             ISettingOperations settingOperations,
             ISymmetricCryptoProviderFactory cryptoProviderFactory)
         {
             _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
-            _json = json;
             _settingOperations = settingOperations;
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
         }
@@ -45,14 +42,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             }
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
+                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(
+                    SettingConsts.GameProviderConfigurations.JDB);
 
             var jsonValue = await DecryptRequestStringToJsonAsync(encrypted, configuration.AESIv, configuration.AESKey);
-            var baseRequest = _json.DeserializeFromString<BaseActionRequest>(jsonValue);
+            var baseRequest = JsonSerializer.Deserialize<BaseActionRequest>(jsonValue);
 
             var gameProviderId =
                 await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.JDB);
+
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(baseRequest.UserId);
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
@@ -71,7 +69,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
 
         private async ValueTask<string> DecryptRequestStringToJsonAsync(
             string encrypted,
-            string aseIv, string aesKey)
+            string aseIv,
+            string aesKey)
         {
             var value = encrypted.Replace("-", "+").Replace("_", "/");
             var paddingCount = (4 - value.Length % 4) % 4;

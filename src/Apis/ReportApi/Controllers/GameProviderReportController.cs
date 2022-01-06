@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.GameProvider;
 
 namespace TGS.Apis.ReportApi.Controllers
@@ -17,7 +16,7 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet]
         [Description("Get game provider round aggregate")]
-        public Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+        public Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(
             [FromQuery] GetGameProviderRoundsRequest request) =>
             _mediator.Send(request);
     }

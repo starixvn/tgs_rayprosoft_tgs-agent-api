@@ -9,9 +9,9 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

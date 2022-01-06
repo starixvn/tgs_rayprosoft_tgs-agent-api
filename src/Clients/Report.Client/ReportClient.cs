@@ -32,6 +32,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request);
 
+        Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(GetAdditionalExpensesRequest request);
         Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(GetAgentContributionsRequest request);
 
         Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(GetPlayerContributionsRequest request);
@@ -55,7 +56,7 @@ namespace TGS.Clients.Report.Client
             GetPlayersAccountChangesRequest request);
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
-        Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
+        Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
@@ -294,10 +295,11 @@ namespace TGS.Clients.Report.Client
 
             var keyValues = new Dictionary<string, string>();
             foreach (var propertyInfo in request
-                .GetType()
-                .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
-                .ToArray())
+                         .GetType()
+                         .GetProperties()
+                         .Where(x => x != null && !x.Name.Contains("CurrencyCodes",
+                             StringComparison.InvariantCultureIgnoreCase))
+                         .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -444,10 +446,11 @@ namespace TGS.Clients.Report.Client
 
             var keyValues = new Dictionary<string, string>();
             foreach (var propertyInfo in request
-                .GetType()
-                .GetProperties()
-                .Where(x => x != null && !x.Name.Contains("CurrencyCodes", StringComparison.InvariantCultureIgnoreCase))
-                .ToArray())
+                         .GetType()
+                         .GetProperties()
+                         .Where(x => x != null && !x.Name.Contains("CurrencyCodes",
+                             StringComparison.InvariantCultureIgnoreCase))
+                         .ToArray())
             {
                 var value = propertyInfo.GetValue(request);
 
@@ -489,12 +492,12 @@ namespace TGS.Clients.Report.Client
             return stream;
         }
 
-        public async Task<PagedResponse<GameProviderRoundsModel>> GetGameProviderRoundsAsync(
+        public async Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(
             GetGameProviderRoundsRequest request)
         {
             var path = ClientPath.AppendWithProperties("/api/gameProviderReport?", request);
 
-            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, PagedResponse<GameProviderRoundsModel>>(
+            return await ExecuteJsonRequestAsync<GetGameProviderRoundsRequest, GetGameProviderRoundsResponse>(
                 HttpMethod.Get,
                 path,
                 request,
@@ -511,6 +514,20 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<GetAgentDividendTeamDetailsRequest,
                 PagedResponse<AgentDividendTeamDetailModel>
             >(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(
+            GetAdditionalExpensesRequest request)
+        {
+            var prefix = $"Report.BrandId.{request.BrandId}.GetAdditionalExpenses";
+            var path = ClientPath.AppendWithProperties("/api/marketReport/additionalExpenses?", request);
+
+            return await ExecuteJsonRequestAsync<GetAdditionalExpensesRequest, GetAdditionalExpensesResponse>(
                 HttpMethod.Get,
                 path,
                 request,

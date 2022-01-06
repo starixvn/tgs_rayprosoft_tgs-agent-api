@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
@@ -16,42 +15,34 @@ namespace TGS.Agent.Repositories
         public AgentRepository(ITgsRepository tgsRepository)
             => _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
-        public async ValueTask<AgentInfo> GetAgentByIdAsync(Guid id)
+        public async ValueTask<AgentInfo?> GetAgentByIdAsync(Guid id)
         {
             var agent = await _tgsRepository.Agents
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
-            var dividend = await _tgsRepository.AgentDividends.AsQueryable()
-                .Where(x => x.AgentId == id && x.SentOn == null)
-                .SumAsync(x => x.AgentDividendAmount).ConfigureAwait(false);
-
-            return new AgentInfo(
-                agent.Id,
-                agent.Username,
-                agent.RealName,
-                agent.Phone,
-                agent.DefaultWalletId,
-                agent.Email,
-                agent.QQ,
-                agent.Wechat,
-                agent.InvitationCode,
-                agent.Brand.Domains.FirstOrDefault()?.Url,
-                (int)agent.LevelType,
-                agent.WithdrawPassword,
-                agent.WithdrawSalt,
-                agent.Password,
-                agent.Salt,
-                dividend,
-                agent.DividendPercentage,
-                agent.ParentAgent?.Username,
-                agent.RegisteredOn,
-                agent.Wallets.FirstOrDefault()?.Balance ?? 0,
-                agent.Status,
-                agent.Type,
-                agent.LevelType,
-                agent.Brand.AgentDividendType,
-                agent.AgentDividendConditions);
+            return agent == null
+                ? null
+                : new AgentInfo(
+                    agent.Id,
+                    agent.Username,
+                    agent.RealName,
+                    agent.Phone,
+                    agent.DefaultWalletId,
+                    agent.Email,
+                    agent.QQ,
+                    agent.Wechat,
+                    agent.InvitationCode,
+                    agent.WithdrawPassword,
+                    agent.WithdrawSalt,
+                    agent.Password,
+                    agent.Salt,
+                    agent.ParentAgentId,
+                    agent.RegisteredOn,
+                    agent.Status,
+                    agent.Type,
+                    agent.LevelType,
+                    agent.DividendPercentage);
         }
 
         public IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId)
@@ -60,11 +51,83 @@ namespace TGS.Agent.Repositories
                 .Select(ad => ad.DomainName)
                 .ToAsyncEnumerable();
 
+        public IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email)
+        {
+            var query = from agent in _tgsRepository.Agents.AsQueryable()
+                        where agent.BrandId == brandId
+                            && agent.Email.ToLower() == email.ToLower()
+                        select new AgentInfo(
+                            agent.Id,
+                            agent.Username,
+                            agent.RealName,
+                            agent.Phone,
+                            agent.DefaultWalletId,
+                            agent.Email,
+                            agent.QQ,
+                            agent.Wechat,
+                            agent.InvitationCode,
+                            agent.WithdrawPassword,
+                            agent.WithdrawSalt,
+                            agent.Password,
+                            agent.Salt,
+                            agent.ParentAgentId,
+                            agent.RegisteredOn,
+                            agent.Status,
+                            agent.Type,
+                            agent.LevelType,
+                            agent.DividendPercentage);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone)
+        {
+            var query = from agent in _tgsRepository.Agents.AsQueryable()
+                        where agent.BrandId == brandId
+                            && agent.Phone.ToLower() == phone.ToLower()
+                        select new AgentInfo(
+                            agent.Id,
+                            agent.Username,
+                            agent.RealName,
+                            agent.Phone,
+                            agent.DefaultWalletId,
+                            agent.Email,
+                            agent.QQ,
+                            agent.Wechat,
+                            agent.InvitationCode,
+                            agent.WithdrawPassword,
+                            agent.WithdrawSalt,
+                            agent.Password,
+                            agent.Salt,
+                            agent.ParentAgentId,
+                            agent.RegisteredOn,
+                            agent.Status,
+                            agent.Type,
+                            agent.LevelType,
+                            agent.DividendPercentage);
+
+            return query.ToAsyncEnumerable();
+        }
+
         public async ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id)
         {
             var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
 
             return agent.Status;
+        }
+
+        public IAsyncEnumerable<DividendCondition> QueryAgentDividendConditionsAsync(Guid agentId)
+        {
+            var query = from agent in _tgsRepository.Agents.AsQueryable()
+                        from dc in agent.AgentDividendConditions
+                        where agent.Id == agentId
+                        select new DividendCondition(
+                            dc.Rank,
+                            dc.NetProfit,
+                            dc.ActiveNumber,
+                            dc.DividendPercentage);
+
+            return query.ToAsyncEnumerable();
         }
 
         public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)

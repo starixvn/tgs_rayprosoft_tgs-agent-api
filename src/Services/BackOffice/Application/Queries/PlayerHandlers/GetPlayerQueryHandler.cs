@@ -32,7 +32,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public override async Task<GetPlayerResponse> Handle(GetPlayerRequest request,
+        public override async Task<GetPlayerResponse> Handle(
+            GetPlayerRequest request,
             CancellationToken cancellationToken)
         {
             var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
@@ -43,15 +44,20 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             }
 
             var playerBuckets = await _repository.PlayerBuckets.AsQueryable()
-                .Where(x => x.PlayerCode == player.PlayerCode).ToArrayAsync(cancellationToken);
+                .Where(x => x.PlayerCode == player.PlayerCode)
+                .ToArrayAsync(cancellationToken);
 
-            var registerIp = _playerIpService.GetPlayerIpRecordsByRegister(player.BrandId, player.Username)
+            var registerIp = _playerIpService
+                .GetPlayerIpRecordsByRegister(player.BrandId, player.Username)
                 .FirstOrDefault();
-            var loginIp = _playerIpService.GetPlayerIpRecordsByLogin(player.BrandId, player.Username).FirstOrDefault();
-            return new()
+            var loginIp = _playerIpService
+                .GetPlayerIpRecordsByLogin(player.BrandId, player.Username)
+                .FirstOrDefault();
+
+            return new GetPlayerResponse
             {
                 Valid = true,
-                Player = new()
+                Player = new PlayerModel
                 {
                     PlayerCode = player.PlayerCode,
                     Username = player.Username,
@@ -62,8 +68,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     StatusName = player.Status.ToString(),
                     RegisteredOn = player.RegisteredOn,
                     AgentUsername = player.Agent?.Username,
-                    Balance =
-                        player.Wallets.FirstOrDefault() == null ? 0 : player.Wallets.FirstOrDefault().Balance,
+                    Balance = player.Wallets.FirstOrDefault() == null
+                        ? 0
+                        : player.Wallets.FirstOrDefault().Balance,
                     AreaCode = player.AreaCode,
                     Phone = player.Phone,
                     Email = player.Email,
@@ -76,11 +83,12 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         BankType = p.BankType,
                         Detail = _jsonSerializationProvider.DeserializeFromString<JsonDocument>(p.Detail)
                     }).ToArray(),
-                    WageringRequirement = playerBuckets.Sum(p => p.BucketAmount) -
-                        playerBuckets.Sum(p => p.CurrentBucketAmount),
-                    RegisterIp = registerIp == null ? string.Empty : registerIp.Ip,
-                    LastLoginIp = loginIp == null ? string.Empty : loginIp.Ip,
-                    LastLoginOn = loginIp == null ? null : loginIp.RecordOn,
+                    WageringRequirement = playerBuckets.Sum(p => p.BucketAmount)
+                        - playerBuckets.Sum(p => p.CurrentBucketAmount),
+                    RegisterIp = registerIp?.Ip ?? string.Empty,
+                    RegisterHost = registerIp?.Host ?? string.Empty,
+                    LastLoginIp = loginIp?.Ip ?? string.Empty,
+                    LastLoginOn = loginIp?.RecordOn,
                     IdNumber = player.IdNumber
                 }
             };

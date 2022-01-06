@@ -2,8 +2,10 @@
 {
     public class CreateAgentResponse
     {
-        public bool IsNew { get; set; }
         public string AgentId { get; set; }
+
+        public bool IsNew { get; set; }
+
         public string Message { get; set; }
     }
 }

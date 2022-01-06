@@ -37,7 +37,8 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
+            where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
         {
             Services
                 .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
@@ -54,7 +55,7 @@ namespace TGS.Services.Operator.Configuration
         }
 
         public OperatorConfiguration AddStationLetterRepository<TStationLetterRepository>()
-                            where TStationLetterRepository : class, IStationLetterRepository
+            where TStationLetterRepository : class, IStationLetterRepository
         {
             Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
 
@@ -62,9 +63,17 @@ namespace TGS.Services.Operator.Configuration
         }
 
         public OperatorConfiguration AddSysRepository<TSysRepository>()
-                    where TSysRepository : class, ISysRepository
+            where TSysRepository : class, ISysRepository
         {
             Services.AddTransient<ISysRepository, TSysRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddBrandRepository<TBrandRepository>()
+            where TBrandRepository : class, IBrandRepository
+        {
+            Services.AddTransient<IBrandRepository, TBrandRepository>();
 
             return this;
         }
@@ -79,7 +88,7 @@ namespace TGS.Services.Operator.Configuration
         }
 
         public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure)
-                            where TDep : class
+            where TDep : class
         {
             Services
                 .AddOptions<EmailConfiguration>()

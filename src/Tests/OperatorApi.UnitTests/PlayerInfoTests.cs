@@ -9,8 +9,8 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
 using CoreEnums = TGS.Core.Models.Enums;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -86,7 +86,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null,
                 null,
-                Guid.NewGuid());
+                Guid.NewGuid(),
+                CoreEnums.PlayerStatus.Enabled);
 
             fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
                 .Returns(ValueTask.FromResult(playerInfo));

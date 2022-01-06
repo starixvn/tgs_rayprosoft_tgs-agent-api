@@ -17,8 +17,8 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Game;
-using TGS.Services.Operator.Services.GameBalance;
+using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

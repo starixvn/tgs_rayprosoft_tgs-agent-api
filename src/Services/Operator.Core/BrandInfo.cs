@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
@@ -8,6 +9,8 @@ namespace TGS.Services.Operator
         Uri DesktopLogoUrl,
         Uri MobileLogoUrl,
         Uri LoadingUrl,
+        BrandStatus Status,
+        string Currency,
         bool SmsEnabled,
         bool SmsRegisterFlowEnabled);
 }

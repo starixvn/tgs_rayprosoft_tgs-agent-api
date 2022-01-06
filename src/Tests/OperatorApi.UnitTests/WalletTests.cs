@@ -8,8 +8,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Wallet;
 using TGS.Services.WalletService;
+using TGS.Services.Operator.ApplicationServices.Wallet;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -1,0 +1,31 @@
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using TGS.Core.DataServices.Tgs;
+using Tgs.ServiceUtility;
+using TGS.Services.Operator.ApplicationServices.Player;
+
+namespace TGS.Services.Operator.ApplicationServices.Player
+{
+    internal class CheckBrandEmailQueryService : IGetService<CheckBrandEmailQuery, bool>
+    {
+        private readonly ITgsRepository _tgsRepository;
+
+        public CheckBrandEmailQueryService(ITgsRepository tgsRepository)
+        {
+            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
+        {
+            var result = _tgsRepository.Players
+                .AsQueryable()
+                .Any(p => p.BrandId == query.BrandId
+                    && p.Email.ToLower() == query.Email.ToLower()
+                    && p.PlayerCode != query.PlayerCode);
+
+            return ValueTask.FromResult(result);
+        }
+    }
+}

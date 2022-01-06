@@ -7,8 +7,8 @@ using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Services.Game;
-using TGS.Services.Operator.Services.GameProvider;
+using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Services.Operator.ApplicationServices.GameProvider;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

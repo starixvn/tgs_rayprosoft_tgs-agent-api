@@ -21,15 +21,15 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
 
         async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreateAgentDividendAsync(new());
-            return new() { ErrorMessage = response.Message };
+            var response = await _client.CreateAgentDividendAsync(new(null));
+            return new() { ErrorMessage = response?.Message };
         }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
         {
             var response =
-                await _client.CreateAgentDividendAsync(new CreateAgentDividendsRequest { BrandCode = brandCode });
-            return new() { ErrorMessage = response.Message };
+                await _client.CreateAgentDividendAsync(new CreateAgentDividendsRequest(brandCode));
+            return new() { ErrorMessage = response?.Message };
         }
     }
 }

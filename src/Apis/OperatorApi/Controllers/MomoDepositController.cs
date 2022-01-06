@@ -7,8 +7,8 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using Tgs.Payment.Clients;
 using Tgs.Payment.SkyPay;
-using TGS.Services.Operator.Services.Deposit;
 using Tgs.ServiceUtility;
+using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

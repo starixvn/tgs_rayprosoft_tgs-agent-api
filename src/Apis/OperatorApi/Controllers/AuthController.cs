@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Auth;
+using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

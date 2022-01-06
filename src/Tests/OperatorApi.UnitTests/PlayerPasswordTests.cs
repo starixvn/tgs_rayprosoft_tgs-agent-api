@@ -15,9 +15,9 @@ using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -105,14 +105,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
             var sut = new ForgotPasswordBySmsCommandService(
                 fakePlayerRepository,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeSysRepository,
+                fakeBrandRepository,
                 fakeSmsServiceClient);
 
             var command = new ForgotPasswordBySmsCommand(
@@ -134,7 +134,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     true,
                     command.Phone,
                     command.AreaCode,
-                    null));
+                    null,
+                    Core.Models.Enums.PlayerStatus.Enabled));
 
             var validateCode = "123456";
             var token = "abc123";
@@ -146,13 +147,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
-            fakeSysRepository.GetBrandInfoAsync(Arg.Is(command.BrandId))
+            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(command.BrandId))
                 .Returns(new BrandInfo(
                     command.BrandId,
                     "brandCode",
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),
+                    Core.Models.Enums.BrandStatus.Active,
+                    "CNY",
                     true,
                     true));
 
@@ -173,14 +176,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
             var sut = new ForgotPasswordBySmsCommandService(
                 fakePlayerRepository,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeSysRepository,
+                fakeBrandRepository,
                 fakeSmsServiceClient);
 
             var command = new ForgotPasswordBySmsCommand(

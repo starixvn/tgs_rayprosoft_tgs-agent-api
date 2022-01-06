@@ -146,6 +146,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promotion.Repositories.Unit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Repositories", "src\Repositories\Wallet.Repositories\Wallet.Repositories.csproj", "{9374A186-2295-4FC3-BD11-BDF5BCCB7023}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TgsSeeding", "src\Core\TgsSeeding\TgsSeeding.csproj", "{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -340,6 +342,10 @@ Global
 		{9374A186-2295-4FC3-BD11-BDF5BCCB7023}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9374A186-2295-4FC3-BD11-BDF5BCCB7023}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9374A186-2295-4FC3-BD11-BDF5BCCB7023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -396,9 +402,10 @@ Global
 		{19134CE1-4EE6-4A1E-8253-B3D0CB51C82C} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 		{EE549C3D-3D17-4F16-A877-7F31C9BBC82A} = {4EB1B234-984A-41E3-9D91-7989D8BCD591}
 		{9374A186-2295-4FC3-BD11-BDF5BCCB7023} = {2D13A664-6549-483A-9659-22362B2C1DE9}
+		{53BB8B77-B670-43DD-AF1D-DFD8F08B71CC} = {8790B3DF-FD49-44FC-9191-7FEDFC22F913}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal

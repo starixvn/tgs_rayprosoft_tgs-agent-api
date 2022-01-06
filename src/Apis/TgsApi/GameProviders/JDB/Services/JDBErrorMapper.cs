@@ -12,7 +12,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public sealed class JDBErrorMapper : IErrorMapper
     {
-        private static readonly IReadOnlyDictionary<Type, GameApiStatus> ApiErrorByException =
+        private static readonly IReadOnlyDictionary<Type, GameApiStatus> _ApiErrorByException =
             new Dictionary<Type, GameApiStatus>
             {
                 {typeof(BrandUnderMaintenanceException), SystemIsMaintained},
@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiStatus>
-            ApiErrorByInvalidGameActionErrorCode =
+            _ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiStatus>
                 {
                     {Cancelled, Succeed},
@@ -46,13 +46,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             }
 
             if (exception is InvalidGameActionException e &&
-                ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+                _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
                 return (int)error;
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Failed;
+            return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Failed;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>
