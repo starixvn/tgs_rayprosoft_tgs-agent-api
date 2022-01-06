@@ -16,10 +16,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBGameInitializer : IGameInitializer
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+        private readonly IJDBApiClient _client;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJDBApiClient _jdbApiClient;
-        private readonly IJDBServices _jdbServices;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IJDBServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public JDBGameInitializer(
@@ -27,18 +27,18 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            IJDBApiClient jdbApiClient,
-            IJDBServices jdbServices)
+            IJDBApiClient client,
+            IJDBServices services)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
-            _jdbApiClient = jdbApiClient;
-            _jdbServices = jdbServices;
+            _client = client;
+            _services = services;
         }
 
-        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        public async ValueTask<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode).ConfigureAwait(false);
             var gameProviderId = await _gameProviderOperations
@@ -47,19 +47,21 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations
-                .MapCultureAsync(gameProviderId, brandId, request.Language)
+                .MapCultureAsync(
+                    gameProviderId,
+                    brandId,
+                    request.Language)
                 .ConfigureAwait(false);
 
-            var game = await _gameProviderOperations
-                .GetCachedGameAsync(gameProviderId, request.GameId)
-                .ConfigureAwait(false);
+            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
 
             var configuration =
                 await _settingOperations
-                    .GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB)
+                    .GetValueFromJsonByKeyAsync<JDBConfiguration>(
+                        SettingConsts.GameProviderConfigurations.JDB)
                     .ConfigureAwait(false);
 
-            var agent = _jdbServices.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
+            var agent = _services.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
             var items = game.ExternalId.Split("_");
 
             if (items.Length != 2)
@@ -67,20 +69,24 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 throw new ArgumentException($"Invalid game external id: {game.ExternalId}");
             }
 
-            var response = await _jdbApiClient
+            var tokenRequest = new GetTokenRequest
+            {
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                Parent = agent.Id,
+                UserId = player.PlayerCode,
+                Language = cultureCode,
+                GameType = items[0],
+                MachineType = items[1],
+                MoreGame = configuration.MoreGame ? 1 : 0
+            };
+
+            var response = await _client
                 .GetTokenAsync(
                     configuration.ApiUrl,
-                    agent,
-                    new GetTokenRequest
-                    {
-                        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        Parent = agent.Id,
-                        UserId = player.PlayerCode,
-                        Language = cultureCode,
-                        GameType = items[0],
-                        MachineType = items[1],
-                        MoreGame = agent.MoreGame ? 1 : 0
-                    })
+                    configuration.ClientDomain,
+                    configuration.AESIv,
+                    configuration.AESKey,
+                    tokenRequest)
                 .ConfigureAwait(false);
 
             if (response.Status.IgnoreCaseNotEquals(GameApiStatus.Succeed.Description()))
@@ -88,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 throw new GameProviderApiErrorException(response.ErrorMessage);
             }
 
-            return new GetGameUrlResponse
+            return new()
             {
                 Url = response.Path
             };

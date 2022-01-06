@@ -55,11 +55,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         }
 
         [HttpPost]
-        [Route("entrance/{currency}")]
+        [Route("entrance")]
         public async Task<BaseActionResponse> ExecuteGameActionAsync(
             [FromForm(Name = "action")] ActionType actionType,
-            [FromForm(Name = "value")] string json,
-            string currency)
+            [FromForm(Name = "value")] string json)
             => actionType switch
             {
                 ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider

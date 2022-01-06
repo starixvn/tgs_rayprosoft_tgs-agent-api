@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBGameHistory : BaseBetHistory
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IJDBApiClient _jdbApiClient;
+        private readonly IJDBApiClient _client;
         private readonly IPlayerOperations _playerOperations;
         private readonly IJDBServices _services;
         private readonly ISettingOperations _settingOperations;
@@ -29,14 +29,14 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
             ISettingOperations settingOperations,
-            IJDBApiClient jdbApiClient,
+            IJDBApiClient client,
             IBrandGameProviderOperations brandGameProviderOperations,
             IPlayerOperations playerOperations,
             IJDBServices services)
             : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
-            _jdbApiClient = jdbApiClient;
+            _client = client;
             _brandGameProviderOperations = brandGameProviderOperations;
             _playerOperations = playerOperations;
             _services = services;
@@ -45,11 +45,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
-            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB)
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<JDBConfiguration>(
+                        SettingConsts.GameProviderConfigurations.JDB)
                     .ConfigureAwait(false);
 
             var agent = _services.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
@@ -79,8 +80,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 SequenceNo = externalRoundId
             };
 
-            var response = await _jdbApiClient
-                .GetBetHistoryUrlAsync(configuration.ApiUrl, agent, request)
+            var response = await _client
+                .GetBetHistoryUrlAsync(
+                    configuration.ApiUrl,
+                    configuration.ClientDomain,
+                    configuration.AESIv,
+                    configuration.AESKey,
+                    request)
                 .ConfigureAwait(false);
 
             var url = string.Empty;
@@ -89,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 url = response.Data.FirstOrDefault()?.Path;
             }
 
-            return new RoundResult
+            return new()
             {
                 BetAmount = round.BetAmount ?? 0,
                 Winloss = (round.WinLoss ?? 0).Negate(),
