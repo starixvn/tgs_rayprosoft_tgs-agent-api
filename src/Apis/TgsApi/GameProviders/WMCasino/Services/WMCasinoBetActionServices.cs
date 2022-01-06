@@ -82,8 +82,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 _utility.GetExternalRoundIdByBetResult(betResult.RoundId, betResult.SubRoundId);
 
             var externalIds =
-                await _services.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId,
-                    playerCode, externalGameActionGroupId).ConfigureAwait(false);
+                await _services
+                    .GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+                        data.GameProviderId,
+                        playerCode,
+                        externalGameActionGroupId)
+                    .ConfigureAwait(false);
 
             var betData = _map.PlaceAndSettleBetRequest(data, playerCode, betResults, externalIds, fromSchedule);
 

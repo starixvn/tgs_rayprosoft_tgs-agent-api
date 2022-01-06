@@ -15,13 +15,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly ILogger<WMCasinoBetResultHandlerService> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IWMDataStore _store;
+        private readonly IWMCasinoDataStore _store;
         private readonly ITgsLog _tgsLog;
 
         public WMCasinoBetResultHandlerService(
             ILogger<WMCasinoBetResultHandlerService> logger,
             IServiceProvider serviceProvider,
-            IWMDataStore store,
+            IWMCasinoDataStore store,
             ITgsLog tgsLog)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

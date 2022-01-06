@@ -46,38 +46,37 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         [HttpPost("betdetail")]
         public async Task<ErrorResponse> BetDetailsAsync(
             [FromServices] ISettingOperations settingOperations,
-            [FromServices] IWMDataStore store,
+            [FromServices] IWMCasinoDataStore store,
             [FromServices] IWMCasinoActionModelMapper map,
             [FromServices] IMessageSender messageSender,
             BetDetailRequest request)
         {
             var agent = HttpContext.Items.Get<WMCasinoAgent>(WMCasinoConsts.ContextItems.Agent, null);
-            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
             var gameResults = request.Results;
             var roundNumber = $"{gameResults[0].ExternalGameId}_{gameResults[0].RoundId}_{gameResults[0].SubRoundId}";
 
-            var requestInfo = new BetDetailRequestInfo(gameProviderId, agent, request);
-            await store.AddBetDetailRequestInfoAsync(agent.AgentId, roundNumber, requestInfo).ConfigureAwait(false);
+            await store
+                .AddBetDetailRequestInfoAsync(agent.AgentId, roundNumber, gameResults)
+                .ConfigureAwait(false);
 
-            var setting =
-                await settingOperations
-                    .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>
-                        (SettingConsts.GameProviderConfigurations.WMCasino)
-                    .ConfigureAwait(false);
+            var totalCount = await store
+                .GetBetDetailRequestInfoCountAsync(agent.AgentId, roundNumber)
+                .ConfigureAwait(false);
 
-            var totalCount = setting.MaxResultCount * (request.Page - 1) + gameResults.Length;
-            if (totalCount == request.TotalCount)
+            if (totalCount != request.TotalCount)
             {
-                var keyRequest = new BetDetailRequestInfoKey(agent.AgentId, roundNumber);
-                var bytes = JsonSerializer.SerializeToUtf8Bytes(
-                    keyRequest,
-                    new JsonSerializerOptions { WriteIndented = false });
-
-                await messageSender
-                    .SendAsync("tgs.gameprovider.wm.betdetailrequest.process", bytes)
-                    .ConfigureAwait(true);
+                return map.Response(GameApiError.Success, string.Empty);
             }
+
+            var keyRequest = new BetDetailRequestInfoKey(agent.AgentId, roundNumber);
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(
+                keyRequest,
+                new JsonSerializerOptions { WriteIndented = false });
+
+            await messageSender
+                .SendAsync("tgs.gameprovider.wm.betdetailrequest.process", bytes)
+                .ConfigureAwait(true);
 
             return map.Response(GameApiError.Success, string.Empty);
         }
@@ -126,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("gamerecord/manual")]
         public async Task<ManuelRoundRecordResponse> ManualExecutePlayerRoundRecordAsync(
-            [FromServices] IWMDataStore store,
+            [FromServices] IWMCasinoDataStore store,
             [FromServices] IWMCasinoBetActionServices service,
             [FromServices] ITgsLog tgsLog,
             ManuelRoundRecordRequest request)

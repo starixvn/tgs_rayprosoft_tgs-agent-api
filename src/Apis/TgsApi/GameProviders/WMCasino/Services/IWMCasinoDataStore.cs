@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
+using TGS.Shared.Game.Models.WMCasino.Common;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
-    public interface IWMDataStore
+    public interface IWMCasinoDataStore
     {
-        ValueTask AddBetDetailRequestInfoAsync(string agentId, string roundNumber, BetDetailRequestInfo info);
+        ValueTask AddBetDetailRequestInfoAsync(string agentId, string roundNumber, IEnumerable<GameBetResult> gameResults);
 
         ValueTask AddBetResultsToQueueAsync(string batchId, IEnumerable<BetDetail> betDetails);
 
@@ -14,11 +15,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         ValueTask<string> GetBatchIdAsync();
 
-        ValueTask<IEnumerable<BetDetailRequestInfo>> GetBetDetailRequestInfosAsync(string agentId, string roundNumber);
+        ValueTask<IEnumerable<GameBetResult>> GetBetDetailRequestInfoAsync(string agentId, string roundNumber);
+
+        ValueTask<long> GetBetDetailRequestInfoCountAsync(string agentId, string roundNumber);
 
         ValueTask<IEnumerable<BetDetail>> GetBetResultsByBatchIdAsync(string batchId);
 
-        ValueTask RemoveBetDetailRequestInfosAsync(string agentId, string roundNumber);
+        ValueTask RemoveBetDetailRequestInfoAsync(string agentId, string roundNumber);
 
         ValueTask RemoveBetResultsByBatchIdAsync(string batchId);
     }

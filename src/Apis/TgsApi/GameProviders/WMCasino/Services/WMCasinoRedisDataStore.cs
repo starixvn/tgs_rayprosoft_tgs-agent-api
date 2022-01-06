@@ -5,15 +5,16 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
+using TGS.Shared.Game.Models.WMCasino.Common;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
-    public class WMRedisDataStore : IWMDataStore
+    public class WMCasinoRedisDataStore : IWMCasinoDataStore
     {
         private readonly IDatabase _database;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public WMRedisDataStore(
+        public WMCasinoRedisDataStore(
             IDatabase database)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
@@ -27,12 +28,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         public async ValueTask AddBetDetailRequestInfoAsync(
             string agentId,
             string roundNumber,
-            BetDetailRequestInfo info)
+            IEnumerable<GameBetResult> gameResults)
         {
             var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
-            var value = JsonSerializer.Serialize(info, _jsonSerializerOptions);
+            var values = gameResults
+                .Select(r => (RedisValue)JsonSerializer.Serialize(r, _jsonSerializerOptions))
+                .ToArray();
 
-            await _database.ListRightPushAsync(key, value).ConfigureAwait(false);
+            await _database.SetAddAsync(key, values).ConfigureAwait(false);
         }
 
         public async ValueTask AddBetResultsToQueueAsync(
@@ -76,17 +79,26 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             return value.HasValue ? value.ToString() : null;
         }
 
-        public async ValueTask<IEnumerable<BetDetailRequestInfo>> GetBetDetailRequestInfosAsync(
+        public async ValueTask<IEnumerable<GameBetResult>> GetBetDetailRequestInfoAsync(
             string agentId,
             string roundNumber)
         {
             var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
 
-            var value = await _database.ListRangeAsync(key).ConfigureAwait(false);
+            var members = await _database.SetMembersAsync(key).ConfigureAwait(false);
 
-            return value.Length == 0 ?
-                Array.Empty<BetDetailRequestInfo>() :
-                value.Select(v => JsonSerializer.Deserialize<BetDetailRequestInfo>(v));
+            return members.Length == 0 ?
+                Array.Empty<GameBetResult>() :
+                members.Select(v => JsonSerializer.Deserialize<GameBetResult>(v));
+        }
+
+        public async ValueTask<long> GetBetDetailRequestInfoCountAsync(
+            string agentId,
+            string roundNumber)
+        {
+            var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
+
+            return await _database.SetLengthAsync(key).ConfigureAwait(false);
         }
 
         public async ValueTask<IEnumerable<BetDetail>> GetBetResultsByBatchIdAsync(string batchId)
@@ -100,7 +112,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 value.Select(v => JsonSerializer.Deserialize<BetDetail>(v));
         }
 
-        public async ValueTask RemoveBetDetailRequestInfosAsync(string agentId, string roundNumber)
+        public async ValueTask RemoveBetDetailRequestInfoAsync(string agentId, string roundNumber)
         {
             var key = GetBetDetailRequestInfoKey(agentId, roundNumber);
 

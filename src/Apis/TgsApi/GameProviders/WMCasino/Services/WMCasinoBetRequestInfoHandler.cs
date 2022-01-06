@@ -9,32 +9,43 @@ using Microsoft.Extensions.Logging;
 using Tgs.Logging;
 using Tgs.MessageQueue;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Models;
+using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public class WMCasinoBetRequestInfoHandler : IMessageHandler
     {
+        private readonly IWMCasinoAgentMapper _agentMapper;
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ILogger<WMCasinoBetRequestInfoHandler> _logger;
         private readonly IPlayerOperations _playerOperations;
         private readonly IWMCasinoPlayerServices _playerServices;
-        private readonly IWMDataStore _store;
+        private readonly ISettingOperations _settingOperations;
+        private readonly IWMCasinoDataStore _store;
         private readonly ITgsLog _tgsLog;
 
         public WMCasinoBetRequestInfoHandler(
             ILogger<WMCasinoBetRequestInfoHandler> logger,
-            IWMDataStore store,
+            IWMCasinoDataStore store,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
+            IGameProviderOperations gameProviderOperations,
+            ISettingOperations settingOperations,
             IWMCasinoPlayerServices playerServices,
+            IWMCasinoAgentMapper agentMapper,
             ITgsLog tgsLog)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerServices = playerServices ?? throw new ArgumentNullException(nameof(playerServices));
+            _agentMapper = agentMapper ?? throw new ArgumentNullException(nameof(agentMapper));
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
         }
 
@@ -49,18 +60,24 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 agentId = key.AgentId;
                 roundNumber = key.RoundNumber;
 
-                var infos =
+                var gameProviderId = await _gameProviderOperations
+                    .GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino)
+                    .ConfigureAwait(false);
+
+                var configuration = await _settingOperations
+                    .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts.GameProviderConfigurations.WMCasino)
+                    .ConfigureAwait(false);
+
+                var agent = _agentMapper.GetAgentById(configuration.BrandMerchants, agentId);
+
+                var gameResults =
                     (await _store
-                        .GetBetDetailRequestInfosAsync(agentId, roundNumber)
+                        .GetBetDetailRequestInfoAsync(agentId, roundNumber)
                         .ConfigureAwait(false))
                     .ToArray();
 
-                if (infos.Length > 0)
+                if (gameResults.Length > 0)
                 {
-                    var gameProviderId = infos[0].GameProviderId;
-                    var agent = infos[0].Agent;
-
-                    var gameResults = infos.SelectMany(r => r.Request.Results).ToArray();
                     var results =
                             (from r in gameResults
                              group r by new { r.User } into g
@@ -108,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                         .ConfigureAwait(false);
                 }
 
-                await _store.RemoveBetDetailRequestInfosAsync(agentId, roundNumber).ConfigureAwait(false);
+                await _store.RemoveBetDetailRequestInfoAsync(agentId, roundNumber).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

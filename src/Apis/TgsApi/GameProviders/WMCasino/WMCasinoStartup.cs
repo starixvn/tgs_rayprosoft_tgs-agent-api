@@ -64,8 +64,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
             services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
 
-            services.AddTransient<IWMDataStore>(sp =>
-                ActivatorUtilities.CreateInstance<WMRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+            services.AddTransient<IWMCasinoDataStore>(sp =>
+                ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
             services.AddHostedService<WMCasinoBetResultHandlerService>();
         }
