@@ -13,13 +13,6 @@ using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
-    public interface IJDBServices
-    {
-        JDBAgent GetAgent(IEnumerable<JDBAgent> agents, string currencyCode);
-
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(PlatformType platformType);
-    }
-
     public sealed class JDBServices : IJDBServices
     {
         private readonly IGameProviderOperations _gameProviderOperations;
@@ -33,11 +26,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _gameProviderOperations = gameProviderOperations;
         }
 
-        JDBAgent IJDBServices.GetAgent(IEnumerable<JDBAgent> agents, string currencyCode)
+        public JDBAgent GetAgent(IEnumerable<JDBAgent> agents, string currencyCode)
             => agents?
                 .FirstOrDefault(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode));
 
-        async ValueTask<GameProviderConfigurationData> IJDBServices.GetGameProviderConfigurationDataAsync(
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
                     PlatformType platformType)
         {
             var items = _httpContext?.Items ??

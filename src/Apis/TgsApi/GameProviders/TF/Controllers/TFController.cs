@@ -102,18 +102,39 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Controllers
                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                .ConfigureAwait(false);
 
-            var betData = await _map
-                .SettleAsync(gameProviderConfigurationData, playerCode, request)
+            if (request.TicketDetail.SettlementStatus == "settled")
+            {
+                var betData = await _map
+                    .SettleAsync(gameProviderConfigurationData, playerCode, request)
+                    .ConfigureAwait(false);
+
+                if (betData == null)
+                {
+                    throw new InvalidGameActionException("");
+                }
+
+                _ = await _actions
+                   .SettleBetAsync(betData)
+                   .ConfigureAwait(false);
+            }
+            else if (request.TicketDetail.SettlementStatus == "cancelled")
+            {
+                var betDataCancelSettle = await _map
+                    .CancelRoundSettleAsync(gameProviderConfigurationData, playerCode, request)
+                    .ConfigureAwait(false);
+
+                _ = await _actions
+                    .CancelTransactionAsync(betDataCancelSettle)
+                    .ConfigureAwait(false);
+
+                var betDataCancelBet = await _map
+                .CancelRoundBetAsync(gameProviderConfigurationData, playerCode, request)
                 .ConfigureAwait(false);
 
-            if (betData == null)
-            {
-                throw new InvalidGameActionException("");
+                _ = await _actions
+                    .SettleBetAsync(betDataCancelBet)
+                    .ConfigureAwait(false);
             }
-
-            _ = await _actions
-               .SettleBetAsync(betData)
-               .ConfigureAwait(false);
         }
 
         [HttpGet("wallet")]

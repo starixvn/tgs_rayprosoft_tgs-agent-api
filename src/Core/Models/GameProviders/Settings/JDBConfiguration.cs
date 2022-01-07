@@ -7,6 +7,14 @@ namespace TGS.Core.Models.GameProviders.Settings
     {
         public Uri ApiUrl { get; init; }
 
+        public bool MoreGame { get; init; }
+
+        public string AESIv { get; init; }
+
+        public string AESKey { get; init; }
+
+        public string ClientDomain { get; init; }
+
         public int TimezoneHour { get; init; }
 
         public JDBAgent[] Agents { get; init; }
