@@ -158,41 +158,41 @@ namespace TGS.Apis.TgsApi.Commons
                     AddCustomNatsMessageQueueHandler(natsConfig);
                 });
 
-            services
-                .AddOptions<OtlpExporterOptions>()
-                .Configure<IConfiguration>((options, config) =>
-                {
-                    var nodeIp = config.GetValue<string>("NODE_IP");
+            //services
+            //    .AddOptions<OtlpExporterOptions>()
+            //    .Configure<IConfiguration>((options, config) =>
+            //    {
+            //        var nodeIp = config.GetValue<string>("NODE_IP");
 
-                    if (!string.IsNullOrWhiteSpace(nodeIp))
-                    {
-                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
-                    }
+            //        if (!string.IsNullOrWhiteSpace(nodeIp))
+            //        {
+            //            options.Endpoint = new Uri($"http://{nodeIp}:4317");
+            //        }
 
-                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
-                });
+            //        config.GetSection("OpenTelemetry:Tracing").Bind(options);
+            //    });
 
-            services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .SetResourceBuilder(
-                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddOtlpExporter()
-                        .AddProfileViewExporter(profileViewBuilder =>
-                        {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
-                .AddProfileViewer();
+            //services
+            //    .AddOpenTelemetryTracing(builder
+            //        => builder
+            //            .SetResourceBuilder(
+            //                ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+            //            .AddSource("TGS.*")
+            //            .AddSource("Tgs.*")
+            //            .AddAspNetCoreInstrumentation()
+            //            .AddHttpClientInstrumentation()
+            //            .AddEntityFrameworkCoreInstrumentation(options =>
+            //            {
+            //                options.SetDbStatementForText = true;
+            //            })
+            //            .AddOtlpExporter()
+            //            .AddProfileViewExporter(profileViewBuilder =>
+            //            {
+            //                profileViewBuilder
+            //                    .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+            //                    .AddFilter(new UrlPathFilter("/health"));
+            //            }))
+            //    .AddProfileViewer();
         }
 
         #region Abstract and Virtual Methods
