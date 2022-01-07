@@ -19,9 +19,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
 
         ValueTask<BetData> CancelRoundSettleAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source);
 
-        ValueTask<BetData> CancelRoundAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source);
-
-
         ValueTask<BetData> CancelSettleAsync(GameProviderConfigurationData data, string playerCode, UnSettleRequest source);
 
         ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source);
@@ -262,6 +259,5 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
                 Transactions = new[] { transactions }
             };
-        ValueTask<BetData> ITFActionModelMapper.CancelRoundAsync(GameProviderConfigurationData data, string playerCode, SettleRequest source) => throw new NotImplementedException();
     }
 }
