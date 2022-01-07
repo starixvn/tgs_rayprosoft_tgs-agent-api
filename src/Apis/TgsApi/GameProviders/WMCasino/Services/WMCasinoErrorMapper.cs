@@ -12,7 +12,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public class WMCasinoErrorMapper : IErrorMapper
     {
-        private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
+        private static readonly IReadOnlyDictionary<Type, GameApiError> _ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
                 { typeof(InvalidCredentialsException), InvalidCredential },
@@ -35,7 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
-            ApiErrorByInvalidGameActionErrorCode =
+            _ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
                     { Settled, Success },
@@ -54,13 +54,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             }
 
             if (exception is InvalidGameActionException e &&
-                ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+                _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
                 return (int)error;
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
+            return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>

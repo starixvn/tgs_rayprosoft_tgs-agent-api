@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.WMCasino.Common
 {
-    public record BetResult
+    public record GameBetResult
     {
         [JsonPropertyName("user")]
         public string User { get; init; }

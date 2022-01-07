@@ -12,6 +12,6 @@ namespace TGS.Shared.Game.Models.WMCasino.Incoming
         public int Page { get; init; }
 
         [JsonPropertyName("result")]
-        public BetResult[] Results { get; init; }
+        public GameBetResult[] Results { get; init; }
     }
 }

@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
@@ -151,26 +154,45 @@ namespace TGS.Apis.TgsApi.Commons
 
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
+
+                    AddCustomNatsMessageQueueHandler(natsConfig);
                 });
 
-            services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddProfileViewExporter(profileViewBuilder =>
-                        {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
-                .AddProfileViewer();
+            //services
+            //    .AddOptions<OtlpExporterOptions>()
+            //    .Configure<IConfiguration>((options, config) =>
+            //    {
+            //        var nodeIp = config.GetValue<string>("NODE_IP");
+
+            //        if (!string.IsNullOrWhiteSpace(nodeIp))
+            //        {
+            //            options.Endpoint = new Uri($"http://{nodeIp}:4317");
+            //        }
+
+            //        config.GetSection("OpenTelemetry:Tracing").Bind(options);
+            //    });
+
+            //services
+            //    .AddOpenTelemetryTracing(builder
+            //        => builder
+            //            .SetResourceBuilder(
+            //                ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+            //            .AddSource("TGS.*")
+            //            .AddSource("Tgs.*")
+            //            .AddAspNetCoreInstrumentation()
+            //            .AddHttpClientInstrumentation()
+            //            .AddEntityFrameworkCoreInstrumentation(options =>
+            //            {
+            //                options.SetDbStatementForText = true;
+            //            })
+            //            .AddOtlpExporter()
+            //            .AddProfileViewExporter(profileViewBuilder =>
+            //            {
+            //                profileViewBuilder
+            //                    .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+            //                    .AddFilter(new UrlPathFilter("/health"));
+            //            }))
+            //    .AddProfileViewer();
         }
 
         #region Abstract and Virtual Methods
@@ -180,6 +202,10 @@ namespace TGS.Apis.TgsApi.Commons
         }
 
         protected virtual void AddCustomFilters(MvcOptions options)
+        {
+        }
+
+        protected virtual void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
         {
         }
 
