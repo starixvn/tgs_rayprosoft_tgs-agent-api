@@ -89,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                     ExternalGameId = bet.ExternalGameId,
                     ExternalBetId = bet.ExternalBetId,
                     ExternalRoundId = bet.ExternalRoundId,
-                    ExternalTransactionId = $"{source.TicketNum}_round_bet_cancel",
+                    ExternalTransactionId = $"{source.TicketNum}_bet_cancel",
                     ExternalTransactionReferenceId = bet.ExternalTransactionId.ToString(),
                     GameActionType = GameActionType.CancelTransaction,
                     RoundClosed = true
@@ -111,12 +111,12 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 .GetSettleGameActionByBetAsync(data.GameProviderId, playerCode, externalRoundId, cachedGame.Id)
                 .ConfigureAwait(false);
 
-            if (gameActionRecord != null)
+            if (gameActionRecord != null && gameActionRecord.Type == GameActionType.LoseBet)
             {
                 transaction = new TransactionData
                 {
                     Amount = Math.Abs(source.Amount),
-                    ExternalTransactionId = $"{externalTransactionId}_round_settle_cancel",
+                    ExternalTransactionId = $"{externalTransactionId}_settle_cancel",
                     ExternalRoundId = externalRoundId,
                     ExternalBetId = externalRoundId,
                     ExternalGameActionGroupId = externalRoundId,
@@ -128,6 +128,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                     RoundClosed = false,
                     RoundDetail = JsonSerializer.Serialize(source.TicketDetail)
                 };
+            }
+            else
+            {
+                return null;
             }
 
             return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
