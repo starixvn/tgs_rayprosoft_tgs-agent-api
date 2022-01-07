@@ -11,18 +11,20 @@ using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
+using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Services.GameOperations.Calculators;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 {
     public sealed class WMCasinoStartup : BaseStartup
     {
+        protected override string LogPrefix => "wmcasino";
+
         public WMCasinoStartup(IConfiguration configuration, IWebHostEnvironment env) : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "wmcasino";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -33,7 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 (provider, key) => key switch
                 {
                     Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
-                    _                            => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             services.AddScoped<WMCasinoDispatcherMiddleware>();
@@ -61,21 +63,18 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
 
             services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
+
+            services.AddTransient<IWMCasinoDataStore>(sp =>
+                ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+
+            services.AddHostedService<WMCasinoBetResultHandlerService>();
         }
 
-        protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        protected override void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
         {
-            const string route = "/api/wm/entrance";
-
-            app.UseWhen(
-                context =>
-                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
-                    HttpMethods.IsPost(context.Request.Method),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
-                    builder.UseMiddleware<WMCasinoDispatcherMiddleware>();
-                });
+            configuration.AddReplyHandler<WMCasinoBetRequestInfoHandler>(
+                "tgs.gameprovider.wm.betdetailrequest.process",
+                "tgs.gameprovider.wm.betdetailrequest.process");
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
@@ -97,6 +96,21 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 builder =>
                 {
                     builder.UseMiddleware<AuthorizeWMCasinoMiddleware>();
+                });
+        }
+
+        protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+            const string route = "/api/wm/entrance";
+
+            app.UseWhen(
+                context =>
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                    HttpMethods.IsPost(context.Request.Method),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
+                    builder.UseMiddleware<WMCasinoDispatcherMiddleware>();
                 });
         }
     }

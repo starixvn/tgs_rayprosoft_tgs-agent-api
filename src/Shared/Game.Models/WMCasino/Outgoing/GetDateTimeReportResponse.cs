@@ -6,6 +6,6 @@ namespace TGS.Shared.Game.Models.WMCasino.Outgoing
     public record GetDateTimeReportResponse : ErrorResponse
     {
         [JsonPropertyName("result")]
-        public BetResult[] Results { get; init; }
+        public GameBetResult[] Results { get; init; }
     }
 }
