@@ -156,7 +156,7 @@ namespace TGS.Apis.TgsApi.Commons
                             options.Url = natsUrl;
                         });
 
-                    //AddCustomNatsMessageQueueHandler(natsConfig);
+                    AddCustomNatsMessageQueueHandler(natsConfig);
                 });
 
             //services

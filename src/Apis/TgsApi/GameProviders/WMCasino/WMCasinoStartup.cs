@@ -72,9 +72,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
         protected override void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
         {
-            //configuration.AddReplyHandler<WMCasinoBetRequestInfoHandler>(
-            //    "tgs.gameprovider.wm.betdetailrequest.process",
-            //    "tgs.gameprovider.wm.betdetailrequest.process");
+            configuration.AddReplyHandler<WMCasinoBetRequestInfoHandler>(
+                "tgs.gameprovider.wm.betdetailrequest.process",
+                "tgs.gameprovider.wm.betdetailrequest.process");
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
