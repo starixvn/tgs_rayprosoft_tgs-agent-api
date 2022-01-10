@@ -6,11 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -150,9 +147,13 @@ namespace TGS.Apis.TgsApi.Commons
                     natsConfig
                         .ConfigQueueOptions((options, sp) =>
                         {
+                            var logger = sp.GetRequiredService<ILogger<BaseStartup>>();
                             var config = sp.GetRequiredService<IConfiguration>();
+                            var natsUrl = config.GetValue<string>("NatsSetting:Urls");
 
-                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                            logger.LogInformation($"nats url: {natsUrl}");
+
+                            options.Url = natsUrl;
                         });
 
                     AddCustomNatsMessageQueueHandler(natsConfig);
