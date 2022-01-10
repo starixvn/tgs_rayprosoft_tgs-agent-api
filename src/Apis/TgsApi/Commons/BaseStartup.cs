@@ -151,8 +151,11 @@ namespace TGS.Apis.TgsApi.Commons
                         .ConfigQueueOptions((options, sp) =>
                         {
                             var config = sp.GetRequiredService<IConfiguration>();
+                            var natsUrl = config.GetValue<string>("NatsSetting:Urls");
 
-                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                            Console.WriteLine("nats url: {0}", natsUrl);
+
+                            options.Url = natsUrl;
                         });
 
                     AddCustomNatsMessageQueueHandler(natsConfig);
