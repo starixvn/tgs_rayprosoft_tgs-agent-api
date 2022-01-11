@@ -152,50 +152,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
             services.AddHttpContextAccessor();
 
-            // custom registration of WMCasino
-
-            services.AddErrorMappers(new[]
-                {
-                    typeof(WMCasinoErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
-
-            services.AddScoped<WMCasinoDispatcherMiddleware>();
-            services.AddScoped<AuthorizeWMCasinoMiddleware>();
-            services.AddScoped<HandleWMCasinoExceptionMiddleware>();
-
-            services.AddScoped<IWMCasinoServices, WMCasinoServices>();
-            services.AddScoped<IWMCasinoBetActionServices, WMCasinoBetActionServices>();
-            services.AddScoped<IWMCasinoGameProviderHistoryServices, WMCasinoGameProviderHistoryServices>();
-
-            services.AddTransient<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
-            services.AddTransient<IWMCasinoUtility, WMCasinoUtility>();
-            services.AddTransient<IWMCasinoPlayerServices, WMCasinoPlayerServices>();
-            services.AddTransient<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
-                {
-                    typeof(WMCasinoGameInitializer)
-                },
-                (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
-                {
-                    typeof(WMCasinoGameHistory)
-                },
-                (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
-
-            services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
-
-            services.AddTransient<IWMCasinoDataStore>(sp =>
-                ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-
-            services.AddHostedService<WMCasinoBetResultHandlerService>();
-
             services.AddFeatureManagement();
 
             services.AddControllers(options =>
@@ -259,6 +215,50 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             //                    .AddFilter(new UrlPathFilter("/health"));
             //            }))
             //    .AddProfileViewer();
+
+            // custom registration of WMCasino
+
+            services.AddErrorMappers(new[]
+                {
+                    typeof(WMCasinoErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
+                });
+
+            services.AddScoped<WMCasinoDispatcherMiddleware>();
+            services.AddScoped<AuthorizeWMCasinoMiddleware>();
+            services.AddScoped<HandleWMCasinoExceptionMiddleware>();
+
+            services.AddScoped<IWMCasinoServices, WMCasinoServices>();
+            services.AddScoped<IWMCasinoBetActionServices, WMCasinoBetActionServices>();
+            services.AddScoped<IWMCasinoGameProviderHistoryServices, WMCasinoGameProviderHistoryServices>();
+
+            services.AddTransient<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
+            services.AddTransient<IWMCasinoUtility, WMCasinoUtility>();
+            services.AddTransient<IWMCasinoPlayerServices, WMCasinoPlayerServices>();
+            services.AddTransient<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+                {
+                    typeof(WMCasinoGameInitializer)
+                },
+                (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(WMCasinoGameHistory)
+                },
+                (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
+
+            services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
+
+            services.AddTransient<IWMCasinoDataStore>(sp =>
+                ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+
+            services.AddHostedService<WMCasinoBetResultHandlerService>();
         }
     }
 }
