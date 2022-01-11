@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly IWMCasinoDataStore _store;
         private readonly ITgsLog _tgsLog;
-        private Task _backgroundTask;
 
         public WMCasinoBetResultHandlerService(
             ILogger<WMCasinoBetResultHandlerService> logger,
@@ -39,59 +38,82 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Run(async () =>
-              {
-                  while (!stoppingToken.IsCancellationRequested)
-                  {
-                      var batchId = await _store.GetBatchIdAsync().ConfigureAwait(false);
-                      if (string.IsNullOrEmpty(batchId))
-                      {
-                          await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
-                          continue;
-                      }
+            {
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                var cancellationToken = cts.Token;
 
-                      var betDetails =
-                          (await _store
-                              .GetBetResultsByBatchIdAsync(batchId)
-                              .ConfigureAwait(false))
-                          .ToArray();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var batchId = await _store.GetBatchIdAsync().ConfigureAwait(false);
+                    if (string.IsNullOrEmpty(batchId))
+                    {
+                        await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+                        continue;
+                    }
 
-                      if (betDetails.Length == 0)
-                      {
-                          continue;
-                      }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        await _store.ApplyBetResultBatchesAsync(new[] { batchId }).ConfigureAwait(false);
+                        return;
+                    }
 
-                      using var scope = _serviceProvider.CreateScope();
+                    var betDetails =
+                        (await _store
+                            .GetBetResultsByBatchIdAsync(batchId)
+                            .ConfigureAwait(false))
+                        .ToArray();
 
-                      var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
+                    if (betDetails.Length == 0)
+                    {
+                        continue;
+                    }
 
-                      try
-                      {
-                          foreach (var betDetail in betDetails)
-                          {
-                              await service
-                                  .ExecuteBetResultsByRoundAsync(
-                                      betDetail.GameProviderId,
-                                      betDetail.GameProviderConfigurationId,
-                                      betDetail.PlayerCode,
-                                      new[] { betDetail.GameBetResult })
-                                  .ConfigureAwait(false);
-                          }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        await _store.ApplyBetResultBatchesAsync(new[] { batchId }).ConfigureAwait(false);
+                        return;
+                    }
 
-                          await _store.RemoveBetResultsByBatchIdAsync(batchId).ConfigureAwait(false);
-                      }
-                      catch (Exception ex)
-                      {
-                          var value = JsonSerializer.Serialize(betDetails, _jsonSerializerOptions);
+                    using var scope = _serviceProvider.CreateScope();
 
-                          _tgsLog.LogError(
-                              $"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}",
-                              ex);
-                          _logger.LogError(new EventId(1000),
-                              ex,
-                              $"Fail to execute WMCasino bet result: BatchId: {batchId}, BetDetails: {value}");
-                      }
-                  }
-              }, stoppingToken);
+                    var service = scope.ServiceProvider.GetRequiredService<IWMCasinoBetActionServices>();
+
+                    try
+                    {
+                        for (var i = 0; i < betDetails.Length; i++)
+                        {
+                            if (cancellationToken.IsCancellationRequested && i != betDetails.Length - 1)
+                            {
+                                await _store.ApplyBetResultBatchesAsync(new[] { batchId }).ConfigureAwait(false);
+                                return;
+                            }
+
+                            var betDetail = betDetails[i];
+
+                            await service
+                                .ExecuteBetResultsByRoundAsync(
+                                    betDetail.GameProviderId,
+                                    betDetail.GameProviderConfigurationId,
+                                    betDetail.PlayerCode,
+                                    new[] { betDetail.GameBetResult })
+                                .ConfigureAwait(false);
+                        }
+
+                        await _store.RemoveBetResultsByBatchIdAsync(batchId).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        var value = JsonSerializer.Serialize(betDetails, _jsonSerializerOptions);
+
+                        _tgsLog.LogError(
+                            $"Fail to execute WMCasino bet result. BatchId: {batchId}, BetDetails: {value}",
+                            ex);
+                        _logger.LogError(new EventId(1000),
+                            ex,
+                            $"Fail to execute WMCasino bet result: BatchId: {batchId}, BetDetails: {value}");
+                    }
+                }
+            }, stoppingToken);
         }
     }
 }
