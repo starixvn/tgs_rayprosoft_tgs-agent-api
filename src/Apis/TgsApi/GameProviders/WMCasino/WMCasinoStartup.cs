@@ -154,6 +154,16 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
             // custom registration of WMCasino
 
+            services.AddErrorMappers(new[]
+                {
+                    typeof(WMCasinoErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
+                });
+
             services.AddScoped<WMCasinoDispatcherMiddleware>();
             services.AddScoped<AuthorizeWMCasinoMiddleware>();
             services.AddScoped<HandleWMCasinoExceptionMiddleware>();
@@ -183,8 +193,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
             services.AddTransient<IWMCasinoDataStore>(sp =>
                 ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-
-            services.AddHostedService<WMCasinoBetResultHandlerService>();
 
             services.AddFeatureManagement();
 
@@ -250,15 +258,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             //            }))
             //    .AddProfileViewer();
 
-            services.AddErrorMappers(new[]
-                {
-                    typeof(WMCasinoErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
+            services.AddHostedService<WMCasinoBetResultHandlerService>();
         }
     }
 }
