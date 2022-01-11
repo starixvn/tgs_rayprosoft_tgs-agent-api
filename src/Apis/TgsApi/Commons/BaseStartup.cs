@@ -122,6 +122,8 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddHttpContextAccessor();
 
+            AddCustomDependencyServices(services);
+
             services.AddFeatureManagement();
 
             services.AddControllers(options =>
@@ -192,8 +194,6 @@ namespace TGS.Apis.TgsApi.Commons
             //                    .AddFilter(new UrlPathFilter("/health"));
             //            }))
             //    .AddProfileViewer();
-
-            AddCustomDependencyServices(services);
         }
 
         #region Abstract and Virtual Methods
