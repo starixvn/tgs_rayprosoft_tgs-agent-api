@@ -3,12 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.Infrastructures.Prometheus;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
-using Tgs.MessageQueue;
 
 namespace TGS.Apis.TgsApi
 {
@@ -41,15 +38,11 @@ namespace TGS.Apis.TgsApi
                 });
         }
 
-        public static Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             PrometheusService.StartCollecting();
 
-            var builder = CreateHostBuilder(args).Build();
-
-            _ = builder.Services.GetRequiredService<IRedisConnectionFactory>();
-
-            return builder.RunAsync();
+            await CreateHostBuilder(args).Build().RunAsync();
         }
     }
 }
