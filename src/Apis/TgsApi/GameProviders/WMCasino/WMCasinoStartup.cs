@@ -184,7 +184,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             services.AddTransient<IWMCasinoDataStore>(sp =>
                 ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
-            services.AddHostedService<WMCasinoBetResultHandlerService>();
+            //services.AddHostedService<WMCasinoBetResultHandlerService>();
 
             services.AddFeatureManagement();
 
