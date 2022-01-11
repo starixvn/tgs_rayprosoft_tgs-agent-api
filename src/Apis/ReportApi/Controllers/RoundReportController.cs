@@ -17,9 +17,14 @@ namespace TGS.Apis.ReportApi.Controllers
 
         public RoundReportController(IMediator mediator) => _mediator = mediator;
 
-        [HttpGet]
-        [Description("Get rounds")]
-        public Task<PagedResponse<RoundModel>> GetRoundsAsync([FromQuery] GetRoundsRequest request) =>
+        [HttpGet("closedRounds")]
+        [Description("Get closed rounds")]
+        public Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync([FromQuery] GetClosedRoundsRequest request) =>
+            _mediator.Send(request);
+
+        [HttpGet("openRounds")]
+        [Description("Get open rounds")]
+        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
             _mediator.Send(request);
 
         [HttpGet("{roundId}")]
@@ -30,9 +35,9 @@ namespace TGS.Apis.ReportApi.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("openRounds")]
-        [Description("Get open rounds")]
-        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
+        [HttpGet]
+        [Description("Get rounds")]
+        public Task<PagedResponse<RoundModel>> GetRoundsAsync([FromQuery] GetRoundsRequest request) =>
             _mediator.Send(request);
     }
 }
