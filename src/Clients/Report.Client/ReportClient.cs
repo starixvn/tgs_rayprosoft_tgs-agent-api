@@ -27,6 +27,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request);
         Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync(GetOpenRoundsRequest request);
+        Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync(GetClosedRoundsRequest request);
 
         Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request);
 
@@ -129,6 +130,18 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties("/api/roundReport/openRounds?", request);
 
             return await ExecuteJsonRequestAsync<GetOpenRoundsRequest, PagedResponse<OpenRoundModel>>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync(GetClosedRoundsRequest request)
+        {
+            var prefix = "Report.GetClosedRounds";
+            var path = ClientPath.AppendWithProperties("/api/roundReport/closedRounds?", request);
+
+            return await ExecuteJsonRequestAsync<GetClosedRoundsRequest, PagedResponse<ClosedRoundModel>>(HttpMethod.Get,
                 path,
                 request,
                 logPrefix: prefix,

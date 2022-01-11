@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
@@ -14,7 +15,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.Game;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -25,6 +25,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         private readonly IReportClient _client;
 
         public RoundReportController(IReportClient client) => _client = client;
+
+        [HttpGet("closedRounds")]
+        [Description("Get closed rounds")]
+        public Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync([FromQuery] GetClosedRoundsRequest request) =>
+            _client.GetClosedRoundsAsync(request);
+
+        [HttpGet("openRounds")]
+        [Description("Get open rounds")]
+        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
+            _client.GetOpenRoundsAsync(request);
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
@@ -124,11 +134,5 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                          }).ToArray()
             };
         }
-
-
-        [HttpGet("openRounds")]
-        [Description("Get open rounds")]
-        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
-            _client.GetOpenRoundsAsync(request);
     }
 }
