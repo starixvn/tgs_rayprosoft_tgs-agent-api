@@ -55,7 +55,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 await _paymentServiceClient
                     .ReviewWithdrawFormAsync(
                         command.FormId,
-                        command.BrandPaymentId.Value,
+                        command.BrandPaymentId,
                         command.Status,
                         command.ReviewUserId,
                         command.ReviewUserName,

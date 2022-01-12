@@ -21,6 +21,63 @@ namespace TGS.Tests.BackendOffice.UnitTests
     public class WithdrawFormTests
     {
         [Test]
+        public async Task Can_Reject_Withdraw_Form_Without_BrandPaymentId()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+            var moqWalletExchangeService = new Mock<IWalletExchangeService>();
+
+            var sut = new ReviewWithdrawFormCommandService(
+                moqPaymentServiceClient.Object,
+                moqWalletExchangeService.Object);
+
+            var formId = Guid.NewGuid();
+            var brandPaymentId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+
+            var command = new ReviewWithdrawFormCommand(
+                brandId,
+                formId,
+                null,
+                ReviewState.Reject,
+                null,
+                "93a723b2-9ebb-4607-ee8d-08d978fba75f",
+                "reviewUserName");
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetWithdrawFormAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(
+                    new WithdrawFormInfo
+                    {
+                        Id = formId,
+                        BrandId = brandId,
+                        Status = PaymentFlowState.Approved
+                    }));
+
+            var fakeFsm = new StateMachine<PaymentFlowState, PaymentTrigger>(PaymentFlowState.Approved);
+            fakeFsm.Configure(PaymentFlowState.Approved)
+                .Permit(PaymentTrigger.Reject, PaymentFlowState.Reject);
+
+            moqPaymentServiceClient
+                .Setup(fake => fake.CreateWithdrawStateMachine(
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.Approved)))
+                .Returns(fakeFsm);
+
+            await sut.ExecuteAsync(command);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.ReviewWithdrawFormAsync(
+                    It.Is<Guid>(x => x == formId),
+                    It.Is<Guid?>(x => x == null),
+                    It.Is<ReviewState>(x => x == ReviewState.Reject),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()),
+                Times.Exactly(1));
+        }
+
+        [Test]
         public async Task Cancel_Withdraw_By_Agent_Should_Call_AgentWalletRepository()
         {
             var moqPlayerWalletExchangeService = new Mock<IPlayerWalletExchangeService>();
