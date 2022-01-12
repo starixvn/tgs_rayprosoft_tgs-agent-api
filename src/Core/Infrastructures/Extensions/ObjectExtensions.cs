@@ -8,6 +8,9 @@ namespace TGS.Core.Infrastructures.Extensions
     {
         public static string ToJson(this object obj, bool indented = false)
         {
+            if (obj is null)
+                return null;
+
             return JsonSerializer.Serialize(obj, obj.GetType(), new JsonSerializerOptions { WriteIndented = indented });
         }
 
