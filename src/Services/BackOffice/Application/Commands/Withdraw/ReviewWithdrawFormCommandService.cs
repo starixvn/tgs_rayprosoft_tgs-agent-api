@@ -30,11 +30,13 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 .GetWithdrawFormAsync(command.BrandId, command.FormId)
                 .ConfigureAwait(false);
 
-            if (formData.Status != PaymentFlowState.WaitApprove)
-                return;
+            var fsm = _paymentServiceClient.CreateWithdrawStateMachine(formData.Status);
 
             if (command.Status == ReviewState.Approve)
             {
+                if (!fsm.CanFire(PaymentTrigger.Approve))
+                    return;
+
                 await _paymentServiceClient
                     .ReviewWithdrawFormAsync(
                         command.FormId,
@@ -47,6 +49,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
             }
             else
             {
+                if (!fsm.CanFire(PaymentTrigger.Reject))
+                    return;
+
                 await _paymentServiceClient
                     .ReviewWithdrawFormAsync(
                         command.FormId,
