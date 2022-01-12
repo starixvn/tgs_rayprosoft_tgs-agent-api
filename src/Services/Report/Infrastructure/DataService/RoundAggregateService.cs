@@ -156,7 +156,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                                 p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
                                 p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             AllAgentRebateAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.AllAgentRebate &&
+                                p.transaction.Type == TransactionType.DividendAllAgentRebate &&
                                 p.transaction.RecordedOn >= start &&
                                 p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             CreatedOn = DateTimeOffset.Now
