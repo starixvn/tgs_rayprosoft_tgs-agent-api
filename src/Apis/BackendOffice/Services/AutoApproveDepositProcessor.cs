@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
-using TGS.Services.BackOffice.Application.Commands.Deposit;
 using Tgs.ServiceUtility;
+using TGS.Services.BackOffice.Application.Commands.Deposit;
 
 namespace TGS.Apis.BackendOffice.Services
 {
     public class AutoApproveDepositProcessor : IMessageHandler
     {
         private readonly ILogger<AutoApproveDepositProcessor> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
 
         public AutoApproveDepositProcessor(
-            IServiceProvider serviceProvider, ILogger<AutoApproveDepositProcessor> logger)
+            ICommandService<ReviewDepositFormCommand> reviewCommandService,
+            ILogger<AutoApproveDepositProcessor> logger)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -32,11 +32,6 @@ namespace TGS.Apis.BackendOffice.Services
             var formId = Guid.Parse(request.FormId);
             var brandId = Guid.Parse(request.BrandId);
 
-            using var scope = _serviceProvider.CreateScope();
-
-            var reviewCommandService =
-                scope.ServiceProvider.GetRequiredService<ICommandService<ReviewDepositFormCommand>>();
-
             var command = new ReviewDepositFormCommand(
                 brandId,
                 formId,
@@ -46,7 +41,7 @@ namespace TGS.Apis.BackendOffice.Services
                 null,
                 null);
 
-            await reviewCommandService
+            await _reviewCommandService
                 .ExecuteAsync(command, cancellationToken)
                 .ConfigureAwait(false);
 

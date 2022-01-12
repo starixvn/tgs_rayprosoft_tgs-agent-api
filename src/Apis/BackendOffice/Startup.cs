@@ -103,7 +103,10 @@ namespace TGS.Apis.BackendOffice
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject");
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve", "tgs.payment.deposit.approve")
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject")
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject", "tgs.payment.deposit.reject")
+                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject", "tgs.payment.withdraw.reject");
                 })
                 .AddNatsGlobPatternExchange("*");
 
