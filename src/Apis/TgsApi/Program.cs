@@ -42,7 +42,9 @@ namespace TGS.Apis.TgsApi
         {
             PrometheusService.StartCollecting();
 
-            await CreateHostBuilder(args).Build().RunAsync();
+            var builder = CreateHostBuilder(args).Build();
+
+            await builder.RunAsync();
         }
     }
 }
