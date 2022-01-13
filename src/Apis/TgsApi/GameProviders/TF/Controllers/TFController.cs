@@ -228,9 +228,29 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Controllers
                 throw new Exception();
             }
 
-            _ = await _actions
-                .CancelTransactionAsync(betDataCancelSettle)
-                .ConfigureAwait(false);
+            if (!betDataCancelSettle.Transactions[0].ExternalTransactionId.EndsWith("_bet_cancel_cancel"))
+            {
+                _ = await _actions
+                    .CancelTransactionAsync(betDataCancelSettle)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                //廠商行為
+                //下單->取消->撤銷取消
+                //這裡實作的是撤銷取消的動作:因為原局號已經close，需要重下一張單子
+
+                var betDataReBet = await _map.CancelSettleReBetAsync(gameProviderConfigurationData, playerCode, request);
+
+                if (betDataReBet == null)
+                {
+                    throw new InvalidGameActionException("");
+                }
+
+                _ = await _actions
+                    .PlaceBetAsync(betDataReBet)
+                    .ConfigureAwait(false);
+            }
         }
 
         [HttpPost("token/validate")]
