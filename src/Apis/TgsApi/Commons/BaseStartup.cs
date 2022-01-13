@@ -6,15 +6,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
-using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -102,7 +103,7 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
-                .AddGameOperations()
+                .AddGameOperations((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddGameProvidersoRepository()
                 .AddCashServiceClient((options, sp) =>
                 {
@@ -146,30 +147,53 @@ namespace TGS.Apis.TgsApi.Commons
                     natsConfig
                         .ConfigQueueOptions((options, sp) =>
                         {
+                            var logger = sp.GetRequiredService<ILogger<BaseStartup>>();
                             var config = sp.GetRequiredService<IConfiguration>();
+                            var natsUrl = config.GetValue<string>("NatsSetting:Urls");
 
-                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                            logger.LogInformation($"nats url: {natsUrl}");
+
+                            options.Url = natsUrl;
                         });
+
+                    AddCustomNatsMessageQueueHandler(natsConfig);
                 });
 
-            services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddProfileViewExporter(profileViewBuilder =>
-                        {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
-                .AddProfileViewer();
+            //services
+            //    .AddOptions<OtlpExporterOptions>()
+            //    .Configure<IConfiguration>((options, config) =>
+            //    {
+            //        var nodeIp = config.GetValue<string>("NODE_IP");
+
+            //        if (!string.IsNullOrWhiteSpace(nodeIp))
+            //        {
+            //            options.Endpoint = new Uri($"http://{nodeIp}:4317");
+            //        }
+
+            //        config.GetSection("OpenTelemetry:Tracing").Bind(options);
+            //    });
+
+            //services
+            //    .AddOpenTelemetryTracing(builder
+            //        => builder
+            //            .SetResourceBuilder(
+            //                ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+            //            .AddSource("TGS.*")
+            //            .AddSource("Tgs.*")
+            //            .AddAspNetCoreInstrumentation()
+            //            .AddHttpClientInstrumentation()
+            //            .AddEntityFrameworkCoreInstrumentation(options =>
+            //            {
+            //                options.SetDbStatementForText = true;
+            //            })
+            //            .AddOtlpExporter()
+            //            .AddProfileViewExporter(profileViewBuilder =>
+            //            {
+            //                profileViewBuilder
+            //                    .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+            //                    .AddFilter(new UrlPathFilter("/health"));
+            //            }))
+            //    .AddProfileViewer();
         }
 
         #region Abstract and Virtual Methods
@@ -179,6 +203,10 @@ namespace TGS.Apis.TgsApi.Commons
         }
 
         protected virtual void AddCustomFilters(MvcOptions options)
+        {
+        }
+
+        protected virtual void AddCustomNatsMessageQueueHandler(NatsMessageQueueConfiguration configuration)
         {
         }
 

@@ -16,6 +16,10 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string Email { get; init; }
 
+        public string IdNumber { get; set; }
+
+        public string RegisterHost { get; init; }
+
         public string LastLoginIp { get; init; }
 
         public DateTimeOffset? LastLoginOn { get; init; }
@@ -45,8 +49,6 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public decimal WageringRequirement { get; set; }
 
         public string WeChat { get; init; }
-
-        public string IdNumber { get; set; }
 
         public class BankModel
         {

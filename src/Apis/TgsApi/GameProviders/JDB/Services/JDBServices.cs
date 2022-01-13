@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -6,19 +7,12 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.JDB;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
-    public interface IJDBServices
-    {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(PlatformType platformType);
-        JDBAgent GetAgent(JDBConfiguration configuration, string currencyCode);
-    }
-
     public sealed class JDBServices : IJDBServices
     {
         private readonly IGameProviderOperations _gameProviderOperations;
@@ -32,8 +26,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _gameProviderOperations = gameProviderOperations;
         }
 
-        async ValueTask<GameProviderConfigurationData> IJDBServices.GetGameProviderConfigurationDataAsync(
-            PlatformType platformType)
+        public JDBAgent GetAgent(IEnumerable<JDBAgent> agents, string currencyCode)
+            => agents?
+                .FirstOrDefault(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode));
+
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+                    PlatformType platformType)
         {
             var items = _httpContext?.Items ??
                 throw new InvalidOperationException("Can not get http context items");
@@ -52,9 +50,5 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 PlatformType = platformType
             };
         }
-
-        JDBAgent IJDBServices.GetAgent(JDBConfiguration configuration, string currencyCode) =>
-            configuration.Agents?
-                .FirstOrDefault(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode));
     }
 }

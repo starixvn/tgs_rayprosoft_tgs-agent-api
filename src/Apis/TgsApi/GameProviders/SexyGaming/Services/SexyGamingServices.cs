@@ -2,15 +2,16 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using TGS.GameProviders.Repositories.Models;
+using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.SexyGaming;
@@ -22,16 +23,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public interface ISexyGamingServices
     {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
-            Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+        ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token);
+
+        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
 
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId, string playerCode, string externalTransactionId);
 
-        ValueTask<Guid> GetGameProviderIdAsync();
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+                                    Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+
         ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
-        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
-        ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
+
+        ValueTask<Guid> GetGameProviderIdAsync();
 
         ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(
             SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request);
@@ -45,6 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ILogger<SexyGamingServices> _logger;
+        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
         private readonly ITokenProvider _tokenProvider;
 
@@ -56,31 +61,42 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             ITokenProvider tokenProvider,
             ISexyGamingApiClient client,
             ILogger<SexyGamingServices> logger,
-            IJsonSerializationProvider jsonSerializationProvider
+            IJsonSerializationProvider jsonSerializationProvider,
+            IRedisPlayerLoginRecordService playerLoginRecordService
         )
         {
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
         }
 
-        async ValueTask<Guid> ISexyGamingServices.GetBrandIdByPlayerCodeAsync(string playerCode)
-            => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+        public async ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token)
+        {
+            if (token.IsNullOrEmpty())
+            {
+                throw new MissingTokenException("empty token");
+            }
 
-        async ValueTask<GameActionExternalIds> ISexyGamingServices.GetGameActionExternalIdAsync(
+            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+
+            return await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
+        }
+
+        public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
+                    => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+
+        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
                 .ConfigureAwait(false);
 
-        async ValueTask<GameProviderConfigurationData> ISexyGamingServices.GetGameProviderConfigurationDataAsync(
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
@@ -95,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             };
         }
 
-        async ValueTask<Guid> ISexyGamingServices.GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        public async ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
         {
             var cachedBrandGameProviderConfiguration = await _brandOperations
                 .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId).ConfigureAwait(false);
@@ -103,22 +119,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             return cachedBrandGameProviderConfiguration.GameProviderConfigurationId;
         }
 
-        async ValueTask<Guid> ISexyGamingServices.GetGameProviderIdAsync() => await _gameProviderOperations
+        public async ValueTask<Guid> GetGameProviderIdAsync() => await _gameProviderOperations
             .GetGameProviderIdByCodeAsync(GameProvider.SexyGaming).ConfigureAwait(false);
 
-        async ValueTask<CachedPlayerLoginRecord> ISexyGamingServices.DecryptTokenAsync(string token)
-        {
-            if (token.IsNullOrEmpty())
-            {
-                throw new MissingTokenException("empty token");
-            }
-
-            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
-
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);
-        }
-
-        async ValueTask<SexyGamingGameUrlResponse> ISexyGamingServices.GetGameUrlAsync(
+        public async ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(
             SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
         {
             var tryCount = 3;

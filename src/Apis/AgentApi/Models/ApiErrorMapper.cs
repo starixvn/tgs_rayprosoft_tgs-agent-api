@@ -121,7 +121,8 @@ namespace TGS.Apis.AgentApi.Models
                 [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.AgentNotFound,
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
                 [typeof(DividendConditionException)] = TgsApiError.DividendConditionError,
-                [typeof(DividendPercentageException)] = TgsApiError.DividendPercentageError
+                [typeof(DividendPercentageException)] = TgsApiError.DividendPercentageError,
+                [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify
             };
 
         public bool CanProcess(Exception exception)

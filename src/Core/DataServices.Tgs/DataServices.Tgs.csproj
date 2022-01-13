@@ -16,6 +16,7 @@
     <None Remove="DataInitializers\Games\LY.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
     <None Remove="DataInitializers\Games\TCG.csv" />
+    <None Remove="DataInitializers\Games\TF.csv" />
     <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
@@ -44,6 +45,7 @@
     <EmbeddedResource Include="DataInitializers\Games\365.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AVIA.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\TF.csv" />
     <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
@@ -134,8 +136,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="27.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
+    <PackageReference Include="CsvHelper" Version="27.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="[5.0.13,6.0)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -128,7 +128,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("View"),
                                 new MenuSetting("Update"),
                                 new MenuSetting("ViewLiveChat"),
-                                new MenuSetting("UpdateLiveChat")
+                                new MenuSetting("UpdateLiveChat"),
+                                new MenuSetting("ViewAllAgent"),
+                                new MenuSetting("UpdateAllAgent")
                             }
                         },
                         new MenuSetting("IPAddress")

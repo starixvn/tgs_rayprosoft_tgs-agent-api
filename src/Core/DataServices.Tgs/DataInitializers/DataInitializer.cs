@@ -109,11 +109,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new LYGameProvider(env),
                 new BetConstructProvider(env),
                 new AviaGameProvider(env),
-                new JiliGameProvider(env)
+                new JiliGameProvider(env),
+                new TFGameProvider(env)
             };
         }
 
-        protected override async Task SetInitialDataAsync()
+        public override async Task SetInitialDataAsync()
         {
             if (_repository.Currencies.Any())
             {

@@ -49,6 +49,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AccountChangeType.GameProviderDeposit    => TransactionType.GameProviderDeposit,
                 AccountChangeType.GameProviderWithdrawal => TransactionType.GameProviderWithdrawal,
                 AccountChangeType.UnsettledBetManual     => TransactionType.UnsettledBetManual,
+                AccountChangeType.AllAgentRebate         => TransactionType.AllAgentRebate,
                 _                                        => null
             };
 

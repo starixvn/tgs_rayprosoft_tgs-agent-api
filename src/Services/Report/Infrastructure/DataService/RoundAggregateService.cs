@@ -37,9 +37,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         public RoundAggregateService(ITgsRepository tgsRepository) : base(
             tgsRepository)
-        {
-            _tgsRepository = tgsRepository;
-        }
+            => _tgsRepository = tgsRepository;
 
         ITgsRepository IRoundAggregateService.Repository => _tgsRepository;
 
@@ -157,6 +155,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PromotionAmount = players.Where(p =>
                                 p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
                                 p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
+                            AllAgentRebateAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.AllAgentRebate &&
+                                p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 
@@ -259,7 +261,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
             playerAggregates = playerAggregates.Where(x =>
                 x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
                 x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.RebateAmount != 0 || x.DividendAmount != 0 ||
-                x.PromotionAmount != 0 || x.BetAmount != 0 || x.OriginalTurnover != 0 || x.ValidBetAmount != 0 || x.Turnover != 0 ||
+                x.PromotionAmount != 0 || x.BetAmount != 0 || x.OriginalTurnover != 0 || x.ValidBetAmount != 0 ||
+                x.Turnover != 0 ||
                 x.WinLossAmount != 0 || players.Contains(x.PlayerCode)).ToArray();
 
             return (playerAggregates, playerAggregateByGameType);

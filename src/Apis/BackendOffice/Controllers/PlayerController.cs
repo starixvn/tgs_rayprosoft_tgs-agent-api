@@ -48,7 +48,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{playerCode}/joinedPromotions")]
         [Description("Get player operation")]
-        public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(string playerCode,
+        public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+            string playerCode,
             [FromQuery] GetJoinedPromotionsRequest request)
         {
             request.PlayerCode = playerCode;
@@ -57,8 +58,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get player list")]
-        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) =>
-            _mediator.Send(request);
+        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) 
+            => _mediator.Send(request);
 
         [HttpGet("{playerCode}/transferwallet")]
         [Description("Get Player Transfer Wallet")]

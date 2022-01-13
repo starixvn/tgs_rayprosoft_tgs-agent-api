@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(b => b.DividendPercentage)
-                .HasPrecision(18, 6)
+                .HasPrecision(9, 6)
                 .IsRequired();
         }
     }

@@ -7,9 +7,9 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Services.BankInfos;
+using TGS.Services.Agent.ApplicationServices.BankInfos;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace Agent.UnitTests
 {
     [TestFixture]
     public class BankInfoTests
@@ -48,22 +48,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     "aaabbb",
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     null,
-                    1,
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    0M,
-                    10M,
-                    "ParentUserName",
                     DateTimeOffset.Now,
-                    0M,
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    AgentDividendType.OneLayer,
-                    Array.Empty<AgentDividendCondition>()));
+                    0M));
 
             await sut.ExecuteAsync(command);
 

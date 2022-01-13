@@ -16,7 +16,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Payment.ApplePay;
@@ -289,8 +291,21 @@ namespace TGS.Apis.OperatorApi
                 .AddRedis(_configuration)
                 .ForwardToPrometheus();
 
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+                });
             services.AddOpenTelemetryTracing(
                 builder => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                        .AddEnvironmentVariableDetector())
                     .AddSource("Tgs.*")
                     .AddSource("TGS.*")
                     .AddAspNetCoreInstrumentation()
@@ -305,7 +320,8 @@ namespace TGS.Apis.OperatorApi
                             .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"))
                             .AddFilter(new UrlPathFilter("/swagger"))
                             .AddFilter(new UrlPathFilter("/health"));
-                    }));
+                    })
+                    .AddOtlpExporter());
             services.AddProfileViewer();
 
             services

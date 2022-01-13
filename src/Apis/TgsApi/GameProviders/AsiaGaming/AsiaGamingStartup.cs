@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
         protected override string LogPrefix => "asiagaming";
 
         public AsiaGamingStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
+                    : base(configuration, env)
         {
         }
 

@@ -3,30 +3,24 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
-using Tgs.Logging;
 using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Operations.Commands
 {
     public sealed class PlayerCommands : IPlayerCommands
     {
-        private const int _RetryCount = 3;
-        private readonly ITgsLog _log;
         private readonly ITgsRepository _repository;
 
         public PlayerCommands(
-            ITgsRepository repository,
-            ITgsLog log)
+            ITgsRepository repository)
         {
-            _repository = repository;
-            _log = log;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
         public async Task ChangePlayerPasswordAsync(ChangePlayerPasswordData data)
@@ -42,80 +36,59 @@ namespace TGS.Services.Operations.Commands
 
         public async Task<string> CreatePlayerAsync(CreatePlayerData data)
         {
-            var retries = 0;
-
-            var username = data.Username;
+            var username = data.UserName;
             var walletId = GuidExtensions.NewSequentialGuid();
             var createdOn = DateTimeOffset.UtcNow;
             var playerCode = default(string);
 
             var vip = await _repository.VipLevels.FirstOrDefaultAsync(x => x.BrandId == data.BrandId && x.Level == 1);
 
-            while (retries < _RetryCount)
+            playerCode = PlayerCodeGenerator.NewId();
+
+            var player = new Player
             {
-                playerCode = PlayerCodeGenerator.NewId();
-
-                try
+                PlayerCode = playerCode,
+                Username = username,
+                Password = data.Password,
+                Salt = data.Salt,
+                WithdrawPassword = data.WithdrawPassword,
+                WithdrawSalt = data.WithdrawSalt,
+                BrandId = data.BrandId,
+                DefaultWalletId = walletId,
+                DefaultWalletCurrencyCode = data.CurrencyCode,
+                LastActiveOn = createdOn,
+                Status = data.PlayerStatus,
+                Type = data.Type,
+                BetLimitId = data.BetLimitId,
+                AgentId = data.AgentId,
+                UpdatedByUsername = username,
+                UpdatedOn = createdOn,
+                VipId = vip.Id,
+                Wallets = new HashSet<Wallet>
                 {
-                    var player = new Player
+                    new()
                     {
+                        Id = walletId,
                         PlayerCode = playerCode,
-                        Username = username,
-                        Password = data.Password,
-                        Salt = data.Salt,
-                        WithdrawPassword = data.WithdrawPassword,
-                        WithdrawSalt = data.WithdrawSalt,
-                        BrandId = data.BrandId,
-                        DefaultWalletId = walletId,
-                        DefaultWalletCurrencyCode = data.CurrencyCode,
-                        LastActiveOn = createdOn,
-                        Status = data.PlayerStatus,
-                        Type = data.Type,
-                        BetLimitId = data.BetLimitId,
-                        AgentId = data.AgentId,
-                        UpdatedByUsername = username,
-                        UpdatedOn = createdOn,
-                        VipId = vip.Id,
-                        Wallets = new HashSet<Wallet>
-                        {
-                            new()
-                            {
-                                Id = walletId,
-                                PlayerCode = playerCode,
-                                CurrencyCode = data.CurrencyCode,
-                                ExternalCurrencyCode = data.ExternalCurrencyCode,
-                                Balance = 0,
-                                CreatedOn = createdOn,
-                                UpdatedOn = createdOn
-                            }
-                        }
-                    };
-
-                    await _repository.Players.AddAsync(player);
-                    await _repository.SaveChangesAsync();
-
-                    break;
+                        CurrencyCode = data.CurrencyCode,
+                        ExternalCurrencyCode = data.CurrencyCode,
+                        Balance = 0,
+                        CreatedOn = createdOn,
+                        UpdatedOn = createdOn
+                    }
                 }
-                catch (Exception e) when (e.InnerException?.InnerException is NpgsqlException exception)
+            };
+
+            await _repository.Players.AddAsync(player);
+
+            if (!string.IsNullOrWhiteSpace(data.UpperPlayerCode))
+                await _repository.PlayerParents.AddAsync(new PlayerParent
                 {
-                    retries++;
+                    PlayerCode = playerCode,
+                    ParentPlayerCode = data.UpperPlayerCode
+                }).ConfigureAwait(false);
 
-                    var err =
-                        $"Exception occurs when creating player. This is attempt number {retries} of {_RetryCount}.";
-
-                    _log.LogError(err, e);
-
-                    if (retries == _RetryCount)
-                    {
-                        throw new InvalidOperationException(err, e);
-                    }
-
-                    if (exception.ErrorCode == 2601) // 2601 is "unique index"
-                    {
-                        break;
-                    }
-                }
-            }
+            await _repository.SaveChangesAsync();
 
             return playerCode;
         }
@@ -141,7 +114,8 @@ namespace TGS.Services.Operations.Commands
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
 
-            return _repository.ExecuteSqlCommandAsync(sql,
+            return _repository.ExecuteSqlCommandAsync(
+                sql,
                 CommandType.Text,
                 new Dictionary<string, object>
                 {

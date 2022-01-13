@@ -6,9 +6,9 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
+using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace Agent.UnitTests
 {

@@ -1,7 +1,8 @@
 ﻿namespace TGS.Services.Operator
 {
     public record PlayerDataInfo(
-        string Username,
+        string PlayerCode,
+        string UserName,
         string RealName,
         string Phone,
         string Email,

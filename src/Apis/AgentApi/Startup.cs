@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.AgentApi.Attributes;
@@ -83,13 +82,14 @@ namespace TGS.Apis.AgentApi
                             HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
                     });
                 endpoints.MapMetrics();
+                endpoints.MapSwagger();
             });
 
-            if (!_env.IsProduction())
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
-            }
+                c.SwaggerEndpoint("/swagger/Normal/swagger.json", "TGS Agent API");
+                c.SwaggerEndpoint("/swagger/HK28/swagger.json", "TGS Agent API - HK28");
+            });
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -174,7 +174,8 @@ namespace TGS.Apis.AgentApi
 
             services.AddMediatR(typeof(Startup).Assembly);
 
-            services.AddHealthChecks()
+            services
+                .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
                 .ForwardToPrometheus();
@@ -192,43 +193,52 @@ namespace TGS.Apis.AgentApi
                         });
                 });
 
-            if (!_env.IsProduction())
+            services.AddSwaggerGen(c =>
             {
-                services.AddSwaggerGen(c =>
+                c.SwaggerDoc(
+                    "Normal",
+                    new OpenApiInfo { Title = "TGS Agent API", Version = "Normal" });
+                c.SwaggerDoc(
+                    "HK28",
+                    new OpenApiInfo { Title = "Tgs Agent API - HK28", Version = "HK28" });
+
+                var securityScheme = new OpenApiSecurityScheme
                 {
-                    c.SwaggerDoc("v1",
-                        new OpenApiInfo { Title = "TGS Agent API", Version = "v1" });
-
-                    var securityScheme = new OpenApiSecurityScheme
+                    Name = "Api Authorization",
+                    Description = "authorized jwt token, get from api/auth/jwt",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
                     {
-                        Name = "Api Authorization",
-                        Description = "authorized jwt token, get from api/auth/jwt",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "bearer",
-                        Reference = new OpenApiReference
-                        {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
-                        }
-                    };
-
-                    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-
-                    c.OperationFilter<SwaggerHeaderFilter>();
-                    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-                    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
-
-                    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                    var path = Path.Combine(AppContext.BaseDirectory, xml);
-
-                    if (File.Exists(path))
-                    {
-                        c.IncludeXmlComments(path);
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
                     }
+                };
+
+                c.DocInclusionPredicate((groupName, desc) =>
+                {
+                    if (groupName == "Normal")
+                        return desc.GroupName is null;
+                    else
+                        return desc.GroupName == groupName;
                 });
-            }
+
+                c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
+
+                c.OperationFilter<SwaggerHeaderFilter>();
+                c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+                c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+
+                var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+                if (File.Exists(path))
+                {
+                    c.IncludeXmlComments(path);
+                }
+            });
 
             services.AddCors(options =>
             {

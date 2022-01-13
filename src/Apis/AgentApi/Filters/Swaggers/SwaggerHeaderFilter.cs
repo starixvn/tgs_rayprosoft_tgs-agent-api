@@ -29,12 +29,13 @@ namespace TGS.Apis.AgentApi.Filters.Swaggers
                     Scheme = "bearer",
                     Reference = new()
                     {
-                        Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
                     }
                 };
 
                 operation.Security ??= new List<OpenApiSecurityRequirement>();
-                operation.Security.Add(new() {{securityScheme, Array.Empty<string>()}});
+                operation.Security.Add(new() { { securityScheme, Array.Empty<string>() } });
             }
 
             var attribute = (AuthorizeAgentTokenAttribute)meta

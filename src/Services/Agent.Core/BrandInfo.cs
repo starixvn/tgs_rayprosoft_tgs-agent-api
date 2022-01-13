@@ -1,10 +1,13 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent
 {
     public record BrandInfo(
         Guid BrandId,
         string Code,
-        bool SmsEnabled,
-        bool SmsRegisterFlowEnabled);
+        bool AgentSmsEnabled,
+        bool SmsRegisterFlowEnabled,
+        AgentDividendType AgentDividendType,
+        string? DomainUrl);
 }

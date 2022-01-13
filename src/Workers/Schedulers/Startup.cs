@@ -170,6 +170,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
+            services.AddTransient<IPlayerAllAgentRebateWorkerService, PlayerAllAgentRebateWorkerService>();
 
             // GameProviders Services
             services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();

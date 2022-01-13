@@ -48,6 +48,10 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IBrandAllAgentService, BrandAllAgentService>();
             services.AddTransient<IBrandAllAgentGameTypeService, BrandAllAgentGameTypeService>();
             services.AddTransient<IBrandAllAgentGameTypeConditionService, BrandAllAgentGameTypeConditionService>();
+            services.AddTransient<IBrandCurrencyService, BrandCurrencyService>();
+            services.AddTransient<IBrandLanguageService, BrandLanguageService>();
+            services.AddTransient<IBrandBetLimitService, BrandBetLimitService>();
+            services.AddTransient<IBrandGroupService, BrandGroupService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

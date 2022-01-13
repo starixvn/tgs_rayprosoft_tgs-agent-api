@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.11")
+                .HasAnnotation("ProductVersion", "5.0.13")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -639,8 +639,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("active_number");
 
                     b.Property<decimal>("DividendPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
                         .HasColumnName("dividend_percentage");
 
                     b.Property<decimal>("NetProfit")
@@ -1235,6 +1235,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("EnableAgentSms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_agent_sms");
+
                     b.Property<bool>("EnableSms")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -1352,8 +1358,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("active_number");
 
                     b.Property<decimal>("DividendPercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
                         .HasColumnName("dividend_percentage");
 
                     b.Property<decimal>("NetProfit")
@@ -3802,6 +3808,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<decimal>("AllAgentRebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("all_agent_rebate_amount");
+
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -3901,6 +3912,89 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
                     b.ToTable("player_aggregates", "report");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAllAgentRebate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("ActualConditionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_condition_amount");
+
+                    b.Property<int>("ActualPlayerNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("actual_player_number");
+
+                    b.Property<short>("AllAgentGameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_game_type");
+
+                    b.Property<short>("AllAgentRebateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("all_agent_rebate_type");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<decimal>("ConditionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("condition_amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
+
+                    b.Property<decimal>("RebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("rebate_percentage");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_all_agent_rebates_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_all_agent_rebates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_all_agent_rebates");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAuditLog", b =>
@@ -4553,6 +4647,175 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_sports_bet_limits_sport_market_id");
 
                     b.ToTable("player_sports_bet_limits");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelAdjustRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid>("NewVipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("new_vip_id");
+
+                    b.Property<Guid>("OldVipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("old_vip_id");
+
+                    b.Property<Guid>("OperatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("operator_id");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Remark")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("remark");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_adjust_records");
+
+                    b.HasIndex("CreatedOn")
+                        .HasDatabaseName("ix_player_vip_level_adjust_records_created_on");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_vip_level_adjust_records_player_code");
+
+                    b.ToTable("player_vip_level_adjust_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelAggregate", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("FromOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from_on");
+
+                    b.Property<DateTimeOffset>("ToOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to_on");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_amount");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Turnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
+
+                    b.Property<DateTimeOffset>("UpdateOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_on");
+
+                    b.HasKey("BrandId", "PlayerCode", "FromOn", "ToOn")
+                        .HasName("pk_player_vip_level_aggregates");
+
+                    b.HasIndex("PlayerCode", "FromOn", "ToOn")
+                        .HasDatabaseName("ix_player_vip_level_aggregates_player_code");
+
+                    b.ToTable("player_vip_level_aggregates");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.Property<DateTimeOffset>("SnapshotOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("snapshot_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_snapshots");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_player_vip_level_snapshots_brand_id");
+
+                    b.ToTable("player_vip_level_snapshots");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelUpgradeRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("ExecutionOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("execution_on");
+
+                    b.Property<Guid>("PlayerVipLevelSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_vip_level_snapshot_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_upgrade_records");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_records_brand_id");
+
+                    b.HasIndex("PlayerVipLevelSnapshotId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_records_player_vip_level_snapshot_id");
+
+                    b.ToTable("player_vip_level_upgrade_records");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>

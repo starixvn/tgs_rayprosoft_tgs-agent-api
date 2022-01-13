@@ -54,7 +54,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 ValidBetAmount = model.ValidBetAmount.Truncate(2),
                 OriginalTurnover = model.OriginalTurnover.Truncate(2),
                 Turnover = model.Turnover.Truncate(2),
-                WinLossAmount = model.WinLossAmount.Truncate(2)
+                WinLossAmount = model.WinLossAmount.Truncate(2),
+                AllAgentRebateAmount = model.AllAgentRebateAmount.Truncate(2)
             }).ToArray());
 
         Task IPlayerAggregateService.DeletePlayerAggregatesAsync(PlayerAggregate[] markets) =>

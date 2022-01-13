@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.Agent.Services.Agent;
-using Tgs.ServiceUtility;
+using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace TGS.Apis.AgentApi.Filters
 {
@@ -49,7 +49,8 @@ namespace TGS.Apis.AgentApi.Filters
                         Error = (int)TgsApiError.UserBlocked,
                         ErrorMessage = string.Empty,
                         ErrorMessageKey = "UserBlocked"
-                    }) {StatusCode = StatusCodes.Status403Forbidden};
+                    })
+                { StatusCode = StatusCodes.Status403Forbidden };
             }
             else if (status == AgentStatus.InBlacklist)
             {
@@ -59,7 +60,8 @@ namespace TGS.Apis.AgentApi.Filters
                         Error = (int)TgsApiError.UserBanned,
                         ErrorMessage = string.Empty,
                         ErrorMessageKey = "AccessDenied"
-                    }) {StatusCode = StatusCodes.Status403Forbidden};
+                    })
+                { StatusCode = StatusCodes.Status403Forbidden };
             }
         }
     }
