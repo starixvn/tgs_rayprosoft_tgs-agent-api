@@ -11,13 +11,6 @@ namespace TGS.Apis.TgsApi
 {
     public partial class Program
     {
-        public static Task Main(string[] args)
-        {
-            PrometheusService.StartCollecting();
-
-            return CreateHostBuilder(args).Build().RunAsync();
-        }
-         
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ??
@@ -43,6 +36,15 @@ namespace TGS.Apis.TgsApi
                     webBuilder.UseStartup(startup)
                         .UseKestrel(options => options.AddServerHeader = false);
                 });
+        }
+
+        public static async Task Main(string[] args)
+        {
+            PrometheusService.StartCollecting();
+
+            var builder = CreateHostBuilder(args).Build();
+
+            await builder.RunAsync();
         }
     }
 }
