@@ -7,7 +7,7 @@ namespace TGS.Services.Report.Application.Models.GameAction
     {
         public DateTimeOffset RecordedOn { get; set; }
 
-        public string? ExternalTransactionId { get; set; }
+        public string ExternalTransactionId { get; set; }
 
         public GameActionType GameActionType { get; set; }
 
