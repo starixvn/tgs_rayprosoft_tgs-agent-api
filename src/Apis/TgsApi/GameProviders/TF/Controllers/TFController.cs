@@ -117,17 +117,21 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Controllers
                    .SettleBetAsync(betData)
                    .ConfigureAwait(false);
             }
-            else if(request.TicketDetail.SettlementStatus == "settled" && request.TicketDetail.IsUnsettled == true)
+            else if (request.TicketDetail.SettlementStatus == "settled" && request.TicketDetail.IsUnsettled == true)
             {
                 //廠商結算輸 改單為贏:
                 //api呼叫順序: settle輸 -> settle贏
                 var betDataCancelSettle = await _map
                     .CancelRoundSettleAsync(gameProviderConfigurationData, playerCode, request)
-                    .ConfigureAwait(false);               
-
-                _ = await _actions
-                    .CancelTransactionAsync(betDataCancelSettle)
                     .ConfigureAwait(false);
+
+                if (betDataCancelSettle != null)
+                {
+                    //改單輸因會先call unsettle 故判斷不執行
+                    _ = await _actions
+                        .CancelTransactionAsync(betDataCancelSettle)
+                        .ConfigureAwait(false);
+                }
 
                 var betData = await _map
                     .SettleAsync(gameProviderConfigurationData, playerCode, request)
