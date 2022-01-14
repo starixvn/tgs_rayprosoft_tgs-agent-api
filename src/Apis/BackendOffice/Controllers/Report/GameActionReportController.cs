@@ -13,7 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         [HttpGet]
         [Description("Get game actions")]
-        public Task<PagedResponse<GameActionModel>> GetRoundsAsync(
+        public Task<PagedResponse<GameActionModel>> GetGameActionsAsync(
             [FromServices] IReportClient client,
             [FromQuery] GetGameActionsRequest request)
             => client.GetGameActionsAsync(request);

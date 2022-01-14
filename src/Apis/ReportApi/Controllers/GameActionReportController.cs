@@ -17,7 +17,7 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet]
         [Description("Get game actions")]
-        public Task<PagedResponse<GameActionModel>> GetGameProviderRoundsAsync(
+        public Task<PagedResponse<GameActionModel>> GetGameActionsAsync(
             [FromQuery] GetGameActionsRequest request) =>
             _mediator.Send(request);
     }
