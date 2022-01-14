@@ -24,7 +24,31 @@ namespace TGS.Apis.BackendOffice.Controllers
             _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient;
         }
 
-        [HttpPut("{roundId}/CloseGameRound")]
+        [HttpPut("{roundId}/AdjustClosedRound", Name = "AdjustClosedRound")]
+        [Description("Adjust a Closed round")]
+        public async Task<MessageResponse> AdjustClosedRoundAsync(Guid roundId, AdjustClosedRoundRequest request)
+        {
+            var model = new AdjustClosedRoundViewModel
+            {
+                BetAmount = request.BetAmount,
+                ClientRoundStatus = request.ClientRoundStatus,
+                Commission = request.Commission,
+                ExternalClosedOn = request.ExternalClosedOn,
+                OperatorId = Guid.Parse(UserId),
+                Remark = request.Remark,
+                SettleAmount = request.SettleAmount,
+                Turnover = request.Turnover,
+                ValidBetAmount = request.ValidBetAmount,
+                WinLoss = request.WinLoss,
+                AdjustAmount = request.AdjustAmount,
+            };
+
+            await _gameProvidersBackofficePluggableClient.AdjustClosedRoundAsync(roundId, model).ConfigureAwait(false);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPut("{roundId}/CloseGameRound", Name = "CloseGameRound")]
         [Description("Close a game round")]
         public async Task<MessageResponse> CloseGameRoundAsync(Guid roundId, CloseGameRoundRequest request)
         {
@@ -48,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpGet("openRounds")]
+        [HttpGet("openRounds", Name = "GetOpenRounds")]
         [Description("Get open rounds")]
         public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
             _client.GetOpenRoundsAsync(request);
