@@ -248,7 +248,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Controllers
                 }
 
                 _ = await _actions
-                    .PlaceBetAsync(betDataReBet)
+                    .CancelTransactionAsync(betDataReBet)
                     .ConfigureAwait(false);
             }
         }
