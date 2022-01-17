@@ -165,8 +165,8 @@ namespace TGS.Apis.BackendOffice
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
+            services
+                .AddHealthChecks()
                 .ForwardToPrometheus();
 
             services.AddAntiforgery(options =>
