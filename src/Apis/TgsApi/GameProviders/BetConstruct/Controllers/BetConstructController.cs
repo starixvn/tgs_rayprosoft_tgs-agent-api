@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 { "TransactionId", request.TransactionId},
                 { "BetId", request.BetId},
                 { "Amount", request.Amount },
-                { "Created", request.Created.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")},
+                { "Created", request.Created.ToString($"yyyy-MM-ddTHH:mm:ss.{MillSecondFormat(request.Created.Millisecond)}Z")},
                 { "BetType", request.BetType},
                 { "SystemMinCount", request.SystemMinCount},
                 { "TotalPrice", request.TotalPrice}
@@ -327,6 +327,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
             _logger.LogInformation($"Hash:{signature}, computedSign:{computedSignature}");
 
             return signature.NotEquals(computedSignature);
+        }
+
+        private string MillSecondFormat(int millsecond)
+        {
+            var trimZeroLength = millsecond
+                .ToString()
+                .TrimEnd('0')
+                .Length;
+
+            var formatResult = string.Empty;
+
+            for (int i = 0; i < trimZeroLength; i++)
+            {
+                formatResult += "f";
+            }
+            return formatResult;
         }
     }
 }
