@@ -243,5 +243,65 @@ namespace TGS.Tests.Games.IntegrationTests
             var expected = "840dab8d372a7c9695da93bd82a25e7d";
             Assert.AreEqual(expected, result);
         }
+
+
+        [Test]
+        public void Test_BC_Hash3()
+        {
+            var authToken = "q7kNOrOZIyHgMAuLLkmt0p";
+            var ts = "1642470482";
+            var transactionId = "55285813312";
+            var betId = "1931448830";
+            var amount = "10.00";
+
+            var created = new DateTime(2022, 1, 18, 1, 48, 2, 36);            
+
+            var trimZeroLength = created.Millisecond.ToString().TrimEnd('0').Length;
+
+            var formatResult = string.Empty;
+            for (var i = 0; i < trimZeroLength; i++)
+            {
+                formatResult += "f";
+            }
+
+            var betType = 1;
+            var systemMinCount = new Nullable<int>();
+            var totalPrice = 2.250m;
+
+            var hashDict = new Dictionary<string, object>
+            {
+                { "AuthToken" , authToken },
+                { "TS", ts },
+                { "TransactionId", transactionId},
+                { "BetId", betId},
+                { "Amount", amount },
+                { "Created", created.ToString($"yyyy-MM-ddTHH:mm:ss.{formatResult}Z")},
+                { "BetType", betType},
+                { "SystemMinCount", systemMinCount},
+                { "TotalPrice", totalPrice}
+            };
+
+            var content = string.Join(
+                            "",
+                            hashDict.Where(x => x.Value != null && x.Value.ToString() != "")
+                                .Select(x =>
+                                {
+                                    return $"{x.Key}{x.Value}";
+                                }));
+
+            var sharedKey = "jiLEPYw5n3n5kcx6T3";
+
+            var plainText = $"{content}{sharedKey}";
+
+            var data = Encoding.UTF8.GetBytes(plainText);
+
+            var hash = MD5.Create().ComputeHash(data);
+
+            var result = Convert.ToHexString(hash).ToLower();
+
+            var expected = "ca4d83e0ae91e06680a4854be182e255";
+            Assert.AreEqual(expected, result);
+        }
+        
     }
 }
