@@ -209,7 +209,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 RoundClosed = false
             };
 
-            return GetReBetData(data, playerCode, transactions, data.AutoCloseRound);
+            return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
         }
 
         async ValueTask<BetData> ITFActionModelMapper.RollbackBetAsync(GameProviderConfigurationData data, string playerCode, RollbackRequest source)
@@ -293,29 +293,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TF.Services
                 GameProviderCode = Consts.GameProvider.TFGaming,
                 HasCurrencyFromGameProvider = false,
                 AutoCloseRound = autoCloseRound,
-                AllowCancelCancelTransaction = false,
+                AllowCancelCancelTransaction = true,
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
                 Transactions = new[] { transactions }
             };
-
-        private BetData GetReBetData(
-           GameProviderConfigurationData data,
-           string playerCode,
-           TransactionData transactions,
-           bool autoCloseRound,
-           bool allowPlaceBetWithDifferentPlatformToken = false)
-           => new BetData()
-           {
-               PlayerCode = playerCode,
-               PlatformType = data.PlatformType,
-               GameProviderId = data.GameProviderId,
-               GameProviderConfigurationId = data.GameProviderConfigurationId,
-               GameProviderCode = Consts.GameProvider.TFGaming,
-               HasCurrencyFromGameProvider = false,
-               AutoCloseRound = autoCloseRound,
-               AllowCancelCancelTransaction = true,
-               AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
-               Transactions = new[] { transactions }
-           };
     }
 }
