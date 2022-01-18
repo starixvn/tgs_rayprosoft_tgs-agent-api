@@ -302,6 +302,5 @@ namespace TGS.Tests.Games.IntegrationTests
             var expected = "ca4d83e0ae91e06680a4854be182e255";
             Assert.AreEqual(expected, result);
         }
-        
     }
 }
