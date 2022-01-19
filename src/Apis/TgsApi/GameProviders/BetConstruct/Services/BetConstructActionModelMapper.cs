@@ -62,10 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "sportsbook",
-                GameActionType = GameActionType.PlaceBet,
-                ExtraData = DateTimeOffset
-                    .FromUnixTimeSeconds(source.Created.ToUnixTimeSeconds())
-                    .ToIso8601String(true),
+                GameActionType = GameActionType.PlaceBet,                
                 TimeStamp = DateTimeOffset.UtcNow,
             };
 
