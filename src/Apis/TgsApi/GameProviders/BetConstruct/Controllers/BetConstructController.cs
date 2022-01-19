@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                 { "TransactionId", request.TransactionId},
                 { "BetId", request.BetId},
                 { "Amount", request.Amount },
-                { "Created", request.Created.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")},
+                { "Created", request.Created },
                 { "BetType", request.BetType},
                 { "SystemMinCount", request.SystemMinCount},
                 { "TotalPrice", request.TotalPrice}

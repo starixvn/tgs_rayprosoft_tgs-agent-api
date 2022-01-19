@@ -27,7 +27,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// A UTC time the bet was placed. (Mandatory)
         /// </summary>
         [JsonPropertyName("Created")]
-        public DateTimeOffset Created { get; init; }
+        public string Created { get; init; }
 
         /// <summary>
         /// 1 – Single/Ordinar, 2 – Multiple/Express, 3 – System,  4 - Chain, 5 - Trixie, 6 - Yankee, 7 - PermedYankee, 8  - SuperYankee, 9 - Heinz, 10 - SuperHeinz, 11 - Goliath, 12 - Patent, 13 - PermedPatent, 14 - Lucky15,  15 - Lucky31, 16 - Lucky63. (Mandatory)

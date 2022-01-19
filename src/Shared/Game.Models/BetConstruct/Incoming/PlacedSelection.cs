@@ -9,7 +9,7 @@ namespace TGS.Shared.Game.Models.BetConstruct.Incoming
         /// Unique ID of the team/player.
         /// </summary>
         [JsonPropertyName("AwayTeamId")]
-        public int AwayTeamId { get; init; }
+        public int? AwayTeamId { get; init; }
 
         /// <summary>
         /// The name of the team/player.

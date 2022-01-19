@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct.Services;
 using TGS.Core.Infrastructures.Extensions;
@@ -15,6 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Middlewares
 {
     public sealed class AuthorizeBetConstructMiddleware : IMiddleware
     {
+        private readonly ILogger<AuthorizeBetConstructMiddleware> _logger;
         private readonly IBetConstructService _service;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
@@ -22,16 +24,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Middlewares
         public AuthorizeBetConstructMiddleware(
             IBetConstructService service,
             ITokenProvider tokenProvider,
-            ISettingOperations settingOperations)
+            ISettingOperations settingOperations,
+            ILogger<AuthorizeBetConstructMiddleware> logger)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var value = await context.Request.ReadAsStringAsync();
+
+            _logger.LogInformation($"BetConstructMiddleware: {value}");
 
             var elements = JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(value);
 
