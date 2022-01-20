@@ -205,7 +205,17 @@ namespace TGS.Apis.TgsApi.Commons
             services
                 .AddInterceptionService()
                 .ConfigureDynamicProxy(config =>
-                    config.Interceptors.AddTyped<DiagnosticsInterceptor>());
+                {
+                    config.Interceptors.AddTyped<DiagnosticsInterceptor>(
+                            Predicates.ForNameSpace("Tgs.*"),
+                            Predicates.ForNameSpace("TGS.*"));
+
+                    config.NonAspectPredicates
+                        .AddNamespace("Tgs.*Infrastructures.*Json*")
+                        .AddNamespace("TGS.*Infrastructures.*Json*")
+                        .AddNamespace("Tgs.Logging*")
+                        .AddNamespace("TGS.Logging*");
+                });
         }
 
         #region Abstract and Virtual Methods
