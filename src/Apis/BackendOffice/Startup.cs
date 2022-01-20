@@ -8,12 +8,15 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.BackendOffice.Filters;
@@ -81,6 +84,16 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDataProtection();
+            services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp => new ConfigureNamedOptions<KeyManagementOptions>(
+                string.Empty,
+                options =>
+                {
+                    options.XmlRepository = new RedisXmlRepository(
+                        () => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                        "Tgs:Bo-Api:DataProtection");
+                }));
+
             services
                 .AddRedis((options, sp) =>
                 {
@@ -103,7 +116,10 @@ namespace TGS.Apis.BackendOffice
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject");
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve", "tgs.payment.deposit.approve")
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject")
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject", "tgs.payment.deposit.reject")
+                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject", "tgs.payment.withdraw.reject");
                 })
                 .AddNatsGlobPatternExchange("*");
 
@@ -149,8 +165,8 @@ namespace TGS.Apis.BackendOffice
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
+            services
+                .AddHealthChecks()
                 .ForwardToPrometheus();
 
             services.AddAntiforgery(options =>

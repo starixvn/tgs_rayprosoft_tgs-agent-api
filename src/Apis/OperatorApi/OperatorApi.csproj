@@ -64,7 +64,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
     <PackageReference Include="Tgs.Interceptors" Version="0.1.0" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.2.0" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />

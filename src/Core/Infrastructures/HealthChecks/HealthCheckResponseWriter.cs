@@ -60,8 +60,10 @@ namespace TGS.Core.Infrastructures.HealthChecks
                 }
             };
 
-            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(response,
-                new() {WriteIndented = true}));
+            await httpContext.Response.WriteAsync(JsonSerializer.Serialize(
+                response,
+                response.GetType(),
+                new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 }

@@ -14,6 +14,8 @@ add-migration <MigrationName> -c TgsRepository -p DataServices.Tgs -s TgsApi
 dotnet tool restore
 
 dotnet ef migrations add <MigrationName>
+
+dotnet ef database update
 ```
 
 

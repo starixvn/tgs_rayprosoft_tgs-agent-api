@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>TGS.Core.Infrastructures</AssemblyName>
+    <RootNamespace>TGS.Core.Infrastructures</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Hangfire\**" />
+    <Compile Remove="Nats\**" />
+    <Compile Remove="Security\**" />
+    <EmbeddedResource Remove="Hangfire\**" />
+    <EmbeddedResource Remove="Nats\**" />
+    <EmbeddedResource Remove="Security\**" />
+    <None Remove="Hangfire\**" />
+    <None Remove="Nats\**" />
+    <None Remove="Security\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\GlobalAssemblyInfo.cs" />
+    <Compile Remove="Redis\BaseRedisConnection.cs" />
+    <Compile Remove="Redis\IRedisConfig.cs" />
+    <Compile Remove="Redis\IRedisPublisher.cs" />
+    <Compile Remove="Redis\IRedisSubscriber.cs" />
+    <Compile Remove="Redis\RedisConfig.cs" />
+    <Compile Remove="Redis\RedisCoreConnection.cs" />
+    <Compile Remove="Redis\RedisPublisher.cs" />
+    <Compile Remove="Redis\RedisSubscriber.cs" />
+    <Compile Include="..\..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
+
+    <PackageReference Include="AspNetCore.HealthChecks.Aws.S3" Version="5.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="5.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="5.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="5.0.2" />
+    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.2.3" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.1" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.5" />
+    <PackageReference Include="ClosedXML" Version="0.95.4" />
+    <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
+    <PackageReference Include="FluentValidation" Version="10.3.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="[5.0.0,6.0)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="[5.0.0,6.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[5.0.0,6.0)" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
+    <PackageReference Include="prometheus-net.DotNetRuntime" Version="4.2.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
+    <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
+    <PackageReference Include="Tgs.Logging" Version="0.0.12" />
+    <PackageReference Include="TimeZoneConverter" Version="3.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataServices.Base\DataServices.Base.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+  </ItemGroup>
+
+</Project>
