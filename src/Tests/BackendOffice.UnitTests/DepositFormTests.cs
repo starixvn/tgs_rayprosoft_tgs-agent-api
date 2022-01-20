@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using StackExchange.Redis;
 using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
@@ -50,13 +52,31 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakePlayerService = Substitute.For<IPlayerService>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var fakePromotionClient = Substitute.For<IPromotionClient>();
+            var fakeRedisDatabase = Substitute.For<IDatabase>();
+            var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
+            var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
+
+            fakeRedisDatabaseFactory.GetConnection()
+                .Returns(fakeRedisConnection);
+
+            fakeRedisConnection.GetDatabase(Arg.Any<int>(), Arg.Any<object>())
+                .Returns(fakeRedisDatabase);
 
             var sut = new ReviewDepositFormCommandService(
                 fakePaymentServiceClient,
                 fakePlayerService,
                 fakePlayerBucketRepository,
                 fakePromotionClient,
+                fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance);
+
+            fakeRedisDatabase.StringSetAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan?>(),
+                Arg.Any<When>(),
+                Arg.Any<CommandFlags>())
+                .Returns(true);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
@@ -92,13 +112,31 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakePlayerService = Substitute.For<IPlayerService>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var fakePromotionClient = Substitute.For<IPromotionClient>();
+            var fakeRedisDatabase = Substitute.For<IDatabase>();
+            var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
+            var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
+
+            fakeRedisDatabaseFactory.GetConnection()
+                .Returns(fakeRedisConnection);
+
+            fakeRedisConnection.GetDatabase(Arg.Any<int>(), Arg.Any<object>())
+                .Returns(fakeRedisDatabase);
 
             var sut = new ReviewDepositFormCommandService(
                 fakePaymentServiceClient,
                 fakePlayerService,
                 fakePlayerBucketRepository,
                 fakePromotionClient,
+                fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance);
+
+            fakeRedisDatabase.StringSetAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan?>(),
+                Arg.Any<When>(),
+                Arg.Any<CommandFlags>())
+                .Returns(true);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
@@ -135,12 +173,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var fakeRedisDatabase = Substitute.For<IDatabase>();
+            var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
+            var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
+
+            fakeRedisDatabaseFactory.GetConnection()
+                .Returns(fakeRedisConnection);
+
+            fakeRedisConnection.GetDatabase(Arg.Any<int>(), Arg.Any<object>())
+                .Returns(fakeRedisDatabase);
 
             var sut = new ReviewDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object,
                 moqPromotionClient.Object,
+                fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance);
 
             var brandId = Guid.NewGuid();
@@ -153,8 +201,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 null,
                 null,
                 "93a723b2-9ebb-4607-ee8d-08d978fba75f",
-                "reviewUserName"
-                );
+                "reviewUserName");
+
+            fakeRedisDatabase.StringSetAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan?>(),
+                Arg.Any<When>(),
+                Arg.Any<CommandFlags>())
+                .Returns(true);
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
