@@ -4,12 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Polly;
-using TGS.Clients.Promotion.Client;
+using StackExchange.Redis;
 using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
+using TGS.Clients.Promotion.Client;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
@@ -20,14 +22,18 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
         private readonly IPromotionClient _promotionClient;
+        private readonly IDatabase _redisDatabase;
 
         public ReviewDepositFormCommandService(
             IPaymentServiceClient paymentServiceClient,
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository,
             IPromotionClient promotionClient,
+            IRedisConnectionFactory redisConnectionFactory,
             ILogger<ReviewDepositFormCommandService> logger)
         {
+            if (redisConnectionFactory is null)
+                throw new ArgumentNullException(nameof(redisConnectionFactory));
             _paymentServiceClient =
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
@@ -35,6 +41,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             _playerBucketRepository =
                 playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
+            _redisDatabase = redisConnectionFactory.GetConnection().GetDatabase();
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -42,40 +49,51 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             ReviewDepositFormCommand command,
             CancellationToken cancellationToken = default)
         {
-            var form = await _paymentServiceClient
-                .GetDepositFormAsync(command.BrandId, command.FormId)
-                .ConfigureAwait(false);
-
-            if (form == null
-                || form.Status == PaymentFlowState.Approved
-                || form.Status == PaymentFlowState.Reject)
-                return;
-
-            if (command.ActualAmount != null)
-                await _paymentServiceClient
-                    .SubmitDepositFormStatusAsync(
-                        form.Id,
-                        actualAmount: command.ActualAmount)
-                    .ConfigureAwait(false);
-
-            await _paymentServiceClient
-                .ReviewDepositFormAsync(
-                    command.FormId,
-                    command.Status,
-                    command.ReviewUserId,
-                    command.ReviewUserName,
-                    command.Remark)
-                .ConfigureAwait(false);
-
-            if (command.Status == ReviewState.Approve)
+            var isSaveSuccess = false;
+            try
             {
-                var player = await _playerService
-                    .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
+                var form = await _paymentServiceClient
+                    .GetDepositFormAsync(command.BrandId, command.FormId)
                     .ConfigureAwait(false);
 
-                var promotionResponse = await Policy.Handle<PostgresException>()
-                    .RetryAsync(3, (ex, count) => _logger.LogWarning($"Retry occur {ex}"))
-                    .ExecuteAsync(async () => await _playerBucketRepository
+                if (form == null
+                    || form.Status == PaymentFlowState.Approved
+                    || form.Status == PaymentFlowState.Reject)
+                    return;
+
+                isSaveSuccess = await _redisDatabase
+                    .StringSetAsync(
+                        $"Tgs:BucketDeposit:{command.FormId:N}",
+                        command.FormId.ToString(),
+                        when: When.NotExists)
+                    .ConfigureAwait(false);
+
+                if (!isSaveSuccess)
+                    return;
+
+                if (command.ActualAmount != null)
+                    await _paymentServiceClient
+                        .SubmitDepositFormStatusAsync(
+                            form.Id,
+                            actualAmount: command.ActualAmount)
+                        .ConfigureAwait(false);
+
+                await _paymentServiceClient
+                    .ReviewDepositFormAsync(
+                        command.FormId,
+                        command.Status,
+                        command.ReviewUserId,
+                        command.ReviewUserName,
+                        command.Remark)
+                    .ConfigureAwait(false);
+
+                if (command.Status == ReviewState.Approve)
+                {
+                    var player = await _playerService
+                        .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
+                        .ConfigureAwait(false);
+
+                    var promotionResponse = await _playerBucketRepository
                         .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                             command.BrandId,
                             form.PromotionId,
@@ -85,28 +103,36 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             command.Remark,
                             command.FormId,
                             string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
-                        .ConfigureAwait(false))
-                    .ConfigureAwait(false);
-
-                await _paymentServiceClient
-                    .SubmitDepositFormStatusAsync(
-                        command.FormId,
-                        promotionPlayerId: promotionResponse.PromotionPlayerId)
-                    .ConfigureAwait(false);
-
-                await _playerService
-                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount)
-                    .ConfigureAwait(false);
-
-                if (form.PromotionId != null)
-                    await _promotionClient.DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
                         .ConfigureAwait(false);
+
+                    await _paymentServiceClient
+                        .SubmitDepositFormStatusAsync(
+                            command.FormId,
+                            promotionPlayerId: promotionResponse.PromotionPlayerId)
+                        .ConfigureAwait(false);
+
+                    await _playerService
+                        .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount)
+                        .ConfigureAwait(false);
+
+                    if (form.PromotionId != null)
+                        await _promotionClient.DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
+                            .ConfigureAwait(false);
+                }
+                else
+                {
+                    if (form.PromotionId != null)
+                        await _promotionClient
+                            .RevertPromotionAsync(form.PromotionId.Value, form.Amount)
+                            .ConfigureAwait(false);
+                }
             }
-            else
+            finally
             {
-                if (form.PromotionId != null)
-                    await _promotionClient
-                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)
+                if (isSaveSuccess)
+                    await _redisDatabase
+                        .KeyDeleteAsync(
+                            $"Tgs:BucketDeposit:{command.FormId:N}")
                         .ConfigureAwait(false);
             }
         }
