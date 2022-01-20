@@ -62,8 +62,6 @@ namespace PlayerBucket.Repositories
             var depositBonusAmount = request.DepositAmount;
             var promotionPlayerId = default(int?);
 
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
             await _cashServiceClient.DepositAsync(
                 request.DefaultWalletId,
                 request.DepositAmount,
@@ -172,8 +170,6 @@ namespace PlayerBucket.Repositories
 
                 await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
-
-            scope.Complete();
 
             return new CreatePlayerBucketWithDepositResponse(depositBonusAmount, promotionPlayerId);
         }
