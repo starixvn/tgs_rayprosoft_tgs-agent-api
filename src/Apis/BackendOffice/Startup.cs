@@ -205,6 +205,13 @@ namespace TGS.Apis.BackendOffice
                 options.BaseUrl = config.GetValue<Uri>("BackOffice:GameProvidersPluggableBaseUrl");
             });
 
+            services.AddDomainSettingClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.DomainSettingBaseAddress = config.GetValue<Uri>("BackOffice:DomainSettingBaseAddress");
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
