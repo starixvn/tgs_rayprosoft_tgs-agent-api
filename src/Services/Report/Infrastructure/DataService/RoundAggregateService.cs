@@ -262,7 +262,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
                 x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.RebateAmount != 0 || x.DividendAmount != 0 ||
                 x.PromotionAmount != 0 || x.BetAmount != 0 || x.OriginalTurnover != 0 || x.ValidBetAmount != 0 ||
-                x.Turnover != 0 ||
+                x.Turnover != 0 || x.AllAgentRebateAmount != 0 ||
                 x.WinLossAmount != 0 || players.Contains(x.PlayerCode)).ToArray();
 
             return (playerAggregates, playerAggregateByGameType);
