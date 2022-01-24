@@ -18,6 +18,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
@@ -66,7 +69,7 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-
+                endpoints.MapProfileViewer();
                 endpoints.MapHealthChecks("/health",
                     new HealthCheckOptions
                     {
@@ -85,14 +88,15 @@ namespace TGS.Apis.BackendOffice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDataProtection();
-            services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp => new ConfigureNamedOptions<KeyManagementOptions>(
-                string.Empty,
-                options =>
-                {
-                    options.XmlRepository = new RedisXmlRepository(
-                        () => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
-                        "Tgs:Bo-Api:DataProtection");
-                }));
+            services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp
+                => new ConfigureNamedOptions<KeyManagementOptions>(
+                    string.Empty,
+                    options =>
+                    {
+                        options.XmlRepository = new RedisXmlRepository(
+                            () => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                            "Tgs:Bo-Api:DataProtection");
+                    }));
 
             services
                 .AddRedis((options, sp) =>
@@ -104,7 +108,8 @@ namespace TGS.Apis.BackendOffice
 
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .AddBackendOfficeRepositories(sp
+                    => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddMessageQueue()
                 .AddNatsMessageQueue(config =>
                 {
@@ -116,10 +121,13 @@ namespace TGS.Apis.BackendOffice
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve", "tgs.payment.deposit.approve")
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve",
+                            "tgs.payment.deposit.approve")
                         .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject", "tgs.payment.deposit.reject")
-                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject", "tgs.payment.withdraw.reject");
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject",
+                            "tgs.payment.deposit.reject")
+                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject",
+                            "tgs.payment.withdraw.reject");
                 })
                 .AddNatsGlobPatternExchange("*");
 
@@ -231,6 +239,28 @@ namespace TGS.Apis.BackendOffice
                     c.IncludeXmlComments(path);
                 }
             });
+
+            services.AddOpenTelemetryTracing(
+                builder => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                        .AddEnvironmentVariableDetector())
+                    .AddSource("Tgs.*")
+                    .AddSource("TGS.*")
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                    })
+                    .AddProfileViewExporter(builder =>
+                    {
+                        builder
+                            .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js", "json"))
+                            .AddFilter(new UrlPathFilter("/swagger"))
+                            .AddFilter(new UrlPathFilter("/health"));
+                    })
+                    .AddOtlpExporter());
+            services.AddProfileViewer();
         }
     }
 }
