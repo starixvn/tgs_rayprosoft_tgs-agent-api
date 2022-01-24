@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.GameProviders.TCG.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG
@@ -41,6 +42,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
             services.AddScoped<HandleTCGExceptionMiddleware>();
             services.AddScoped<DispatcherTCGMiddleware>();
             services.AddScoped<ITCGService, TCGService>();
+            services.AddScoped<ITCGCacheService, TCGCacheService>(
+                sp => ActivatorUtilities.CreateInstance<TCGCacheService>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
             services.AddScoped<ITCGActionModelMapper, TCGActionModelMapper>();
 
@@ -48,6 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 => provider.GetRequiredService<TCGGameInitializer>());
             services.AddScopedWithResolver<IGameHistory>(new[] { typeof(TCGGameHistory) }, (provider, _)
                 => provider.GetRequiredService<TCGGameHistory>());
+
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
