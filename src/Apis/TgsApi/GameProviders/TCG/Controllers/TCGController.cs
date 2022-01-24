@@ -192,15 +192,28 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                        transactionData.PlayerCode,
                        transactionData.ExternalTransactionId).ConfigureAwait(false);
             }
-            var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
+            //var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
+
+
+            var balanceInfos = new List<BalanceInfo>();
+            foreach (var playerCode in betData.Transactions.GroupBy(x => x.PlayerCode).Select(x => x.Key).ToArray())
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, playerCode).ConfigureAwait(false);
+                balanceInfos.Add(new BalanceInfo()
+                {
+                    UserName = getBalance.Username,
+                    Balance = getBalance.Balance
+                });
+            }
+            /*
             var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
                                 select new BalanceInfo
                                 {
                                     UserName = PlayerBalance.Key,
                                     Balance = PlayerBalance.Value
                                 }).ToArray();
-
+            */
             foreach (var transactionData in betData.Transactions)
             {
                 await _cacheService.RemoveAsync(
