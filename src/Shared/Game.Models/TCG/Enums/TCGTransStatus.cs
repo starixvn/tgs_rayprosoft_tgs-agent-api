@@ -9,6 +9,10 @@ namespace TGS.Shared.Game.Models.TCG.Enums
     public enum TCGTransStatus
     {
         /// <summary>
+        /// 未知
+        /// </summary>
+        UNKNOWN,
+        /// <summary>
         /// 未找到
         /// </summary>
         NOT_FOUND,
@@ -23,14 +27,6 @@ namespace TGS.Shared.Game.Models.TCG.Enums
         /// <summary>
         /// 待处理
         /// </summary>
-        PENDING,
-        /// <summary>
-        /// 取消
-        /// </summary>
-        CANCELLED,
-        /// <summary>
-        /// 保留
-        /// </summary>
-        RESERVED
+        PENDING
     }
 }
