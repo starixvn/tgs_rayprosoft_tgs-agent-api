@@ -262,6 +262,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [PlayerCheckEnabled]
         public async Task<GetGameUrlResponse> GetLobbyGameUrlForPostAsync(
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IStatusValidator playerStatusValidator,
