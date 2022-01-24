@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -239,6 +240,18 @@ namespace TGS.Apis.BackendOffice
                     c.IncludeXmlComments(path);
                 }
             });
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+                });
 
             services.AddOpenTelemetryTracing(
                 builder => builder
