@@ -127,15 +127,28 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var gameProviderCode = _service.GetGameProviderCode();
             var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var betData = await _mapper.ConfirmReserveAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
-            var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
+            //var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
+
+
+            var balanceInfos = new List<BalanceInfo>();
+            foreach (var playerCode in betData.Transactions.GroupBy(x => x.PlayerCode).Select(x => x.Key).ToArray())
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, playerCode).ConfigureAwait(false);
+                balanceInfos.Add(new BalanceInfo()
+                {
+                    UserName = getBalance.Username,
+                    Balance = getBalance.Balance
+                });
+            }
+            /*
             var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
                                 select new BalanceInfo
                                 {
                                     UserName = PlayerBalance.Key,
                                     Balance = PlayerBalance.Value
                                 }).ToArray();
-
+            */
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
