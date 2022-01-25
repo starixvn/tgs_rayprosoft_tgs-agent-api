@@ -940,63 +940,92 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlatformType = PlatformType.Desktop
             };
 
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-            var fakeGetGameUrlQueryService = Substitute.For<IGetService<GetGameUrlQuery, GameUrlInfo>>();
+            var gameUrl = new Uri("http://www.lobbyURL.com");
 
-            var gameProviderCode = "KY";
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGetGameUrlQueryService = Substitute.For<IGetService<GetGameUrlQuery, Uri>>();
+
             var gameProviderId = new Guid("a0f49ce0-2c1d-4f50-9fc5-58b610a30bf5");
-            var gameId = 1000012;
-            var languageCode = "zh-TW";
             var extendedData = JsonDocument.Parse(@"{""lobbyurl"":""http://www.lobbyurl.com""}");
-
-            fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(gameProviderCode)
-                .Returns(gameProviderId);
-            var externalGameId = "CardGameLobby";
-
-            var cachedGameList = new List<CachedGame>
-            {
-                new CachedGame
-                {
-                    Id = gameId,
-                    ExternalId = externalGameId,
-                    PlatformType = GamePlatformType.Desktop,
-                    Type = gameType,
-                    AvailableToBrand = true,
-                    Status = GameStatus.Active,
-                    SubGame = false
-                }
-            };
-
-            var cachedGames = cachedGameList.ToArray();
-
-            fakeGameProviderOperations
-                .GetCachedGamesAsync(gameProviderId, Arg.Any<GamePlatformType[]>(), gameType)
-                .Returns(cachedGames);
-
-            fakeGetGameUrlQueryService
-                .GetAsync(Arg.Any<GetGameUrlQuery>())
-                .Returns(new GameUrlInfo(0, "", "http://www.lobbyURL.com"));
 
             var query = new GetLobbyGameUrlQuery(
                 Guid.NewGuid(),
-                gameProviderCode,
+                gameProviderId,
                 playerToken,
-                PlayerType.RealPlayer,
                 gameType,
-                languageCode,
+                "en-US",
+                "127.0.0.1",
                 extendedData);
 
+            var games = new[]
+            {
+                new BrandGameInfo(
+                    1000001,
+                    "1",
+                    "1",
+                    "test",
+                    "KY",
+                    gameProviderId,
+                    "KY",
+                    GameStatus.Active,
+                    GameType.CardGameLobby,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    "{}",
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    1000002,
+                    "2",
+                    "2",
+                    "test",
+                    "KY",
+                    gameProviderId,
+                    "KY",
+                    GameStatus.Active,
+                    GameType.CardGame,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    "{}",
+                    GameTag.New,
+                    0),
+                new BrandGameInfo(
+                    1000003,
+                    "3",
+                    "3",
+                    "test",
+                    "KY",
+                    gameProviderId,
+                    "KY",
+                    GameStatus.Active,
+                    GameType.CardGame,
+                    GamePlatformType.Desktop,
+                    true,
+                    string.Empty,
+                    "{}",
+                    GameTag.New,
+                    0)
+            };
+
+            fakeGameProviderRepository
+                .QueryAllGamesAsync(query.BrandId)
+                .Returns(games.ToAsyncEnumerable());
+
+            fakeGetGameUrlQueryService
+                .GetAsync(Arg.Any<GetGameUrlQuery>())
+                .Returns(gameUrl);
+
             var sut = new GetLobbyGameUrlQueryService(
-                fakeGameProviderOperations,
+                fakeGameProviderRepository,
                 fakeGetGameUrlQueryService);
 
             // act
             var actual = await sut.GetAsync(query);
 
             // assert
-            Assert.AreEqual("http://www.lobbyURL.com", actual.Url);
-            Assert.AreEqual(0, actual.Error);
+            Assert.AreEqual(gameUrl, actual);
         }
 
         [Test]
@@ -1140,7 +1169,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
                 .Returns(ValueTask.FromResult(gameUrl));
 
-            await sut.GetGameUrlForPostAsync(
+            await sut.GetGameUrlAsync(
                 fakeGetGpCodeService,
                 fakeGetGameUrlQueryService,
                 fakeFundInAllService,
@@ -1154,11 +1183,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Should_Fund_In_All_Game_Balance_Before_Get_Lobby_Game_Url()
         {
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
-            var fakeGetLobbyGameUrlQueryService = Substitute.For<IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo>>();
+            var fakeGetLobbyGameUrlQueryService = Substitute.For<IGetService<GetLobbyGameUrlQuery, Uri>>();
             var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
             var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
 
@@ -1173,13 +1199,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var httpContext = new DefaultHttpContext();
             httpContext.Items.Add("playerToken", playerTokenData);
             httpContext.Items.Add("brandId", Guid.NewGuid());
-
-            fakePlayerOperations.GetCachedPlayerAsync(Arg.Any<string>())
-                .Returns(Task.FromResult(new CachedPlayer
-                {
-                    PlayerCode = playerTokenData.PlayerCode,
-                    Status = PlayerStatus.Enabled
-                }));
 
             var sut = new GameController
             {
@@ -1206,13 +1225,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Status.Active,
                     string.Empty)));
 
-            _ = fakeGetLobbyGameUrlQueryService.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
-                .Returns(ValueTask.FromResult(new LobbyGameUrlInfo(0, string.Empty, "http://www.google.com")));
+            _ = fakeGetLobbyGameUrlQueryService
+                .GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
+                .Returns(ValueTask.FromResult(new Uri("http://www.google.com")));
 
-            await sut.GetLobbyGameUrlForPostAsync(
-                fakePlayerOperations,
-                fakeStatusValidator,
-                fakeBrandLanguageCodeMapper,
+            await sut.GetLobbyGameUrlAsync(
                 fakeGetGpCodeService,
                 fakeGetLobbyGameUrlQueryService,
                 fakeFundInAllService,

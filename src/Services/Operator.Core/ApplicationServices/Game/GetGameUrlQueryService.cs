@@ -20,7 +20,7 @@ namespace TGS.Services.Operator.ApplicationServices.Game
             IGameProviderRepository gameProviderRepository)
         {
             _pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
-            _gameProviderRepository = gameProviderRepository;
+            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
 
         public async ValueTask<Uri?> GetAsync(
@@ -28,12 +28,11 @@ namespace TGS.Services.Operator.ApplicationServices.Game
             CancellationToken cancellationToken = default)
         {
             var playerTokenData = query.PlayerTokenData;
-            var gameId = query.GameId;
 
             var game = await _gameProviderRepository
                 .QueryAllGamesAsync(query.BrandId)
                 .Where(g => g.Id == query.GameId)
-                .FirstOrDefaultAsync(cancellationToken)
+                .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
             var allowedGamePlatformTypes = playerTokenData.PlatformType.ToGamePlatformTypes();
