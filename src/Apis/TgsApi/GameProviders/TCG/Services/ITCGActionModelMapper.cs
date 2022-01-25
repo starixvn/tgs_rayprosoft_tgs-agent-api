@@ -9,16 +9,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 {
     public interface ITCGActionModelMapper
     {
-        ValueTask<BetData[]> BetAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGDebitRequest source);
+        ValueTask<BetData[]> BetAsync(Guid gameProviderId, CachedGame cachedGame, TCGDebitRequest source);
 
-        ValueTask<BatchBetData> CancelReserveAsync(Guid gameProviderId, string gameProviderCode, TCGCancelReserveRequest source);
+        ValueTask<BatchBetData> CancelReserveAsync(Guid gameProviderId, TCGCancelReserveRequest source);
 
-        ValueTask<QueryResult> CheckTransactionStatusAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, string player, string externalTransactionId);
+        ValueTask<QueryResult> CheckTransactionStatusAsync(Guid gameProviderId, string player, string externalTransactionId);
 
-        ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGConfirmReserveRequest source);
+        ValueTask<BetData> CloseAsync(TCGCloseRequest source);
 
-        ValueTask<BetData[]> ReserveMoneyAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGReserveMoneyRequest source);
+        ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, CachedGame cachedGame, TCGConfirmReserveRequest source);
 
-        ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGCreditRequest source);
+        ValueTask<BetData[]> ReserveMoneyAsync(Guid gameProviderId, CachedGame cachedGame, TCGReserveMoneyRequest source);
+
+        ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, CachedGame cachedGame, TCGCreditRequest source);
     }
 }

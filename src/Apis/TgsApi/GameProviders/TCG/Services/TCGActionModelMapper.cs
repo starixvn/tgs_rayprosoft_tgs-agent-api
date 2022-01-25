@@ -31,7 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public async ValueTask<BetData[]> BetAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGDebitRequest source)
+        public async ValueTask<BetData[]> BetAsync(Guid gameProviderId, CachedGame cachedGame, TCGDebitRequest source)
         {
             var playerMappers = new Dictionary<string, CachedPlayer>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             return betDatas.ToArray();
         }
 
-        public async ValueTask<BatchBetData> CancelReserveAsync(Guid gameProviderId, string gameProviderCode, TCGCancelReserveRequest source)
+        public async ValueTask<BatchBetData> CancelReserveAsync(Guid gameProviderId, TCGCancelReserveRequest source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -127,10 +127,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                     });
                 }
             }
-            return GetBetData(gameProviderId, gameProviderCode, autoCloseRound, batchTransactionData.ToArray());
+            return GetBetData(gameProviderId, autoCloseRound, batchTransactionData.ToArray());
         }
 
-        public async ValueTask<QueryResult> CheckTransactionStatusAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, string player, string externalTransactionId)
+        public async ValueTask<QueryResult> CheckTransactionStatusAsync(Guid gameProviderId, string player, string externalTransactionId)
         {
             var externalId = await _service.GetGameActionExternalIdAsync(gameProviderId, player, externalTransactionId).ConfigureAwait(false);
             if (externalId == null)
@@ -148,7 +148,71 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             };
         }
 
-        public async ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGConfirmReserveRequest source)
+        public async ValueTask<BetData> CloseAsync(TCGCloseRequest source)
+        {
+            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
+            var betExternalId = await _service.GetGameActionExternalIdAsync(gameProviderId, source.UserName, source.RefNo).ConfigureAwait(false);
+
+            if (betExternalId == null
+                || betExternalId.GameActionType != GameActionType.PlaceBet)
+            {
+                return null;
+            }
+
+            var cachedGame = await _service.GetCachedGameAsync(
+                gameProviderId,
+                betExternalId.ExternalGameId).ConfigureAwait(false);
+
+            var roundStatus = await _service.GetRoundStatusAsync(
+                gameProviderId, source.UserName,
+                betExternalId.ExternalRoundId,
+                cachedGame.Id).ConfigureAwait(false);
+            if (roundStatus.Value != RoundStatus.Open)
+            {
+                return null;
+            }
+
+            var brandId = await _service.GetBrandIdByPlayerCodeAsync(
+                source.UserName).ConfigureAwait(false);
+
+            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(
+                gameProviderId).ConfigureAwait(false);
+
+            var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(
+               brandId,
+               gameProviderId).ConfigureAwait(false);
+            var loginRecord = await _service.GetPlayerLatestEnabledLoginRecordAsync(source.UserName).ConfigureAwait(false);
+            var externalTransactionId = $"{ source.RefNo}_close";
+            var transaction = new TransactionData()
+            {
+                Amount = source.Amount,
+                ExternalTransactionId = externalTransactionId,
+                ExternalRoundId = betExternalId.ExternalRoundId,
+                ExternalBetId = betExternalId.ExternalBetId.ToString(),
+                ExternalGameActionGroupId = betExternalId.ExternalGameActionGroupId.ToString(),
+                ExternalTransactionReferenceId = betExternalId.ExternalBetId.ToString(),
+                ExternalGameId = betExternalId.ExternalGameId,
+                GameActionType = GameActionType.LoseBet,
+                TimeStamp = DateTimeOffset.UtcNow,
+                BetType = string.Empty,
+                RoundDetail = _jsonSerializationProvider.SerializeToString(source.AdditionalInformation)
+            };
+            return new BetData
+            {
+                PlayerCode = (loginRecord != null) ? loginRecord.PlayerCode : source.UserName,
+                PlatformType = (loginRecord != null) ? loginRecord.PlatformType : PlatformType.Desktop,
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                GameProviderCode = Consts.GameProvider.TCG,
+                HasCurrencyFromGameProvider = false,
+                AutoCloseRound = autoCloseRound,
+                AllowCancelCancelTransaction = false,
+                AllowPlaceBetWithDifferentPlatformToken = false,
+                Transactions = new TransactionData[] { transaction },
+            };
+        }
+
+        public async ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, CachedGame cachedGame, TCGConfirmReserveRequest source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -185,10 +249,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                     }
                 }
             }
-            return GetBetData(gameProviderId, gameProviderCode, autoCloseRound, batchTransactionData.ToArray());
+            return GetBetData(gameProviderId, autoCloseRound, batchTransactionData.ToArray());
         }
 
-        public async ValueTask<BetData[]> ReserveMoneyAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGReserveMoneyRequest source)
+        public async ValueTask<BetData[]> ReserveMoneyAsync(Guid gameProviderId, CachedGame cachedGame, TCGReserveMoneyRequest source)
         {
             var playerMappers = new Dictionary<string, CachedPlayer>();
 
@@ -252,7 +316,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             return betDatas.ToArray();
         }
 
-        public async ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, string gameProviderCode, CachedGame cachedGame, TCGCreditRequest source)
+        public async ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, CachedGame cachedGame, TCGCreditRequest source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -284,14 +348,14 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                     });
                 }
             }
-            return GetBetData(gameProviderId, gameProviderCode, autoCloseRound, batchTransactionData.ToArray());
+            return GetBetData(gameProviderId, autoCloseRound, batchTransactionData.ToArray());
         }
 
-        private BatchBetData GetBetData(Guid gameProviderId, string gameProviderCode, bool autoCloseRound, BatchTransactionData[] transactions)
+        private BatchBetData GetBetData(Guid gameProviderId, bool autoCloseRound, BatchTransactionData[] transactions)
          => new()
          {
              GameProviderId = gameProviderId,
-             GameProviderCode = gameProviderCode,
+             GameProviderCode = Consts.GameProvider.TCG,
              AutoCloseRound = autoCloseRound,
              ExternalBatchId = string.Empty,
              AllowCancelCancelTransaction = false,
