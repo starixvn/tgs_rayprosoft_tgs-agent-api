@@ -205,6 +205,25 @@ namespace TGS.Operator.Repositories
                 });
         }
 
+        public async ValueTask<GameDataInfo?> QueryGameAsync(int gameId)
+            => await _tgsRepository.Games
+                .AsQueryable()
+                .Where(g => g.Id == gameId)
+                .Select(g => new GameDataInfo(
+                    g.Id,
+                    g.Code,
+                    g.Name,
+                    g.Description,
+                    g.SubGameProviderCode,
+                    g.Status,
+                    g.Type,
+                    g.PlatformType,
+                    g.AvailableToBrand,
+                    g.AvailableCurrencies,
+                    g.Localization))
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
         public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId)
         {
             var query = from gpc in _tgsRepository.GameProviderCurrencies.AsQueryable()

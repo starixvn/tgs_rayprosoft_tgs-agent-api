@@ -3,6 +3,7 @@ using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
@@ -23,7 +24,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -92,7 +94,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -150,7 +153,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -198,7 +202,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -246,7 +251,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -294,7 +300,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -342,7 +349,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -390,7 +398,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -444,7 +453,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -492,7 +502,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -540,7 +551,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -588,7 +600,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -636,7 +649,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -690,7 +704,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -759,7 +774,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -807,7 +823,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 Guid.NewGuid(),
-                Core.Models.Enums.PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                PlayerType.RealPlayer);
 
             var brandPayment = new BrandPaymentInfo
             {

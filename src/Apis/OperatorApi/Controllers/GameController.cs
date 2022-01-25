@@ -192,11 +192,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async Task<GetGameUrlResponse> GetGameUrlForPostAsync(
-            [FromServices] IPlayerOperations playerOperations,
-            [FromServices] IStatusValidator playerStatusValidator,
-            [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
-            [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
+            [FromServices] IGetService<GetGameUrlQuery, Uri> getGameUrlQueryService,
             [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetGameUrlRequest request)
@@ -204,38 +201,28 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var cachedPlayer = await playerOperations
-                .GetCachedPlayerAsync(playerTokenData.PlayerCode)
-                .ConfigureAwait(false);
-
-            playerStatusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
-
-            var currentCultureInfo = CultureInfo.CurrentUICulture;
-            var language = await brandLanguageCodeMapper
-                .ExternalToInternalAsync(currentCultureInfo.Name, cachedPlayer.BrandId)
-                .ConfigureAwait(false);
-
             var subGp = await getGpCodeService
                 .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
                 .ConfigureAwait(false);
 
             await fundInAllService
                 .ExecuteAsync(new FundInAllGameBalanceCommand(
-                    cachedPlayer.BrandId,
+                    brandId,
                     playerTokenData.PlayerCode,
                     subGp.Code))
                 .ConfigureAwait(false);
 
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
             var query = new GetGameUrlQuery(
-                cachedPlayer.BrandId,
+                brandId,
                 playerTokenData,
-                cachedPlayer.Type,
-                request.SubGameProviderCode,
                 request.GameId,
-                language,
+                CultureInfo.CurrentUICulture.Name,
+                ipAddress,
                 request.ExtendedData);
 
-            var info = await getGameUrlQueryService
+            var gameUrl = await getGameUrlQueryService
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
@@ -243,7 +230,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 await fundService
                     .ExecuteAsync(new FundOutBeforeEnterGameCommand(
-                        cachedPlayer.BrandId,
+                        brandId,
                         playerTokenData.PlayerCode,
                         subGp.Code))
                     .ConfigureAwait(false);
@@ -251,9 +238,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return new GetGameUrlResponse
             {
-                Error = info.Error,
-                ErrorMessage = info.ErrorMessage,
-                Url = info.Url
+                Url = gameUrl?.AbsoluteUri
             };
         }
 

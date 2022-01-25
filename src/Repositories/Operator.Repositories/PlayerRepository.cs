@@ -39,7 +39,8 @@ namespace TGS.Operator.Repositories
                 player.Phone,
                 player.AreaCode,
                 player.VipId,
-                player.Status);
+                player.Status,
+                player.Type);
         }
 
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
@@ -66,7 +67,8 @@ namespace TGS.Operator.Repositories
                     playerData.Phone,
                     playerData.AreaCode,
                     playerData.VipId,
-                    playerData.Status);
+                    playerData.Status,
+                    playerData.Type);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
@@ -88,7 +90,8 @@ namespace TGS.Operator.Repositories
                 playerData.Phone,
                 playerData.AreaCode,
                 playerData.VipId,
-                playerData.Status);
+                playerData.Status,
+                playerData.Type);
         }
 
         public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)

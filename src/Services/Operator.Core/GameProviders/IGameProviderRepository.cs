@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.GameProviders
 {
@@ -20,6 +19,8 @@ namespace TGS.Services.Operator.GameProviders
             IEnumerable<GameStatus> statuses);
 
         IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId);
+
+        ValueTask<GameDataInfo?> QueryGameAsync(int gameId);
 
         IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId);
 

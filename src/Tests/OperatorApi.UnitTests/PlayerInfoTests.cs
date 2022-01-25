@@ -87,7 +87,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 Guid.NewGuid(),
-                CoreEnums.PlayerStatus.Enabled);
+                CoreEnums.PlayerStatus.Enabled,
+                CoreEnums.PlayerType.RealPlayer);
 
             fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
                 .Returns(ValueTask.FromResult(playerInfo));
