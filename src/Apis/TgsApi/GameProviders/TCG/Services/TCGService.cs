@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -17,47 +16,6 @@ using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 {
-    public interface ITCGService
-    {
-        ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
-
-        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
-
-        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
-
-        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
-
-        ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
-
-        ValueTask<TCGConfiguration> GetConfigurationAsync();
-
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
-
-        ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
-
-        ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
-
-        string GetGameProviderCode();
-
-        ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
-
-        ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
-
-        ValueTask<Guid> GetGameProviderIdAsync();
-
-        ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode);
-
-        ValueTask<TCGMerchant> GetMerchantByMerchantCodeAsync(string merchantCode);
-
-        ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
-
-        ValueTask<PlayerLoginRecordModel> GetPlayerLatestEnabledLoginRecordAsync(string playerCode);
-
-        ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
-
-        ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId);
-    }
-
     public class TCGService : ITCGService
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
@@ -71,25 +29,25 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         private readonly ISettingOperations _settingOperations;
 
         public TCGService(
-            IGameProviderOperations gameProviderOperations,
-            ISettingOperations settingOperations,
-            IPlayerOperations playerOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
             IBrandOperations brandOperations,
             IGameActionQueries gameActionQueries,
+            IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
+            IGameProviderOperations gameProviderOperations,
+            IRedisPlayerLoginRecordService playerLoginRecordService,
+            IPlayerOperations playerOperations,
             IRoundQueries roundQueries,
-            IRedisPlayerLoginRecordService playerLoginRecordService)
+            ISettingOperations settingOperations)
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
-            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
-            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
+            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
         public async ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
@@ -130,9 +88,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             return new(data.Round, gameAction);
         }
 
-        public ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-            => _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId);
-
         public string GetGameProviderCode()
         {
             return Consts.GameProvider.TCG;
@@ -140,9 +95,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         public async ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
-
-        public async ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
-            => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
                                                                                                             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
@@ -159,16 +111,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             return configuration.Merchants.Where(x => x.MerchantCode == merchantCode).FirstOrDefault();
         }
 
-        public async ValueTask<Player> GetPlayerByCodeAsync(string playerCode)
-                            => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-
         public async ValueTask<PlayerLoginRecordModel> GetPlayerLatestEnabledLoginRecordAsync(string playerCode)
         => await _playerLoginRecordService.GetLastAsync(playerCode).ConfigureAwait(false);
 
         public ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
           => _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
-
-        public ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId)
-                    => _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, playerCode, externalRoundId, externalTransactionId);
     }
 }
