@@ -185,7 +185,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var externalTransactionId = $"{ source.RefNo}_close";
             var transaction = new TransactionData()
             {
-                Amount = source.Amount,
+                Amount = 0,
                 ExternalTransactionId = externalTransactionId,
                 ExternalRoundId = betExternalId.ExternalRoundId,
                 ExternalBetId = betExternalId.ExternalBetId.ToString(),

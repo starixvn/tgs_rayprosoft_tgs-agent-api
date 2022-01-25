@@ -12,9 +12,6 @@ namespace TGS.Shared.Game.Models.TCG.Incoming
     public record TCGCloseRequest
     {
         [Required]
-        [JsonPropertyName("amount")]
-        public decimal Amount { get; init; }
-        [Required]
         [JsonPropertyName("ref_no")]
         public string RefNo { get; init; }
         [Required]
