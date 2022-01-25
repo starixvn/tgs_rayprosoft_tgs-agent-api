@@ -31,10 +31,11 @@
     <None Remove="SqlScripts\Indexes\players_brand_id_email.sql" />
     <None Remove="SqlScripts\Indexes\rounds_createdon.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
+    <None Remove="tgs.appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="appsettings.json">
+    <Content Include="tgs.appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

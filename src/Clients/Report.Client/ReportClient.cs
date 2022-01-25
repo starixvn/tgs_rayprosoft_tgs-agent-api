@@ -4,8 +4,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.GameAction;
 using TGS.Clients.Report.Client.Models.GameProvider;
 using TGS.Clients.Report.Client.Models.LicenseeMarket;
 using TGS.Clients.Report.Client.Models.Market;
@@ -27,6 +29,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request);
         Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync(GetOpenRoundsRequest request);
+        Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync(GetClosedRoundsRequest request);
 
         Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request);
 
@@ -57,6 +60,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
         Task<GetGameProviderRoundsResponse> GetGameProviderRoundsAsync(GetGameProviderRoundsRequest request);
+        Task<PagedResponse<GameActionModel>> GetGameActionsAsync(GetGameActionsRequest request);
 
         Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
@@ -129,6 +133,19 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties("/api/roundReport/openRounds?", request);
 
             return await ExecuteJsonRequestAsync<GetOpenRoundsRequest, PagedResponse<OpenRoundModel>>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync(GetClosedRoundsRequest request)
+        {
+            var prefix = "Report.GetClosedRounds";
+            var path = ClientPath.AppendWithProperties("/api/roundReport/closedRounds?", request);
+
+            return await ExecuteJsonRequestAsync<GetClosedRoundsRequest, PagedResponse<ClosedRoundModel>>(
+                HttpMethod.Get,
                 path,
                 request,
                 logPrefix: prefix,
@@ -533,6 +550,24 @@ namespace TGS.Clients.Report.Client
                 request,
                 logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<GameActionModel>> GetGameActionsAsync(GetGameActionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/gameActionReport?",
+                request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            return JsonSerializer.Deserialize<PagedResponse<GameActionModel>>(
+                await response.Content.ReadAsStringAsync(),
+                new() { PropertyNameCaseInsensitive = true });
         }
     }
 }

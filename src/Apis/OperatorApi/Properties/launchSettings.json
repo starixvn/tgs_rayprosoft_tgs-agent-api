@@ -16,7 +16,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Operator-API-Local-Dev",
-        "NODE_IP": "192.168.50.107"
+        "NODE_IP": "192.168.50.112"
       },
       "applicationUrl": "https://localhost:7001;http://localhost:7000"
     },

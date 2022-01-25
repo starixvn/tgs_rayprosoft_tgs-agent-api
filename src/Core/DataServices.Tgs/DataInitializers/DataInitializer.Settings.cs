@@ -252,7 +252,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View")
+                                new MenuSetting("View"),
+                                new MenuSetting("ViewGameAction")
                             }
                         },
                         new MenuSetting("AgentContributionReport")
@@ -425,6 +426,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("View"),
+                                new MenuSetting("ViewGameAction"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("ResettleGameRound")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("ViewGameAction"),
                                 new MenuSetting("Update")
                             }
                         },

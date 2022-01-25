@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Tgs.DomainSettings.Clients;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
@@ -27,6 +28,70 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fake => fake.AddDomainToAgentAsync(
                     It.Is<Guid>(x => x == command.AgentId),
                     It.Is<string>(x => x == command.DomainName)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Apply_Ingress_For_AgentDomain()
+        {
+            var moqDomainSettingClient = new Mock<IDomainSettingClient>();
+
+            var sut = new ApplyAgentDomainIngressCommandService(moqDomainSettingClient.Object);
+
+            var command = new ApplyAgentDomainIngressCommand(Guid.NewGuid());
+
+            await sut.ExecuteAsync(command);
+
+            moqDomainSettingClient.Verify(
+                fake => fake.ApplyAgentDomainIngressAsync(It.Is<Guid>(x => x == command.AgentId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Create_Dns_Zone_For_AgentDomain()
+        {
+            var moqDomainSettingClient = new Mock<IDomainSettingClient>();
+
+            var sut = new CreateAgentDnsZoneCommandService(moqDomainSettingClient.Object);
+
+            var command = new CreateAgentDnsZoneCommand(Guid.NewGuid());
+
+            await sut.ExecuteAsync(command);
+
+            moqDomainSettingClient.Verify(
+                fake => fake.CreateZoneAsync(It.Is<Guid>(x => x == command.AgentId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Delete_Dns_Zone_For_AgentDomain()
+        {
+            var moqDomainSettingClient = new Mock<IDomainSettingClient>();
+
+            var sut = new DeleteAgentDnsZoneCommandService(moqDomainSettingClient.Object);
+
+            var command = new DeleteAgentDnsZoneCommand(Guid.NewGuid());
+
+            await sut.ExecuteAsync(command);
+
+            moqDomainSettingClient.Verify(
+                fake => fake.DeleteZoneAsync(It.Is<Guid>(x => x == command.AgentId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Delete_Ingress_For_AgentDomain()
+        {
+            var moqDomainSettingClient = new Mock<IDomainSettingClient>();
+
+            var sut = new DeleteAgentDomainIngressCommandService(moqDomainSettingClient.Object);
+
+            var command = new DeleteAgentDomainIngressCommand(Guid.NewGuid());
+
+            await sut.ExecuteAsync(command);
+
+            moqDomainSettingClient.Verify(
+                fake => fake.DeleteAgentDomainIngressAsync(It.Is<Guid>(x => x == command.AgentId)),
                 Times.Exactly(1));
         }
 

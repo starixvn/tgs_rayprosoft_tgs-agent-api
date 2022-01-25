@@ -437,6 +437,15 @@
       },
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "Docker-WMCasino": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GameProviderCode": "TF"
+      }
     }
   }
 }

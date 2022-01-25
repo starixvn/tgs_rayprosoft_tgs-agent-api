@@ -4746,6 +4746,60 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_vip_level_aggregates");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelSeasonPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("FromOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from_on");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PlayerVipLevelSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_vip_level_snapshot_id");
+
+                    b.Property<DateTimeOffset>("SeasonOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("season_on");
+
+                    b.Property<DateTimeOffset>("ToOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to_on");
+
+                    b.Property<Guid>("VipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_season_promotions");
+
+                    b.HasIndex("PlayerVipLevelSnapshotId")
+                        .HasDatabaseName("ix_player_vip_level_season_promotions_player_vip_level_snapshot_id");
+
+                    b.HasIndex("VipId")
+                        .HasDatabaseName("ix_player_vip_level_season_promotions_vip_id");
+
+                    b.ToTable("player_vip_level_season_promotions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4777,6 +4831,51 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_vip_level_snapshots_brand_id");
 
                     b.ToTable("player_vip_level_snapshots");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelUpgradePromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PlayerVipLevelSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_vip_level_snapshot_id");
+
+                    b.Property<Guid>("VipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_upgrade_promotions");
+
+                    b.HasIndex("PlayerVipLevelSnapshotId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_promotions_player_vip_level_snapshot_id");
+
+                    b.HasIndex("VipId")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_promotions_vip_id");
+
+                    b.HasIndex("VipId", "PlayerCode")
+                        .HasDatabaseName("ix_player_vip_level_upgrade_promotions_vip_id_player_code");
+
+                    b.ToTable("player_vip_level_upgrade_promotions");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelUpgradeRecord", b =>
