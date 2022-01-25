@@ -1120,8 +1120,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 Guid.NewGuid(),
-                PlayerStatus.Enabled,
-                PlayerType.RealPlayer);
+                PlayerStatus.Enabled);
 
             var playerTokenData = new PlayerTokenData
             {

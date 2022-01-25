@@ -136,8 +136,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     command.Phone,
                     command.AreaCode,
                     null,
-                    PlayerStatus.Enabled,
-                    PlayerType.RealPlayer));
+                    PlayerStatus.Enabled));
 
             var validateCode = "123456";
             var token = "abc123";

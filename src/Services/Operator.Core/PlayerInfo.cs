@@ -12,6 +12,5 @@ namespace TGS.Services.Operator
         string? Phone,
         string? AreaCode,
         Guid? VipLevel,
-        PlayerStatus Status,
-        PlayerType Type);
+        PlayerStatus Status);
 }

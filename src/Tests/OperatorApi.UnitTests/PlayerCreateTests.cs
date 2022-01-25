@@ -237,8 +237,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled,
-                    PlayerType.RealPlayer));
+                    PlayerStatus.Enabled));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -505,8 +504,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled,
-                    PlayerType.RealPlayer));
+                    PlayerStatus.Enabled));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
