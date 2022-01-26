@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Tgs;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.BrandLiveChat;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandLiveChat
 {

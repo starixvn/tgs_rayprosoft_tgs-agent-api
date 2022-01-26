@@ -25,7 +25,6 @@ COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
 COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
-COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
 COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
 RUN dotnet restore "src/Apis/BackendOffice/BackendOffice.csproj"
 COPY . .

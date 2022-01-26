@@ -2,9 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
-using TGS.Services.Operations;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.PayPassowrd;
+using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.PayPassowrd
 {

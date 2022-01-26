@@ -73,7 +73,6 @@
     <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
-    <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>
