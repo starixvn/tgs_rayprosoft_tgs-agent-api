@@ -84,7 +84,12 @@ namespace TGS.Workers.Schedulers
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddOperations()
-                .AddReportAggregateClient(_configuration)
+                .AddReportAggregateClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("ReportAggregate:Url");
+                })
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
