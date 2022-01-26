@@ -18,7 +18,6 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Filters;
 using TGS.Apis.AgentApi.Filters.Swaggers;
 using TGS.Apis.AgentApi.Models;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -105,7 +104,12 @@ namespace TGS.Apis.AgentApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddReportClientServices(_configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddTransactions();
 
             services.AddErrorMapper()
@@ -197,10 +201,18 @@ namespace TGS.Apis.AgentApi
             {
                 c.SwaggerDoc(
                     "Normal",
-                    new OpenApiInfo { Title = "TGS Agent API", Version = "Normal" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS Agent API",
+                        Version = "Normal"
+                    });
                 c.SwaggerDoc(
                     "HK28",
-                    new OpenApiInfo { Title = "Tgs Agent API - HK28", Version = "HK28" });
+                    new OpenApiInfo
+                    {
+                        Title = "Tgs Agent API - HK28",
+                        Version = "HK28"
+                    });
 
                 var securityScheme = new OpenApiSecurityScheme
                 {
@@ -221,8 +233,7 @@ namespace TGS.Apis.AgentApi
                 {
                     if (groupName == "Normal")
                         return desc.GroupName is null;
-                    else
-                        return desc.GroupName == groupName;
+                    return desc.GroupName == groupName;
                 });
 
                 c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
+using Tgs.ProfitRebate.Client;
 
 namespace TGS.Workers.Schedulers.Jobs.Players
 {
@@ -12,24 +12,22 @@ namespace TGS.Workers.Schedulers.Jobs.Players
 
     public class PlayerRebateWorkerService : IPlayerRebateWorkerService
     {
-        private readonly IReportAggregateClient _client;
+        private readonly IProfitRebateClient _client;
 
         public PlayerRebateWorkerService(
-            IReportAggregateClient client)
-        {
-            _client = client;
-        }
+            IProfitRebateClient client)
+            => _client = client;
 
         async Task<TgsResponse> IPlayerRebateWorkerService.ExecutionAsync()
         {
             var response = await _client.CreatePlayerRebateAsync(new());
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
 
         async Task<TgsResponse> IPlayerRebateWorkerService.ManualExecutionAsync(string date)
         {
             var response = await _client.CreatePlayerRebateAsync(new(date));
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
     }
 }

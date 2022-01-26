@@ -21,14 +21,13 @@
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
-    <PackageReference Include="Tgs.ProfitRebate.Client" Version="1.0.16" />
+    <PackageReference Include="Tgs.ProfitRebate.Client" Version="1.0.17" />
+    <PackageReference Include="Tgs.Report.Aggregate.Client" Version="0.0.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
-    <ProjectReference Include="..\..\Services\Report\Report.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Shared\Game.ApiClients\Game.ApiClients.csproj" />
   </ItemGroup>

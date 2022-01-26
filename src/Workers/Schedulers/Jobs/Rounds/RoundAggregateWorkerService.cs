@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Aggregate.Client;
 
 namespace TGS.Workers.Schedulers.Jobs.Rounds
 {
@@ -16,20 +16,18 @@ namespace TGS.Workers.Schedulers.Jobs.Rounds
 
         public RoundAggregateWorkerService(
             IReportAggregateClient client)
-        {
-            _client = client;
-        }
+            => _client = client;
 
         async Task<TgsResponse> IRoundAggregateWorkerService.ExecutionAsync()
         {
             var response = await _client.CreateRoundAggregateAsync(new()).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
 
         async Task<TgsResponse> IRoundAggregateWorkerService.ManualExecutionAsync(string date, int hour)
         {
             var response = await _client.ManualCreateRoundAggregateAsync(new(date, hour)).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
     }
 }

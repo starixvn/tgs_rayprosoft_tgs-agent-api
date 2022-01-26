@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Round;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -18,10 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         private readonly IReportClient _client;
 
-        public PlayerReportController(IReportClient client)
-        {
-            _client = client;
-        }
+        public PlayerReportController(IReportClient client) => _client = client;
 
         /// <summary>
         ///     Get player round report
@@ -46,14 +43,14 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ClosedTo = null,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
 
             var response = await _client.GetRoundsAsync(roundsRequest);
 
-            return new PagingResponse<RoundModel>()
+            return new PagingResponse<RoundModel>
             {
                 TotalCount = response.TotalCount,
                 Items = response.Items ?? Array.Empty<RoundModel>()

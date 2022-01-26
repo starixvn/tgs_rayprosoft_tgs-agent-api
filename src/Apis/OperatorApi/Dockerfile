@@ -12,22 +12,20 @@ RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || tru
 WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["src/Apis/OperatorApi/OperatorApi.csproj", "src/Apis/OperatorApi/"]
-COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
-COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
-COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataServices.Tgs/"]
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
-COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
-COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
-COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
-COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
 COPY ["src/Repositories/Operator.Repositories/Operator.Repositories.csproj", "src/Repositories/Operator.Repositories/"]
 COPY ["src/Services/Operator.Core/Operator.Core.csproj", "src/Services/Operator.Core/"]
+COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
+COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
+COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
+COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
 COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
-COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
+COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
 COPY ["src/Libraries/IdentityVerifiers/IdentityVerifiers.csproj", "src/Libraries/IdentityVerifiers/"]
+COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
 RUN dotnet restore "src/Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/OperatorApi"

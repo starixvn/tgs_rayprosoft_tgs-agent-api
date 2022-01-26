@@ -74,12 +74,12 @@
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
-    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
