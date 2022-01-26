@@ -314,6 +314,7 @@ namespace TGS.Apis.OperatorApi
                             .AddEnvironmentVariableDetector())
                         .AddSource("Tgs.*")
                         .AddSource("TGS.*")
+                        .AddSource("*")
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddEntityFrameworkCoreInstrumentation(options =>
@@ -334,7 +335,7 @@ namespace TGS.Apis.OperatorApi
                 //                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                 //    };
                 //});
-            ;
+
             services.AddProfileViewer();
 
             services
