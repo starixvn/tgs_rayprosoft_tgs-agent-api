@@ -305,7 +305,6 @@ namespace TGS.Apis.OperatorApi
                     if (!string.IsNullOrWhiteSpace(nodeIp))
                         options.Endpoint = new Uri($"http://{nodeIp}:4317");
 
-
                     conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
             services
@@ -321,7 +320,7 @@ namespace TGS.Apis.OperatorApi
                         {
                             options.SetDbStatementForText = true;
                         })
-                        .AddProfileViewExporter(_ => { })
+                        //.AddProfileViewExporter(_ => { })
                         .AddOtlpExporter())
                 .Configure<AspNetCoreInstrumentationOptions>(options =>
                 {
