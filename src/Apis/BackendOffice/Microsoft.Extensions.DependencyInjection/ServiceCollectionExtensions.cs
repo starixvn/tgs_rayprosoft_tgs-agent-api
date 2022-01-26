@@ -15,7 +15,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Extensions;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.PluggableServices.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -48,7 +47,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTgsLog()
                 .AddOperations()
                 .AddApiClient()
-                .AddPluggableServices()
                 .AddTransactions()
                 .AddBackOfficeApplicationServices()
                 .AddReportClient((options, sp) =>
