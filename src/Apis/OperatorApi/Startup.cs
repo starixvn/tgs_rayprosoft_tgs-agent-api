@@ -320,8 +320,8 @@ namespace TGS.Apis.OperatorApi
                         {
                             options.SetDbStatementForText = true;
                         })
-                        //.AddProfileViewExporter(_ => { })
-                        .AddOtlpExporter())
+                        .AddProfileViewExporter()
+                        /*.AddOtlpExporter()*/)
                 .Configure<AspNetCoreInstrumentationOptions>(options =>
                 {
                     options.Filter = httpContext =>
