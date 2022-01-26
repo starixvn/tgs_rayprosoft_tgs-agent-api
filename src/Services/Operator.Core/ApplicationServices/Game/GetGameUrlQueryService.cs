@@ -2,126 +2,76 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models;
+using Tgs.GameProviders.Pluggable.Client;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Validators;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.PluggableServices;
-using TGS.Services.PluggableServices.Models;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Game;
 
 namespace TGS.Services.Operator.ApplicationServices.Game
 {
-    internal class GetGameUrlQueryService : IGetService<GetGameUrlQuery, GameUrlInfo>
+    internal class GetGameUrlQueryService : IGetService<GetGameUrlQuery, Uri?>
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
-        private readonly IPluggalbeGameProviderApiClient _pluggableApiClient;
-        private readonly IPluggableOperations _pluggableOperations;
-        private readonly IStatusValidator _statusValidator;
-        private readonly IValidStatus<GameStatus> _validGameStatus;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly IGameProvidersOperatorPluggableClient _pluggableClient;
 
         public GetGameUrlQueryService(
-            IStatusValidator statusValidator,
-            IGameProviderOperations gameProviderOperations,
-            IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus,
-            IPluggableOperations pluggableOperations,
-            IPluggalbeGameProviderApiClient pluggableApiClient,
+            IGameProvidersOperatorPluggableClient pluggableClient,
             IGameProviderRepository gameProviderRepository)
         {
-            _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
-            _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-            _pluggableOperations = pluggableOperations ?? throw new ArgumentNullException(nameof(pluggableOperations));
-            _pluggableApiClient = pluggableApiClient ?? throw new ArgumentNullException(nameof(pluggableApiClient));
-            _gameProviderRepository = gameProviderRepository;
+            _pluggableClient = pluggableClient ?? throw new ArgumentNullException(nameof(pluggableClient));
+            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
 
-        public async ValueTask<GameUrlInfo> GetAsync(
+        public async ValueTask<Uri?> GetAsync(
             GetGameUrlQuery query,
             CancellationToken cancellationToken = default)
         {
             var playerTokenData = query.PlayerTokenData;
-            var platformType = playerTokenData.PlatformType;
-            var subGameProviderCode = query.SubGameProviderCode;
-            var gameId = query.GameId;
 
-            var subGp = await _gameProviderRepository
-                .GetSubGameProviderDataInfoAsync(subGameProviderCode)
+            var game = await _gameProviderRepository
+                .QueryAllGamesAsync(query.BrandId)
+                .Where(g => g.Id == query.GameId)
+                .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-            if (subGp == null)
-                throw new ArgumentException(
-                    $"No game provider of code '{subGameProviderCode}' is found");
-
-            var gameProvider = await _gameProviderOperations
-                .GetCachedGameProviderAsync(subGp.GameProviderId)
-                .ConfigureAwait(false);
-
-            var gameProviderCode = gameProvider.Code;
-
-            var statuses = _validStatus.GetStatus(query.PlayerType);
-            var gameStatuses = _validGameStatus.GetStatus(query.PlayerType);
-
-            await _statusValidator.ThrowIfGameOrGameProviderStatusIsNotOneOfAsync(
-                    query.BrandId,
-                    subGp.GameProviderId,
-                    gameId,
-                    gameId.ToString(),
-                    statuses,
-                    gameStatuses)
-                .ConfigureAwait(false);
-
-            var gamePlatformType = await _gameProviderOperations
-                .GetGamePlatformTypeAsync(subGp.GameProviderId, gameId)
-                .ConfigureAwait(false);
-
-            if (gamePlatformType == null)
+            var allowedGamePlatformTypes = playerTokenData.PlatformType.ToGamePlatformTypes();
+            if (!allowedGamePlatformTypes.Contains(game!.PlatformType))
             {
-                throw new InvalidOperationException($"Game with id '{gameId}' doesn't exist");
-            }
-
-            var allowedGamePlatformTypes = platformType.ToGamePlatformTypes();
-            if (!allowedGamePlatformTypes.Contains(gamePlatformType.Value))
-            {
-                string allowPlatforms = allowedGamePlatformTypes.JoinAsString(",");
-                string msg =
+                var allowPlatforms = string.Join(",", allowedGamePlatformTypes);
+                var msg =
                     $"Launch game platform is expected as '{allowPlatforms}' " +
-                    $"but is {gamePlatformType.Value} with player login as '{platformType}'";
+                    $"but is {game.PlatformType} with player login as '{playerTokenData.PlatformType}'";
 
                 throw new InvalidOperationException(msg);
             }
 
-            var serviceUrl = await _pluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .ConfigureAwait(false);
+            Uri? backUrl = null;
 
-            var gameUrlResponse = await _pluggableApiClient
+            var extendedData = query.ExtendedData;
+
+            if (extendedData != null &&
+                extendedData.RootElement.TryGetProperty("lobbyurl", out var prop))
+            {
+                var lobbyUrl = prop.GetString();
+                if (!string.IsNullOrEmpty(lobbyUrl))
+                {
+                    backUrl = new Uri(lobbyUrl);
+                }
+            }
+
+            var gameUrl = await _pluggableClient
                 .GetGameUrlAsync(
-                    serviceUrl,
-                    new GetGameUrlRequest
-                    {
-                        Token = playerTokenData,
-                        GameProviderCode = gameProviderCode,
-                        GameId = gameId,
-                        Language = query.LanguageCode,
-                        ExtendedData = query.ExtendedData
-                    })
+                    playerTokenData.PlayerCode,
+                    playerTokenData.LoginRecordId,
+                    playerTokenData.PlatformType == PlatformType.Mobile,
+                    query.GameId,
+                    query.LanguageCode,
+                    query.IpAddress,
+                    backUrl)
                 .ConfigureAwait(false);
 
-            return new GameUrlInfo(
-                gameUrlResponse.Error,
-                gameUrlResponse.ErrorMessage,
-                gameUrlResponse.Url);
+            return gameUrl;
         }
     }
 }

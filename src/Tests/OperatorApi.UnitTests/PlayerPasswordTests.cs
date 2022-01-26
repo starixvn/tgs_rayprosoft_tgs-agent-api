@@ -9,6 +9,7 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
@@ -135,7 +136,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     command.Phone,
                     command.AreaCode,
                     null,
-                    Core.Models.Enums.PlayerStatus.Enabled));
+                    PlayerStatus.Enabled));
 
             var validateCode = "123456";
             var token = "abc123";
