@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
 using TGS.Services.BackOffice.Application.Queries.Game;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -15,6 +15,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Parallelizable]
     public class RoundControllerTests : BaseTests
     {
+        [SetUp]
+        public override void Setup()
+        {
+            base.Setup();
+            _controller = new(
+                _clientMock.Object);
+        }
+
         private readonly Mock<IReportClient> _clientMock = new();
 
         private RoundReportController _controller;
@@ -53,14 +61,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             moqReportClient.Verify(
                 fake => fake.GetRoundsAsync(It.IsAny<GetRoundsRequest>()),
                 Times.Exactly(1));
-        }
-
-        [SetUp]
-        public override void Setup()
-        {
-            base.Setup();
-            _controller = new(
-                _clientMock.Object);
         }
     }
 }

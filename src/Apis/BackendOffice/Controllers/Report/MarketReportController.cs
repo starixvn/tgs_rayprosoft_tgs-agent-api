@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Market;
+using TGS.Apis.BackendOffice.Models.Market;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Market;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -17,14 +19,66 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get market report")]
-        public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
-            _client.GetMarketsAsync(request);
+        public async Task<PagedResponse<MarketReportModel>> GetMarketsAsync([FromQuery] GetMarketsReportRequest request)
+        {
+            var reportRequest = new GetMarketsRequest
+            {
+                BrandId = request.BrandId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetMarketsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = true,
+                TotalCount = response.TotalCount,
+                Items = response.Items.Select(x => new MarketReportModel
+                {
+                    ReportDate = x.ReportDate,
+                    RegisteredCount = x.RegisteredCount,
+                    FirstFundInCount = x.FirstFundInCount,
+                    DepositAmount = x.DepositAmount,
+                    WithdrawalAmount = x.WithdrawalAmount,
+                    AdjustmentAmount = x.AdjustmentAmount,
+                    BonusAmount = x.BonusAmount,
+                    ValidBetAmount = x.ValidBetAmount,
+                    Turnover = x.Turnover,
+                    WinLossAmount = x.WinLossAmount,
+                    NetProfit = x.NetProfit,
+                    AdditionalExpenses = x.AdditionalExpenses
+                }).ToArray()
+            };
+        }
 
         [HttpGet("additionalExpenses")]
         [Description("Get Additional Expenses")]
-        public Task<GetAdditionalExpensesResponse> GetAdditionalExpensesAsync(
-            [FromQuery] GetAdditionalExpensesRequest request) =>
-            _client.GetAdditionalExpensesAsync(request);
+        public async Task<GetAdditionalExpensesReportResponse> GetAdditionalExpensesAsync(
+            [FromQuery] GetAdditionalExpensesReportRequest request)
+        {
+            var reportRequest = new GetAdditionalExpensesRequest
+            {
+                BrandId = request.BrandId,
+                ReportDate = request.ReportDate
+            };
+
+            var response = await _client.GetAdditionalExpensesAsync(reportRequest);
+
+            return new GetAdditionalExpensesReportResponse
+            {
+                AdditionalExpenses = response.AdditionalExpenses.Select(x => new AdditionalExpensesReportModel
+                {
+                    AdditionalExpensesType = (AdditionalExpensesType)x.AdditionalExpensesType,
+                    Amount = x.Amount
+                }).ToArray()
+            };
+        }
 
         [HttpGet("exportMarkets")]
         public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportMarketsRequest request) => File(

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models;
+using Tgs.Report.Client.Models.Round;
 using Tgs.ServiceUtility;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Round;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
@@ -13,9 +13,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
         private readonly IReportClient _reportClient;
 
         public GetGameRoundListQueryService(IReportClient reportClient)
-        {
-            _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-        }
+            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
         public async ValueTask<PagedResponse<RoundModel>> GetAsync(
             GetGameRoundListQuery query,
@@ -29,17 +27,17 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                 RoundId = query.RoundId,
                 ExternalRoundId = query.ExternalRoundId,
                 GameProviderId = query.GameProviderId,
-                Status = query.Status,
-                GameType = query.GameType,
+                Status = (short?)query.Status,
+                GameType = (short?)query.GameType,
                 From = query.From,
                 To = query.To,
                 ClosedFrom = query.ClosedFrom,
                 ClosedTo = query.ClosedTo,
                 Page = query.Paging.Page,
                 Rows = query.Paging.Rows,
-                OrderBy = query.Paging.OrderBy,
+                OrderBy = (short)query.Paging.OrderBy,
                 SortBy = query.Paging.SortBy,
-                ShowAll = query.Paging.ShowAll,
+                ShowAll = query.Paging.ShowAll
             };
 
             return await _reportClient

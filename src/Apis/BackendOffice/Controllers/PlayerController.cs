@@ -1,14 +1,17 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Models.Player;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Player;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -41,10 +44,38 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public Task<PagedResponse<PlayerAccountChangeModel>> GetAccountChangesAsync(
+        public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
             [FromServices] IReportClient client,
-            [FromQuery] GetPlayerAccountChangesRequest request) =>
-            client.GetPlayerAccountChangesAsync(request);
+            [FromQuery] GetPlayerAccountChangesReportRequest request)
+        {
+            var reportRequest = new GetPlayerAccountChangesRequest
+            {
+                BrandId = request.BrandId,
+                PlayerCode = request.PlayerCode,
+                AccountChangeType = (short?)request.AccountChangeType,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+            var response = await client.GetPlayerAccountChangesAsync(reportRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items.Select(x => new PlayerAccountChangeReportModel
+                {
+                    TransactionId = x.TransactionId,
+                    GameActionId = x.GameActionId,
+                    Amount = x.Amount,
+                    Balance = x.Balance,
+                    TransactionType = (TransactionType)x.TransactionType,
+                    GameActionType = (GameActionType)x.GameActionType,
+                    RecordedOn = x.RecordedOn
+                }).ToArray()
+            };
+        }
 
         [HttpGet("{playerCode}/joinedPromotions")]
         [Description("Get player operation")]
@@ -58,7 +89,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get player list")]
-        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request) 
+        public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
             => _mediator.Send(request);
 
         [HttpGet("{playerCode}/transferwallet")]

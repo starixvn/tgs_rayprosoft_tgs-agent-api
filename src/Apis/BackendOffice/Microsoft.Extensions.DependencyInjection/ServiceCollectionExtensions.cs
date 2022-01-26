@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -53,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddPluggableServices()
                 .AddTransactions()
                 .AddBackOfficeApplicationServices()
-                .AddReportClientServices(configuration)
+                .AddReportClient(configuration)
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -82,11 +80,11 @@ namespace Microsoft.Extensions.DependencyInjection
             Action<RedisOptions, IServiceProvider> configure)
         {
             services
-               .AddOptions<RedisOptions>()
-               .Configure(configure)
-               .Services
-               .AddRedisServices()
-               .RegisterRedisConnectionFactory<RedisConnectionFactory>();
+                .AddOptions<RedisOptions>()
+                .Configure(configure)
+                .Services
+                .AddRedisServices()
+                .RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
             return services;
         }

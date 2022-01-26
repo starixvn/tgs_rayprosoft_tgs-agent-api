@@ -33,7 +33,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -163,7 +162,7 @@ namespace TGS.Apis.OperatorApi
                 .AddOperations()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddReportClientServices(_configuration)
+                .AddReportClient(_configuration)
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();

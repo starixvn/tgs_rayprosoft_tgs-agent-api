@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models.Enums;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Agent;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -52,10 +52,10 @@ namespace TGS.Apis.AgentApi.Controllers
                 BrandId = brandId,
                 From = request.From,
                 To = request.To,
-                TransactionType = request.TransactionType,
+                TransactionType = (short?)request.TransactionType,
                 Page = pagingRequest.Page,
                 Rows = pagingRequest.Rows,
-                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = pagingRequest.SortBy,
                 ShowAll = pagingRequest.ShowAll
             };
@@ -107,7 +107,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
@@ -134,7 +134,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
@@ -170,7 +170,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
@@ -206,7 +206,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
@@ -237,7 +237,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 AgentId = id,
                 Page = pagingRequest.Page,
                 Rows = pagingRequest.Rows,
-                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = pagingRequest.SortBy,
                 ShowAll = pagingRequest.ShowAll
             };

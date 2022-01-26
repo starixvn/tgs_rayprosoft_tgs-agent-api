@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -85,7 +84,7 @@ namespace TGS.Workers.Schedulers
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddOperations()
-                .AddReportClientServices(_configuration)
+                .AddReportAggregateClient(_configuration)
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
