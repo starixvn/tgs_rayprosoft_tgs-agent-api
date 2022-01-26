@@ -1,50 +1,46 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Models.Extensions;
-using TGS.Services.Operations;
 using Tgs.ServiceUtility;
-using System.Linq;
-using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Core.Models.Extensions;
+using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game
 {
-    internal class GetLobbyGameUrlQueryService : IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo>
+    internal class GetLobbyGameUrlQueryService : IGetService<GetLobbyGameUrlQuery, Uri?>
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IGetService<GetGameUrlQuery, GameUrlInfo> _getGameUrlQueryService;
+        private readonly IGameProviderRepository _gameProviderRepository;
+        private readonly IGetService<GetGameUrlQuery, Uri?> _getGameUrlQueryService;
 
         public GetLobbyGameUrlQueryService(
-            IGameProviderOperations gameProviderOperations,
-            IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService)
+            IGameProviderRepository gameProviderRepository,
+            IGetService<GetGameUrlQuery, Uri?> getGameUrlQueryService)
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
             _getGameUrlQueryService = getGameUrlQueryService ?? throw new ArgumentNullException(nameof(getGameUrlQueryService));
         }
 
-        public async ValueTask<LobbyGameUrlInfo> GetAsync(GetLobbyGameUrlQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<Uri?> GetAsync(GetLobbyGameUrlQuery query, CancellationToken cancellationToken = default)
         {
             var playerTokenData = query.PlayerTokenData;
             var platformType = playerTokenData.PlatformType;
-            var gameProviderCode = query.GameProviderCode;
             var gameType = query.GameType;
 
-            var gameProviderId = await _gameProviderOperations
-                .GetGameProviderIdByCodeAsync(gameProviderCode)
-                .ConfigureAwait(false);
-
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
-            var games = await _gameProviderOperations
-                .GetCachedGamesAsync(
-                    gameProviderId,
-                    gamePlatformTypes,
-                    gameType)
+
+            var games = await _gameProviderRepository
+                .QueryAllGamesAsync(query.BrandId)
+                .Where(g => g.GpId == query.GameProviderId &&
+                            gamePlatformTypes.Contains(g.PlatformType) &&
+                            g.Type == query.GameType)
+                .ToArrayAsync()
                 .ConfigureAwait(false);
 
             if (games.Length != 1)
-            {                
+            {
                 throw new InvalidOperationException(
-                $"Game Provider '{gameProviderCode}' with game type '{gameType}' and platform '{platformType}' should only have 1 lobby but found {games.Length}.");                
+                $"Game Provider '{games[0].GpCode}' with game type '{gameType}' and platform '{platformType}' should only have 1 lobby but found {games.Length}.");
             }
 
             var gameId = games[0].Id;
@@ -52,20 +48,14 @@ namespace TGS.Services.Operator.ApplicationServices.Game
             var getGameUrlQuery = new GetGameUrlQuery(
                 query.BrandId,
                 playerTokenData,
-                query.PlayerType,
-                gameProviderCode,
                 gameId,
                 query.LanguageCode,
+                query.IpAddress,
                 query.Extends);
 
-            var gameUrlInfo = await _getGameUrlQueryService
-                .GetAsync(getGameUrlQuery)
-                .ConfigureAwait(false);
-
-            return new LobbyGameUrlInfo(
-                gameUrlInfo.Error,
-                gameUrlInfo.ErrorMessage,
-                gameUrlInfo.Url);
+            return await _getGameUrlQueryService
+                 .GetAsync(getGameUrlQuery)
+                 .ConfigureAwait(false);
         }
     }
 }

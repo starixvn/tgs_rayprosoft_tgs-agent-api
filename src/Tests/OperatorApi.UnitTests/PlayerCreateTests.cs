@@ -7,6 +7,7 @@ using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -236,7 +237,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    Core.Models.Enums.PlayerStatus.Enabled));
+                    PlayerStatus.Enabled));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -488,7 +489,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         new Uri("http://image.com/img01"),
                         new Uri("http://image.com/img02"),
                         new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
+                        BrandStatus.Active,
                         "CNY",
                         false,
                         false)));
@@ -503,7 +504,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    Core.Models.Enums.PlayerStatus.Enabled));
+                    PlayerStatus.Enabled));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
