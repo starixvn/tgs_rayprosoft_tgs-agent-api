@@ -267,7 +267,7 @@ namespace TGS.Apis.BackendOffice
                         {
                             options.SetDbStatementForText = true;
                         })
-                        .AddProfileViewExporter()
+                        .AddProfileViewExporter(_ => { })
                         .AddOtlpExporter())
                 .Configure<AspNetCoreInstrumentationOptions>(options =>
                 {
