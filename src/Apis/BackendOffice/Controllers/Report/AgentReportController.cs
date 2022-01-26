@@ -44,8 +44,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentContributionReportModel
+                Items = response.Items?.Select(x => new AgentContributionReportModel
                 {
                     Username = x.Username,
                     Type = (AccountType)x.Type,
@@ -82,8 +84,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new TeamInfoReportModel
+                Items = response.Items?.Select(x => new TeamInfoReportModel
                 {
                     Username = x.Username,
                     RegisteredOn = x.RegisteredOn,
@@ -116,8 +120,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentDividendReportModel
+                Items = response.Items?.Select(x => new AgentDividendReportModel
                 {
                     Id = x.Id,
                     Username = x.Username,
@@ -158,8 +164,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentDividendDetailReportModel
+                Items = response.Items?.Select(x => new AgentDividendDetailReportModel
                 {
                     Id = x.Id,
                     Username = x.Username,
@@ -201,8 +209,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentDividendTeamDetailReportModel
+                Items = response.Items?.Select(x => new AgentDividendTeamDetailReportModel
                 {
                     Id = x.Id,
                     Username = x.Username,
@@ -246,8 +256,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentPlayerWinLossReportModel
+                Items = response.Items?.Select(x => new AgentPlayerWinLossReportModel
                 {
                     Username = x.Username,
                     LiveDealerWinLossAmount = x.LiveDealerWinLossAmount,

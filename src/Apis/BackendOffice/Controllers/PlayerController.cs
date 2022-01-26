@@ -63,8 +63,10 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new PlayerAccountChangeReportModel
+                Items = response.Items?.Select(x => new PlayerAccountChangeReportModel
                 {
                     TransactionId = x.TransactionId,
                     GameActionId = x.GameActionId,

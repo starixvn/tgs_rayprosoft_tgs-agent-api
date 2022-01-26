@@ -35,26 +35,32 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             var response = await _client.GetMarketsAsync(reportRequest);
 
-            return new()
-            {
-                Valid = true,
-                TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new MarketReportModel
+            return response.Valid
+                ? new()
                 {
-                    ReportDate = x.ReportDate,
-                    RegisteredCount = x.RegisteredCount,
-                    FirstFundInCount = x.FirstFundInCount,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    BonusAmount = x.BonusAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit,
-                    AdditionalExpenses = x.AdditionalExpenses
-                }).ToArray()
-            };
+                    Valid = response.Valid,
+                    TotalCount = response.TotalCount,
+                    Items = response.Items.Select(x => new MarketReportModel
+                    {
+                        ReportDate = x.ReportDate,
+                        RegisteredCount = x.RegisteredCount,
+                        FirstFundInCount = x.FirstFundInCount,
+                        DepositAmount = x.DepositAmount,
+                        WithdrawalAmount = x.WithdrawalAmount,
+                        AdjustmentAmount = x.AdjustmentAmount,
+                        BonusAmount = x.BonusAmount,
+                        ValidBetAmount = x.ValidBetAmount,
+                        Turnover = x.Turnover,
+                        WinLossAmount = x.WinLossAmount,
+                        NetProfit = x.NetProfit,
+                        AdditionalExpenses = x.AdditionalExpenses
+                    }).ToArray()
+                }
+                : new PagedResponse<MarketReportModel>
+                {
+                    Valid = response.Valid,
+                    Message = response.Message
+                };
         }
 
         [HttpGet("additionalExpenses")]

@@ -41,8 +41,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new PlayerContributionReportModel
+                Items = response.Items?.Select(x => new PlayerContributionReportModel
                 {
                     Username = x.Username,
                     PlayerCode = x.PlayerCode,
@@ -85,8 +87,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new PlayersAccountChangeReportModel
+                Items = response.Items?.Select(x => new PlayersAccountChangeReportModel
                 {
                     Username = x.Username,
                     Amount = x.Amount,

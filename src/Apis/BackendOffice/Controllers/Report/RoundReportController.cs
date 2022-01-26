@@ -49,8 +49,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new ClosedRoundReportModel
+                Items = response.Items?.Select(x => new ClosedRoundReportModel
                 {
                     AdditionalData = x.AdditionalData,
                     BetAmount = x.BetAmount,
@@ -104,8 +106,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new OpenRoundReportModel
+                Items = response.Items?.Select(x => new OpenRoundReportModel
                 {
                     Id = x.Id,
                     AdditionalData = x.AdditionalData,
@@ -170,7 +174,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [HttpGet]
         [Description("Get rounds")]
         public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
-            [FromServices] IGetService<GetGameRoundListQuery, PagedResponse<RoundModel>> queryService,
+            [FromServices]
+            IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
             [FromServices] IQueryService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
@@ -186,8 +191,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 request.RoundId,
                 request.ExternalRoundId,
                 request.GameProviderId,
-                (ClientRoundStatus)request.Status,
-                (GameType)request.GameType,
+                (ClientRoundStatus?)request.Status,
+                (GameType?)request.GameType,
                 request.From,
                 request.To,
                 request.ClosedFrom,

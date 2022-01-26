@@ -26,6 +26,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 BrandId = request.BrandId,
                 Username = request.Username,
                 Level = request.Level,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
@@ -37,8 +39,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new VipReportModel
+                Items = response.Items?.Select(x => new VipReportModel
                 {
                     BrandId = x.BrandId,
                     Username = x.Username,
@@ -67,6 +71,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             {
                 BrandId = request.BrandId,
                 Username = username,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
@@ -78,8 +84,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new VipRebateReportModel
+                Items = response.Items?.Select(x => new VipRebateReportModel
                 {
                     ReportDate = x.ReportDate,
                     LiveDealerAmount = x.LiveDealerAmount,

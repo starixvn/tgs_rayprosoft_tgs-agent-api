@@ -34,8 +34,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new GameActionReportModel
+                Items = response.Items?.Select(x => new GameActionReportModel
                 {
                     RecordedOn = x.RecordedOn,
                     ExternalTransactionId = x.ExternalTransactionId,

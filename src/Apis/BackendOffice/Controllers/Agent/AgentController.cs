@@ -89,8 +89,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
 
             return new()
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items.Select(x => new AgentAccountChangeReportModel
+                Items = response.Items?.Select(x => new AgentAccountChangeReportModel
                 {
                     TransactionId = x.TransactionId,
                     Amount = x.Amount,

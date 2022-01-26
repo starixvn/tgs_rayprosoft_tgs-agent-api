@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -22,13 +21,8 @@ namespace TGS.Apis.AgentApi.Controllers
     public class AgentReportController : ControllerBase
     {
         private readonly IReportClient _client;
-        private readonly IMediator _mediator;
 
-        public AgentReportController(IMediator mediator, IReportClient client)
-        {
-            _mediator = mediator;
-            _client = client;
-        }
+        public AgentReportController(IReportClient client) => _client = client;
 
         /// <summary>
         /// Get account changes
