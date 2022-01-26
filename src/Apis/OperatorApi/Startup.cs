@@ -21,6 +21,13 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Payment.ApplePay;
+using Tgs.Payment.Help2Pay;
+using Tgs.Payment.LeePay;
+using Tgs.Payment.MaticPay;
+using Tgs.Payment.PrimePay;
+using Tgs.Payment.SkyPay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -35,18 +42,10 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using Tgs.Payment.ApplePay;
-using Tgs.Payment.Help2Pay;
-using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
-using Tgs.Payment.MaticPay;
-using Tgs.Payment.PrimePay;
-using Tgs.Payment.SkyPay;
-using Tgs.Payment.UmPay;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
-using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
@@ -163,7 +162,6 @@ namespace TGS.Apis.OperatorApi
                 .AddSecurity()
                 .AddOperations()
                 .AddApiClient()
-                .AddPluggableServices()
                 .AddReportClient((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
