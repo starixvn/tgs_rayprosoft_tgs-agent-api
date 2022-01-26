@@ -51,7 +51,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddPluggableServices()
                 .AddTransactions()
                 .AddBackOfficeApplicationServices()
-                .AddReportClient(configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();

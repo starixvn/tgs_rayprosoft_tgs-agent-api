@@ -104,7 +104,12 @@ namespace TGS.Apis.AgentApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddReportClient(_configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddTransactions();
 
             services.AddErrorMapper()
