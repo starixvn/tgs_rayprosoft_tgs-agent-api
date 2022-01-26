@@ -37,7 +37,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc8" />
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.11-beta" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.1.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
