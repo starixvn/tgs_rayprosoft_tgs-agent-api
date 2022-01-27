@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -179,7 +178,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromServices] IQueryService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
-            [FromQuery] GetRoundsRequest request)
+            [FromQuery] GetRoundsReportRequest request)
         {
             var serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
             var currentCulture = CultureInfo.CurrentUICulture.Name;
@@ -191,8 +190,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 request.RoundId,
                 request.ExternalRoundId,
                 request.GameProviderId,
-                (ClientRoundStatus?)request.Status,
-                (GameType?)request.GameType,
+                request.Status,
+                request.GameType,
                 request.From,
                 request.To,
                 request.ClosedFrom,
@@ -201,7 +200,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 {
                     Page = request.Page,
                     Rows = request.Rows,
-                    OrderBy = (SortOrder)request.OrderBy,
+                    OrderBy = request.OrderBy,
                     SortBy = request.SortBy,
                     ShowAll = request.ShowAll
                 });
