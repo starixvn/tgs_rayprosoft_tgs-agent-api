@@ -314,7 +314,6 @@ namespace TGS.Apis.OperatorApi
                             .AddEnvironmentVariableDetector())
                         .AddSource("Tgs.*")
                         .AddSource("TGS.*")
-                        .AddSource("*")
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddEntityFrameworkCoreInstrumentation(options =>
@@ -322,19 +321,19 @@ namespace TGS.Apis.OperatorApi
                             options.SetDbStatementForText = true;
                         })
                         .AddProfileViewExporter()
-                        .AddOtlpExporter());
-                //.Configure<AspNetCoreInstrumentationOptions>(options =>
-                //{
-                //    options.Filter = httpContext =>
-                //    {
-                //        return !httpContext.Request.Path.HasValue
-                //            || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                //            && !httpContext.Request.Path.StartsWithSegments("/health")
-                //            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                //            && !new[] { "html", "ico", "png", "jpg" }.Any(
-                //                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
-                //    };
-                //});
+                        .AddOtlpExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext =>
+                    {
+                        return !httpContext.Request.Path.HasValue
+                            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                            && !httpContext.Request.Path.StartsWithSegments("/health")
+                            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !new[] { "html", "ico", "png", "jpg" }.Any(
+                                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                    };
+                });
 
             services.AddProfileViewer();
 
