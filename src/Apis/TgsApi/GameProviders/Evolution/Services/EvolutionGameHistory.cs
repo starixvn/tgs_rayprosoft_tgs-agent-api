@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.Evolution;
-using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult;
 using TGS.Shared.Game.Models.Evolution.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
@@ -23,8 +16,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public sealed class EvolutionGameHistory : BaseBetHistory
     {
         private readonly IEvolutionApiClient _client;
-        private readonly IEvolutionService _service;
         private readonly IEvolutionGameHistoryService _gameHistoryService;
+        private readonly IEvolutionService _service;
 
         public EvolutionGameHistory(
             IRoundQueries roundQueries,

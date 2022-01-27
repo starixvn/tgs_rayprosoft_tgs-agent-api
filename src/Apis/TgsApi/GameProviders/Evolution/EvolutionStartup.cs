@@ -9,18 +9,19 @@ using TGS.Apis.TgsApi.GameProviders.Evolution.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution
 {
     public sealed class EvolutionStartup : BaseStartup
     {
+        protected override string LogPrefix => "evo";
+
         public EvolutionStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+                    base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "evo";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -32,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
                 (provider, key) => key switch
                 {
                     GameProvider.Evolution => provider.GetRequiredService<EvolutionErrorMapper>(),
-                    _                      => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
             services.AddHttpContextAccessor();
             services.AddScoped<HandleEvolutionExceptionMiddleware>();
@@ -40,8 +41,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
 
             services.AddScoped<IEvolutionService, EvolutionService>();
             services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
-            services.AddScoped<IEvolutionRedisCacheService, EvolutionRedisCacheService>();
+            services.AddScoped<IEvolutionCacheService, EvolutionCacheService>(
+                sp => ActivatorUtilities.CreateInstance<EvolutionCacheService>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
             services.AddScoped<IEvolutionGameHistoryService, EvolutionGameHistoryService>();
+            services.AddScoped<EvolutionExternalTransactionService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
