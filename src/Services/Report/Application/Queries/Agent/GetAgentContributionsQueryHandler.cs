@@ -65,7 +65,6 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         x.PlayerCode,
                         WithdrawalAmount = withdrawals.Sum(w => w.WithdrawalAmount)
                     })
-                .Where(x => x.AgentId == agent.Id)
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
