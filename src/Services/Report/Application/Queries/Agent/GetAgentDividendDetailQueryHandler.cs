@@ -63,7 +63,9 @@ namespace TGS.Services.Report.Application.Queries.Agent
             var agents = await _tgsAgentService.GetAgentQueries(q => q.Where(x => agentIds.Contains(x.Id)))
                 .ToArrayAsync(cancellationToken);
 
-            var models = agentDividends.Join(agents, ad => ad.AgentId, a => a.Id,
+            var models = agentDividends.Join(agents,
+                ad => ad.AgentId,
+                a => a.Id,
                 (ad, a) => new AgentDividendDetailModel
                 {
                     Id = ad.AgentId,
@@ -83,7 +85,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     ExpenditureAmount = ad.ExpenditureAmount
                 }).ToArray();
 
-            return await models.CreatePagedResponseAsync(models.Length);
+            return models.AsQueryable().CreatePagedResponse(request);
         }
     }
 }

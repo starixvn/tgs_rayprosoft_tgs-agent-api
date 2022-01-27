@@ -80,7 +80,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
             var players = await _tgsPlayerService
                 .GetPlayerQueries(q => q.Where(x => playerAggregate.Select(x => x.playerCode).Contains(x.PlayerCode)))
                 .ToArrayAsync(cancellationToken);
-            return await players.Join(
+            return players.Join(
                 playerAggregate,
                 p => p.PlayerCode,
                 winLossPlayer => winLossPlayer.playerCode,
@@ -93,7 +93,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     CardGameWinLossAmount = winLossPlayer.CardGameWinLossAmount,
                     SportsWinLossAmount = winLossPlayer.SportsWinLossAmount,
                     VirtualSportsWinLossAmount = winLossPlayer.VirtualSportsWinLossAmount
-                }).CreatePagedResponseAsync(players.Length);
+                }).AsQueryable().CreatePagedResponse(request);
         }
     }
 }
