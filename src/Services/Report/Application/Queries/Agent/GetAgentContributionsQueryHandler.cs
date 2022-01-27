@@ -122,8 +122,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
 
             if (!request.IncludeAgents)
             {
-                return await players
-                    .CreatePagedResponseAsync(players.Length);
+                return players.AsQueryable()
+                    .CreatePagedResponse(request);
             }
 
             var childAgentPlayers = childAgents.GroupJoin(_service.GetPlayerAggregateQueries()
@@ -174,9 +174,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
                                 p.playerAggregate.PromotionAmount)
                         }).ToArray();
 
-
-            return await childAgentPlayers.Union(players)
-                .CreatePagedResponseAsync(childAgentPlayers.Length + players.Length);
+            return childAgentPlayers.Union(players).AsQueryable()
+                .CreatePagedResponse(request);
         }
     }
 }
