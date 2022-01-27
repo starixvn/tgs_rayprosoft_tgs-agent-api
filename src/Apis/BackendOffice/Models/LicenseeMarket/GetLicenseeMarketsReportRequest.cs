@@ -7,7 +7,7 @@ namespace TGS.Apis.BackendOffice.Models.LicenseeMarket
     {
         public string CurrencyCode { get; init; } = default!;
 
-        public string[]? CurrencyCodes { get; init; }
+        public string[] CurrencyCodes { get; init; }
 
         public DateTimeOffset From { get; init; }
 
