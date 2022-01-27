@@ -10,20 +10,11 @@ using TGS.Shared.Game.Models.Evolution.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 {
-    public interface IEvolutionActionModelMapper
-    {
-        BetData Bet(GameProviderConfigurationData data, string playCode, EvolutionDebitRequest source);
-
-        ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source);
-
-        Task<BetData> CancelAsync(GameProviderConfigurationData data, string playCode, EvolutionCancelRequest source);
-    }
-
     public class EvolutionActionModelMapper : IEvolutionActionModelMapper
     {
         private readonly string _gameProviderCode = Consts.GameProvider.Evolution;
-        private readonly IEvolutionService _service;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IEvolutionService _service;
 
         public EvolutionActionModelMapper(
             IEvolutionService service,
@@ -34,10 +25,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-
         BetData IEvolutionActionModelMapper.Bet(GameProviderConfigurationData data, string playCode, EvolutionDebitRequest source)
         {
-
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(source.Transaction.Amount),
@@ -49,6 +38,33 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                 GameActionType = GameActionType.PlaceBet,
                 TimeStamp = DateTimeOffset.UtcNow,
             };
+            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+        }
+
+        async Task<BetData> IEvolutionActionModelMapper.CancelAsync(GameProviderConfigurationData data, string playCode, EvolutionCancelRequest source)
+        {
+            var transactions = default(TransactionData);
+
+            var orders = await _service.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId, playCode, source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false);
+            var order = orders.Where(x => x.ExternalTransactionId == source.Transaction.ExternalTransactionId).First();
+
+            if (order != null)
+            {
+                (bool RoundClosed, string ExternalTransactionId) = _service.GetCancelExternalTransactionId(order.ExternalTransactionId, order.GameActionType);
+                transactions = new TransactionData()
+                {
+                    Amount = Math.Abs(source.Transaction.Amount),
+                    ExternalRoundId = source.Game.ExternalRoundId,
+                    ExternalTransactionId = ExternalTransactionId,
+                    ExternalBetId = source.Transaction.ExternalGameActionGroupId,
+                    ExternalGameActionGroupId = source.Transaction.ExternalGameActionGroupId,
+                    ExternalGameId = source.Game.GameDetail.GameTable.ExternalGameId.ToString(),
+                    ExternalTransactionReferenceId = order.ExternalTransactionId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    RoundClosed = RoundClosed,
+                    TimeStamp = DateTimeOffset.UtcNow
+                };
+            }
             return GetBetData(data, playCode, transactions, data.AutoCloseRound);
         }
 
@@ -73,33 +89,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             };
 
             return GetBetData(data, playCode, transactions);
-        }
-
-        async Task<BetData> IEvolutionActionModelMapper.CancelAsync(GameProviderConfigurationData data, string playCode, EvolutionCancelRequest source)
-        {
-            var transactions = default(TransactionData);
-
-            var orders = await _service.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId, playCode, source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false);
-            var order = orders.Where(x => x.ExternalTransactionId == source.Transaction.ExternalTransactionId).First();
-
-            if (order != null)
-            {
-                string action = _service.GetActionCancel(order.GameActionType);
-                transactions = new TransactionData()
-                {
-                    Amount = Math.Abs(source.Transaction.Amount),
-                    ExternalRoundId = source.Game.ExternalRoundId,
-                    ExternalTransactionId = $"{ order.ExternalTransactionId}_{action}",
-                    ExternalBetId = source.Transaction.ExternalGameActionGroupId,
-                    ExternalGameActionGroupId = source.Transaction.ExternalGameActionGroupId,
-                    ExternalGameId = source.Game.GameDetail.GameTable.ExternalGameId.ToString(),
-                    ExternalTransactionReferenceId = order.ExternalTransactionId,
-                    GameActionType = GameActionType.CancelTransaction,
-                    RoundClosed = false,
-                    TimeStamp = DateTimeOffset.UtcNow
-                };
-            }
-            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
         }
 
         private BetData GetBetData(GameProviderConfigurationData data, string playerCode,
@@ -134,7 +123,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             {
                 return GameActionType.LoseBet;
             }
-
         }
     }
 }
