@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.CustomQueryParameters;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
 
@@ -97,18 +98,18 @@ namespace TGS.Services.Operations.Queries
             }
 
             return r.ToLookup(o => new
-                {
-                    Id = o.RoundId,
-                    o.ExternalRoundId,
-                    Status = o.RoundStatus,
-                    BetAmount = o.RoundBetAmount,
-                    ValidBetAmount = o.RoundValidBetAmount,
-                    WinLoss = o.RoundWinLoss,
-                    o.Commission,
-                    o.TieBetAdjustment,
-                    o.PlatformType,
-                    ClosedOn = o.RoundClosedOn
-                })
+            {
+                Id = o.RoundId,
+                o.ExternalRoundId,
+                Status = o.RoundStatus,
+                BetAmount = o.RoundBetAmount,
+                ValidBetAmount = o.RoundValidBetAmount,
+                WinLoss = o.RoundWinLoss,
+                o.Commission,
+                o.TieBetAdjustment,
+                o.PlatformType,
+                ClosedOn = o.RoundClosedOn
+            })
                 .Select(g => new GameActionData
                 {
                     Round = new()
@@ -181,17 +182,60 @@ namespace TGS.Services.Operations.Queries
                    select ga.ExternalTransactionId).ToArrayAsync()
                 .ConfigureAwait(false);
 
-        async ValueTask<GameActionExternalIds> IGameActionQueries.GetGameActionExternalIdAsync(Guid gameProviderId,
-            string playerCode, string externalTransactionId)
+        async ValueTask<GameActionExternalIds> IGameActionQueries.GetGameActionExternalIdAsync(
+            Guid gameProviderId,
+            string playerCode,
+            string externalTransactionId)
         {
-            const string spName = "bet.game_action_get_game_actions_by_external_transaction_id";
-            return await _repository.SqlQuerySingleAsync<GameActionExternalIds>(spName, parameters:
-                new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId},
-                    {":player_code", playerCode},
-                    {":external_transaction_id", externalTransactionId}
-                });
+            var gameActionData =
+                await (from round in _repository.Rounds.AsQueryable()
+                       join gameAction in _repository.GameActions.AsQueryable()
+                       on round.Id equals gameAction.RoundId
+                       join game in _repository.Games.AsQueryable()
+                       on round.GameId equals game.Id
+                       where round.GameProviderId == gameProviderId
+                       && round.PlayerCode == playerCode
+                       && gameAction.ExternalTransactionId == externalTransactionId
+                       select new
+                       {
+                           ExternalBetId = gameAction.ExternalBetId,
+                           ExternalTransactionId = gameAction.ExternalTransactionId,
+                           ExternalRoundId = round.ExternalRoundId,
+                           ExternalGameActionGroupId = gameAction.ExternalGameActionGroupId,
+                           ReferencedGameActionId = gameAction.ReferencedGameActionId,
+                           GameId = round.GameId,
+                           ExternalGameId = game.ExternalId,
+                           Amount = gameAction.Amount,
+                           RecordedOn = gameAction.RecordedOn,
+                           GameActionType = gameAction.Type
+                       }).FirstOrDefaultAsync();
+
+            if (gameActionData == null)
+            {
+                return null;
+            }
+
+            var externalReferencedTransactionId = default(string);
+
+            if (gameActionData.ReferencedGameActionId.HasValue)
+            {
+                externalReferencedTransactionId = await _repository.GameActions.AsQueryable()
+                   .Where(x => x.Id == gameActionData.ReferencedGameActionId.Value)
+                   .Select(x => x.ExternalTransactionId).FirstOrDefaultAsync();
+            }
+
+            return new()
+            {
+                ExternalBetId = gameActionData.ExternalBetId,
+                ExternalTransactionId = gameActionData.ExternalTransactionId,
+                ExternalRoundId = gameActionData.ExternalRoundId,
+                ExternalGameActionGroupId = gameActionData.ExternalGameActionGroupId,
+                ExternalReferencedTransactionId = externalReferencedTransactionId,
+                ExternalGameId = gameActionData.ExternalGameId,
+                Amount = gameActionData.Amount,
+                RecordedOn = gameActionData.RecordedOn,
+                GameActionType = gameActionData.GameActionType,
+            };
         }
     }
 }
