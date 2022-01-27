@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -89,7 +89,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                 Id = cachedGame.ExternalId
             };
 
-
             if (cachedGame.Type == GameType.LiveDealerLobby)
             {
                 category = "baccarat_sicbo";
@@ -132,7 +131,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                     }
                 }
             };
-
 
             var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
 

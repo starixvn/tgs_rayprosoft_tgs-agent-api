@@ -16,42 +16,6 @@ using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 {
-    public interface IEvolutionService
-    {
-        ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token);
-
-        ValueTask<bool> ExistCancelGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId);
-
-        ValueTask<bool> ExistGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId);
-
-        string GetActionCancel(GameActionType gameActionType);
-
-        ValueTask<EvolutionConfiguration> GetConfigurationAsync();
-
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId);
-
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(
-            Guid gameProviderId, string playerCode, string externalRoundId, int gameId,
-            GameActionType[] gameActionTypes);
-
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
-            Guid gameProviderId, string playerCode, string externalGameActionGroupId);
-
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
-                                                                            Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
-
-        ValueTask<Guid> GetGameProviderIdAsync();
-
-        void IgnoreCaseNotEqualsUserId(string userId, string playerCode);
-
-        ValueTask<bool> NotExistBetGameActionExternalIdAsync(
-                            Guid gameProviderId, string playerCode, string externalRoundId, string externalGameId,
-            string externalGameActionGroupId);
-    }
-
     public class EvolutionService : IEvolutionService
     {
         private readonly IGameActionQueries _gameActionQueries;
@@ -86,36 +50,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return await _playerLoginRecordService.GetAsync(loginRecordId);
         }
 
-        public async ValueTask<bool> ExistCancelGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId)
-        {
-            var orderData = await _gameActionQueries
-                .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
-            var cancelExternalTransactionId = $"{externalTransactionId}_{GetActionCancel(orderData.GameActionType)}";
-
-            var data = await _gameActionQueries
-                .GetGameActionExternalIdAsync(gameProviderId, playerCode, cancelExternalTransactionId)
-                .ConfigureAwait(false);
-
-            return data != null;
-        }
-
-        public async ValueTask<bool> ExistGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId)
-            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
-                .ConfigureAwait(false) != null;
-
-        public string GetActionCancel(GameActionType gameActionType)
-            => gameActionType == GameActionType.PlaceBet ? "cancel_bet" : "cancel_settle";
+        public (bool RoundClosed, string ExternalTransactionId) GetCancelExternalTransactionId(
+            string externalTransactionId,
+            GameActionType gameActionType)
+                => gameActionType == GameActionType.PlaceBet ? (true, $"{ externalTransactionId}_cancel_bet") : (false, $"{ externalTransactionId}_cancel_settle");
 
         public async ValueTask<EvolutionConfiguration> GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<EvolutionConfiguration>(SettingConsts
                 .GameProviderConfigurations.Evolution);
-
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
-                                                    Guid gameProviderId, string playerCode, string externalTransactionId)
-            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
-                .ConfigureAwait(false);
 
         public async ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(
             Guid gameProviderId, string playerCode, string externalRoundId, int gameId,

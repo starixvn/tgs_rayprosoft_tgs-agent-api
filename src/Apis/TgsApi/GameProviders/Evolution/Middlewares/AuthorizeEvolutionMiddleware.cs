@@ -16,17 +16,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
     public sealed class AuthorizeEvolutionMiddleware : IMiddleware
     {
         private readonly IBrandOperations _brandOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IEvolutionCacheService _redisCacheService;
         private readonly IEvolutionService _service;
-        private readonly IEvolutionRedisCacheService _redisCacheService;
 
         public AuthorizeEvolutionMiddleware(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IJsonSerializationProvider jsonSerializationProvider,
             IEvolutionService service,
-            IEvolutionRedisCacheService redisCacheService)
+            IEvolutionCacheService redisCacheService)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
@@ -37,7 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
-
             string authToken = context.Request.Query["authToken"];
             var config = await _service.GetConfigurationAsync().ConfigureAwait(false);
 

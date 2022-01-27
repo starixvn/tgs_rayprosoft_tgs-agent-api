@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
-using TGS.Core.Models;
-using TGS.Services.GameOperations;
-using TGS.Shared.Game.Models.Evolution.Commons;
-using TGS.Shared.Game.Models.Evolution.Incoming;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Apis.TgsApi.GameProviders.Evolution.Services;
 using TGS.Apis.TgsApi.Extensions;
+using TGS.Apis.TgsApi.GameProviders.Evolution.Services;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations;
 using TGS.Core.Models.Exceptions;
+using TGS.Services.GameOperations;
+using TGS.Services.Operations;
+using TGS.Shared.Game.Models.Evolution.Commons;
 using TGS.Shared.Game.Models.Evolution.Enums;
+using TGS.Shared.Game.Models.Evolution.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 {
@@ -27,16 +27,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
     public sealed class EvolutionController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
+        private readonly EvolutionExternalTransactionService _evolutionExternalTransactionService;
         private readonly IEvolutionActionModelMapper _map;
-        private readonly IEvolutionService _service;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IEvolutionRedisCacheService _redisCacheService;
+        private readonly IEvolutionCacheService _redisCacheService;
+        private readonly IEvolutionService _service;
+
         public EvolutionController(
             IGamePlayActions actions,
             IEvolutionActionModelMapper map,
             IEvolutionService service,
             IPlayerOperations playerOperations,
-            IEvolutionRedisCacheService redisCacheService
+            IEvolutionCacheService redisCacheService,
+            EvolutionExternalTransactionService evolutionExternalTransactionService
         )
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
@@ -44,18 +47,99 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
+            _evolutionExternalTransactionService = evolutionExternalTransactionService ?? throw new ArgumentNullException(nameof(evolutionExternalTransactionService));
         }
 
-        [HttpPost("check")]
-        public Task<EvolutionCheckUserResponse> GetCheckAsync(
-            EvolutionCheckUserRequest source)
+        [HttpPost("debit")]
+        public async Task<EvolutionStandardResponse> BetAsync(
+            EvolutionDebitRequest source)
         {
-            return Task.FromResult(new EvolutionCheckUserResponse()
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+            var gameProviderConfigurationData = await _service
+                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
+                .ConfigureAwait(false);
+
+            if (await _evolutionExternalTransactionService.ExistExternalTransactionAsync(
+                gameProviderId,
+                playerCode,
+                source.Transaction.ExternalTransactionId).ConfigureAwait(false))
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                return new EvolutionStandardResponse()
+                {
+                    Status = GameApiError.BetAlreadyExist.Description(),
+                    Balance = getBalance.Balance.Truncate(2),
+                    Uuid = source.Uuid
+                };
+            }
+            var betData = _map.Bet(gameProviderConfigurationData, playerCode, source);
+            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Sid = source.Sid,
+                Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
-            });
+            };
+        }
+
+        [HttpPost("cancel")]
+        public async Task<EvolutionStandardResponse> CancelAsync(
+            EvolutionCancelRequest source)
+        {
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+            var gameProviderConfigurationData = await _service
+                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
+                .ConfigureAwait(false);
+
+            if (await _service.NotExistBetGameActionExternalIdAsync(
+                gameProviderId, playerCode,
+                source.Game.ExternalRoundId,
+                source.Game.GameDetail.GameTable.ExternalGameId,
+                source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false))
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                return new EvolutionStandardResponse()
+                {
+                    Status = GameApiError.BetDoesNotExist.Description(),
+                    Balance = getBalance.Balance.Truncate(2),
+                    Uuid = source.Uuid
+                };
+            }
+
+            if (await _evolutionExternalTransactionService.ExistExternalTransactionCancelAsync(
+                gameProviderId,
+                playerCode,
+                source.Transaction.ExternalTransactionId).ConfigureAwait(false))
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                return new EvolutionStandardResponse()
+                {
+                    Status = GameApiError.BetAlreadySettled.Description(),
+                    Balance = getBalance.Balance.Truncate(2),
+                    Uuid = source.Uuid
+                };
+            }
+
+            var betData = await _map.CancelAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
+            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
+            return new EvolutionStandardResponse()
+            {
+                Status = GameApiError.OK.Description(),
+                Balance = betResult.Balance.Truncate(2),
+                Uuid = source.Uuid
+            };
         }
 
         [HttpPost("balance")]
@@ -74,41 +158,26 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             };
         }
 
-        [HttpPost("debit")]
-        public async Task<EvolutionStandardResponse> BetAsync(
-            EvolutionDebitRequest source)
+        [HttpPost("check")]
+        public Task<EvolutionCheckUserResponse> GetCheckAsync(
+            EvolutionCheckUserRequest source)
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var gameProviderConfigurationData = await _service
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
-
-            if (await _service.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.ExternalTransactionId))
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
-                return new EvolutionStandardResponse()
-                {
-                    Status = GameApiError.BetAlreadyExist.Description(),
-                    Balance = getBalance.Balance.Truncate(2),
-                    Uuid = source.Uuid
-
-                };
-            }
-
-            var betData = _map.Bet(gameProviderConfigurationData, playerCode, source);
-            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-
-            return new EvolutionStandardResponse()
+            return Task.FromResult(new EvolutionCheckUserResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Balance = betResult.Balance.Truncate(2),
+                Sid = source.Sid,
                 Uuid = source.Uuid
-            };
+            });
+        }
+
+        [HttpPost("ping")]
+        public EvolutionBaseResponse Ping(EvolutionBaseRequest source)
+        {
+            return (new EvolutionBaseResponse()
+            {
+                Status = GameApiError.OK.Description(),
+                Uuid = source.Uuid
+            });
         }
 
         [HttpPost("credit")]
@@ -136,7 +205,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 };
             }
 
-            if (await _service.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.ExternalTransactionId))
+            if (await _evolutionExternalTransactionService.ExistExternalTransactionAsync(
+                gameProviderId,
+                playerCode,
+                source.Transaction.ExternalTransactionId).ConfigureAwait(false))
             {
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
@@ -158,53 +230,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             };
         }
 
-        [HttpPost("cancel")]
-        public async Task<EvolutionStandardResponse> CancelAsync(
-            EvolutionCancelRequest source)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var gameProviderConfigurationData = await _service
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
-
-            if (await _service.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Game.ExternalRoundId, source.Game.GameDetail.GameTable.ExternalGameId, source.Transaction.ExternalGameActionGroupId))
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
-                return new EvolutionStandardResponse()
-                {
-                    Status = GameApiError.BetDoesNotExist.Description(),
-                    Balance = getBalance.Balance.Truncate(2),
-                    Uuid = source.Uuid
-                };
-            }
-
-            if (await _service.ExistCancelGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.ExternalTransactionId))
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
-                return new EvolutionStandardResponse()
-                {
-                    Status = GameApiError.BetAlreadySettled.Description(),
-                    Balance = getBalance.Balance.Truncate(2),
-                    Uuid = source.Uuid
-                };
-            }
-
-            var betData = await _map.CancelAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
-
-            return new EvolutionStandardResponse()
-            {
-                Status = GameApiError.OK.Description(),
-                Balance = betResult.Balance.Truncate(2),
-                Uuid = source.Uuid
-            };
-        }
-
         [HttpPost("sid")]
         public async Task<EvolutionCheckUserResponse> SidAsync(
             EvolutionCheckUserRequest source)
@@ -217,7 +242,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             }
 
             var sid = Guid.NewGuid().ToString("N");
-            await _redisCacheService.AddSidAsync(sid, player).ConfigureAwait(false);
+            await _redisCacheService.AddSidAsync(sid, player.PlayerCode).ConfigureAwait(false);
 
             return new EvolutionCheckUserResponse()
             {
@@ -225,17 +250,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 Sid = sid,
                 Uuid = source.Uuid
             };
-        }
-
-        [HttpPost("ping")]
-        public EvolutionBaseResponse Ping(EvolutionBaseRequest source)
-        {
-            return (new EvolutionBaseResponse()
-            {
-                Status = GameApiError.OK.Description(),
-                Uuid = source.Uuid
-
-            });
         }
     }
 }
