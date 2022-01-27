@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,6 +13,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -264,6 +269,53 @@ namespace TGS.Apis.AgentApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+                });
+
+            services
+                .AddOpenTelemetryTracing(
+                    builder => builder
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                            .AddEnvironmentVariableDetector())
+                        .AddSource("Tgs.*")
+                        .AddSource("TGS.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddProfileViewExporter(_ => { })
+                        .AddOtlpExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext =>
+                    {
+                        return !httpContext.Request.Path.HasValue
+                            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                            && !httpContext.Request.Path.StartsWithSegments("/health")
+                            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !new[]
+                            {
+                                "html",
+                                "ico",
+                                "png",
+                                "jpg"
+                            }.Any(
+                                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                    };
+                });
+            services.AddProfileViewer();
         }
     }
 }
