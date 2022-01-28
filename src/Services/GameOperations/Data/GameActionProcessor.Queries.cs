@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
@@ -56,17 +59,38 @@ namespace TGS.Services.GameOperations.Data
                 parameters: new Dictionary<string, object> { { ":wallet_id", walletId } }).ConfigureAwait(false);
         }
 
-        private static async ValueTask<int?> GetGameIdInSameRoundAsync(
+        private static async ValueTask<CachedGame?> GetGameIdInSameRoundAsync(
             ITgsRepository repository,
             Guid gameProviderId,
-            string playerCode,
-            string externalRoundId)
-            => await repository.Rounds.AsQueryable()
-            .Where(x => x.GameProviderId == gameProviderId &&
-            x.ExternalRoundId == externalRoundId &&
-            x.PlayerCode == playerCode
-            ).Select(x => (int?)x.GameId)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
+            string externalGameId)
+        {
+            var game = await repository.Games.AsQueryable()
+                .Where(x => x.GameProviderId == gameProviderId &&
+                x.ExternalId == externalGameId
+                ).FirstOrDefaultAsync().ConfigureAwait(false);
+            if (game == null)
+            {
+                return null;
+            }
+            return new CachedGame()
+            {
+                Id = game.Id,
+                Code = game.Code,
+                Name = game.Name,
+                Description = game.Description,
+                Status = game.Status,
+                ExternalId = game.ExternalId,
+                SubGame = game.SubGame,
+                AvailableToBrand = game.AvailableToBrand,
+                RuleUrl = game.RuleUrl,
+                EndpointPath = game.EndpointPath,
+                Type = game.Type,
+                PlatformType = game.PlatformType,
+                HasTurnoverOnTieBet = game.HasTurnoverOnTieBet,
+                AvailableCurrencies = game.AvailableCurrencies.IsNotNullOrEmpty()
+                    ? game.AvailableCurrencies.SplitByComma()
+                    : Array.Empty<string>()
+            };
+        }
     }
 }
