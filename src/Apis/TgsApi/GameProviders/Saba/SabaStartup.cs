@@ -26,8 +26,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddRequestDecompression();
-
             services.AddErrorMappers(
                 new[]
                 {
@@ -41,6 +39,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
             services.AddScoped<AuthorizeSabaMiddleware>();
             services.AddScoped<HandleSabaExceptionMiddleware>();
+
+            services.AddSingleton<GzipRequestDecompressionMiddleware>();
 
             services.AddScoped<ISabaServices, SabaServices>();
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
@@ -60,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
-            app.UseRequestDecompression();
+            app.UseMiddleware<GzipRequestDecompressionMiddleware>();
 
             const string Route = "/api/saba";
 

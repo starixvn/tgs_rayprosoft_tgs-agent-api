@@ -72,14 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            var headers = context.Request.Headers.Keys
-                .Select(key => $"{key}: {context.Request.Headers[key]}")
-                .ToArray();
-
             var value = await context.Request.ReadAsStringAsync();
-
-            _logger.LogInformation(
-                $@"Request Header: {string.Join(Environment.NewLine, headers)}{Environment.NewLine}Request Body: {value}");
 
             var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<ResolveRequestAttribute>();
 
