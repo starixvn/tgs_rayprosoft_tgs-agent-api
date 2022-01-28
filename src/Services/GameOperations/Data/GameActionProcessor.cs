@@ -125,11 +125,12 @@ namespace TGS.Services.GameOperations.Data
 
         private static async ValueTask<GameActionState> FillRoundDataAsync(GameActionState s)
         {
-            var roundData = await GetRoundByExternalRoundIdAsync(s.Repository,
-                    s.GameProviderConfigurationId,
-                    s.PlayerData.Wallet.Id,
-                    s.ExternalRoundId,
-                    s.GameId)
+            var roundData = await GetRoundByExternalRoundIdAsync(
+                s.Repository,
+                s.ExternalRoundId,
+                s.GameProvider.Id,
+                s.GameId,
+                s.PlayerData.Wallet.Id)
                 .ConfigureAwait(false);
 
             if (roundData == null)

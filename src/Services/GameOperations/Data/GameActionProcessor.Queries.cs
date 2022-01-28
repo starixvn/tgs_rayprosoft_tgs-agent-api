@@ -95,18 +95,26 @@ namespace TGS.Services.GameOperations.Data
             };
         }
 
-        private static async ValueTask<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
-                                            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId) =>
-            await repository.Rounds
-                .Where(r => r.GameProviderConfigurationId == gameProviderConfigurationId &&
-                    r.WalletId == walletId && r.GameId == gameId &&
-                    r.ExternalRoundId == externalRoundId)
-                .Select(r => new RoundIdAndStatusData
-                {
-                    RoundId = r.Id,
-                    ExternalRoundId = r.ExternalRoundId,
-                    Status = r.Status
-                })
-                .FirstOrDefaultAsync().ConfigureAwait(false);
+        private static async ValueTask<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(
+            ITgsRepository repository,
+            string externalRoundId,
+            Guid gameProviderId,
+            int gameId,
+            Guid walletId)
+            => await repository.Rounds.AsQueryable()
+            .Where(r =>
+                r.ExternalRoundId == externalRoundId &&
+                r.GameProviderId == gameProviderId &&
+                r.GameId == gameId &&
+                r.WalletId == walletId
+            )
+            .Select(r => new RoundIdAndStatusData
+            {
+                RoundId = r.Id,
+                ExternalRoundId = r.ExternalRoundId,
+                Status = r.Status
+            })
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
     }
 }
