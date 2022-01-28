@@ -174,12 +174,14 @@ namespace TGS.Services.GameOperations.Data
                 game = s.GameProviderGames.FirstOrDefault(g => g.ExternalId.IgnoreCaseEquals(s.ExternalGameId));
             }
 
-            if (game == null)
+            if (game == null && s.HasExtRefTransactionId)
             {
                 game = await GetGameIdInSameRoundAsync(s.Repository,
                        s.GameProvider.Id,
                        s.PlayerData.PlayerCode,
-                       s.ExternalRoundId)
+                       s.ExternalRoundId,
+                       s.ExternalTransactionReferenceId
+                       )
                    .ConfigureAwait(false);
             }
 

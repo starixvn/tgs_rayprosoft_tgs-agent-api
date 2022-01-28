@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.GameOperations.Models.Data;
 
@@ -14,18 +13,19 @@ namespace TGS.Services.GameOperations.Data
 {
     internal sealed partial class GameActionProcessor
     {
-        private static async ValueTask<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
-            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId) =>
-            await repository.Rounds
-                .Where(r => r.GameProviderConfigurationId == gameProviderConfigurationId &&
-                    r.WalletId == walletId && r.GameId == gameId &&
-                    r.ExternalRoundId == externalRoundId)
-                .Select(r => new RoundIdAndStatusData
-                {
-                    RoundId = r.Id,
-                    ExternalRoundId = r.ExternalRoundId,
-                    Status = r.Status
-                })
+        private static async ValueTask<decimal> GetBalanceAsync(ITgsRepository repository, Guid walletId)
+        {
+            const string spName = "dbo.wallet_get_balance";
+            return await repository.SqlQuerySingleAsync<decimal>(spName,
+                parameters: new Dictionary<string, object> { { ":wallet_id", walletId } }).ConfigureAwait(false);
+        }
+
+        private static async ValueTask<string> GetExternalRoundIdAsync(ITgsRepository repository,
+            string externalTransactionId) =>
+            await repository.GameActions
+                .Where(ga => ga.ExternalTransactionId == externalTransactionId)
+                .Include(ga => ga.Round)
+                .Select(ga => ga.Round.ExternalRoundId)
                 .FirstOrDefaultAsync().ConfigureAwait(false);
 
         private static async ValueTask<SameRoundActionData[]> GetGameActionsInSameRoundAsync(ITgsRepository repository,
@@ -44,33 +44,27 @@ namespace TGS.Services.GameOperations.Data
             return data.ToArray();
         }
 
-        private static async ValueTask<string> GetExternalRoundIdAsync(ITgsRepository repository,
-            string externalTransactionId) =>
-            await repository.GameActions
-                .Where(ga => ga.ExternalTransactionId == externalTransactionId)
-                .Include(ga => ga.Round)
-                .Select(ga => ga.Round.ExternalRoundId)
-                .FirstOrDefaultAsync().ConfigureAwait(false);
-
-        private static async ValueTask<decimal> GetBalanceAsync(ITgsRepository repository, Guid walletId)
-        {
-            const string spName = "dbo.wallet_get_balance";
-            return await repository.SqlQuerySingleAsync<decimal>(spName,
-                parameters: new Dictionary<string, object> { { ":wallet_id", walletId } }).ConfigureAwait(false);
-        }
-
         private static async ValueTask<CachedGame?> GetGameIdInSameRoundAsync(
             ITgsRepository repository,
             Guid gameProviderId,
-            string PlayerCode,
-            string ExternalRoundId)
+            string playerCode,
+            string externalRoundId,
+            string externalTransactionReferenceId)
         {
-            var gameId = await repository.Rounds.AsQueryable()
-                .Where(x => x.GameProviderId == gameProviderId &&
-                x.PlayerCode == PlayerCode &&
-                x.ExternalRoundId == ExternalRoundId
-                ).Select(x => (int?)x.GameId).FirstOrDefaultAsync().ConfigureAwait(false);
-            if (gameId == null)
+            var gameId = await (
+                from round in repository.Rounds.AsQueryable()
+                join gameActions in repository.GameActions.AsQueryable()
+                on round.Id equals gameActions.RoundId
+                where
+                round.GameProviderId == gameProviderId &&
+                round.ExternalRoundId == externalRoundId &&
+                round.PlayerCode == playerCode &&
+                gameActions.ExternalTransactionId == externalTransactionReferenceId
+                select (int?)round.GameId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (!gameId.HasValue)
             {
                 return null;
             }
@@ -100,5 +94,19 @@ namespace TGS.Services.GameOperations.Data
                     : Array.Empty<string>()
             };
         }
+
+        private static async ValueTask<RoundIdAndStatusData> GetRoundByExternalRoundIdAsync(ITgsRepository repository,
+                                            Guid gameProviderConfigurationId, Guid walletId, string externalRoundId, int gameId) =>
+            await repository.Rounds
+                .Where(r => r.GameProviderConfigurationId == gameProviderConfigurationId &&
+                    r.WalletId == walletId && r.GameId == gameId &&
+                    r.ExternalRoundId == externalRoundId)
+                .Select(r => new RoundIdAndStatusData
+                {
+                    RoundId = r.Id,
+                    ExternalRoundId = r.ExternalRoundId,
+                    Status = r.Status
+                })
+                .FirstOrDefaultAsync().ConfigureAwait(false);
     }
 }
