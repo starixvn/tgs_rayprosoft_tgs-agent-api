@@ -60,8 +60,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
-            app.UseRequestDecompression();
-
             const string Route = "/api/saba";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
@@ -70,6 +68,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     builder.UseMiddleware<HandleSabaExceptionMiddleware>();
                     builder.UseMiddleware<AuthorizeSabaMiddleware>();
                 });
+
+            app.UseRequestDecompression();
         }
     }
 }
