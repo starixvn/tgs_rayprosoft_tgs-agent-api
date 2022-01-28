@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -178,6 +179,18 @@ namespace TGS.Apis.PromotionApi
 
                             configuration.GetSection("RabbitMQ").Bind(options);
                         });
+                });
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
 
             services
