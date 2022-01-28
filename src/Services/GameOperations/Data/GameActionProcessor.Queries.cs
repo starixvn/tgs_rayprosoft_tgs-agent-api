@@ -53,16 +53,20 @@ namespace TGS.Services.GameOperations.Data
         {
             const string spName = "dbo.wallet_get_balance";
             return await repository.SqlQuerySingleAsync<decimal>(spName,
-                parameters: new Dictionary<string, object> {{":wallet_id", walletId}}).ConfigureAwait(false);
+                parameters: new Dictionary<string, object> { { ":wallet_id", walletId } }).ConfigureAwait(false);
         }
 
-        private static async ValueTask<int?> GetGameIdInSameRoundAsync(ITgsRepository repository, Guid gameProviderId,
-            string playerCode, string externalRoundId, string externalTransactionReferenceId) =>
-            await repository.Rounds.Where(r =>
-                    r.GameProviderId == gameProviderId &&
-                    r.ExternalRoundId == externalRoundId &&
-                    r.PlayerCode == playerCode &&
-                    r.GameActions.Any(ga => ga.ExternalTransactionId == externalTransactionReferenceId))
-                .Select(r => (int?)r.GameId).FirstOrDefaultAsync().ConfigureAwait(false);
+        private static async ValueTask<int?> GetGameIdInSameRoundAsync(
+            ITgsRepository repository,
+            Guid gameProviderId,
+            string playerCode,
+            string externalRoundId)
+            => await repository.Rounds.AsQueryable()
+            .Where(x => x.GameProviderId == gameProviderId &&
+            x.ExternalRoundId == externalRoundId &&
+            x.PlayerCode == playerCode
+            ).Select(x => (int?)x.GameId)
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
     }
 }

@@ -179,8 +179,7 @@ namespace TGS.Services.GameOperations.Data
                 var gameId = await GetGameIdInSameRoundAsync(s.Repository,
                         s.GameProvider.Id,
                         s.PlayerData.PlayerCode,
-                        s.ExternalRoundId,
-                        s.ExternalTransactionReferenceId)
+                        s.ExternalRoundId)
                     .ConfigureAwait(false);
 
                 if (gameId.HasValue)
