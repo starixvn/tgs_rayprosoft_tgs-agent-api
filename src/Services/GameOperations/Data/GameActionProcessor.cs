@@ -178,7 +178,8 @@ namespace TGS.Services.GameOperations.Data
             {
                 game = await GetGameIdInSameRoundAsync(s.Repository,
                        s.GameProvider.Id,
-                       s.ExternalGameId)
+                       s.PlayerData.PlayerCode,
+                       s.ExternalRoundId)
                    .ConfigureAwait(false);
             }
 

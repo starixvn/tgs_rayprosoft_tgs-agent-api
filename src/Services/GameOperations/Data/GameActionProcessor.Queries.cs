@@ -62,16 +62,24 @@ namespace TGS.Services.GameOperations.Data
         private static async ValueTask<CachedGame?> GetGameIdInSameRoundAsync(
             ITgsRepository repository,
             Guid gameProviderId,
-            string externalGameId)
+            string PlayerCode,
+            string ExternalRoundId)
         {
-            var game = await repository.Games.AsQueryable()
+            var gameId = await repository.Rounds.AsQueryable()
                 .Where(x => x.GameProviderId == gameProviderId &&
-                x.ExternalId == externalGameId
-                ).FirstOrDefaultAsync().ConfigureAwait(false);
-            if (game == null)
+                x.PlayerCode == PlayerCode &&
+                x.ExternalRoundId == ExternalRoundId
+                ).Select(x => (int?)x.GameId).FirstOrDefaultAsync().ConfigureAwait(false);
+            if (gameId == null)
             {
                 return null;
             }
+
+            var game = await repository.Games.AsQueryable()
+                .Where(x => x.Id == gameId.Value)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
             return new CachedGame()
             {
                 Id = game.Id,
