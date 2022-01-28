@@ -97,6 +97,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(c => new { c.ExternalRoundId, c.GameProviderId, c.GameId, c.WalletId })
                 .HasDatabaseName("ix_rounds_wallet_id_composite");
+
             builder.HasIndex(c => new { c.GameProviderConfigurationId, c.WalletId, c.GameId, c.ExternalRoundId })
                 .HasDatabaseName("ix_rounds_game_provider_configuration_id_composite");
         }
