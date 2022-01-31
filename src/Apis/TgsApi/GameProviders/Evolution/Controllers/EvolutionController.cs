@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Vml.Spreadsheet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
@@ -10,6 +11,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Evolution.Commons;
@@ -28,18 +30,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
     {
         private readonly IGamePlayActions _actions;
         private readonly EvolutionExternalTransactionService _evolutionExternalTransactionService;
+        private readonly ISingleWalletMessageSender _singleWalletMessageSender;
         private readonly IEvolutionActionModelMapper _map;
         private readonly IPlayerOperations _playerOperations;
         private readonly IEvolutionCacheService _redisCacheService;
         private readonly IEvolutionService _service;
-
         public EvolutionController(
             IGamePlayActions actions,
             IEvolutionActionModelMapper map,
             IEvolutionService service,
             IPlayerOperations playerOperations,
             IEvolutionCacheService redisCacheService,
-            EvolutionExternalTransactionService evolutionExternalTransactionService
+            EvolutionExternalTransactionService evolutionExternalTransactionService,
+            ISingleWalletMessageSender singleWalletMessageSender
         )
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
@@ -48,6 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
             _evolutionExternalTransactionService = evolutionExternalTransactionService ?? throw new ArgumentNullException(nameof(evolutionExternalTransactionService));
+            _singleWalletMessageSender = singleWalletMessageSender ?? throw new ArgumentNullException(nameof(singleWalletMessageSender));
         }
 
         [HttpPost("debit")]
@@ -102,13 +106,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
+            var getBalance = default(GetBalanceResult);
+
             if (await _service.NotExistBetGameActionExternalIdAsync(
                 gameProviderId, playerCode,
                 source.Game.ExternalRoundId,
                 source.Game.GameDetail.GameTable.ExternalGameId,
                 source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetDoesNotExist.Description(),
@@ -122,7 +128,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 playerCode,
                 source.Transaction.ExternalTransactionId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetAlreadySettled.Description(),
@@ -132,12 +138,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             }
 
             var betData = await _map.CancelAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
+
+            await _singleWalletMessageSender.PublishGameActionAsync(
+                new GameActionMessage(
+                    false,
+                    betData,
+                    false,
+                    null)).ConfigureAwait(false);
+
+            getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
 
             return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Balance = betResult.Balance.Truncate(2),
+                Balance = getBalance.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
         }
@@ -194,9 +209,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
+
+            var getBalance = default(GetBalanceResult);
             if (await _service.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Game.ExternalRoundId, source.Game.GameDetail.GameTable.ExternalGameId, source.Transaction.ExternalGameActionGroupId))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetDoesNotExist.Description(),
@@ -210,7 +227,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 playerCode,
                 source.Transaction.ExternalTransactionId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetAlreadySettled.Description(),
@@ -220,12 +237,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             }
 
             var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
-            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            await _singleWalletMessageSender.PublishGameActionAsync(
+                new GameActionMessage(
+                    true,
+                    betData,
+                    false,
+                    null)).ConfigureAwait(false);
+
+            getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
 
             return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Balance = betResult.Balance.Truncate(2),
+                Balance = getBalance.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
         }

@@ -38,6 +38,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(sp, redisDatabaseResolver(sp)));
 
+            services.AddScoped<ISingleWalletMessageSender, SingleWalletMessageSender>();
+
             return services;
         }
     }
