@@ -5600,10 +5600,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_rounds_player_code");
 
-                    b.HasIndex("ExternalRoundId", "PlayerCode", "GameProviderId", "GameId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_rounds_external_round_id_composite")
-                        .IncludeProperties(new[] { "GameProviderConfigurationId", "WalletId" });
+                    b.HasIndex("ExternalRoundId", "GameProviderId", "GameId", "WalletId")
+                        .HasDatabaseName("ix_rounds_wallet_id_composite");
+
+
+                    b.HasIndex("GameProviderConfigurationId", "WalletId", "GameId", "ExternalRoundId")
+                        .HasDatabaseName("ix_rounds_game_provider_configuration_id_composite");
 
                     b.ToTable("rounds", "bet");
                 });

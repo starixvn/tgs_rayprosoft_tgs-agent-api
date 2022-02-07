@@ -125,11 +125,12 @@ namespace TGS.Services.GameOperations.Data
 
         private static async ValueTask<GameActionState> FillRoundDataAsync(GameActionState s)
         {
-            var roundData = await GetRoundByExternalRoundIdAsync(s.Repository,
-                    s.GameProviderConfigurationId,
-                    s.PlayerData.Wallet.Id,
-                    s.ExternalRoundId,
-                    s.GameId)
+            var roundData = await GetRoundByExternalRoundIdAsync(
+                s.Repository,
+                s.ExternalRoundId,
+                s.GameProvider.Id,
+                s.GameId,
+                s.PlayerData.Wallet.Id)
                 .ConfigureAwait(false);
 
             if (roundData == null)
@@ -176,17 +177,13 @@ namespace TGS.Services.GameOperations.Data
 
             if (game == null && s.HasExtRefTransactionId)
             {
-                var gameId = await GetGameIdInSameRoundAsync(s.Repository,
-                        s.GameProvider.Id,
-                        s.PlayerData.PlayerCode,
-                        s.ExternalRoundId,
-                        s.ExternalTransactionReferenceId)
-                    .ConfigureAwait(false);
-
-                if (gameId.HasValue)
-                {
-                    game = s.GameProviderGames.FirstOrDefault(g => g.Id == gameId);
-                }
+                game = await GetGameIdInSameRoundAsync(s.Repository,
+                       s.GameProvider.Id,
+                       s.PlayerData.PlayerCode,
+                       s.ExternalRoundId,
+                       s.ExternalTransactionReferenceId
+                       )
+                   .ConfigureAwait(false);
             }
 
             if (game == null)
