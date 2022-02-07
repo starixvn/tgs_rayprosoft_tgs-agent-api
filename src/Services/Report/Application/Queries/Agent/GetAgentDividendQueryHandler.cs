@@ -129,7 +129,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     FromTeamAgentDividendAmount = ad.FromTeamAgentDividendAmount
                 }).ToArray();
 
-            return await models.CreatePagedResponseAsync(models.Length);
+            return models.AsQueryable().CreatePagedResponse(request);
         }
     }
 }

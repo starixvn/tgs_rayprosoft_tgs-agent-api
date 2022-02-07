@@ -15,12 +15,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 {
     public sealed class SabaStartup : BaseStartup
     {
-        public SabaStartup(IConfiguration configuration, IWebHostEnvironment env)
+        protected override string LogPrefix => "saba";
+
+        public SabaStartup(
+            IConfiguration configuration,
+            IWebHostEnvironment env)
             : base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "saba";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -32,11 +34,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                 (provider, key) => key switch
                 {
                     GameProvider.Saba => provider.GetRequiredService<SabaErrorMapper>(),
-                    _                 => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             services.AddScoped<AuthorizeSabaMiddleware>();
             services.AddScoped<HandleSabaExceptionMiddleware>();
+
+            services.AddSingleton<GzipRequestDecompressionMiddleware>();
 
             services.AddScoped<ISabaServices, SabaServices>();
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
@@ -56,6 +60,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
+            app.UseMiddleware<GzipRequestDecompressionMiddleware>();
+
             const string Route = "/api/saba";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),

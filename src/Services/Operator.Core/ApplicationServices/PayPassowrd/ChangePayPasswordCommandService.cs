@@ -2,10 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.PayPassowrd;
 
 namespace TGS.Services.Operator.ApplicationServices.PayPassowrd
 {

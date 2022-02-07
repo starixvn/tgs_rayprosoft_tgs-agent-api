@@ -6,15 +6,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Round;
+using TGS.Apis.BackendOffice.Models.Round;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
 using TGS.Services.BackOffice.Application.Queries.Game;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -28,30 +30,155 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("closedRounds")]
         [Description("Get closed rounds")]
-        public Task<PagedResponse<ClosedRoundModel>> GetClosedRoundsAsync([FromQuery] GetClosedRoundsRequest request) =>
-            _client.GetClosedRoundsAsync(request);
+        public async Task<PagedResponse<ClosedRoundReportModel>> GetClosedRoundsAsync(
+            [FromQuery] GetClosedRoundsReportRequest request)
+        {
+            var reportRequest = new GetClosedRoundsRequest
+            {
+                ExternalRoundId = request.ExternalRoundId,
+                GameProviderId = request.GameProviderId,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetClosedRoundsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new ClosedRoundReportModel
+                {
+                    AdditionalData = x.AdditionalData,
+                    BetAmount = x.BetAmount,
+                    BrandCode = x.BrandCode,
+                    BrandName = x.BrandName,
+                    ClosedOn = x.ClosedOn,
+                    Commission = x.Commission,
+                    CreatedOn = x.CreatedOn,
+                    CurrencyCode = x.CurrencyCode,
+                    ExternalClosedOn = x.ExternalClosedOn,
+                    ExternalCreatedOn = x.ExternalCreatedOn,
+                    ExternalPlayerCode = x.ExternalPlayerCode,
+                    ExternalRoundId = x.ExternalRoundId,
+                    GameId = x.GameId,
+                    GameName = x.GameName,
+                    GameProviderCode = x.GameProviderCode,
+                    GameProviderId = x.GameProviderId,
+                    Id = x.Id,
+                    PlatformType = (PlatformType)x.PlatformType,
+                    PlayerCode = x.PlayerCode,
+                    PlayerName = x.PlayerName,
+                    PlayerType = (PlayerType)x.PlayerType,
+                    SettleAmount = x.SettleAmount,
+                    Status = (ClientRoundStatus)x.Status,
+                    SubGameProviderName = x.SubGameProviderName,
+                    TieBetAdjustment = x.TieBetAdjustment,
+                    UpdatedOn = x.UpdatedOn,
+                    ValidBetAmount = x.ValidBetAmount,
+                    WinLoss = x.WinLoss
+                }).ToArray()
+            };
+        }
 
         [HttpGet("openRounds")]
         [Description("Get open rounds")]
-        public Task<PagedResponse<OpenRoundModel>> GetOpenRoundsAsync([FromQuery] GetOpenRoundsRequest request) =>
-            _client.GetOpenRoundsAsync(request);
+        public async Task<PagedResponse<OpenRoundReportModel>> GetOpenRoundsAsync(
+            [FromQuery] GetOpenRoundsReportRequest request)
+        {
+            var reportRequest = new GetOpenRoundsRequest
+            {
+                ExternalRoundId = request.ExternalRoundId,
+                GameProviderId = request.GameProviderId,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetOpenRoundsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new OpenRoundReportModel
+                {
+                    Id = x.Id,
+                    AdditionalData = x.AdditionalData,
+                    BetAmount = x.BetAmount,
+                    BrandCode = x.BrandCode,
+                    BrandName = x.BrandName,
+                    ClosedOn = x.ClosedOn,
+                    Commission = x.Commission,
+                    CreatedOn = x.CreatedOn,
+                    CurrencyCode = x.CurrencyCode,
+                    ExternalClosedOn = x.ExternalClosedOn,
+                    ExternalCreatedOn = x.ExternalCreatedOn,
+                    ExternalPlayerCode = x.ExternalPlayerCode,
+                    ExternalRoundId = x.ExternalRoundId,
+                    GameId = x.GameId,
+                    GameName = x.GameName,
+                    GameProviderCode = x.GameProviderCode,
+                    GameProviderId = x.GameProviderId,
+                    PlatformType = (PlatformType)x.PlatformType,
+                    PlayerCode = x.PlayerCode,
+                    PlayerName = x.PlayerName,
+                    PlayerType = (PlayerType)x.PlayerType,
+                    SettleAmount = x.SettleAmount,
+                    Status = (ClientRoundStatus)x.Status,
+                    SubGameProviderName = x.SubGameProviderName,
+                    TieBetAdjustment = x.TieBetAdjustment,
+                    UpdatedOn = x.UpdatedOn,
+                    ValidBetAmount = x.ValidBetAmount,
+                    WinLoss = x.WinLoss
+                }).ToArray()
+            };
+        }
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public Task<GetRoundHistoryResponse> GetRoundAsync(Guid roundId, [FromQuery] GetRoundHistoryRequest request)
+        public async Task<GetRoundHistoryResponse> GetRoundAsync(Guid roundId,
+            [FromQuery] GetRoundHistoryReportRequest request)
         {
-            request.RoundId = roundId;
-            return _client.GetRoundHistoriesAsync(request);
+            var reportRequest = new GetRoundHistoryRequest
+            {
+                GameProviderCode = request.GameProviderCode,
+                PlayerCode = request.PlayerCode,
+                RoundId = roundId,
+                Language = request.Language
+            };
+
+            var response = await _client.GetRoundHistoriesAsync(reportRequest);
+
+            return new()
+            {
+                GameProviderName = response.GameProviderName,
+                GameName = response.GameName,
+                ExternalRoundId = response.ExternalRoundId,
+                BetAmount = response.BetAmount,
+                Turnover = response.Turnover,
+                Winloss = response.Winloss,
+                GameResult = response.GameResult,
+                Data = response.Data
+            };
         }
 
         [HttpGet]
         [Description("Get rounds")]
         public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
-            [FromServices] IGetService<GetGameRoundListQuery, PagedResponse<RoundModel>> queryService,
+            [FromServices]
+            IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
             [FromServices] IQueryService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
-            [FromQuery] GetRoundsRequest request)
+            [FromQuery] GetRoundsReportRequest request)
         {
             var serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
             var currentCulture = CultureInfo.CurrentUICulture.Name;
@@ -69,7 +196,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 request.To,
                 request.ClosedFrom,
                 request.ClosedTo,
-                request);
+                new PageableRequest
+                {
+                    Page = request.Page,
+                    Rows = request.Rows,
+                    OrderBy = request.OrderBy,
+                    SortBy = request.SortBy,
+                    ShowAll = request.ShowAll
+                });
 
             var records = await queryService
                 .GetAsync(query)
@@ -121,10 +255,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                              GameProviderName = model.GameProviderName,
                              GameProviderId = model.GameProviderId,
                              PlayerCode = model.PlayerCode,
-                             PlatformType = model.PlatformType,
+                             PlatformType = (PlatformType)model.PlatformType,
                              PlayerName = model.PlayerName,
                              SettleAmount = model.SettleAmount,
-                             Status = model.Status,
+                             Status = (ClientRoundStatus)model.Status,
                              SubGameProviderName = model.SubGameProviderName,
                              TieBetAdjustment = model.TieBetAdjustment,
                              UpdatedOn = model.UpdatedOn,

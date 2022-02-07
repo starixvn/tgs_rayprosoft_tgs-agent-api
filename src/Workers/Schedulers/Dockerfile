@@ -23,7 +23,6 @@ COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Services/Report/Report.csproj", "src/Services/Report/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
-COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Services/Promotion.Core/Promotion.Core.csproj", "src/Services/Promotion.Core/"]
 COPY ["src/Shared/Game.ApiClients/Game.ApiClients.csproj", "src/Shared/Game.ApiClients/"]
 COPY ["src/Shared/Game.Models/Game.Models.csproj", "src/Shared/Game.Models/"]
