@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Vml.Spreadsheet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
@@ -139,7 +138,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             var betData = await _map.CancelAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
 
-
+            /*
             await _singleWalletMessageSender.PublishGameActionAsync(
                 new GameActionMessage(
                     false,
@@ -148,11 +147,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                     null)).ConfigureAwait(false);
 
             getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
-
+            */
+            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Balance = getBalance.Balance.Truncate(2),
+                Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
         }
@@ -238,6 +238,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
 
+            /*
             await _singleWalletMessageSender.PublishGameActionAsync(
                 new GameActionMessage(
                     true,
@@ -246,11 +247,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                     null)).ConfigureAwait(false);
 
             getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+            */
+
+            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Balance = getBalance.Balance.Truncate(2),
+                Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
         }
