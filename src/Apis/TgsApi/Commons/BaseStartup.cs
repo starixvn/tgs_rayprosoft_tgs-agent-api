@@ -28,6 +28,8 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
+using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
+
 
 namespace TGS.Apis.TgsApi.Commons
 {
@@ -164,7 +166,19 @@ namespace TGS.Apis.TgsApi.Commons
                         });
 
                     AddCustomNatsMessageQueueHandler(natsConfig);
-                });
+                })
+                .AddMongoMessageQueue(config =>
+                    {
+                        config
+                        .DefineMessageQueue(
+                            "singlewallet.database",
+                            sp => MongoMessageQueue.Default,
+                            sp => sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString"))
+                        .DeclareQueue("tgs.singlewallet.gameaction");
+                    })
+                .ClearAllExchanges()
+                .AddMongoGlobPatternExchange("tgs.singlewallet.gameaction", "singlewallet.database", "tgs.singlewallet.gameaction")
+                .AddNatsGlobPatternExchange("*");
 
             services
                 .AddOptions<OtlpExporterOptions>()
