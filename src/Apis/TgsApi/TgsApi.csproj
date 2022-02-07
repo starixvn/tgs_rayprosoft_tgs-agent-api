@@ -42,12 +42,8 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.0.18" />
-<<<<<<< .mine
     <PackageReference Include="Tgs.MessageQueue.MongoDB" Version="1.5.0" />
-=======
     <PackageReference Include="Tgs.Interceptors" Version="0.2.0" />
->>>>>>> .theirs
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
   </ItemGroup>
 
   <ItemGroup>
