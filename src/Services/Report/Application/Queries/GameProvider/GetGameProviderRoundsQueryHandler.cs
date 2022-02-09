@@ -28,8 +28,18 @@ namespace TGS.Services.Report.Application.Queries.GameProvider
             GetGameProviderRoundsRequest request,
             CancellationToken cancellationToken)
         {
-            var transactionCounts = await _tgsRoundService.GetRoundQueries().Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ClosedOn >= request.From && x.ClosedOn < request.To)
+            if ((request.From is null || request.To is null) &&
+                (request.ExternalFrom is null || request.ExternalTo is null))
+            {
+                return new GetGameProviderRoundsResponse();
+            }
+
+            var transactionCounts = await _tgsRoundService.GetRoundQueries()
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(request.From is not null && request.To is not null,
+                    x => x.ClosedOn >= request.From && x.ClosedOn < request.To)
+                .Where(request.ExternalFrom is not null && request.ExternalTo is not null,
+                    x => x.ExternalClosedOn >= request.ExternalFrom && x.ExternalClosedOn < request.ExternalTo)
                 .Join(_tgsRoundService.TgsRepository.Games,
                     t => t.GameId,
                     g => g.Id,
