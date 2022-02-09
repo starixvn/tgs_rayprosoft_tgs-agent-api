@@ -98,6 +98,18 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
+        [HttpGet("list/statuses")]
+        [Description("Get player status types")]
+        [TgsResponseWrapper]
+        public ValueTask<Dictionary<int, string>> GetPlayerStatusTypesAsync()
+        {
+            var dict = Enum.GetValues(typeof(PlayerStatus))
+                .Cast<PlayerStatus>()
+                .ToDictionary(t => (int)t, t => t.ToString());
+
+            return ValueTask.FromResult(dict);
+        }
+
         [HttpGet("list/viplevels")]
         [Description("Get player vip levels")]
         [TgsResponseWrapper]
