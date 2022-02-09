@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.TgsApi.GameProviders.Saba.Attributes;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Core.Infrastructures.Extensions;
@@ -25,6 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         private readonly IRedisCacheManager _cacheManger;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
+        private readonly ILogger<AuthorizeSabaMiddleware> _logger;
         private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
 
@@ -35,6 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         private readonly ISettingOperations _settingOperations;
 
         public AuthorizeSabaMiddleware(
+            ILogger<AuthorizeSabaMiddleware> logger,
             IJsonSerializationProvider json,
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
@@ -44,6 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             ISabaServices services,
             IRedisPlayerLoginRecordService playerLoginRecordService)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _json = json;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
@@ -172,7 +176,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         }
 
         private ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
-                                                            ResolveGetBalanceRequestAsync(string value, bool isTestEnv)
+            ResolveGetBalanceRequestAsync(string value, bool isTestEnv)
         {
             var r = _json.DeserializeFromString<GetBalanceRequest>(value);
             var playerCode = _services.GetPlayerCode(r.Body.UserId, isTestEnv);
