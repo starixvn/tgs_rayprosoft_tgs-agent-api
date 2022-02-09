@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.EntityFrameworkCore;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
-using System.Linq.Expressions;
-using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.Agent.ApplicationServices.Player
 {
