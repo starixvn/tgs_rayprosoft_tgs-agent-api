@@ -50,26 +50,7 @@ namespace TGS.Apis.AgentApi.Controllers
 
             if (pagingRequest.ShowAll)
             {
-                return new PagedResponse<PlayerInfoModel>
-                {
-                    TotalCount = await playerInfos.CountAsync().ConfigureAwait(false),
-                    Items = await playerInfos
-                        .Select(playerInfo => new PlayerInfoModel
-                        {
-                            AreaCode = playerInfo.AreaCode,
-                            Balance = playerInfo.Balance,
-                            Phone = playerInfo.Phone,
-                            PlayerCode = playerInfo.PlayerCode,
-                            RegisteredTime = playerInfo.RegisteredTime,
-                            RegisterHost = playerInfo.RegisterHost,
-                            Status = playerInfo.Status,
-                            Username = playerInfo.Username,
-                            VipLevel = playerInfo.VipLevel
-                        })
-                        .ApplyOrderBy(paging)
-                        .ToArrayAsync()
-                        .ConfigureAwait(false)
-                };
+                throw new InvalidOperationException("showall is not supported");
             }
 
             paging.Page = pagingRequest.Page;
