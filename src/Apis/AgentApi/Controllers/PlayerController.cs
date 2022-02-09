@@ -20,7 +20,7 @@ namespace TGS.Apis.AgentApi.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        [HttpGet("list")]
+        [HttpGet("list", Name = "GetPlayerInfos")]
         [Description("Get players of agent")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<PagedResponse<PlayerInfoModel>> GetPlayerInfosAsync(
@@ -98,7 +98,7 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
-        [HttpGet("list/statuses")]
+        [HttpGet("list/statuses", Name = "GetPlayerStatusTypes")]
         [Description("Get player status types")]
         [TgsResponseWrapper]
         public ValueTask<Dictionary<int, string>> GetPlayerStatusTypesAsync()
@@ -110,7 +110,7 @@ namespace TGS.Apis.AgentApi.Controllers
             return ValueTask.FromResult(dict);
         }
 
-        [HttpGet("list/viplevels")]
+        [HttpGet("list/viplevels", Name = "GetVipLevels")]
         [Description("Get player vip levels")]
         [TgsResponseWrapper]
         public IAsyncEnumerable<VipLevelInfoModel> GetPlayerVipLevelsAsync(
