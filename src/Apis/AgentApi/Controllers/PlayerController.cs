@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Agent;
@@ -93,6 +96,24 @@ namespace TGS.Apis.AgentApi.Controllers
                     .ToArrayAsync()
                     .ConfigureAwait(false)
             };
+        }
+
+        [HttpGet("list/viplevels")]
+        [Description("Get player vip levels")]
+        [TgsResponseWrapper]
+        public IAsyncEnumerable<VipLevelInfoModel> GetPlayerVipLevelsAsync(
+            [FromServices] IQueryService<GetPlayerVipLevelsQuery, VipLevelInfo> queryService)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new GetPlayerVipLevelsQuery(brandId);
+
+            return queryService.QueryAsync(query)
+                .Select(info => new VipLevelInfoModel
+                {
+                    Id = info.Id,
+                    Level = info.Level
+                });
         }
     }
 }
