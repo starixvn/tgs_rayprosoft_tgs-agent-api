@@ -222,8 +222,7 @@ namespace TGS.Apis.PromotionApi
                                 "ico",
                                 "png",
                                 "jpg"
-                            }.Any(
-                                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                            }.Any(ext => httpContext.Request.Path.Value?.EndsWith($".{ext}") == true);
                     };
                 });
             services.AddProfileViewer();

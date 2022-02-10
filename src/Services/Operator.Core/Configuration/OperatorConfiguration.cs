@@ -18,8 +18,16 @@ namespace TGS.Services.Operator.Configuration
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        public OperatorConfiguration AddAgentRepository<TAgentRepository>()
+            where TAgentRepository : class, IAgentRepository
+        {
+            Services.AddTransient<IAgentRepository, TAgentRepository>();
+
+            return this;
+        }
+
         public OperatorConfiguration AddBrandRepository<TBrandRepository>()
-            where TBrandRepository : class, IBrandRepository
+                    where TBrandRepository : class, IBrandRepository
         {
             Services.AddTransient<IBrandRepository, TBrandRepository>();
 
