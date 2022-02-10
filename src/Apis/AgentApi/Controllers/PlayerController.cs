@@ -24,10 +24,18 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PlayerInfoModel>> GetPlayerInfosAsync(
             [FromServices] IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo> queryService,
+            [FromServices] IGetService<GetAgentPlayerInfosQuery, int> countService,
             [FromQuery] GetAgentPlayersRequest request,
             [FromQuery] PagingRequest pagingRequest)
         {
             var agentToken = HttpContext.Items.GetAgentTokenData();
+
+            var paging = new Paging<PlayerInfoModel>();
+
+            if (pagingRequest.ShowAll)
+            {
+                throw new InvalidOperationException("showall is not supported");
+            }
 
             var query = new GetAgentPlayerInfosQuery(
                 agentToken.AgentId,
@@ -36,29 +44,13 @@ namespace TGS.Apis.AgentApi.Controllers
                 request.EndRegisteredOn,
                 request.RegisterHost,
                 request.Status,
-                request.VipId);
-
-            var playerInfos = queryService.QueryAsync(query);
-
-            var paging = new Paging<PlayerInfoModel>();
-
-            if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
-            {
-                paging.SortByPropertyName(pagingRequest.SortBy, paging.IsDesc);
-            }
-
-            if (pagingRequest.ShowAll)
-            {
-                throw new InvalidOperationException("showall is not supported");
-            }
-
-            paging.Page = pagingRequest.Page;
-            paging.RowCount = pagingRequest.Rows;
+                request.VipId,
+                new PagingInfo(pagingRequest.Page, pagingRequest.Rows, pagingRequest.SortBy, paging.IsDesc));
 
             return new PagingResponse<PlayerInfoModel>
             {
-                TotalCount = await playerInfos.CountAsync().ConfigureAwait(false),
-                Items = await playerInfos
+                TotalCount = await countService.GetAsync(query).ConfigureAwait(false),
+                Items = queryService.QueryAsync(query)
                     .Select(playerInfo => new PlayerInfoModel
                     {
                         AreaCode = playerInfo.AreaCode,
@@ -71,10 +63,7 @@ namespace TGS.Apis.AgentApi.Controllers
                         Username = playerInfo.Username,
                         VipLevel = playerInfo.VipLevel
                     })
-                    .ApplyOrderBy(paging)
-                    .ApplyPaging(paging)
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
+                    .ToEnumerable()
             };
         }
 

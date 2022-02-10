@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
+using TGS.Paging;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories
@@ -130,6 +132,43 @@ namespace TGS.Agent.Repositories
             return query.ToAsyncEnumerable();
         }
 
+        public IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfosAsync(
+            Guid agentId,
+            string? username,
+            DateTimeOffset? beginRegisteredOn,
+            DateTimeOffset? endRegisteredOn,
+            string? registerHost,
+            PlayerStatus? status,
+            Guid? vipId,
+            Paging<AgentPlayerInfo> paging)
+            => QueryAgentPlayerInfosAsync(
+                    agentId,
+                    username,
+                    beginRegisteredOn,
+                    endRegisteredOn,
+                    registerHost,
+                    status,
+                    vipId)
+                .ApplyOrderBy(paging)
+                .ApplyPaging(paging);
+
+        public ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
+            Guid agentId,
+            string? username,
+            DateTimeOffset? beginRegisteredOn,
+            DateTimeOffset? endRegisteredOn,
+            string? registerHost,
+            PlayerStatus? status,
+            Guid? vipId)
+            => QueryAgentPlayerInfosAsync(
+                agentId,
+                username,
+                beginRegisteredOn,
+                endRegisteredOn,
+                registerHost,
+                status,
+                vipId).CountAsync();
+
         public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
         {
             var rows = _tgsRepository.SystemLocalizations.AsQueryable()
@@ -173,6 +212,70 @@ namespace TGS.Agent.Repositories
             agent.UpdatedOn = updatedOn;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfosAsync(
+            Guid agentId,
+            string? username,
+            DateTimeOffset? beginRegisteredOn,
+            DateTimeOffset? endRegisteredOn,
+            string? registerHost,
+            PlayerStatus? status,
+            Guid? vipId)
+        {
+            var playerQuery = _tgsRepository.Players
+                .AsQueryable()
+                .Where(player => player.AgentId == agentId);
+
+            if (!string.IsNullOrWhiteSpace(username))
+                playerQuery = playerQuery.Where(player => player.Username == username);
+
+            if (status != null)
+                playerQuery = playerQuery.Where(player => player.Status == status);
+
+            if (vipId != null)
+                playerQuery = playerQuery.Where(player => player.VipId == vipId);
+
+            var playerIpQuery = _tgsRepository.PlayerIpRecords
+                .AsQueryable()
+                .Where(r => r.IpType == 1);
+
+            var players =
+                from player in playerQuery
+                join wallet in _tgsRepository.Wallets
+                   on player.DefaultWalletId equals wallet.Id
+                join vip in _tgsRepository.VipLevels
+                    on player.VipId equals vip.Id into vipGroup
+                from vip in vipGroup.DefaultIfEmpty()
+                join ipRecord in playerIpQuery
+                    on player.PlayerCode equals ipRecord.PlayerCode into ipRecordGroup
+                from ipRecord in ipRecordGroup.DefaultIfEmpty()
+                select new AgentPlayerInfo(
+                    player.PlayerCode,
+                    player.Username,
+                    wallet.Balance,
+                    ipRecord.RecordOn,
+                    player.AreaCode,
+                    player.Phone,
+                    ipRecord.Host,
+                    player.Status,
+                    vip.Level);
+
+            if (!string.IsNullOrWhiteSpace(registerHost))
+            {
+                players = players.Where(p =>
+                    p.RegisterHost != null &&
+                    p.RegisterHost.ToLower() == registerHost.ToLower());
+            }
+
+            if (beginRegisteredOn != null && endRegisteredOn != null)
+            {
+                players = players.Where(p =>
+                    p.RegisteredTime > beginRegisteredOn &&
+                    p.RegisteredTime <= endRegisteredOn);
+            }
+
+            return players.AsAsyncEnumerable();
         }
     }
 }

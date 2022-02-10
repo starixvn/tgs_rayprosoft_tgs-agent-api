@@ -10,5 +10,6 @@ namespace TGS.Services.Agent.ApplicationServices.Player
         DateTimeOffset? EndRegisteredOn,
         string? RegisterHost,
         PlayerStatus? Status,
-        Guid? VipId);
+        Guid? VipId,
+        PagingInfo Paging);
 }
