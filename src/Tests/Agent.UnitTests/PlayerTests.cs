@@ -3,10 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 
 namespace Agent.UnitTests
@@ -710,48 +712,22 @@ namespace Agent.UnitTests
         [Test]
         public async Task Get_VipLevels_Should_Success()
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-
             var brandId = Guid.NewGuid();
 
-            var vipLevels = new VipLevel[]
+            var vipLevels = new VipLevelInfo[]
             {
-                new()
-                {
-                    BrandId = brandId,
-                    Id = Guid.Parse("77AC3B71-AB0D-471F-8F14-7AE1D3446043"),
-                    Level = 1,
-                    CreatedOn = DateTimeOffset.Now
-                },
-                new()
-                {
-                    BrandId = brandId,
-                    Id = Guid.Parse("B1611B0F-E1BA-4F51-9DC2-F6318BA37928"),
-                    Level = 2,
-                    CreatedOn = DateTimeOffset.Now
-                },
-                new()
-                {
-                    BrandId = brandId,
-                    Id = Guid.Parse("2673009D-B8F0-4906-A43A-27012234BE06"),
-                    Level = 3,
-                    CreatedOn = DateTimeOffset.Now
-                }
+                new(Guid.Parse("77AC3B71-AB0D-471F-8F14-7AE1D3446043"), 1),
+                new(Guid.Parse("B1611B0F-E1BA-4F51-9DC2-F6318BA37928"), 2),
+                new(Guid.Parse("2673009D-B8F0-4906-A43A-27012234BE06"), 3)
             };
 
-            repository.VipLevels.AddRange(vipLevels);
-
-            await repository.SaveChangesAsync();
-
-            var sut = new GetPlayerVipLevelsQueryService(repository);
-
             var query = new GetPlayerVipLevelsQuery(brandId);
+
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            fakeBrandRepository.GetVipLevelsAsync(query.BrandId).Returns(vipLevels.ToAsyncEnumerable());
+
+            var sut = new GetPlayerVipLevelsQueryService(fakeBrandRepository);
 
             var actual = await sut.QueryAsync(query).ToArrayAsync().ConfigureAwait(false);
 

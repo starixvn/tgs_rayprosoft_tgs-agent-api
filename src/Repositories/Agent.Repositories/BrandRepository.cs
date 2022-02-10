@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
@@ -34,5 +35,12 @@ namespace TGS.Agent.Repositories
                         .FirstOrDefault()
                         ?.Url);
         }
+
+        public IAsyncEnumerable<VipLevelInfo> GetVipLevelsAsync(Guid brandId)
+            => _tgsRepository.VipLevels
+                .AsQueryable()
+                .Where(vip => vip.BrandId == brandId)
+                .Select(vip => new VipLevelInfo(vip.Id, vip.Level))
+                .ToAsyncEnumerable();
     }
 }
