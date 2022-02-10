@@ -9,7 +9,6 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
@@ -23,7 +22,7 @@ namespace TGS.Apis.AgentApi.Controllers
         [HttpGet("list", Name = "GetPlayerInfos")]
         [Description("Get players of agent")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<PagedResponse<PlayerInfoModel>> GetPlayerInfosAsync(
+        public async ValueTask<PagingResponse<PlayerInfoModel>> GetPlayerInfosAsync(
             [FromServices] IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo> queryService,
             [FromQuery] GetAgentPlayersRequest request,
             [FromQuery] PagingRequest pagingRequest)
@@ -56,7 +55,7 @@ namespace TGS.Apis.AgentApi.Controllers
             paging.Page = pagingRequest.Page;
             paging.RowCount = pagingRequest.Rows;
 
-            return new PagedResponse<PlayerInfoModel>
+            return new PagingResponse<PlayerInfoModel>
             {
                 TotalCount = await playerInfos.CountAsync().ConfigureAwait(false),
                 Items = await playerInfos
