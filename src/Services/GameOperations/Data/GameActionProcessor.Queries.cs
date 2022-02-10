@@ -44,7 +44,7 @@ namespace TGS.Services.GameOperations.Data
             return data.ToArray();
         }
 
-        private static async ValueTask<CachedGame?> GetGameIdInSameRoundAsync(
+        private static async ValueTask<CachedGame> GetGameIdInSameRoundAsync(
             ITgsRepository repository,
             Guid gameProviderId,
             string playerCode,

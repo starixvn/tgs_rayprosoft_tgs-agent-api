@@ -30,7 +30,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddSysRepository<SysRepository>()
                 .AddBrandRepository<BrandRepository>()
                 .AddHelp2PayRedisRepository<Help2PayRedisRepository>(redisDatabaseResolver)
-                .AddVipLevelRepository<VipLevelRepository>();
+                .AddVipLevelRepository<VipLevelRepository>()
+                .AddAgentRepository<AgentRepository>();
         }
     }
 }
