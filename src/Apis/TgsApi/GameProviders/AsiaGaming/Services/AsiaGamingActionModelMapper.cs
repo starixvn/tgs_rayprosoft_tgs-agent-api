@@ -199,10 +199,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             bool isLockGame,
             OppositeBetSetting[] oppositeBetSettings)
         {
-            var gameActionType = GetGameActionType(transactionType);
             var currencyCode = r.Record.Currency;
 
             var amount = r.Record.BetAmount + r.Record.WinAmount;
+            var gameActionType = GetGameActionType(transactionType, amount, r.Record.GameType);
 
             var isRoundFinish = bool.TryParse(r.Record.RoundFinish, out var finish) && finish;
 
@@ -269,14 +269,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 }).ToArray()
             };
 
-        private GameActionType GetGameActionType(TransactionType transactionType)
-                    => transactionType switch
-                    {
-                        TransactionType.WIN => GameActionType.WinBet,
-                        TransactionType.LOSE => GameActionType.LoseBet,
-                        TransactionType.REFUND => GameActionType.CancelTransaction,
-                        _ => GameActionType.PlaceBet
-                    };
+        private GameActionType GetGameActionType(TransactionType transactionType, decimal payoutAmount, string gameType)
+            => transactionType switch
+            {
+                TransactionType.WIN => GameActionType.WinBet,
+                TransactionType.LOSE when payoutAmount > 0 && gameType == "DT" => GameActionType.TieBet,
+                TransactionType.LOSE when payoutAmount > 0 => GameActionType.WinBet,
+                TransactionType.LOSE => GameActionType.LoseBet,
+                TransactionType.REFUND => GameActionType.CancelTransaction,
+                _ => GameActionType.PlaceBet
+            };
 
         private string GetGameId(PostTransferRequest r) =>
             $"{r.Record.GamePlatformType}_{r.Record.GameRound}_{r.Record.GameType}";
