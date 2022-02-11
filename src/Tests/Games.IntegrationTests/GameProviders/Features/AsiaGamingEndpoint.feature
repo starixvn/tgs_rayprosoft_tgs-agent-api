@@ -162,7 +162,7 @@ Scenario: 04.e - Lose bet with 2 transactions
     When I settle bet for win amount $-20
     Then I will receive bet response of OK and balance of $80
         And player wallet database record will be for $80
-        And 2 game actions will be recorded in the database of type "LoseBet" for $0
+        And 1 game actions will be recorded in the database of type "LoseBet" for $0
 
 Scenario: 04.f - Settle bet with duplicate transaction ID
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
