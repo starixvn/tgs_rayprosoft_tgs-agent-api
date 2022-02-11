@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Agent;
+using Tgs.Report.Client.Models.Round;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Enums;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Agent;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -142,6 +143,21 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
+        /// Get rounds query status
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("rounds/status")]
+        [Description("Get rounds query status")]
+        public Task<Dictionary<int, string>> GetClientRoundStatusAsync()
+        {
+            var dict = Enum.GetValues(typeof(ClientRoundStatus))
+                .Cast<ClientRoundStatus>()
+                .ToDictionary(t => (int)t, t => t.ToString());
+
+            return Task.FromResult(dict);
+        }
+
+        /// <summary>
         ///     Get agent contributions
         /// </summary>
         [HttpGet("contributions")]
@@ -211,6 +227,52 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 TotalCount = response.TotalCount,
                 Items = response.Items ?? Array.Empty<AgentDividendModel>()
+            };
+        }
+
+        /// <summary>
+        /// Get player rounds
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet("rounds")]
+        [Description("Get player rounds")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
+           [FromQuery] PagingRequest pagingRequest,
+           [FromQuery] GetRoundsReportRequest request)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var roundsRequest = new GetAgentPlayerRoundsRequest
+            {
+                AgentId = agentTokenData.AgentId,
+                BrandId = brandId,
+                Username = request.Username,
+                RoundId = request.RoundId,
+                ExternalRoundId = request.ExternalRoundId,
+                GameProviderId = request.GameProviderId,
+                Status = (short?)request.Status,
+                From = request.From,
+                To = request.To,
+                ClosedFrom = request.ClosedFrom,
+                ClosedTo = request.ClosedTo,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
+            };
+
+            var response = await _client.GetAgentPlayerRoundsAsync(roundsRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<RoundModel>()
             };
         }
 
