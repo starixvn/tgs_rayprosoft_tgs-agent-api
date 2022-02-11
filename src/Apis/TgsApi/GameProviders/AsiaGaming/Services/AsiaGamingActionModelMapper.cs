@@ -219,9 +219,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
                 var settleAmount = amount;
 
-                if (transactionType == TransactionType.WIN)
+                if (amount > 0 && index != 0)
                 {
-                    settleAmount = index == 0 ? amount : 0m; // only first bet will pay the settle amount
+                    settleAmount = 0m; // only first bet will pay the settle amount
                 }
 
                 return new TransactionData
