@@ -242,8 +242,8 @@ namespace TGS.Agent.Repositories
             if (beginRegisteredOn != null && endRegisteredOn != null)
             {
                 playerQuery = playerQuery.Where(p =>
-                    p.RegisteredOn > beginRegisteredOn &&
-                    p.RegisteredOn <= endRegisteredOn);
+                    p.RegisteredOn > beginRegisteredOn
+                    && p.RegisteredOn <= endRegisteredOn);
             }
 
             var playerIpQuery =
@@ -277,24 +277,21 @@ namespace TGS.Agent.Repositories
 
             if (!string.IsNullOrWhiteSpace(registerHost))
             {
-                query = query
-                    .Where(p =>
-                        p.Host != null &&
-                        p.Host.ToLower() == registerHost.ToLower());
+                query = query.Where(p =>
+                    p.Host != null
+                    && p.Host.ToLower() == registerHost.ToLower());
             }
 
-            return query
-                .Select(p =>
-                    new AgentPlayerInfo(
-                        p.PlayerCode,
-                        p.Username,
-                        p.Balance,
-                        p.RegisteredOn,
-                        p.AreaCode,
-                        p.Phone,
-                        p.Host,
-                        p.Status,
-                        p.Level));
+            return query.Select(p => new AgentPlayerInfo(
+                p.PlayerCode,
+                p.Username,
+                p.Balance,
+                p.RegisteredOn,
+                p.AreaCode,
+                p.Phone,
+                p.Host,
+                p.Status,
+                p.Level));
         }
     }
 }
