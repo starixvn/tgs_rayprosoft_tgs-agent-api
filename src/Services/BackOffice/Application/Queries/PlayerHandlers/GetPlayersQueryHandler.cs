@@ -66,11 +66,14 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             if (request.VipId != null)
                 playerQuery = playerQuery.Where(player => player.VipId == request.VipId);
 
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                playerQuery = playerQuery.Where(player => player.Phone == request.Phone);
+            }
+
             var playerIpQuery = from record in _tgsRepository.PlayerIpRecords.AsQueryable()
                                 where record.IpType == 1
                                 select record;
-
-            
 
             var query = from player in playerQuery
                         join brand in queryableBrands
