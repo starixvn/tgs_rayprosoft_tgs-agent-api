@@ -137,10 +137,10 @@ namespace TGS.Apis.OperatorApi
                     foreach (var knownProxie in knownProxies)
                         options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>() ??
+                    var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ??
                         Array.Empty<string>();
 
-                    foreach (var cidr in knowNetworks)
+                    foreach (var cidr in knownNetworks)
                     {
                         (var ip, var range) = cidr.Split("/");
 
