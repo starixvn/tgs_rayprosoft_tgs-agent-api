@@ -236,17 +236,31 @@ namespace TGS.Agent.Repositories
             if (vipId != null)
                 playerQuery = playerQuery.Where(player => player.VipId == vipId);
 
-            var playerIpQuery = _tgsRepository.PlayerIpRecords
-                .AsQueryable()
-                .Where(r => r.IpType == 1);
+            if (beginRegisteredOn != null && endRegisteredOn != null)
+            {
+                playerQuery = playerQuery.Where(p =>
+                    p.RegisteredOn > beginRegisteredOn &&
+                    p.RegisteredOn <= endRegisteredOn);
+            }
+
+            var playerIpQuery =
+                (from ipRecord in _tgsRepository.PlayerIpRecords
+                 join player in playerQuery
+                     on ipRecord.PlayerCode equals player.PlayerCode
+                 where ipRecord.IpType == 1
+                 select new
+                 {
+                     ipRecord.PlayerCode,
+                     ipRecord.Host
+                 })
+                .AsQueryable();
 
             var players =
                 (from player in playerQuery
                  join wallet in _tgsRepository.Wallets
-                    on player.DefaultWalletId equals wallet.Id
+                     on player.DefaultWalletId equals wallet.Id
                  join vip in _tgsRepository.VipLevels
-                     on player.VipId equals vip.Id into vipGroup
-                 from vip in vipGroup.DefaultIfEmpty()
+                     on player.VipId equals vip.Id
                  join ipRecord in playerIpQuery
                      on player.PlayerCode equals ipRecord.PlayerCode into ipRecordGroup
                  from ipRecord in ipRecordGroup.DefaultIfEmpty()
@@ -254,26 +268,20 @@ namespace TGS.Agent.Repositories
                      player.PlayerCode,
                      player.Username,
                      wallet.Balance,
-                     ipRecord.RecordOn,
+                     player.RegisteredOn,
                      player.AreaCode,
                      player.Phone,
                      ipRecord.Host,
                      player.Status,
                      vip.Level))
-                .AsAsyncEnumerable();
+                .ToAsyncEnumerable();
 
             if (!string.IsNullOrWhiteSpace(registerHost))
             {
-                players = players.Where(p =>
-                    p.RegisterHost != null &&
-                    p.RegisterHost.ToLower() == registerHost.ToLower());
-            }
-
-            if (beginRegisteredOn != null && endRegisteredOn != null)
-            {
-                players = players.Where(p =>
-                    p.RegisteredTime > beginRegisteredOn &&
-                    p.RegisteredTime <= endRegisteredOn);
+                players = players
+                    .Where(p =>
+                        p.RegisterHost != null &&
+                        p.RegisterHost.ToLower() == registerHost.ToLower());
             }
 
             return players;
