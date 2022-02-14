@@ -4434,15 +4434,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("player_authentication_form_id");
 
-                    b.Property<string>("PlayerCode1")
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code1");
-
                     b.HasKey("PlayerCode")
                         .HasName("pk_player_identity");
-
-                    b.HasIndex("PlayerCode1")
-                        .HasDatabaseName("ix_player_identity_player_code1");
 
                     b.ToTable("player_identity");
                 });
@@ -7680,13 +7673,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasConstraintName("fk_player_identity_players_player_code")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerCode1")
-                        .HasConstraintName("fk_player_identity_players_player_code1");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>

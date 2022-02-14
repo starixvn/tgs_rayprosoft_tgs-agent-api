@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class Player_Identity_Authentication : Migration
+    public partial class Add_Player_Identity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,7 +41,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: table => new
                 {
                     player_code = table.Column<string>(type: "character varying(16)", nullable: false),
-                    player_code1 = table.Column<string>(type: "character varying(16)", nullable: true),
                     player_authentication_form_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -54,32 +53,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         principalTable: "players",
                         principalColumn: "player_code",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_player_identity_players_player_code1",
-                        column: x => x.player_code1,
-                        principalSchema: "dbo",
-                        principalTable: "players",
-                        principalColumn: "player_code",
-                        onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_rounds_game_provider_configuration_id_composite",
-                schema: "bet",
-                table: "rounds",
-                columns: new[] { "game_provider_configuration_id", "wallet_id", "game_id", "external_round_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_rounds_wallet_id_composite",
-                schema: "bet",
-                table: "rounds",
-                columns: new[] { "external_round_id", "game_provider_id", "game_id", "wallet_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_player_identity_player_code1",
-                schema: "dbo",
-                table: "player_identity",
-                column: "player_code1");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -91,16 +65,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.DropTable(
                 name: "player_identity",
                 schema: "dbo");
-
-            migrationBuilder.DropIndex(
-                name: "ix_rounds_game_provider_configuration_id_composite",
-                schema: "bet",
-                table: "rounds");
-
-            migrationBuilder.DropIndex(
-                name: "ix_rounds_wallet_id_composite",
-                schema: "bet",
-                table: "rounds");
 
             migrationBuilder.DropColumn(
                 name: "enable_player_identity",
