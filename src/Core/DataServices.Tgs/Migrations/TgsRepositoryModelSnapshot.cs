@@ -4434,8 +4434,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("player_authentication_form_id");
 
+                    b.Property<string>("PlayerCode1")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code1");
+
                     b.HasKey("PlayerCode")
                         .HasName("pk_player_identity");
+
+                    b.HasIndex("PlayerCode1")
+                        .HasDatabaseName("ix_player_identity_player_code1");
 
                     b.ToTable("player_identity");
                 });
@@ -7667,12 +7674,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIdentity", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithOne("Identity")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithOne()
                         .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerIdentity", "PlayerCode")
-                        .HasConstraintName("fk_player_identity_players")
+                        .HasConstraintName("fk_player_identity_players_player_code")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode1")
+                        .HasConstraintName("fk_player_identity_players_player_code1");
 
                     b.Navigation("Player");
                 });
@@ -8354,8 +8366,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("BrandPaymentPlayers");
 
                     b.Navigation("GameSetting");
-
-                    b.Navigation("Identity");
 
                     b.Navigation("Letters");
 

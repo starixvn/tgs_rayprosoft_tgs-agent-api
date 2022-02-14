@@ -16,10 +16,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(pi => pi.PlayerAuthenticationFormId)
                 .IsRequired();
 
-            builder.HasOne(pi => pi.Player)
-                .WithOne(p => p.Identity)
+            builder.HasOne<Player>()
+                .WithOne()
                 .HasForeignKey<PlayerIdentity>(pi => pi.PlayerCode)
-                .HasConstraintName("fk_player_identity_players");
+                .HasConstraintName("fk_player_identity_players_player_code")
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
