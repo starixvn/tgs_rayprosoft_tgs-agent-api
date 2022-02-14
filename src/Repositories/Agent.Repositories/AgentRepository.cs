@@ -241,25 +241,26 @@ namespace TGS.Agent.Repositories
                 .Where(r => r.IpType == 1);
 
             var players =
-                from player in playerQuery
-                join wallet in _tgsRepository.Wallets
-                   on player.DefaultWalletId equals wallet.Id
-                join vip in _tgsRepository.VipLevels
-                    on player.VipId equals vip.Id into vipGroup
-                from vip in vipGroup.DefaultIfEmpty()
-                join ipRecord in playerIpQuery
-                    on player.PlayerCode equals ipRecord.PlayerCode into ipRecordGroup
-                from ipRecord in ipRecordGroup.DefaultIfEmpty()
-                select new AgentPlayerInfo(
-                    player.PlayerCode,
-                    player.Username,
-                    wallet.Balance,
-                    ipRecord.RecordOn,
-                    player.AreaCode,
-                    player.Phone,
-                    ipRecord.Host,
-                    player.Status,
-                    vip.Level);
+                (from player in playerQuery
+                 join wallet in _tgsRepository.Wallets
+                    on player.DefaultWalletId equals wallet.Id
+                 join vip in _tgsRepository.VipLevels
+                     on player.VipId equals vip.Id into vipGroup
+                 from vip in vipGroup.DefaultIfEmpty()
+                 join ipRecord in playerIpQuery
+                     on player.PlayerCode equals ipRecord.PlayerCode into ipRecordGroup
+                 from ipRecord in ipRecordGroup.DefaultIfEmpty()
+                 select new AgentPlayerInfo(
+                     player.PlayerCode,
+                     player.Username,
+                     wallet.Balance,
+                     ipRecord.RecordOn,
+                     player.AreaCode,
+                     player.Phone,
+                     ipRecord.Host,
+                     player.Status,
+                     vip.Level))
+                .AsAsyncEnumerable();
 
             if (!string.IsNullOrWhiteSpace(registerHost))
             {
@@ -275,7 +276,7 @@ namespace TGS.Agent.Repositories
                     p.RegisteredTime <= endRegisteredOn);
             }
 
-            return players.AsAsyncEnumerable();
+            return players;
         }
     }
 }
