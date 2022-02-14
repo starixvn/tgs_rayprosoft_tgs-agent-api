@@ -38,6 +38,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual PlayerGameSetting GameSetting { get; set; }
 
+        public virtual PlayerIdentity Identity { get; set; }
+
         public bool IdentityAuthentication { get; set; }
 
         public string IdNumber { get; set; }

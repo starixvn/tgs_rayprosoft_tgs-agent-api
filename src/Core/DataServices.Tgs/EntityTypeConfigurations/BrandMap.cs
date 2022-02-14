@@ -51,6 +51,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(false)
                 .IsRequired();
 
+            builder.Property(b => b.EnablePlayerIdentity)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(c => c.SmsVendorCode);
 
             builder.Property(c => c.SmsVendorSettings)
