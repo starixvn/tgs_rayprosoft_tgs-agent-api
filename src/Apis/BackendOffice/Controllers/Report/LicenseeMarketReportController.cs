@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.LicenseeMarket;
-using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.LicenseeMarket;
+using TGS.Apis.BackendOffice.Models.LicenseeMarket;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -19,8 +19,19 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("exportLicenseeMarkets")]
         [Description(" Export licensee markets")]
-        public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportLicenseeMarketsRequest request) => File(
-            await _client.ExportLicenseeMarketsAsync(request).ConfigureAwait(false),
+        public async Task<IActionResult> ExportMarketsAsync([FromQuery] GetLicenseeMarketsReportRequest request) => File(
+            await _client.ExportLicenseeMarketsAsync(new ExportLicenseeMarketsRequest
+            {
+                CurrencyCode = request.CurrencyCode,
+                CurrencyCodes = request.CurrencyCodes,
+                From = request.From,
+                LicenseeId = request.LicenseeId,
+                Page = request.Page,
+                Rows = request.Rows,
+                ShowAll = request.ShowAll,
+                SortBy = request.SortBy,
+                To = request.To
+            }).ConfigureAwait(false),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "LicenseeMarkets.xlsx");
 
