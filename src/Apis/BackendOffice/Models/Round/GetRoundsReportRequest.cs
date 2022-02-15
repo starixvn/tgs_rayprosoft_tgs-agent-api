@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Models.Round
 
         public GameType? GameType { get; init; }
 
-        public string PlayerCode { get; init; } = default!;
+        public string? PlayerCode { get; init; }
 
         public Guid? RoundId { get; init; }
 
@@ -30,6 +30,6 @@ namespace TGS.Apis.BackendOffice.Models.Round
 
         public DateTimeOffset? To { get; init; }
 
-        public string Username { get; init; } = default!;
+        public string? Username { get; init; }
     }
 }

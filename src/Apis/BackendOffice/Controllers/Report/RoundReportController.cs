@@ -173,8 +173,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [HttpGet]
         [Description("Get rounds")]
         public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
-            [FromServices]
-            IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
+            [FromServices] IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
             [FromServices] IQueryService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
