@@ -4072,6 +4072,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
                     b.Property<DateTimeOffset?>("ReviewedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("reviewed_on");
