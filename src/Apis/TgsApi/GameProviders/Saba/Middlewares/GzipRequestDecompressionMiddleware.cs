@@ -9,7 +9,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
     {
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            if (context.Request.Headers.ContainsKey(HeaderNames.ContentEncoding) &&
+            if (context.Request.Method != HttpMethods.Get &&
+                context.Request.Headers.ContainsKey(HeaderNames.ContentEncoding) &&
                 context.Request.Headers[HeaderNames.ContentEncoding] == "gzip")
             {
                 context.Request.Headers.Remove(HeaderNames.ContentEncoding);
