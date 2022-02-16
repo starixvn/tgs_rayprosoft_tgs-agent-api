@@ -183,7 +183,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                         .AddReplyHandler<WMCasinoBetRequestInfoHandler>(
                             "tgs.gameprovider.wm.betdetailrequest.process",
                             "tgs.gameprovider.wm.betdetailrequest.process");
-                });
+                })
+                .AddNatsGlobPatternExchange("*");
 
             services
                 .AddOptions<OtlpExporterOptions>()
