@@ -23,11 +23,11 @@ namespace TGS.Apis.BackendOffice.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask HandleAsync(byte[] data, CancellationToken cancellationToken)
+        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Receive AutoApproveDeposit request.");
 
-            var request = ApproveDepositRequest.Parser.ParseFrom(data);
+            var request = ApproveDepositRequest.Parser.ParseFrom(data.Span);
 
             var formId = Guid.Parse(request.FormId);
             var brandId = Guid.Parse(request.BrandId);

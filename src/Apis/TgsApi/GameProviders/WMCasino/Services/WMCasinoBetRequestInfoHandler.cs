@@ -49,14 +49,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
         }
 
-        public async ValueTask HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
         {
             string agentId = default;
             string roundNumber = default;
 
             try
             {
-                var key = JsonSerializer.Deserialize<BetDetailRequestInfoKey>(data)!;
+                var key = JsonSerializer.Deserialize<BetDetailRequestInfoKey>(data.Span)!;
                 agentId = key.AgentId;
                 roundNumber = key.RoundNumber;
 

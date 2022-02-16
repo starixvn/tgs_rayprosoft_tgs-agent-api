@@ -36,11 +36,11 @@ namespace TGS.Services.Promotion.MessageQueue
             _dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
         }
 
-        public async ValueTask HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Deposit status change event.");
 
-            var formEvent = FormEvent.Parser.ParseFrom(data);
+            var formEvent = FormEvent.Parser.ParseFrom(data.Span);
 
             if (formEvent == null)
                 return;
