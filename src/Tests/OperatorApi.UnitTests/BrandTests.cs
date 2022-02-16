@@ -27,6 +27,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Core.Models.Enums.BrandStatus.Active,
                     "CNY",
                     false,
+                    false,
                     false));
 
             var sut = new GetBrandQueryService(fakeBrandRepository);

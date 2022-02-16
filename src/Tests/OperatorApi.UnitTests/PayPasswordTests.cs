@@ -256,6 +256,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Core.Models.Enums.BrandStatus.Active,
                     "CNY",
                     false,
+                    false,
                     false));
 
             var actualSecurityKey = await sut.GetAsync(command);

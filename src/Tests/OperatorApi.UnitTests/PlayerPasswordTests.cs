@@ -158,7 +158,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Core.Models.Enums.BrandStatus.Active,
                     "CNY",
                     true,
-                    true));
+                    true,
+                    false));
 
             var expected = $"Your ID verification code is : {validateCode}";
 
