@@ -12,5 +12,6 @@ namespace TGS.Services.Operator
         BrandStatus Status,
         string Currency,
         bool SmsEnabled,
-        bool SmsRegisterFlowEnabled);
+        bool SmsRegisterFlowEnabled,
+        bool PlayerIdentityEnabled);
 }

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -11,6 +14,34 @@ namespace TGS.Tests.OperatorApi.UnitTests
     [TestFixture]
     public class PlayerIdentityTests
     {
+        [Test]
+        public void Create_Player_Identity_Should_Failed_When_Brand_Enable_Player_Identity_Is_False()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var brandId = Guid.NewGuid();
+
+            var brandInfo = new BrandInfo(
+                brandId,
+                "GPI",
+                new Uri("http://img.org/1.png"),
+                new Uri("http://img.org/1.png"),
+                new Uri("http://img.org/1.png"),
+                BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                PlayerIdentityEnabled: false);
+
+            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
+
+            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            Assert.ThrowsAsync<BrandEnablePlayerIdentityNotSetException>(
+                async () => await sut.ExecuteAsync(new CreateIdentityAuthenticationFormCommand("playerCode", brandId, "fileId")));
+        }
+
         [Test]
         public async Task Set_Player_Identity_Should_Success()
         {
@@ -42,6 +73,48 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<bool>(x => x == false),
                     It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task When_Brand_Enable_Player_Identity_Equals_True_Should_Create_Player_Identity_Success()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var brandId = Guid.NewGuid();
+
+            var brandInfo = new BrandInfo(
+                brandId,
+                "GPI",
+                new Uri("http://img.org/1.png"),
+                new Uri("http://img.org/1.png"),
+                new Uri("http://img.org/1.png"),
+                BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                PlayerIdentityEnabled: true);
+
+            _ = fakeBrandRepository
+                .GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(brandInfo);
+
+            var authFormId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            _ = fakePlayerRepository
+                .CreatePlayerAuthenticationFormAsync(Arg.Is(brandId), Arg.Is(playerCode), Arg.Is("{}"))
+                .Returns(authFormId);
+
+            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            var command = new CreateIdentityAuthenticationFormCommand(playerCode, brandId, "620c6db1110125f95bb9ccb2");
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .UpdatePlayerIdentityAsync(Arg.Is(playerCode), Arg.Any<Guid>());
         }
     }
 }

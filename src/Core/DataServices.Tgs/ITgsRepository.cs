@@ -132,6 +132,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; }
 
+        DbSet<PlayerAuthenticationForm> PlayerAuthenticationForms { get; set; }
+
         DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
@@ -143,6 +145,8 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
 
         DbSet<PlayerGameSetting> PlayerGameSettings { get; set; }
+
+        DbSet<PlayerIdentity> PlayerIdentity { get; set; }
 
         DbSet<PlayerIpRecord> PlayerIpRecords { get; set; }
 

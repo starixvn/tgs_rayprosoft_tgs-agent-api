@@ -43,6 +43,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         false,
+                        false,
                         false)));
 
             fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -105,7 +106,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         true,
-                        true)));
+                        true,
+                        false)));
 
             fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
                 .Returns("TestPlayerCode");
@@ -175,6 +177,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         false,
+                        false,
                         false)));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
@@ -224,6 +227,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         new Uri("http://image.com/img03"),
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
+                        false,
                         false,
                         false)));
 
@@ -290,6 +294,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         false,
+                        false,
                         false)));
 
             var sut = new CreatePlayerCommandService(
@@ -342,6 +347,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         false,
+                        false,
                         false)));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
@@ -390,6 +396,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         new Uri("http://image.com/img03"),
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
+                        false,
                         false,
                         false)));
 
@@ -444,6 +451,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Core.Models.Enums.BrandStatus.Active,
                         "CNY",
                         false,
+                        false,
                         false)));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
@@ -491,6 +499,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         new Uri("http://image.com/img03"),
                         BrandStatus.Active,
                         "CNY",
+                        false,
                         false,
                         false)));
 

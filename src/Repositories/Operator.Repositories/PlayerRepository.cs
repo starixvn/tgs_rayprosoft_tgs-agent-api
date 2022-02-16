@@ -18,6 +18,29 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
+        {
+            var createFormId = Guid.NewGuid();
+            var currentDate = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.PlayerAuthenticationForms
+                .AddAsync(new PlayerAuthenticationForm
+                {
+                    Id = createFormId,
+                    CreatedOn = currentDate,
+                    BrandId = brandId,
+                    PlayerCode = playerCode,
+                    Data = data
+                })
+                .ConfigureAwait(false);
+
+            _ = await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
+
+            return createFormId;
+        }
+
         public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
         {
             var player = await _tgsRepository.Players.AsQueryable()
@@ -209,7 +232,35 @@ namespace TGS.Operator.Repositories
 
             settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
 
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId)
+        {
+            var identityData = await _tgsRepository.PlayerIdentity
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (identityData == null)
+            {
+                identityData = new PlayerIdentity
+                {
+                    PlayerCode = playerCode,
+                    PlayerAuthenticationFormId = IdentityAuthenticationFormId
+                };
+
+                _ = await _tgsRepository.PlayerIdentity
+                    .AddAsync(identityData)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                identityData.PlayerAuthenticationFormId = IdentityAuthenticationFormId;
+
+                _ = await _tgsRepository
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+            }
         }
 
         public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
@@ -220,7 +271,7 @@ namespace TGS.Operator.Repositories
             player.Status = playerStatus;
             player.UpdatedOn = DateTimeOffset.UtcNow;
 
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
