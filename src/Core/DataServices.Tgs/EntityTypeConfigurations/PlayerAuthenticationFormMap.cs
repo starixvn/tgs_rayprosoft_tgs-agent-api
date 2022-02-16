@@ -27,6 +27,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(paf => paf.CreatedOn)
                 .IsRequired();
 
+            builder.Property(paf => paf.Remark);
+
             builder.Property(paf => paf.Data)
                 .HasColumnType(ColumnTypes.Jsonb)
                 .IsRequired();

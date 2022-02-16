@@ -21,5 +21,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string ReviewedUserName { get; set; }
 
         public int Status { get; set; }
+
+        public string Remark { get; set; }
     }
 }
