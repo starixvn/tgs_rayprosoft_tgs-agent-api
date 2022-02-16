@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,13 +13,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Filters;
 using TGS.Apis.AgentApi.Filters.Swaggers;
 using TGS.Apis.AgentApi.Models;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -105,7 +109,12 @@ namespace TGS.Apis.AgentApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddReportClientServices(_configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddTransactions();
 
             services.AddErrorMapper()
@@ -197,10 +206,18 @@ namespace TGS.Apis.AgentApi
             {
                 c.SwaggerDoc(
                     "Normal",
-                    new OpenApiInfo { Title = "TGS Agent API", Version = "Normal" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS Agent API",
+                        Version = "Normal"
+                    });
                 c.SwaggerDoc(
                     "HK28",
-                    new OpenApiInfo { Title = "Tgs Agent API - HK28", Version = "HK28" });
+                    new OpenApiInfo
+                    {
+                        Title = "Tgs Agent API - HK28",
+                        Version = "HK28"
+                    });
 
                 var securityScheme = new OpenApiSecurityScheme
                 {
@@ -221,8 +238,7 @@ namespace TGS.Apis.AgentApi
                 {
                     if (groupName == "Normal")
                         return desc.GroupName is null;
-                    else
-                        return desc.GroupName == groupName;
+                    return desc.GroupName == groupName;
                 });
 
                 c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
@@ -253,6 +269,53 @@ namespace TGS.Apis.AgentApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+                });
+
+            services
+                .AddOpenTelemetryTracing(
+                    builder => builder
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                            .AddEnvironmentVariableDetector())
+                        .AddSource("Tgs.*")
+                        .AddSource("TGS.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddProfileViewExporter(_ => { })
+                        .AddOtlpExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext =>
+                    {
+                        return !httpContext.Request.Path.HasValue
+                            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                            && !httpContext.Request.Path.StartsWithSegments("/health")
+                            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !new[]
+                            {
+                                "html",
+                                "ico",
+                                "png",
+                                "jpg"
+                            }.Any(
+                                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                    };
+                });
+            services.AddProfileViewer();
         }
     }
 }

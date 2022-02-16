@@ -21,23 +21,6 @@ using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.GameOperations.Data
 {
-    public interface IGameActionDataOperations
-    {
-        ValueTask<BetResult> LockAmountAsync(BetData data);
-
-        ValueTask<BetResult> PlaceBetAsync(BetData data);
-
-        ValueTask<BetResult> SettleBetAsync(BetData data);
-
-        ValueTask<BetResult> CancelTransactionAsync(BetData data);
-
-        ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data);
-
-        ValueTask<BatchBetResult> SettleBatchAsync(BatchBetData data);
-
-        ValueTask<BatchBetResult> CancelBatchAsync(BatchBetData data);
-    }
-
     internal sealed class GameActionDataOperations : IGameActionDataOperations
     {
         private readonly IBrandOperations _brandOperations;

@@ -5,7 +5,7 @@
     <AssemblyName>TGS.Apis.TgsApi</AssemblyName>
     <RootNamespace>TGS.Apis.TgsApi</RootNamespace>
     <UserSecretsId>8becd8f5-1a79-4b6e-87c1-63da6719254c</UserSecretsId>
-	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
@@ -36,12 +37,14 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc8" />
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.11-beta" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.1.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.0.18" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
+    <PackageReference Include="Tgs.Interceptors" Version="0.2.0" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.5.0" />
+    <PackageReference Include="Tgs.MessageQueue.MongoDB" Version="1.5.0" />
   </ItemGroup>
 
   <ItemGroup>

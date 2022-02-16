@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -31,17 +32,20 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
         private readonly IAsiaGamingActionModelMapper _map;
         private readonly IAsiaGamingServices _services;
         private readonly ISettingOperations _settingOperations;
+        private readonly IAsiaGamingDataStore _store;
 
         public AsiaGamingGameController(
             IGamePlayActions actions,
             IAsiaGamingServices services,
             IAsiaGamingActionModelMapper map,
-            ISettingOperations settingOperations)
+            ISettingOperations settingOperations,
+            IAsiaGamingDataStore store)
         {
             _actions = actions;
             _services = services;
             _map = map;
             _settingOperations = settingOperations;
+            _store = store;
 
             _actionMapper = new Dictionary<TransactionType, Func<PostTransferRequest, ValueTask<TransferResponse>>>
             {
@@ -54,7 +58,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 
         [HttpPost("betresponse")]
         public async ValueTask<TransferResponse> BetResponseAsync(
-            [FromServices] IAsiaGamingDataStore store,
             BetResponseRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
@@ -69,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 
             var transactionId = request.TransactionId;
 
-            var isExist = await store
+            var isExist = await _store
                 .ExistBetResponseTransactionIdAsync(transactionId)
                 .ConfigureAwait(false);
 
@@ -81,7 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                 };
             }
 
-            _ = await store
+            _ = await _store
                 .StoreBetResponseTransactionIdAsync(transactionId)
                 .ConfigureAwait(false);
 
@@ -96,12 +99,12 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                 await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
-            var betData = _map.PlaceBetForLockGameRequest(playerCode, data, request,
+            var betData = await _map.PlaceBetForLockGameRequestAsync(playerCode, data, request,
                 lockGameActionExternalIds, configuration.OppositeBets);
 
             _ = await _actions.PlaceBetAsync(betData);
 
-            await store
+            await _store
                 .RemoveBetResponseTransactionIdAsync(transactionId)
                 .ConfigureAwait(false);
 
@@ -131,9 +134,18 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
             var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
-            var betData = _map.CancelTransactionRequest(playerCode, data, request, isLockGame, configuration.OppositeBets);
+            var betData = await _map.CancelTransactionRequestAsync(playerCode, data, request, isLockGame, configuration.OppositeBets).ConfigureAwait(false);
 
             var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
+            var betInfos = await _store
+                .GetBetInfosAsync(request.Record.RoundId)
+                .ConfigureAwait(false);
+
+            if (betInfos.All(info => info.IsSettled))
+            {
+                await _store.RemoveBetInfosAsync(request.Record.RoundId).ConfigureAwait(false);
+            }
 
             return _map.Response(r);
         }
@@ -159,7 +171,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             }
             else
             {
-                var betData = _map.PlaceBetRequest(playerCode, data, request, configuration.OppositeBets);
+                var betData = await _map
+                    .PlaceBetRequestAsync(playerCode, data, request, configuration.OppositeBets)
+                    .ConfigureAwait(false);
                 r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
             }
 
@@ -180,10 +194,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 
             var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
 
-            var betData = _map.SettleBetRequest(playerCode, data, request, transactionType,
-                    isLockGame, configuration.OppositeBets);
+            var (betData, roundClosed) = await _map
+                .SettleBetRequestAsync(playerCode, data, request, transactionType, isLockGame, configuration.OppositeBets)
+                .ConfigureAwait(false);
 
             var result = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+            if (roundClosed)
+            {
+                await _store.RemoveBetInfosAsync(request.Record.RoundId).ConfigureAwait(false);
+            }
 
             return _map.Response(result);
         }

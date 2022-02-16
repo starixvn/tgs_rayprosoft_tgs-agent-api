@@ -16,10 +16,8 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.PluggableServices;
-using TGS.Services.PluggableServices.Models;
-using CoreModesl = TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
+using CoreModesl = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -84,6 +82,35 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Player_Can_Get_Game_Balance_Infos()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var brandId = Guid.NewGuid();
+
+            repository.Brands.Add(new CoreModesl.Brand()
+            {
+                Id = brandId,
+                Name = "brandName"
+            });
+            await repository.SaveChangesAsync();
+
+            var sut = new GetGameBalanceInfosQueryService(repository);
+
+            var query = new GetGameBalanceInfosQuery(
+                BrandId: brandId,
+                PlayerCode: "playerCode",
+                RecordOnRange: null);
+
+            var info = await sut.QueryAsync(query).ToArrayAsync();
+
+            Assert.IsTrue(info.Length >= 0);
+        }
+
+        [Test]
         public async Task Player_Can_Get_Transfer_Wallet_Balance()
         {
             // arrange
@@ -92,12 +119,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeUri = new Uri("https://www.fake.com");
 
             var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
-
-            var request = new GameProviderWalletGetBalanceRequest()
-            {
-                GameProviderCode = gameProviderCode,
-                PlayerCode = playerCode
-            };
 
             fakeGameProvidersOperatorPluggableClient
                 .GetBalanceAsync(playerCode, gameProviderCode)
@@ -271,35 +292,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // assert
             Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
-        }
-
-        [Test]
-        public async Task Player_Can_Get_Game_Balance_Infos()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-            var brandId = Guid.NewGuid();
-
-            repository.Brands.Add(new CoreModesl.Brand()
-            {
-                Id = brandId,
-                Name = "brandName"
-            });
-            await repository.SaveChangesAsync();
-
-            var sut = new GetGameBalanceInfosQueryService(repository);
-
-            var query = new GetGameBalanceInfosQuery(
-                BrandId: brandId,
-                PlayerCode: "playerCode",
-                RecordOnRange: null);
-
-            var info = await sut.QueryAsync(query).ToArrayAsync();
-
-            Assert.IsTrue(info.Length >= 0);
         }
     }
 }

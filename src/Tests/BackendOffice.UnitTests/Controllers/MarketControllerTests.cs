@@ -6,9 +6,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Market;
-using TGS.Core.Models.Messages;
+using TGS.Apis.BackendOffice.Models.Market;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models;
+using Tgs.Report.Client.Models.Market;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -35,7 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .CreateMany<MarketModel>(99)
                 .ToArray();
 
-            var request = new GetMarketsRequest
+            var request = new GetMarketsReportRequest
             {
                 Page = 1,
                 Rows = 10,
@@ -50,7 +51,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _clientMock
                 .Setup(m => m.GetMarketsAsync(It.IsAny<GetMarketsRequest>()))
-                .ReturnsAsync(new PagedResponse<MarketModel> {Valid = true, Items = expectedRoles});
+                .ReturnsAsync(new PagedResponse<MarketModel>
+                {
+                    Valid = true,
+                    Items = expectedRoles
+                });
 
             var response = await _controller.GetMarketsAsync(request);
             response.Valid.Should().BeTrue();

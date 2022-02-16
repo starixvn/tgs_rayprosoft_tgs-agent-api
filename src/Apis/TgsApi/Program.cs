@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -35,7 +36,8 @@ namespace TGS.Apis.TgsApi
 
                     webBuilder.UseStartup(startup)
                         .UseKestrel(options => options.AddServerHeader = false);
-                });
+                })
+                .UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
         }
 
         public static async Task Main(string[] args)

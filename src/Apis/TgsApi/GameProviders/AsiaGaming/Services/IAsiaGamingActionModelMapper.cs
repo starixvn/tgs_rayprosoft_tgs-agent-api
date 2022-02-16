@@ -1,4 +1,5 @@
-﻿using TGS.Core.Models.GameProviders.Settings;
+﻿using System.Threading.Tasks;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.AsiaGaming.Enums;
@@ -8,7 +9,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 {
     public interface IAsiaGamingActionModelMapper
     {
-        BetData CancelTransactionRequest(
+        ValueTask<BetData> CancelTransactionRequestAsync(
             string playerCode,
             GameProviderConfigurationData data,
             PostTransferRequest r,
@@ -20,15 +21,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             GameProviderConfigurationData data,
             PostTransferRequest r);
 
-        BetData PlaceBetForLockGameRequest(
+        ValueTask<BetData> PlaceBetForLockGameRequestAsync(
             string playerCode,
             GameProviderConfigurationData data,
             BetResponseRequest r,
             GameActionExternalIds lockGameActionExternalIds,
             OppositeBetSetting[] oppositeBetSettings);
 
-        BetData PlaceBetRequest(
-                    string playerCode,
+        ValueTask<BetData> PlaceBetRequestAsync(
+            string playerCode,
             GameProviderConfigurationData data,
             PostTransferRequest r,
             OppositeBetSetting[] oppositeBetSettings);
@@ -39,7 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
         TransferResponse Response(BetResult result);
 
-        BetData SettleBetRequest(
+        ValueTask<(BetData BetData, bool RoundClosed)> SettleBetRequestAsync(
             string playerCode,
             GameProviderConfigurationData data,
             PostTransferRequest r,

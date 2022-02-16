@@ -29,10 +29,19 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.Linq.Async" Version="5.1.0" />
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.7" />
+    <PackageReference Include="OpenTelemetry" Version="1.2.0-rc1" />
+    <PackageReference Include="OpenTelemetry.Contrib.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta2" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.2.0-rc1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc8" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc8" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc8" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.1.0" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Repositories\Agent.Repositories\Agent.Repositories.csproj" />

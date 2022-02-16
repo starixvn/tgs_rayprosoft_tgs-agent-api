@@ -6,7 +6,6 @@ using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.Operator.StationLetters;
-using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Operator.Configuration
 {
@@ -19,8 +18,24 @@ namespace TGS.Services.Operator.Configuration
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        public OperatorConfiguration AddAgentRepository<TAgentRepository>()
+            where TAgentRepository : class, IAgentRepository
+        {
+            Services.AddTransient<IAgentRepository, TAgentRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddBrandRepository<TBrandRepository>()
+                    where TBrandRepository : class, IBrandRepository
+        {
+            Services.AddTransient<IBrandRepository, TBrandRepository>();
+
+            return this;
+        }
+
         public OperatorConfiguration AddGameProviderRepository<TGameProviderRepository>()
-            where TGameProviderRepository : class, IGameProviderRepository
+                    where TGameProviderRepository : class, IGameProviderRepository
         {
             Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
@@ -70,10 +85,10 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration AddBrandRepository<TBrandRepository>()
-            where TBrandRepository : class, IBrandRepository
+        public OperatorConfiguration AddVipLevelRepository<TVipLevelRepository>()
+                            where TVipLevelRepository : class, IVipLevelRepository
         {
-            Services.AddTransient<IBrandRepository, TBrandRepository>();
+            Services.AddTransient<IVipLevelRepository, TVipLevelRepository>();
 
             return this;
         }

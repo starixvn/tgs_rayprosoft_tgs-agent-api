@@ -8,7 +8,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "SBO-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "SBO"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
@@ -20,7 +20,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Habanero-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "HABA"
       },
       "applicationUrl": "http://localhost:62330"
@@ -32,7 +32,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "PragmaticPlay-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "PP"
       },
       "applicationUrl": "http://localhost:62330"
@@ -44,7 +44,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "KY-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "KY"
       },
       "applicationUrl": "http://localhost:62330"
@@ -56,7 +56,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "AsiaGaming-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "AG"
       },
       "applicationUrl": "http://localhost:62330"
@@ -68,7 +68,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Saba-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "SABA"
       },
       "applicationUrl": "http://localhost:62330"
@@ -80,7 +80,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "IMESports-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "IMES"
       },
       "applicationUrl": "http://localhost:62330"
@@ -92,7 +92,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "VR-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "VR"
       },
       "applicationUrl": "http://localhost:62330"
@@ -104,7 +104,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "BigGaming-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "BG"
       },
       "applicationUrl": "http://localhost:62330"
@@ -115,7 +115,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "JDB-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "JDB"
       },
       "applicationUrl": "http://localhost:62330"
@@ -127,7 +127,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "SexyGaming-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "SG"
       },
       "applicationUrl": "http://localhost:62330"
@@ -139,7 +139,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Skywind-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "SW"
       },
       "applicationUrl": "http://localhost:62330"
@@ -151,7 +151,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "AllBet-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "AB"
       },
       "applicationUrl": "http://localhost:62330"
@@ -163,7 +163,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "EVO-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "EVO"
       },
       "applicationUrl": "http://localhost:62330"
@@ -175,7 +175,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "WGSports-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "WGFM"
       },
       "applicationUrl": "http://localhost:62330"
@@ -187,7 +187,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "WGHorse-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "WGVIA"
       },
       "applicationUrl": "http://localhost:62330"
@@ -199,7 +199,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "WMCasino-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "WM"
       },
       "applicationUrl": "http://localhost:62330"
@@ -211,7 +211,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "TCG-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "TCG"
       },
       "applicationUrl": "http://localhost:62330"
@@ -223,7 +223,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Card365-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "365"
       },
       "applicationUrl": "http://localhost:62330"
@@ -235,7 +235,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "LY-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "LY"
       },
       "applicationUrl": "http://localhost:62330"
@@ -247,7 +247,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "BetConstruct-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "BC"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
@@ -259,7 +259,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Avia-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "AVIA"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
@@ -271,7 +271,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Jili-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "JILI"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
@@ -283,7 +283,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "TFGaming-API-Local-Dev",
-        "NODE_IP": "192.168.50.107",
+        "NODE_IP": "192.168.50.112",
         "GameProviderCode": "TF"
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"

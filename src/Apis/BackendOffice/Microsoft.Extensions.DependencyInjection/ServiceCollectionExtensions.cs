@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.BackendOffice;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -17,7 +15,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Extensions;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.PluggableServices.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -50,10 +47,14 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTgsLog()
                 .AddOperations()
                 .AddApiClient()
-                .AddPluggableServices()
                 .AddTransactions()
                 .AddBackOfficeApplicationServices()
-                .AddReportClientServices(configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -82,11 +83,11 @@ namespace Microsoft.Extensions.DependencyInjection
             Action<RedisOptions, IServiceProvider> configure)
         {
             services
-               .AddOptions<RedisOptions>()
-               .Configure(configure)
-               .Services
-               .AddRedisServices()
-               .RegisterRedisConnectionFactory<RedisConnectionFactory>();
+                .AddOptions<RedisOptions>()
+                .Configure(configure)
+                .Services
+                .AddRedisServices()
+                .RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
             return services;
         }
