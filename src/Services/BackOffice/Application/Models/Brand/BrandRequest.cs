@@ -23,5 +23,6 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public string[] Domains { get; set; }
         public decimal PlatformCharge { get; set; }
         public bool CheckDividendActiveCount { get; set; }
+        public bool EnablePlayerIdentity { get; set; }
     }
 }
