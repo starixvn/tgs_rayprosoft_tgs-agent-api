@@ -16,6 +16,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
+using Tgs.MessageQueue.MongoDB.Configuration;
 using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -170,10 +171,13 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddMongoMessageQueue(config =>
                     {
                         config
-                        .DefineMessageQueue(
-                            "singlewallet.database",
-                            sp => MongoMessageQueue.Default,
-                            sp => sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString"))
+                            .DefineMessageQueue(
+                                "singlewallet.database",
+                                sp => new MongoMessageQueueBuilderOptions
+                                {
+                                    MessageQueue = MongoMessageQueue.Default,
+                                    ConnectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString")
+                                })
                         .DeclareQueue("tgs.singlewallet.gameaction");
                     })
                 .ClearAllExchanges()
