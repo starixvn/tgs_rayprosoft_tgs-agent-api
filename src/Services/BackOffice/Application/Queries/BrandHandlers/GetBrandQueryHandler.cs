@@ -140,7 +140,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     Description = brand.Description,
                     OperationalEmail = brand.OperationalEmail,
                     CreatedOn = brand.CreatedOn,
-                    UpdatedOn = brand.UpdatedOn
+                    UpdatedOn = brand.UpdatedOn,
+                    EnablePlayerIdentity = brand.EnablePlayerIdentity
                 }
             };
         }
