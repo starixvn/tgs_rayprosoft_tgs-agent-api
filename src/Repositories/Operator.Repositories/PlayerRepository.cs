@@ -256,11 +256,10 @@ namespace TGS.Operator.Repositories
             else
             {
                 identityData.PlayerAuthenticationFormId = IdentityAuthenticationFormId;
-
-                _ = await _tgsRepository
-                    .SaveChangesAsync()
-                    .ConfigureAwait(false);
             }
+            _ = await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
         public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
