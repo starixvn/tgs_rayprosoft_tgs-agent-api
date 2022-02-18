@@ -6,6 +6,9 @@ namespace TGS.Services.Operator
 {
     public interface IPlayerRepository
     {
+        ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
+
+
         ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
@@ -25,5 +28,7 @@ namespace TGS.Services.Operator
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
+
+        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId);
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Apis.BackendOffice.Models.Agent;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 
@@ -65,8 +68,39 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
 
         [HttpGet("accountChanges")]
         [Description("Get agent account changes")]
-        public Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
-            [FromQuery] GetAgentAccountChangesRequest request) =>
-            _client.GetAgentAccountChangesAsync(request);
+        public async ValueTask<PagedResponse<AgentAccountChangeReportModel>> GetAgentAccountChangesAsync(
+            [FromQuery] GetAgentAccountChangesReportRequest request)
+        {
+            var reportRequest = new GetAgentAccountChangesRequest
+            {
+                BrandId = request.BrandId,
+                AgentId = request.AgentId,
+                TransactionType = (short?)request.TransactionType,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentAccountChangesAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentAccountChangeReportModel
+                {
+                    TransactionId = x.TransactionId,
+                    Amount = x.Amount,
+                    Balance = x.Balance,
+                    TransactionType = (TransactionType)x.TransactionType,
+                    RecordedOn = x.RecordedOn
+                }).ToArray()
+            };
+        }
     }
 }

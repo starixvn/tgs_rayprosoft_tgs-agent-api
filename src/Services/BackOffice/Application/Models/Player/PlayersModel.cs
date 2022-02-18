@@ -11,6 +11,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public decimal Balance { get; set; }
 
+        public Guid? IdentityFormId { get; init; }
+
         public string PlayerCode { get; init; } = default!;
 
         public DateTimeOffset? RegisteredTime { get; init; }

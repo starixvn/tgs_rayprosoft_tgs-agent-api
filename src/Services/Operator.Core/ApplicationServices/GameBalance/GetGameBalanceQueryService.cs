@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.PluggableServices;
-using TGS.Services.PluggableServices.Models;
-using Tgs.ServiceUtility;
 using Tgs.GameProviders.Pluggable.Client;
-using TGS.Core.Models.Enums;
-using TGS.Services.Operator.ApplicationServices.GameBalance;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance
 {

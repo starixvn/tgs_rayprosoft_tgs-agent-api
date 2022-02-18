@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Aggregate.Client;
 
 namespace TGS.Workers.Schedulers.Jobs.Rounds
 {
@@ -18,23 +18,24 @@ namespace TGS.Workers.Schedulers.Jobs.Rounds
 
         public FillPlayerBucketMinutelyWorkerService(
             IReportAggregateClient client)
-        {
-            _client = client;
-        }
+            => _client = client;
 
         async Task<TgsResponse> IFillPlayerBucketMinutelyWorkerService.ExecutionAsync()
         {
             var response = await _client.FillPlayerBucketMinutelyAsync(new());
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
 
         async Task<TgsResponse> IFillPlayerBucketMinutelyWorkerService.ManualExecutionAsync(string date, int hour,
             int fromMinute, int toMinute, bool fillPlayerBucket)
         {
             var response =
-                await _client.ManualFillPlayerBucketMinutelyAsync(new(date, hour, fromMinute, toMinute,
+                await _client.ManualFillPlayerBucketMinutelyAsync(new(date,
+                    hour,
+                    fromMinute,
+                    toMinute,
                     fillPlayerBucket));
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
     }
 }

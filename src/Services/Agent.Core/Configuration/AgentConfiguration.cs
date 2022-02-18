@@ -17,28 +17,35 @@ namespace TGS.Services.Agent.Configuration
 
         public AgentConfiguration AddAgentRepository<TAgentRepository>() where TAgentRepository : class, IAgentRepository
         {
-            Services.AddTransient<IAgentRepository, TAgentRepository>();
+            _ = Services.AddTransient<IAgentRepository, TAgentRepository>();
 
             return this;
         }
 
         public AgentConfiguration AddBrandRepository<TBrandRepository>() where TBrandRepository : class, IBrandRepository
         {
-            Services.AddTransient<IBrandRepository, TBrandRepository>();
+            _ = Services.AddTransient<IBrandRepository, TBrandRepository>();
+
+            return this;
+        }
+
+        public AgentConfiguration AddGameProviderRepository<TGameProviderRepository>() where TGameProviderRepository : class, IGameProviderRepository
+        {
+            _ = Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
             return this;
         }
 
         public AgentConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
-            Services.AddPaymentServiceClient(configure);
+            _ = Services.AddPaymentServiceClient(configure);
 
             return this;
         }
 
         public AgentConfiguration ConfigureAgentOptions<TDep>(Action<AgentOptions, TDep> configure) where TDep : class
         {
-            Services
+            _ = Services
                 .AddOptions<AgentOptions>()
                 .Configure(configure);
 
@@ -47,7 +54,7 @@ namespace TGS.Services.Agent.Configuration
 
         public AgentConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure) where TDep : class
         {
-            Services
+            _ = Services
                 .AddOptions<EmailConfiguration>()
                 .Configure(configure);
 

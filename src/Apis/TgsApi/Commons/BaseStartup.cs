@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using AspectCore.Configuration;
+using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -8,7 +10,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Interceptors;
+using Tgs.MessageQueue.MongoDB.Configuration;
 using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -163,51 +171,69 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddMongoMessageQueue(config =>
                     {
                         config
-                        .DefineMessageQueue(
-                            "singlewallet.database",
-                            sp => MongoMessageQueue.Default,
-                            sp => sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString"))
+                            .DefineMessageQueue(
+                                "singlewallet.database",
+                                sp => new MongoMessageQueueBuilderOptions
+                                {
+                                    MessageQueue = MongoMessageQueue.Default,
+                                    ConnectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString")
+                                })
                         .DeclareQueue("tgs.singlewallet.gameaction");
                     })
                 .ClearAllExchanges()
                 .AddMongoGlobPatternExchange("tgs.singlewallet.gameaction", "singlewallet.database", "tgs.singlewallet.gameaction")
                 .AddNatsGlobPatternExchange("*");
 
-            //services
-            //    .AddOptions<OtlpExporterOptions>()
-            //    .Configure<IConfiguration>((options, config) =>
-            //    {
-            //        var nodeIp = config.GetValue<string>("NODE_IP");
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    var nodeIp = config.GetValue<string>("NODE_IP");
 
-            //        if (!string.IsNullOrWhiteSpace(nodeIp))
-            //        {
-            //            options.Endpoint = new Uri($"http://{nodeIp}:4317");
-            //        }
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                    {
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                    }
 
-            //        config.GetSection("OpenTelemetry:Tracing").Bind(options);
-            //    });
+                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
+                });
 
-            //services
-            //    .AddOpenTelemetryTracing(builder
-            //        => builder
-            //            .SetResourceBuilder(
-            //                ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-            //            .AddSource("TGS.*")
-            //            .AddSource("Tgs.*")
-            //            .AddAspNetCoreInstrumentation()
-            //            .AddHttpClientInstrumentation()
-            //            .AddEntityFrameworkCoreInstrumentation(options =>
-            //            {
-            //                options.SetDbStatementForText = true;
-            //            })
-            //            .AddOtlpExporter()
-            //            .AddProfileViewExporter(profileViewBuilder =>
-            //            {
-            //                profileViewBuilder
-            //                    .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-            //                    .AddFilter(new UrlPathFilter("/health"));
-            //            }))
-            //    .AddProfileViewer();
+            services
+                .AddOpenTelemetryTracing(builder
+                    => builder
+                        .SetResourceBuilder(
+                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+                        .AddSource("TGS.*")
+                        .AddSource("Tgs.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddOtlpExporter()
+                        .AddProfileViewExporter(profileViewBuilder =>
+                        {
+                            profileViewBuilder
+                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+                                .AddFilter(new UrlPathFilter("/health"));
+                        }))
+                .AddProfileViewer();
+
+            services
+                .AddInterceptionService()
+                .ConfigureDynamicProxy(config =>
+                {
+                    config.Interceptors.AddTyped<DiagnosticsInterceptor>(
+                            Predicates.ForNameSpace("Tgs.*"),
+                            Predicates.ForNameSpace("TGS.*"));
+
+                    config.NonAspectPredicates
+                        .AddNamespace("Tgs.*Infrastructures.*Json*")
+                        .AddNamespace("TGS.*Infrastructures.*Json*")
+                        .AddNamespace("Tgs.Logging*")
+                        .AddNamespace("TGS.Logging*");
+                });
         }
 
         #region Abstract and Virtual Methods

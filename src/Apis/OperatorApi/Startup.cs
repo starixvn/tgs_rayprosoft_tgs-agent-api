@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
@@ -33,7 +33,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -47,7 +46,6 @@ using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
-using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
@@ -133,16 +131,18 @@ namespace TGS.Apis.OperatorApi
                     if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
                         options.ForwardedForHeaderName = forwardedForHeaderName;
 
-                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
+                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ??
+                        Array.Empty<string>();
 
                     foreach (var knownProxie in knownProxies)
                         options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-                    var knowNetworks = config.GetSection("ForwardedHeaders:KnowNetworks").Get<string[]>() ?? Array.Empty<string>();
+                    var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ??
+                        Array.Empty<string>();
 
-                    foreach (var cidr in knowNetworks)
+                    foreach (var cidr in knownNetworks)
                     {
-                        (string ip, string range) = cidr.Split("/");
+                        (var ip, var range) = cidr.Split("/");
 
                         options.KnownNetworks.Add(
                             new IPNetwork(
@@ -162,8 +162,12 @@ namespace TGS.Apis.OperatorApi
                 .AddSecurity()
                 .AddOperations()
                 .AddApiClient()
-                .AddPluggableServices()
-                .AddReportClientServices(_configuration)
+                .AddReportClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
+                })
                 .AddPromotionClientServices((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -201,7 +205,8 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .UseOperatorRepositories((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .UseOperatorRepositories(sp
+                    => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .ConfigureWallet((options, sp) =>
                 {
                     var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
@@ -235,12 +240,12 @@ namespace TGS.Apis.OperatorApi
                 .AddNatsMessageQueue(natsConfig =>
                 {
                     natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var config = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    });
+                            options.Url = config.GetValue<string>("NatsSetting:Urls");
+                        });
                 })
                 .AddNatsGlobPatternExchange("*");
 
@@ -302,26 +307,34 @@ namespace TGS.Apis.OperatorApi
 
                     conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
-            services.AddOpenTelemetryTracing(
-                builder => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddEnvironmentVariableDetector())
-                    .AddSource("Tgs.*")
-                    .AddSource("TGS.*")
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation(options =>
+            services
+                .AddOpenTelemetryTracing(
+                    builder => builder
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                            .AddEnvironmentVariableDetector())
+                        .AddSource("Tgs.*")
+                        .AddSource("TGS.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddProfileViewExporter()
+                        .AddOtlpExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext =>
                     {
-                        options.SetDbStatementForText = true;
-                    })
-                    .AddProfileViewExporter(builder =>
-                    {
-                        builder
-                            .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"))
-                            .AddFilter(new UrlPathFilter("/swagger"))
-                            .AddFilter(new UrlPathFilter("/health"));
-                    })
-                    .AddOtlpExporter());
+                        return !httpContext.Request.Path.HasValue
+                            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                            && !httpContext.Request.Path.StartsWithSegments("/health")
+                            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !new[] { "html", "ico", "png", "jpg" }.Any(
+                                ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                    };
+                });
+
             services.AddProfileViewer();
 
             services
@@ -331,7 +344,11 @@ namespace TGS.Apis.OperatorApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new OpenApiInfo { Title = "TGS Operator API", Version = "v1" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS Operator API",
+                        Version = "v1"
+                    });
 
                 c.AddBrandCertificateSecurityDefinition();
                 c.OperationFilter<SwaggerHeaderFilter>();

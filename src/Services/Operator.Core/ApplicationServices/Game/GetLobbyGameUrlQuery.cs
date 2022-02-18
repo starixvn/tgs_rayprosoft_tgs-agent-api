@@ -7,10 +7,10 @@ namespace TGS.Services.Operator.ApplicationServices.Game
 {
     public record GetLobbyGameUrlQuery(
         Guid BrandId,
-        string GameProviderCode,
+        Guid GameProviderId,
         PlayerTokenData PlayerTokenData,
-        PlayerType PlayerType,
         GameType GameType,
         string LanguageCode,
+        string IpAddress,
         JsonDocument? Extends);
 }

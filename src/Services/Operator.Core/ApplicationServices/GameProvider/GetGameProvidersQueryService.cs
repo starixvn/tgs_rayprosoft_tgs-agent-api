@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -11,8 +12,6 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operator.GameProviders;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.GameProvider;
 
 namespace TGS.Services.Operator.ApplicationServices.GameProvider
 {
@@ -147,8 +146,8 @@ namespace TGS.Services.Operator.ApplicationServices.GameProvider
             {
                 PlayerType.RealPlayer => statuses,
                 PlayerType.TestPlayer => statuses,
-                PlayerType.All        => statuses,
-                _                     => Array.Empty<Status>()
+                PlayerType.All => statuses,
+                _ => Array.Empty<Status>()
             };
         }
     }

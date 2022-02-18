@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
@@ -9,13 +10,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Promotion.MessageQueue;
@@ -26,15 +30,18 @@ namespace TGS.Apis.PromotionApi
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => _configuration = configuration;
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -145,7 +152,11 @@ namespace TGS.Apis.PromotionApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
-                    new OpenApiInfo { Title = "TGS Promotion API", Version = "v1" });
+                    new OpenApiInfo
+                    {
+                        Title = "TGS Promotion API",
+                        Version = "v1"
+                    });
 
                 var xml = "TGS.Apis.Promotion.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
@@ -169,6 +180,52 @@ namespace TGS.Apis.PromotionApi
                             configuration.GetSection("RabbitMQ").Bind(options);
                         });
                 });
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, conifg) =>
+                {
+                    var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+                    conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+                });
+
+            services
+                .AddOpenTelemetryTracing(
+                    builder => builder
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                            .AddEnvironmentVariableDetector())
+                        .AddSource("Tgs.*")
+                        .AddSource("TGS.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddProfileViewExporter(_ => { })
+                        .AddOtlpExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext =>
+                    {
+                        return !httpContext.Request.Path.HasValue
+                            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                            && !httpContext.Request.Path.StartsWithSegments("/health")
+                            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !new[]
+                            {
+                                "html",
+                                "ico",
+                                "png",
+                                "jpg"
+                            }.Any(ext => httpContext.Request.Path.Value?.EndsWith($".{ext}") == true);
+                    };
+                });
+            services.AddProfileViewer();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Aggregate.Client;
 
 namespace TGS.Workers.Schedulers.Jobs.Reports
 {
@@ -16,20 +16,19 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
 
         public PlayerAggregateReportWorkerService(
             IReportAggregateClient client)
-        {
-            _client = client;
-        }
+            => _client = client;
 
         async Task<TgsResponse> IPlayerAggregateReportWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreatePlayerAggregateAsync(new()).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
+            var response = await _client.CreatePlayerAggregateAsync(new())
+                .ConfigureAwait(false);
+            return new() { ErrorMessage = response.Message };
         }
 
         async Task<TgsResponse> IPlayerAggregateReportWorkerService.ManualExecutionAsync(string date, int hour)
         {
             var response = await _client.ManualCreatePlayerAggregateAsync(new(date, hour)).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
+            return new() { ErrorMessage = response.Message };
         }
     }
 }

@@ -44,6 +44,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool EnableSmsRegisterFlow { get; set; }
 
+        public bool EnablePlayerIdentity { get; set; }
+
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }

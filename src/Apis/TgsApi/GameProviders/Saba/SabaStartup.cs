@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using AspectCore.Configuration;
+using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Interceptors;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -151,6 +158,58 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
+                })
+                .AddNatsGlobPatternExchange("*");
+
+            services
+                .AddOptions<OtlpExporterOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    var nodeIp = config.GetValue<string>("NODE_IP");
+
+                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                    {
+                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                    }
+
+                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
+                });
+
+            services
+                .AddOpenTelemetryTracing(builder
+                    => builder
+                        .SetResourceBuilder(
+                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+                        .AddSource("TGS.*")
+                        .AddSource("Tgs.*")
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
+                        .AddOtlpExporter()
+                        .AddProfileViewExporter(profileViewBuilder =>
+                        {
+                            profileViewBuilder
+                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
+                                .AddFilter(new UrlPathFilter("/health"));
+                        }))
+                .AddProfileViewer();
+
+            services
+                .AddInterceptionService()
+                .ConfigureDynamicProxy(config =>
+                {
+                    config.Interceptors.AddTyped<DiagnosticsInterceptor>(
+                            Predicates.ForNameSpace("Tgs.*"),
+                            Predicates.ForNameSpace("TGS.*"));
+
+                    config.NonAspectPredicates
+                        .AddNamespace("Tgs.*Infrastructures.*Json*")
+                        .AddNamespace("TGS.*Infrastructures.*Json*")
+                        .AddNamespace("Tgs.Logging*")
+                        .AddNamespace("TGS.Logging*");
                 });
 
             // custom registration of Saba

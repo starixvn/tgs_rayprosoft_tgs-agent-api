@@ -2,12 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using TGS.Core.Models.Enums;
-using TGS.Services.PluggableServices;
-using TGS.Services.PluggableServices.Models;
-using Tgs.ServiceUtility;
 using Tgs.GameProviders.Pluggable.Client;
-using TGS.Services.Operator.ApplicationServices.GameBalance;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance
 {
@@ -26,8 +22,6 @@ namespace TGS.Services.Operator.ApplicationServices.GameBalance
 
         public async ValueTask ExecuteAsync(FundInGameBalanceCommand command, CancellationToken cancellationToken = default)
         {
-
-
             var response = await _gameProvidersOperatorPluggableClient.GameProviderFundInAsync(
                 command.PlayerCode,
                 command.GameProviderCode,
