@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             IHttpContextAccessor accessor) :
             base(accessor)
         {
-            _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
+            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
         public override Task<PagedResponse<PlayersModel>> Handle(
@@ -112,9 +113,10 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             on player.DefaultWalletId equals wallet.Id
                         join ipRecord in playerIpQuery
                             on player.PlayerCode equals ipRecord.PlayerCode into gj
-                        join playerIdentity in playerIdentityQuery
-                            on player.PlayerCode equals playerIdentity.PlayerCode
                         from ipRecord in gj.DefaultIfEmpty()
+                        join playerIdentity in playerIdentityQuery
+                            on player.PlayerCode equals playerIdentity.PlayerCode into pij
+                        from playerIdentity in pij.DefaultIfEmpty()
                         select new
                         {
                             player.PlayerCode,
