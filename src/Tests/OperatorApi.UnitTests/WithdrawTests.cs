@@ -8,19 +8,20 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.CashService.Client;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
-using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
+using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.PlayerBucket;
-using TGS.Services.WalletService;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
-using Tgs.CashService.Client;
-using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -263,6 +264,49 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public void Player_Can_Not_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_False()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            _ = fakeBrandRepository
+                .GetBrandInfoAsync(brandId)
+                .Returns(new BrandInfo(
+                    brandId,
+                    "GPI",
+                    new Uri("https://img.org/1.png"),
+                    new Uri("https://img.org/2.png"),
+                    new Uri("https://img.org/3.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    false,
+                    false,
+                    PlayerIdentityEnabled: true));
+
+            _ = fakePlayerRepository
+                .GetPlayerInfoAsync(playerCode)
+                .Returns(new PlayerInfo(
+                    playerCode,
+                    brandId,
+                    0m,
+                    IdentityAuthentication: false,
+                    false,
+                    null,
+                    null,
+                    null,
+                    PlayerStatus.Enabled));
+
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            Assert.ThrowsAsync<PlayerCanNotWithdrawException>(
+                async () => await sut.ExecuteAsync(
+                    new CheckPlayerIdentityCommand(brandId, playerCode)));
+        }
+
+        [Test]
         public void Player_Withdraw_But_Balance_Not_Enough_Will_Throw_Excpetion()
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
@@ -347,6 +391,38 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await command.ReturnSource.Task.ConfigureTimeout(TimeSpan.FromMilliseconds(500));
 
             Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public async Task When_Brand_Enable_Player_Identity_Is_False_Will_Not_Check_Player_Identity()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            _ = fakeBrandRepository
+                .GetBrandInfoAsync(brandId)
+                .Returns(new BrandInfo(
+                    brandId,
+                    "GPI",
+                    new Uri("https://img.org/1.png"),
+                    new Uri("https://img.org/2.png"),
+                    new Uri("https://img.org/3.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    false,
+                    false,
+                    PlayerIdentityEnabled: false));
+
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            await sut.ExecuteAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
+
+            _ = fakePlayerRepository
+                .Received(0)
+               .GetPlayerInfoAsync(playerCode);
         }
     }
 }

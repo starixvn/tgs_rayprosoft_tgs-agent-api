@@ -95,6 +95,15 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     record.Host
                 };
 
+            var playerIdentityQuery =
+                from identity in _tgsRepository.PlayerIdentity.AsQueryable()
+                join player in playerQuery on identity.PlayerCode equals player.PlayerCode
+                select new
+                {
+                    identity.PlayerCode,
+                    identity.PlayerAuthenticationFormId
+                };
+
             var query =
                         from player in playerQuery
                         join brand in queryableBrands
@@ -103,6 +112,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             on player.DefaultWalletId equals wallet.Id
                         join ipRecord in playerIpQuery
                             on player.PlayerCode equals ipRecord.PlayerCode into gj
+                        join playerIdentity in playerIdentityQuery
+                            on player.PlayerCode equals playerIdentity.PlayerCode
                         from ipRecord in gj.DefaultIfEmpty()
                         select new
                         {
@@ -113,7 +124,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             player.Status,
                             player.RegisteredOn,
                             RegisterHost = ipRecord.Host,
-                            AgentName = player.Agent.Username
+                            AgentName = player.Agent.Username,
+                            IdentityFormId = playerIdentity.PlayerAuthenticationFormId
                         };
 
             if (!string.IsNullOrWhiteSpace(request.RegisterHost))
@@ -128,7 +140,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 Status = row.Status,
                 RegisteredTime = row.RegisteredOn,
                 RegisterHost = row.RegisterHost,
-                AgentName = row.AgentName
+                AgentName = row.AgentName,
+                IdentityFormId = row.IdentityFormId
             }).CreatePagedResponseAsync(request);
         }
     }

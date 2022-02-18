@@ -25,6 +25,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async Task<Guid> CreateWithdrawRequestAsync(
+            [FromServices] ICommandService<CheckPlayerIdentityCommand> checkService,
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
             CreateWithdrawRequest request)
         {
@@ -32,6 +33,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 var brandId = HttpContext.Items.GetBrandId();
                 var playerData = HttpContext.Items.GetPlayerTokenData();
+
+                var checkCommand = new CheckPlayerIdentityCommand(brandId, playerData.PlayerCode);
+
+                await checkService.ExecuteAsync(checkCommand).ConfigureAwait(false);
 
                 var command = new CreateWithdrawFormCommand(
                     playerData.PlayerCode,
