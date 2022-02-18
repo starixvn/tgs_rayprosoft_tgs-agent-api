@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             IHttpContextAccessor accessor) :
             base(accessor)
         {
-            _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
+            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
         public override Task<PagedResponse<PlayersModel>> Handle(
@@ -95,6 +96,15 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     record.Host
                 };
 
+            var playerIdentityQuery =
+                from identity in _tgsRepository.PlayerIdentity.AsQueryable()
+                join player in playerQuery on identity.PlayerCode equals player.PlayerCode
+                select new
+                {
+                    identity.PlayerCode,
+                    identity.PlayerAuthenticationFormId
+                };
+
             var query =
                         from player in playerQuery
                         join brand in queryableBrands
@@ -104,6 +114,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         join ipRecord in playerIpQuery
                             on player.PlayerCode equals ipRecord.PlayerCode into gj
                         from ipRecord in gj.DefaultIfEmpty()
+                        join playerIdentity in playerIdentityQuery
+                            on player.PlayerCode equals playerIdentity.PlayerCode into pij
+                        from playerIdentity in pij.DefaultIfEmpty()
                         select new
                         {
                             player.PlayerCode,
@@ -113,7 +126,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             player.Status,
                             player.RegisteredOn,
                             RegisterHost = ipRecord.Host,
-                            AgentName = player.Agent.Username
+                            AgentName = player.Agent.Username,
+                            IdentityFormId = playerIdentity.PlayerAuthenticationFormId
                         };
 
             if (!string.IsNullOrWhiteSpace(request.RegisterHost))
@@ -128,7 +142,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 Status = row.Status,
                 RegisteredTime = row.RegisteredOn,
                 RegisterHost = row.RegisterHost,
-                AgentName = row.AgentName
+                AgentName = row.AgentName,
+                IdentityFormId = row.IdentityFormId
             }).CreatePagedResponseAsync(request);
         }
     }
