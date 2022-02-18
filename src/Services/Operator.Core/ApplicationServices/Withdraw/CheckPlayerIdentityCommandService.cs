@@ -5,7 +5,7 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw
 {
-    internal class CheckPlayerIdentityCommandService : ICommandService<CheckPlayerIdentityCommand>
+    internal class CheckPlayerIdentityCommandService : IGetService<CheckPlayerIdentityCommand, bool>
     {
         private readonly IBrandRepository _brandRepository;
         private readonly IPlayerRepository _playerRepository;
@@ -16,14 +16,14 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
-        public async ValueTask ExecuteAsync(CheckPlayerIdentityCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> GetAsync(CheckPlayerIdentityCommand command, CancellationToken cancellationToken = default)
         {
             var brand = await _brandRepository
                 .GetBrandInfoAsync(command.BrandId)
                 .ConfigureAwait(false);
 
             if (!brand!.PlayerIdentityEnabled)
-                return;
+                return true;
 
             var player = await _playerRepository
                 .GetPlayerInfoAsync(command.PlayerCode)
@@ -33,7 +33,9 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
                 throw new PlayerNotFoundException("Player not found when withdraw check.");
 
             if (!player.IdentityAuthentication)
-                throw new PlayerCanNotWithdrawException();
+                return false;
+
+            return true;
         }
     }
 }

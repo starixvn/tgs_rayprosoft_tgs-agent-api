@@ -264,7 +264,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Player_Can_Not_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_False()
+        public async Task Player_Can_Not_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_False()
         {
             var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
@@ -301,9 +301,86 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
 
-            Assert.ThrowsAsync<PlayerCanNotWithdrawException>(
-                async () => await sut.ExecuteAsync(
-                    new CheckPlayerIdentityCommand(brandId, playerCode)));
+            var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
+
+            Assert.IsFalse(actual);
+        }
+
+        [Test]
+        public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_False()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            _ = fakeBrandRepository
+                .GetBrandInfoAsync(brandId)
+                .Returns(new BrandInfo(
+                    brandId,
+                    "GPI",
+                    new Uri("https://img.org/1.png"),
+                    new Uri("https://img.org/2.png"),
+                    new Uri("https://img.org/3.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    false,
+                    false,
+                    PlayerIdentityEnabled: false));
+
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            var acutal = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
+
+            _ = fakePlayerRepository
+                .Received(0)
+                .GetPlayerInfoAsync(playerCode);
+
+            Assert.IsTrue(acutal);
+        }
+
+        [Test]
+        public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_True()
+        {
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var brandId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            _ = fakeBrandRepository
+                .GetBrandInfoAsync(brandId)
+                .Returns(new BrandInfo(
+                    brandId,
+                    "GPI",
+                    new Uri("https://img.org/1.png"),
+                    new Uri("https://img.org/2.png"),
+                    new Uri("https://img.org/3.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    false,
+                    false,
+                    PlayerIdentityEnabled: true));
+
+            _ = fakePlayerRepository
+                .GetPlayerInfoAsync(playerCode)
+                .Returns(new PlayerInfo(
+                    playerCode,
+                    brandId,
+                    0m,
+                    IdentityAuthentication: true,
+                    false,
+                    null,
+                    null,
+                    null,
+                    PlayerStatus.Enabled));
+
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+
+            var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
+
+            Assert.IsTrue(actual);
         }
 
         [Test]
@@ -391,38 +468,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await command.ReturnSource.Task.ConfigureTimeout(TimeSpan.FromMilliseconds(500));
 
             Assert.IsTrue(actual);
-        }
-
-        [Test]
-        public async Task When_Brand_Enable_Player_Identity_Is_False_Will_Not_Check_Player_Identity()
-        {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-            var brandId = Guid.NewGuid();
-            var playerCode = "playerCode";
-
-            _ = fakeBrandRepository
-                .GetBrandInfoAsync(brandId)
-                .Returns(new BrandInfo(
-                    brandId,
-                    "GPI",
-                    new Uri("https://img.org/1.png"),
-                    new Uri("https://img.org/2.png"),
-                    new Uri("https://img.org/3.png"),
-                    BrandStatus.Active,
-                    "CNY",
-                    false,
-                    false,
-                    PlayerIdentityEnabled: false));
-
-            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
-
-            await sut.ExecuteAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
-
-            _ = fakePlayerRepository
-                .Received(0)
-               .GetPlayerInfoAsync(playerCode);
         }
     }
 }

@@ -11,9 +11,10 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
-using TGS.Services.Operator.BrandPayment;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
+using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -25,7 +26,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
         public async Task<Guid> CreateWithdrawRequestAsync(
-            [FromServices] ICommandService<CheckPlayerIdentityCommand> checkService,
+            [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
             CreateWithdrawRequest request)
         {
@@ -36,7 +37,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
                 var checkCommand = new CheckPlayerIdentityCommand(brandId, playerData.PlayerCode);
 
-                await checkService.ExecuteAsync(checkCommand).ConfigureAwait(false);
+                var playerCanWithdraw = await checkService.GetAsync(checkCommand).ConfigureAwait(false);
+
+                if (!playerCanWithdraw == false)
+                    throw new PlayerCanNotWithdrawException();
 
                 var command = new CreateWithdrawFormCommand(
                     playerData.PlayerCode,
