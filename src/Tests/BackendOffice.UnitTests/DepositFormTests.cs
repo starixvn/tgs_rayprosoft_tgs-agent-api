@@ -57,6 +57,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
+            var fakeBrandService = Substitute.For<IBrandService>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -71,7 +72,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fakePromotionClient,
                 fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator);
+                fakeMediator,
+                fakeBrandService);
 
             fakeRedisDatabase.StringSetAsync(
                     Arg.Any<RedisKey>(),
@@ -115,6 +117,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
+            var fakeBrandService = Substitute.For<IBrandService>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -129,7 +132,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fakePromotionClient,
                 fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator);
+                fakeMediator,
+                fakeBrandService);
 
             fakeRedisDatabase.StringSetAsync(
                     Arg.Any<RedisKey>(),
@@ -174,6 +178,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
+            var fakeBrandService = Substitute.For<IBrandService>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -188,7 +193,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 moqPromotionClient.Object,
                 fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator);
+                fakeMediator,
+                fakeBrandService);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
