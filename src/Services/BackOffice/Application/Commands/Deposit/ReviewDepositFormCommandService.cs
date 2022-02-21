@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -92,7 +93,16 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 
                 if (command.Status == ReviewState.Approve)
                 {
-                    await _mediator.Send(new ClearPlayerBucketsWithDepositRequest(form.PlayerCode), cancellationToken);
+                    var playerAllBalances = await _mediator.Send(
+                        new GetPlayerGameProviderBalanceRequest(form.PlayerCode),
+                        cancellationToken).ConfigureAwait(false);
+
+                    var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
+
+                    if (balance <= 1M)
+                    {
+                        await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode).ConfigureAwait(false);
+                    }
 
                     var player = await _playerService
                         .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
