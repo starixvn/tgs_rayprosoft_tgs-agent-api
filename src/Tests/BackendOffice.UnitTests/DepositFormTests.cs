@@ -178,7 +178,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisConnection = Substitute.For<IConnectionMultiplexer>();
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
-            var fakeBrandService = Substitute.For<IBrandService>();
+            var moqBrandService = new Mock<IBrandService>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -194,7 +194,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fakeRedisDatabaseFactory,
                 NullLogger<ReviewDepositFormCommandService>.Instance,
                 fakeMediator,
-                fakeBrandService);
+                moqBrandService.Object);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
@@ -244,6 +244,12 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     PlayerCode = "ThisIsPlayerCode",
                     DefaultWalletId = walletId
                 }));
+
+            moqBrandService
+                .Setup(fake => fake.GetBrandAsync(
+                    It.IsAny<Expression<Func<Brand, bool>>>(),
+                    It.IsAny<Func<IQueryable<Brand>, IQueryable<Brand>>>()))
+                .Returns(Task.FromResult(new Brand { AutoClearWageringRequirement = false }));
 
             moqPlayerBucketRepository
                 .Setup(fake => fake.CreatePlayerBucketWithDepositAsync(
