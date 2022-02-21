@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.Extensions;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
@@ -18,6 +19,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
 {
     public sealed class VerifyPlayerTokenMiddleware
     {
+        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
+
         private readonly RequestDelegate _next;
 
         public VerifyPlayerTokenMiddleware(RequestDelegate next)
@@ -34,6 +37,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             IExpirationValidator expirationValidator,
             IJwtTokenHandler handler)
         {
+            using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
+
             var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizePlayerTokenAttribute>();
 
             if (attribute == null)
