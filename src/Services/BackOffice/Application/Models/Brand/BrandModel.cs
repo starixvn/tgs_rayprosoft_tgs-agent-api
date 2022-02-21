@@ -62,5 +62,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public bool CheckDividendActiveCount { get; set; }
 
         public bool EnablePlayerIdentity { get; set; }
+
+        public bool AutoClearWageringRequirement { get; set; }
     }
 }

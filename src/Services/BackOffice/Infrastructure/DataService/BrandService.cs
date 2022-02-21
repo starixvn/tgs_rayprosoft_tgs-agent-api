@@ -127,7 +127,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now,
                 PlatformCharge = request.PlatformCharge,
                 CheckDividendActiveCount = request.CheckDividendActiveCount,
-                EnablePlayerIdentity = request.EnablePlayerIdentity
+                EnablePlayerIdentity = request.EnablePlayerIdentity,
+                AutoClearWageringRequirement = request.AutoClearWageringRequirement
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
@@ -242,6 +243,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.PlatformCharge = request.PlatformCharge;
             brand.CheckDividendActiveCount = request.CheckDividendActiveCount;
             brand.EnablePlayerIdentity = request.EnablePlayerIdentity;
+            brand.AutoClearWageringRequirement = request.AutoClearWageringRequirement;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 

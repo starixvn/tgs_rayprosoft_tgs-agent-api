@@ -18,6 +18,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
     internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
     {
+        private readonly IBrandService _brandService;
         private readonly ILogger<ReviewDepositFormCommandService> _logger;
         private readonly IMediator _mediator;
         private readonly IPaymentServiceClient _paymentServiceClient;
@@ -93,15 +94,21 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 
                 if (command.Status == ReviewState.Approve)
                 {
-                    var playerAllBalances = await _mediator.Send(
-                        new GetPlayerGameProviderBalanceRequest(form.PlayerCode),
-                        cancellationToken).ConfigureAwait(false);
+                    var brand = await _brandService.GetBrandAsync(x => x.Id == form.BrandId);
 
-                    var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
-
-                    if (balance <= 1M)
+                    if (brand.AutoClearWageringRequirement)
                     {
-                        await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode).ConfigureAwait(false);
+                        var playerAllBalances = await _mediator.Send(
+                            new GetPlayerGameProviderBalanceRequest(form.PlayerCode),
+                            cancellationToken).ConfigureAwait(false);
+
+                        var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
+
+                        if (balance <= 1M)
+                        {
+                            await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode)
+                                .ConfigureAwait(false);
+                        }
                     }
 
                     var player = await _playerService

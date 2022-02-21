@@ -91,5 +91,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string TimeZoneId { get; set; }
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
+
+        public bool AutoClearWageringRequirement { get; set; }
     }
 }
