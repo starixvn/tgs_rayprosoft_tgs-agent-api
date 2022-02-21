@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -94,6 +95,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             {
                 ExternalRoundId = request.ExternalRoundId,
                 GameProviderId = request.GameProviderId,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
@@ -144,7 +147,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public async Task<GetRoundHistoryResponse> GetRoundAsync(Guid roundId,
+        public async Task<JsonDocument?> GetRoundAsync(Guid roundId,
             [FromQuery] GetRoundHistoryReportRequest request)
         {
             var reportRequest = new GetRoundHistoryRequest
@@ -155,25 +158,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 Language = request.Language
             };
 
-            var response = await _client.GetRoundHistoriesAsync(reportRequest);
-
-            return new()
-            {
-                GameProviderName = response.GameProviderName,
-                GameName = response.GameName,
-                ExternalRoundId = response.ExternalRoundId,
-                BetAmount = response.BetAmount,
-                Turnover = response.Turnover,
-                Winloss = response.Winloss,
-                GameResult = response.GameResult,
-                Data = response.Data
-            };
+            return await _client.GetRoundHistoriesAsync(reportRequest);
         }
 
         [HttpGet]
         [Description("Get rounds")]
         public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
-            [FromServices] IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
+            [FromServices]
+            IGetService<GetGameRoundListQuery, Tgs.Report.Client.Models.PagedResponse<RoundModel>> queryService,
             [FromServices] IQueryService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,

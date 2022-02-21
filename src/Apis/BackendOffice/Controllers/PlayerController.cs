@@ -53,6 +53,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 BrandId = request.BrandId,
                 PlayerCode = request.PlayerCode,
                 AccountChangeType = (short?)request.AccountChangeType,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
@@ -72,8 +74,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     GameActionId = x.GameActionId,
                     Amount = x.Amount,
                     Balance = x.Balance,
-                    TransactionType = (TransactionType)x.TransactionType,
-                    GameActionType = (GameActionType)x.GameActionType,
+                    TransactionType = (TransactionType?)x.TransactionType,
+                    GameActionType = (GameActionType?)x.GameActionType,
                     RecordedOn = x.RecordedOn
                 }).ToArray()
             };
