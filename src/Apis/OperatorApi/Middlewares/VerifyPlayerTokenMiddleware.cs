@@ -19,7 +19,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 {
     public sealed class VerifyPlayerTokenMiddleware
     {
-        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
+        private static readonly ActivitySource _VerifyPlayerTokenMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
 
         private readonly RequestDelegate _next;
 
@@ -37,7 +37,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             IExpirationValidator expirationValidator,
             IJwtTokenHandler handler)
         {
-            using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
+            using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
 
             var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizePlayerTokenAttribute>();
 

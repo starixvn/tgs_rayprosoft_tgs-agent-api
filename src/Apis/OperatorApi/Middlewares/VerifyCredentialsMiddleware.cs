@@ -10,7 +10,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 {
     public sealed class VerifyCredentialsMiddleware
     {
-        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
+        private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
 
         private readonly RequestDelegate _next;
 
@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             HttpContext context,
             IStatusValidator statusValidator)
         {
-            using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
+            using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
 
             var brandId = context.GetBrandId();
 
