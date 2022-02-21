@@ -34,7 +34,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             IPromotionClient promotionClient,
             IRedisConnectionFactory redisConnectionFactory,
             ILogger<ReviewDepositFormCommandService> logger,
-            IMediator mediator)
+            IMediator mediator,
+            IBrandService brandService)
         {
             if (redisConnectionFactory is null)
                 throw new ArgumentNullException(nameof(redisConnectionFactory));
@@ -48,6 +49,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             _redisDatabase = redisConnectionFactory.GetConnection().GetDatabase();
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
         }
 
         public async ValueTask ExecuteAsync(
