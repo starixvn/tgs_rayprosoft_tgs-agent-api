@@ -85,6 +85,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             {
                 ExternalRoundId = request.ExternalRoundId,
                 GameProviderId = request.GameProviderId,
+                From = request.From,
+                To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,

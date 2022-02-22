@@ -42,8 +42,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        [HttpPost("{formId}", Name = "ReviewDepositForm")]
-        public async Task<MessageResponse> ReviewDepositFormAsync(
+        [HttpPost("{formId}", Name = "ReviewPlayerIdentityForm")]
+        public async Task<MessageResponse> ReviewPlayerIdentityFormAsync(
            [FromServices] ICommandService<ReviewPlayerIdentityFormCommand> reviewCommandService,
            Guid formId,
            [FromBody] PlayerIdentityReviewRequest reviewResponse)

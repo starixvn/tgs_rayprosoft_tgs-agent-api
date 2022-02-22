@@ -168,20 +168,6 @@ namespace TGS.Apis.TgsApi.Commons
 
                     AddCustomNatsMessageQueueHandler(natsConfig);
                 })
-                .AddMongoMessageQueue(config =>
-                    {
-                        config
-                            .DefineMessageQueue(
-                                "singlewallet.database",
-                                sp => new MongoMessageQueueBuilderOptions
-                                {
-                                    MessageQueue = MongoMessageQueue.Default,
-                                    ConnectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoDBMessagingConnectionString")
-                                })
-                        .DeclareQueue("tgs.singlewallet.gameaction");
-                    })
-                .ClearAllExchanges()
-                .AddMongoGlobPatternExchange("tgs.singlewallet.gameaction", "singlewallet.database", "tgs.singlewallet.gameaction")
                 .AddNatsGlobPatternExchange("*");
 
             services

@@ -49,14 +49,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new SetIdentityCommandService(moqPlayerOperations.Object);
 
+            var brandId = Guid.NewGuid();
+
             var player = new Player
             {
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
-                BrandId = Guid.NewGuid(),
+                BrandId = brandId,
                 DefaultWalletCurrencyCode = "TBH"
             };
-            var command = new SetIdentityCommand(player.PlayerCode, "RealName", "123456789");
+            var command = new SetIdentityCommand(player.PlayerCode, "RealName", "123456789", brandId);
 
             moqPlayerOperations
                 .Setup(fake => fake.GetPlayerByCodeAsync(
