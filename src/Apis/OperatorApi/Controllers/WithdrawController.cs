@@ -39,7 +39,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
                 var playerCanWithdraw = await checkService.GetAsync(checkCommand).ConfigureAwait(false);
 
-                if (playerCanWithdraw == false)
+                if (playerCanWithdraw is false)
                     throw new PlayerCanNotWithdrawException();
 
                 var command = new CreateWithdrawFormCommand(
