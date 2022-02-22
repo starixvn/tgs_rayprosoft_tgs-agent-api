@@ -56,7 +56,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 BrandId = Guid.NewGuid(),
                 DefaultWalletCurrencyCode = "TBH"
             };
-            var command = new SetIdentityCommand(player.PlayerCode, "RealName", "123456789");
+            var command = new SetIdentityCommand(player.PlayerCode, "RealName", "123456789",true);
 
             moqPlayerOperations
                 .Setup(fake => fake.GetPlayerByCodeAsync(
@@ -70,7 +70,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<string>(x => x == player.PlayerCode),
                     It.Is<string>(x => x == command.RealName),
                     It.Is<string>(x => x == command.Identity),
-                    It.Is<bool>(x => x == false),
+                    It.Is<bool>(x => x == true),
                     It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
         }
