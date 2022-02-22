@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExecuteAsync(new FundInAllGameBalanceCommand(
                     brandId,
                     playerTokenData.PlayerCode,
-                    "BC"))
+                    ""))
                 .ConfigureAwait(false);
 
             var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
