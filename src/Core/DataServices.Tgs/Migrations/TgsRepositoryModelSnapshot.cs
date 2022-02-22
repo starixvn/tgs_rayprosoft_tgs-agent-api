@@ -1188,6 +1188,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("api_key");
 
+                    b.Property<bool>("AutoClearWageringRequirement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_clear_wagering_requirement");
+
                     b.Property<bool>("AutoSentAgentBonus")
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_agent_bonus");
