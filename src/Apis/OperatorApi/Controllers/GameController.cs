@@ -29,6 +29,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("bc")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<ContentResult> BCSportsHtmlAsync(
+            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
         {
             var currentCultureName = CultureInfo.CurrentUICulture.Name;
@@ -36,6 +37,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+            await fundInAllService
+                .ExecuteAsync(new FundInAllGameBalanceCommand(
+                    brandId,
+                    playerTokenData.PlayerCode,
+                    ""))
+                .ConfigureAwait(false);
 
             var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
 
