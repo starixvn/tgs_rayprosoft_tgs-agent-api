@@ -44,6 +44,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool EnableSmsRegisterFlow { get; set; }
 
+        public bool EnablePlayerIdentity { get; set; }
+
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }
@@ -89,5 +91,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string TimeZoneId { get; set; }
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
+
+        public bool AutoClearWageringRequirement { get; set; }
     }
 }

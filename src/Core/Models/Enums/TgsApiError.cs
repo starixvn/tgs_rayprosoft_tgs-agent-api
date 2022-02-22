@@ -42,6 +42,7 @@
         FavoriteFull = 408,
         BrandEmailDuplicate = 409,
         MaticPayDepositNeedRealName = 410,
+        PlayerCanNotWithdraw = 411,
 
         DividendConditionError = 600,
         DividendPercentageError = 601,

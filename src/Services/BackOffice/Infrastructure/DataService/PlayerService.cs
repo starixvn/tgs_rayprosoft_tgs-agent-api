@@ -3,13 +3,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 using TGS.Services.BackOffice.Application.Models.Player;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
@@ -22,17 +23,23 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
 
+        ValueTask<PlayerIdentityFormModel> GetPlayerIdentityFormAsync(string playerCode);
+
+        ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormByIdAsync(Guid formId);
+
         IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
-            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
+                    Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
             bool tracking = false);
 
         IQueryable<Player> GetPlayerQueries(
             Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
             bool tracking = false);
 
-        Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
+        ValueTask SignOffPlayerIdentityFormAsync(Guid brandId, Guid formId, PlayerIdentityReviewState? reviewStatus, string reviewUserId, string reviewUserName, string remark);
 
         Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount);
+
+        Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -52,18 +59,128 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _cacheManager = cacheManager;
         }
 
+        Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
+            ExistsAsync(predicate);
+
         Task<Player> IPlayerService.GetPlayerAsync(
-            Expression<Func<Player, bool>> predicate,
+                    Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
+        async ValueTask<PlayerIdentityFormModel> IPlayerService.GetPlayerIdentityFormAsync(string playerCode)
+        {
+            var player = await _repository.Players
+              .FindAsync(playerCode)
+              .ConfigureAwait(false);
+
+            var playerIdentity = await _repository.PlayerIdentity
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            var form = await _repository.PlayerAuthenticationForms
+                .FirstOrDefaultAsync(paf => paf.Id == playerIdentity.PlayerAuthenticationFormId)
+                .ConfigureAwait(false);
+
+            return new PlayerIdentityFormModel
+            {
+                Id = form.Id,
+                RealName = player.RealName,
+                IdNumber = player.IdNumber,
+                Data = form.Data,
+                CreatedOn = form.CreatedOn,
+                Remark = form.Remark,
+                ReviewedOn = form.ReviewedOn,
+                ReviewedUserName = form.ReviewedUserName,
+                Status = (PlayerIdentityReviewState)form.Status
+            };
+        }
+
+        async ValueTask<PlayerIdentityFormInfo> IPlayerService.GetPlayerIdentityFormByIdAsync(Guid formId)
+        {
+            var form = await _repository.PlayerAuthenticationForms
+                .SingleOrDefaultAsync(paf => paf.Id == formId)
+                .ConfigureAwait(false);
+
+            return new PlayerIdentityFormInfo
+            {
+                FormId = form.Id,
+                Status = (PlayerIdentityReviewState)form.Status
+            };
+        }
+
+        IQueryable<PlayerAuditLog> IPlayerService.GetPlayerOperationQueries(
+                    Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking) =>
+            GetQueriesAsync(preQuery, tracking);
+
         IQueryable<Player> IPlayerService.GetPlayerQueries(
-            Func<IQueryable<Player>, IQueryable<Player>> preQuery,
+                            Func<IQueryable<Player>, IQueryable<Player>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
+        async ValueTask IPlayerService.SignOffPlayerIdentityFormAsync(Guid brandId, Guid formId, PlayerIdentityReviewState? status, string reviewUserId, string reviewUserName, string remark)
+        {
+            var brand = await _repository.Brands.SingleAsync(b => b.Id == brandId).ConfigureAwait(false);
+
+            if (!brand.EnablePlayerIdentity)
+                return;
+
+            var formData = await _repository.PlayerAuthenticationForms
+                .FindAsync(new object[] { formId })
+                .ConfigureAwait(false);
+
+            var playerCode = formData.PlayerCode;
+
+            if (formData == null)
+                return;
+
+            formData.Status = status.HasValue ? (int)status.Value : formData.Status;
+            formData.ReviewedOn = DateTimeOffset.UtcNow;
+            formData.Remark = remark;
+            formData.ReviewedUserId = reviewUserId;
+
+            if (status == PlayerIdentityReviewState.Approve)
+            {
+                var player = await _repository.Players.SingleAsync(p => p.PlayerCode == playerCode);
+                player.IdentityAuthentication = true;
+            }
+
+            _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount)
+        {
+            var player = await _repository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.AccumulatedDeposit += amount;
+
+            player.UpdatedByUsername = playerCode;
+            player.UpdatedOn = DateTimeOffset.Now;
+
+            var auditLog = new PlayerAuditLog
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                ModuleName = "Player",
+                CreatedByUsername = playerCode,
+                CreatedOn = DateTimeOffset.Now,
+                Operation = "Update Player AccumulatedDeposit",
+                Username = playerCode
+            };
+
+            await _repository.PlayerAuditLogs
+                .AddAsync(auditLog)
+                .ConfigureAwait(false);
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            await _cacheManager
+                .ClearCacheAsync(RedisCacheType.Player, playerCode)
+                .ConfigureAwait(false);
+        }
+
         async Task IPlayerService.UpdatePlayerAsync(
-            Player player, UpdatePlayerRequest request)
+                    Player player, UpdatePlayerRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -124,45 +241,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
             scope.Complete();
-        }
-
-        Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
-            ExistsAsync(predicate);
-
-        IQueryable<PlayerAuditLog> IPlayerService.GetPlayerOperationQueries(
-            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
-
-        public async Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount)
-        {
-            var player = await _repository.Players
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            player.AccumulatedDeposit += amount;
-
-            player.UpdatedByUsername = playerCode;
-            player.UpdatedOn = DateTimeOffset.Now;
-
-            var auditLog = new PlayerAuditLog
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                ModuleName = "Player",
-                CreatedByUsername = playerCode,
-                CreatedOn = DateTimeOffset.Now,
-                Operation = "Update Player AccumulatedDeposit",
-                Username = playerCode
-            };
-
-            await _repository.PlayerAuditLogs
-                .AddAsync(auditLog)
-                .ConfigureAwait(false);
-
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
-
-            await _cacheManager
-                .ClearCacheAsync(RedisCacheType.Player, playerCode)
-                .ConfigureAwait(false);
         }
     }
 }

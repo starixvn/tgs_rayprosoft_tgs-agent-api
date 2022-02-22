@@ -1188,6 +1188,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("api_key");
 
+                    b.Property<bool>("AutoClearWageringRequirement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_clear_wagering_requirement");
+
                     b.Property<bool>("AutoSentAgentBonus")
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_agent_bonus");
@@ -1240,6 +1244,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("enable_agent_sms");
+
+                    b.Property<bool>("EnablePlayerIdentity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_player_identity");
 
                     b.Property<bool>("EnableSms")
                         .ValueGeneratedOnAdd()
@@ -4040,6 +4050,60 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_audit_logs");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAuthenticationForm", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
+                    b.Property<DateTimeOffset?>("ReviewedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_on");
+
+                    b.Property<string>("ReviewedUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_id");
+
+                    b.Property<string>("ReviewedUserName")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_user_name");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_authentication_forms");
+
+                    b.ToTable("player_authentication_forms");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4366,6 +4430,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_game_settings");
 
                     b.ToTable("player_game_settings");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIdentity", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PlayerAuthenticationFormId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_authentication_form_id");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_identity");
+
+                    b.ToTable("player_identity");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>
@@ -5602,7 +5682,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("ExternalRoundId", "GameProviderId", "GameId", "WalletId")
                         .HasDatabaseName("ix_rounds_wallet_id_composite");
-
 
                     b.HasIndex("GameProviderConfigurationId", "WalletId", "GameId", "ExternalRoundId")
                         .HasDatabaseName("ix_rounds_game_provider_configuration_id_composite");
@@ -7592,6 +7671,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIdentity", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerIdentity", "PlayerCode")
+                        .HasConstraintName("fk_player_identity_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>

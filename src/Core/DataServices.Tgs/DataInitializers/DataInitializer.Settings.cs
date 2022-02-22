@@ -173,7 +173,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("View"),
-                                new MenuSetting("Update")
+                                new MenuSetting("Update"),
+                                new MenuSetting("PhoneFilter")
                             }
                         },
                         new MenuSetting("BalanceAdjustment")
@@ -442,6 +443,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             }
                         },
                         new MenuSetting("GameProviders")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("GameProviderReport")
                         {
                             SubMenus = new[]
                             {

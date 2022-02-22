@@ -6,10 +6,10 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.ValidateCode;
 using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Models
 {
@@ -50,7 +50,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.UserBanned] = "UserBanned",
                 [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
                 [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
-                [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired"
+                [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired",
+                [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -89,7 +90,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
-                [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest
+                [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
+                [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -130,7 +132,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
                 [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate,
                 [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
-                [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired
+                [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired,
+                [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw
             };
 
         public bool CanProcess(Exception exception)

@@ -158,7 +158,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
                             options.Url = config.GetValue<string>("NatsSetting:Urls");
                         });
-                });
+                })
+                .AddNatsGlobPatternExchange("*");
 
             services
                 .AddOptions<OtlpExporterOptions>()

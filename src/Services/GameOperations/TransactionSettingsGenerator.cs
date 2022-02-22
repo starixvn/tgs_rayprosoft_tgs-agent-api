@@ -106,8 +106,8 @@ namespace TGS.Services.GameOperations
         private TransactionSettings GetTieBetTransactionSettings(TransactionData trx) => new()
         {
             GameActionType = GameActionType.TieBet,
-            ValidateAmount = _amountValidator.ThrowIfAmountIsNotPositive,
-            HasWalletUpdate = true,
+            ValidateAmount = _amountValidator.ThrowIfAmountIsNegative,
+            HasWalletUpdate = trx.Amount > 0,
             MustHaveExistingRound = true,
             MustHaveReferencedTransaction = true,
             GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
