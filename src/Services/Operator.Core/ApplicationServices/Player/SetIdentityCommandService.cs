@@ -27,7 +27,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                     command.PlayerCode,
                     command.RealName,
                     command.Identity,
-                    command.IsAuthenticate,
+                    false,
                     updatedOn)
                 .ConfigureAwait(false);
         }

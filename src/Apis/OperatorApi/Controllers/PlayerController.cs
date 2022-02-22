@@ -17,7 +17,6 @@ using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
@@ -437,32 +436,21 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Sets the player identity.
         /// </summary>
-        /// <param name="getService">The get brand service.</param>
         /// <param name="setIdentityService">The set identity service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPatch("identity", Name = "SetPlayerIdentity")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetPlayerIdentityAsync(
-            [FromServices] IGetService<BrandQuery, BrandInfo> getService,
+        public ValueTask SetPlayerIdentityAsync(
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
             [FromBody] SetPlayerIdentityRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var brand = await getService
-                .GetAsync(new BrandQuery(brandId))
-                .ConfigureAwait(false);
+            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
 
-            var isAuthenticate = true;
-
-            if (brand.PlayerIdentityEnabled)
-                isAuthenticate = false;
-
-            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, isAuthenticate);
-
-            await setIdentityService.ExecuteAsync(command).ConfigureAwait(false);
+            return setIdentityService.ExecuteAsync(command);
         }
 
         /// <summary>
