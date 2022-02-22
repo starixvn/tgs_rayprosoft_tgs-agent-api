@@ -445,9 +445,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
             [FromBody] SetPlayerIdentityRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity);
+            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
 
             return setIdentityService.ExecuteAsync(command);
         }
