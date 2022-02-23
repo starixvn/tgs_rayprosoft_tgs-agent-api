@@ -2,48 +2,28 @@
 CREATE OR REPLACE FUNCTION DBO.report_generate_brand_game_provider_aggregate_by_closed_on(
     _from timestamptz, 
 	_to timestamptz,
-    _brand_id uuid)
-RETURNS numeric
+    _brand_id uuid,
+	_created_on timestamptz)
+RETURNS void
 LANGUAGE plpgsql
 AS $$
 	BEGIN
-	RETURN QUERY
-		WITH rounds AS(
-		SELECT
+	INSERT INTO report.brand_game_provider_aggregates (brand_id,game_provider_id,currency_code,transaction_count,bet_amount,valid_bet_amount,turnover,win_loss,closed_on,created_on)
+	SELECT r2.brand_id,r2.game_provider_id,r2.currency_code,r2.transaction_count,r2.bet_amount,r2.valid_bet_amount,r2.turnover,r2.win_loss,r2.report_date,_created_on
+	FROM (SELECT r1.brand_id,r1.game_provider_id,bc.currency_code,r1.transaction_count,r1.bet_amount,r1.valid_bet_amount,r1.turnover,r1.win_loss,r1.report_date FROM
+		(SELECT
 		r.brand_id,
 		r.game_provider_id,
-		date_trunc('hour', r.closed_on at time zone 'Asia/Taipei') report_date,
-		COUNT(1),
+		date_trunc('hour', r.closed_on) report_date,
+		COUNT(1) transaction_count,
 		SUM(r.bet_amount) bet_amount,
 		SUM(r.valid_bet_amount) valid_bet_amount,
 		SUM(r.turnover) turnover,
 		SUM(r.win_loss) win_loss
 		FROM bet.rounds r
 		WHERE r.closed_on >= _from and r.closed_on < _to and r.brand_id = _brand_id
-		GROUP BY 1,2,3
-		),
-		insert_rows AS(
-		INSERT INTO report.round_aggregates (brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,original_turnover,turnover,win_loss,report_date,created_on,game_id)
-		SELECT brand_id,agent_id,player_code,game_provider_id,game_type,hour,minute,bet_amount,valid_bet_amount,original_turnover,turnover,win_loss,report_date,created_on,game_id
-		FROM rows
-		)
-
-		SELECT
-		brand_id "BrandId",
-		agent_id "AgentId",
-		game_provider_id "GameProviderId",
-		player_code "PlayerCode",
-		game_id "GameId",
-		game_type "GameType",
-		username "Username",
-		hour "Hour",
-		minute "Minute",
-		bet_amount "BetAmount",
-		valid_bet_amount "ValidBetAmount",
-		original_turnover "OriginalTurnover",
-		turnover "Turnover",
-		win_loss "WinLoss",
-		report_date "ReportDate"
-		from rows;
+		GROUP BY 1,2,3) r1
+		left join LATERAL (select brand_id,currency_code from dbo.brand_currencies where brand_id=r1.brand_id limit 1) bc on r1.brand_id = bc.brand_id
+		) r2;
 	END;
 	$$

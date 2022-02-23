@@ -23,5 +23,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal WinLoss { get; set; }
 
         public DateTimeOffset ClosedOn { get; set; }
+
+        public DateTimeOffset CreatedOn { get; set; }
     }
 }

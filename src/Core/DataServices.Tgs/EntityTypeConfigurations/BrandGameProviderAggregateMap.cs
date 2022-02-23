@@ -43,6 +43,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.ClosedOn)
                 .IsRequired();
 
+            builder.Property(c => c.CreatedOn)
+                .IsRequired();
+
             builder.HasIndex(c => new
                 {
                     c.ClosedOn,

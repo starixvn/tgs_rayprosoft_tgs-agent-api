@@ -25,6 +25,7 @@
     <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\Functions\report_generate_brand_game_provider_aggregate_by_closed_on.sql" />
+    <None Remove="SqlScripts\Functions\report_generate_game_provider_aggregate_by_closed_on.sql" />
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
@@ -85,6 +86,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_log_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\promotion_revert_amount_used.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_generate_game_provider_aggregate_by_closed_on.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_generate_brand_game_provider_aggregate_by_closed_on.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_account_change_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
