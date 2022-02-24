@@ -6,6 +6,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Operator-Api(local)",
         "NODE_IP": "192.168.50.112"
       },
