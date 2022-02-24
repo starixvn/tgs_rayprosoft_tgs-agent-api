@@ -86,10 +86,11 @@ namespace TGS.Operator.Repositories
         {
             var playerIdentityQuery =
                 from player in _tgsRepository.Players.AsQueryable()
-                join identity in _tgsRepository.PlayerIdentity
-                    on player.PlayerCode equals identity.PlayerCode into pj
                 where player.PlayerCode == playerCode
+                join identity in _tgsRepository.PlayerIdentity
+                    on player.PlayerCode equals identity.PlayerCode into pj                                
                 from playerIdentity in pj.DefaultIfEmpty()
+                where playerIdentity.PlayerCode == playerCode
                 select new
                 {
                     playerIdentity.PlayerCode,
