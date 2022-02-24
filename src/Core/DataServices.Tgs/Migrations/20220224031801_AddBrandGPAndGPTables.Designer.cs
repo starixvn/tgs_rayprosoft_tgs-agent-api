@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220222075550_AddBrandGPAndGPTables")]
+    [Migration("20220224031801_AddBrandGPAndGPTables")]
     partial class AddBrandGPAndGPTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1708,6 +1708,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<int>("AuditLogId")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_log_id");
+
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -1717,9 +1721,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateTimeOffset>("ClosedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("closed_on");
+                    b.Property<decimal>("Commission")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("commission");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -1733,6 +1738,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("SettleAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("settle_amount");
 
                     b.Property<int>("TransactionCount")
                         .HasColumnType("integer")
@@ -1756,10 +1770,72 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_brand_game_provider_aggregate_id");
 
-                    b.HasIndex("ClosedOn", "BrandId", "GameProviderId")
+                    b.HasIndex("AuditLogId")
+                        .HasDatabaseName("ix_brand_game_provider_aggregate_audit_log_id");
+
+                    b.HasIndex("ReportDate", "BrandId", "GameProviderId")
                         .HasDatabaseName("ix_brand_game_provider_aggregate_multiple_keys");
 
                     b.ToTable("brand_game_provider_aggregates", "report");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGameProviderAggregateAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<Guid?>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_brand_game_provider_aggregate_audit_log_id");
+
+                    b.HasIndex("CreatedOn", "CreatedByUserId", "BrandId")
+                        .HasDatabaseName("ix_brand_game_provider_aggregate_audit_log_multiple_keys");
+
+                    b.ToTable("brand_game_provider_aggregate_audit_logs");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGameProviderAggregateRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("AuditLogId")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_log_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.HasKey("Id")
+                        .HasName("pk_brand_game_provider_aggregate_record_id");
+
+                    b.HasIndex("AuditLogId")
+                        .HasDatabaseName("ix_brand_game_provider_aggregate_record_audit_log_id");
+
+                    b.ToTable("brand_game_provider_aggregate_records", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGameProviderSchedule", b =>
@@ -2885,14 +2961,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<int>("AuditLogId")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_log_id");
+
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
-                    b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("brand_id");
+                    b.Property<decimal>("Commission")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("commission");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -2903,13 +2984,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("currency_code");
 
-                    b.Property<DateTimeOffset>("ExternalClosedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("external_closed_on");
-
-                    b.Property<Guid>("GameProviderId")
+                    b.Property<Guid?>("GameProviderId")
+                        .IsRequired()
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("SettleAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("settle_amount");
 
                     b.Property<int>("TransactionCount")
                         .HasColumnType("integer")
@@ -2933,10 +3020,72 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_game_provider_aggregate_id");
 
-                    b.HasIndex("ExternalClosedOn", "GameProviderId", "BrandId")
+                    b.HasIndex("AuditLogId")
+                        .HasDatabaseName("ix_game_provider_aggregate_audit_log_id");
+
+                    b.HasIndex("ReportDate", "GameProviderId")
                         .HasDatabaseName("ix_game_provider_aggregate_multiple_keys");
 
                     b.ToTable("game_provider_aggregates", "report");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderAggregateAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid?>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_provider_aggregate_audit_log_id");
+
+                    b.HasIndex("CreatedOn")
+                        .HasDatabaseName("ix_game_provider_aggregate_audit_log_created_on");
+
+                    b.ToTable("game_provider_aggregate_audit_logs");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderAggregateRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("AuditLogId")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_log_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_provider_aggregate_record_id");
+
+                    b.HasIndex("AuditLogId")
+                        .HasDatabaseName("ix_game_provider_aggregate_record_audit_log_id");
+
+                    b.ToTable("game_provider_aggregate_records", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderBetLimit", b =>

@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(c => c.Id)
                 .HasName("pk_game_provider_aggregate_id");
 
-            builder.Property(c => c.BrandId)
+            builder.Property(c => c.AuditLogId)
                 .IsRequired();
 
             builder.Property(c => c.GameProviderId)
@@ -40,17 +40,27 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.ExternalClosedOn)
+            builder.Property(c => c.SettleAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.Commission)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(c => c.ReportDate)
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
                 .IsRequired();
 
+            builder.HasIndex(c => c.AuditLogId)
+                .HasDatabaseName("ix_game_provider_aggregate_audit_log_id");
+
             builder.HasIndex(c => new
                 {
-                    c.ExternalClosedOn,
-                    c.GameProviderId,
-                    c.BrandId
+                    c.ReportDate,
+                    c.GameProviderId
                 })
                 .HasDatabaseName("ix_game_provider_aggregate_multiple_keys");
         }

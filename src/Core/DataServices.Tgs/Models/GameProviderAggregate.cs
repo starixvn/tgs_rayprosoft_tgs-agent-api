@@ -6,9 +6,9 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public int Id { get; set; }
 
-        public Guid BrandId { get; set; }
+        public int AuditLogId { get; set; }
 
-        public Guid GameProviderId { get; set; }
+        public Guid? GameProviderId { get; set; }
 
         public string CurrencyCode { get; set; }
 
@@ -22,7 +22,11 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal WinLoss { get; set; }
 
-        public DateTimeOffset ExternalClosedOn { get; set; }
+        public decimal SettleAmount { get; set; }
+
+        public decimal Commission { get; set; }
+
+        public DateTimeOffset ReportDate { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
     }
