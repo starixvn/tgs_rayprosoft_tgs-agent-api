@@ -6,12 +6,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    public class MemoryGetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
+    public class MemoryCachedGetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IGetService<GetPlayerQuery, PlayerInfo> _targetService;
 
-        public MemoryGetPlayerQueryService(
+        public MemoryCachedGetPlayerQueryService(
             IGetService<GetPlayerQuery, PlayerInfo> targetService,
             IMemoryCache memoryCache)
         {
