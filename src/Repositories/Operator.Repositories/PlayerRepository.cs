@@ -84,18 +84,16 @@ namespace TGS.Operator.Repositories
 
         public ValueTask<PlayerIdentityReviewState> GetPlayerIdentityFormStatusQueryAsync(string playerCode)
         {
-            var playerQuery = _tgsRepository.Players
-                .AsQueryable()
-                .Where(p => p.PlayerCode == playerCode);
-
             var playerIdentityQuery =
-                from identity in _tgsRepository.PlayerIdentity.AsQueryable()
-                join player in playerQuery on identity.PlayerCode equals player.PlayerCode into pj
+                from player in _tgsRepository.Players.AsQueryable()
+                join identity in _tgsRepository.PlayerIdentity
+                    on player.PlayerCode equals identity.PlayerCode into pj
+                where player.PlayerCode == playerCode
                 from playerIdentity in pj.DefaultIfEmpty()
                 select new
                 {
-                    identity.PlayerCode,
-                    identity.PlayerAuthenticationFormId
+                    playerIdentity.PlayerCode,
+                    playerIdentity.PlayerAuthenticationFormId
                 };
 
             var playerIdentityFormQuery =
@@ -110,22 +108,16 @@ namespace TGS.Operator.Repositories
                     identityForm.Status
                 };
 
-            var playerData = from player in playerQuery
-                             join playerIdentity in playerIdentityQuery
-                                on player.PlayerCode equals playerIdentity.PlayerCode into pij
-                             from playerIdentity in pij.DefaultIfEmpty()
+            var playerData = from playerIdentity in playerIdentityQuery
                              join identityForm in playerIdentityFormQuery
-                                on player.PlayerCode equals identityForm.PlayerCode into pafj
+                                on playerIdentity.PlayerCode equals identityForm.PlayerCode into pafj
                              from playerAuthForm in pafj.DefaultIfEmpty()
                              select new
                              {
-                                 player.IdentityAuthentication,
                                  playerAuthForm.Status
                              };
 
-            return new ValueTask<PlayerIdentityReviewState>(playerData.First().IdentityAuthentication
-                ? PlayerIdentityReviewState.Approve
-                : (PlayerIdentityReviewState)playerData.First().Status);
+            return ValueTask.FromResult((PlayerIdentityReviewState)playerData.First().Status);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
