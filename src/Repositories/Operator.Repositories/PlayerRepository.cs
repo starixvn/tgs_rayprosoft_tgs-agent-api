@@ -6,6 +6,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Operator.Repositories
 {
@@ -62,7 +63,14 @@ namespace TGS.Operator.Repositories
                 player.Phone,
                 player.AreaCode,
                 player.VipId,
-                player.Status);
+                player.Status,
+                player.Username,
+                player.RealName,
+                player.Email,
+                player.Vip.Level,
+                player.QQ,
+                player.Wechat,
+                player.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
@@ -72,6 +80,52 @@ namespace TGS.Operator.Repositories
                 .ConfigureAwait(false);
 
             return settingData?.IsAutoTransferToGame ?? true;
+        }
+
+        public ValueTask<PlayerIdentityReviewState> GetPlayerIdentityFormStatusQueryAsync(string playerCode)
+        {
+            var playerQuery = _tgsRepository.Players
+                .AsQueryable()
+                .Where(p => p.PlayerCode == playerCode);
+
+            var playerIdentityQuery =
+                from identity in _tgsRepository.PlayerIdentity.AsQueryable()
+                join player in playerQuery on identity.PlayerCode equals player.PlayerCode into pj
+                from playerIdentity in pj.DefaultIfEmpty()
+                select new
+                {
+                    identity.PlayerCode,
+                    identity.PlayerAuthenticationFormId
+                };
+
+            var playerIdentityFormQuery =
+                from identityForm in _tgsRepository.PlayerAuthenticationForms.AsQueryable()
+                where identityForm.PlayerCode == playerCode
+                join playerIdentity in playerIdentityQuery
+                    on identityForm.Id equals playerIdentity.PlayerAuthenticationFormId
+                select new
+                {
+                    identityForm.Id,
+                    identityForm.PlayerCode,
+                    identityForm.Status
+                };
+
+            var playerData = from player in playerQuery
+                             join playerIdentity in playerIdentityQuery
+                                on player.PlayerCode equals playerIdentity.PlayerCode into pij
+                             from playerIdentity in pij.DefaultIfEmpty()
+                             join identityForm in playerIdentityFormQuery
+                                on player.PlayerCode equals identityForm.PlayerCode into pafj
+                             from playerAuthForm in pafj.DefaultIfEmpty()
+                             select new
+                             {
+                                 player.IdentityAuthentication,
+                                 playerAuthForm.Status
+                             };
+
+            return new ValueTask<PlayerIdentityReviewState>(playerData.First().IdentityAuthentication
+                ? PlayerIdentityReviewState.Approve
+                : (PlayerIdentityReviewState)playerData.First().Status);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
@@ -89,7 +143,14 @@ namespace TGS.Operator.Repositories
                     playerData.Phone,
                     playerData.AreaCode,
                     playerData.VipId,
-                    playerData.Status);
+                    playerData.Status,
+                    playerData.Username,
+                    playerData.RealName,
+                    playerData.Email,
+                    playerData.Vip.Level,
+                    playerData.QQ,
+                    playerData.Wechat,
+                    playerData.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
@@ -111,7 +172,14 @@ namespace TGS.Operator.Repositories
                 playerData.Phone,
                 playerData.AreaCode,
                 playerData.VipId,
-                playerData.Status);
+                playerData.Status,
+                playerData.Username,
+                playerData.RealName,
+                playerData.Email,
+                playerData.Vip.Level,
+                playerData.QQ,
+                playerData.Wechat,
+                playerData.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)

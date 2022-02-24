@@ -192,8 +192,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerQueryService,
-            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService)
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
+            [FromServices] IGetService<GetPlayerIdentityFormStatusQuery, PlayerIdentityReviewState> getIdentityFormStatusService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -218,6 +219,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.IdentityAuthentication = player.IdentityAuthentication;
                 playerData.IsAutoTransferToGame = await getAutoTransFlagService
                     .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
+                    .ConfigureAwait(false);
+                playerData.IdentityAuthenticationFormStatus = await getIdentityFormStatusService
+                    .GetAsync(new GetPlayerIdentityFormStatusQuery(playerCode,player.IdentityAuthentication))
                     .ConfigureAwait(false);
             }
             catch (CoreExceptions.PlayerNotFoundException)

@@ -138,7 +138,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
-           [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerInfoService,
+           [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
