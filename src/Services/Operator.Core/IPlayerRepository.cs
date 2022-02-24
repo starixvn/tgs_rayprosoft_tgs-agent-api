@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator
 {
@@ -8,10 +9,11 @@ namespace TGS.Services.Operator
     {
         ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
 
-
         ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+
+        ValueTask<PlayerIdentityReviewState> GetPlayerIdentityFormStatusQueryAsync(string playerCode);
 
         ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
 
@@ -27,8 +29,8 @@ namespace TGS.Services.Operator
 
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
-
         ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId);
+
+        ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
     }
 }

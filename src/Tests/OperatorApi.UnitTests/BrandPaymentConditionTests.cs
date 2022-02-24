@@ -24,7 +24,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -93,7 +100,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -151,7 +165,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -199,7 +220,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -247,7 +275,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -295,7 +330,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -343,7 +385,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -391,7 +440,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -445,7 +501,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -493,7 +556,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -541,7 +611,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -589,7 +666,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -637,7 +721,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -691,7 +782,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -760,7 +858,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 null,
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -808,7 +913,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 Guid.NewGuid(),
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var brandPayment = new BrandPaymentInfo
             {
@@ -837,7 +949,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 TransferType = TransferType.Deposit
             };
 
-            var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
+            var sut = new VipCondition(new[] { playerInfo.VipLevelId.Value });
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 

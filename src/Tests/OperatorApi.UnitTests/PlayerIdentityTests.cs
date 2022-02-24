@@ -78,6 +78,38 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task When_Player_IdentityAuthentication_Is_True_Identity_Form_Status_Should_Be_Approve()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var sut = new GetPlayerIdentityFormStatusQueryService(fakePlayerRepository);
+
+            var query = new GetPlayerIdentityFormStatusQuery("playerCode", IdentityAuthentication: true);
+
+            var actual = await sut.GetAsync(query);
+
+            Assert.AreEqual(PlayerIdentityReviewState.Approve, actual);
+        }
+
+        [Test]
+        public async Task Query_Identity_Form_Status_Should_Success()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            fakePlayerRepository
+                .GetPlayerIdentityFormStatusQueryAsync("playerCode")
+                .Returns(PlayerIdentityReviewState.Reject);
+
+            var sut = new GetPlayerIdentityFormStatusQueryService(fakePlayerRepository);
+
+            var query = new GetPlayerIdentityFormStatusQuery("playerCode", IdentityAuthentication: false);
+
+            var actual = await sut.GetAsync(query);
+
+            Assert.AreEqual(PlayerIdentityReviewState.Reject, actual);
+        }
+
+        [Test]
         public async Task When_Brand_Enable_Player_Identity_Equals_True_Should_Create_Player_Identity_Success()
         {
             var fakeBrandRepository = Substitute.For<IBrandRepository>();
