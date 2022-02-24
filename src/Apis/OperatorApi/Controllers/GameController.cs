@@ -245,7 +245,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return new GetGameUrlResponse
             {
-                Url = gameUrl?.ToString()
+                Url = gameUrl?.OriginalString
             };
         }
 
@@ -303,7 +303,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return new GetGameUrlResponse
             {
-                Url = gameUrl?.ToString()
+                Url = gameUrl?.OriginalString
             };
         }
 
