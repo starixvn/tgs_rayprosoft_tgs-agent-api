@@ -165,6 +165,7 @@ namespace TGS.Core.Models
             public const string Payment = "payment";
             public const string Promotion = "promotion";
             public const string StationLetter = "stationLetter";
+            public const string Identity = "identity";
 
             public static readonly string[] Types =
             {
@@ -172,7 +173,8 @@ namespace TGS.Core.Models
                 Promotion,
                 MessengerQRCode,
                 Banner,
-                Payment
+                Payment,
+                Identity
             };
         }
     }

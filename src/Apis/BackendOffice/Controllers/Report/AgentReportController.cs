@@ -1,10 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Apis.BackendOffice.Models.Agent;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Agent;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -18,48 +21,255 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("contributions")]
         [Description("Get agent contributions")]
-        public Task<PagedResponse<AgentContributionModel>> GetRoundsAsync(
-            [FromQuery] GetAgentContributionsRequest request) =>
-            _client.GetAgentContributionsAsync(request);
+        public async Task<PagedResponse<AgentContributionReportModel>> GetRoundsAsync(
+            [FromQuery] GetAgentContributionsReportRequest request)
+        {
+            var reportRequest = new GetAgentContributionsRequest
+            {
+                BrandId = request.BrandId,
+                AgentId = request.AgentId,
+                Username = request.Username,
+                Type = (short?)request.Type,
+                From = request.From,
+                To = request.To,
+                IncludeAgents = request.IncludeAgents,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentContributionsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentContributionReportModel
+                {
+                    Username = x.Username,
+                    Type = (AccountType)x.Type,
+                    DepositAmount = x.DepositAmount,
+                    WithdrawalAmount = x.WithdrawalAmount,
+                    AdjustmentAmount = x.AdjustmentAmount,
+                    BonusAmount = x.BonusAmount,
+                    BetAmount = x.BetAmount,
+                    ValidBetAmount = x.ValidBetAmount,
+                    Turnover = x.Turnover,
+                    WinLossAmount = x.WinLossAmount,
+                    NetProfit = x.NetProfit
+                }).ToArray()
+            };
+        }
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(
+        public async Task<PagedResponse<TeamInfoReportModel>> GetAgentTeamInformationAsync(
             Guid id,
-            [FromQuery] GetAgentTeamInfoRequest request)
+            [FromQuery] GetAgentTeamInfoReportRequest request)
         {
-            request.AgentId = id;
+            var reportRequest = new GetAgentTeamInfoRequest
+            {
+                AgentId = id,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
 
-            return _client.GetAgentTeamInfoAsync(request);
+            var response = await _client.GetAgentTeamInfoAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new TeamInfoReportModel
+                {
+                    Username = x.Username,
+                    RegisteredOn = x.RegisteredOn,
+                    Contribution = x.Contribution
+                }).ToArray()
+            };
         }
 
         [HttpGet("dividends")]
         [Description("Get agent dividends report")]
-        public Task<PagedResponse<AgentDividendModel>>
-            GetAgentDividendsAsync([FromQuery] GetAgentDividendsRequest request) =>
-            _client.GetAgentDividendsAsync(request);
+        public async Task<PagedResponse<AgentDividendReportModel>>
+            GetAgentDividendsAsync([FromQuery] GetAgentDividendsReportRequest request)
+        {
+            var reportRequest = new GetAgentDividendsRequest
+            {
+                BrandId = request.BrandId,
+                AgentId = request.AgentId,
+                Username = request.Username,
+                Type = (short?)request.Type,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentDividendsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentDividendReportModel
+                {
+                    Id = x.Id,
+                    Username = x.Username,
+                    DepositAmount = x.DepositAmount,
+                    WithdrawalAmount = x.WithdrawalAmount,
+                    AdjustmentAmount = x.AdjustmentAmount,
+                    BonusAmount = x.BonusAmount,
+                    BetAmount = x.BetAmount,
+                    ValidBetAmount = x.ValidBetAmount,
+                    Turnover = x.Turnover,
+                    WinLossAmount = x.WinLossAmount,
+                    NetProfit = x.NetProfit,
+                    AgentDividendAmount = x.AgentDividendAmount,
+                    FromPlayerAgentDividendAmount = x.FromPlayerAgentDividendAmount,
+                    FromTeamAgentDividendAmount = x.FromTeamAgentDividendAmount
+                }).ToArray()
+            };
+        }
 
         [HttpGet("dividendDetails")]
         [Description("Get agent dividend details report")]
-        public Task<PagedResponse<AgentDividendDetailModel>>
-            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendDetailsRequest request) =>
-            _client.GetAgentDividendDetailsAsync(request);
+        public async Task<PagedResponse<AgentDividendDetailReportModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendDetailsReportRequest request)
+        {
+            var reportRequest = new GetAgentDividendDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentDividendDetailsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentDividendDetailReportModel
+                {
+                    Id = x.Id,
+                    Username = x.Username,
+                    SettlementDate = x.SettlementDate,
+                    SettlementDateFrom = x.SettlementDateFrom,
+                    SettlementDateTo = x.SettlementDateTo,
+                    LiveDealerWinLoss = x.LiveDealerWinLoss,
+                    SlotWinLoss = x.SlotWinLoss,
+                    LotteryWinLoss = x.LotteryWinLoss,
+                    CardGameWinLoss = x.CardGameWinLoss,
+                    SportsWinLoss = x.SportsWinLoss,
+                    VirtualSportsWinLoss = x.VirtualSportsWinLoss,
+                    WinLossAmount = x.WinLossAmount,
+                    AgentDividendAmount = x.AgentDividendAmount,
+                    AgentDividendPercentage = x.AgentDividendPercentage,
+                    ExpenditureAmount = x.ExpenditureAmount
+                }).ToArray()
+            };
+        }
 
         [HttpGet("dividendTeamDetails")]
         [Description("Get agent dividend team details report")]
-        public Task<PagedResponse<AgentDividendTeamDetailModel>>
-            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendTeamDetailsRequest request) =>
-            _client.GetAgentDividendTeamDetailsAsync(request);
+        public async Task<PagedResponse<AgentDividendTeamDetailReportModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetAgentDividendTeamDetailsReportRequest request)
+        {
+            var reportRequest = new GetAgentDividendTeamDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentDividendTeamDetailsAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentDividendTeamDetailReportModel
+                {
+                    Id = x.Id,
+                    Username = x.Username,
+                    SettlementDate = x.SettlementDate,
+                    SettlementDateFrom = x.SettlementDateFrom,
+                    SettlementDateTo = x.SettlementDateTo,
+                    LiveDealerWinLoss = x.LiveDealerWinLoss,
+                    SlotWinLoss = x.SlotWinLoss,
+                    LotteryWinLoss = x.LotteryWinLoss,
+                    CardGameWinLoss = x.CardGameWinLoss,
+                    SportsWinLoss = x.SportsWinLoss,
+                    VirtualSportsWinLoss = x.VirtualSportsWinLoss,
+                    WinLossAmount = x.WinLossAmount,
+                    AgentDividendAmount = x.AgentDividendAmount,
+                    AgentDividendPercentage = x.AgentDividendPercentage,
+                    ExpenditureAmount = x.ExpenditureAmount,
+                    BonusAmount = x.BonusAmount
+                }).ToArray()
+            };
+        }
 
         [HttpGet("{id}/winLoss")]
         [Description("Get agent player Win/Loss report")]
-        public Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
+        public async Task<PagedResponse<AgentPlayerWinLossReportModel>> GetAgentPlayerWinLossAsync(
             Guid id,
-            [FromQuery] GetAgentPlayerWinLossRequest request)
+            [FromQuery] GetAgentPlayerWinLossReportRequest request)
         {
-            request.AgentId = id;
+            var reportRequest = new GetAgentPlayerWinLossRequest
+            {
+                AgentId = id,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
 
-            return _client.GetAgentPlayerWinLossAsync(request);
+            var response = await _client.GetAgentPlayerWinLossAsync(reportRequest);
+
+            return new()
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items?.Select(x => new AgentPlayerWinLossReportModel
+                {
+                    Username = x.Username,
+                    LiveDealerWinLossAmount = x.LiveDealerWinLossAmount,
+                    SlotWinLossAmount = x.SlotWinLossAmount,
+                    LotteryWinLossAmount = x.LotteryWinLossAmount,
+                    CardGameWinLossAmount = x.CardGameWinLossAmount,
+                    SportsWinLossAmount = x.SportsWinLossAmount,
+                    VirtualSportsWinLossAmount = x.VirtualSportsWinLossAmount
+                }).ToArray()
+            };
         }
 
         [HttpGet("exportAgentContributions")]

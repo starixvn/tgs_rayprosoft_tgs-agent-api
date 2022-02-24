@@ -15,21 +15,13 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
-
-        public DbSet<BrandAllAgent> BrandAllAgents { get; set; }
-
-        public DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
-
-        public DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
-
         public DbSet<AdminLog> AdminLogs { get; set; }
 
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
 
         public DbSet<AgentBank> AgentBanks { get; set; }
+
+        public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
         public DbSet<AgentDividend> AgentDividends { get; set; }
 
@@ -50,6 +42,14 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<Banner> Banners { get; set; }
 
         public DbSet<BetLimit> BetLimits { get; set; }
+
+        public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+
+        public DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
+
+        public DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
+
+        public DbSet<BrandAllAgent> BrandAllAgents { get; set; }
 
         public DbSet<BrandBetLimit> BrandBetLimits { get; set; }
 
@@ -148,6 +148,8 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerAuditLog> PlayerAuditLogs { get; set; }
 
+        public DbSet<PlayerAuthenticationForm> PlayerAuthenticationForms { get; set; }
+
         public DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
@@ -160,9 +162,13 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerGameSetting> PlayerGameSettings { get; set; }
 
+        public DbSet<PlayerIdentity> PlayerIdentity { get; set; }
+
         public DbSet<PlayerIpRecord> PlayerIpRecords { get; set; }
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+
+        public DbSet<PlayerParent> PlayerParents { get; set; }
 
         public DbSet<PlayerRebate> PlayerRebates { get; set; }
 
@@ -228,11 +234,9 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
 
-        public DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
-
-        public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
-
-        public DbSet<PlayerParent> PlayerParents { get; set; }
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
             Database.BeginTransactionAsync(level);

@@ -2,6 +2,8 @@
 using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
+using TGS.Apis.BackendOffice.Controllers.Messages.Player;
+using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -49,6 +51,13 @@ namespace TGS.Apis.BackendOffice.Extensions
             {
                 ReviewResponseState.Approve => ReviewState.Approve,
                 _ => ReviewState.Reject
+            };
+
+        public static PlayerIdentityReviewState ToReviewState(this PlayerIdentityReviewResponseState identityReviewResponse)
+            => identityReviewResponse switch
+            {
+                PlayerIdentityReviewResponseState.Approve => PlayerIdentityReviewState.Approve,
+                _ => PlayerIdentityReviewState.Reject
             };
     }
 }

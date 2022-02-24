@@ -2,23 +2,22 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
-using Tgs.ServiceUtility;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.ApplicationServices.PayPassowrd;
 
 namespace TGS.Services.Operator.ApplicationServices.PayPassowrd
 {
     internal class StartChangePayPasswordCommandService : IGetService<StartChangePayPasswordCommand, string>
     {
+        private readonly IBrandRepository _brandRepository;
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IEmailClient _emailClient;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISmsServiceClient _smsServiceClient;
-        private readonly IBrandRepository _brandRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public StartChangePayPasswordCommandService(

@@ -7,11 +7,11 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Controllers;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models;
-using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models;
+using Tgs.Report.Client.Models.Round;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -27,12 +27,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeHttpContext = new DefaultHttpContext();
             var brandId = Guid.NewGuid();
             fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            });
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
 
-            var playerRoundRequest = new GetPlayerRoundReportRequest()
+            var playerRoundRequest = new GetPlayerRoundReportRequest
             {
                 From = new DateTimeOffset(new DateTime(2021, 4, 19)),
                 To = new DateTimeOffset(new DateTime(2021, 5, 19, 23, 59, 59)),
@@ -48,7 +45,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var rounds = roundList.ToArray();
 
-            var resp = new PagedResponse<RoundModel>()
+            var resp = new PagedResponse<RoundModel>
             {
                 Message = string.Empty,
                 TotalCount = rounds.Length,
@@ -60,10 +57,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(resp);
 
             var sut = new PlayerReportController(fakeReportClient);
-            sut.ControllerContext = new ControllerContext()
-            {
-                HttpContext = fakeHttpContext
-            };
+            sut.ControllerContext = new ControllerContext { HttpContext = fakeHttpContext };
 
             // act
             await sut.GetRoundsAsync(playerRoundRequest);

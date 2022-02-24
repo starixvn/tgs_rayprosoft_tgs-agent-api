@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Linq.Dynamic.Core;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             IHttpContextAccessor accessor) :
             base(accessor)
         {
-            _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
+            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
         public override Task<PagedResponse<PlayersModel>> Handle(
@@ -51,7 +51,6 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             var playerQuery = _tgsRepository.Players
                 .Include(player => player.Vip)
                 .Include(player => player.Agent)
-                .Include(player => player.Wallets)
                 .AsQueryable();
 
             if (request.BrandId != null)
@@ -66,38 +65,86 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             if (request.VipId != null)
                 playerQuery = playerQuery.Where(player => player.VipId == request.VipId);
 
-            var playerIpQuery = from record in _tgsRepository.PlayerIpRecords.AsQueryable()
-                                where record.IpType == 1
-                                select record;
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                playerQuery = playerQuery.Where(player => player.Phone == request.Phone);
+            }
 
-            
+            if (request.BeginRegisteredOn != null && request.EndRegisteredOn != null)
+            {
+                playerQuery = playerQuery.Where(p =>
+                    p.RegisteredOn > request.BeginRegisteredOn
+                    && p.RegisteredOn <= request.EndRegisteredOn);
+            }
 
-            var query = from player in playerQuery
+            var walletQuery =
+                from wallet in _tgsRepository.Wallets.AsQueryable()
+                join player in playerQuery on wallet.Id equals player.DefaultWalletId
+                select new
+                {
+                    wallet.Id,
+                    wallet.Balance
+                };
+
+            var playerIpQuery =
+                from record in _tgsRepository.PlayerIpRecords.AsQueryable()
+                join player in playerQuery on record.PlayerCode equals player.PlayerCode
+                where record.IpType == 1
+                select new
+                {
+                    record.PlayerCode,
+                    record.Host
+                };
+
+            var playerIdentityQuery =
+                from identity in _tgsRepository.PlayerIdentity.AsQueryable()
+                join player in playerQuery on identity.PlayerCode equals player.PlayerCode
+                select new
+                {
+                    identity.PlayerCode,
+                    identity.PlayerAuthenticationFormId
+                };
+
+            var query =
+                        from player in playerQuery
                         join brand in queryableBrands
                             on player.BrandId equals brand.Id
+                        join wallet in walletQuery
+                            on player.DefaultWalletId equals wallet.Id
                         join ipRecord in playerIpQuery
                             on player.PlayerCode equals ipRecord.PlayerCode into gj
                         from ipRecord in gj.DefaultIfEmpty()
-                        select new PlayersModel
+                        join playerIdentity in playerIdentityQuery
+                            on player.PlayerCode equals playerIdentity.PlayerCode into pij
+                        from playerIdentity in pij.DefaultIfEmpty()
+                        select new
                         {
-                            PlayerCode = player.PlayerCode,
-                            Username = player.Username,
-                            Balance = player.Wallets.FirstOrDefault().Balance,
+                            player.PlayerCode,
+                            player.Username,
+                            wallet.Balance,
                             VipLevel = player.Vip.Level,
-                            Status = player.Status,
-                            RegisteredTime = ipRecord.RecordOn,
+                            player.Status,
+                            player.RegisteredOn,
                             RegisterHost = ipRecord.Host,
-                            AgentName = player.Agent.Username
+                            AgentName = player.Agent.Username,
+                            IdentityFormId = playerIdentity.PlayerAuthenticationFormId
                         };
 
             if (!string.IsNullOrWhiteSpace(request.RegisterHost))
                 query = query.Where(row => row.RegisterHost.ToLower() == request.RegisterHost.ToLower());
 
-            if (request.BeginRegisteredOn != null && request.EndRegisteredOn != null)
-                query = query.Where(pm => pm.RegisteredTime > request.BeginRegisteredOn
-                    && pm.RegisteredTime <= request.EndRegisteredOn);
-
-            return query.CreatePagedResponseAsync(request);
+            return query.Select(row => new PlayersModel
+            {
+                PlayerCode = row.PlayerCode,
+                Username = row.Username,
+                Balance = row.Balance,
+                VipLevel = row.VipLevel,
+                Status = row.Status,
+                RegisteredTime = row.RegisteredOn,
+                RegisterHost = row.RegisterHost,
+                AgentName = row.AgentName,
+                IdentityFormId = row.IdentityFormId
+            }).CreatePagedResponseAsync(request);
         }
     }
 }

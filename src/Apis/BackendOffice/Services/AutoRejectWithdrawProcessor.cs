@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
@@ -22,11 +23,11 @@ namespace TGS.Apis.BackendOffice.Services
             _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask HandleAsync(byte[] data, CancellationToken cancellationToken)
+        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Receive AutoRejectWithdraw request.");
 
-            var request = RejectDepositRequest.Parser.ParseFrom(data);
+            var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
 
             var formId = request.FormId.ToGuid();
             var brandId = request.BrandId.ToGuid();

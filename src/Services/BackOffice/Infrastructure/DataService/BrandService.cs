@@ -5,13 +5,13 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
-using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -23,17 +23,21 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IBrandService
     {
+        Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
+
+        Task CreateBrandAsync(CreateBrandRequest request);
+
+        Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
+
         Task<Brand> GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null);
+                                    Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null);
 
         IQueryable<Brand> GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery = null,
             bool tracking = false);
 
-        Task CreateBrandAsync(CreateBrandRequest request);
-        Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
-        Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
         Task SyncBrandGamesAsync(Guid brandId);
-        Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
+
+        Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
     }
 
     public class BrandService : BaseRepositoryOperations<ITgsRepository>, IBrandService
@@ -122,7 +126,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
                 PlatformCharge = request.PlatformCharge,
-                CheckDividendActiveCount = request.CheckDividendActiveCount
+                CheckDividendActiveCount = request.CheckDividendActiveCount,
+                EnablePlayerIdentity = request.EnablePlayerIdentity,
+                AutoClearWageringRequirement = request.AutoClearWageringRequirement
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
@@ -163,11 +169,49 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             scope.Complete();
         }
 
+        Task<bool> IBrandService.ExistsAsync(Expression<Func<Brand, bool>> predicate) => ExistsAsync(predicate);
+
         Task<Brand> IBrandService.GetBrandAsync(Expression<Func<Brand, bool>> predicate,
-            Func<IQueryable<Brand>, IQueryable<Brand>> preQuery) =>
+                    Func<IQueryable<Brand>, IQueryable<Brand>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        Task<bool> IBrandService.ExistsAsync(Expression<Func<Brand, bool>> predicate) => ExistsAsync(predicate);
+        IQueryable<Brand> IBrandService.GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
+            bool tracking) =>
+            GetQueriesAsync(preQuery, tracking);
+
+        async Task IBrandService.SyncBrandGamesAsync(Guid brandId)
+        {
+            var brand = await _repository.Brands.AsQueryable().FirstOrDefaultAsync(x => x.Id == brandId);
+
+            var brandCurrencies = brand.Currencies.Select(bc => bc.CurrencyCode);
+
+            var baseGames = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand)
+                .Where(x => brand.GameProviders.Select(g => g.GameProviderId).Contains(x.GameProviderId))
+                .Where(x => x.GameProvider.Currencies.Any(c => brandCurrencies.Contains(c.CurrencyCode)))
+                .ToArrayAsync();
+
+            baseGames = baseGames.Where(x
+                => x.AvailableCurrencies.IsNullOrEmpty() ||
+                x.AvailableCurrencies.Split(",").Any(c => brandCurrencies.Contains(c))).ToArray();
+
+            var baseGameIds = baseGames.Select(x => x.Id).ToArray();
+
+            var addList = baseGameIds.Except(brand.Games.Select(x => x.GameId)).ToArray();
+
+            var games = addList.Select(id => new BrandGame
+            {
+                BrandId = brand.Id,
+                GameId = id,
+                DisplayOrder = 99,
+                Rebate = true,
+                EffectiveBettingPercentage = 100M
+            });
+
+            await CreateEntitiesAsync(games);
+
+            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brand.Id, true);
+        }
 
         async Task IBrandService.UpdateBrandAsync(Brand brand, UpdateBrandRequest request)
         {
@@ -198,6 +242,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.UpdatedOn = DateTimeOffset.Now;
             brand.PlatformCharge = request.PlatformCharge;
             brand.CheckDividendActiveCount = request.CheckDividendActiveCount;
+            brand.EnablePlayerIdentity = request.EnablePlayerIdentity;
+            brand.AutoClearWageringRequirement = request.AutoClearWageringRequirement;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
@@ -262,58 +308,195 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
         }
 
-        IQueryable<Brand> IBrandService.GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
-            bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
-
-        async Task IBrandService.SyncBrandGamesAsync(Guid brandId)
+        private static HashSet<BrandGameProvider> GenerateBrandGameProviders(
+            Brand brand, BrandRequest request)
         {
-            var brand = await _repository.Brands.AsQueryable().FirstOrDefaultAsync(x => x.Id == brandId);
+            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId).ToArray();
+            var brandGameProviders = brand.GameProviders.Where(x => gameProviderIds.Contains(x.GameProviderId)).Select(
+                x =>
+                {
+                    var requestBrandGameProvider =
+                        request.GameProviders.First(m => m.GameProviderId == x.GameProviderId);
 
-            var brandCurrencies = brand.Currencies.Select(bc => bc.CurrencyCode);
+                    x.DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode;
+                    x.GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId;
+                    x.DesktopQueryString = requestBrandGameProvider.DesktopQueryString;
+                    x.MobileQueryString = requestBrandGameProvider.MobileQueryString;
 
-            var baseGames = await _repository.Games.AsQueryable()
-                .Where(x => x.AvailableToBrand)
-                .Where(x => brand.GameProviders.Select(g => g.GameProviderId).Contains(x.GameProviderId))
-                .Where(x => x.GameProvider.Currencies.Any(c => brandCurrencies.Contains(c.CurrencyCode)))
-                .ToArrayAsync();
+                    return x;
+                }
+            );
 
-            baseGames = baseGames.Where(x
-                => x.AvailableCurrencies.IsNullOrEmpty() ||
-                x.AvailableCurrencies.Split(",").Any(c => brandCurrencies.Contains(c))).ToArray();
-
-            var baseGameIds = baseGames.Select(x => x.Id).ToArray();
-
-            var addList = baseGameIds.Except(brand.Games.Select(x => x.GameId)).ToArray();
-
-            var games = addList.Select(id => new BrandGame
-            {
-                BrandId = brand.Id,
-                GameId = id,
-                DisplayOrder = 99,
-                Rebate = true,
-                EffectiveBettingPercentage = 100M
-            });
-
-            await CreateEntitiesAsync(games);
-
-            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brand.Id, true);
+            return new(brandGameProviders);
         }
 
-        private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandRequest request)
+        private static HashSet<BrandGroupGame> GenerateBrandGroupGames(Brand brand, Guid brandGroupId,
+            IEnumerable<int> brandGameIds)
         {
-            var cultureCodes = request.Languages.Select(c => c.CultureCode);
-            var languages = await _repository.Languages.AsQueryable()
-                .Where(x => cultureCodes.Contains(x.CultureCode)).ToArrayAsync();
-            var brandLanguages = languages.Select(x =>
-                new BrandLanguage
+            var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
+            {
+                BrandGroupId = brandGroupId,
+                BrandGame = brand.Games.First(g => g.GameId == brandGameId)
+            });
+            return new(brandGroupGames);
+        }
+
+        private static HashSet<BrandGroupGameProviderBetLimit> GenerateGameProviderBetLimits(Brand brand,
+            Guid brandGroupBetLimitId, BetLimit betLimit, bool isSports)
+        {
+            bool BetLimitRangeFunc(GameProviderBetLimit gb) =>
+                gb.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= gb.MinBet &&
+                betLimit.MaxBet >= gb.MaxBet;
+
+            bool BetLimitIsSportsFunc(GameProviderBetLimit b) => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch;
+
+            var brandGroupGameProviderBetLimits = brand.GameProviders.Where(x => x.GameProvider.BetLimits
+                    .Any(BetLimitRangeFunc))
+                .Where(isSports, x => x.GameProvider.BetLimits
+                    .Any(BetLimitIsSportsFunc))
+                .Select(x =>
+                {
+                    var gameProviderBetLimits = x.GameProvider.BetLimits
+                        .Where(BetLimitRangeFunc)
+                        .Where(isSports, BetLimitIsSportsFunc)
+                        .OrderBy(b => b.MinBet).ToArray();
+
+                    return new BrandGroupGameProviderBetLimit
+                    {
+                        BrandGroupBetLimitId = brandGroupBetLimitId,
+                        GameProviderBetLimitId = gameProviderBetLimits.First().Id
+                    };
+                });
+
+            return new(brandGroupGameProviderBetLimits);
+        }
+
+        private static HashSet<BrandGroupGame> GenerateWithUpdateBrandGroupGames(Brand brand, BrandGroup brandGroup,
+            IEnumerable<int> brandGameIds)
+        {
+            var brandGamePoolIds = brand.Games.Select(x => x.GameId).ToArray();
+            var brandGroupGames = brandGameIds?
+                .Where(brandGameId => brandGamePoolIds.Contains(brandGameId)).Select(brandGameId =>
+                    new BrandGroupGame
+                    {
+                        BrandGroup = brandGroup,
+                        BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
+                    });
+            return new(brandGroupGames ?? Array.Empty<BrandGroupGame>());
+        }
+
+        private static HashSet<BrandGroupGameProviderBetLimit> GenerateWithUpdateGameProviderBetLimits(
+            BrandGroupBetLimit brandGroupBetLimit, BrandGroupGameProviderBetLimitModel[] models)
+        {
+            var brandGroupGameProviderBetLimits = models?.Where(x => x.BrandBetLimitId == brandGroupBetLimit.BetLimitId)
+                .Select(x =>
+                    new BrandGroupGameProviderBetLimit
+                    {
+                        BrandGroupBetLimit = brandGroupBetLimit,
+                        GameProviderBetLimitId = x.GameProviderBetLimitId
+                    });
+
+            return new(brandGroupGameProviderBetLimits ?? Array.Empty<BrandGroupGameProviderBetLimit>());
+        }
+
+        private static (DateTimeOffset, DateTimeOffset, DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth, DateTimeOffset currentFromDate)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate, startDate.AddDays(1), startDate.AddDays(1));
+
+                case SettlementIntervalType.Weekly:
+                    return (startDate,
+                        DateGenerator.GetLastDayOfWeek(startDate),
+                        DateGenerator.GetFirstDayOfWeek(startDate.AddDays(7)),
+                        DateGenerator.GetLastDayOfWeek(startDate.AddDays(7)));
+
+                case SettlementIntervalType.Monthly:
+                    if (dayOfMonth == null)
+                    {
+                        return (startDate,
+                            DateGenerator.GetLastDayOfMonth(startDate),
+                            DateGenerator.GetFirstDayOfMonth(startDate.AddMonths(1)),
+                            DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1)));
+                    }
+
+                    if (startDate.Day <= dayOfMonth)
+                    {
+                        return (currentFromDate,
+                            startDate,
+                            startDate.AddDays(1),
+                            DateGenerator.GetSpecifyDayOfMonth(startDate, dayOfMonth.Value!));
+                    }
+
+                    return (currentFromDate,
+                        startDate,
+                        startDate.AddDays(1),
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        private async Task<HashSet<BrandGameProvider>> GenerateAddBrandGameProvidersAsync(
+            Brand brand, BrandRequest request)
+        {
+            var gameProviderIds =
+                request.GameProviders.Where(x => x.Id == null).Select(x => x.GameProviderId).ToArray();
+
+            var gameProviders = await _repository.GameProviders.AsQueryable()
+                .Where(x => gameProviderIds.Contains(x.Id)).ToArrayAsync();
+            var brandGameProviders = gameProviders.Select(x =>
+                {
+                    var requestBrandGameProvider = request.GameProviders.First(m => m.GameProviderId == x.Id);
+                    var brandGameProviderId = GuidExtensions.NewSequentialGuid();
+
+                    var newBrandGameProvider = new BrandGameProvider
+                    {
+                        Id = brandGameProviderId,
+                        BrandId = brand.Id,
+                        GameProviderId = x.Id,
+                        GameProvider = x,
+                        DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode,
+                        GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId,
+                        DesktopQueryString = requestBrandGameProvider.DesktopQueryString,
+                        MobileQueryString = requestBrandGameProvider.MobileQueryString,
+                        Schedules = new BrandGameProviderSchedule[]
+                        {
+                            new()
+                            {
+                                BrandGameProviderId = brandGameProviderId,
+                                From = DateTimeOffset.Now,
+                                To = DateTimeOffset.Now.AddDays(7),
+                                DayOfWeek = DayOfWeek.Monday,
+                                IsDefault = true,
+                                Status = SwitchStatus.Disabled
+                            }
+                        }.ToHashSet()
+                    };
+
+                    return newBrandGameProvider;
+                }
+            );
+            return new(brandGameProviders);
+        }
+
+        private async Task<HashSet<BrandBetLimit>> GenerateBetLimitsAsync(Brand brand, BrandRequest request)
+        {
+            var betLimits = await _repository.BetLimits.AsQueryable()
+                .Where(x => request.BetLimits.Select(b => b.Id).Contains(x.Id)).ToArrayAsync();
+            var brandBetLimits = betLimits.Select(x =>
+                new BrandBetLimit
                 {
                     BrandId = brand.Id,
-                    CultureCode = x.CultureCode,
-                    BrandCultureCode = request.Languages.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
-                        ?.BrandCultureCode
+                    BetLimitId = x.Id,
+                    BetLimit = x,
+                    IsDefault = request.BetLimits.First(b => b.Id == x.Id).IsDefault
                 });
-            return new(brandLanguages);
+            return new(brandBetLimits);
         }
 
         private HashSet<BrandCurrency> GenerateBrandCurrencies(Brand brand, BrandRequest request)
@@ -339,19 +522,61 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandDomains);
         }
 
-        private async Task<HashSet<BrandBetLimit>> GenerateBetLimitsAsync(Brand brand, BrandRequest request)
+        private HashSet<BrandGroupBetLimit> GenerateBrandGroupBetLimits(Brand brand, Guid brandGroupId,
+            bool isSports = false)
         {
-            var betLimits = await _repository.BetLimits.AsQueryable()
-                .Where(x => request.BetLimits.Select(b => b.Id).Contains(x.Id)).ToArrayAsync();
-            var brandBetLimits = betLimits.Select(x =>
-                new BrandBetLimit
+            var brandGroupBetLimits = brand.BetLimits.Select(x =>
+            {
+                var id = Guid.NewGuid();
+                return new BrandGroupBetLimit
+                {
+                    Id = id,
+                    BrandGroupId = brandGroupId,
+                    BetLimitId = x.BetLimitId,
+                    GameProviderBetLimits = GenerateGameProviderBetLimits(brand, id, x.BetLimit, isSports)
+                };
+            });
+            return new(brandGroupBetLimits);
+        }
+
+        private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandRequest request)
+        {
+            var cultureCodes = request.Languages.Select(c => c.CultureCode);
+            var languages = await _repository.Languages.AsQueryable()
+                .Where(x => cultureCodes.Contains(x.CultureCode)).ToArrayAsync();
+            var brandLanguages = languages.Select(x =>
+                new BrandLanguage
                 {
                     BrandId = brand.Id,
-                    BetLimitId = x.Id,
-                    BetLimit = x,
-                    IsDefault = request.BetLimits.First(b => b.Id == x.Id).IsDefault
+                    CultureCode = x.CultureCode,
+                    BrandCultureCode = request.Languages.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
+                        ?.BrandCultureCode
                 });
-            return new(brandBetLimits);
+            return new(brandLanguages);
+        }
+
+        private async Task<HashSet<BrandGame>> GenerateWithCreateGamesAsync(Brand brand)
+        {
+            var gameProviderIds = brand.GameProviders.Select(x => x.GameProviderId).ToArray();
+
+            var brandGames = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand)
+                .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
+
+            var games = brandGames.Select(x =>
+                new BrandGame
+                {
+                    Id = Guid.NewGuid(),
+                    BrandId = brand.Id,
+                    GameId = x.Id,
+                    Game = x,
+                    Status = GameStatus.Active,
+                    Tag = GameTag.None,
+                    DisplayOrder = 99,
+                    Rebate = true,
+                    EffectiveBettingPercentage = 100M
+                });
+            return new(games);
         }
 
         private HashSet<BrandGroup> GenerateWithCreateGroups(Brand brand, BrandRequest request)
@@ -383,54 +608,22 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(groups);
         }
 
-        private async Task<HashSet<BrandGame>> GenerateWithCreateGamesAsync(Brand brand)
+        private HashSet<BrandGroupBetLimit> GenerateWithUpdateBrandGroupBetLimits(Brand brand, BrandGroup brandGroup,
+            BrandGroupGameProviderBetLimitModel[] models)
         {
-            var gameProviderIds = brand.GameProviders.Select(x => x.GameProviderId).ToArray();
-
-            var brandGames = await _repository.Games.AsQueryable()
-                .Where(x => x.AvailableToBrand)
-                .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
-
-            var games = brandGames.Select(x =>
-                new BrandGame
-                {
-                    Id = Guid.NewGuid(),
-                    BrandId = brand.Id,
-                    GameId = x.Id,
-                    Game = x,
-                    Status = GameStatus.Active,
-                    Tag = GameTag.None,
-                    DisplayOrder = 99,
-                    Rebate = true,
-                    EffectiveBettingPercentage = 100M
-                });
-            return new(games);
-        }
-
-        private HashSet<BrandGroup> GenerateWithUpdateGroups(Brand brand, UpdateBrandRequest request)
-        {
-            var brandGroups = request.BrandGroups.Select(x =>
+            var brandGroupBetLimits = brand.BetLimits.Select(x =>
             {
-                var brandGroup = new BrandGroup
+                var brandGroupBetLimit = new BrandGroupBetLimit
                 {
-                    Name = x.Name,
-                    BrandId = brand.Id,
-                    Description = x.Description,
-                    IsSports = x.IsSports,
-                    CreatedByUsername = request.EditorUsername,
-                    UpdatedByUsername = request.EditorUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedOn = DateTimeOffset.Now
+                    BrandGroup = brandGroup,
+                    BetLimitId = x.BetLimitId
                 };
-                brandGroup.BrandGames =
-                    GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGames?.Select(g => g.GameId));
-                brandGroup.BrandGroupBetLimits =
-                    GenerateWithUpdateBrandGroupBetLimits(brand, brandGroup, x.GameProviderBetLimits);
+                brandGroupBetLimit.GameProviderBetLimits =
+                    GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, models);
 
-                return brandGroup;
+                return brandGroupBetLimit;
             });
-
-            return new(brandGroups);
+            return new(brandGroupBetLimits);
         }
 
         private async Task<HashSet<BrandGame>> GenerateWithUpdateGamesAsync(Brand brand,
@@ -481,216 +674,33 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 return brandGame;
             });
 
-
             return new(brandGames);
         }
 
-        private static HashSet<BrandGroupGame> GenerateWithUpdateBrandGroupGames(Brand brand, BrandGroup brandGroup,
-            IEnumerable<int> brandGameIds)
+        private HashSet<BrandGroup> GenerateWithUpdateGroups(Brand brand, UpdateBrandRequest request)
         {
-            var brandGamePoolIds = brand.Games.Select(x => x.GameId).ToArray();
-            var brandGroupGames = brandGameIds?
-                .Where(brandGameId => brandGamePoolIds.Contains(brandGameId)).Select(brandGameId =>
-                    new BrandGroupGame
-                    {
-                        BrandGroup = brandGroup,
-                        BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
-                    });
-            return new(brandGroupGames ?? Array.Empty<BrandGroupGame>());
-        }
-
-        private static HashSet<BrandGroupGame> GenerateBrandGroupGames(Brand brand, Guid brandGroupId,
-            IEnumerable<int> brandGameIds)
-        {
-            var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
+            var brandGroups = request.BrandGroups.Select(x =>
             {
-                BrandGroupId = brandGroupId,
-                BrandGame = brand.Games.First(g => g.GameId == brandGameId)
-            });
-            return new(brandGroupGames);
-        }
-
-        private async Task<HashSet<BrandGameProvider>> GenerateAddBrandGameProvidersAsync(
-            Brand brand, BrandRequest request)
-        {
-            var gameProviderIds =
-                request.GameProviders.Where(x => x.Id == null).Select(x => x.GameProviderId).ToArray();
-
-            var gameProviders = await _repository.GameProviders.AsQueryable()
-                .Where(x => gameProviderIds.Contains(x.Id)).ToArrayAsync();
-            var brandGameProviders = gameProviders.Select(x =>
+                var brandGroup = new BrandGroup
                 {
-                    var requestBrandGameProvider = request.GameProviders.First(m => m.GameProviderId == x.Id);
-                    var brandGameProviderId = GuidExtensions.NewSequentialGuid();
-
-                    var newBrandGameProvider = new BrandGameProvider
-                    {
-                        Id = brandGameProviderId,
-                        BrandId = brand.Id,
-                        GameProviderId = x.Id,
-                        GameProvider = x,
-                        DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode,
-                        GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId,
-                        DesktopQueryString = requestBrandGameProvider.DesktopQueryString,
-                        MobileQueryString = requestBrandGameProvider.MobileQueryString,
-                        Schedules = new BrandGameProviderSchedule[]
-                        {
-                            new()
-                            {
-                                BrandGameProviderId = brandGameProviderId,
-                                From = DateTimeOffset.Now,
-                                To = DateTimeOffset.Now.AddDays(7),
-                                DayOfWeek = DayOfWeek.Monday,
-                                IsDefault = true,
-                                Status = SwitchStatus.Disabled
-                            }
-                        }.ToHashSet()
-                    };
-
-                    return newBrandGameProvider;
-                }
-            );
-            return new(brandGameProviders);
-        }
-
-        private static HashSet<BrandGameProvider> GenerateBrandGameProviders(
-            Brand brand, BrandRequest request)
-        {
-            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId).ToArray();
-            var brandGameProviders = brand.GameProviders.Where(x => gameProviderIds.Contains(x.GameProviderId)).Select(
-                x =>
-                {
-                    var requestBrandGameProvider =
-                        request.GameProviders.First(m => m.GameProviderId == x.GameProviderId);
-
-                    x.DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode;
-                    x.GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId;
-                    x.DesktopQueryString = requestBrandGameProvider.DesktopQueryString;
-                    x.MobileQueryString = requestBrandGameProvider.MobileQueryString;
-
-                    return x;
-                }
-            );
-
-            return new(brandGameProviders);
-        }
-
-        private HashSet<BrandGroupBetLimit> GenerateWithUpdateBrandGroupBetLimits(Brand brand, BrandGroup brandGroup,
-            BrandGroupGameProviderBetLimitModel[] models)
-        {
-            var brandGroupBetLimits = brand.BetLimits.Select(x =>
-            {
-                var brandGroupBetLimit = new BrandGroupBetLimit
-                {
-                    BrandGroup = brandGroup,
-                    BetLimitId = x.BetLimitId
+                    Name = x.Name,
+                    BrandId = brand.Id,
+                    Description = x.Description,
+                    IsSports = x.IsSports,
+                    CreatedByUsername = request.EditorUsername,
+                    UpdatedByUsername = request.EditorUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 };
-                brandGroupBetLimit.GameProviderBetLimits =
-                    GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, models);
+                brandGroup.BrandGames =
+                    GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGames?.Select(g => g.GameId));
+                brandGroup.BrandGroupBetLimits =
+                    GenerateWithUpdateBrandGroupBetLimits(brand, brandGroup, x.GameProviderBetLimits);
 
-                return brandGroupBetLimit;
+                return brandGroup;
             });
-            return new(brandGroupBetLimits);
-        }
 
-        private HashSet<BrandGroupBetLimit> GenerateBrandGroupBetLimits(Brand brand, Guid brandGroupId,
-            bool isSports = false)
-        {
-            var brandGroupBetLimits = brand.BetLimits.Select(x =>
-            {
-                var id = Guid.NewGuid();
-                return new BrandGroupBetLimit
-                {
-                    Id = id,
-                    BrandGroupId = brandGroupId,
-                    BetLimitId = x.BetLimitId,
-                    GameProviderBetLimits = GenerateGameProviderBetLimits(brand, id, x.BetLimit, isSports)
-                };
-            });
-            return new(brandGroupBetLimits);
-        }
-
-        private static HashSet<BrandGroupGameProviderBetLimit> GenerateGameProviderBetLimits(Brand brand,
-            Guid brandGroupBetLimitId, BetLimit betLimit, bool isSports)
-        {
-            bool BetLimitRangeFunc(GameProviderBetLimit gb) =>
-                gb.CurrencyCode == betLimit.CurrencyCode && betLimit.MinBet <= gb.MinBet &&
-                betLimit.MaxBet >= gb.MaxBet;
-
-            bool BetLimitIsSportsFunc(GameProviderBetLimit b) => betLimit.MaxBetPerMatch >= b.MaxBetPerMatch;
-
-            var brandGroupGameProviderBetLimits = brand.GameProviders.Where(x => x.GameProvider.BetLimits
-                    .Any(BetLimitRangeFunc))
-                .Where(isSports, x => x.GameProvider.BetLimits
-                    .Any(BetLimitIsSportsFunc))
-                .Select(x =>
-                {
-                    var gameProviderBetLimits = x.GameProvider.BetLimits
-                        .Where(BetLimitRangeFunc)
-                        .Where(isSports, BetLimitIsSportsFunc)
-                        .OrderBy(b => b.MinBet).ToArray();
-
-                    return new BrandGroupGameProviderBetLimit
-                    {
-                        BrandGroupBetLimitId = brandGroupBetLimitId,
-                        GameProviderBetLimitId = gameProviderBetLimits.First().Id
-                    };
-                });
-
-            return new(brandGroupGameProviderBetLimits);
-        }
-
-        private static HashSet<BrandGroupGameProviderBetLimit> GenerateWithUpdateGameProviderBetLimits(
-            BrandGroupBetLimit brandGroupBetLimit, BrandGroupGameProviderBetLimitModel[] models)
-        {
-            var brandGroupGameProviderBetLimits = models?.Where(x => x.BrandBetLimitId == brandGroupBetLimit.BetLimitId)
-                .Select(x =>
-                    new BrandGroupGameProviderBetLimit
-                    {
-                        BrandGroupBetLimit = brandGroupBetLimit,
-                        GameProviderBetLimitId = x.GameProviderBetLimitId
-                    });
-
-            return new(brandGroupGameProviderBetLimits ?? Array.Empty<BrandGroupGameProviderBetLimit>());
-        }
-
-        private static (DateTimeOffset, DateTimeOffset, DateTimeOffset, DateTimeOffset) GetInterval(
-            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth, DateTimeOffset currentFromDate)
-        {
-            switch (type)
-            {
-                case SettlementIntervalType.Daily:
-                    return (startDate, startDate, startDate.AddDays(1), startDate.AddDays(1));
-                case SettlementIntervalType.Weekly:
-                    return (startDate,
-                        DateGenerator.GetLastDayOfWeek(startDate),
-                        DateGenerator.GetFirstDayOfWeek(startDate.AddDays(7)),
-                        DateGenerator.GetLastDayOfWeek(startDate.AddDays(7)));
-                case SettlementIntervalType.Monthly:
-                    if (dayOfMonth == null)
-                    {
-                        return (startDate,
-                            DateGenerator.GetLastDayOfMonth(startDate),
-                            DateGenerator.GetFirstDayOfMonth(startDate.AddMonths(1)),
-                            DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1)));
-                    }
-
-                    if (startDate.Day <= dayOfMonth)
-                    {
-                        return (currentFromDate,
-                            startDate,
-                            startDate.AddDays(1),
-                            DateGenerator.GetSpecifyDayOfMonth(startDate, dayOfMonth.Value!));
-                    }
-
-                    return (currentFromDate,
-                        startDate,
-                        startDate.AddDays(1),
-                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
-                            dayOfMonth.Value!));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            return new(brandGroups);
         }
     }
 }

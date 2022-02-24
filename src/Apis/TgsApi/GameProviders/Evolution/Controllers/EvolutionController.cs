@@ -10,6 +10,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Evolution.Commons;
@@ -32,7 +33,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         private readonly IPlayerOperations _playerOperations;
         private readonly IEvolutionCacheService _redisCacheService;
         private readonly IEvolutionService _service;
-
         public EvolutionController(
             IGamePlayActions actions,
             IEvolutionActionModelMapper map,
@@ -102,13 +102,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
+            var getBalance = default(GetBalanceResult);
+
             if (await _service.NotExistBetGameActionExternalIdAsync(
                 gameProviderId, playerCode,
                 source.Game.ExternalRoundId,
                 source.Game.GameDetail.GameTable.ExternalGameId,
                 source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetDoesNotExist.Description(),
@@ -122,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 playerCode,
                 source.Transaction.ExternalTransactionId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetAlreadySettled.Description(),
@@ -132,8 +134,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             }
 
             var betData = await _map.CancelAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
+            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return new EvolutionStandardResponse()
             {
                 Status = GameApiError.OK.Description(),
@@ -194,9 +196,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
+
+            var getBalance = default(GetBalanceResult);
             if (await _service.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Game.ExternalRoundId, source.Game.GameDetail.GameTable.ExternalGameId, source.Transaction.ExternalGameActionGroupId))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetDoesNotExist.Description(),
@@ -210,7 +214,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 playerCode,
                 source.Transaction.ExternalTransactionId).ConfigureAwait(false))
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
+                getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
                 {
                     Status = GameApiError.BetAlreadySettled.Description(),
@@ -220,6 +224,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             }
 
             var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
+
             var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new EvolutionStandardResponse()

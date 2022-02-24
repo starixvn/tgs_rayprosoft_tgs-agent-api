@@ -57,14 +57,14 @@
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc8" />
-    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.11-beta" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.1.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
-    <PackageReference Include="Scrutor" Version="3.3.0" />
+    <PackageReference Include="Scrutor" Version="4.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
-    <PackageReference Include="Tgs.Interceptors" Version="0.2.0" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
+    <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.0.2" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
@@ -74,12 +74,12 @@
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.7" />
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
-    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
@@ -88,7 +88,6 @@
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
-    <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>

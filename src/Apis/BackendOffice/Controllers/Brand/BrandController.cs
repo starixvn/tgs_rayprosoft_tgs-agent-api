@@ -3,12 +3,12 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
@@ -23,17 +23,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             _mediator = mediator;
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateBrand")]
         [Description("Create a Brand")]
         public Task<MessageResponse> CreateBrandAsync(CreateBrandRequest request)
             => _mediator.Send(request);
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetBrand")]
         [Description("Get a Brand")]
         public Task<GetBrandResponse> GetBrandAsync(Guid id)
             => _mediator.Send(new GetBrandRequest(id));
 
-        [HttpGet("logo/{brandId}")]
+        [HttpGet("logo/{brandId}", Name = "GetBrandLogoInfo")]
         public async ValueTask<ResponseViewModel<BrandLogoInfoViewModel>> GetBrandLogoInfoAsync(
             [FromServices] IGetService<GetBrandLogoQuery, BrandLogoInfo> getService,
             Guid brandId)
@@ -67,12 +67,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             };
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetBrands")]
         [Description("Get brands: 品牌商列表")]
         public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
             => _mediator.Send(request);
 
-        [HttpPut("logo")]
+        [HttpPut("logo", Name = "ModifyBrandLogoInfo")]
         public ValueTask ModifyBrandLogoInfoAsync(
             [FromServices] ICommandService<ModifyBrandLogoInfoCommand> modifyService,
             BrandLogoInfoViewModel request)
@@ -87,12 +87,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             return modifyService.ExecuteAsync(command, HttpContext.RequestAborted);
         }
 
-        [HttpGet("{id}/syncGames")]
+        [HttpGet("{id}/syncGames", Name = "SyncBrandGames")]
         [Description("sync brand games")]
         public Task<MessageResponse> SyncBrandGamesAsync(Guid id)
             => _mediator.Send(new SyncGamesRequest(id));
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateBrand")]
         [Description("Update a Brand")]
         public Task<MessageResponse> UpdateBrandAsync(Guid id, UpdateBrandRequest request)
         {

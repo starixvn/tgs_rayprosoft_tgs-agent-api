@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -80,10 +82,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             PlatformCredit platformCredit,
             UpdatePlatformCreditRequest request)
         {
-            var balance = platformCredit.Credit - request.Credit;
+            var balance = await GetBalanceAsync(platformCredit.BrandPayRecords, platformCredit.BrandId, request.Credit);
 
             platformCredit.Credit = request.Credit;
-            platformCredit.Balance += balance;
+            platformCredit.Balance = balance;
             platformCredit.UpdatedByUsername = request.EditorUsername;
             platformCredit.UpdatedOn = DateTimeOffset.Now;
 
@@ -93,5 +95,37 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<PlatformPayRecord> IPlatformCreditService.GetPlatformCreditPaymentQueries(
             Func<IQueryable<PlatformPayRecord>, IQueryable<PlatformPayRecord>> preQuery, bool tracking)
             => GetQueriesAsync(preQuery, tracking);
+
+        private async ValueTask<decimal> GetBalanceAsync(IEnumerable<PlatformPayRecord> records, Guid brandId,
+            decimal amount)
+        {
+            var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
+
+            var reportDate = new DateTimeOffset(previousDay.Year,
+                previousDay.Month,
+                previousDay.Day,
+                0,
+                0,
+                0,
+                previousDay.Offset);
+
+            var firstDayOfMonth = new DateTimeOffset(reportDate.Year, reportDate.Month, 1, 0, 0, 0, new(8, 0, 0));
+
+            var netProfit = await _repository.PlayerAggregates.AsQueryable()
+                .Where(x => x.BrandId == brandId)
+                .Where(x => x.ReportDate >= firstDayOfMonth && x.ReportDate <= reportDate)
+                .SumAsync(x => x.WinLossAmount - x.AdjustmentAmount -
+                    x.RebateAmount -
+                    x.PromotionAmount);
+
+            var isFirstDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).Day == 1;
+
+            var payTime = isFirstDay ? reportDate : DateTimeOffset.Now;
+
+            var pay = records
+                .Where(p => p.CreatedOn >= firstDayOfMonth && p.CreatedOn < payTime).Sum(p => p.PayAmount);
+
+            return amount - netProfit + pay;
+        }
     }
 }

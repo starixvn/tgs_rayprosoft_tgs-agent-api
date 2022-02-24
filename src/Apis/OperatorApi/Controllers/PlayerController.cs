@@ -17,9 +17,9 @@ using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -112,6 +112,33 @@ namespace TGS.Apis.OperatorApi.Controllers
             var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CheckUsernameResponse { Exists = isExist };
+        }
+
+        [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask CreateIdentityAuthenticationFormAsync(
+            [FromServices] IGetService<UploadIdentityCommand, string> uploadIdentityCommandService,
+            [FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
+            [FromForm(Name = "file")] IFormFile identityFile)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var contentType = identityFile.ContentType;
+            await using var fileStream = identityFile.OpenReadStream();
+
+            var fileId = await uploadIdentityCommandService
+                .GetAsync(new UploadIdentityCommand(contentType, fileStream))
+                .ConfigureAwait(false);
+
+            var command = new CreateIdentityAuthenticationFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                fileId);
+
+            await commandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -418,9 +445,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
             [FromBody] SetPlayerIdentityRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity);
+            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
 
             return setIdentityService.ExecuteAsync(command);
         }
