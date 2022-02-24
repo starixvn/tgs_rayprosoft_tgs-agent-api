@@ -11,22 +11,10 @@ AS $$
 
 	BEGIN
 	WITH rounds AS(
-		SELECT 
-		r1.brand_id,
-		r1.game_provider_id,
-		bc.currency_code,
-		r1.transaction_count,
-		r1.bet_amount,
-		r1.valid_bet_amount,
-		r1.turnover,
-		r1.win_loss,
-		r1.settle_amount,
-		r1.commission,
-		r1.report_date FROM
-		(
 		SELECT
 		r.brand_id,
 		r.game_provider_id,
+		r.currency_code,
 		date_trunc('hour', r.closed_on) report_date,
 		COUNT(1) transaction_count,
 		COALESCE(SUM(r.bet_amount), 0) bet_amount,
@@ -37,8 +25,7 @@ AS $$
 		COALESCE(SUM(r.commission), 0) commission
 		FROM bet.rounds r
 		WHERE r.closed_on >= _from and r.closed_on < _to and r.brand_id = _brand_id
-		GROUP BY 1,2,3) r1
-		left join LATERAL (select brand_id,currency_code from dbo.brand_currencies where brand_id=r1.brand_id limit 1) bc on r1.brand_id = bc.brand_id
+		GROUP BY 1,2,3,4
 		),
 		insert_rows AS(
 		INSERT INTO report.brand_game_provider_aggregates (audit_log_id,brand_id,game_provider_id,currency_code,transaction_count,bet_amount,valid_bet_amount,turnover,win_loss,settle_amount,commission,report_date,created_on)
