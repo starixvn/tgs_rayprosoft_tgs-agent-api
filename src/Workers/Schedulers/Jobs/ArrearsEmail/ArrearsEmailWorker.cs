@@ -145,7 +145,7 @@ namespace TGS.Workers.Schedulers.Jobs.ArrearsEmail
                 decimal? percentageKey = null;
                 foreach (var netProfit in netProfitList)
                 {
-                    if (netProfitAndPay > netProfit.CalculatedCredit)
+                    if (netProfitAndPay > netProfit.CalculatedCredit && x.Credit > 0)
                     {
                         percentageKey = netProfit.Percentage;
                         break;
@@ -176,7 +176,7 @@ namespace TGS.Workers.Schedulers.Jobs.ArrearsEmail
                 var balance = platformCredit.Credit -
                     models.First(x => x.BrandId == platformCredit.BrandId).NetProfitAndPay;
 
-                platformCredit.Balance = balance < 0 ? 0M : balance;
+                platformCredit.Balance = balance;
             }
 
             await _repository.SaveChangesAsync();
