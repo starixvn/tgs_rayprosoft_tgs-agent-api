@@ -258,8 +258,7 @@ namespace TGS.Apis.OperatorApi
                     config.GetSection("Operator").Bind(options);
                 })
                 .Services
-                .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>()
-                .Decorate<IGetService<GetPlayerQuery, PlayerInfo>, MemoryCachedGetPlayerQueryService>();
+                .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
             services
                 .AddIdentityVerifiers()
