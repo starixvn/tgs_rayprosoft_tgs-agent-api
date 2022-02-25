@@ -123,10 +123,13 @@ namespace TGS.Apis.BackendOffice
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
                         .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve", "tgs.payment.deposit.approve")
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve",
+                            "tgs.payment.deposit.approve")
                         .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject", "tgs.payment.deposit.reject")
-                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject", "tgs.payment.withdraw.reject");
+                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject",
+                            "tgs.payment.deposit.reject")
+                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject",
+                            "tgs.payment.withdraw.reject");
                 })
                 .AddNatsGlobPatternExchange("*");
 
@@ -274,7 +277,13 @@ namespace TGS.Apis.BackendOffice
                             || !httpContext.Request.Path.StartsWithSegments("/swagger")
                             && !httpContext.Request.Path.StartsWithSegments("/health")
                             && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                            && !new[] { "html", "ico", "png", "jpg" }.Any(
+                            && !new[]
+                            {
+                                "html",
+                                "ico",
+                                "png",
+                                "jpg"
+                            }.Any(
                                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                     };
                 });

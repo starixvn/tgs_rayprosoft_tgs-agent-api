@@ -10,7 +10,8 @@ namespace TGS.Apis.PromotionApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((ctx, builder) =>
                 {
-                    builder.AddJsonFile("/config/appsettings.json", true);
+                    builder.AddJsonFile("/config/appsettings.json", true)
+                        .AddEnvironmentVariables();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
