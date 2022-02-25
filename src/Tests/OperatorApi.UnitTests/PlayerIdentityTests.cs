@@ -43,6 +43,26 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Query_Identity_Form_Should_Success()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            _ = fakePlayerRepository
+                .GetPlayerIdentityFormQueryAsync("playerCode")
+                .Returns(new PlayerIdentityFormInfo(Guid.NewGuid(), PlayerIdentityReviewState.Reject));
+
+            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
+
+            var query = new GetPlayerIdentityFormQuery("playerCode");
+
+            await sut.GetAsync(query);
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .GetPlayerIdentityFormQueryAsync("playerCode");
+        }
+
+        [Test]
         public async Task Set_Player_Identity_Should_Success()
         {
             var moqPlayerOperations = new Mock<IPlayerOperations>();
@@ -75,38 +95,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<bool>(x => x == false),
                     It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task When_Player_IdentityAuthentication_Is_True_Identity_Form_Status_Should_Be_Approve()
-        {
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
-
-            var query = new GetPlayerIdentityFormQuery("playerCode");
-
-            var actual = await sut.GetAsync(query);
-
-            Assert.AreEqual(PlayerIdentityReviewState.Approve, actual);
-        }
-
-        [Test]
-        public async Task Query_Identity_Form_Status_Should_Success()
-        {
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-
-            fakePlayerRepository
-                .GetPlayerIdentityFormQueryAsync("playerCode")
-                .Returns(new PlayerIdentityFormInfo(Guid.NewGuid(),PlayerIdentityReviewState.Reject));
-
-            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
-
-            var query = new GetPlayerIdentityFormQuery("playerCode");
-
-            var actual = await sut.GetAsync(query);
-
-            Assert.AreEqual(PlayerIdentityReviewState.Reject, actual);
         }
 
         [Test]
