@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.GameProvider;
+using TGS.Apis.BackendOffice.Models.BrandGameProvider;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.GameProvider;
@@ -26,8 +26,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get game provider round aggregate")]
-        public async Task<GetGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
-            [FromQuery] GetGameProviderRoundsReportRequest request)
+        public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
+            [FromQuery] GetBrandGameProviderRoundsReportRequest request)
         {
             var reportRequest = new GetGameProviderRoundsRequest
             {
@@ -47,10 +47,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
             return new()
             {
-                Datas = new PagedResponse<GameProviderRoundsReportModel>
+                Datas = new PagedResponse<BrandGameProviderRoundsReportModel>
                 {
                     TotalCount = response.Datas.TotalCount,
-                    Items = response.Datas.Items.Select(x => new GameProviderRoundsReportModel
+                    Items = response.Datas.Items.Select(x => new BrandGameProviderRoundsReportModel
                     {
                         GameProviderId = x.GameProviderId,
                         GameProviderName = x.GameProviderName,
@@ -62,7 +62,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                         CompanyWinLoss = x.CompanyWinLoss
                     }).ToArray()
                 },
-                Totals = response.Totals.Select(x => new GameProviderRoundTotalReportModel
+                Totals = response.Totals.Select(x => new BrandGameProviderRoundTotalReportModel
                 {
                     CurrencyCode = x.CurrencyCode,
                     TransactionCount = x.TransactionCount,
