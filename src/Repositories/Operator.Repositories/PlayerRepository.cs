@@ -92,15 +92,11 @@ namespace TGS.Operator.Repositories
                             authForm.Id,
                             authForm.Status
                         };
-            
+
             var formData = query.FirstOrDefault();
 
-            var Id = formData == null 
-                ? new Guid?() 
-                : formData.Id;
-
-            var status = formData == null 
-                ? PlayerIdentityReviewState.WaitingVerify 
+            var status = formData == null
+                ? PlayerIdentityReviewState.WaitingVerify
                 : (PlayerIdentityReviewState)formData.Status;
 
             return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
