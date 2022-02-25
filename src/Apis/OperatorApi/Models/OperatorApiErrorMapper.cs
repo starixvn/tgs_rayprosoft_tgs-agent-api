@@ -93,7 +93,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest,
-                [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status500InternalServerError
+                [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
