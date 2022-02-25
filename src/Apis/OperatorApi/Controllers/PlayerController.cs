@@ -194,7 +194,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<GetPlayerResponse> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
-            [FromServices] IGetService<GetPlayerIdentityFormStatusQuery, PlayerIdentityReviewState> getIdentityFormStatusService)
+            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -220,9 +220,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.IsAutoTransferToGame = await getAutoTransFlagService
                     .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
                     .ConfigureAwait(false);
-                playerData.IdentityAuthenticationFormStatus = await getIdentityFormStatusService
-                    .GetAsync(new GetPlayerIdentityFormStatusQuery(playerCode,player.IdentityAuthentication))
+
+                var identityFormInfo = await getIdentityFormStatusService
+                    .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
                     .ConfigureAwait(false);
+
+                playerData.IdentityAuthenticationFormId = identityFormInfo.FormId;
+
+                if (player.IdentityAuthentication)
+                {
+                    playerData.IdentityAuthenticationFormStatus = PlayerIdentityReviewState.Approve;
+                }
+                else
+                {
+                    playerData.IdentityAuthenticationFormStatus = identityFormInfo.Status;
+                }
             }
             catch (CoreExceptions.PlayerNotFoundException)
             {

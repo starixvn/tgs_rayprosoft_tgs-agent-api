@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
@@ -13,6 +14,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("identityformstatus")]
         public PlayerIdentityReviewState IdentityAuthenticationFormStatus { get; set; }
+
+        [JsonPropertyName("identityformid")]
+        public Guid? IdentityAuthenticationFormId { get; set; }
 
         [JsonPropertyName("autotransfertogame")]
         public bool IsAutoTransferToGame { get; set; }

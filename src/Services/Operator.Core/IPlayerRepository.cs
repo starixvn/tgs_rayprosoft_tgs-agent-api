@@ -13,7 +13,7 @@ namespace TGS.Services.Operator
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask<PlayerIdentityReviewState> GetPlayerIdentityFormStatusQueryAsync(string playerCode);
+        ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
 
         ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
 
