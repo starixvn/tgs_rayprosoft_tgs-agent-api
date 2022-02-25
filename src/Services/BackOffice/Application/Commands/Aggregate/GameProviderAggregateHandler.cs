@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
 {
     public class GameProviderAggregateHandler : Handler<GenerateGameProviderAggregateRequest, MessageResponse>
     {
-        private readonly IGameProviderAuditLogService _gameProviderAuditLogService;
+        private readonly IGameProviderAggregateAuditLogService _gameProviderAuditLogService;
         private readonly IGameProviderService _gameProviderService;
         private readonly IMessageSender _messageSender;
         private readonly IRedisCacheManager _redisCacheManager;
@@ -25,7 +25,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
         public GameProviderAggregateHandler(
             IMessageSender messageSender,
             IGameProviderService gameProviderService,
-            IGameProviderAuditLogService gameProviderAuditLogService,
+            IGameProviderAggregateAuditLogService gameProviderAuditLogService,
             IRedisCacheManager redisCacheManager,
             IHttpContextAccessor accessor) : base(accessor)
         {

@@ -7,20 +7,20 @@ using TGS.Services.BackOffice.Application.Models.Aggregate;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
-    public interface IBrandGameProviderAuditLogService
+    public interface IBrandGameProviderAggregateAuditLogService
     {
         ValueTask<int> CreateBrandGameProviderAggregateAuditLogAsync(
             CreateBrandGameProviderAggregateAuditLogRequest request);
     }
 
-    public class BrandGameProviderAuditLogService : BaseRepositoryOperations<ITgsRepository>,
-        IBrandGameProviderAuditLogService
+    public class BrandGameProviderAggregateAuditLogService : BaseRepositoryOperations<ITgsRepository>,
+        IBrandGameProviderAggregateAuditLogService
     {
-        public BrandGameProviderAuditLogService(ITgsRepository repository) : base(repository)
+        public BrandGameProviderAggregateAuditLogService(ITgsRepository repository) : base(repository)
         {
         }
 
-        async ValueTask<int> IBrandGameProviderAuditLogService.CreateBrandGameProviderAggregateAuditLogAsync(
+        async ValueTask<int> IBrandGameProviderAggregateAuditLogService.CreateBrandGameProviderAggregateAuditLogAsync(
             CreateBrandGameProviderAggregateAuditLogRequest request)
         {
             var log = new BrandGameProviderAggregateAuditLog

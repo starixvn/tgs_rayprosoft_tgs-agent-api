@@ -52,7 +52,8 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IBrandLanguageService, BrandLanguageService>();
             services.AddTransient<IBrandBetLimitService, BrandBetLimitService>();
             services.AddTransient<IBrandGroupService, BrandGroupService>();
-            services.AddTransient<IBrandGameProviderAuditLogService, BrandGameProviderAuditLogService>();
+            services
+                .AddTransient<IBrandGameProviderAggregateAuditLogService, BrandGameProviderAggregateAuditLogService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;
