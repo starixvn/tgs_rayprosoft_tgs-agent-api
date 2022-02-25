@@ -82,9 +82,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
-            var sut = new GetPlayerIdentityFormStatusQueryService(fakePlayerRepository);
+            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
 
-            var query = new GetPlayerIdentityFormStatusQuery("playerCode", IdentityAuthentication: true);
+            var query = new GetPlayerIdentityFormQuery("playerCode");
 
             var actual = await sut.GetAsync(query);
 
@@ -97,12 +97,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
             fakePlayerRepository
-                .GetPlayerIdentityFormStatusQueryAsync("playerCode")
-                .Returns(PlayerIdentityReviewState.Reject);
+                .GetPlayerIdentityFormQueryAsync("playerCode")
+                .Returns(new PlayerIdentityFormInfo(Guid.NewGuid(),PlayerIdentityReviewState.Reject));
 
-            var sut = new GetPlayerIdentityFormStatusQueryService(fakePlayerRepository);
+            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
 
-            var query = new GetPlayerIdentityFormStatusQuery("playerCode", IdentityAuthentication: false);
+            var query = new GetPlayerIdentityFormQuery("playerCode");
 
             var actual = await sut.GetAsync(query);
 

@@ -82,42 +82,28 @@ namespace TGS.Operator.Repositories
             return settingData?.IsAutoTransferToGame ?? true;
         }
 
-        public ValueTask<PlayerIdentityReviewState> GetPlayerIdentityFormStatusQueryAsync(string playerCode)
+        public ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode)
         {
-            var playerIdentityQuery =
-                from player in _tgsRepository.Players.AsQueryable()
-                where player.PlayerCode == playerCode
-                join identity in _tgsRepository.PlayerIdentity
-                    on player.PlayerCode equals identity.PlayerCode into pj                                
-                from playerIdentity in pj.DefaultIfEmpty()                
-                select new
-                {
-                    playerIdentity.PlayerCode,
-                    playerIdentity.PlayerAuthenticationFormId
-                };
+            var query = from playerIdentity in _tgsRepository.PlayerIdentity.AsQueryable()
+                        where playerIdentity.PlayerCode == playerCode
+                        join authForm in _tgsRepository.PlayerAuthenticationForms on playerIdentity.PlayerAuthenticationFormId equals authForm.Id
+                        select new
+                        {
+                            authForm.Id,
+                            authForm.Status
+                        };
+            
+            var formData = query.FirstOrDefault();
 
-            var playerIdentityFormQuery =
-                from identityForm in _tgsRepository.PlayerAuthenticationForms.AsQueryable()
-                where identityForm.PlayerCode == playerCode
-                join playerIdentity in playerIdentityQuery
-                    on identityForm.Id equals playerIdentity.PlayerAuthenticationFormId
-                select new
-                {
-                    identityForm.Id,
-                    identityForm.PlayerCode,
-                    identityForm.Status
-                };
+            var Id = formData == null 
+                ? new Guid?() 
+                : formData.Id;
 
-            var playerData = from playerIdentity in playerIdentityQuery
-                             join identityForm in playerIdentityFormQuery
-                                on playerIdentity.PlayerCode equals identityForm.PlayerCode into pafj
-                             from playerAuthForm in pafj.DefaultIfEmpty()
-                             select new
-                             {
-                                 playerAuthForm.Status
-                             };
+            var status = formData == null 
+                ? PlayerIdentityReviewState.WaitingVerify 
+                : (PlayerIdentityReviewState)formData.Status;
 
-            return ValueTask.FromResult((PlayerIdentityReviewState)playerData.First().Status);
+            return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
