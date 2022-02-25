@@ -49,6 +49,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                         WithdrawalAmount = x.WithdrawalAmount,
                         AdjustmentAmount = x.AdjustmentAmount,
                         BonusAmount = x.BonusAmount,
+                        BetAmount = x.BetAmount,
                         ValidBetAmount = x.ValidBetAmount,
                         Turnover = x.Turnover,
                         WinLossAmount = x.WinLossAmount,
