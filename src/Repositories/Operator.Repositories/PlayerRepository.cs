@@ -89,8 +89,7 @@ namespace TGS.Operator.Repositories
                 where player.PlayerCode == playerCode
                 join identity in _tgsRepository.PlayerIdentity
                     on player.PlayerCode equals identity.PlayerCode into pj                                
-                from playerIdentity in pj.DefaultIfEmpty()
-                where playerIdentity.PlayerCode == playerCode
+                from playerIdentity in pj.DefaultIfEmpty()                
                 select new
                 {
                     playerIdentity.PlayerCode,
