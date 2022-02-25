@@ -1,11 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Models.GameProvider;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.GameProvider;
+using TGS.Services.BackOffice.Application.Models.Aggregate;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -14,8 +16,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     public class GameProviderReportController : BaseContextController
     {
         private readonly IReportClient _client;
+        private readonly IMediator _mediator;
 
-        public GameProviderReportController(IReportClient client) => _client = client;
+        public GameProviderReportController(IReportClient client, IMediator mediator)
+        {
+            _client = client;
+            _mediator = mediator;
+        }
 
         [HttpGet]
         [Description("Get game provider round aggregate")]
@@ -66,5 +73,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 }).ToArray()
             };
         }
+
+        [HttpPost("generate")]
+        [Description("Generate game provider round aggregate")]
+        public Task<MessageResponse> GenerateGameProviderAggregateAsync(
+            [FromBody] GenerateGameProviderAggregateRequest request)
+            => _mediator.Send(request);
     }
 }

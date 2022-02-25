@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
 {
-    public record GameProviderRoundTotalReportModel
+    public record BrandGameProviderRoundTotalReportModel
     {
         public string CurrencyCode { get; init; } = default!;
 

@@ -61,7 +61,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
             await _redisCacheManager.SetAddAsync("aggregate",
                 "brandGP",
                 brandIds.Select(x => (RedisValue)x.ToString()).ToArray(),
-                TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                TimeSpan.FromMinutes(10)).ConfigureAwait(false);
 
             foreach (var brandId in brandIds)
             {
@@ -69,7 +69,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
                 {
                     request.StartDate,
                     BrandId = brandId,
-                    AuditLogId = auditLogId
+                    AuditLogId = auditLogId,
+                    Key = "aggregate:brandGP"
                 };
 
                 await _messageSender.PublishAsync("tgs.report.aggregate.brand.game.provider",

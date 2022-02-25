@@ -2,10 +2,10 @@
 
 namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
 {
-    public record GetGameProviderRoundsReportResponse
+    public record GetBrandGameProviderRoundsReportResponse
     {
         public PagedResponse<BrandGameProviderRoundsReportModel> Datas { get; init; } = default!;
 
-        public GameProviderRoundTotalReportModel[] Totals { get; init; } = default!;
+        public BrandGameProviderRoundTotalReportModel[] Totals { get; init; } = default!;
     }
 }

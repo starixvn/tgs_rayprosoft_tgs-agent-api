@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
 {
-    public record GameProviderRoundsReportModel
+    public record BrandGameProviderRoundsReportModel
     {
         public Guid GameProviderId { get; init; }
 

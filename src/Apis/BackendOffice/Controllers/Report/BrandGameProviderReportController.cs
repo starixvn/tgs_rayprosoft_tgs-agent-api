@@ -25,7 +25,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet]
-        [Description("Get game provider round aggregate")]
+        [Description("Get brand game provider round aggregate")]
         public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
             [FromQuery] GetBrandGameProviderRoundsReportRequest request)
         {
@@ -75,7 +75,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpPost("generate")]
-        [Description("Generate game provider round aggregate")]
+        [Description("Generate brand game provider round aggregate")]
         public Task<MessageResponse> GenerateGameProviderAggregateAsync(
             [FromBody] GenerateBrandGameProviderAggregateRequest request)
             => _mediator.Send(request);
