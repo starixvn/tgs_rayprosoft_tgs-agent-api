@@ -12,7 +12,6 @@ namespace TGS.Apis.BackendOffice
             .ConfigureAppConfiguration(builder =>
             {
                 builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
-                    .AddEnvironmentVariables();
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {

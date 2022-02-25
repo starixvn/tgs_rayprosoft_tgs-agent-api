@@ -12,7 +12,6 @@ namespace TGS.Apis.AgentApi
                 .ConfigureAppConfiguration((_, builder) =>
                 {
                     builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
-                        .AddEnvironmentVariables();
                 })
                 .ConfigureLogging((_, builder) =>
                 {

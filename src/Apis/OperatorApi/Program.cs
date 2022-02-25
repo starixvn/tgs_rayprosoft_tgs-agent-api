@@ -16,7 +16,6 @@ namespace TGS.Apis.OperatorApi
                 .ConfigureAppConfiguration((ctx, builder) =>
                 {
                     builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
-                        .AddEnvironmentVariables();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
