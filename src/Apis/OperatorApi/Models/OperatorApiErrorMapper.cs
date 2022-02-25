@@ -51,7 +51,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
                 [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
                 [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired",
-                [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw"
+                [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw",
+                [TgsApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -91,7 +92,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
-                [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest
+                [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest,
+                [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status500InternalServerError
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -133,7 +135,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate,
                 [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
                 [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired,
-                [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw
+                [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw,
+                [typeof(BrandPhoneDuplicateException)] = TgsApiError.BrandPhoneDuplicate
             };
 
         public bool CanProcess(Exception exception)
