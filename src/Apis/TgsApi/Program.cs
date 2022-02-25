@@ -25,7 +25,8 @@ namespace TGS.Apis.TgsApi
                         throw new ArgumentException($"No configuration file mapping is found of '{gpCode}'");
                     }
 
-                    config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", false);
+                    config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", false)
+                        .AddEnvironmentVariables();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
