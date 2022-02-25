@@ -11,7 +11,7 @@ namespace TGS.Apis.BackendOffice
         public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(builder =>
             {
-                builder.AddJsonFile("/config/appsettings.json", true)
+                builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
                     .AddEnvironmentVariables();
             })
             .ConfigureWebHostDefaults(webBuilder =>
