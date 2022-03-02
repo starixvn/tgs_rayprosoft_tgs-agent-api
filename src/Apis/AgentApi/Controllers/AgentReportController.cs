@@ -6,12 +6,15 @@ using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Tgs.Report.Client;
+using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Agent;
 using Tgs.Report.Client.Models.Round;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Controllers
@@ -22,8 +25,16 @@ namespace TGS.Apis.AgentApi.Controllers
     public class AgentReportController : ControllerBase
     {
         private readonly IReportClient _client;
+        private readonly IMemoryCache _memoryCache;
 
-        public AgentReportController(IReportClient client) => _client = client;
+        public AgentReportController(
+            IReportClient client,
+            IMemoryCache memoryCache
+            )
+        {
+            _client = client;
+            _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        }
 
         /// <summary>
         /// Get account changes
@@ -95,6 +106,7 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<PagingResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
         {
+
             var dividendRequest = new GetAgentDividendDetailsRequest
             {
                 AgentId = request.AgentId,
@@ -164,33 +176,74 @@ namespace TGS.Apis.AgentApi.Controllers
         [Description("Get contributions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<AgentContributionModel>> GetContributionsAsync(
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = false)]
+        public async Task<AgentContributionResponse> GetContributionsAsync(
             [FromQuery] GetContributionsRequest request)
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            var agentTokenData = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
 
-            var contributionRequest = new GetAgentContributionsRequest
+            var key = $"contributions:{brandId}:{Guid.NewGuid()}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentContributionModel> response))
             {
-                BrandId = brandId,
-                AgentId = agentTokenData.AgentId,
-                IncludeAgents = true,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                var contributionRequest = new GetAgentContributionsRequest
+                {
+                    BrandId = brandId,
+                    AgentId = Guid.NewGuid(),
+                    IncludeAgents = true,
+                    From = request.From,
+                    To = request.To,
+                    Page = 1,
+                    Rows = int.MaxValue,
+                    OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                    SortBy = request.SortBy,
+                    ShowAll = true
+                };
+
+                response = await _client.GetAgentContributionsAsync(contributionRequest);
+
+                if (response != null)
+                {
+                    _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
+                }
+            }
+
+            var page = request.Page <= 0 ? 0 : request.Page - 1;
+            var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+            var items = response.Items.Select(x => new AgentContributionData(
+                x.Username,
+                x.Type,
+                x.DepositAmount,
+                x.WithdrawalAmount,
+                x.AdjustmentAmount,
+                x.BonusAmount,
+                x.BetAmount,
+                x.ValidBetAmount,
+                x.WinLossAmount,
+                x.NetProfit)).Skip(page * pageSize).Take(pageSize).ToArray();
+
+            var pagedResponse = new PagedResponse<AgentContributionData>()
+            {
+                TotalCount = response.TotalCount,
+                Items = items ?? Array.Empty<AgentContributionData>()
             };
 
-            var response = await _client.GetAgentContributionsAsync(contributionRequest);
+            var total = new AgentContributionTotal(
+                    DepositAmount: response.Items.Sum(x => x.DepositAmount),
+                    WithdrawalAmount: response.Items.Sum(x => x.WithdrawalAmount),
+                    AdjustmentAmount: response.Items.Sum(x => x.AdjustmentAmount),
+                    BonusAmount: response.Items.Sum(x => x.BonusAmount),
+                    BetAmount: response.Items.Sum(x => x.BetAmount),
+                    ValidBetAmount: response.Items.Sum(x => x.ValidBetAmount),
+                    Turnover: response.Items.Sum(x => x.Turnover),
+                    WinLossAmount: response.Items.Sum(x => x.WinLossAmount),
+                    NetProfit: response.Items.Sum(x => x.NetProfit));
+
 
             return new()
             {
-                TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<AgentContributionModel>()
+                Datas = pagedResponse,
+                Total = total
             };
         }
 
