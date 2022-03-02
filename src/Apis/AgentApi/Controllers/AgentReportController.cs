@@ -210,7 +210,7 @@ namespace TGS.Apis.AgentApi.Controllers
 
             var page = request.Page <= 0 ? 0 : request.Page - 1;
             var pageSize = request.Rows <= 0 ? 10 : request.Rows;
-            var items = response.Items.Select(x => new AgentContributionData(
+            var items = response.Items.Select(x => new AgentContribution(
                 x.Username,
                 x.Type,
                 x.DepositAmount,
@@ -221,12 +221,6 @@ namespace TGS.Apis.AgentApi.Controllers
                 x.ValidBetAmount,
                 x.WinLossAmount,
                 x.NetProfit)).Skip(page * pageSize).Take(pageSize).ToArray();
-
-            var pagedResponse = new PagedResponse<AgentContributionData>()
-            {
-                TotalCount = response.TotalCount,
-                Items = items ?? Array.Empty<AgentContributionData>()
-            };
 
             var total = new AgentContributionTotal(
                     DepositAmount: response.Items.Sum(x => x.DepositAmount),
@@ -240,11 +234,10 @@ namespace TGS.Apis.AgentApi.Controllers
                     NetProfit: response.Items.Sum(x => x.NetProfit));
 
 
-            return new()
-            {
-                Datas = pagedResponse,
-                Total = total
-            };
+            return new(
+                TotalCount: response.TotalCount,
+                Items: items ?? Array.Empty<AgentContribution>(),
+                Total: total);
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.AgentApi.Models
 {
-    public record AgentContributionData(
+    public record AgentContribution(
         string Username,
         short Type,
         decimal DepositAmount,
