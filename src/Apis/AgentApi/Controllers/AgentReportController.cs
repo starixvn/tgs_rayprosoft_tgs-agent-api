@@ -180,16 +180,16 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<AgentContributionResponse> GetContributionsAsync(
             [FromQuery] GetContributionsRequest request)
         {
-            var agentTokenData = Guid.NewGuid();
-            var brandId = Guid.NewGuid();
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
-            var key = $"contributions:{brandId}:{Guid.NewGuid()}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            var key = $"contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
             if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentContributionModel> response))
             {
                 var contributionRequest = new GetAgentContributionsRequest
                 {
                     BrandId = brandId,
-                    AgentId = Guid.NewGuid(),
+                    AgentId = agentTokenData.AgentId,
                     IncludeAgents = true,
                     From = request.From,
                     To = request.To,
