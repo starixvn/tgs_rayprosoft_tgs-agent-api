@@ -29,6 +29,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         ValueTask<Guid> GetGameProviderIdAsync();
 
+        ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId);
+
         bool IsTest(string playerCode);
     }
 }
