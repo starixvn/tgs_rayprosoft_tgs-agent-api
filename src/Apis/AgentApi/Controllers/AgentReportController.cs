@@ -234,11 +234,14 @@ namespace TGS.Apis.AgentApi.Controllers
                     NetProfit: response.Items.Sum(x => x.NetProfit));
 
 
-            return new(
-                TotalCount: response.TotalCount,
-                Items: items ?? Array.Empty<AgentContribution>(),
-                Total: total);
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = items ?? Array.Empty<AgentContribution>(),
+                Total = total
+            };
         }
+
 
         /// <summary>
         ///     Get agent dividends
