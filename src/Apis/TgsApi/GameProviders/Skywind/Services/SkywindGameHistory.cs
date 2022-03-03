@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
             var response = await _client
                 .GetGamHistoryRoundDetailsAsync(configuration,
-                    new SkywindGamHistoryRoundDetailsRequest {RoundId = roundId}).ConfigureAwait(false);
+                    new SkywindGamHistoryRoundDetailsRequest { RoundId = roundId }).ConfigureAwait(false);
 
             return new RoundResult
             {
