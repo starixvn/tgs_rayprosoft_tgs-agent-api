@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Models.BrandGameProvider;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
-using Tgs.Report.Client.Models.GameProvider;
+using Tgs.Report.Client.Models.BrandGameProvider;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
@@ -29,7 +29,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
             [FromQuery] GetBrandGameProviderRoundsReportRequest request)
         {
-            var reportRequest = new GetGameProviderRoundsRequest
+            var reportRequest = new GetBrandGameProviderRoundsRequest
             {
                 From = request.From,
                 To = request.To,
@@ -43,7 +43,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 ShowAll = request.ShowAll
             };
 
-            var response = await _client.GetGameProviderRoundsAsync(reportRequest);
+            var response = await _client.GetBrandGameProviderRoundsAsync(reportRequest);
 
             return new()
             {
