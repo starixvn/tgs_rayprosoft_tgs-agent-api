@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Aggregate.Client;
 
@@ -22,7 +23,8 @@ namespace TGS.Workers.Schedulers.Jobs.Rounds
 
         async Task<TgsResponse> IFillPlayerBucketMinutelyWorkerService.ExecutionAsync()
         {
-            var response = await _client.FillPlayerBucketMinutelyAsync(new());
+            var startDate = DateTimeOffset.UtcNow.AddMinutes(-1);
+            var response = await _client.FillPlayerBucketMinutelyAsync(new(startDate));
             return new() { ErrorMessage = response.Message };
         }
 
