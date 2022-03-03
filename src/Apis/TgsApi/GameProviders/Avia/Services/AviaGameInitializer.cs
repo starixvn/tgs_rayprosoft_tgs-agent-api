@@ -10,7 +10,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Avia.Services
 {
     public record AviaGameInitializer : IGameInitializer
     {
-        private readonly string _gameProviderCode = Consts.GameProvider.Avia;
         private readonly IAviaApiClient _client;
         private readonly IPlayerOperations _playerOperations;
         private readonly IAviaService _service;
