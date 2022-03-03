@@ -43,6 +43,26 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Query_Identity_Form_Should_Success()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            _ = fakePlayerRepository
+                .GetPlayerIdentityFormQueryAsync("playerCode")
+                .Returns(new PlayerIdentityFormInfo(Guid.NewGuid(), PlayerIdentityReviewState.Reject));
+
+            var sut = new GetPlayerIdentityFormQueryService(fakePlayerRepository);
+
+            var query = new GetPlayerIdentityFormQuery("playerCode");
+
+            await sut.GetAsync(query);
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .GetPlayerIdentityFormQueryAsync("playerCode");
+        }
+
+        [Test]
         public async Task Set_Player_Identity_Should_Success()
         {
             var moqPlayerOperations = new Mock<IPlayerOperations>();

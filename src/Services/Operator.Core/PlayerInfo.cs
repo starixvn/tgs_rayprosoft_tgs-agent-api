@@ -11,6 +11,13 @@ namespace TGS.Services.Operator
         bool PhoneAuthentication,
         string? Phone,
         string? AreaCode,
-        Guid? VipLevel,
-        PlayerStatus Status);
+        Guid? VipLevelId,
+        PlayerStatus Status,
+        string UserName,
+        string? RealName,
+        string? Email,
+        int VipLevel,
+        string? QQ,
+        string? Wechat,
+        bool IsSetPayPassword);
 }

@@ -6,6 +6,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Operator.Repositories
 {
@@ -62,7 +63,14 @@ namespace TGS.Operator.Repositories
                 player.Phone,
                 player.AreaCode,
                 player.VipId,
-                player.Status);
+                player.Status,
+                player.Username,
+                player.RealName,
+                player.Email,
+                player.Vip.Level,
+                player.QQ,
+                player.Wechat,
+                player.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
@@ -72,6 +80,26 @@ namespace TGS.Operator.Repositories
                 .ConfigureAwait(false);
 
             return settingData?.IsAutoTransferToGame ?? true;
+        }
+
+        public ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode)
+        {
+            var query = from playerIdentity in _tgsRepository.PlayerIdentity.AsQueryable()
+                        where playerIdentity.PlayerCode == playerCode
+                        join authForm in _tgsRepository.PlayerAuthenticationForms on playerIdentity.PlayerAuthenticationFormId equals authForm.Id
+                        select new
+                        {
+                            authForm.Id,
+                            authForm.Status
+                        };
+
+            var formData = query.FirstOrDefault();
+
+            var status = formData == null
+                ? PlayerIdentityReviewState.WaitingVerify
+                : (PlayerIdentityReviewState)formData.Status;
+
+            return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
@@ -89,7 +117,14 @@ namespace TGS.Operator.Repositories
                     playerData.Phone,
                     playerData.AreaCode,
                     playerData.VipId,
-                    playerData.Status);
+                    playerData.Status,
+                    playerData.Username,
+                    playerData.RealName,
+                    playerData.Email,
+                    playerData.Vip.Level,
+                    playerData.QQ,
+                    playerData.Wechat,
+                    playerData.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
@@ -111,7 +146,14 @@ namespace TGS.Operator.Repositories
                 playerData.Phone,
                 playerData.AreaCode,
                 playerData.VipId,
-                playerData.Status);
+                playerData.Status,
+                playerData.Username,
+                playerData.RealName,
+                playerData.Email,
+                playerData.Vip.Level,
+                playerData.QQ,
+                playerData.Wechat,
+                playerData.WithdrawPassword.Length > 0);
         }
 
         public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)

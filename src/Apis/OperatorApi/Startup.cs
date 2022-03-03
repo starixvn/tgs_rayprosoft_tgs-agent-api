@@ -28,6 +28,7 @@ using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
 using Tgs.Payment.UmPay;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -45,6 +46,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ValidateCode;
 using GlobalConsts = TGS.Core.Models.Consts;
 
