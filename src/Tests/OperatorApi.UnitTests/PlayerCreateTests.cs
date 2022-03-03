@@ -241,7 +241,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled));
+                    PlayerStatus.Enabled,
+                    "username",
+                    null,
+                    null,
+                    1,
+                    null,
+                    null,
+                    false));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -513,7 +520,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled));
+                    PlayerStatus.Enabled,
+                    "username",
+                    null,
+                    null,
+                    1,
+                    null,
+                    null,
+                    false));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions
@@ -17,10 +16,10 @@ namespace TGS.Services.Operator.BrandPayment.PaymentConditions
 
         public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
         {
-            if (player.VipLevel == null)
+            if (player.VipLevelId == null)
                 return false;
 
-            return _allowVips.Contains(player.VipLevel.Value);
+            return _allowVips.Contains(player.VipLevelId.Value);
         }
     }
 }
