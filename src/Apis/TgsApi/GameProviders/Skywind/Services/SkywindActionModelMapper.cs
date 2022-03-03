@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 //Table Game 額外判定
                 if (amount == 0)
                 {
-                    return GameActionType.WinBet;
+                    return GameActionType.FreeBet;
                 }
                 else
                 {
