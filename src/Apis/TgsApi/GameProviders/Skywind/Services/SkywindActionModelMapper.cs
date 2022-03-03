@@ -108,7 +108,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
             if (game_status.IgnoreCaseEquals("bonusgame"))
             {
-                return GameActionType.WinJackpot;
+                //Table Game 額外判定
+                if (amount == 0)
+                {
+                    return GameActionType.WinBet;
+                }
+                else
+                {
+                    return GameActionType.WinJackpot;
+                }
             }
             else if (game_status.IgnoreCaseEquals("freegame"))
             {
