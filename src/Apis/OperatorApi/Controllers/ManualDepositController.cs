@@ -71,6 +71,20 @@ namespace TGS.Apis.OperatorApi.Controllers
                     BankName = brandPayment.ChannelName
                 };
             }
+            else if (paymentMethodInfo.BankType == "Fps")
+            {
+                return new ManualDepositFpsFormResponse()
+                {
+                    MethodName = paymentMethods[brandPayment.MethodId].Name,
+                    ChannelName = paymentChannels[brandPayment.ChannelId].Name,
+                    Amount = form.Amount,
+                    QrCodeFileUrl = ((ManualDepositFpsApplyInfo)bankInfo).QrCodeFileUrl,
+                    Email = ((ManualDepositFpsApplyInfo)bankInfo).Email,
+                    FpsId = ((ManualDepositFpsApplyInfo)bankInfo).FpsId,
+                    Phone = ((ManualDepositFpsApplyInfo)bankInfo).Phone,
+                    BankName = brandPayment.ChannelName
+                };
+            }
             else
             {
                 return new ManualDepositThirdPartyFormResponse()
@@ -153,6 +167,48 @@ namespace TGS.Apis.OperatorApi.Controllers
             await submitBankDepositFormCommandService.ExecuteAsync(command);
         }
 
+        [HttpPut("fps", Name = "SubmitDepositFpsRequest")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<Guid> SubmitDepositFpsRequestAsync(
+           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+           [FromServices] ManualDepositSerializer serializer,
+           [FromBody] SubmitManualDepositFpsRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositFpsApplyInfo
+                    {
+                        BankType = request.BankType,
+                        QrCodeFileUrl = brandPaymentBankInfo.RootElement.GetProperty("qrCodeFileUrl").GetString(),
+                        Email = brandPaymentBankInfo.RootElement.GetProperty("email").GetString(),
+                        FpsId = brandPaymentBankInfo.RootElement.GetProperty("fpsId").GetString(),
+                        Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString()
+                    }));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+
         [HttpPut("thirdparty")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -197,6 +253,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             return bankType switch
             {
                 "Bank" => serializer.Deserialize<ManualDepositBankApplyInfo>(applyInfo),
+                "Fps" => serializer.Deserialize<ManualDepositFpsApplyInfo>(applyInfo),
                 "ThirdParty" => serializer.Deserialize<ManualDepositThirdPartyApplyInfo>(applyInfo),
                 _ => throw new NotImplementedException()
             };
