@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -69,12 +69,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
                     .GameProviderConfigurations.Skywind);
-
-            var url = default(string);
-
             var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId)
                 .ConfigureAwait(false);
 
+            string url;
             if (cachedGame.Type == GameType.LiveDealerLobby)
             {
                 url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
