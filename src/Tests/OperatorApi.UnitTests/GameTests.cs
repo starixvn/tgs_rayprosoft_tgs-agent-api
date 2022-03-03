@@ -13,11 +13,7 @@ using TGS.Apis.OperatorApi.Controllers;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
@@ -1120,7 +1116,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 null,
                 Guid.NewGuid(),
-                PlayerStatus.Enabled);
+                PlayerStatus.Enabled,
+                "username",
+                null,
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var playerTokenData = new PlayerTokenData
             {
