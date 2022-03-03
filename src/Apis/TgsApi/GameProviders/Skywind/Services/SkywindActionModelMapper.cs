@@ -20,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             IGameProviderOperations gameProviderOperations)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
         public async ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest source)
