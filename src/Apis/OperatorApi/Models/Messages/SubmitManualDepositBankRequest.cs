@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
+#nullable enable
+
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record SubmitManualDepositBankRequest
     {
         [JsonPropertyName("account")]
-        public string BankAccount { get; init; }
+        public string BankAccount { get; init; } = default!;
 
         [JsonPropertyName("name")]
-        public string BankName { get; init; }
+        public string? BankName { get; init; }
 
         [JsonPropertyName("amount")]
         public decimal Amount { get; init; }
@@ -21,6 +23,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public Guid? PromotionId { get; init; }
 
         [JsonPropertyName("banktype")]
-        public string BankType { get; init; }
+        public string BankType { get; init; } = default!;
     }
 }
