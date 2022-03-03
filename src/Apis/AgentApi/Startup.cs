@@ -161,6 +161,7 @@ namespace TGS.Apis.AgentApi
                 var url = _configuration.GetSection("Email:Url");
                 c.BaseAddress = new Uri(url.Value);
             });
+            services.AddMemoryCache();
 
             services.AddRouting(options => options.LowercaseUrls = true);
 
