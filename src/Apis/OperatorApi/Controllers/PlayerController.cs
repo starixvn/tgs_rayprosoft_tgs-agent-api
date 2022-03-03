@@ -192,8 +192,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerQueryService,
-            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService)
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
+            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -219,6 +220,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.IsAutoTransferToGame = await getAutoTransFlagService
                     .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
                     .ConfigureAwait(false);
+
+                var identityFormInfo = await getIdentityFormStatusService
+                    .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
+                    .ConfigureAwait(false);
+
+                playerData.IdentityAuthenticationFormId = identityFormInfo.FormId;
+
+                if (player.IdentityAuthentication)
+                {
+                    playerData.IdentityAuthenticationFormStatus = PlayerIdentityReviewState.Approve;
+                }
+                else
+                {
+                    playerData.IdentityAuthenticationFormStatus = identityFormInfo.Status;
+                }
             }
             catch (CoreExceptions.PlayerNotFoundException)
             {
@@ -514,11 +530,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Starts the change phone.
         /// </summary>
+        /// <param name="checkService">The check player phone service.</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
         [HttpPost("phone", Name = "StartChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask<string> StartChangePhoneAsync(
+        public async ValueTask<string> StartChangePhoneAsync(
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
         {
@@ -526,7 +544,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 || string.IsNullOrWhiteSpace(request.AreaCode))
                 throw new PlayerPhoneRequiredException();
 
+            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var checkQuery = new CheckBrandPhoneQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                request.AreaCode.Trim(),
+                request.Phone.Trim());
+
+            var isBrandHasSamePhone = await checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
 
             var command = new StartSetPlayerPhoneCommand(
                 playerTokenData.PlayerCode,
@@ -534,7 +566,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Phone.Trim(),
                 CultureInfo.CurrentUICulture);
 
-            return startSetPlayerPhoneService.GetAsync(command);
+            return await startSetPlayerPhoneService
+                .GetAsync(command)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
