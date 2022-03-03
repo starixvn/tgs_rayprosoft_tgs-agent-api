@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         public async ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest source)
         {
-            string externalRoundId = _service.GetExternalRoundId(source.RoundId, source.TrxId, source.EventId);
+            string externalRoundId = source.RoundId;
             string externalTransactionId = source.TrxId;
 
             var gameActionExternal = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId).ConfigureAwait(false);
@@ -70,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         public async ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest source)
         {
-            var gameActionType = ProcessingSettlement(source.GameType, source.Amount);
+            var gameActionType = ProcessingSettlement(source.GameStatus, source.Amount);
             var action = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot) ? "settle" : gameActionType.ToString().ToLower();
             var autoCloseRound = data.AutoCloseRound;
             var externalTransactionId = $"{source.TrxId}_{action}";
@@ -103,13 +103,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             return GetBetData(data, playCode, transactions, autoCloseRound);
         }
 
-        private static GameActionType ProcessingSettlement(string gameType, decimal amount)
+        private static GameActionType ProcessingSettlement(string game_status, decimal amount)
         {
-            if (gameType.IgnoreCaseEquals("bonusgame"))
+
+            if (game_status.IgnoreCaseEquals("bonusgame"))
             {
                 return GameActionType.WinJackpot;
             }
-            else if (gameType.IgnoreCaseEquals("freegame"))
+            else if (game_status.IgnoreCaseEquals("freegame"))
             {
                 return GameActionType.FreeBet;
             }
