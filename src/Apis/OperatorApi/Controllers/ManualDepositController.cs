@@ -129,6 +129,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     {
                         BankType = request.BankType,
                         SendBankAccount = request.BankAccount,
+                        SendBankName = request.BankName,
                         ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
                         ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
                     }));

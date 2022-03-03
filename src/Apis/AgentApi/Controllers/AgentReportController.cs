@@ -183,7 +183,7 @@ namespace TGS.Apis.AgentApi.Controllers
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var key = $"contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            var key = $"agentapi:contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
             if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentContributionModel> response))
             {
                 var contributionRequest = new GetAgentContributionsRequest
@@ -251,31 +251,74 @@ namespace TGS.Apis.AgentApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<AgentDividendModel>> GetDividendsAsync(
+        public async Task<AgentDividendResponse> GetDividendsAsync(
             [FromQuery] GetDividendsRequest request)
         {
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var dividendRequest = new GetAgentDividendsRequest
+            var key = $"agentapi:dividends:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentDividendModel> response))
             {
-                BrandId = brandId,
-                AgentId = agentTokenData.AgentId,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+                var dividendRequest = new GetAgentDividendsRequest
+                {
+                    BrandId = brandId,
+                    AgentId = agentTokenData.AgentId,
+                    From = request.From,
+                    To = request.To,
+                    Page = 1,
+                    Rows = int.MaxValue,
+                    OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                    SortBy = request.SortBy,
+                    ShowAll = true
+                };
 
-            var response = await _client.GetAgentDividendsAsync(dividendRequest);
+                response = await _client.GetAgentDividendsAsync(dividendRequest);
+
+                if (response != null)
+                {
+                    _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
+                }
+            }
+
+            var page = request.Page <= 0 ? 0 : request.Page - 1;
+            var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+            var items = response.Items.Select(x => new AgentDividend(
+                x.Id,
+                x.Username,
+                x.DepositAmount,
+                x.WithdrawalAmount,
+                x.AdjustmentAmount,
+                x.BonusAmount,
+                x.BetAmount,
+                x.ValidBetAmount,
+                x.Turnover,
+                x.WinLossAmount,
+                x.NetProfit,
+                x.AgentDividendAmount,
+                x.FromPlayerAgentDividendAmount,
+                x.FromTeamAgentDividendAmount)).Skip(page * pageSize).Take(pageSize).ToArray();
+
+            var total = new AgentDividendTotal(
+                    DepositAmount: response.Items.Sum(x => x.DepositAmount),
+                    WithdrawalAmount: response.Items.Sum(x => x.WithdrawalAmount),
+                    AdjustmentAmount: response.Items.Sum(x => x.AdjustmentAmount),
+                    BonusAmount: response.Items.Sum(x => x.BonusAmount),
+                    BetAmount: response.Items.Sum(x => x.BetAmount),
+                    ValidBetAmount: response.Items.Sum(x => x.ValidBetAmount),
+                    Turnover: response.Items.Sum(x => x.Turnover),
+                    WinLossAmount: response.Items.Sum(x => x.WinLossAmount),
+                    NetProfit: response.Items.Sum(x => x.NetProfit),
+                    AgentDividendAmount: response.Items.Sum(x => x.AgentDividendAmount),
+                    FromPlayerAgentDividendAmount: response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
+                    FromTeamAgentDividendAmount: response.Items.Sum(x => x.FromTeamAgentDividendAmount));
+
 
             return new()
             {
                 TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<AgentDividendModel>()
+                Items = items ?? Array.Empty<AgentDividend>(),
+                Total = total
             };
         }
 

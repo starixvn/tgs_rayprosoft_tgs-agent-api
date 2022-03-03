@@ -136,7 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 };
             }
 
-            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
             {

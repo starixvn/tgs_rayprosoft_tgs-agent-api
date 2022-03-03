@@ -23,26 +23,28 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IRoundQueries _roundQueries;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
 
         public SkywindService(
-            IGameProviderOperations gameProviderOperations,
-            ITokenProvider tokenProvider,
-            IPlayerOperations playerOperations,
-            IGameActionQueries gameActionQueries,
-            ISettingOperations settingOperations,
             IBrandOperations brandOperations,
-            IRedisPlayerLoginRecordService playerLoginRecordService)
+            IGameActionQueries gameActionQueries,
+            IGameProviderOperations gameProviderOperations,
+            IRedisPlayerLoginRecordService playerLoginRecordService,
+            IPlayerOperations playerOperations,
+            IRoundQueries roundQueries,
+            ISettingOperations settingOperations,
+            ITokenProvider tokenProvider)
         {
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
         }
 
         public async ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token)
@@ -68,14 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
                 .GameProviderConfigurations.Skywind);
 
-        public string GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
-
-        public string GetExternalTransactionId(string trxId, long eventId, string action)
-        {
-            var externalTransaction = $"{trxId}_{eventId}";
-
-            return string.IsNullOrEmpty(action) ? externalTransaction : $"{externalTransaction}_{action}";
-        }
+        public string GetExternalRoundId(string roundId, string trxId, long eventId) => $"{roundId}_{trxId}_{eventId}";
 
         public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId,
