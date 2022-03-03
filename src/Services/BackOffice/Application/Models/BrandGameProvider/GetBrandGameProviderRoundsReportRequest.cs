@@ -2,7 +2,7 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
+namespace TGS.Services.BackOffice.Application.Models.BrandGameProvider
 {
     public class GetBrandGameProviderRoundsReportRequest : PageableRequest
     {

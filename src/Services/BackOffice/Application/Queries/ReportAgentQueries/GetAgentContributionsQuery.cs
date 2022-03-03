@@ -4,20 +4,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.ReportAgent;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportHandlers
+namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
 {
     public class
-        GetAgentContributionsReportHandler : IGetService<GetAgentContributionsReportRequest,
+        GetAgentContributionsQuery : IGetService<GetAgentContributionsReportRequest,
             GetAgentContributionsReportResponse>
     {
         private readonly IReportClient _reportClient;
 
-        public GetAgentContributionsReportHandler(IReportClient reportClient)
+        public GetAgentContributionsQuery(IReportClient reportClient)
             => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
         public async ValueTask<GetAgentContributionsReportResponse> GetAsync(GetAgentContributionsReportRequest request,
@@ -41,7 +42,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportHandlers
 
             var response = await _reportClient.GetAgentContributionsAsync(reportRequest);
 
-            var pageArray = await response.Items.Select(x => new AgentContributionReportModel
+            var pageArray = response.Items?.Select(x => new AgentContributionReportModel
             {
                 Username = x.Username,
                 Type = (AccountType)x.Type,
@@ -54,7 +55,13 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportHandlers
                 Turnover = x.Turnover,
                 WinLossAmount = x.WinLossAmount,
                 NetProfit = x.NetProfit
-            }).AsQueryable().ToPagedArrayAsync(reportRequest.Page, reportRequest.Rows);
+            }).AsQueryable().CreatePagedResponse(new PageableRequest
+            {
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.OrderBy,
+                SortBy = request.SortBy
+            });
 
             var total = new AgentContributionTotalModel(
                 response.Items.Sum(x => x.DepositAmount),

@@ -14,7 +14,7 @@ using Tgs.Report.Aggregate.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.Aggregate
+namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
 {
     public class GameProviderAggregateHandler : Handler<GenerateGameProviderAggregateRequest, MessageResponse>
     {

@@ -1,13 +1,7 @@
-﻿using System;
-
-namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
+﻿namespace TGS.Services.BackOffice.Application.Models.BrandGameProvider
 {
-    public record BrandGameProviderRoundsReportModel
+    public record BrandGameProviderRoundTotalReportModel
     {
-        public Guid GameProviderId { get; init; }
-
-        public string GameProviderName { get; init; } = default!;
-
         public string CurrencyCode { get; init; } = default!;
 
         public int TransactionCount { get; init; }

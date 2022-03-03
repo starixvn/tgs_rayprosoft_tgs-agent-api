@@ -1,6 +1,6 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Models.BrandGameProvider
+namespace TGS.Services.BackOffice.Application.Models.BrandGameProvider
 {
     public record GetBrandGameProviderRoundsReportResponse
     {
