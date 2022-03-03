@@ -242,119 +242,118 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
+
+        /// <summary>
+        ///     Get agent dividends
+        /// </summary>
+        [HttpGet("dividends")]
+        [Description("Get dividends")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentDividendModel>> GetDividendsAsync(
+            [FromQuery] GetDividendsRequest request)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var dividendRequest = new GetAgentDividendsRequest
+            {
+                BrandId = brandId,
+                AgentId = agentTokenData.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetAgentDividendsAsync(dividendRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendModel>()
+            };
+        }
+
+        /// <summary>
+        /// Get player rounds
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet("rounds")]
+        [Description("Get player rounds")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
+           [FromQuery] PagingRequest pagingRequest,
+           [FromQuery] GetRoundsReportRequest request)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var roundsRequest = new GetAgentPlayerRoundsRequest
+            {
+                AgentId = agentTokenData.AgentId,
+                BrandId = brandId,
+                Username = request.Username,
+                RoundId = request.RoundId,
+                ExternalRoundId = request.ExternalRoundId,
+                GameProviderId = request.GameProviderId,
+                Status = (short?)request.Status,
+                From = request.From,
+                To = request.To,
+                ClosedFrom = request.ClosedFrom,
+                ClosedTo = request.ClosedTo,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
+            };
+
+            var response = await _client.GetAgentPlayerRoundsAsync(roundsRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<RoundModel>()
+            };
+        }
+
+        /// <summary>
+        /// Get team Information
+        /// </summary>
+        /// <param name="pagingRequest"></param>
+        /// <returns></returns>
+        [HttpGet("teaminfo")]
+        [Description("Get team Information")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
+            [FromQuery] PagingRequest pagingRequest,
+            [FromQuery] Guid id)
+        {
+            var request = new GetAgentTeamInfoRequest
+            {
+                AgentId = id,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
+            };
+
+            var response = await _client.GetAgentTeamInfoAsync(request);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<TeamInfoModel>()
+            };
+        }
     }
-
-    /// <summary>
-    ///     Get agent dividends
-    /// </summary>
-    [HttpGet("dividends")]
-    [Description("Get dividends")]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [TgsResponseWrapper]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<AgentDividendModel>> GetDividendsAsync(
-        [FromQuery] GetDividendsRequest request)
-    {
-        var agentTokenData = HttpContext.Items.GetAgentTokenData();
-        var brandId = HttpContext.Items.GetBrandId();
-
-        var dividendRequest = new GetAgentDividendsRequest
-        {
-            BrandId = brandId,
-            AgentId = agentTokenData.AgentId,
-            From = request.From,
-            To = request.To,
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = request.SortBy,
-            ShowAll = request.ShowAll
-        };
-
-        var response = await _client.GetAgentDividendsAsync(dividendRequest);
-
-        return new()
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<AgentDividendModel>()
-        };
-    }
-
-    /// <summary>
-    /// Get player rounds
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpGet("rounds")]
-    [Description("Get player rounds")]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [TgsResponseWrapper]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
-       [FromQuery] PagingRequest pagingRequest,
-       [FromQuery] GetRoundsReportRequest request)
-    {
-        var agentTokenData = HttpContext.Items.GetAgentTokenData();
-        var brandId = HttpContext.Items.GetBrandId();
-
-        var roundsRequest = new GetAgentPlayerRoundsRequest
-        {
-            AgentId = agentTokenData.AgentId,
-            BrandId = brandId,
-            Username = request.Username,
-            RoundId = request.RoundId,
-            ExternalRoundId = request.ExternalRoundId,
-            GameProviderId = request.GameProviderId,
-            Status = (short?)request.Status,
-            From = request.From,
-            To = request.To,
-            ClosedFrom = request.ClosedFrom,
-            ClosedTo = request.ClosedTo,
-            Page = pagingRequest.Page,
-            Rows = pagingRequest.Rows,
-            OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = pagingRequest.SortBy,
-            ShowAll = pagingRequest.ShowAll
-        };
-
-        var response = await _client.GetAgentPlayerRoundsAsync(roundsRequest);
-
-        return new()
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<RoundModel>()
-        };
-    }
-
-    /// <summary>
-    /// Get team Information
-    /// </summary>
-    /// <param name="pagingRequest"></param>
-    /// <returns></returns>
-    [HttpGet("teaminfo")]
-    [Description("Get team Information")]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
-        [FromQuery] PagingRequest pagingRequest,
-        [FromQuery] Guid id)
-    {
-        var request = new GetAgentTeamInfoRequest
-        {
-            AgentId = id,
-            Page = pagingRequest.Page,
-            Rows = pagingRequest.Rows,
-            OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = pagingRequest.SortBy,
-            ShowAll = pagingRequest.ShowAll
-        };
-
-        var response = await _client.GetAgentTeamInfoAsync(request);
-
-        return new()
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<TeamInfoModel>()
-        };
-    }
-}
 }
