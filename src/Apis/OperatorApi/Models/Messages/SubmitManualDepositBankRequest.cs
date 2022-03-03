@@ -8,6 +8,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("account")]
         public string BankAccount { get; init; }
 
+        [JsonPropertyName("name")]
+        public string BankName { get; init; }
+
         [JsonPropertyName("amount")]
         public decimal Amount { get; init; }
 
