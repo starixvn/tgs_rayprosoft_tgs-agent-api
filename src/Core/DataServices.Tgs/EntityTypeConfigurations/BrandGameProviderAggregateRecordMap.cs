@@ -19,6 +19,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.AuditLogId)
                 .IsRequired();
 
+            builder.Property(c => c.BrandId)
+                .IsRequired();
+
             builder.Property(c => c.Data)
                 .HasColumnType(ColumnTypes.Jsonb)
                 .IsRequired();

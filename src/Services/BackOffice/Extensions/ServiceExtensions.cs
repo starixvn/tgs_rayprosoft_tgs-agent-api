@@ -54,6 +54,7 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IBrandGroupService, BrandGroupService>();
             services
                 .AddTransient<IBrandGameProviderAggregateAuditLogService, BrandGameProviderAggregateAuditLogService>();
+            services.AddTransient<IGameProviderAggregateAuditLogService, GameProviderAggregateAuditLogService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

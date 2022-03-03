@@ -1737,6 +1737,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
+                    b.Property<int>("GameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_type");
+
                     b.Property<DateTimeOffset>("ReportDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
@@ -1817,6 +1821,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("AuditLogId")
                         .HasColumnType("integer")
                         .HasColumnName("audit_log_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -3076,6 +3084,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("Id")
                         .HasName("pk_game_provider_aggregate_record_id");

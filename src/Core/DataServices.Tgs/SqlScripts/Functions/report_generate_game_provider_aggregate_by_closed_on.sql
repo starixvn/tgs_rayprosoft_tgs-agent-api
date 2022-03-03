@@ -32,8 +32,8 @@ AS $$
 		FROM rounds
 		)
 
-   		INSERT INTO report.game_provider_aggregate_records (audit_log_id,"data",created_on)
-		SELECT _audit_log_id,(select case when count(1) > 0 then jsonb_agg(rounds) else '[]' end FROM rounds),_created_on;
+   		INSERT INTO report.game_provider_aggregate_records (audit_log_id,game_provider_id,"data",created_on)
+		SELECT _audit_log_id,_game_provider_id,(select case when count(1) > 0 then jsonb_agg(rounds) else '[]' end FROM rounds),_created_on;
 		
 	END;
 	$$

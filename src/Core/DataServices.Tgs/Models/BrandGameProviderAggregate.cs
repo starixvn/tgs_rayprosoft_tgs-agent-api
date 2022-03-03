@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
@@ -11,6 +12,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid BrandId { get; set; }
 
         public Guid GameProviderId { get; set; }
+
+        public GameType GameType { get; set; }
 
         public string CurrencyCode { get; set; }
 

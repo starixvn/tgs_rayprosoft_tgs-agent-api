@@ -10,6 +10,7 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
 using Tgs.MessageQueue;
+using Tgs.Report.Aggregate.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
@@ -17,6 +18,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
 {
     public class GameProviderAggregateHandler : Handler<GenerateGameProviderAggregateRequest, MessageResponse>
     {
+        private readonly IReportAggregateClient _client;
         private readonly IGameProviderAggregateAuditLogService _gameProviderAuditLogService;
         private readonly IGameProviderService _gameProviderService;
         private readonly IMessageSender _messageSender;
@@ -27,18 +29,25 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
             IGameProviderService gameProviderService,
             IGameProviderAggregateAuditLogService gameProviderAuditLogService,
             IRedisCacheManager redisCacheManager,
+            IReportAggregateClient client,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _gameProviderService = gameProviderService;
             _messageSender = messageSender;
             _gameProviderAuditLogService = gameProviderAuditLogService;
             _redisCacheManager = redisCacheManager;
+            _client = client;
         }
 
         public override async Task<MessageResponse> Handle(
             GenerateGameProviderAggregateRequest request,
             CancellationToken cancellationToken)
         {
+            if (request.StartDate.ToOffset(new(8, 0, 0)).Day != 1)
+            {
+                return CreateInvalidResponse<MessageResponse>("The date must be number 1 of each month.");
+            }
+
             var aggregate = await _redisCacheManager.GetSetAllMembersAsync("aggregate", "GP")
                 .ConfigureAwait(false);
 
@@ -52,11 +61,16 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
                 {
                     request.GameProviderId.Value
                 }
-                : await _gameProviderService.GetGameProviderQueries().Select(x => x.Id).ToArrayAsync(cancellationToken);
+                : await _gameProviderService.GetGameProviderQueries().Select(x => x.Id).ToArrayAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
             var auditLogId =
                 await _gameProviderAuditLogService.CreateGameProviderAggregateAuditLogAsync(
-                    new CreateGameProviderAggregateAuditLogRequest(Guid.Parse(UserId), request.GameProviderId));
+                        new CreateGameProviderAggregateAuditLogRequest(Guid.Parse(UserId), request.GameProviderId))
+                    .ConfigureAwait(false);
+
+            await _client.RemoveGameProviderAggregateAsync(new(request.GameProviderId, request.StartDate))
+                .ConfigureAwait(false);
 
             await _redisCacheManager.SetAddAsync("aggregate",
                 "GP",
@@ -70,7 +84,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Aggregate
                     request.StartDate,
                     GameProviderId = gameProviderId,
                     AuditLogId = auditLogId,
-                    Key = "aggregate:brandGP"
+                    RedisKey = "aggregate:GP"
                 };
 
                 await _messageSender.PublishAsync("tgs.report.aggregate.game.provider",

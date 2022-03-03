@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TGS.Core.DataServices.Base.Extensions;
 using System.Reflection;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
@@ -34,6 +34,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     audit_log_id = table.Column<int>(type: "integer", nullable: false),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     data = table.Column<string>(type: "jsonb", nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -52,6 +53,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     audit_log_id = table.Column<int>(type: "integer", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     game_provider_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    game_type = table.Column<int>(type: "integer", nullable: false),
                     currency_code = table.Column<string>(type: "text", nullable: false),
                     transaction_count = table.Column<int>(type: "integer", nullable: false),
                     bet_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
@@ -92,6 +94,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     audit_log_id = table.Column<int>(type: "integer", nullable: false),
+                    game_provider_id = table.Column<Guid>(type: "uuid", nullable: false),
                     data = table.Column<string>(type: "jsonb", nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
