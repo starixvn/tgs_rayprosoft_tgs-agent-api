@@ -3,11 +3,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.Agent;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Agent;
+using TGS.Services.BackOffice.Application.Models.ReportAgent;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -21,48 +21,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("contributions")]
         [Description("Get agent contributions")]
-        public async Task<PagedResponse<AgentContributionReportModel>> GetRoundsAsync(
+        public async Task<GetAgentContributionsReportResponse> GetRoundsAsync(
+            [FromServices] IGetService<GetAgentContributionsReportRequest, GetAgentContributionsReportResponse>
+                getAgentContributionsReportService,
             [FromQuery] GetAgentContributionsReportRequest request)
-        {
-            var reportRequest = new GetAgentContributionsRequest
-            {
-                BrandId = request.BrandId,
-                AgentId = request.AgentId,
-                Username = request.Username,
-                Type = (short?)request.Type,
-                From = request.From,
-                To = request.To,
-                IncludeAgents = request.IncludeAgents,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
-
-            var response = await _client.GetAgentContributionsAsync(reportRequest);
-
-            return new()
-            {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new AgentContributionReportModel
-                {
-                    Username = x.Username,
-                    Type = (AccountType)x.Type,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    BonusAmount = x.BonusAmount,
-                    BetAmount = x.BetAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit
-                }).ToArray()
-            };
-        }
+            => await getAgentContributionsReportService
+                .GetAsync(request)
+                .ConfigureAwait(false);
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]

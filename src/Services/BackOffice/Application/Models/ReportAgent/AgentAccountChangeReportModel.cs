@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Apis.BackendOffice.Models.Agent
+namespace TGS.Services.BackOffice.Application.Models.ReportAgent
 {
     public record AgentAccountChangeReportModel
     {

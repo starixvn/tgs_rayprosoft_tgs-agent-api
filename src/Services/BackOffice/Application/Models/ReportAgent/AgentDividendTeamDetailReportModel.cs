@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Models.Agent
+namespace TGS.Services.BackOffice.Application.Models.ReportAgent
 {
     public record AgentDividendTeamDetailReportModel
     {
