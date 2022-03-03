@@ -72,27 +72,32 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             }
             */
             var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, source.CustId, externalTransactionId).ConfigureAwait(false);
-            if (bet != null)
+            if (bet == null)
             {
-                transactions = new TransactionData()
-                {
-                    ExternalGameId = source.GameCode,
-                    ExternalBetId = bet.ExternalBetId.ToString(),
-                    ExternalRoundId = bet.ExternalRoundId.ToString(),
-                    ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
-                    ExternalTransactionReferenceId = bet.ExternalTransactionId,
-                    GameActionType = GameActionType.CancelTransaction,
-                    RoundClosed = true
-                };
+                return null;
+
             }
-            if (transactions == null)
+
+            (RoundStatus RoundStatus, int GameId)? round = await _service.GetRoundStatusAndGameIdAsync(data.GameProviderId, playCode, bet.ExternalRoundId, bet.ExternalTransactionId).ConfigureAwait(false);
+
+            if (!round.HasValue || round.Value.RoundStatus == RoundStatus.Closed)
             {
                 return null;
             }
-            else
+
+            transactions = new TransactionData()
             {
-                return GetBetData(data, playCode, transactions, data.AutoCloseRound);
-            }
+                ExternalGameId = source.GameCode,
+                ExternalBetId = bet.ExternalBetId.ToString(),
+                ExternalRoundId = bet.ExternalRoundId.ToString(),
+                ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
+                ExternalTransactionReferenceId = bet.ExternalTransactionId,
+                GameActionType = GameActionType.CancelTransaction,
+                RoundClosed = true
+            };
+
+            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+
         }
 
         public async ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest source)
