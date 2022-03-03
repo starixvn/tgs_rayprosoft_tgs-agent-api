@@ -19,17 +19,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         ValueTask<SkywindConfiguration> GetConfigurationAsync();
 
-        string GetExternalRoundId(string roundId, long eventId);
-
-        string GetExternalTransactionId(string trxId, long eventId, string action);
+        string GetExternalRoundId(string roundId, string trxId, long eventId);
 
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
 
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
 
         ValueTask<Guid> GetGameProviderIdAsync();
-
-        ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId);
 
         bool IsTest(string playerCode);
     }

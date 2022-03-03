@@ -70,14 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
                 .GameProviderConfigurations.Skywind);
 
-        public string GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
-
-        public string GetExternalTransactionId(string trxId, long eventId, string action)
-        {
-            var externalTransaction = $"{trxId}_{eventId}";
-
-            return string.IsNullOrEmpty(action) ? externalTransaction : $"{externalTransaction}_{action}";
-        }
+        public string GetExternalRoundId(string roundId, string trxId, long eventId) => $"{roundId}_{trxId}_{eventId}";
 
         public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId,
@@ -108,13 +101,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
-
-        public ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(
-                            Guid gameProviderId,
-            string playerCode,
-            string externalRoundId,
-            string externalTransactionId)
-            => _roundQueries.GetRoundStatusAndGameIdAsync(gameProviderId, playerCode, externalRoundId, externalTransactionId);
 
         public bool IsTest(string playerCode)
             => playerCode.IgnoreCaseEquals("4uedhjjznnw4") || playerCode.IgnoreCaseEquals("4ueua6d0au9x");
