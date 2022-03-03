@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         {
             var gameActionType = ProcessingSettlement(source.GameStatus, source.Amount);
             var action = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot) ? "settle" : gameActionType.ToString().ToLower();
-            var autoCloseRound = data.AutoCloseRound;
+            var autoCloseRound = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot);
             var externalTransactionId = $"{source.TrxId}_{action}";
             var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, source.CustId, source.TrxId).ConfigureAwait(false);
             if (bet == null)
