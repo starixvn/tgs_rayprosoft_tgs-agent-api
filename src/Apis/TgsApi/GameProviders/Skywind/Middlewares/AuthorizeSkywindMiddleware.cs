@@ -39,12 +39,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var configuration = await _services.GetConfigurationAsync().ConfigureAwait(false);
-            var gameProviderId = await _services.GetGameProviderIdByCodeAsync().ConfigureAwait(false);
+            var gameProviderId = await _services.GetGameProviderIdAsync().ConfigureAwait(false);
 
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
             var value = await context.Request.ReadAsStringAsync();
-            var parameters = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString((JsonDocument.Parse(value))));
+            var parameters = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString(JsonDocument.Parse(value)));
 
             if (parameters["merch_id"].ToString().IgnoreCaseNotEquals(configuration.MerchId) || parameters["merch_pwd"].ToString().IgnoreCaseNotEquals(configuration.MerchPwd))
             {
@@ -55,11 +55,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
+
             var loginRecord = await execute(parameters).ConfigureAwait(false);
             if (loginRecord == null)
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
+
             var platformType = loginRecord.PlatformType;
             var brandId = await _services.GetBrandIdByPlayerCodeAsync(loginRecord.PlayerCode);
             var bgpc = await _services.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
@@ -75,51 +77,46 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
 
         private async ValueTask<PlayerLoginRecordModel> ValidateBetAsync(Dictionary<string, object> parameters)
         {
-            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
+            if (!parameters.TryGetValue("trx_id", out var trxId) || string.IsNullOrEmpty(trxId.ToString()))
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
-            if (!parameters.TryGetValue("amount", out object amount) || !decimal.TryParse(amount.ToString(), out decimal decimalAmount) || decimalAmount < 0)
-            {
-                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
-            }
-            return await _services.DecryptTokenAsync(parameters["cust_session_id"].ToString()).ConfigureAwait(false);
+
+            return !parameters.TryGetValue("amount", out var amount) || !decimal.TryParse(amount.ToString(), out var decimalAmount) || decimalAmount < 0
+                ? throw new InvalidOperationException(GameApiError.MerchantInternalError.Description())
+                : await _services.DecryptTokenAsync(parameters["cust_session_id"].ToString()).ConfigureAwait(false);
         }
 
         private ValueTask<PlayerLoginRecordModel> ValidateRollbackAsync(Dictionary<string, object> parameters)
         {
-            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
-            {
-                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
-            }
-
-            return ValueTask.FromResult(new PlayerLoginRecordModel()
-            {
-                PlayerCode = parameters["cust_id"].ToString(),
-                PlatformType = PlatformType.Desktop,
-                Status = LoginStatus.Enabled
-            });
+            return !parameters.TryGetValue("trx_id", out var trxId) || string.IsNullOrEmpty(trxId.ToString())
+                ? throw new InvalidOperationException(GameApiError.MerchantInternalError.Description())
+                : ValueTask.FromResult(new PlayerLoginRecordModel()
+                {
+                    PlayerCode = parameters["cust_id"].ToString(),
+                    PlatformType = PlatformType.Desktop,
+                    Status = LoginStatus.Enabled
+                });
         }
 
         private ValueTask<PlayerLoginRecordModel> ValidateSettleAsync(Dictionary<string, object> parameters)
         {
-            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
+            if (!parameters.TryGetValue("trx_id", out var trxId) || string.IsNullOrEmpty(trxId.ToString()))
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
-            if (!parameters.TryGetValue("amount", out object amount) || !decimal.TryParse(amount.ToString(), out decimal decimalAmount) || decimalAmount < 0)
-            {
-                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
-            }
-            return ValueTask.FromResult(new PlayerLoginRecordModel()
-            {
-                PlayerCode = parameters["cust_id"].ToString(),
-                PlatformType = PlatformType.Desktop,
-                Status = LoginStatus.Enabled
-            });
+
+            return !parameters.TryGetValue("amount", out var amount) || !decimal.TryParse(amount.ToString(), out var decimalAmount) || decimalAmount < 0
+                ? throw new InvalidOperationException(GameApiError.MerchantInternalError.Description())
+                : ValueTask.FromResult(new PlayerLoginRecordModel()
+                {
+                    PlayerCode = parameters["cust_id"].ToString(),
+                    PlatformType = PlatformType.Desktop,
+                    Status = LoginStatus.Enabled
+                });
         }
 
         private async ValueTask<PlayerLoginRecordModel> ValidateTicketAsync(Dictionary<string, object> parameters)
-                                            => await _services.DecryptTokenAsync(parameters["ticket"].ToString()).ConfigureAwait(false);
+            => await _services.DecryptTokenAsync(parameters["ticket"].ToString()).ConfigureAwait(false);
     }
 }

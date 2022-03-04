@@ -15,16 +15,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
 {
     public sealed class SkywindStartup : BaseStartup
     {
-        public SkywindStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+        protected override string LogPrefix => "skywind";
+
+        public SkywindStartup(IConfiguration configuration, IWebHostEnvironment env) : base(configuration, env)
         {
         }
 
-        protected override string LogPrefix => "skywind";
-
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers(
+            _ = services.AddErrorMappers(
                 new[]
                 {
                     typeof(SkywindErrorMapper)
@@ -36,19 +35,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                 }
             );
 
-            services.AddScoped<AuthorizeSkywindMiddleware>();
-            services.AddScoped<HandleSkywindExceptionMiddleware>();
-            services.AddScoped<ISkywindService, SkywindService>();
-            services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
+            _ = services.AddScoped<AuthorizeSkywindMiddleware>();
+            _ = services.AddScoped<HandleSkywindExceptionMiddleware>();
+            _ = services.AddScoped<ISkywindService, SkywindService>();
+            _ = services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+            _ = services.AddScopedWithResolver<IGameInitializer>(new[]
             {
                 typeof(SkywindGameInitializer)
             }, (provider, _) =>
                 provider.GetRequiredService<SkywindGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[]
-            {
+            _ = services.AddScopedWithResolver<IGameHistory>(new[]
+             {
                 typeof(SkywindGameHistory)
             }, (provider, _) =>
                 provider.GetRequiredService<SkywindGameHistory>());
@@ -58,11 +57,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
         {
             const string Route = "/sw/api";
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            _ = app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
-                    builder.UseMiddleware<HandleSkywindExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeSkywindMiddleware>();
+                    _ = builder.UseMiddleware<HandleSkywindExceptionMiddleware>();
+                    _ = builder.UseMiddleware<AuthorizeSkywindMiddleware>();
                 });
         }
     }
