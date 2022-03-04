@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -70,7 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         public async ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest source)
         {
-            var gameActionType = ProcessingSettlement(source.GameStatus, source.Amount);
+            var gameActionType = ProcessingSettlement(source.GameType, source.GameStatus, source.Amount);
             var action = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot) ? "settle" : gameActionType.ToString().ToLower();
             var autoCloseRound = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot);
             var externalTransactionId = $"{source.TrxId}_{action}";
@@ -103,21 +104,59 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             return GetBetData(data, playCode, transactions, autoCloseRound);
         }
 
-        private static GameActionType ProcessingSettlement(string game_status, decimal amount)
+        private static GameActionType ProcessingSettlement(string game_type, string game_status, decimal amount)
         {
+            //"game_type" = "bonusgame" 流程
+            if (game_type.IgnoreCaseEquals("bonusgame"))
+            {
+                if (game_status.IgnoreCaseEquals("settled"))
+                {
+                    return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
+                }
+                else
+                {
+                    return GameActionType.FreeBet;
+                }
+            }
+            //"game_type" = "freegame" 流程
+            if (game_type.IgnoreCaseEquals("freegame"))
+            {
+                if (game_status.IgnoreCaseEquals("settled"))
+                {
+                    return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
+                }
+                else
+                {
+                    if (game_status.IgnoreCaseEquals("bonusgame"))
+                    {
+                        return GameActionType.WinJackpot;
+                    }
+                    else
+                    {
+                        return GameActionType.FreeBet;
+                    }
 
-            if (game_status.IgnoreCaseEquals("bonusgame"))
-            {
-                return GameActionType.WinJackpot;
+                }
             }
-            else if (game_status.IgnoreCaseEquals("freegame"))
-            {
-                return GameActionType.FreeBet;
-            }
-            else
+
+            //"game_type" = "normal" 流程
+            if (game_status.IgnoreCaseEquals("settled"))
             {
                 return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
             }
+            else
+            {
+                if (game_status.IgnoreCaseEquals("bonusgame"))
+                {
+
+                    return GameActionType.WinJackpot;
+                }
+                else
+                {
+                    return GameActionType.FreeBet;
+                }
+            }
+
         }
 
         private BetData GetBetData(
