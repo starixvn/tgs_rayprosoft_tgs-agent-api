@@ -27,7 +27,6 @@ namespace TGS.Core.Infrastructures.Redis
         /// <param name="pattern">String that used as pattern to match keys against</param>
         /// <param name="fireAndForget">is fireforget or not </param>
         /// <returns>Amount of deleted keys</returns>
-
         Task<int> ClearCacheByPatternAsync(object cacheType, string pattern, bool fireAndForget = false);
 
         Task<T> SafeGetAndCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, Func<Task<T>> getData);
@@ -47,10 +46,17 @@ namespace TGS.Core.Infrastructures.Redis
         Task SafeCacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields, TimeSpan? expiresIn,
             bool fireAndForget = false);
 
-        Task<RedisValue[]> SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields, bool fireAndForget = false);
+        Task<RedisValue[]> SafeGetHashSetAsync(object cacheType, object key, RedisValue[] hashFields,
+            bool fireAndForget = false);
 
-        Task<RedisValue> SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField, bool fireAndForget = false);
+        Task<RedisValue> SafeGetHashSetAsync(object cacheType, object key, RedisValue hashField,
+            bool fireAndForget = false);
 
         Task<HashEntry[]> SafeGetAllHashSetAsync(object cacheType, object key, bool fireAndForget = false);
+
+        Task<long> SetAddAsync(string cacheType, string key, RedisValue[] values, TimeSpan? expiresIn,
+            bool fireAndForget = false);
+
+        Task<RedisValue[]> GetSetAllMembersAsync(string cacheType, string key, bool fireAndForget = false);
     }
 }
