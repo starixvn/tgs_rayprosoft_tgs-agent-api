@@ -6,7 +6,6 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Market;
-using TGS.Services.BackOffice.Application.Models.ReportAgent;
 using TGS.Services.BackOffice.Application.Models.ReportMarket;
 using Tgs.ServiceUtility;
 
@@ -39,7 +38,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
 
             var response = await _reportClient.GetMarketsAsync(reportRequest);
 
-            var pageArray = response.Items?.Select(x => new MarketModel
+            var pageArray = response.Items?.Select(x => new MarketReportModel
             {
                 ReportDate = x.ReportDate,
                 RegisteredCount = x.RegisteredCount,
@@ -83,5 +82,6 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
                 Items = pageArray.Items,
                 Total = total
             };
+        }
     }
-    }
+}
