@@ -40,9 +40,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("dividends")]
         [Description("Get agent dividends report")]
-        public async Task<PagedResponse<AgentDividendReportModel>>
+        public async Task<GetAgentDividendsReportResponse>
             GetAgentDividendsAsync(
-                [FromServices] IGetService<GetAgentDividendsReportRequest, PagedResponse<AgentDividendReportModel>>
+                [FromServices] IGetService<GetAgentDividendsReportRequest, GetAgentDividendsReportResponse>
                     agentDividendsService,
                 [FromQuery] GetAgentDividendsReportRequest request)
             => await agentDividendsService

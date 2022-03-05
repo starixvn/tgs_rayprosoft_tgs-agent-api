@@ -6,10 +6,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
-using TGS.Apis.BackendOffice.Models.Market;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Market;
+using TGS.Services.BackOffice.Application.Models.ReportMarket;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {

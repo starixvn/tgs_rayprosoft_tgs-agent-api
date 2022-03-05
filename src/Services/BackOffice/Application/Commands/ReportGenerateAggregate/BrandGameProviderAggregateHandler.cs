@@ -74,7 +74,8 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
 
             var auditLogId =
                 await _brandGameProviderAuditLogService.CreateBrandGameProviderAggregateAuditLogAsync(
-                        new CreateBrandGameProviderAggregateAuditLogRequest(request.UserId, request.BrandId))
+                        new CreateBrandGameProviderAggregateAuditLogRequest(Guid.Parse(request.UserId),
+                            request.BrandId))
                     .ConfigureAwait(false);
 
             await _client.RemoveBrandGameProviderAggregateAsync(new(request.BrandId, request.StartDate))

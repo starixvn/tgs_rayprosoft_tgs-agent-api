@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using TGS.Core.Infrastructures.Redis;
@@ -13,10 +12,11 @@ using Tgs.MessageQueue;
 using Tgs.Report.Aggregate.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
 {
-    public class GameProviderAggregateHandler : Handler<GenerateGameProviderAggregateRequest, MessageResponse>
+    public class GameProviderAggregateHandler : IGetService<GenerateGameProviderAggregateRequest, MessageResponse>
     {
         private readonly IReportAggregateClient _client;
         private readonly IGameProviderAggregateAuditLogService _gameProviderAuditLogService;
@@ -29,8 +29,7 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
             IGameProviderService gameProviderService,
             IGameProviderAggregateAuditLogService gameProviderAuditLogService,
             IRedisCacheManager redisCacheManager,
-            IReportAggregateClient client,
-            IHttpContextAccessor accessor) : base(accessor)
+            IReportAggregateClient client)
         {
             _gameProviderService = gameProviderService;
             _messageSender = messageSender;
@@ -39,13 +38,17 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
             _client = client;
         }
 
-        public override async Task<MessageResponse> Handle(
+        public async ValueTask<MessageResponse> GetAsync(
             GenerateGameProviderAggregateRequest request,
             CancellationToken cancellationToken)
         {
             if (request.StartDate.ToOffset(new(8, 0, 0)).Day != 1)
             {
-                return CreateInvalidResponse<MessageResponse>("The date must be number 1 of each month.");
+                return new MessageResponse
+                {
+                    Valid = false,
+                    Message = "The date must be number 1 of each month."
+                };
             }
 
             var aggregate = await _redisCacheManager.GetSetAllMembersAsync("aggregate", "GP")
@@ -53,7 +56,11 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
 
             if (aggregate.Length > 0)
             {
-                return CreateInvalidResponse<MessageResponse>("waiting for report generation.");
+                return new MessageResponse
+                {
+                    Valid = false,
+                    Message = "waiting for report generation."
+                };
             }
 
             var gameProviderIds = request.GameProviderId is not null
@@ -66,7 +73,8 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
 
             var auditLogId =
                 await _gameProviderAuditLogService.CreateGameProviderAggregateAuditLogAsync(
-                        new CreateGameProviderAggregateAuditLogRequest(Guid.Parse(UserId), request.GameProviderId))
+                        new CreateGameProviderAggregateAuditLogRequest(Guid.Parse(request.UserId),
+                            request.GameProviderId))
                     .ConfigureAwait(false);
 
             await _client.RemoveGameProviderAggregateAsync(new(request.GameProviderId, request.StartDate))
@@ -93,7 +101,7 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate
                     .ConfigureAwait(false);
             }
 
-            return CreateValidResponse<MessageResponse>();
+            return new MessageResponse { Valid = true };
         }
     }
 }

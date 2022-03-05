@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Agent;
@@ -11,14 +12,14 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
 {
     public class
-        GetAgentDividendsQuery : IGetService<GetAgentDividendsReportRequest, PagedResponse<AgentDividendReportModel>>
+        GetAgentDividendsQuery : IGetService<GetAgentDividendsReportRequest, GetAgentDividendsReportResponse>
     {
         private readonly IReportClient _reportClient;
 
         public GetAgentDividendsQuery(IReportClient reportClient)
             => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
-        public async ValueTask<PagedResponse<AgentDividendReportModel>> GetAsync(GetAgentDividendsReportRequest request,
+        public async ValueTask<GetAgentDividendsReportResponse> GetAsync(GetAgentDividendsReportRequest request,
             CancellationToken cancellationToken = default)
         {
             var reportRequest = new GetAgentDividendsRequest
@@ -33,33 +34,55 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                ShowAll = true
             };
 
             var response = await _reportClient.GetAgentDividendsAsync(reportRequest);
 
-            return new()
+            var pageArray = response.Items?.Select(x => new AgentDividendReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
+                Id = x.Id,
+                Username = x.Username,
+                DepositAmount = x.DepositAmount,
+                WithdrawalAmount = x.WithdrawalAmount,
+                AdjustmentAmount = x.AdjustmentAmount,
+                BonusAmount = x.BonusAmount,
+                BetAmount = x.BetAmount,
+                ValidBetAmount = x.ValidBetAmount,
+                Turnover = x.Turnover,
+                WinLossAmount = x.WinLossAmount,
+                NetProfit = x.NetProfit,
+                AgentDividendAmount = x.AgentDividendAmount,
+                FromPlayerAgentDividendAmount = x.FromPlayerAgentDividendAmount,
+                FromTeamAgentDividendAmount = x.FromTeamAgentDividendAmount
+            }).AsQueryable().CreatePagedResponse(new PageableRequest
+            {
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.OrderBy,
+                SortBy = request.SortBy
+            });
+
+            var total = new AgentDividendReportTotalModel(
+                response.Items.Sum(x => x.DepositAmount),
+                response.Items.Sum(x => x.WithdrawalAmount),
+                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.BonusAmount),
+                response.Items.Sum(x => x.BetAmount),
+                response.Items.Sum(x => x.ValidBetAmount),
+                response.Items.Sum(x => x.Turnover),
+                response.Items.Sum(x => x.WinLossAmount),
+                response.Items.Sum(x => x.NetProfit),
+                response.Items.Sum(x => x.AgentDividendAmount),
+                response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
+                response.Items.Sum(x => x.FromTeamAgentDividendAmount)
+            );
+
+            return new GetAgentDividendsReportResponse
+            {
                 TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new AgentDividendReportModel
-                {
-                    Id = x.Id,
-                    Username = x.Username,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    BonusAmount = x.BonusAmount,
-                    BetAmount = x.BetAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit,
-                    AgentDividendAmount = x.AgentDividendAmount,
-                    FromPlayerAgentDividendAmount = x.FromPlayerAgentDividendAmount,
-                    FromTeamAgentDividendAmount = x.FromTeamAgentDividendAmount
-                }).ToArray()
+                Items = pageArray.Items,
+                Total = total
             };
         }
     }

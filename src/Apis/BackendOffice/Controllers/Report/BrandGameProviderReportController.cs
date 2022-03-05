@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
-using TGS.Services.BackOffice.Application.Models.BrandGameProvider;
+using TGS.Services.BackOffice.Application.Models.ReportBrandGameProviderRound;
 using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
@@ -14,15 +12,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class BrandGameProviderReportController : BaseContextController
     {
-        private readonly IReportClient _client;
-        private readonly IMediator _mediator;
-
-        public BrandGameProviderReportController(IReportClient client, IMediator mediator)
-        {
-            _client = client;
-            _mediator = mediator;
-        }
-
         [HttpGet]
         [Description("Get brand game provider round aggregate")]
         public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
@@ -40,8 +29,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromServices] IGetService<GenerateBrandGameProviderAggregateRequest, MessageResponse>
                 generateBrandGameProviderAggregateService,
             [FromBody] GenerateBrandGameProviderAggregateRequest request)
-            => await generateBrandGameProviderAggregateService
+        {
+            request.UserId = UserId;
+            return await generateBrandGameProviderAggregateService
                 .GetAsync(request)
                 .ConfigureAwait(false);
+        }
     }
 }

@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\Commands\Aggregate\**" />
+    <EmbeddedResource Remove="Application\Commands\Aggregate\**" />
+    <None Remove="Application\Commands\Aggregate\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Domain\Consts.cs" />
   </ItemGroup>
 
@@ -215,10 +221,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Language.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Application\Commands\Aggregate\" />
   </ItemGroup>
 
 </Project>

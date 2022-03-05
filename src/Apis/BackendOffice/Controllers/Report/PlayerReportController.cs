@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.Player;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
+using TGS.Services.BackOffice.Application.Models.ReportPlayer;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -14,101 +13,37 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class PlayerReportController : BaseContextController
     {
-        private readonly IReportClient _client;
-
-        public PlayerReportController(IReportClient client) => _client = client;
-
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
         public async Task<PagedResponse<PlayerContributionReportModel>> GetRoundsAsync(
+            [FromServices]
+            IGetService<GetPlayerContributionsReportRequest, PagedResponse<PlayerContributionReportModel>>
+                playerContributionsService,
             [FromQuery] GetPlayerContributionsReportRequest request)
-        {
-            var reportRequest = new GetPlayerContributionsRequest
-            {
-                BrandId = request.BrandId,
-                Username = request.Username,
-                Level = request.Level,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
-
-            var response = await _client.GetPlayerContributionsAsync(reportRequest);
-
-            return new()
-            {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new PlayerContributionReportModel
-                {
-                    Username = x.Username,
-                    PlayerCode = x.PlayerCode,
-                    Type = (AccountType)x.Type,
-                    Level = x.Level,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    BonusAmount = x.BonusAmount,
-                    BetAmount = x.BetAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit
-                }).ToArray()
-            };
-        }
+            => await playerContributionsService
+                .GetAsync(request)
+                .ConfigureAwait(false);
 
         [HttpGet("playersAccountChanges")]
         [Description("Get account changes of multiple players")]
         public async Task<PagedResponse<PlayersAccountChangeReportModel>> GetPlayersAccountChangesAsync(
-            [FromServices] IReportClient client,
+            [FromServices]
+            IGetService<GetPlayersAccountChangesReportRequest, PagedResponse<PlayersAccountChangeReportModel>>
+                playersAccountChangesService,
             [FromQuery] GetPlayersAccountChangesReportRequest request)
-        {
-            var reportRequest = new GetPlayersAccountChangesRequest
-            {
-                BrandId = request.BrandId,
-                Username = request.Username,
-                TransactionType = (short?)request.TransactionType,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
-
-            var response = await client.GetPlayersAccountChangesAsync(reportRequest);
-
-            return new()
-            {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new PlayersAccountChangeReportModel
-                {
-                    Username = x.Username,
-                    Amount = x.Amount,
-                    BeforeBalance = x.BeforeBalance,
-                    AfterBalance = x.AfterBalance,
-                    TransactionType = (TransactionType)x.TransactionType,
-                    RecordedOn = x.RecordedOn,
-                    Operator = x.Operator,
-                    Description = x.Description
-                }).ToArray()
-            };
-        }
+            => await playersAccountChangesService
+                .GetAsync(request)
+                .ConfigureAwait(false);
 
         [HttpGet("exportPlayerContributions")]
         public async Task<IActionResult> ExportPlayerContributionsAsync(
+            [FromServices] IGetService<ExportPlayerContributionsRequest, Stream>
+                exportPlayerContributionsService,
             [FromQuery] ExportPlayerContributionsRequest request)
             => File(
-                await _client.ExportPlayerContributionsAsync(request).ConfigureAwait(false),
+                await exportPlayerContributionsService
+                    .GetAsync(request)
+                    .ConfigureAwait(false),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "PlayerContributions.xlsx");
     }
