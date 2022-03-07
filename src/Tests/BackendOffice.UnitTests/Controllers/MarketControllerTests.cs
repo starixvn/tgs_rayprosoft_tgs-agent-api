@@ -6,10 +6,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
+using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
-using Tgs.Report.Client.Models;
-using Tgs.Report.Client.Models.Market;
 using TGS.Services.BackOffice.Application.Models.ReportMarket;
+using Tgs.ServiceUtility;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -21,19 +21,21 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new(
-                _clientMock.Object);
+            _controller = new();
         }
 
         private MarketReportController _controller;
         private readonly Mock<IReportClient> _clientMock = new();
+
+        private readonly Mock<IGetService<GetMarketsReportRequest, PagedResponse<MarketReportModel>>> _getServiceMock =
+            new();
 
         [TestCase(true)]
         [TestCase(false)]
         public async Task Can_Get_Markets(bool showAll)
         {
             var list = new Fixture()
-                .CreateMany<MarketModel>(99)
+                .CreateMany<MarketReportModel>(99)
                 .ToArray();
 
             var request = new GetMarketsReportRequest
@@ -49,15 +51,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-            _clientMock
-                .Setup(m => m.GetMarketsAsync(It.IsAny<GetMarketsRequest>()))
-                .ReturnsAsync(new PagedResponse<MarketModel>
+            _getServiceMock
+                .Setup(m => m.GetAsync(It.IsAny<GetMarketsReportRequest>(), default))
+                .ReturnsAsync(new PagedResponse<MarketReportModel>
                 {
                     Valid = true,
                     Items = expectedRoles
                 });
 
-            var response = await _controller.GetMarketsAsync(request);
+            var response = await _controller.GetMarketsAsync(_getServiceMock.Object, request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
@@ -65,7 +67,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].ReportDate.Should().Be(expectedRoles[i].ReportDate);
             }
 
-            _clientMock.Verify(x => x.GetMarketsAsync(It.IsAny<GetMarketsRequest>()));
+            _getServiceMock.Verify(x => x.GetAsync(It.IsAny<GetMarketsReportRequest>(), default));
         }
     }
 }
