@@ -40,9 +40,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromServices] IGetService<GetRoundHistoryReportRequest, JsonDocument?>
                 roundHistoryService,
             [FromQuery] GetRoundHistoryReportRequest request)
-            => await roundHistoryService
+        {
+            request.RoundId = roundId;
+            return await roundHistoryService
                 .GetAsync(request)
                 .ConfigureAwait(false);
+        }
 
         [HttpGet]
         [Description("Get rounds")]
