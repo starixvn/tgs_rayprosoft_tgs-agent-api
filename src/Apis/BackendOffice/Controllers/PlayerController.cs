@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.Player;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
@@ -11,6 +10,7 @@ using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
+using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers

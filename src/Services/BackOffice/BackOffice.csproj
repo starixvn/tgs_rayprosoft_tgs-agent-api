@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\Commands\Aggregate\**" />
+    <EmbeddedResource Remove="Application\Commands\Aggregate\**" />
+    <None Remove="Application\Commands\Aggregate\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Domain\Consts.cs" />
   </ItemGroup>
 
