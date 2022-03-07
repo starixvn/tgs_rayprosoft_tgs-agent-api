@@ -147,7 +147,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public async Task<JsonDocument?> GetRoundAsync(Guid roundId,
+        public async Task<JsonDocument> GetRoundAsync(Guid roundId,
             [FromQuery] GetRoundHistoryReportRequest request)
         {
             var reportRequest = new GetRoundHistoryRequest
