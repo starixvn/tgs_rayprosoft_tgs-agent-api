@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Models.Vip
+namespace TGS.Services.BackOffice.Application.Models.ReportVip
 {
     public record VipReportModel
     {

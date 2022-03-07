@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Models.Vip
+namespace TGS.Services.BackOffice.Application.Models.ReportVip
 {
     public class GetVipReportReportRequest : PageableRequest
     {

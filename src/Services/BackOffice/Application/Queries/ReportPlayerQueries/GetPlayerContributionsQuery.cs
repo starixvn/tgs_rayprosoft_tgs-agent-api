@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
@@ -13,14 +14,14 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
 {
     public class
         GetPlayerContributionsQuery : IGetService<GetPlayerContributionsReportRequest,
-            PagedResponse<PlayerContributionReportModel>>
+            GetPlayerContributionsReportResponse>
     {
         private readonly IReportClient _reportClient;
 
         public GetPlayerContributionsQuery(IReportClient reportClient)
             => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
-        public async ValueTask<PagedResponse<PlayerContributionReportModel>> GetAsync(
+        public async ValueTask<GetPlayerContributionsReportResponse> GetAsync(
             GetPlayerContributionsReportRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -40,27 +41,46 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
 
             var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
 
-            return new()
+            var pageArray = response.Items?.Select(x => new PlayerContributionReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
+                Username = x.Username,
+                PlayerCode = x.PlayerCode,
+                Type = (AccountType)x.Type,
+                Level = x.Level,
+                DepositAmount = x.DepositAmount,
+                WithdrawalAmount = x.WithdrawalAmount,
+                AdjustmentAmount = x.AdjustmentAmount,
+                BonusAmount = x.BonusAmount,
+                BetAmount = x.BetAmount,
+                ValidBetAmount = x.ValidBetAmount,
+                Turnover = x.Turnover,
+                WinLossAmount = x.WinLossAmount,
+                NetProfit = x.NetProfit
+            }).AsQueryable().CreatePagedResponse(new PageableRequest
+            {
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.OrderBy,
+                SortBy = request.SortBy
+            });
+
+            var total = new PlayerContributionReportTotalModel(
+                response.Items.Sum(x => x.DepositAmount),
+                response.Items.Sum(x => x.WithdrawalAmount),
+                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.BonusAmount),
+                response.Items.Sum(x => x.BetAmount),
+                response.Items.Sum(x => x.ValidBetAmount),
+                response.Items.Sum(x => x.Turnover),
+                response.Items.Sum(x => x.WinLossAmount),
+                response.Items.Sum(x => x.NetProfit)
+            );
+
+            return new GetPlayerContributionsReportResponse
+            {
                 TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new PlayerContributionReportModel
-                {
-                    Username = x.Username,
-                    PlayerCode = x.PlayerCode,
-                    Type = (AccountType)x.Type,
-                    Level = x.Level,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    BonusAmount = x.BonusAmount,
-                    BetAmount = x.BetAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit
-                }).ToArray()
+                Items = pageArray.Items,
+                Total = total
             };
         }
     }

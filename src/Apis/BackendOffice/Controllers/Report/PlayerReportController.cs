@@ -15,9 +15,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
-        public async Task<PagedResponse<PlayerContributionReportModel>> GetRoundsAsync(
-            [FromServices]
-            IGetService<GetPlayerContributionsReportRequest, PagedResponse<PlayerContributionReportModel>>
+        public async Task<GetPlayerContributionsReportResponse> GetPlayerContributionsAsync(
+            [FromServices] IGetService<GetPlayerContributionsReportRequest, GetPlayerContributionsReportResponse>
                 playerContributionsService,
             [FromQuery] GetPlayerContributionsReportRequest request)
             => await playerContributionsService

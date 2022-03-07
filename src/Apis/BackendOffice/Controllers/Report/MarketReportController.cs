@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models.Messages;
 using Tgs.Report.Client.Models.Market;
 using TGS.Services.BackOffice.Application.Models.ReportMarket;
 using Tgs.ServiceUtility;
@@ -15,8 +14,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     {
         [HttpGet]
         [Description("Get market report")]
-        public async Task<PagedResponse<MarketReportModel>> GetMarketsAsync(
-            [FromServices] IGetService<GetMarketsReportRequest, PagedResponse<MarketReportModel>>
+        public async Task<GetMarketsReportResponse> GetMarketsAsync(
+            [FromServices] IGetService<GetMarketsReportRequest, GetMarketsReportResponse>
                 marketsService,
             [FromQuery] GetMarketsReportRequest request)
             => await marketsService
