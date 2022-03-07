@@ -6,8 +6,6 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
-using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
 using TGS.Services.BackOffice.Application.Models.ReportMarket;
 using Tgs.ServiceUtility;
 
@@ -25,9 +23,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         private MarketReportController _controller;
-        private readonly Mock<IReportClient> _clientMock = new();
 
-        private readonly Mock<IGetService<GetMarketsReportRequest, PagedResponse<MarketReportModel>>> _getServiceMock =
+        private readonly Mock<IGetService<GetMarketsReportRequest, GetMarketsReportResponse>> _getServiceMock =
             new();
 
         [TestCase(true)]
@@ -53,14 +50,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _getServiceMock
                 .Setup(m => m.GetAsync(It.IsAny<GetMarketsReportRequest>(), default))
-                .ReturnsAsync(new PagedResponse<MarketReportModel>
+                .ReturnsAsync(new GetMarketsReportResponse
                 {
-                    Valid = true,
+                    TotalCount = list.Count(),
                     Items = expectedRoles
                 });
 
             var response = await _controller.GetMarketsAsync(_getServiceMock.Object, request);
-            response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
             {
