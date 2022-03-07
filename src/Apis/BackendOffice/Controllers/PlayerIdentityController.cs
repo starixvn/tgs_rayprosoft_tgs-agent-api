@@ -3,14 +3,14 @@ using System.ComponentModel;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Player;
 using TGS.Apis.BackendOffice.Extensions;
-using TGS.Apis.BackendOffice.Models.Player;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
+using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -44,9 +44,9 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPost("{formId}", Name = "ReviewPlayerIdentityForm")]
         public async Task<MessageResponse> ReviewPlayerIdentityFormAsync(
-           [FromServices] ICommandService<ReviewPlayerIdentityFormCommand> reviewCommandService,
-           Guid formId,
-           [FromBody] PlayerIdentityReviewRequest reviewResponse)
+            [FromServices] ICommandService<ReviewPlayerIdentityFormCommand> reviewCommandService,
+            Guid formId,
+            [FromBody] PlayerIdentityReviewRequest reviewResponse)
         {
             var command = new ReviewPlayerIdentityFormCommand(
                 reviewResponse.BrandId,
