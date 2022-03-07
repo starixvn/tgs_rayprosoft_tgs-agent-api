@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Report.Client.Models;
+using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Application.Models.ReportGameProviderRound;
 using Tgs.ServiceUtility;
-using MessageResponse = TGS.Core.Models.Messages.MessageResponse;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
