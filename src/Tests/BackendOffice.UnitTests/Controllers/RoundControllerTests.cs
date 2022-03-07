@@ -19,11 +19,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new(
-                _clientMock.Object);
+            _controller = new();
         }
-
-        private readonly Mock<IReportClient> _clientMock = new();
 
         private RoundReportController _controller;
 

@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.Vip;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Vip;
+using TGS.Services.BackOffice.Application.Models.ReportVip;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -19,102 +20,36 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get vips")]
-        public async Task<PagedResponse<VipReportModel>> GetVipsAsync([FromQuery] GetVipReportReportRequest request)
-        {
-            var reportRequest = new GetVipReportRequest
-            {
-                BrandId = request.BrandId,
-                Username = request.Username,
-                Level = request.Level,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
-
-            var response = await _client.GetVipReportAsync(reportRequest);
-
-            return new()
-            {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new VipReportModel
-                {
-                    BrandId = x.BrandId,
-                    Username = x.Username,
-                    PlayerCode = x.PlayerCode,
-                    Level = x.Level,
-                    DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
-                    BonusAmount = x.BonusAmount,
-                    AdjustmentAmount = x.AdjustmentAmount,
-                    RebateAmount = x.RebateAmount,
-                    BetAmount = x.BetAmount,
-                    ValidBetAmount = x.ValidBetAmount,
-                    Turnover = x.Turnover,
-                    WinLossAmount = x.WinLossAmount,
-                    NetProfit = x.NetProfit
-                }).ToArray()
-            };
-        }
+        public async Task<GetVipReportReportResponse> GetVipsAsync(
+            [FromServices] IGetService<GetVipReportReportRequest, GetVipReportReportResponse>
+                vipReportService,
+            [FromQuery] GetVipReportReportRequest request)
+            => await vipReportService
+                .GetAsync(request)
+                .ConfigureAwait(false);
 
         [HttpGet("{username}")]
         [Description("Get vip rebates")]
         public async Task<PagedResponse<VipRebateReportModel>> GetVipRebatesAsync(string username,
+            [FromServices] IGetService<GetVipRebateReportReportRequest, PagedResponse<VipRebateReportModel>>
+                vipRebateReportService,
             [FromQuery] GetVipRebateReportReportRequest request)
         {
-            var reportRequest = new GetVipRebateReportRequest
-            {
-                BrandId = request.BrandId,
-                Username = username,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+            request.Username = username;
 
-            var response = await _client.GetVipRebateReportAsync(reportRequest);
-
-            return new()
-            {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new VipRebateReportModel
-                {
-                    ReportDate = x.ReportDate,
-                    LiveDealerAmount = x.LiveDealerAmount,
-                    SlotAmount = x.SlotAmount,
-                    LotteryAmount = x.LotteryAmount,
-                    CardGameAmount = x.CardGameAmount,
-                    SportsAmount = x.SportsAmount,
-                    VirtualSportsAmount = x.VirtualSportsAmount,
-                    LiveDealerTurnover = x.LiveDealerTurnover,
-                    SlotTurnover = x.SlotTurnover,
-                    LotteryTurnover = x.LotteryTurnover,
-                    CardGameTurnover = x.CardGameTurnover,
-                    SportsTurnover = x.SportsTurnover,
-                    VirtualSportsTurnover = x.VirtualSportsTurnover,
-                    LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,
-                    SlotRebatePercentage = x.SlotRebatePercentage,
-                    LotteryRebatePercentage = x.LotteryRebatePercentage,
-                    CardGameRebatePercentage = x.CardGameRebatePercentage,
-                    SportsRebatePercentage = x.SportsRebatePercentage,
-                    VirtualSportsRebatePercentage = x.VirtualSportsRebatePercentage
-                }).ToArray()
-            };
+            return await vipRebateReportService
+                .GetAsync(request)
+                .ConfigureAwait(false);
         }
 
         [HttpGet("exportVips")]
-        public async Task<IActionResult> ExportVipsAsync([FromQuery] ExportVipReportRequest request) => File(
-            await _client.ExportVipsAsync(request).ConfigureAwait(false),
+        public async Task<IActionResult> ExportVipsAsync(
+            [FromServices] IGetService<ExportVipReportRequest, Stream>
+                exportVipReportService,
+            [FromQuery] ExportVipReportRequest request) => File(
+            await exportVipReportService
+                .GetAsync(request)
+                .ConfigureAwait(false),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "Vips.xlsx");
     }
