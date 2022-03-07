@@ -68,6 +68,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
                 response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.RebateAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
                 response.Items.Sum(x => x.ValidBetAmount),
