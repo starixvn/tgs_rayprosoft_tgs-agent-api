@@ -4,6 +4,7 @@
         decimal DepositAmount,
         decimal WithdrawalAmount,
         decimal AdjustmentAmount,
+        decimal RebateAmount,
         decimal BonusAmount,
         decimal BetAmount,
         decimal ValidBetAmount,
