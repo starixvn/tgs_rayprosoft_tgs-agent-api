@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
 using TGS.Services.BackOffice.Application.Models.ReportRound;
 using Tgs.ServiceUtility;
 
@@ -15,10 +14,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class RoundReportController : BaseContextController
     {
-        private readonly IReportClient _client;
-
-        public RoundReportController(IReportClient client) => _client = client;
-
         [HttpGet("closedRounds")]
         [Description("Get closed rounds")]
         public async Task<PagedResponse<ClosedRoundReportModel>> GetClosedRoundsAsync(
