@@ -185,6 +185,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+            _ = brandPaymentBankInfo.RootElement.TryGetProperty("qrCodeFileUrl", out var qrCodeFileUrl);
+            _ = brandPaymentBankInfo.RootElement.TryGetProperty("email", out var email);
+            _ = brandPaymentBankInfo.RootElement.TryGetProperty("fpsId", out var fpsId);
+            _ = brandPaymentBankInfo.RootElement.TryGetProperty("phone", out var phone);
 
             var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
@@ -197,10 +201,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                     new ManualDepositFpsApplyInfo
                     {
                         BankType = request.BankType,
-                        QrCodeFileUrl = brandPaymentBankInfo.RootElement.GetProperty("qrCodeFileUrl").GetString(),
-                        Email = brandPaymentBankInfo.RootElement.GetProperty("email").GetString(),
-                        FpsId = brandPaymentBankInfo.RootElement.GetProperty("fpsId").GetString(),
-                        Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString()
+                        QrCodeFileUrl = qrCodeFileUrl.GetString(),
+                        Email = email.GetString(),
+                        FpsId = fpsId.GetString(),
+                        Phone = phone.GetString()
                     }));
 
             await createDepositFormService
