@@ -28,6 +28,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportGameProviderQueries
                 From = request.From,
                 To = request.To,
                 GameProviderId = request.GameProviderId,
+                CurrencyCode = request.CurrencyCode,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,

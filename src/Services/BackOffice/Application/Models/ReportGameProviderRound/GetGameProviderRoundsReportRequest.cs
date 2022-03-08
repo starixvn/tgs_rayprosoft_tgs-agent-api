@@ -10,5 +10,7 @@ namespace TGS.Services.BackOffice.Application.Models.ReportGameProviderRound
         public DateTimeOffset To { get; init; }
 
         public Guid? GameProviderId { get; init; }
+
+        public string CurrencyCode { get; init; }
     }
 }
