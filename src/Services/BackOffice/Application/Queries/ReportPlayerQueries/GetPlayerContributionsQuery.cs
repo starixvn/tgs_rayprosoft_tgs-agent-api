@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
 {
@@ -29,6 +29,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
             {
                 BrandId = request.BrandId,
                 Username = request.Username,
+                HasUpperAgent = request.HasUpperAgent,
                 Level = request.Level,
                 From = request.From,
                 To = request.To,
