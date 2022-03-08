@@ -1,0 +1,47 @@
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Lobby,Lobby,,dglobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,DG
+Baccarat_DG01,Baccarat_DG01,,10101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG02,Baccarat_DG02,,10102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG03,Baccarat_DG03,,10103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG05,Baccarat_DG05,,10105,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG06,Baccarat_DG06,,10106,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG07,Baccarat_DG07,,10107,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_DG08,Baccarat_DG08,,10108,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+DragonTiger_DG12,DragonTiger_DG12,,10301,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Roulette_DG13,Roulette_DG13,,10401,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Sicbo_DG15,Sicbo_DG15,,10501,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Bull_DG16,Bull_DG16,,10701,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Three Cards_DG17,Three_Cards_DG17,,11101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Speed Sicbo_DG18,Speed_Sicbo_DG18,,11201,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+three face_DG19,three_face_DG19,,11601,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site Baccarat_CT01,Site_Baccarat_CT01,,30101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site Baccarat_CT02,Site_Baccarat_CT02,,30102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site Baccarat_CT03,Site_Baccarat_CT03,,30103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site Baccarat_CT05,Site_Baccarat_CT05,,30105,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site DragonTiger_CT06,Site_DragonTiger_CT06,,30301,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Site Roulette_CT08,Site_Roulette_CT08,,30401,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+FanTan Roulette_CT10,FanTan_Roulette_CT10,,30601,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Poipet Baccarat_CT21,Poipet_Baccarat_CT21,,40101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Poipet Baccarat_CT22,Poipet_Baccarat_CT22,,40102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_CT28,Baccarat_CT28,,40103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Poipet Sicbo_CT27,Poipet_Sicbo_CT27,,40501,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Bid Baccarat_DG09,Bid_Baccarat_DG09,,20802,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Bid Baccarat_DG10,Bid_Baccarat_DG10,,20803,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_E1,Baccarat_E1,,50101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_E3,Baccarat_E3,,50102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_E7,Baccarat_E7,,50103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Roulette_R1,Roulette_R1,,50401,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_GC01,Baccarat_GC01,,70101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_GC02,Baccarat_GC02,,70102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_GC03,Baccarat_GC03,,70103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_GC05,Baccarat_GC05,,70105,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Baccarat_GC06,Baccarat_GC06,,70106,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+DragonTiger_GC07,DragonTiger_GC07,,70301,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Roulette_GC08,Roulette_GC08,,70401,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Sicbo_GC09,Sicbo_GC09,,70501,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+FightBull_GC10,FightBull_GC10,,70701,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Sedie_GC11,Sedie_GC11,,71401,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+HuluCock_GC12,HuluCock_GC12,,71501,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+InBaccarat_GC13,InBaccarat_GC13,,70201,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Live Lucky 5_CP01,Live_Lucky_5_CP01,,65101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
+Live Lucky10_CP02,Live_Lucky10_CP02,,65201,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
