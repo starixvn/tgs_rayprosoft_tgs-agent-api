@@ -12,6 +12,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IBrandGameProviderService
     {
+        ITgsRepository TgsRepository { get; }
+
         Task<BrandGameProvider> GetBrandGameProviderAsync(
             Expression<Func<BrandGameProvider, bool>> predicate,
             Func<IQueryable<BrandGameProvider>, IQueryable<BrandGameProvider>> preQuery =
@@ -28,10 +30,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     public class BrandGameProviderService : BaseRepositoryOperations<ITgsRepository>,
         IBrandGameProviderService
     {
-        private readonly ITgsRepository _repository;
-
         public BrandGameProviderService(ITgsRepository tgsRepository) : base(tgsRepository)
-            => _repository = tgsRepository;
+            => TgsRepository = tgsRepository;
+
+        public ITgsRepository TgsRepository { get; }
 
         Task<BrandGameProvider> IBrandGameProviderService.GetBrandGameProviderAsync(
             Expression<Func<BrandGameProvider, bool>> predicate,
@@ -50,7 +52,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task IBrandGameProviderService.UpdateBrandGameProvidersAsync(string toMaintenanceIds, string toActiveIds)
         {
             const string spName = "dbo.brand_game_providers_status_changes";
-            return _repository
+            return TgsRepository
                 .SqlQuerySingleAsync<object>(spName,
                     parameters:
                     new Dictionary<string, object>
