@@ -288,6 +288,18 @@
       },
       "applicationUrl": "http://localhost:62330;http://+:62330"
     },
+    "TgsApi-DreamGame": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "DreamGame-API-Local-Dev",
+        "NODE_IP": "192.168.50.112",
+        "GameProviderCode": "DG"
+      },
+      "applicationUrl": "http://localhost:62330;http://+:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -445,6 +457,17 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "GameProviderCode": "TF"
+      }
+    },
+    "Docker-DreamGame": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OTEL_SERVICE_NAME": "DreamGame-API-Local-Dev",
+        "NODE_IP": "192.168.50.112",
+        "GameProviderCode": "DG"
       }
     }
   }
