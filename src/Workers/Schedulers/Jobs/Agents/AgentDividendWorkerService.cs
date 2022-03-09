@@ -18,21 +18,21 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
 
     public class AgentDividendWorkerService : IAgentDividendWorkerService
     {
-        private readonly IBrandGameProviderService _brandService;
         private readonly IProfitRebateClient _client;
+        private readonly IBrandGameProviderService _service;
 
         public AgentDividendWorkerService(
-            IProfitRebateClient client, IBrandGameProviderService brandService)
+            IProfitRebateClient client, IBrandGameProviderService service)
         {
             _client = client;
-            _brandService = brandService;
+            _service = service;
         }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
             var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
-            var brands = await _brandService.TgsRepository.Brands.AsQueryable()
+            var brands = await _service.TgsRepository.Brands.AsQueryable()
                 .Where(x => queryDate.ToUniversalTime() > x.CurrentSettlementTo)
                 .Select(x => new { x.Code })
                 .ToArrayAsync();
