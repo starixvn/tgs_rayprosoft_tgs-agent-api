@@ -54,7 +54,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
         [HttpPost("user/getBalance/{agentName:RegexAgentName}")]
         public async ValueTask<DreamGameBalanceResponse> GetBalanceAsync(DreamGameBalanceRequest request)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, request.Member.Username).ConfigureAwait(false);
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, playerCode).ConfigureAwait(false);
 
             return new()
             {

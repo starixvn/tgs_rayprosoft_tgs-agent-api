@@ -37,7 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
                 path.Contains("account/inform/", StringComparison.CurrentCultureIgnoreCase) ||
                 path.Contains("account/transfer/", StringComparison.CurrentCultureIgnoreCase))
             {
-                var playerCode = jsonDocument.RootElement.GetProperty("member").GetProperty("username").GetString();
+                var playerCode = jsonDocument.RootElement.GetProperty("member").GetProperty("username").GetString().ToLower();
                 var playerLoginRecordModel = await _service.GetPlayerLoginLastAsync(playerCode).ConfigureAwait(false);
                 if (playerLoginRecordModel == null)
                 {
