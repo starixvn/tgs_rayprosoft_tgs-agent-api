@@ -24,6 +24,7 @@ using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Apis.TgsApi.GameProviders.WGHorse;
 using TGS.Apis.TgsApi.GameProviders.WGSports;
 using TGS.Apis.TgsApi.GameProviders.WMCasino;
+using TGS.Apis.TgsApi.GameProviders.DreamGame;
 using static TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi
@@ -55,7 +56,8 @@ namespace TGS.Apis.TgsApi
             { BetConstruct, "BetConstruct/betconstruct.json" },
             { Avia, "Avia/avia.json" },
             { Jili, "Jili/jili.json" },
-            { TFGaming, "TF/tf.json" }
+            { TFGaming, "TF/tf.json" },
+            { DreamGame, "DreamGame/dreamgame.json" }
         };
 
         private static readonly IReadOnlyDictionary<string, Type> _StartupMap = new Dictionary<string, Type>
@@ -83,7 +85,8 @@ namespace TGS.Apis.TgsApi
             { BetConstruct, typeof(BetConstructStartup) },
             { Avia, typeof(AviaStartup) },
             { Jili, typeof(JiliStartup) },
-            { TFGaming, typeof(TFStartup) }
+            { TFGaming, typeof(TFStartup) },
+            { DreamGame, typeof(DreamGameStartup) }
         };
     }
 }
