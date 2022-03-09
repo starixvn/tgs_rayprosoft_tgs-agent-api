@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Messages;
 using Tgs.ProfitRebate.Client;
 using Tgs.ProfitRebate.Client.Models;
-using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Workers.Schedulers.Jobs.Agents
 {
@@ -19,20 +19,20 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
     public class AgentDividendWorkerService : IAgentDividendWorkerService
     {
         private readonly IProfitRebateClient _client;
-        private readonly IBrandGameProviderService _service;
+        private readonly ITgsRepository _tgsRepository;
 
         public AgentDividendWorkerService(
-            IProfitRebateClient client, IBrandGameProviderService service)
+            IProfitRebateClient client, ITgsRepository tgsRepository)
         {
             _client = client;
-            _service = service;
+            _tgsRepository = tgsRepository;
         }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
             var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
-            var brands = await _service.TgsRepository.Brands.AsQueryable()
+            var brands = await _tgsRepository.Brands.AsQueryable()
                 .Where(x => queryDate.ToUniversalTime() > x.CurrentSettlementTo)
                 .Select(x => new { x.Code })
                 .ToArrayAsync();
