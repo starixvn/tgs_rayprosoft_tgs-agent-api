@@ -26,7 +26,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
             var configuration = await _service.GetDreamGameConfigurationAsync().ConfigureAwait(false);
             var jsonDocument = JsonDocument.Parse(await context.Request.ReadAsStringAsync().ConfigureAwait(false));
             var token = jsonDocument.RootElement.GetProperty("token").GetString();
-            if (configuration.ApiKey != token)
+            var key = _service.GetHashMD5(configuration.AgentName, configuration.ApiKey).ToLower();
+            if (key != token)
             {
                 throw new InvalidCredentialsException($"{token }");
             }
