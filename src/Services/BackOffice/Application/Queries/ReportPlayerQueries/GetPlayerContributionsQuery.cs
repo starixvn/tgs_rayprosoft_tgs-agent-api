@@ -37,7 +37,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                ShowAll = true
             };
 
             var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
