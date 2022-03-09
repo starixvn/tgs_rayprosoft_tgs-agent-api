@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Models.Commons;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -108,6 +111,14 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.DreamGame).ConfigureAwait(false);
+
+        public string GetHashMD5(string agentName, string ApiKey)
+        {
+            using var md5 = MD5.Create();
+            var dataByte = Encoding.UTF8.GetBytes($"{agentName}{ApiKey}");
+            var hash = md5.ComputeHash(dataByte);
+            return hash.ToHexString().ToUpper();
+        }
 
         public async ValueTask<PlayerLoginRecordModel> GetPlayerLoginLastAsync(string playerCode)
                             => await _playerLoginRecordService.GetLastAsync(playerCode).ConfigureAwait(false);

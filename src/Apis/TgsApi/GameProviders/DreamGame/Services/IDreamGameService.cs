@@ -30,6 +30,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
 
         ValueTask<Guid> GetGameProviderIdAsync();
 
+        string GetHashMD5(string agentName, string ApiKey);
+
         ValueTask<PlayerLoginRecordModel> GetPlayerLoginLastAsync(string playerCode);
 
         ValueTask<OrderInfo[]> GetUnsettleAsync(Guid gameProviderId);

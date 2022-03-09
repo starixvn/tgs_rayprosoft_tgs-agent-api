@@ -48,7 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
             app.UseGlobalExceptionHandler();
 
             app.UseGameApiLogger(
-                "wmcasino",
+                "dreamgame",
                 new[] { "/health", "/favicon.ico", "/metrics" });
 
             app.UseRouting();
