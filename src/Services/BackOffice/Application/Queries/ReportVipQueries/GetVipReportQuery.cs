@@ -35,7 +35,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                ShowAll = true
             };
 
             var response = await _reportClient.GetVipReportAsync(reportRequest);
