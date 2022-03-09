@@ -530,11 +530,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Starts the change phone.
         /// </summary>
+        /// <param name="checkService">The check player phone service.</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
         [HttpPost("phone", Name = "StartChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask<string> StartChangePhoneAsync(
+        public async ValueTask<string> StartChangePhoneAsync(
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
         {
@@ -542,7 +544,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 || string.IsNullOrWhiteSpace(request.AreaCode))
                 throw new PlayerPhoneRequiredException();
 
+            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var checkQuery = new CheckBrandPhoneQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                request.AreaCode.Trim(),
+                request.Phone.Trim());
+
+            var isBrandHasSamePhone = await checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
 
             var command = new StartSetPlayerPhoneCommand(
                 playerTokenData.PlayerCode,
@@ -550,7 +566,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Phone.Trim(),
                 CultureInfo.CurrentUICulture);
 
-            return startSetPlayerPhoneService.GetAsync(command);
+            return await startSetPlayerPhoneService
+                .GetAsync(command)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -558,6 +576,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="getPlayerInfoService">The get player information service.</param>
         /// <param name="validatePlayerService">The validate init phone service</param>
+        /// /// <param name="checkService">The check player phone service.</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
         /// <returns>
@@ -567,6 +586,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartInitPhoneRequest request)
         {
@@ -593,6 +613,19 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             if (!isValid)
                 throw new CoreExceptions.InvalidCredentialsException("Login fail.");
+
+            var checkQuery = new CheckBrandPhoneQuery(
+                brandId,
+                playerInfo.PlayerCode,
+                request.AreaCode.Trim(),
+                request.Phone.Trim());
+
+            var isBrandHasSamePhone = await checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
 
             var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
                 playerInfo.PlayerCode,
@@ -632,38 +665,90 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Submits the change phone.
         /// </summary>
+        /// /// <param name="getPlayerQueryService">Get player info service.</param>
+        /// /// <param name="checkService">The check player phone service.</param>
         /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("phone", Name = "SubmitChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask SubmitChangePhoneAsync(
+        public async ValueTask SubmitChangePhoneAsync(
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetPlayerQuery(brandId, playerTokenData.PlayerCode);
+
+            var player = await getPlayerQueryService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var checkQuery = new CheckBrandPhoneQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                player.AreaCode,
+                player.Phone);
+
+            var isBrandHasSamePhone = await checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
 
             var command = new CommitSetPlayerPhoneCommand(
                 playerTokenData.PlayerCode,
                 request.SecurityKey,
                 request.ValidateCode);
 
-            return commitPlayerPhoneService.ExecuteAsync(command);
+            await commitPlayerPhoneService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
         /// Submits the change phone.
         /// </summary>
+        /// <param name="getPlayerQueryService">Get player info service.</param>
+        /// <param name="checkService">The check player phone service.</param>
         /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
         /// <param name="requestAnalyzer">The request analyzer.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
-        public ValueTask SubmitInitPhoneAsync(
+        public async ValueTask SubmitInitPhoneAsync(
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
             [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromBody] SubmitInitPhoneRequest request)
         {
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetPlayerQuery(brandId, playerTokenData.PlayerCode);
+
+            var player = await getPlayerQueryService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var checkQuery = new CheckBrandPhoneQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                player.AreaCode,
+                player.Phone);
+
+            var isBrandHasSamePhone = await checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
+
             var ipAddress = HttpContext.Connection.RemoteIpAddress;
             var hostName = Request.Host.Host;
 
@@ -673,7 +758,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ipAddress.ToString(),
                 hostName);
 
-            return commitPlayerInitPhoneService.ExecuteAsync(command);
+            await commitPlayerInitPhoneService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
         }
 
         [HttpPost("game/auto-transfer", Name = "ToggleAutoTransferToGameFlag")]

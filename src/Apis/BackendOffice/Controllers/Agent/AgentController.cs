@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Models.Agent;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
+using TGS.Services.BackOffice.Application.Models.ReportAgent;
 
 namespace TGS.Apis.BackendOffice.Controllers.Agent
 {
