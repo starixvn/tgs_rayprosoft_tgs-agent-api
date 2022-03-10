@@ -89,7 +89,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     RegisterHost = registerIp?.Host ?? string.Empty,
                     LastLoginIp = loginIp?.Ip ?? string.Empty,
                     LastLoginOn = loginIp?.RecordOn,
-                    IdNumber = player.IdNumber
+                    IdNumber = player.IdNumber,
+                    Remark = player.Remark
                 }
             };
         }
