@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
+using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Redis;
@@ -28,10 +29,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPlayerOperations = new Mock<IPlayerOperations>();
             var moqCacheManager = new Mock<IRedisCacheManager>();
 
+            var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
+
             var sut = new CommitPlayerInitPhoneService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqCacheManager.Object);
+                moqCacheManager.Object,
+                moqCheckService.Object);
 
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
@@ -40,7 +44,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 securityKey,
                 validateCode,
                 "127.0.0.1",
-                "localhost");
+                "localhost",
+                Guid.NewGuid());
 
             moqValidateCodeOperator
                 .Setup(
@@ -59,11 +64,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPlayerRepository = new Mock<IPlayerRepository>();
             var moqPlayerOperations = new Mock<IPlayerOperations>();
             var moqCacheManager = new Mock<IRedisCacheManager>();
+            var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
 
             var sut = new CommitPlayerInitPhoneService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqCacheManager.Object);
+                moqCacheManager.Object,
+                moqCheckService.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
@@ -75,7 +82,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 securityKey,
                 validateCode,
                 "127.0.0.1",
-                "localhost");
+                "localhost",
+                Guid.NewGuid());
 
             moqValidateCodeOperator
                 .Setup(
@@ -105,11 +113,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPlayerRepository = new Mock<IPlayerRepository>();
             var moqPlayerOperations = new Mock<IPlayerOperations>();
             var moqCacheManager = new Mock<IRedisCacheManager>();
+            var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
 
             var sut = new CommitPlayerInitPhoneService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqCacheManager.Object);
+                moqCacheManager.Object,
+                moqCheckService.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
@@ -121,7 +131,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 securityKey,
                 validateCode,
                 "127.0.0.1",
-                "localhost");
+                "localhost",
+                Guid.NewGuid());
 
             moqValidateCodeOperator
                 .Setup(
