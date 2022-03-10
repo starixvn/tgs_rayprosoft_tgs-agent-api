@@ -77,6 +77,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Wechat)
                 .HasMaxLength(64);
 
+            builder.Property(p => p.Birthday);
+
+            builder.Property(p => p.Remark);
+
             builder.Property(c => c.AccumulatedDeposit)
                 .HasPrecision(18, 6)
                 .HasDefaultValue(0)
@@ -115,11 +119,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDatabaseName("ix_players_bet_limit_id");
 
             builder.HasIndex(p => new
-                {
-                    p.BrandId,
-                    p.AreaCode,
-                    p.Phone
-                })
+            {
+                p.BrandId,
+                p.AreaCode,
+                p.Phone
+            })
                 .IsUnique()
                 .HasDatabaseName("ux_players_brand_phone");
         }

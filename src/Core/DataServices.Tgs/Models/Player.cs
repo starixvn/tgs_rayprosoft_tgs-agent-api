@@ -20,6 +20,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int BetLimitId { get; set; }
 
+        public DateTimeOffset? Birthday { get; set; }
+
         public virtual Brand Brand { get; set; }
 
         public Guid BrandId { get; set; }
@@ -63,6 +65,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string RealName { get; set; }
 
         public DateTimeOffset? RegisteredOn { get; set; }
+
+        public string Remark { get; set; }
 
         public byte[] Salt { get; set; }
 
