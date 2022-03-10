@@ -56,5 +56,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             => await roundsService
                 .GetAsync(request)
                 .ConfigureAwait(false);
+
+        [HttpGet("betRecords")]
+        [Description("Get bet records")]
+        public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
+            [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
+                betRecordsService,
+            [FromQuery] GetBetRecordsReportRequest request)
+            => await betRecordsService
+                .GetAsync(request)
+                .ConfigureAwait(false);
     }
 }
