@@ -1737,8 +1737,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
-                    b.Property<int>("GameType")
-                        .HasColumnType("integer")
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
                         .HasColumnName("game_type");
 
                     b.Property<DateTimeOffset>("ReportDate")
@@ -3953,6 +3953,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
 
+                    b.Property<DateTimeOffset?>("Birthday")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birthday");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -4020,6 +4024,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset?>("RegisteredOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("registered_on");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
