@@ -1,8 +1,11 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Player
+﻿using System;
+
+namespace TGS.Services.Operator.ApplicationServices.Player
 {
     public record CommitPlayerInitPhoneCommand(
         string SecurityKey,
         string ValidateCode,
         string IpAddress,
-        string? HostName);
+        string? HostName,
+        Guid BrandId);
 }
