@@ -27,10 +27,12 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
             var jsonDocument = JsonDocument.Parse(await context.Request.ReadAsStringAsync().ConfigureAwait(false));
             var token = jsonDocument.RootElement.GetProperty("token").GetString();
             var key = _service.GetHashMD5(configuration.AgentName, configuration.ApiKey).ToLower();
+            /*
             if (key != token)
             {
                 throw new InvalidCredentialsException($"{token }");
             }
+            */
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
