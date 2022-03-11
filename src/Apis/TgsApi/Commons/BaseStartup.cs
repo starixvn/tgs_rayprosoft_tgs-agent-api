@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,8 +17,9 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using Tgs.MessageQueue.MongoDB.Configuration;
 using Tgs.MessageQueue.Nats.Configuration;
+using TGS.Apis.TgsApi.GameProviders.DreamGame.Constraints;
+using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
@@ -29,8 +31,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
-using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
-
 
 namespace TGS.Apis.TgsApi.Commons
 {
@@ -136,14 +136,23 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddFeatureManagement();
 
-            services.AddControllers(options =>
+            services
+                .AddControllers(options =>
+                {
+                    options.Filters.Add<ValidateModelFilter>();
+                    AddCustomFilters(options);
+                })
+                .AddXmlSerializerFormatters()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = false;
+                });
+
+            _ = services.Configure<RouteOptions>(routeOptions =>
             {
-                options.Filters.Add<ValidateModelFilter>();
-                AddCustomFilters(options);
-            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = false;
+                routeOptions.ConstraintMap.Add("RegexAgentName", typeof(RegexAgentNameConstraint));
             });
+            _ = services.AddScoped<IDreamGameService, NoopDreamGameService>();
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")

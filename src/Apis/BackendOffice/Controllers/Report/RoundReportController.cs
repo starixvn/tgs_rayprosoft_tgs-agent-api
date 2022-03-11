@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 using System.ComponentModel;
 using System.Text.Json;
@@ -36,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public async Task<JsonDocument> GetRoundHistoryAsync(Guid roundId,
+        public async Task<JsonDocument?> GetRoundHistoryAsync(Guid roundId,
             [FromServices] IGetService<GetRoundHistoryReportRequest, JsonDocument?>
                 roundHistoryService,
             [FromQuery] GetRoundHistoryReportRequest request)
