@@ -4057,7 +4057,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("username");
 
                     b.Property<Guid?>("VipId")
-                        .IsRequired()
                         .HasColumnType("uuid")
                         .HasColumnName("vip_id");
 
@@ -7923,9 +7922,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "Vip")
                         .WithMany("Players")
                         .HasForeignKey("VipId")
-                        .HasConstraintName("fk_players_vip_levels_vip_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasConstraintName("fk_players_vip_levels_vip_id");
 
                     b.Navigation("Agent");
 
@@ -8710,8 +8707,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("BrandPaymentPlayers");
 
-                    b.Navigation("GameSetting")
-                        .IsRequired();
+                    b.Navigation("GameSetting");
 
                     b.Navigation("Letters");
 

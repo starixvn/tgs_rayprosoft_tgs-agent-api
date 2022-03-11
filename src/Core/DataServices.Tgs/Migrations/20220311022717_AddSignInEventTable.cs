@@ -7,22 +7,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "fk_players_vip_levels_vip_id",
-                schema: "dbo",
-                table: "players");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "vip_id",
-                schema: "dbo",
-                table: "players",
-                type: "uuid",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(Guid),
-                oldType: "uuid",
-                oldNullable: true);
-
             migrationBuilder.CreateTable(
                 name: "sign_in_events",
                 schema: "dbo",
@@ -64,47 +48,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo",
                 table: "sign_in_events",
                 column: "player_code");
-
-            migrationBuilder.AddForeignKey(
-                name: "fk_players_vip_levels_vip_id",
-                schema: "dbo",
-                table: "players",
-                column: "vip_id",
-                principalSchema: "dbo",
-                principalTable: "vip_levels",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "fk_players_vip_levels_vip_id",
-                schema: "dbo",
-                table: "players");
-
             migrationBuilder.DropTable(
                 name: "sign_in_events",
                 schema: "dbo");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "vip_id",
-                schema: "dbo",
-                table: "players",
-                type: "uuid",
-                nullable: true,
-                oldClrType: typeof(Guid),
-                oldType: "uuid");
-
-            migrationBuilder.AddForeignKey(
-                name: "fk_players_vip_levels_vip_id",
-                schema: "dbo",
-                table: "players",
-                column: "vip_id",
-                principalSchema: "dbo",
-                principalTable: "vip_levels",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Restrict);
         }
     }
 }
