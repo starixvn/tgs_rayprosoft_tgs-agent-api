@@ -90,7 +90,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<Wallet> Wallets { get; set; } = default!;
 
-        public string Wechat { get; set; }
+        public string? Wechat { get; set; }
 
         public byte[] WithdrawPassword { get; set; } = default!;
 
