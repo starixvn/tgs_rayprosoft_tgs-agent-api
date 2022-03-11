@@ -1,4 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Messages;
 using Tgs.ProfitRebate.Client;
 using Tgs.ProfitRebate.Client.Models;
@@ -14,15 +19,36 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
     public class AgentDividendWorkerService : IAgentDividendWorkerService
     {
         private readonly IProfitRebateClient _client;
+        private readonly ITgsRepository _tgsRepository;
 
         public AgentDividendWorkerService(
-            IProfitRebateClient client)
-            => _client = client;
+            IProfitRebateClient client, ITgsRepository tgsRepository)
+        {
+            _client = client;
+            _tgsRepository = tgsRepository;
+        }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreateAgentDividendAsync(new(null));
-            return new() { ErrorMessage = response?.Message };
+            var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
+            var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
+            var brands = await _tgsRepository.Brands.AsQueryable()
+                .Where(x => queryDate.ToUniversalTime() > x.CurrentSettlementTo)
+                .Select(x => new { x.Code })
+                .ToArrayAsync();
+
+            var responses = new List<TgsResponse>();
+
+            foreach (var brand in brands)
+            {
+                var response = await _client.CreateAgentDividendAsync(new(brand.Code));
+                if (response.Message != null)
+                {
+                    responses.Add(new TgsResponse { ErrorMessage = $"{brand} : {response.Message}" });
+                }
+            }
+
+            return new() { ErrorMessage = responses.Count > 0 ? responses.ToString() : "" };
         }
 
         async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
