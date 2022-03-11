@@ -123,7 +123,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             if (IsTransferToPlayer(request))
             {
                 await _cashServiceClient
-                    .AdjustAsync(
+                    .TransferAdjustAsync(
                         targetPlayer.DefaultWalletId,
                         request.Amount,
                         request.Remark,
