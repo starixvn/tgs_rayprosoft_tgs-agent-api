@@ -20,7 +20,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.PlayerCode)
                 .IsRequired();
 
-            builder.Property(c => c.PlayerReduceAmountType)
+            builder.Property(c => c.Type)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -50,7 +50,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     c.CreatedOn,
                     c.BrandId,
                     c.PlayerCode,
-                    c.PlayerReduceAmountType
+                    c.Type
                 })
                 .HasDatabaseName("ix_player_reduce_amount_multiple_keys");
         }

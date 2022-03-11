@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PlayerCode { get; set; }
 
-        public PlayerIncreaseAmountType PlayerIncreaseAmountType { get; set; }
+        public PlayerIncreaseAmountType Type { get; set; }
 
         public decimal Amount { get; set; }
 

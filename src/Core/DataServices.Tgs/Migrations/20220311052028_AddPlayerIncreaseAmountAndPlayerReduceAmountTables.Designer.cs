@@ -4781,7 +4781,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<short>("PlayerIncreaseAmountType")
                         .HasColumnType("smallint")
-                        .HasColumnName("player_increase_amount_type");
+                        .HasColumnName("type");
 
                     b.Property<string>("Remark")
                         .HasColumnType("text")
@@ -5089,7 +5089,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<short>("PlayerReduceAmountType")
                         .HasColumnType("smallint")
-                        .HasColumnName("player_reduce_amount_type");
+                        .HasColumnName("type");
 
                     b.Property<string>("Remark")
                         .HasColumnType("text")

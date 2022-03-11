@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PlayerCode { get; set; }
 
-        public PlayerReduceAmountType PlayerReduceAmountType { get; set; }
+        public PlayerReduceAmountType Type { get; set; }
 
         public string TransferTarget { get; set; }
 

@@ -20,7 +20,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.PlayerCode)
                 .IsRequired();
 
-            builder.Property(c => c.PlayerIncreaseAmountType)
+            builder.Property(c => c.Type)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -51,7 +51,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     c.CreatedOn,
                     c.BrandId,
                     c.PlayerCode,
-                    c.PlayerIncreaseAmountType
+                    c.Type
                 })
                 .HasDatabaseName("ix_player_increase_amount_multiple_keys");
         }
