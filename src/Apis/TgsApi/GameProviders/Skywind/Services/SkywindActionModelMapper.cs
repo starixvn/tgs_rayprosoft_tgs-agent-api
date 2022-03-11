@@ -144,7 +144,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
             if (game_status.IgnoreCaseEquals("settled"))
             {
-                gameActionType = amount == 0 ? GameActionType.TieBet : amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
+                gameActionType = amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
             }
             else
             {
