@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public decimal AccumulatedDeposit { get; set; }
 
-        public virtual Agent Agent { get; set; } = default!;
+        public virtual Agent? Agent { get; set; }
 
         public Guid? AgentId { get; set; }
 
@@ -40,7 +40,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset? FirstPromotionOn { get; set; }
 
-        public virtual PlayerGameSetting GameSetting { get; set; } = default!;
+        public virtual PlayerGameSetting? GameSetting { get; set; }
 
         public bool IdentityAuthentication { get; set; }
 
@@ -84,7 +84,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Username { get; set; } = default!;
 
-        public virtual VipLevel Vip { get; set; } = default!;
+        public virtual VipLevel? Vip { get; set; }
 
         public Guid? VipId { get; set; }
 

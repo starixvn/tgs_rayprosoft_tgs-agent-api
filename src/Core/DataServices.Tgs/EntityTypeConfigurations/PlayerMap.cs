@@ -60,7 +60,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.LastActiveOn)
                 .IsRequired();
 
-            builder.Property(c => c.VipId);
+            builder.Property(c => c.VipId)
+                .IsRequired(false);
 
             builder.Property(c => c.AreaCode)
                 .HasMaxLength(10);
@@ -98,8 +99,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(p => p.Agent)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.AgentId)
-                .HasConstraintName("fk_players_agents_agent_id")
-                .IsRequired(false);
+                .HasConstraintName("fk_players_agents_agent_id");
 
             builder.HasOne(p => p.Vip)
                 .WithMany(p => p.Players)
