@@ -1,6 +1,6 @@
 ﻿namespace TGS.Core.Models.Enums
 {
-    public enum AdjustmentTransactionType
+    public enum AgentAdjustmentTransactionType
     {
         Dividend = 1,
         Recharge = 2,

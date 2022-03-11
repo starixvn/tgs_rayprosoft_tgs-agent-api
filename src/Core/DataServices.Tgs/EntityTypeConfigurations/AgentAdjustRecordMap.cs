@@ -5,22 +5,30 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PlayerReduceAmountMap : IEntityTypeConfiguration<PlayerReduceAmount>
+    internal class AgentAdjustRecordMap : IEntityTypeConfiguration<AgentAdjustRecord>
     {
-        void IEntityTypeConfiguration<PlayerReduceAmount>.Configure(EntityTypeBuilder<PlayerReduceAmount> builder)
+        void IEntityTypeConfiguration<AgentAdjustRecord>.Configure(EntityTypeBuilder<AgentAdjustRecord> builder)
         {
-            builder.ToTable("player_reduce_amounts");
+            builder.ToTable("agent_adjust_records");
 
             builder.HasKey(bc => bc.Id)
-                .HasName("pk_player_reduce_amounts_id");
+                .HasName("pk_agent_adjust_records_id");
 
             builder.Property(c => c.BrandId)
                 .IsRequired();
 
-            builder.Property(c => c.PlayerCode)
+            builder.Property(c => c.AgentId)
+                .IsRequired();
+
+            builder.Property(c => c.AdjustmentType)
+                .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
             builder.Property(c => c.Type)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(c => c.TransferType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
@@ -35,24 +43,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(32)
                 .IsRequired();
 
-            builder.Property(l => l.UpdatedByUsername)
-                .HasMaxLength(32)
-                .IsRequired();
-
             builder.Property(l => l.CreatedOn)
-                .IsRequired();
-
-            builder.Property(l => l.UpdatedOn)
                 .IsRequired();
 
             builder.HasIndex(c => new
                 {
                     c.CreatedOn,
                     c.BrandId,
-                    c.PlayerCode,
+                    c.AgentId,
                     c.Type
                 })
-                .HasDatabaseName("ix_player_reduce_amount_multiple_keys");
+                .HasDatabaseName("ix_agent_adjust_record_multiple_keys");
         }
     }
 }

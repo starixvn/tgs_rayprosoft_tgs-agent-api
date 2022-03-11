@@ -3,15 +3,19 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class PlayerReduceAmount
+    public class AgentAdjustRecord
     {
         public Guid Id { get; set; }
 
         public Guid BrandId { get; set; }
 
-        public string PlayerCode { get; set; }
+        public Guid AgentId { get; set; }
 
-        public PlayerReduceAmountType Type { get; set; }
+        public AdjustmentType AdjustmentType { get; set; }
+
+        public AgentAdjustmentTransactionType Type { get; set; }
+
+        public AgentTransferType TransferType { get; set; }
 
         public string TransferTarget { get; set; }
 
@@ -21,10 +25,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset CreatedOn { get; set; }
 
-        public DateTimeOffset UpdatedOn { get; set; }
-
         public string CreatedByUsername { get; set; }
-
-        public string UpdatedByUsername { get; set; }
     }
 }
