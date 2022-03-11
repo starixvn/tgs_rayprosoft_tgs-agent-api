@@ -73,12 +73,13 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
         [HttpPost("account/inform/{agentName}")]
         public async Task<DreamGameInformResponse> InformAsync(DreamGameInformRequest request)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, request.Member.Username).ConfigureAwait(false);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, playerCode).ConfigureAwait(false);
+
             if (request.Member.Amount >= 0)
             {
                 //Settle
@@ -124,12 +125,13 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
         [HttpPost("account/transfer/{agentName}")]
         public async Task<DreamGameTransferResponse> TransferAsync(DreamGameTransferRequest request)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, request.Member.Username).ConfigureAwait(false);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, playerCode).ConfigureAwait(false);
+
             if (request.Member.Amount >= 0)
             {
                 //Settle
