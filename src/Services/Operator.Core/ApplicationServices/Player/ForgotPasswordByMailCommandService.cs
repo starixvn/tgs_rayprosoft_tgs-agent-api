@@ -58,7 +58,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             await _validateCodeOperator.SendEmailAsync(
                 command.CultureInfo,
-                player.Email,
+                player.Email!,
                 saveResult.ValidateCode).ConfigureAwait(false);
 
             return saveResult.Token;

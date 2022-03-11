@@ -6,8 +6,8 @@ namespace TGS.Services.BackOffice.Application.Models.ReportRound
     {
         public int TotalCount { get; init; }
 
-        public BetRecordView[] Items { get; init; }
+        public BetRecordView[] Items { get; init; } = default!;
 
-        public BetRecordTotalView Total { get; init; }
+        public BetRecordTotalView Total { get; init; } = default!;
     }
 }
