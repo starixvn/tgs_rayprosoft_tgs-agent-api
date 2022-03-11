@@ -214,7 +214,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
                 },
                 (provider, key) => key switch
                 {
-                    Consts.GameProvider.WMCasino => provider.GetRequiredService<DreamGameErrorMapper>(),
+                    Consts.GameProvider.DreamGame => provider.GetRequiredService<DreamGameErrorMapper>(),
                     _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
@@ -224,11 +224,12 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
             _ = services.AddScoped<IDreamGameService, DreamGameService>();
 
             _ = services.AddScoped<IDreamGamegModelActionMapper, DreamGamegModelActionMapper>();
-
+            /*
             _ = services.Configure<RouteOptions>(routeOptions =>
               {
                   routeOptions.ConstraintMap.Add("RegexAgentName", typeof(RegexAgentNameConstraint));
               });
+            */
         }
     }
 }
