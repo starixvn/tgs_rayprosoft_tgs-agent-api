@@ -252,6 +252,12 @@ namespace TGS.Core.DataServices.Tgs
             {
                 await Database.MigrateAsync();
             }
+
+            if (env.IsDevelopmentOrDocker())
+            {
+                IDataInitializer data = new DataInitializer(this, env);
+                await data.SetInitialDataAsync();
+            }
         }
 
         public IDbConnection GetDbConnection() =>

@@ -713,41 +713,17 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Submits the change phone.
         /// </summary>
-        /// <param name="getPlayerQueryService">Get player info service.</param>
-        /// <param name="checkService">The check player phone service.</param>
         /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
         /// <param name="requestAnalyzer">The request analyzer.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
         public async ValueTask SubmitInitPhoneAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
             [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromBody] SubmitInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new GetPlayerQuery(brandId, playerTokenData.PlayerCode);
-
-            var player = await getPlayerQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            var checkQuery = new CheckBrandPhoneQuery(
-                brandId,
-                playerTokenData.PlayerCode,
-                player.AreaCode,
-                player.Phone);
-
-            var isBrandHasSamePhone = await checkService
-                .GetAsync(checkQuery)
-                .ConfigureAwait(false);
-
-            if (isBrandHasSamePhone)
-                throw new BrandPhoneDuplicateException();
 
             var ipAddress = HttpContext.Connection.RemoteIpAddress;
             var hostName = Request.Host.Host;
@@ -756,7 +732,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.SecurityKey,
                 request.ValidateCode,
                 ipAddress.ToString(),
-                hostName);
+                hostName,
+                brandId);
 
             await commitPlayerInitPhoneService
                 .ExecuteAsync(command)
