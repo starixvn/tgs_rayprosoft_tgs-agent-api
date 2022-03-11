@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -150,7 +151,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
 
             _ = services.AddHealthChecks()
                 .ForwardToPrometheus();
-            /*
+
             _ = services
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, config) =>
@@ -164,7 +165,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
 
                     config.GetSection("OpenTelemetry:Tracing").Bind(options);
                 });
-            */
+
             _ = services
                 .AddMessageQueue()
                 .AddNatsMessageQueue(natsConfig =>
