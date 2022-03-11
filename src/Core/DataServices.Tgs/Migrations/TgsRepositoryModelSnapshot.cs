@@ -4057,6 +4057,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("username");
 
                     b.Property<Guid?>("VipId")
+                        .IsRequired()
                         .HasColumnType("uuid")
                         .HasColumnName("vip_id");
 
@@ -6172,6 +6173,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("settings");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SignInEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sign_in_events");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_sign_in_events_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_sign_in_events_player_code");
+
+                    b.ToTable("sign_in_events");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -7884,7 +7923,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", "Vip")
                         .WithMany("Players")
                         .HasForeignKey("VipId")
-                        .HasConstraintName("fk_players_vip_levels_vip_id");
+                        .HasConstraintName("fk_players_vip_levels_vip_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Agent");
 
@@ -8233,6 +8274,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SignInEvent", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_sign_in_events_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_sign_in_events_players_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
@@ -8652,7 +8710,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Navigation("BrandPaymentPlayers");
 
-                    b.Navigation("GameSetting");
+                    b.Navigation("GameSetting")
+                        .IsRequired();
 
                     b.Navigation("Letters");
 
