@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,8 +17,6 @@ using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
 using Tgs.MessageQueue.Nats.Configuration;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Constraints;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
@@ -148,11 +145,6 @@ namespace TGS.Apis.TgsApi.Commons
                     options.SuppressModelStateInvalidFilter = false;
                 });
 
-            _ = services.Configure<RouteOptions>(routeOptions =>
-            {
-                routeOptions.ConstraintMap.Add("RegexAgentName", typeof(RegexAgentNameConstraint));
-            });
-            _ = services.AddScoped<IDreamGameService, NoopDreamGameService>();
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
