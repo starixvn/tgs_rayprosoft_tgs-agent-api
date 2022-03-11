@@ -30,15 +30,7 @@ namespace TGS.Operator.Repositories
         }
 
         public IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode)
-        {
-            var query = from letterPlayer in _tgsRepository.StationLetterPlayers.AsQueryable()
-                            .Include(letterPlayer => letterPlayer.StationLetter)
-                        where letterPlayer.PlayerCode == playerCode
-                            && letterPlayer.StationLetter.Status == StationLetterStatus.Published
-                        orderby letterPlayer.StationLetter.CreatedOn descending
-                        select letterPlayer;
-
-            return InternalQueryStationLetters(playerCode)
+            => InternalQueryStationLetters(playerCode)
                 .ToAsyncEnumerable()
                 .Select(letterPlayer => new StationLetter(
                     letterPlayer.StationLetterId,
@@ -50,7 +42,6 @@ namespace TGS.Operator.Repositories
                         ? null
                         : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
                             letterPlayer.StationLetter.Localization)));
-        }
 
         public ValueTask<int> QueryStationLettersTotalCountAsync(string playerCode)
             => new ValueTask<int>(InternalQueryStationLetters(playerCode).CountAsync());
