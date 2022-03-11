@@ -17,6 +17,5 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public string Remark { get; set; }
 
         public decimal BucketAmount { get; set; }
-    
-   
+    }
 }
