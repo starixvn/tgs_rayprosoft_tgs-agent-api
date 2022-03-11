@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
-using Tgs.Logging;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -120,7 +120,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                         targetAgent.BrandId,
                         targetAgent.DefaultWalletId,
                         targetAgent.Id,
-                        TransactionTypes.Adjust,
+                        TransactionTypes.CompanyAdjust,
                         request.Amount).ConfigureAwait(false);
                 }
             }

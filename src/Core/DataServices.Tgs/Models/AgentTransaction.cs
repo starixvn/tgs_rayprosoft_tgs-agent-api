@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal Amount { get; set; }
         public decimal Balance { get; set; }
         public string Description { get; set; }
-        public TransactionType Type { get; set; }
+        public AgentTransactionType Type { get; set; }
         public DateTimeOffset RecordedOn { get; set; }
         public DateTimeOffset? SentOn { get; set; }
     }

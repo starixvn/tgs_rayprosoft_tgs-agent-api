@@ -7,15 +7,14 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Models;
+using TGS.Core.Models.Enums;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Agent;
 using Tgs.Report.Client.Models.Round;
-using TGS.Apis.AgentApi.Attributes;
-using TGS.Apis.AgentApi.Extensions;
-using TGS.Apis.AgentApi.Models;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -30,7 +29,7 @@ namespace TGS.Apis.AgentApi.Controllers
         public AgentReportController(
             IReportClient client,
             IMemoryCache memoryCache
-            )
+        )
         {
             _client = client;
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
@@ -87,7 +86,7 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 TransactionType.Withdrawal,
                 TransactionType.CancelWithdrawal,
-                TransactionType.Adjust,
+                TransactionType.CompanyAdjust,
                 TransactionType.Dividend
             };
 
@@ -106,7 +105,6 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<PagingResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
         {
-
             var dividendRequest = new GetAgentDividendDetailsRequest
             {
                 AgentId = request.AgentId,
@@ -183,7 +181,8 @@ namespace TGS.Apis.AgentApi.Controllers
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var key = $"agentapi:contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            var key =
+                $"agentapi:contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
             if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentContributionModel> response))
             {
                 var contributionRequest = new GetAgentContributionsRequest
@@ -223,16 +222,15 @@ namespace TGS.Apis.AgentApi.Controllers
                 x.NetProfit)).Skip(page * pageSize).Take(pageSize).ToArray();
 
             var total = new AgentContributionTotal(
-                    DepositAmount: response.Items.Sum(x => x.DepositAmount),
-                    WithdrawalAmount: response.Items.Sum(x => x.WithdrawalAmount),
-                    AdjustmentAmount: response.Items.Sum(x => x.AdjustmentAmount),
-                    BonusAmount: response.Items.Sum(x => x.BonusAmount),
-                    BetAmount: response.Items.Sum(x => x.BetAmount),
-                    ValidBetAmount: response.Items.Sum(x => x.ValidBetAmount),
-                    Turnover: response.Items.Sum(x => x.Turnover),
-                    WinLossAmount: response.Items.Sum(x => x.WinLossAmount),
-                    NetProfit: response.Items.Sum(x => x.NetProfit));
-
+                response.Items.Sum(x => x.DepositAmount),
+                response.Items.Sum(x => x.WithdrawalAmount),
+                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.BonusAmount),
+                response.Items.Sum(x => x.BetAmount),
+                response.Items.Sum(x => x.ValidBetAmount),
+                response.Items.Sum(x => x.Turnover),
+                response.Items.Sum(x => x.WinLossAmount),
+                response.Items.Sum(x => x.NetProfit));
 
             return new()
             {
@@ -257,7 +255,8 @@ namespace TGS.Apis.AgentApi.Controllers
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var key = $"agentapi:dividends:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+            var key =
+                $"agentapi:dividends:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
             if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentDividendModel> response))
             {
                 var dividendRequest = new GetAgentDividendsRequest
@@ -300,19 +299,18 @@ namespace TGS.Apis.AgentApi.Controllers
                 x.FromTeamAgentDividendAmount)).Skip(page * pageSize).Take(pageSize).ToArray();
 
             var total = new AgentDividendTotal(
-                    DepositAmount: response.Items.Sum(x => x.DepositAmount),
-                    WithdrawalAmount: response.Items.Sum(x => x.WithdrawalAmount),
-                    AdjustmentAmount: response.Items.Sum(x => x.AdjustmentAmount),
-                    BonusAmount: response.Items.Sum(x => x.BonusAmount),
-                    BetAmount: response.Items.Sum(x => x.BetAmount),
-                    ValidBetAmount: response.Items.Sum(x => x.ValidBetAmount),
-                    Turnover: response.Items.Sum(x => x.Turnover),
-                    WinLossAmount: response.Items.Sum(x => x.WinLossAmount),
-                    NetProfit: response.Items.Sum(x => x.NetProfit),
-                    AgentDividendAmount: response.Items.Sum(x => x.AgentDividendAmount),
-                    FromPlayerAgentDividendAmount: response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
-                    FromTeamAgentDividendAmount: response.Items.Sum(x => x.FromTeamAgentDividendAmount));
-
+                response.Items.Sum(x => x.DepositAmount),
+                response.Items.Sum(x => x.WithdrawalAmount),
+                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.BonusAmount),
+                response.Items.Sum(x => x.BetAmount),
+                response.Items.Sum(x => x.ValidBetAmount),
+                response.Items.Sum(x => x.Turnover),
+                response.Items.Sum(x => x.WinLossAmount),
+                response.Items.Sum(x => x.NetProfit),
+                response.Items.Sum(x => x.AgentDividendAmount),
+                response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
+                response.Items.Sum(x => x.FromTeamAgentDividendAmount));
 
             return new()
             {
@@ -333,8 +331,8 @@ namespace TGS.Apis.AgentApi.Controllers
         [TgsResponseWrapper]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
-           [FromQuery] PagingRequest pagingRequest,
-           [FromQuery] GetRoundsReportRequest request)
+            [FromQuery] PagingRequest pagingRequest,
+            [FromQuery] GetRoundsReportRequest request)
         {
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();

@@ -5,7 +5,6 @@ using System.Transactions;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 
@@ -18,13 +17,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class AgentTransactionService : BaseRepositoryOperations<ITgsRepository>, IAgentTransactionService
     {
-        private readonly IPasswordHandler _passwordHandler;
-        private readonly ITgsRepository _repository;
-
-        public AgentTransactionService(ITgsRepository repository, IPasswordHandler passwordHandler) : base(repository)
+        public AgentTransactionService(ITgsRepository repository) : base(repository)
         {
-            _passwordHandler = passwordHandler;
-            _repository = repository;
         }
 
         async Task IAgentTransactionService.CreateAgentTransactionAsync(
@@ -46,7 +40,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 WalletId = agent.DefaultWalletId,
                 BrandId = agent.BrandId,
-                Type = TransactionType.Adjust,
+                Type = AgentTransactionType.CompanyAdjust,
                 Amount = request.Amount,
                 Balance = amount,
                 RecordedOn = DateTimeOffset.Now

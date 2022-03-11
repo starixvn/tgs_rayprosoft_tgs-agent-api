@@ -9,19 +9,20 @@ namespace TGS.Apis.AgentApi.Validators
     {
         public GetAccountChangesRequestValidator()
         {
-            var allowType = new TransactionType[]
+            var allowType = new[]
             {
                 TransactionType.Deposit,
                 TransactionType.Withdrawal,
                 TransactionType.CancelWithdrawal,
-                TransactionType.Adjust,
+                TransactionType.CompanyAdjust,
                 TransactionType.Dividend
             };
 
             RuleFor(r => r.TransactionType)
                 .Must(r => allowType.Contains(r.Value))
                 .When(r => r.TransactionType != null)
-                .WithMessage($"TransactionType should contain only {string.Join(",", allowType)}"); ;
+                .WithMessage($"TransactionType should contain only {string.Join(",", allowType)}");
+            ;
         }
     }
 }

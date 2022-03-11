@@ -44,7 +44,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
+        public async Task<PagedResponse<PlayerAccountChangeReportModel>?> GetAccountChangesAsync(
             [FromServices] IReportClient client,
             [FromQuery] GetPlayerAccountChangesReportRequest request)
         {

@@ -106,7 +106,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 agent.BrandId,
                 agent.DefaultWalletId,
                 agent.Id,
-                TransactionTypes.Adjust,
+                TransactionTypes.CompanyAdjust,
                 request.AdjustmentType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
                 remark);
 
@@ -116,7 +116,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     targetAgent.BrandId,
                     targetAgent.DefaultWalletId,
                     targetAgent.Id,
-                    TransactionTypes.Adjust,
+                    TransactionTypes.CompanyAdjust,
                     request.Amount);
             }
 
