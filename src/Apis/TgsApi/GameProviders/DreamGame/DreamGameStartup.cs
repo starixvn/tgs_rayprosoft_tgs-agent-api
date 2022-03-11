@@ -6,16 +6,15 @@ using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Constraints;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -156,7 +155,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
                     });
                 })
                 .AddNatsGlobPatternExchange("*");
-            /*
+
             services
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, config) =>
@@ -170,7 +169,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
 
                     config.GetSection("OpenTelemetry:Tracing").Bind(options);
                 });
-            */
+
             _ = services
                 .AddOpenTelemetryTracing(builder
                     => builder
@@ -214,21 +213,17 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
                 },
                 (provider, key) => key switch
                 {
-                    Consts.GameProvider.WMCasino => provider.GetRequiredService<DreamGameErrorMapper>(),
+                    Consts.GameProvider.DreamGame => provider.GetRequiredService<DreamGameErrorMapper>(),
                     _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             _ = services.AddScoped<AuthorizeDreamGameMiddleware>();
+
             _ = services.AddScoped<HandleDreamGameExceptionMiddleware>();
 
             _ = services.AddScoped<IDreamGameService, DreamGameService>();
 
             _ = services.AddScoped<IDreamGamegModelActionMapper, DreamGamegModelActionMapper>();
-
-            _ = services.Configure<RouteOptions>(routeOptions =>
-              {
-                  routeOptions.ConstraintMap.Add("RegexAgentName", typeof(RegexAgentNameConstraint));
-              });
         }
     }
 }
