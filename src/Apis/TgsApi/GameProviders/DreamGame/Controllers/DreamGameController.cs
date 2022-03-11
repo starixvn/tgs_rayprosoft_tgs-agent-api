@@ -98,6 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             {
                 CodeId = (int)GameApiError.OperationSucceeded,
                 Token = request.Token,
+                Data = request.Data,
                 Member = new()
                 {
                     Username = getBalance.Username,
@@ -146,8 +147,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             }
             return new()
             {
-                CodeId = 0,
+                CodeId = (int)GameApiError.OperationSucceeded,
                 Token = request.Token,
+                Data = request.Data,
                 Member = new()
                 {
                     Username = getBalance.Username,
