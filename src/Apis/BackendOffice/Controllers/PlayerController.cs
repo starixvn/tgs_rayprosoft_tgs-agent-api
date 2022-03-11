@@ -3,15 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -78,6 +78,28 @@ namespace TGS.Apis.BackendOffice.Controllers
                     GameActionType = (GameActionType?)x.GameActionType,
                     RecordedOn = x.RecordedOn
                 }).ToArray()
+            };
+        }
+
+        [HttpGet("accountChanges/totalAmount", Name = "GetAccountChangesTotalAmount")]
+        [Description("Get player account changes Total Amount")]
+        public async Task<PlayerAccountChangesTotalModel> GetAccountChangesTotalAmountAsync(
+            [FromServices] IReportClient client,
+            [FromQuery] GetPlayerAccountChangesReportTotalAmountRequest request)
+        {
+            var reportRequest = new GetPlayerAccountChangesTotalRequest
+            {
+                BrandId = request.BrandId,
+                PlayerCode = request.PlayerCode,
+                AccountChangeType = (short?)request.AccountChangeType,
+                From = request.From,
+                To = request.To
+            };
+            var response = await client.GetPlayerAccountChangesTotalAmountAsync(reportRequest);
+
+            return new PlayerAccountChangesTotalModel()
+            {
+                Amount = response
             };
         }
 

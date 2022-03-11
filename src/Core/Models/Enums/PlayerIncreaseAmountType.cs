@@ -2,8 +2,8 @@
 {
     public enum PlayerIncreaseAmountType
     {
-        CompanyAdjust = 10,
-        AgentAdjust = 20,
-        SystemAdjust = 30
+        CompanyAdjust = 2,
+        AgentAdjust = 5100,
+        SystemAdjust = 5200
     }
 }

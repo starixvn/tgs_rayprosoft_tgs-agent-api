@@ -36,7 +36,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]
-        public async Task<JsonDocument> GetRoundHistoryAsync(Guid roundId,
+        public async Task<JsonDocument?> GetRoundHistoryAsync(Guid roundId,
             [FromServices] IGetService<GetRoundHistoryReportRequest, JsonDocument?>
                 roundHistoryService,
             [FromQuery] GetRoundHistoryReportRequest request)
@@ -54,6 +54,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 roundsService,
             [FromQuery] GetRoundsReportRequest request)
             => await roundsService
+                .GetAsync(request)
+                .ConfigureAwait(false);
+
+        [HttpGet("betRecords")]
+        [Description("Get bet records")]
+        public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
+            [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
+                betRecordsService,
+            [FromQuery] GetBetRecordsReportRequest request)
+            => await betRecordsService
                 .GetAsync(request)
                 .ConfigureAwait(false);
     }

@@ -1,18 +1,22 @@
 ﻿using System.CommandLine;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.DataInitializers;
 
-var builder = Host.CreateDefaultBuilder();
+var builder = WebApplication.CreateBuilder();
 
-builder
-    .ConfigureWebHostDefaults(webHostBuilder => webHostBuilder
-        .ConfigureKestrel(serverOptions =>
-        {
-            serverOptions.ListenUnixSocket("/tgs-seeding.sock");
-        }));
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenUnixSocket("/tgs-seeding.sock");
+});
 
 var app = builder.Build();
+
+await app.StartAsync().ConfigureAwait(false);
 
 var connectionStringOption = new Option<string>("--connection-string", "連線字串");
 connectionStringOption.AddAlias("-c");
@@ -45,3 +49,5 @@ rootCommand.SetHandler<string>(
     connectionStringOption);
 
 await rootCommand.InvokeAsync(args).ConfigureAwait(false);
+
+await app.StopAsync().ConfigureAwait(false);

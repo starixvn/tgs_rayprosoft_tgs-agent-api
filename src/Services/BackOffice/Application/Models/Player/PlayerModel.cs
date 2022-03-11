@@ -18,8 +18,6 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string IdNumber { get; set; }
 
-        public string RegisterHost { get; init; }
-
         public string LastLoginIp { get; init; }
 
         public DateTimeOffset? LastLoginOn { get; init; }
@@ -34,7 +32,11 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public DateTimeOffset? RegisteredOn { get; init; }
 
+        public string RegisterHost { get; init; }
+
         public string RegisterIp { get; init; }
+
+        public string Remark { get; init; }
 
         public PlayerStatus Status { get; init; }
 
