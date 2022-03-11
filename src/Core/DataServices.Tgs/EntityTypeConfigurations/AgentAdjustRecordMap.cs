@@ -5,9 +5,9 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class AgentAdjustRecordMap : IEntityTypeConfiguration<AgentAdjustRecord>
+    internal class AgentAdjustRecordMap : IEntityTypeConfiguration<AdjustAgentRecord>
     {
-        void IEntityTypeConfiguration<AgentAdjustRecord>.Configure(EntityTypeBuilder<AgentAdjustRecord> builder)
+        void IEntityTypeConfiguration<AdjustAgentRecord>.Configure(EntityTypeBuilder<AdjustAgentRecord> builder)
         {
             builder.ToTable("agent_adjust_records");
 

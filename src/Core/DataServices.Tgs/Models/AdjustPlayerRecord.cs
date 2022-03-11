@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class PlayerAdjustRecord
+    public class AdjustPlayerRecord
     {
         public Guid Id { get; set; }
 
@@ -14,6 +14,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public AdjustmentType AdjustmentType { get; set; }
 
         public PlayerAdjustmentTransactionType Type { get; set; }
+
+        public AdjustTransferType TransferType { get; set; }
 
         public string TransferTarget { get; set; }
 

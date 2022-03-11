@@ -5,9 +5,9 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PlayerAdjustRecordMap : IEntityTypeConfiguration<PlayerAdjustRecord>
+    internal class PlayerAdjustRecordMap : IEntityTypeConfiguration<AdjustPlayerRecord>
     {
-        void IEntityTypeConfiguration<PlayerAdjustRecord>.Configure(EntityTypeBuilder<PlayerAdjustRecord> builder)
+        void IEntityTypeConfiguration<AdjustPlayerRecord>.Configure(EntityTypeBuilder<AdjustPlayerRecord> builder)
         {
             builder.ToTable("player_adjust_records");
 

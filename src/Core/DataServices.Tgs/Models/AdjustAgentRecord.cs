@@ -3,9 +3,11 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class AgentAdjustRecord
+    public class AdjustAgentRecord
     {
         public Guid Id { get; set; }
+
+        public Guid TransactionId { get; set; }
 
         public Guid BrandId { get; set; }
 
@@ -15,7 +17,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public AgentAdjustmentTransactionType Type { get; set; }
 
-        public AgentTransferType TransferType { get; set; }
+        public AdjustTransferType TransferType { get; set; }
 
         public string TransferTarget { get; set; }
 
