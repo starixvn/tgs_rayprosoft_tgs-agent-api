@@ -13,9 +13,9 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public AdjustTransferType TransferType { get; set; }
 
-        public string TransferFromTarget { get; set; }
+        public string TransferFromUsername { get; set; }
 
-        public string TransferToTarget { get; set; }
+        public string TransferToUsername { get; set; }
 
         public decimal Amount { get; set; }
 

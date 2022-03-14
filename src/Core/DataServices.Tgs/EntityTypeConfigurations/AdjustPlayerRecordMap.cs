@@ -5,7 +5,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PlayerAdjustRecordMap : IEntityTypeConfiguration<AdjustPlayerRecord>
+    internal class AdjustPlayerRecordMap : IEntityTypeConfiguration<AdjustPlayerRecord>
     {
         void IEntityTypeConfiguration<AdjustPlayerRecord>.Configure(EntityTypeBuilder<AdjustPlayerRecord> builder)
         {
@@ -13,6 +13,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasKey(bc => bc.Id)
                 .HasName("pk_player_adjust_record_id");
+
+            builder.Property(c => c.TransactionId);
 
             builder.Property(c => c.BrandId)
                 .IsRequired();
@@ -25,6 +27,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.Type)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(c => c.TransferType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 

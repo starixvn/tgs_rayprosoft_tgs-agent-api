@@ -5,14 +5,16 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class AgentAdjustRecordMap : IEntityTypeConfiguration<AdjustAgentRecord>
+    internal class AdjustAgentRecordMap : IEntityTypeConfiguration<AdjustAgentRecord>
     {
         void IEntityTypeConfiguration<AdjustAgentRecord>.Configure(EntityTypeBuilder<AdjustAgentRecord> builder)
         {
-            builder.ToTable("agent_adjust_records");
+            builder.ToTable("adjust_agent_records");
 
             builder.HasKey(bc => bc.Id)
-                .HasName("pk_agent_adjust_records_id");
+                .HasName("pk_adjust_agent_records_id");
+
+            builder.Property(c => c.TransactionId);
 
             builder.Property(c => c.BrandId)
                 .IsRequired();
@@ -53,7 +55,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     c.AgentId,
                     c.Type
                 })
-                .HasDatabaseName("ix_agent_adjust_record_multiple_keys");
+                .HasDatabaseName("ix_adjust_agent_record_multiple_keys");
         }
     }
 }

@@ -7,6 +7,8 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid Id { get; set; }
 
+        public Guid? TransactionId { get; set; }
+
         public Guid BrandId { get; set; }
 
         public string PlayerCode { get; set; }
