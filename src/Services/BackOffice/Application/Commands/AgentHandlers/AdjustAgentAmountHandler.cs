@@ -16,6 +16,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 {
     public class AdjustAgentAmountHandler : Handler<CreateAgentAdjustmentRequest, MessageResponse>
     {
+        private readonly IAdjustAgentAccountService _adjustAgentAccountService;
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly ICashServiceClient _cashServiceClient;
@@ -28,6 +29,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             ICashServiceClient cashServiceClient,
             IPlayerService playerService,
             IJsonSerializationProvider jsonSerializationProvider,
+            IAdjustAgentAccountService adjustAgentAccountService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
@@ -35,6 +37,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerService = playerService;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _adjustAgentAccountService = adjustAgentAccountService;
         }
 
         public override async Task<MessageResponse> Handle(

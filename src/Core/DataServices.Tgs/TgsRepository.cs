@@ -15,10 +15,6 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public DbSet<PlayerIncreaseAmount> PlayerIncreaseAmounts { get; set; }
-
-        public DbSet<PlayerReduceAmount> PlayerReduceAmounts { get; set; }
-
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
         }

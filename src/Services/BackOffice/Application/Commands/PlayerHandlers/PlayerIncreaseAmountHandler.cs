@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
 using TGS.Core.Models.Enums;
@@ -20,7 +19,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
     public class PlayerIncreaseAmountHandler : Handler<CreatePlayerIncreaseAmountRequest, MessageResponse>
     {
         private readonly ICashServiceClient _cashServiceClient;
-        private readonly IPlayerAdjustAccountService _playerAdjustAccountService;
+        private readonly IAdjustPlayerAccountService _playerAdjustAccountService;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
         private readonly ITgsLog _tgsLog;
@@ -31,7 +30,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor,
             ITgsLog tgsLog,
-            IPlayerAdjustAccountService playerAdjustAccountService) : base(accessor)
+            IAdjustPlayerAccountService playerAdjustAccountService) : base(accessor)
         {
             if (accessor is null)
             {
@@ -73,9 +72,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Remark
             });
 
-            using var tranScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            await _playerAdjustAccountService.CreateAsync(
+            var record = await _playerAdjustAccountService.CreateAsync(
                 player.BrandId,
                 player.PlayerCode,
                 AdjustmentType.Add,
@@ -88,11 +85,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             if (request.Amount > 0M)
             {
-                await AdjustAsync(request.TransactionType,
+                var response = await AdjustAsync(request.TransactionType,
                     player.DefaultWalletId,
                     request.Amount,
                     remark,
                     Guid.Parse(UserId)).ConfigureAwait(false);
+
+                record.TransactionId = response.TransactionId;
+
+                await _playerAdjustAccountService.UpdateAdjustPlayerRecordAsync(record).ConfigureAwait(false);
 
                 _tgsLog.LogInfo($"Increase amount to {player.PlayerCode} wallet: {request.Amount}");
             }
@@ -113,8 +114,6 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
                 _tgsLog.LogInfo($"Adjust add bucket {player.PlayerCode}: {request.BucketAmount}");
             }
-
-            tranScope.Complete();
 
             return CreateValidResponse<MessageResponse>();
         }

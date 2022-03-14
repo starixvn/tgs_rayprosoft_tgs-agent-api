@@ -56,7 +56,7 @@ namespace TGS.Services.BackOffice.Extensions
                 .AddTransient<IBrandGameProviderAggregateAuditLogService, BrandGameProviderAggregateAuditLogService>();
             services.AddTransient<IGameProviderAggregateAuditLogService, GameProviderAggregateAuditLogService>();
             services.AddTransient<IPlayerIncreaseAmountService, PlayerIncreaseAmountService>();
-            services.AddTransient<IPlayerReduceAmountService, PlayerReduceAmountService>();
+            services.AddTransient<IAdjustTransferService, AdjustTransferService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

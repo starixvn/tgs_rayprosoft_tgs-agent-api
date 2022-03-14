@@ -7,7 +7,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
-    public interface IPlayerAdjustAccountService
+    public interface IAdjustAgentAccountService
     {
         ValueTask<AdjustPlayerRecord> CreateAsync(Guid brandId, string playerCode, AdjustmentType adjustmentType,
             PlayerAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
@@ -16,9 +16,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task UpdateAdjustPlayerRecordAsync(AdjustPlayerRecord record);
     }
 
-    public class PlayerAdjustAccountService : BaseRepositoryOperations<ITgsRepository>, IPlayerAdjustAccountService
+    public class AdjustAgentAccountService : BaseRepositoryOperations<ITgsRepository>, IAdjustAgentAccountService
     {
-        public PlayerAdjustAccountService(ITgsRepository tgsRepository) : base(
+        public AdjustAgentAccountService(ITgsRepository tgsRepository) : base(
             tgsRepository)
         {
         }

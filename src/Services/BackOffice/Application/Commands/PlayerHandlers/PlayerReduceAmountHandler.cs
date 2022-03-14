@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
 using TGS.Core.Models.Enums;
@@ -18,10 +17,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class PlayerReduceAmountHandler : Handler<CreatePlayerReduceAmountRequest, MessageResponse>
     {
+        private readonly IAdjustTransferService _adjustTransferService;
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly ICashServiceClient _cashServiceClient;
-        private readonly IPlayerReduceAmountService _playerReduceAmountService;
+        private readonly IAdjustPlayerAccountService _playerAdjustAccountService;
         private readonly IPlayerService _playerService;
         private readonly ITgsLog _tgsLog;
 
@@ -32,7 +32,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerService playerService,
             IHttpContextAccessor accessor,
             ITgsLog tgsLog,
-            IPlayerReduceAmountService playerReduceAmountService) : base(accessor)
+            IAdjustPlayerAccountService playerAdjustAccountService,
+            IAdjustTransferService adjustTransferService) : base(accessor)
         {
             if (accessor is null)
             {
@@ -46,9 +47,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
 
-            _playerReduceAmountService = playerReduceAmountService ??
-                throw new ArgumentNullException(nameof(playerReduceAmountService));
+            _playerAdjustAccountService = playerAdjustAccountService ??
+                throw new ArgumentNullException(nameof(playerAdjustAccountService));
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
+            _adjustTransferService = adjustTransferService ??
+                throw new ArgumentNullException(nameof(adjustTransferService));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -94,50 +97,59 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Remark
             });
 
-            using var tranScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            await _playerReduceAmountService.CreateAsync(player.BrandId,
+            var record = await _playerAdjustAccountService.CreateAsync(player.BrandId,
                 player.PlayerCode,
+                AdjustmentType.Subtract,
                 request.TransactionType,
-                targetAgent?.Username,
+                isTransferToAgent ? AdjustTransferType.PlayerToAgent : AdjustTransferType.None,
                 request.Amount,
                 request.Remark,
                 request.BucketAmount,
-                Username).ConfigureAwait(false);
+                Username,
+                targetAgent?.Username).ConfigureAwait(false);
 
             if (request.Amount > 0M)
             {
-                await AdjustAsync(request.TransactionType,
+                var response = await AdjustAsync(request.TransactionType,
                     player.DefaultWalletId,
                     -request.Amount,
                     remark,
                     Guid.Parse(UserId));
 
+                record.TransactionId = response.TransactionId;
+
+                await _playerAdjustAccountService.UpdateAdjustPlayerRecordAsync(record).ConfigureAwait(false);
+
                 if (isTransferToAgent)
                 {
-                    await _agentWalletRepository.ExchangeAsync(
+                    var agentResponse = await _agentWalletRepository.ExchangeAsync(
                         targetAgent.BrandId,
                         targetAgent.DefaultWalletId,
                         targetAgent.Id,
                         TransactionTypes.CompanyAdjust,
                         request.Amount).ConfigureAwait(false);
+
+                    await _adjustTransferService.CreateAsync(response.TransactionId,
+                        agentResponse.TransactionId,
+                        AdjustTransferType.PlayerToAgent,
+                        player.Username,
+                        targetAgent.Username,
+                        request.Amount);
                 }
 
                 _tgsLog.LogInfo($"Reduce amount from {player.PlayerCode} wallet: {request.Amount}");
             }
 
-            tranScope.Complete();
-
             return CreateValidResponse<MessageResponse>();
         }
 
         private static bool IsTransferToAgent(CreatePlayerReduceAmountRequest request) =>
-            request.TransactionType == PlayerReduceAmountType.TransferAdjust;
+            request.TransactionType == PlayerAdjustmentTransactionType.TransferAdjust;
 
-        private async ValueTask<TransactionResponse> AdjustAsync(PlayerReduceAmountType type, Guid walletId,
+        private async ValueTask<TransactionResponse> AdjustAsync(PlayerAdjustmentTransactionType type, Guid walletId,
             decimal amount, string remark, Guid userId) => type switch
         {
-            PlayerReduceAmountType.AgentAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
                 .AgentAdjustAsync(
                     walletId,
                     amount,
@@ -145,7 +157,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     null,
                     userId)
                 .ConfigureAwait(false),
-            PlayerReduceAmountType.SystemAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
                 .SystemAdjustAsync(
                     walletId,
                     amount,
@@ -153,7 +165,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     null,
                     userId)
                 .ConfigureAwait(false),
-            PlayerReduceAmountType.CompanyAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
                 .CompanyAdjustAsync(
                     walletId,
                     amount,
@@ -161,7 +173,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     null,
                     userId)
                 .ConfigureAwait(false),
-            PlayerReduceAmountType.TransferAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.TransferAdjust => await _cashServiceClient
                 .TransferAdjustAsync(
                     walletId,
                     amount,
