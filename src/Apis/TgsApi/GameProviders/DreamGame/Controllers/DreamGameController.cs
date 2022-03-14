@@ -37,7 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        [HttpPost("account/checkTransfer/{agentName:RegexAgentName}")]
+        [HttpPost("account/checkTransfer/{agentName}")]
         public async Task<DreamGameResponse> CheckTransferAsync(DreamGameCheckTransferRequest request)
         {
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             };
         }
 
-        [HttpPost("user/getBalance/{agentName:RegexAgentName}")]
+        [HttpPost("user/getBalance/{agentName}")]
         public async ValueTask<DreamGameBalanceResponse> GetBalanceAsync(DreamGameBalanceRequest request)
         {
             var items = HttpContext.Items;
@@ -70,15 +70,16 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             };
         }
 
-        [HttpPost("account/inform/{agentName:RegexAgentName}")]
+        [HttpPost("account/inform/{agentName}")]
         public async Task<DreamGameInformResponse> InformAsync(DreamGameInformRequest request)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, request.Member.Username).ConfigureAwait(false);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, playerCode).ConfigureAwait(false);
+
             if (request.Member.Amount >= 0)
             {
                 //Settle
@@ -97,6 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             {
                 CodeId = (int)GameApiError.OperationSucceeded,
                 Token = request.Token,
+                Data = request.Data,
                 Member = new()
                 {
                     Username = getBalance.Username,
@@ -106,7 +108,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             };
         }
 
-        [HttpPost("account/order/{agentName:RegexAgentName}")]
+        [HttpPost("account/order/{agentName}")]
         public async Task<DreamGameOrderResponse> OrderAsync(DreamGameOrderRequest request)
         {
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
@@ -121,15 +123,16 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             };
         }
 
-        [HttpPost("account/transfer/{agentName:RegexAgentName}")]
+        [HttpPost("account/transfer/{agentName}")]
         public async Task<DreamGameTransferResponse> TransferAsync(DreamGameTransferRequest request)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, request.Member.Username).ConfigureAwait(false);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.DreamGame, playerCode).ConfigureAwait(false);
+
             if (request.Member.Amount >= 0)
             {
                 //Settle
@@ -144,8 +147,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             }
             return new()
             {
-                CodeId = 0,
+                CodeId = (int)GameApiError.OperationSucceeded,
                 Token = request.Token,
+                Data = request.Data,
                 Member = new()
                 {
                     Username = getBalance.Username,
@@ -155,7 +159,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             };
         }
 
-        [HttpPost("account/unsettle/{agentName:RegexAgentName}")]
+        [HttpPost("account/unsettle/{agentName}")]
         public async Task<DreamGameUnsettleResponse> UnsettleAsync(DreamGameRequest request)
         {
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);

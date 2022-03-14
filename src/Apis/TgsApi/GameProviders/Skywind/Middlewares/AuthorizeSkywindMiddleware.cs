@@ -69,6 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
             context.Items.Add(Consts.ContextItems.PlayerCode, loginRecord.PlayerCode);
             context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+
             await next(context);
         }
 

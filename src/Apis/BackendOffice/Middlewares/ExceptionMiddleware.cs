@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
 {
     public class ExceptionMiddleware : IMiddleware
     {
-        private const int ResMessageSizeLimit = 1000012;
+        private const int ResMessageSizeLimit = 8000;
         private readonly IWebHostEnvironment _env;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;

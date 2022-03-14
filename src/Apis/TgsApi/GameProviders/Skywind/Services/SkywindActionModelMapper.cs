@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -19,12 +18,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        public async ValueTask<BetData> BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest source)
+        public async ValueTask<BetData> BetAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType, string playerCode, SkywindBetRequest source)
         {
             string externalRoundId = source.RoundId;
             string externalTransactionId = source.TrxId;
 
-            var gameActionExternal = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId).ConfigureAwait(false);
+            var gameActionExternal = await _service.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
             if (gameActionExternal != null)
             {
                 return null;
@@ -42,12 +41,23 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
             };
-            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+            return new()
+            {
+                PlayerCode = playerCode,
+                PlatformType = platformType,
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                GameProviderCode = Consts.GameProvider.Skywind,
+                HasCurrencyFromGameProvider = false,
+                AutoCloseRound = await _service.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false),
+                AllowCancelCancelTransaction = false,
+                Transactions = new[] { transactions }
+            };
         }
 
-        public async ValueTask<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playCode, SkywindRollbackBetRequest source)
+        public async ValueTask<BetData> RollbackBetAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType, string playerCode, SkywindRollbackBetRequest source)
         {
-            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, source.CustId, source.TrxId).ConfigureAwait(false);
+            var bet = await _service.GetGameActionExternalIdAsync(gameProviderId, source.CustId, source.TrxId).ConfigureAwait(false);
             if (bet == null)
             {
                 return null;
@@ -66,22 +76,33 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 RoundClosed = true
             };
 
-            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+            return new()
+            {
+                PlayerCode = playerCode,
+                PlatformType = platformType,
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                GameProviderCode = Consts.GameProvider.Skywind,
+                HasCurrencyFromGameProvider = false,
+                AutoCloseRound = await _service.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false),
+                AllowCancelCancelTransaction = false,
+                Transactions = new[] { transactions }
+            };
         }
 
-        public async ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest source)
+        public async ValueTask<BetData> SettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType, string playerCode, SkywindSettleRequest source)
         {
-            var gameActionType = ProcessingSettlement(source.GameType, source.GameStatus, source.Amount);
-            var action = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot) ? "settle" : gameActionType.ToString().ToLower();
-            var autoCloseRound = (gameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot);
+            (bool RoundClosed, GameActionType GameActionType) = ProcessingSettlement(source.GameStatus, source.Amount);
+            var action = (GameActionType is not GameActionType.FreeBet and not GameActionType.WinJackpot) ? "settle" : GameActionType.ToString().ToLower();
+
             var externalTransactionId = $"{source.TrxId}_{action}";
-            var bet = await _service.GetGameActionExternalIdAsync(data.GameProviderId, source.CustId, source.TrxId).ConfigureAwait(false);
+            var bet = await _service.GetGameActionExternalIdAsync(gameProviderId, source.CustId, source.TrxId).ConfigureAwait(false);
             if (bet == null)
             {
                 return null;
             }
 
-            var gameActionExternal = await _service.GetGameActionExternalIdAsync(data.GameProviderId, playCode, externalTransactionId).ConfigureAwait(false);
+            var gameActionExternal = await _service.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
             if (gameActionExternal != null)
             {
                 return null;
@@ -95,88 +116,48 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 ExternalTransactionReferenceId = bet.ExternalTransactionId,
                 ExternalTransactionId = externalTransactionId,
                 ExternalGameId = source.GameCode.ToString(),
-                GameActionType = gameActionType,
+                GameActionType = GameActionType,
+                RoundClosed = RoundClosed,
                 Amount = Math.Abs(source.Amount),
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow
             };
 
-            return GetBetData(data, playCode, transactions, autoCloseRound);
+            return new()
+            {
+                PlayerCode = playerCode,
+                PlatformType = platformType,
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                GameProviderCode = Consts.GameProvider.Skywind,
+                HasCurrencyFromGameProvider = false,
+                AutoCloseRound = await _service.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false),
+                AllowCancelCancelTransaction = false,
+                Transactions = new[] { transactions }
+            };
         }
 
-        private static GameActionType ProcessingSettlement(string game_type, string game_status, decimal amount)
+        private static (bool RoundClosed, GameActionType GameActionType) ProcessingSettlement(string game_status, decimal amount)
         {
-            //"game_type" = "bonusgame" 流程
-            if (game_type.IgnoreCaseEquals("bonusgame"))
-            {
-                if (game_status.IgnoreCaseEquals("settled"))
-                {
-                    return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
-                }
-                else
-                {
-                    return GameActionType.FreeBet;
-                }
-            }
-            //"game_type" = "freegame" 流程
-            if (game_type.IgnoreCaseEquals("freegame"))
-            {
-                if (game_status.IgnoreCaseEquals("settled"))
-                {
-                    return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
-                }
-                else
-                {
-                    if (game_status.IgnoreCaseEquals("bonusgame"))
-                    {
-                        return GameActionType.WinJackpot;
-                    }
-                    else
-                    {
-                        return GameActionType.FreeBet;
-                    }
+            var roundClosed = game_status.IgnoreCaseEquals("settled");
+            var gameActionType = GameActionType.TieBet;
 
-                }
-            }
-
-            //"game_type" = "normal" 流程
             if (game_status.IgnoreCaseEquals("settled"))
             {
-                return amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
+                gameActionType = amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
             }
             else
             {
                 if (game_status.IgnoreCaseEquals("bonusgame"))
                 {
-
-                    return GameActionType.WinJackpot;
+                    gameActionType = amount > 0 ? GameActionType.WinJackpot : GameActionType.FreeBet;
                 }
                 else
                 {
-                    return GameActionType.FreeBet;
+                    gameActionType = GameActionType.FreeBet;
                 }
             }
-
+            return (roundClosed, gameActionType);
         }
-
-        private BetData GetBetData(
-            GameProviderConfigurationData data,
-            string playerCode,
-            TransactionData transactions,
-            bool autoCloseRound,
-            bool allowPlaceBetWithDifferentPlatformToken = false) =>
-            new()
-            {
-                PlayerCode = playerCode,
-                PlatformType = data.PlatformType,
-                GameProviderId = data.GameProviderId,
-                GameProviderConfigurationId = data.GameProviderConfigurationId,
-                GameProviderCode = Consts.GameProvider.Skywind,
-                HasCurrencyFromGameProvider = false,
-                AutoCloseRound = autoCloseRound,
-                AllowCancelCancelTransaction = false,
-                AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
-                Transactions = new[] { transactions }
-            };
     }
 }

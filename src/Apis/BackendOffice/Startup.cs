@@ -76,8 +76,8 @@ namespace TGS.Apis.BackendOffice
                     new HealthCheckOptions
                     {
                         ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                        ResponseWriter = (httpContext, result)
+                            => HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
                     });
 
                 endpoints.MapMetrics();
@@ -110,8 +110,8 @@ namespace TGS.Apis.BackendOffice
 
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories(sp
-                    => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .AddBackendOfficeRepositories(
+                    sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddMessageQueue()
                 .AddNatsMessageQueue(config =>
                 {
@@ -121,14 +121,22 @@ namespace TGS.Apis.BackendOffice
                             var configuration = sp.GetRequiredService<IConfiguration>();
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                            options.MaxReconnect = -1;
                         })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.deposit.approve",
+                        .AddReplyHandler<AutoApproveDepositProcessor>(
+                            "tgs.payment.approve",
+                            "tgs.payment.approve")
+                        .AddReplyHandler<AutoApproveDepositProcessor>(
+                            "tgs.payment.deposit.approve",
                             "tgs.payment.deposit.approve")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.reject", "tgs.payment.reject")
-                        .AddReplyHandler<AutoRejectDepositProcessor>("tgs.payment.deposit.reject",
+                        .AddReplyHandler<AutoRejectDepositProcessor>(
+                            "tgs.payment.reject",
+                            "tgs.payment.reject")
+                        .AddReplyHandler<AutoRejectDepositProcessor>(
+                            "tgs.payment.deposit.reject",
                             "tgs.payment.deposit.reject")
-                        .AddReplyHandler<AutoRejectWithdrawProcessor>("tgs.payment.withdraw.reject",
+                        .AddReplyHandler<AutoRejectWithdrawProcessor>(
+                            "tgs.payment.withdraw.reject",
                             "tgs.payment.withdraw.reject");
                 })
                 .AddNatsGlobPatternExchange("*");

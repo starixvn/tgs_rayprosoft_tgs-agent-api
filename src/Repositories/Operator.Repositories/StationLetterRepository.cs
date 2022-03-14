@@ -29,30 +29,22 @@ namespace TGS.Operator.Repositories
             return query;
         }
 
-        public ValueTask<int> QueryStationLettersTotalCountAsync(string playerCode)
-            => QueryStationLettersAsync(playerCode).CountAsync();
-
         public IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode)
-        {
-            var query = from letterPlayer in _tgsRepository.StationLetterPlayers
-                            .Include(letterPlayer => letterPlayer.StationLetter)
-                            .AsAsyncEnumerable()
-                            .OrderByDescending(x => x.StationLetter.CreatedOn)
-                        where letterPlayer.PlayerCode == playerCode
-                            && letterPlayer.StationLetter.Status == StationLetterStatus.Published
-                        select new StationLetter(
-                            letterPlayer.StationLetterId,
-                            letterPlayer.StationLetter.Subject,
-                            letterPlayer.StationLetter.Content,
-                            letterPlayer.StationLetter.CreatedOn,
-                            letterPlayer.IsRead,
-                            letterPlayer.StationLetter.Localization == null
-                                ? null
-                                : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
-                                    letterPlayer.StationLetter.Localization));
+            => InternalQueryStationLetters(playerCode)
+                .ToAsyncEnumerable()
+                .Select(letterPlayer => new StationLetter(
+                    letterPlayer.StationLetterId,
+                    letterPlayer.StationLetter.Subject,
+                    letterPlayer.StationLetter.Content,
+                    letterPlayer.StationLetter.CreatedOn,
+                    letterPlayer.IsRead,
+                    letterPlayer.StationLetter.Localization == null
+                        ? null
+                        : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
+                            letterPlayer.StationLetter.Localization)));
 
-            return query;
-        }
+        public ValueTask<int> QueryStationLettersTotalCountAsync(string playerCode)
+            => new ValueTask<int>(InternalQueryStationLetters(playerCode).CountAsync());
 
         public async ValueTask SetStationLetterHaveReadAsync(string playerCode, Guid letterId)
         {
@@ -68,5 +60,13 @@ namespace TGS.Operator.Repositories
                 await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+
+        private IQueryable<Core.DataServices.Tgs.Models.StationLetterPlayer> InternalQueryStationLetters(string playerCode)
+            => from letterPlayer in _tgsRepository.StationLetterPlayers.AsQueryable()
+                .Include(letterPlayer => letterPlayer.StationLetter)
+               where letterPlayer.PlayerCode == playerCode
+                && letterPlayer.StationLetter.Status == StationLetterStatus.Published
+               orderby letterPlayer.StationLetter.CreatedOn descending
+               select letterPlayer;
     }
 }

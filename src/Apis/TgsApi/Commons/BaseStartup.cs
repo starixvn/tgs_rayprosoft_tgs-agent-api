@@ -16,7 +16,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using Tgs.MessageQueue.MongoDB.Configuration;
 using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -29,8 +28,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
-using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
-
 
 namespace TGS.Apis.TgsApi.Commons
 {
@@ -136,14 +133,18 @@ namespace TGS.Apis.TgsApi.Commons
 
             services.AddFeatureManagement();
 
-            services.AddControllers(options =>
-            {
-                options.Filters.Add<ValidateModelFilter>();
-                AddCustomFilters(options);
-            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = false;
-            });
+            services
+                .AddControllers(options =>
+                {
+                    options.Filters.Add<ValidateModelFilter>();
+                    AddCustomFilters(options);
+                })
+                .AddXmlSerializerFormatters()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = false;
+                });
+
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
