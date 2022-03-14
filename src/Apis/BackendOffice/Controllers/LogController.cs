@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
@@ -16,11 +17,10 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public LogController(
             ILogQueries logQueries)
-        {
-            _logQueries = logQueries;
-        }
+            => _logQueries = logQueries;
 
         [HttpGet("admin")]
+        [ByPassAdminLog]
         public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
         {
             var (logs, totalCount) = await _logQueries.GetAdminLogsAsync(request);
@@ -29,6 +29,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("admin/{id:Guid}")]
+        [ByPassAdminLog]
         public async Task<LogDetailResponse> GetAdminLogAsync(Guid id)
         {
             var logDetail = await _logQueries.GetAdminLogAsync(id);
@@ -41,6 +42,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("api")]
+        [ByPassAdminLog]
         public async Task<PagedResponse<ApiLogModel>> GetApiLogsAsync([FromQuery] ApiLogRequest request)
         {
             var (logs, totalCount) = await _logQueries.GetApiLogsAsync(request);
@@ -49,6 +51,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("api/{id:Guid}")]
+        [ByPassAdminLog]
         public async Task<LogDetailResponse> GetApiLogAsync(Guid id)
         {
             var logDetail = await _logQueries.GetApiLogAsync(id);
@@ -61,6 +64,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("log")]
+        [ByPassAdminLog]
         public async Task<PagedResponse<LogRecordModel>> GetLogRecordsAsync([FromQuery] LogRecordRequest request)
         {
             var (logs, totalCount) = await _logQueries.GetLogRecordsAsync(request);
