@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220314015958_AddAdjustTables")]
+    [Migration("20220314021123_AddAdjustTables")]
     partial class AddAdjustTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -147,12 +147,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("type");
 
                     b.HasKey("Id")
-                        .HasName("pk_player_adjust_record_id");
+                        .HasName("pk_adjust_player_record_id");
 
                     b.HasIndex("CreatedOn", "BrandId", "PlayerCode", "Type")
-                        .HasDatabaseName("ix_player_adjust_record_multiple_keys");
+                        .HasDatabaseName("ix_adjust_player_record_multiple_keys");
 
-                    b.ToTable("player_adjust_records");
+                    b.ToTable("adjust_player_records");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdjustTransferRecord", b =>
@@ -180,10 +180,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("transaction_to_id");
 
                     b.Property<string>("TransferFromUsername")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("transfer_from_username");
 
                     b.Property<string>("TransferToUsername")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("transfer_to_username");
 

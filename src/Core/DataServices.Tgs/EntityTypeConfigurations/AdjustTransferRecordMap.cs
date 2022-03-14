@@ -24,12 +24,15 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
 
-            builder.Property(c => c.TransferFromUsername);
+            builder.Property(c => c.TransferFromUsername)
+                .IsRequired();
 
-            builder.Property(c => c.TransferToUsername);
+            builder.Property(c => c.TransferToUsername)
+                .IsRequired();
 
             builder.Property(c => c.Amount)
-                .HasPrecision(18, 6);
+                .HasPrecision(18, 6)
+                .IsRequired();
 
             builder.Property(l => l.CreatedOn)
                 .IsRequired();

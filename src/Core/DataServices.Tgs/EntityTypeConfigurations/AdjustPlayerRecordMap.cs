@@ -9,10 +9,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<AdjustPlayerRecord>.Configure(EntityTypeBuilder<AdjustPlayerRecord> builder)
         {
-            builder.ToTable("player_adjust_records");
+            builder.ToTable("adjust_player_records");
 
             builder.HasKey(bc => bc.Id)
-                .HasName("pk_player_adjust_record_id");
+                .HasName("pk_adjust_player_record_id");
 
             builder.Property(c => c.TransactionId);
 
@@ -37,7 +37,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.TransferTarget);
 
             builder.Property(c => c.Amount)
-                .HasPrecision(18, 6);
+                .HasPrecision(18, 6)
+                .IsRequired();
 
             builder.Property(c => c.BucketAmount)
                 .HasPrecision(18, 6);
@@ -58,7 +59,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     c.PlayerCode,
                     c.Type
                 })
-                .HasDatabaseName("ix_player_adjust_record_multiple_keys");
+                .HasDatabaseName("ix_adjust_player_record_multiple_keys");
         }
     }
 }

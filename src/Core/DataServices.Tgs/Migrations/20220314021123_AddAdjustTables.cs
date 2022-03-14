@@ -31,26 +31,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "adjust_transfer_records",
-                schema: "dbo",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    transaction_from_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    transaction_to_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    transfer_type = table.Column<short>(type: "smallint", nullable: false),
-                    transfer_from_username = table.Column<string>(type: "text", nullable: true),
-                    transfer_to_username = table.Column<string>(type: "text", nullable: true),
-                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_adjust_transfer_record_id", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "player_adjust_records",
+                name: "adjust_player_records",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -70,7 +51,26 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_player_adjust_record_id", x => x.id);
+                    table.PrimaryKey("pk_adjust_player_record_id", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "adjust_transfer_records",
+                schema: "dbo",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    transaction_from_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    transaction_to_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    transfer_type = table.Column<short>(type: "smallint", nullable: false),
+                    transfer_from_username = table.Column<string>(type: "text", nullable: false),
+                    transfer_to_username = table.Column<string>(type: "text", nullable: false),
+                    amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false),
+                    created_on = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_adjust_transfer_record_id", x => x.id);
                 });
 
             migrationBuilder.CreateIndex(
@@ -80,16 +80,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 columns: new[] { "created_on", "brand_id", "agent_id", "type" });
 
             migrationBuilder.CreateIndex(
+                name: "ix_adjust_player_record_multiple_keys",
+                schema: "dbo",
+                table: "adjust_player_records",
+                columns: new[] { "created_on", "brand_id", "player_code", "type" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_adjust_transfer_record_multiple_keys",
                 schema: "dbo",
                 table: "adjust_transfer_records",
                 columns: new[] { "created_on", "transfer_type", "transfer_from_username", "transfer_to_username" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_player_adjust_record_multiple_keys",
-                schema: "dbo",
-                table: "player_adjust_records",
-                columns: new[] { "created_on", "brand_id", "player_code", "type" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -99,11 +99,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "adjust_transfer_records",
+                name: "adjust_player_records",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "player_adjust_records",
+                name: "adjust_transfer_records",
                 schema: "dbo");
         }
     }
