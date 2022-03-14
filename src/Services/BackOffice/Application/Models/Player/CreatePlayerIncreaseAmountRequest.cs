@@ -8,7 +8,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
     {
         public string PlayerCode { get; set; }
 
-        public PlayerIncreaseAmountType TransactionType { get; set; }
+        public PlayerAdjustmentTransactionType TransactionType { get; set; }
 
         public decimal Amount { get; set; }
 

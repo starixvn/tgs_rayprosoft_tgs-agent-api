@@ -137,10 +137,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
         private static bool IsTransferToAgent(CreateAgentAdjustmentRequest request) =>
             request.AdjustmentType == AdjustmentType.Subtract &&
-            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Agent;
+            request.TransactionType == AgentAdjustmentTransactionType.Transfer &&
+            request.AccountType == AccountType.Agent;
 
         private static bool IsTransferToPlayer(CreateAgentAdjustmentRequest request) =>
             request.AdjustmentType == AdjustmentType.Subtract &&
-            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Player;
+            request.TransactionType == AgentAdjustmentTransactionType.Transfer &&
+            request.AccountType == AccountType.Player;
     }
 }

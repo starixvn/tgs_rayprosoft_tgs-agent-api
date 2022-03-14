@@ -20,8 +20,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
     public class PlayerIncreaseAmountHandler : Handler<CreatePlayerIncreaseAmountRequest, MessageResponse>
     {
         private readonly ICashServiceClient _cashServiceClient;
+        private readonly IPlayerAdjustAccountService _playerAdjustAccountService;
         private readonly IPlayerBucketRepository _playerBucketRepository;
-        private readonly IPlayerIncreaseAmountService _playerIncreaseAmountService;
         private readonly IPlayerService _playerService;
         private readonly ITgsLog _tgsLog;
 
@@ -31,7 +31,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor,
             ITgsLog tgsLog,
-            IPlayerIncreaseAmountService playerIncreaseAmountService) : base(accessor)
+            IPlayerAdjustAccountService playerAdjustAccountService) : base(accessor)
         {
             if (accessor is null)
             {
@@ -45,8 +45,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
 
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
-            _playerIncreaseAmountService = playerIncreaseAmountService ??
-                throw new ArgumentNullException(nameof(playerIncreaseAmountService));
+            _playerAdjustAccountService = playerAdjustAccountService ??
+                throw new ArgumentNullException(nameof(playerAdjustAccountService));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -75,9 +75,12 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             using var tranScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _playerIncreaseAmountService.CreateAsync(player.BrandId,
+            await _playerAdjustAccountService.CreateAsync(
+                player.BrandId,
                 player.PlayerCode,
+                AdjustmentType.Add,
                 request.TransactionType,
+                AdjustTransferType.None,
                 request.Amount,
                 request.Remark,
                 request.BucketAmount,
@@ -116,10 +119,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async ValueTask<TransactionResponse> AdjustAsync(PlayerIncreaseAmountType type, Guid walletId,
+        private async ValueTask<TransactionResponse> AdjustAsync(PlayerAdjustmentTransactionType type, Guid walletId,
             decimal amount, string remark, Guid userId) => type switch
         {
-            PlayerIncreaseAmountType.AgentAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
                 .AgentAdjustAsync(
                     walletId,
                     amount,
@@ -127,7 +130,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     null,
                     userId)
                 .ConfigureAwait(false),
-            PlayerIncreaseAmountType.SystemAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
                 .SystemAdjustAsync(
                     walletId,
                     amount,
@@ -135,7 +138,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     null,
                     userId)
                 .ConfigureAwait(false),
-            PlayerIncreaseAmountType.CompanyAdjust => await _cashServiceClient
+            PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
                 .CompanyAdjustAsync(
                     walletId,
                     amount,
