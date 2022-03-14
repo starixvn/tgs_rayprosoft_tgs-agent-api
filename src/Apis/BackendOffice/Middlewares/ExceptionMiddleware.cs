@@ -123,7 +123,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             var attribute = httpContext.Features.Get<IEndpointFeature>()?.Endpoint?.Metadata
                 .GetMetadata<ByPassAdminLogAttribute>();
 
-            if (!defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)) &&
+            if (adminLogEvent.Path is not null && !defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)) &&
                 attribute == null)
             {
                 _tgsLog.LogAdmin(adminLogEvent);
