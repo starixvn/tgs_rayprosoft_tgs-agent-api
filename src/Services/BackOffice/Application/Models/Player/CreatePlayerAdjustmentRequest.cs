@@ -10,7 +10,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public AdjustmentType AdjustType { get; set; }
 
-        public AdjustmentTransactionType TransactionType { get; set; }
+        public PlayerAdjustmentTransactionType TransactionType { get; set; }
 
         public decimal Amount { get; set; }
 
