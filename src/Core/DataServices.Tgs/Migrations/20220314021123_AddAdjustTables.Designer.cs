@@ -168,7 +168,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
                     b.Property<Guid>("TransactionFromId")
