@@ -60,11 +60,13 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 return null;
             }
 
+            var externalTransactionId = $"{ request.Data}_cancel";
+
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(request.Member.Amount),
                 ExternalRoundId = betOrder.ExternalRoundId,
-                ExternalTransactionId = request.Data,
+                ExternalTransactionId = externalTransactionId,
                 ExternalBetId = betOrder.ExternalBetId,
                 ExternalGameActionGroupId = betOrder.ExternalGameActionGroupId,
                 ExternalGameId = betOrder.ExternalGameId,
@@ -101,11 +103,13 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 return null;
             }
 
+            var externalTransactionId = $"{ request.Data}_cancel";
+
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(request.Member.Amount),
                 ExternalRoundId = settleOrder.ExternalRoundId,
-                ExternalTransactionId = request.Data,
+                ExternalTransactionId = externalTransactionId,
                 ExternalBetId = settleOrder.ExternalBetId,
                 ExternalGameActionGroupId = settleOrder.ExternalGameActionGroupId,
                 ExternalGameId = settleOrder.ExternalGameId,
