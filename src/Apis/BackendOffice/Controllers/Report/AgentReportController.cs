@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.ReportAgent;
@@ -88,6 +89,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet("exportAgentContributions")]
+        [Description("export agent contributions")]
+        [ByPassAdminLog]
         public async Task<IActionResult> ExportAgentContributionsFileAsync(
             [FromServices] IGetService<ExportAgentContributionsRequest, Stream>
                 exportAgentContributionsService,
@@ -100,6 +103,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 "AgentContributions.xlsx");
 
         [HttpGet("exportAgentDividends")]
+        [Description("export agent dividends")]
+        [ByPassAdminLog]
         public async Task<IActionResult> ExportAgentDividendsFileAsync(
             [FromServices] IGetService<ExportAgentDividendsRequest, Stream>
                 exportAgentDividendsService,
@@ -113,6 +118,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("exportAgentDividendsTrialCalculation")]
         [Description("export agent dividends trial calculation")]
+        [ByPassAdminLog]
         public async Task<IActionResult> ExportAgentDividendsTrialCalculationAsync(
             [FromServices] IGetService<ExportAgentDividendsTrialCalculationRequest, Stream>
                 exportAgentDividendsTrialCalculationService,
