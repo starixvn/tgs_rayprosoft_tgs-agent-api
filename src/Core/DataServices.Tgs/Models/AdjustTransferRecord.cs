@@ -19,6 +19,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal Amount { get; set; }
 
-        public DateTime CreatedOn { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
     }
 }

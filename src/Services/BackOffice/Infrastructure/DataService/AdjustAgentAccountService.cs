@@ -9,11 +9,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAdjustAgentAccountService
     {
-        ValueTask<AdjustPlayerRecord> CreateAsync(Guid brandId, string playerCode, AdjustmentType adjustmentType,
-            PlayerAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
-            string remark, decimal bucketAmount, string username, string targetAgentUsername = null);
+        ValueTask<AdjustAgentRecord> CreateAsync(Guid transactionId, Guid brandId, Guid agentId,
+            AdjustmentType adjustmentType,
+            AgentAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
+            string remark, string username, string targetAgentUsername = null);
 
-        Task UpdateAdjustPlayerRecordAsync(AdjustPlayerRecord record);
+        Task UpdateAdjustAgentRecordAsync(AdjustAgentRecord record);
     }
 
     public class AdjustAgentAccountService : BaseRepositoryOperations<ITgsRepository>, IAdjustAgentAccountService
@@ -23,21 +24,21 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
         }
 
-        public async ValueTask<AdjustPlayerRecord> CreateAsync(Guid brandId, string playerCode,
+        public async ValueTask<AdjustAgentRecord> CreateAsync(Guid transactionId, Guid brandId, Guid agentId,
             AdjustmentType adjustmentType,
-            PlayerAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
-            string remark, decimal bucketAmount, string username, string targetAgentUsername)
+            AgentAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
+            string remark, string username, string targetAgentUsername)
         {
-            var vipLevel = new AdjustPlayerRecord
+            var vipLevel = new AdjustAgentRecord
             {
+                TransactionId = transactionId,
                 BrandId = brandId,
-                PlayerCode = playerCode,
+                AgentId = agentId,
                 AdjustmentType = adjustmentType,
                 Type = transactionType,
                 TransferType = transferType,
                 Amount = amount,
                 Remark = remark,
-                BucketAmount = bucketAmount,
                 CreatedByUsername = username,
                 TransferTarget = targetAgentUsername,
                 CreatedOn = DateTimeOffset.Now
@@ -48,7 +49,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return vipLevel;
         }
 
-        public async Task UpdateAdjustPlayerRecordAsync(AdjustPlayerRecord record)
+        public async Task UpdateAdjustAgentRecordAsync(AdjustAgentRecord record)
             => await UpdateEntityAsync(record);
     }
 }

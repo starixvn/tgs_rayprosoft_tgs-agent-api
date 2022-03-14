@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
 
         [HttpPost("{playerCode}/adjust/increase")]
-        [Description("Create a player adjustment")]
+        [Description("Create a player adjustment to increase amount")]
         public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
             CreatePlayerIncreaseAmountRequest request)
         {
@@ -43,7 +43,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("{playerCode}/adjust/reduce")]
-        [Description("Create a player adjustment")]
+        [Description("Create a player adjustment to reduce amount")]
         public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
             CreatePlayerReduceAmountRequest request)
         {
