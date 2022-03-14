@@ -31,6 +31,8 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
+using Microsoft.Extensions.Logging;
+using Tgs.Logging;
 
 namespace TGS.Apis.BackendOffice
 {
