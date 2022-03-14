@@ -27,6 +27,7 @@ namespace TGS.Apis.BackendOffice
                             fluentOptions.Host = nodeIp;
                             fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
                             fluentOptions.UseMessagePack();
+                            fluentOptions.BatchExportProcessorOptions.MaxExportBatchSize = 64 * 1024;
                         });
                     });
             })
