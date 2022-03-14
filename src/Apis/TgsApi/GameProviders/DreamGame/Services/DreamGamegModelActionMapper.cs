@@ -70,6 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalGameId = betOrder.ExternalGameId,
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = GameActionType.CancelTransaction,
+                RoundClosed = true,
                 TimeStamp = DateTimeOffset.UtcNow
             };
 
@@ -153,6 +154,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalGameId = betOrder.ExternalGameId,
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                RoundClosed = true,
                 TimeStamp = DateTimeOffset.UtcNow
             };
 
@@ -195,6 +197,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalGameId = betOrder.ExternalGameId,
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                RoundClosed = true,
                 TimeStamp = DateTimeOffset.UtcNow
             };
 
