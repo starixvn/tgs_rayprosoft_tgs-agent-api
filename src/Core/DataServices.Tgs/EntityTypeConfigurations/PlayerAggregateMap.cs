@@ -35,7 +35,15 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.AdjustmentAmount)
+            builder.Property(b => b.CompanyAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.AgentAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.SystemAdjustAmount)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
