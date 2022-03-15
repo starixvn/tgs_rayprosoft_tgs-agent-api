@@ -135,12 +135,15 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> ResettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameInformRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
-            var externalTransactionId = request.Data + "_resettle";
+            var externalTransactionId = request.Data;
+            var settleOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, request.Data).ConfigureAwait(false);
+            if (settleOrder != null)
+            {
+                externalTransactionId = request.Data + "_resettle";
+            }
 
             var betOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, $"-{request.Data}").ConfigureAwait(false);
-
             if (betOrder == null)
             {
                 return null;
@@ -178,7 +181,6 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> SettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameTransferRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
             var externalTransactionId = request.Data;
 
