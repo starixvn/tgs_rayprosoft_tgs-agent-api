@@ -51,20 +51,21 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> CancelBetAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameInformRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
-            var betOrder = await _service.GetGameActionExternalIdByPlaceBetAsync(gameProviderId, playCode, request.TicketId.ToString(), game.Id).ConfigureAwait(false);
+            var betOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, request.Data).ConfigureAwait(false);
 
             if (betOrder == null)
             {
                 return null;
             }
 
+            var externalTransactionId = $"{ request.Data}_cancel";
+
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(request.Member.Amount),
                 ExternalRoundId = betOrder.ExternalRoundId,
-                ExternalTransactionId = request.Data,
+                ExternalTransactionId = externalTransactionId,
                 ExternalBetId = betOrder.ExternalBetId,
                 ExternalGameActionGroupId = betOrder.ExternalGameActionGroupId,
                 ExternalGameId = betOrder.ExternalGameId,
@@ -92,20 +93,21 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> CancelSettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameInformRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
-            var settleOrder = await _service.GetGameActionExternalIdBySettleAsync(gameProviderId, playCode, request.TicketId.ToString(), game.Id).ConfigureAwait(false);
+            var settleOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, request.Data).ConfigureAwait(false);
 
             if (settleOrder == null)
             {
                 return null;
             }
 
+            var externalTransactionId = $"{ request.Data}_cancel";
+
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(request.Member.Amount),
                 ExternalRoundId = settleOrder.ExternalRoundId,
-                ExternalTransactionId = request.Data,
+                ExternalTransactionId = externalTransactionId,
                 ExternalBetId = settleOrder.ExternalBetId,
                 ExternalGameActionGroupId = settleOrder.ExternalGameActionGroupId,
                 ExternalGameId = settleOrder.ExternalGameId,
@@ -133,12 +135,15 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> ResettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameInformRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
-            var externalTransactionId = request.Data + "_resettle";
+            var externalTransactionId = request.Data;
+            var settleOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, request.Data).ConfigureAwait(false);
+            if (settleOrder != null)
+            {
+                externalTransactionId = request.Data + "_resettle";
+            }
 
-            var betOrder = await _service.GetGameActionExternalIdByPlaceBetAsync(gameProviderId, playCode, request.TicketId.ToString(), game.Id).ConfigureAwait(false);
-
+            var betOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, $"-{request.Data}").ConfigureAwait(false);
             if (betOrder == null)
             {
                 return null;
@@ -176,11 +181,10 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> SettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameTransferRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
             var externalTransactionId = request.Data;
 
-            var betOrder = await _service.GetGameActionExternalIdByPlaceBetAsync(gameProviderId, playCode, request.TicketId.ToString(), game.Id).ConfigureAwait(false);
+            var betOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, $"-{request.Data}").ConfigureAwait(false);
 
             if (betOrder == null)
             {

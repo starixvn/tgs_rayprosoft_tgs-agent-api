@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.0.6-beta" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.3.6" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[5.0.13, 6.0)" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
@@ -58,14 +57,14 @@
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc8" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc8" />
-    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.0" />
+    <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.1.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
     <PackageReference Include="Scrutor" Version="4.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
     <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.0.3" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.0.2" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />

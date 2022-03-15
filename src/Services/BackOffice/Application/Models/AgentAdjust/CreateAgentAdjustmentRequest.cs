@@ -19,6 +19,6 @@ namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
 
         public string TargetName { get; set; }
 
-        public AdjustmentTransactionType TransactionType { get; set; }
+        public AgentAdjustmentTransactionType TransactionType { get; set; }
     }
 }

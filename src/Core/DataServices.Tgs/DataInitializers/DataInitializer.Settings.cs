@@ -174,7 +174,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             {
                                 new MenuSetting("View"),
                                 new MenuSetting("Update"),
-                                new MenuSetting("PhoneFilter")
+                                new MenuSetting("PhoneFilter"),
+                                new MenuSetting("RealnameFilter")
                             }
                         },
                         new MenuSetting("BalanceAdjustment")
@@ -182,7 +183,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("View"),
-                                new MenuSetting("Update")
+                                new MenuSetting("Update"),
+                                new MenuSetting("SystemTransactionType"),
                             }
                         },
                         new MenuSetting("OnlinePlayerList")
@@ -213,7 +215,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SubMenus = new[]
                             {
                                 new MenuSetting("View"),
-                                new MenuSetting("Update")
+                                new MenuSetting("Update"),
+                                new MenuSetting("SystemTransactionType")
                             }
                         }
                     }
@@ -644,6 +647,69 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             {
                                 Zh = "每月救援金",
                                 En = "Monthly SOS"
+                            }
+                        }
+                    }
+                },
+                new PromotionTypeGroup
+                {
+                    Name = "Signin",
+                    Trans = new()
+                    {
+                        Zh = "签到活动",
+                        En = "Sign-in Event"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "SigninDaily",
+                            SettlementIntervalType = "Daily",
+                            Trans = new()
+                            {
+                                Zh = "每日签到",
+                                En = "Daily Sign-in"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "SigninWeekly",
+                            SettlementIntervalType = "Weekly",
+                            Trans = new()
+                            {
+                                Zh = "每周签到",
+                                En = "Weekly Sign-in"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "SigninMonthly",
+                            SettlementIntervalType = "Monthly",
+                            Trans = new()
+                            {
+                                Zh = "每月签到",
+                                En = "Monthly Sign-in"
+                            }
+                        }
+                    }
+                },
+                new PromotionTypeGroup
+                {
+                    Name = "NewUser",
+                    Trans = new()
+                    {
+                        Zh = "新用戶",
+                        En = "New User"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "NewUser",
+                            Trans = new()
+                            {
+                                Zh = "新用戶",
+                                En = "New User"
                             }
                         }
                     }

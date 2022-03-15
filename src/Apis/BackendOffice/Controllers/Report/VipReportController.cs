@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Vip;
@@ -43,6 +44,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet("exportVips")]
+        [Description("Export vips")]
+        [ByPassAdminLog]
         public async Task<IActionResult> ExportVipsAsync(
             [FromServices] IGetService<ExportVipReportRequest, Stream>
                 exportVipReportService,

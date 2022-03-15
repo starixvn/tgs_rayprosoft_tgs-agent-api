@@ -114,7 +114,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var netProfit = await _repository.PlayerAggregates.AsQueryable()
                 .Where(x => x.BrandId == brandId)
                 .Where(x => x.ReportDate >= firstDayOfMonth && x.ReportDate <= reportDate)
-                .SumAsync(x => x.WinLossAmount - x.AdjustmentAmount -
+                .SumAsync(x => x.WinLossAmount - x.CompanyAdjustAmount -
                     x.RebateAmount -
                     x.PromotionAmount);
 

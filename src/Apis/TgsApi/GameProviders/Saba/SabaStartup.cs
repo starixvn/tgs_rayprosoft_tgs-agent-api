@@ -15,7 +15,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Constraints;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
@@ -144,11 +143,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
             {
                 options.Filters.Add<ValidateModelFilter>();
             });
-            _ = services.Configure<RouteOptions>(routeOptions =>
-            {
-                routeOptions.ConstraintMap.Add("RegexAgentName", typeof(RegexAgentNameConstraint));
-            });
-            _ = services.AddScoped<IDreamGameService, NoopDreamGameService>();
 
             services.AddHealthChecks()
                 //.AddPostgres(_configuration, "Tgs", "tgs-db")

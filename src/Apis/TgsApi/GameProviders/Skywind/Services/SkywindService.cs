@@ -3,12 +3,10 @@ using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
-using TGS.Core.Models.Services.Games;
 using TGS.GameProviders.Repositories.Models;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
@@ -23,7 +21,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IRoundQueries _roundQueries;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
 
@@ -33,7 +30,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             IGameProviderOperations gameProviderOperations,
             IRedisPlayerLoginRecordService playerLoginRecordService,
             IPlayerOperations playerOperations,
-            IRoundQueries roundQueries,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider)
         {
@@ -42,7 +38,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
         }
@@ -59,8 +54,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             return await _playerLoginRecordService.GetAsync(loginRecordId);
         }
 
-        public async ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(
-            Guid brandId, Guid gameProviderId)
+        public async ValueTask<bool> GetAutoCloseRoundAsync(Guid gameProviderId)
+            => await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
+
+        public async ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
             => await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
         public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
@@ -69,8 +66,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         public async ValueTask<SkywindConfiguration> GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
                 .GameProviderConfigurations.Skywind);
-
-        public string GetExternalRoundId(string roundId, string trxId, long eventId) => $"{roundId}_{trxId}_{eventId}";
 
         public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
             Guid gameProviderId,
@@ -81,23 +76,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 playerCode,
                 externalTransactionId)
                 .ConfigureAwait(false);
-
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
-            Guid gameProviderId,
-            Guid gameProviderConfigurationId,
-            PlatformType platformType)
-        {
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                .ConfigureAwait(false);
-
-            return new()
-            {
-                GameProviderId = gameProviderId,
-                GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
-            };
-        }
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
