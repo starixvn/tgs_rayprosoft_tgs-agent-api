@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Models;
 using TGS.Core.Models;
@@ -32,6 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 GameActionType = GameActionType.PlaceBet,
                 RoundClosed = false,
                 TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
             return new()
             {
@@ -72,7 +74,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = GameActionType.CancelTransaction,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -114,7 +117,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = settleOrder.ExternalTransactionId,
                 GameActionType = GameActionType.CancelTransaction,
                 RoundClosed = false,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -160,7 +164,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -202,7 +207,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
