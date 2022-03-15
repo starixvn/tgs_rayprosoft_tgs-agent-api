@@ -467,12 +467,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("zeronineninepay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<UmPayDepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
+        public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] UmPaySerializer serializer,
             [FromBody] SubmitDepositRequest request
             )
         {
@@ -495,7 +494,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Amount,
                 "tgs.payment.zeronineninepay.deposit",
                 request.PromotionId,
-                formId => serializer.Serialize(
+                formId => JsonSerializer.Serialize(
                     new ZeroNineNinePayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
                         brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
@@ -519,7 +518,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
 
-            var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
+            var applyInfo = JsonSerializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
 
             if (applyInfo.Response.Code == 200)
             {
@@ -531,11 +530,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .ExecuteAsync(updateThirdPartyOrderNoCommand)
                     .ConfigureAwait(false);
 
-                return new UmPayDepositFormCreatedResponse
+                return new DepositFormCreatedResponse
                 {
                     FormId = createdFormId,
-                    PaymentUrl = applyInfo.Response.Data.PayUrl,
-                    ErrorMessage = string.Empty
+                    PaymentUrl = applyInfo.Response.Data.PayUrl
                 };
             }
             else
