@@ -165,7 +165,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount");
 
-                    b.Property<DateTime>("CreatedOn")
+                    b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
@@ -4281,10 +4281,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal>("AdjustmentAmount")
+                    b.Property<decimal>("AgentAdjustAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("adjustment_amount");
+                        .HasColumnName("agent_adjust_amount");
 
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
@@ -4308,6 +4308,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<decimal>("CompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("company_adjust_amount");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -4363,6 +4368,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("ReportDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
+
+                    b.Property<decimal>("SystemAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("system_adjust_amount");
 
                     b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)

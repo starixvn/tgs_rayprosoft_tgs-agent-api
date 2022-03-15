@@ -62,15 +62,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
                 .ConfigureAwait(false);
 
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdByPlaceBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-                        => (await _gameActionQueries
-                .GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, new[] { GameActionType.PlaceBet })
-                .ConfigureAwait(false)).FirstOrDefault();
-
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdBySettleAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-            => (await _gameActionQueries
-                .GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, new[] { GameActionType.WinBet, GameActionType.LoseBet })
-                .ConfigureAwait(false)).FirstOrDefault();
+        public ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
+            => _gameActionQueries
+                .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId);
 
         public async ValueTask<OrderInfo[]> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string externalRoundId, int gameId)
         {

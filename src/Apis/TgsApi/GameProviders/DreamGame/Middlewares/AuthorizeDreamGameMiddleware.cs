@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -12,11 +13,13 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
     public sealed class AuthorizeDreamGameMiddleware : IMiddleware
     {
         private readonly IDreamGameService _service;
-
+        private readonly ILogger<AuthorizeDreamGameMiddleware> _logger;
         public AuthorizeDreamGameMiddleware(
-            IDreamGameService service)
+            IDreamGameService service,
+            ILogger<AuthorizeDreamGameMiddleware> logger)
         {
             _service = service ?? throw new System.ArgumentNullException(nameof(service));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -27,12 +30,14 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
             var jsonDocument = JsonDocument.Parse(await context.Request.ReadAsStringAsync().ConfigureAwait(false));
             var token = jsonDocument.RootElement.GetProperty("token").GetString();
             var key = _service.GetHashMD5(configuration.AgentName, configuration.ApiKey).ToLower();
-            /*
+
+            _logger.LogInformation(eventId: new EventId(10000), message: $"GP Token:{token} | TGS Token:{key}");
+
             if (key != token)
             {
                 throw new InvalidCredentialsException($"{token }");
             }
-            */
+
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
