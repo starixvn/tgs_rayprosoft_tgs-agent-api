@@ -51,7 +51,7 @@ namespace TGS.Services.GameOperations
 
         public ValueTask<BetResult> LockAmountAsync(BetData data)
             => ExecuteGamePlayActionAsync(data,
-                _operations.PlaceAndSettleBetAsync,
+                _operations.LockAmountAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
         public ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data)
@@ -60,8 +60,8 @@ namespace TGS.Services.GameOperations
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
         public ValueTask<BetResult> PlaceBetAsync(BetData data)
-                    => ExecuteGamePlayActionAsync(data,
-                _operations.PlaceAndSettleBetAsync,
+            => ExecuteGamePlayActionAsync(data,
+                _operations.PlaceBetAsync,
                 player => ValidateRequiredStatusOnBettingAsync(data, player));
 
         public ValueTask<BetResult> SettleBetAsync(BetData data)
