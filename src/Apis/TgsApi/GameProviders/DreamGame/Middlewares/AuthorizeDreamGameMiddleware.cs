@@ -12,8 +12,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
 {
     public sealed class AuthorizeDreamGameMiddleware : IMiddleware
     {
-        private readonly IDreamGameService _service;
         private readonly ILogger<AuthorizeDreamGameMiddleware> _logger;
+        private readonly IDreamGameService _service;
+
         public AuthorizeDreamGameMiddleware(
             IDreamGameService service,
             ILogger<AuthorizeDreamGameMiddleware> logger)
@@ -29,7 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Middlewares
             var configuration = await _service.GetDreamGameConfigurationAsync().ConfigureAwait(false);
             var jsonDocument = JsonDocument.Parse(await context.Request.ReadAsStringAsync().ConfigureAwait(false));
             var token = jsonDocument.RootElement.GetProperty("token").GetString();
-            var key = _service.GetHashMD5(configuration.AgentName, configuration.ApiKey).ToLower();
+            var key = _service.GetHashMD5(configuration.AgentName, configuration.ApiKey);
 
             _logger.LogInformation(eventId: new EventId(10000), message: $"GP Token:{token} | TGS Token:{key}");
 

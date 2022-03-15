@@ -16,9 +16,9 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
 
         ValueTask<DreamGameConfiguration> GetDreamGameConfigurationAsync();
 
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdByCancelTransactionAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
-
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
+
+        ValueTask<GameActionExternalIds> GetGameActionExternalIdByCancelTransactionAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
 
         ValueTask<OrderInfo[]> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string externalRoundId, int gameId);
 
