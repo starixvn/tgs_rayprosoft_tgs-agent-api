@@ -6,6 +6,8 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public Guid BrandId { get; set; }
 
+        public int Combo { get; set; }
+
         public DateTime CreatedOn { get; set; }
 
         public DateTime Date { get; set; }
