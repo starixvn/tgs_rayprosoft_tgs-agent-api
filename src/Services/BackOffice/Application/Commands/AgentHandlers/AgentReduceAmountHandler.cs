@@ -151,7 +151,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             if (IsTransferToPlayer(request))
             {
                 var playerTargetResponse = await _cashServiceClient
-                    .TransferAdjustAsync(
+                    .AdjustTransferAsync(
                         targetPlayer.DefaultWalletId,
                         request.Amount,
                         request.Remark,
