@@ -128,7 +128,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             decimal amount, string remark, Guid userId) => type switch
         {
             PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
-                .AgentAdjustAsync(
+                .AdjustAgentAsync(
                     walletId,
                     amount,
                     remark,
@@ -136,7 +136,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     userId)
                 .ConfigureAwait(false),
             PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
-                .SystemAdjustAsync(
+                .AdjustSystemAsync(
                     walletId,
                     amount,
                     remark,
@@ -144,7 +144,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     userId)
                 .ConfigureAwait(false),
             PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
-                .CompanyAdjustAsync(
+                .AdjustCompanyAsync(
                     walletId,
                     amount,
                     remark,
