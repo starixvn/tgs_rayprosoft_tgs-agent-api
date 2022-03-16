@@ -93,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         {
             var gameProviderId = await GetGameProviderIdAsync().ConfigureAwait(false);
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId).ConfigureAwait(false);
-            return games.Where(x => x.Type == GameType.LiveDealerLobby).FirstOrDefault();
+            return games.Where(x => x.ExternalId.ToLower() == "dg").FirstOrDefault();
         }
 
         public async ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId)
