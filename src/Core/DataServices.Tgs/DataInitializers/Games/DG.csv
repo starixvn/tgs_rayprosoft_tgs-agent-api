@@ -1,5 +1,6 @@
 Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Lobby,Lobby,,dglobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,DG
+DG,DG,,dg,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
 Baccarat_DG01,Baccarat_DG01,,10101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
 Baccarat_DG02,Baccarat_DG02,,10102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG
 Baccarat_DG03,Baccarat_DG03,,10103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,DG

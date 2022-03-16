@@ -84,8 +84,12 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Controllers
             {
                 //Settle
                 var cancelBetData = await _mapper.CancelSettleAsync(gameProviderId, gameProviderConfigurationId, playerCode, platformType, request).ConfigureAwait(false);
-                _ = await _actions.CancelTransactionAsync(cancelBetData).ConfigureAwait(false);
+                if (cancelBetData != null)
+                {
+                    _ = await _actions.CancelTransactionAsync(cancelBetData).ConfigureAwait(false);
+                }
                 var betData = await _mapper.ResettleAsync(gameProviderId, gameProviderConfigurationId, playerCode, platformType, request).ConfigureAwait(false);
+
                 _ = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
             }
             else

@@ -27,6 +27,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasColumnType("timestamptz")
                 .HasDefaultValueSql("Now()");
+            builder.Property(s => s.Combo)
+                .IsRequired()
+                .HasDefaultValue(1);
 
             builder.HasOne<Brand>()
                 .WithMany()

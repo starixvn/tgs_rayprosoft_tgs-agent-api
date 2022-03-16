@@ -93,6 +93,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-dg") : new("http://localhost:62330"),
                     ApiUrl = new Uri(" https://api.dg0.co"),
+                    VideoGameApiUrl = new Uri("https://ag.dg66.info"),
                     ApiKey = "974e8e9a072e4ad59a9e3f43a06ff9ae",
                     AgentName = "DGTE0105CO",
                     PlayerPassword = "TgsP@ssw0rd"

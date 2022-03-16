@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Models;
 using TGS.Core.Models;
@@ -32,6 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 GameActionType = GameActionType.PlaceBet,
                 RoundClosed = false,
                 TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
             return new()
             {
@@ -72,7 +74,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = GameActionType.CancelTransaction,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -114,7 +117,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = settleOrder.ExternalTransactionId,
                 GameActionType = GameActionType.CancelTransaction,
                 RoundClosed = false,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -135,12 +139,15 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> ResettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameInformRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
-            var externalTransactionId = request.Data + "_resettle";
+            var externalTransactionId = request.Data;
+            var settleOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, request.Data).ConfigureAwait(false);
+            if (settleOrder != null)
+            {
+                externalTransactionId = request.Data + "_resettle";
+            }
 
             var betOrder = await _service.GetGameActionExternalIdAsync(gameProviderId, playCode, $"-{request.Data}").ConfigureAwait(false);
-
             if (betOrder == null)
             {
                 return null;
@@ -157,7 +164,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()
@@ -178,7 +186,6 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<BetData> SettleAsync(Guid gameProviderId, Guid gameProviderConfigurationId, string playCode, PlatformType platformType, DreamGameTransferRequest request)
         {
             var autoCloseRound = await _service.GetAutoCloseRoundAsync().ConfigureAwait(false);
-            var game = await _service.GetGameAsync().ConfigureAwait(false);
 
             var externalTransactionId = request.Data;
 
@@ -200,7 +207,8 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
                 RoundClosed = true,
-                TimeStamp = DateTimeOffset.UtcNow
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(request)
             };
 
             return new()

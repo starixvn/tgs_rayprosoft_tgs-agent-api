@@ -57,14 +57,14 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         public async ValueTask<DreamGameConfiguration> GetDreamGameConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<DreamGameConfiguration>(SettingConsts.GameProviderConfigurations.DreamGame).ConfigureAwait(false);
 
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdByCancelTransactionAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
-                    => await _gameActionQueries
-                .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
-                .ConfigureAwait(false);
-
         public ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => _gameActionQueries
                 .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId);
+
+        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdByCancelTransactionAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
+                            => await _gameActionQueries
+                .GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
+                .ConfigureAwait(false);
 
         public async ValueTask<OrderInfo[]> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string externalRoundId, int gameId)
         {
@@ -93,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
         {
             var gameProviderId = await GetGameProviderIdAsync().ConfigureAwait(false);
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId).ConfigureAwait(false);
-            return games.Where(x => x.Type == GameType.LiveDealerLobby).FirstOrDefault();
+            return games.Where(x => x.ExternalId.ToLower() == "dg").FirstOrDefault();
         }
 
         public async ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId)
@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
             using var md5 = MD5.Create();
             var dataByte = Encoding.UTF8.GetBytes($"{agentName}{ApiKey}");
             var hash = md5.ComputeHash(dataByte);
-            return hash.ToHexString().ToUpper();
+            return hash.ToHexString();
         }
 
         public async ValueTask<PlayerLoginRecordModel> GetPlayerLoginLastAsync(string playerCode)
