@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +10,6 @@ using TGS.Apis.TgsApi.GameProviders.TCG.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.TCG;
 using TGS.Shared.Game.Models.TCG.Common;
 using TGS.Shared.Game.Models.TCG.Enums;
@@ -21,6 +18,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
 {
     public class DispatcherTCGMiddleware : IMiddleware
     {
+        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager = new();
+
         private static readonly IReadOnlyDictionary<string, string> _Routes = new Dictionary<string, string>
         {
             { "sgb", "/api/tcg/balance" },
@@ -32,11 +31,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
             { "scs", "/api/tcg/checktransactionstatus" }
         };
 
-        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager = new();
-
         private readonly IJsonSerializationProvider _json;
-        private readonly ITCGUtility _utility;
         private readonly ITCGService _service;
+        private readonly ITCGUtility _utility;
 
         public DispatcherTCGMiddleware(
             IJsonSerializationProvider json,
@@ -73,7 +70,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
             }
             var decodeSign = HttpUtility.UrlDecode(sign);
 
-
             var hash256 = _utility.GetHash256(paramsRequest, merchant.SHA256Key);
             if (hash256.IgnoreCaseNotEquals(decodeSign))
             {
@@ -104,8 +100,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
             context.Request.Path = route;
 
             await next(context);
-
         }
-
     }
 }

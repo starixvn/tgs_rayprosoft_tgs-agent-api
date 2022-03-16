@@ -15,8 +15,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
     public sealed class TCGGameInitializer : IGameInitializer
     {
         private readonly ITCGApiClient _client;
-        private readonly ITCGService _service;
         private readonly IReadOnlyDictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>> _methodMapper;
+        private readonly ITCGService _service;
 
         public TCGGameInitializer(
             ITCGApiClient client,
@@ -42,7 +42,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var merchant = await _service.GetMerchantAsync(player.DefaultWalletCurrencyCode);
             var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.GameId);
 
-
             if (!_methodMapper.TryGetValue(cachedGame.ExternalId.ToUpper(), out var execute))
             {
                 throw new GameProviderApiErrorException($"GameId{request.GameId} could not find the corresponding lottery entry (GameId{request.GameId}找不到對應彩票入口)");
@@ -51,7 +50,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 UserName = request.Token.PlayerCode,
                 Language = cultureCode
-
             };
 
             var response = await execute(configuration.ApiUrl, merchant, data, request.Token.PlatformType == PlatformType.Mobile).ConfigureAwait(false);
@@ -78,9 +76,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             }
             return new() { Url = $"{ merchant.GameUrl}{response.GameUrl}" };
         }
+
         private ValueTask<TCGLaunchGameResponse> ELOTTOAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
         {
-
             var data = new TCGLaunchGameByELOTTORequest()
             {
                 UserName = source.UserName,
@@ -99,20 +97,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             }
             return _client.LaunchGameAsync(apiUrl, merchant, data);
         }
-        private ValueTask<TCGLaunchGameResponse> SEAAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
-        {
-            var data = new TCGLaunchGameBySEARequest()
-            {
-                UserName = source.UserName,
-                Platform = "html5",
-                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
-                GameCode = "lobby",
-                Language = source.Language,
-                LotteryBetMode = "SEA_Tradition",
-                View = "lobby"
-            };
-            return _client.LaunchGameAsync(apiUrl, merchant, data);
-        }
+
         private ValueTask<TCGLaunchGameResponse> LOTTOVNAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
         {
             var data = new TCGLaunchGameByLOTTOVNRequest()
@@ -126,6 +111,21 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 View = "lobby"
             };
 
+            return _client.LaunchGameAsync(apiUrl, merchant, data);
+        }
+
+        private ValueTask<TCGLaunchGameResponse> SEAAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+        {
+            var data = new TCGLaunchGameBySEARequest()
+            {
+                UserName = source.UserName,
+                Platform = "html5",
+                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
+                GameCode = "lobby",
+                Language = source.Language,
+                LotteryBetMode = "SEA_Tradition",
+                View = "lobby"
+            };
             return _client.LaunchGameAsync(apiUrl, merchant, data);
         }
     }

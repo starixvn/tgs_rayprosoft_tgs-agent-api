@@ -6,6 +6,7 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.TCG.Common;
@@ -159,9 +160,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 return null;
             }
 
-            var cachedGame = await _service.GetCachedGameAsync(
-                gameProviderId,
-                betExternalId.ExternalGameId).ConfigureAwait(false);
+            var cachedGame = await _service.GetCachedGameAsync(betExternalId.ExternalGameId).ConfigureAwait(false);
 
             var roundStatus = await _service.GetRoundStatusAsync(
                 gameProviderId, source.UserName,
@@ -212,7 +211,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             };
         }
 
-        public async ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, CachedGame cachedGame, TCGConfirmReserveRequest source)
+        public async ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, TCGConfirmReserveRequest source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -222,10 +221,12 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
                 var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
                 var betExternalId = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, order.RefNo).ConfigureAwait(false);
+
                 if (betExternalId != null
                     && additionalInformation.OrderNo == betExternalId.ExternalRoundId
                     && betExternalId.GameActionType == GameActionType.PlaceBet)
                 {
+                    var cachedGame = await _service.GetCachedGameAsync(betExternalId.ExternalGameId).ConfigureAwait(false);
                     var roundStatus = await _service.GetRoundStatusAsync(gameProviderId, order.UserName, betExternalId.ExternalRoundId, cachedGame.Id).ConfigureAwait(false);
                     if (roundStatus.Value == RoundStatus.Open)
                     {
@@ -316,7 +317,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             return betDatas.ToArray();
         }
 
-        public async ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, CachedGame cachedGame, TCGCreditRequest source)
+        public async ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, IEnumerable<CachedGame> cachedGames, TCGCreditRequest source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
@@ -325,10 +326,23 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
                 var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
-                var (roundRecord, gameActionRecord) = await _service.GetGameActionsByBetAsync(gameProviderId, order.UserName, additionalInformation.OrderNo, cachedGame.Id).ConfigureAwait(false);
-                if (gameActionRecord != null
-                    && additionalInformation.OrderNo == roundRecord.ExternalRoundId
-                    )
+
+                var cachedGame = default(CachedGame);
+                var roundRecord = default(RoundRecord);
+                var gameActionRecord = default(GameActionRecord);
+                foreach (var game in cachedGames)
+                {
+                    (roundRecord, gameActionRecord) = await _service.GetGameActionsByBetAsync(gameProviderId, order.UserName, additionalInformation.OrderNo, game.Id).ConfigureAwait(false);
+                    if (gameActionRecord != null
+                        && additionalInformation.OrderNo == roundRecord.ExternalRoundId
+                        )
+                    {
+                        cachedGame = game;
+                        break;
+                    }
+                }
+
+                if (gameActionRecord != null && roundRecord != null && cachedGame != null)
                 {
                     batchTransactionData.Add(new BatchTransactionData()
                     {
