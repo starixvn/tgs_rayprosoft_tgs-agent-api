@@ -52,6 +52,12 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             CreatePlayerIncreaseAmountRequest request,
             CancellationToken cancellationToken)
         {
+            if (!Enum.IsDefined(request.TransactionType) ||
+                !Enum.IsDefined((PlayerAdjustmentTransactionType)request.TransactionType))
+            {
+                return CreateInvalidResponse<MessageResponse>("is not define type");
+            }
+
             var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode);
 
             if (player is null)
@@ -76,7 +82,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 player.BrandId,
                 player.PlayerCode,
                 AdjustmentType.Add,
-                request.TransactionType,
+                (PlayerAdjustmentTransactionType)request.TransactionType,
                 AdjustTransferType.None,
                 request.Amount,
                 request.Remark,
@@ -85,7 +91,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             if (request.Amount > 0M)
             {
-                var response = await AdjustAsync(request.TransactionType,
+                var response = await AdjustAsync((PlayerAdjustmentTransactionType)request.TransactionType,
                     player.DefaultWalletId,
                     request.Amount,
                     remark,

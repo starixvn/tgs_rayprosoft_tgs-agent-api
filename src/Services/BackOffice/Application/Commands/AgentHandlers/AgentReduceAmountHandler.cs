@@ -48,6 +48,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             CreateAgentReduceAmountRequest request,
             CancellationToken cancellationToken)
         {
+            if (!Enum.IsDefined(request.TransactionType) ||
+                !Enum.IsDefined((AgentAdjustmentTransactionType)request.TransactionType))
+            {
+                return CreateInvalidResponse<MessageResponse>("is not define type");
+            }
+
             var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId).ConfigureAwait(false);
 
             if (agent is null)
@@ -119,7 +125,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 agent.BrandId,
                 agent.Id,
                 AdjustmentType.Add,
-                request.TransactionType,
+                (AgentAdjustmentTransactionType)request.TransactionType,
                 AdjustTransferType.None,
                 request.Amount,
                 request.Remark,
@@ -167,11 +173,11 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         }
 
         private static bool IsTransferToAgent(CreateAgentReduceAmountRequest request) =>
-            request.TransactionType == AgentAdjustmentTransactionType.Transfer &&
+            request.TransactionType == AgentReduceTransactionType.Transfer &&
             request.AccountType == AccountType.Agent;
 
         private static bool IsTransferToPlayer(CreateAgentReduceAmountRequest request) =>
-            request.TransactionType == AgentAdjustmentTransactionType.Transfer &&
+            request.TransactionType == AgentReduceTransactionType.Transfer &&
             request.AccountType == AccountType.Player;
     }
 }

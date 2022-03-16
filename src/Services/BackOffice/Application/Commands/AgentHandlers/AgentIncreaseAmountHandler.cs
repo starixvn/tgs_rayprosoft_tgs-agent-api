@@ -44,6 +44,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             CreateAgentIncreaseAmountRequest request,
             CancellationToken cancellationToken)
         {
+            if (!Enum.IsDefined(request.TransactionType) ||
+                !Enum.IsDefined((AgentAdjustmentTransactionType)request.TransactionType))
+            {
+                return CreateInvalidResponse<MessageResponse>("is not define type");
+            }
+
             var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId);
 
             if (agent is null)
@@ -72,7 +78,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 agent.BrandId,
                 agent.Id,
                 AdjustmentType.Add,
-                request.TransactionType,
+                (AgentAdjustmentTransactionType)request.TransactionType,
                 AdjustTransferType.None,
                 request.Amount,
                 request.Remark,

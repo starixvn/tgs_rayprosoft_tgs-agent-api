@@ -3,6 +3,7 @@
     public record AgentContributionTotal(
         decimal DepositAmount,
         decimal WithdrawalAmount,
+        decimal CompanyAdjustAmount,
         decimal AdjustmentAmount,
         decimal BonusAmount,
         decimal BetAmount,

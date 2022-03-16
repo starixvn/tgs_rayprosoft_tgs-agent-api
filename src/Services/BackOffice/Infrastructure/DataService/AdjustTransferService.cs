@@ -29,8 +29,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 TransactionToId = transactionToId,
                 TransferType = transferType,
                 TransferFromUsername = transferFromUsername,
+                TransferToUsername = transferToUsername,
                 Amount = amount,
-                CreatedOn = DateTime.Now
+                CreatedOn = DateTimeOffset.UtcNow
             };
 
             return CreateEntityAsync(vipLevel);

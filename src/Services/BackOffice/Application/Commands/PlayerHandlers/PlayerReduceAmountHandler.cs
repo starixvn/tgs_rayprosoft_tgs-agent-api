@@ -58,6 +58,12 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             CreatePlayerReduceAmountRequest request,
             CancellationToken cancellationToken)
         {
+            if (!Enum.IsDefined(request.TransactionType) ||
+                !Enum.IsDefined((PlayerAdjustmentTransactionType)request.TransactionType))
+            {
+                return CreateInvalidResponse<MessageResponse>("is not define type");
+            }
+
             var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode);
 
             if (player is null)
@@ -100,7 +106,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             var record = await _playerAdjustAccountService.CreateAsync(player.BrandId,
                 player.PlayerCode,
                 AdjustmentType.Subtract,
-                request.TransactionType,
+                (PlayerAdjustmentTransactionType)request.TransactionType,
                 isTransferToAgent ? AdjustTransferType.PlayerToAgent : AdjustTransferType.None,
                 request.Amount,
                 request.Remark,
@@ -110,7 +116,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             if (request.Amount > 0M)
             {
-                var response = await AdjustAsync(request.TransactionType,
+                var response = await AdjustAsync((PlayerAdjustmentTransactionType)request.TransactionType,
                     player.DefaultWalletId,
                     -request.Amount,
                     remark,
@@ -144,7 +150,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         }
 
         private static bool IsTransferToAgent(CreatePlayerReduceAmountRequest request) =>
-            request.TransactionType == PlayerAdjustmentTransactionType.TransferAdjust;
+            request.TransactionType == PlayerReduceTransactionType.TransferAdjust;
 
         private async ValueTask<TransactionResponse> AdjustAsync(PlayerAdjustmentTransactionType type, Guid walletId,
             decimal amount, string remark, Guid userId) => type switch
