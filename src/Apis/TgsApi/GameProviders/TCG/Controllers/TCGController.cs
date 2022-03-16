@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
@@ -207,7 +207,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
             var betData = await _mapper.ConfirmReserveAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
 
             foreach (var transactionData in betData.Transactions)
@@ -291,7 +291,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
@@ -342,7 +342,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
