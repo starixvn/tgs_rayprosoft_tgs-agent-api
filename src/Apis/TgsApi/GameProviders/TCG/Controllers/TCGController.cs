@@ -269,6 +269,26 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("balance")]
         public async ValueTask<TCGBalanceResponse> GetBalanceAsync(TCGBalanceRequest request)
         {
+
+            try
+            {
+                var player = await _service.GetCachedPlayerAsync(request.Username).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(JsonSerializer.Serialize(new
+                {
+                    Data = JsonSerializer.Serialize(request),
+                    Message = $"玩家不存在{ex.Message}",
+                    Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }));
+                return new TCGBalanceResponse()
+                {
+                    Status = (int)GameApiError.UserDoesNotExists,
+                    ErrorDesc = GameApiError.UserDoesNotExists.Description()
+                };
+            }
+
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, request.Username).ConfigureAwait(false);
 
             return new TCGBalanceResponse()
