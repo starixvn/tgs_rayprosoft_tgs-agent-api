@@ -103,6 +103,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         public async ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
         {
             var data = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId).ConfigureAwait(false);
+            if (data == null)
+            {
+                return (null, null);
+            }
             var gameAction = data.GameActions.Where(x => x.Type == GameActionType.PlaceBet).FirstOrDefault();
             return new(data.Round, gameAction);
         }
