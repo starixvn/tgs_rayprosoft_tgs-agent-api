@@ -18,7 +18,7 @@ namespace TGS.Services.BackOffice.Application.Models.ReportVip
 
         public decimal BonusAmount { get; init; }
 
-        public decimal AdjustmentAmount { get; init; }
+        public decimal CompanyAdjustAmount { get; init; }
 
         public decimal RebateAmount { get; init; }
 

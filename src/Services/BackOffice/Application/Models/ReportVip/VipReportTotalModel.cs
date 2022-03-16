@@ -3,7 +3,7 @@
     public record VipReportTotalModel(
         decimal DepositAmount,
         decimal WithdrawalAmount,
-        decimal AdjustmentAmount,
+        decimal CompanyAdjustAmount,
         decimal RebateAmount,
         decimal BonusAmount,
         decimal BetAmount,
