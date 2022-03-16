@@ -13,6 +13,7 @@ pipeline {
             steps {
                 sh "echo 'Process components: $Components'";
                 sh "echo 'Branch: $GIT_BRANCH'";
+                sh "echo 'TEST'";
 
                 script {
                     switch(env.GIT_BRANCH)
