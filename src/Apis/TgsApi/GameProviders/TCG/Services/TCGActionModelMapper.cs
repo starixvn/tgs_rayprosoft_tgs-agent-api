@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -18,18 +20,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
     public class TCGActionModelMapper : ITCGActionModelMapper
     {
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ILogger<TCGActionModelMapper> _logger;
         private readonly ITCGService _service;
 
         public TCGActionModelMapper(
-            ITCGService service,
             IGameProviderOperations gameProviderOperations,
-            IJsonSerializationProvider jsonSerializationProvider
+            ILogger<TCGActionModelMapper> logger,
+            ITCGService service
             )
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async ValueTask<BetData[]> BetAsync(Guid gameProviderId, CachedGame cachedGame, TCGDebitRequest source)
@@ -62,7 +64,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var loginRecord = await _service.GetPlayerLatestEnabledLoginRecordAsync(playerCode).ConfigureAwait(false);
                 filtersOrders.ForEach(order =>
                 {
-                    var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
+                    var additionalInformation = JsonSerializer.Deserialize<AdditionalInformationLotto>(JsonSerializer.Serialize(order.AdditionalInformation));
                     batchTransactionData.Add(new TransactionData()
                     {
                         Amount = order.Amount,
@@ -74,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                         GameActionType = GameActionType.PlaceBet,
                         TimeStamp = DateTimeOffset.UtcNow,
                         BetType = string.Empty,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                        RoundDetail = JsonSerializer.Serialize(order)
                     });
                 });
 
@@ -103,7 +105,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
-                var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
+                var additionalInformation = JsonSerializer.Deserialize<AdditionalInformationLotto>(JsonSerializer.Serialize(order.AdditionalInformation));
                 var betExternalId = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, order.RefNo).ConfigureAwait(false);
                 if (betExternalId != null
                     && additionalInformation.OrderNo == betExternalId.ExternalRoundId
@@ -124,7 +126,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                         GameActionType = GameActionType.CancelTransaction,
                         BetType = string.Empty,
                         Timestamp = DateTime.UtcNow,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                        RoundDetail = JsonSerializer.Serialize(order)
                     });
                 }
             }
@@ -194,7 +196,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 GameActionType = GameActionType.LoseBet,
                 TimeStamp = DateTimeOffset.UtcNow,
                 BetType = string.Empty,
-                RoundDetail = _jsonSerializationProvider.SerializeToString(source.AdditionalInformation)
+                RoundDetail = JsonSerializer.Serialize(source.AdditionalInformation)
             };
             return new BetData
             {
@@ -219,7 +221,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
-                var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
+                var additionalInformation = JsonSerializer.Deserialize<AdditionalInformationLotto>(JsonSerializer.Serialize(order.AdditionalInformation));
                 var betExternalId = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, order.RefNo).ConfigureAwait(false);
 
                 if (betExternalId != null
@@ -245,7 +247,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                             GameActionType = GameActionType.LoseBet,
                             BetType = string.Empty,
                             Timestamp = DateTime.UtcNow,
-                            RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                            RoundDetail = JsonSerializer.Serialize(order)
                         });
                     }
                 }
@@ -284,7 +286,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var loginRecord = await _service.GetPlayerLatestEnabledLoginRecordAsync(playerCode).ConfigureAwait(false);
                 filtersOrders.ForEach(order =>
                 {
-                    var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
+                    var additionalInformation = JsonSerializer.Deserialize<AdditionalInformationLotto>(JsonSerializer.Serialize(order.AdditionalInformation));
                     batchTransactionData.Add(new TransactionData()
                     {
                         Amount = order.Amount,
@@ -296,7 +298,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                         GameActionType = GameActionType.PlaceBet,
                         TimeStamp = DateTimeOffset.UtcNow,
                         BetType = string.Empty,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                        RoundDetail = JsonSerializer.Serialize(order)
                     });
                 });
 
@@ -323,16 +325,31 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
             foreach (var order in source.Transactions)
             {
-                var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
+                CachedPlayer player = default;
+                try
+                {
+                    player = await _service.GetCachedPlayerAsync(order.UserName).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation(JsonSerializer.Serialize(new
+                    {
+                        Data = JsonSerializer.Serialize(order),
+                        Message = $"玩家不存在{ex.Message}",
+                        Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    }));
+                    continue;
+                }
+                var brandId = await _service.GetBrandIdByPlayerCodeAsync(player.PlayerCode).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
-                var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
+                var additionalInformation = JsonSerializer.Deserialize<AdditionalInformationLotto>(JsonSerializer.Serialize(order.AdditionalInformation));
 
                 var cachedGame = default(CachedGame);
                 var roundRecord = default(RoundRecord);
                 var gameActionRecord = default(GameActionRecord);
                 foreach (var game in cachedGames)
                 {
-                    (roundRecord, gameActionRecord) = await _service.GetGameActionsByBetAsync(gameProviderId, order.UserName, additionalInformation.OrderNo, game.Id).ConfigureAwait(false);
+                    (roundRecord, gameActionRecord) = await _service.GetGameActionsByBetAsync(gameProviderId, player.PlayerCode, additionalInformation.OrderNo, game.Id).ConfigureAwait(false);
                     if (gameActionRecord != null
                         && additionalInformation.OrderNo == roundRecord.ExternalRoundId
                         )
@@ -346,7 +363,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 {
                     batchTransactionData.Add(new BatchTransactionData()
                     {
-                        PlayerCode = order.UserName,
+                        PlayerCode = player.PlayerCode,
                         GameProviderConfigurationId = gameProviderConfigurationId,
                         Amount = order.Amount,
                         Commission = 0,
@@ -358,7 +375,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                         GameActionType = (order.Amount > 0) ? GameActionType.WinBet : GameActionType.LoseBet,
                         BetType = string.Empty,
                         Timestamp = DateTime.UtcNow,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                        RoundDetail = JsonSerializer.Serialize(order)
                     });
                 }
             }
