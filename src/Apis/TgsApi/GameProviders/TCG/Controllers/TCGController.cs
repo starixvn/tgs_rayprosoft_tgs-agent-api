@@ -28,9 +28,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
     {
         private readonly IGamePlayActions _actions;
         private readonly ITCGCacheService _cacheService;
+        private readonly ILogger<TCGController> _logger;
         private readonly ITCGActionModelMapper _mapper;
         private readonly ITCGService _service;
-        private readonly ILogger<TCGController> _logger;
 
         public TCGController(
             IGamePlayActions actions,
@@ -269,7 +269,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("balance")]
         public async ValueTask<TCGBalanceResponse> GetBalanceAsync(TCGBalanceRequest request)
         {
-
             try
             {
                 var player = await _service.GetCachedPlayerAsync(request.Username).ConfigureAwait(false);
