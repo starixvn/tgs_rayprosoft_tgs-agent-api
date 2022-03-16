@@ -66,9 +66,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="appsettings.test.json">
-      <TransformOnBuild>true</TransformOnBuild>
-    </Content>
     <Content Update="appsettings.Development.json">
       <TransformOnBuild>true</TransformOnBuild>
     </Content>
