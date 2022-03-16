@@ -635,10 +635,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal>("AdjustmentAmount")
+                    b.Property<decimal>("AgentAdjustAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("adjustment_amount");
+                        .HasColumnName("agent_adjust_amount");
 
                     b.Property<decimal>("AgentDividendAmount")
                         .HasPrecision(18, 6)
@@ -682,6 +682,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("card_game_win_loss");
+
+                    b.Property<decimal>("CompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("company_adjust_amount");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
