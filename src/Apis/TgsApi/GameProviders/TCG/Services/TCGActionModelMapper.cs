@@ -275,7 +275,20 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
                 if (!playerMappers.TryGetValue(playerCode, out CachedPlayer player))
                 {
-                    player = await _service.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+                    try
+                    {
+                        player = await _service.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation(JsonSerializer.Serialize(new
+                        {
+                            Data = JsonSerializer.Serialize(source),
+                            Message = $"玩家不存在{ex.Message}",
+                            Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                        }));
+                        continue;
+                    }
                     playerMappers.Add(playerCode, player);
                 }
 
