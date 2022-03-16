@@ -28,9 +28,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
     {
         private readonly IGamePlayActions _actions;
         private readonly ITCGCacheService _cacheService;
+        private readonly ILogger<TCGController> _logger;
         private readonly ITCGActionModelMapper _mapper;
         private readonly ITCGService _service;
-        private readonly ILogger<TCGController> _logger;
 
         public TCGController(
             IGamePlayActions actions,
@@ -53,13 +53,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
-
-            _logger.LogInformation(JsonSerializer.Serialize(new
-            {
-                Data = JsonSerializer.Serialize(request),
-                GameId = cachedGame.Id,
-                GameExternalId = cachedGame.ExternalId,
-            }));
 
             foreach (var transactionData in request.Transactions)
             {
@@ -236,7 +229,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, playerCode).ConfigureAwait(false);
                 balanceInfos.Add(new BalanceInfo()
                 {
-                    UserName = getBalance.Username,
+                    UserName = playerCode,
                     Balance = getBalance.Balance
                 });
             }
@@ -276,6 +269,25 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("balance")]
         public async ValueTask<TCGBalanceResponse> GetBalanceAsync(TCGBalanceRequest request)
         {
+            try
+            {
+                var player = await _service.GetCachedPlayerAsync(request.Username).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(JsonSerializer.Serialize(new
+                {
+                    Data = JsonSerializer.Serialize(request),
+                    Message = $"玩家不存在{ex.Message}",
+                    Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }));
+                return new TCGBalanceResponse()
+                {
+                    Status = (int)GameApiError.UserDoesNotExists,
+                    ErrorDesc = GameApiError.UserDoesNotExists.Description()
+                };
+            }
+
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, request.Username).ConfigureAwait(false);
 
             return new TCGBalanceResponse()
@@ -361,6 +373,13 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var cachedGames = await _service.GetCachedGamesAsync(request.ProductType.ToString());
+
+            _logger.LogInformation(JsonSerializer.Serialize(new
+            {
+                Data = JsonSerializer.Serialize(request),
+                CachedGames = JsonSerializer.Serialize(cachedGames),
+                Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            }));
 
             foreach (var transactionData in request.Transactions)
             {
