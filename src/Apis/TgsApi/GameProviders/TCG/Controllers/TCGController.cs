@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.TCG.Services;
@@ -28,17 +30,20 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         private readonly ITCGCacheService _cacheService;
         private readonly ITCGActionModelMapper _mapper;
         private readonly ITCGService _service;
+        private readonly ILogger<TCGController> _logger;
 
         public TCGController(
             IGamePlayActions actions,
             ITCGCacheService cacheService,
             ITCGActionModelMapper mapper,
-            ITCGService service)
+            ITCGService service,
+            ILogger<TCGController> logger)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _service = service ?? throw new ArgumentNullException(nameof(service));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [Consumes(MediaTypeNames.Application.Json)]
@@ -48,6 +53,13 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
+
+            _logger.LogInformation(JsonSerializer.Serialize(new
+            {
+                Data = JsonSerializer.Serialize(request),
+                GameId = cachedGame.Id,
+                GameExternalId = cachedGame.ExternalId,
+            }));
 
             foreach (var transactionData in request.Transactions)
             {
@@ -291,6 +303,13 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
+
+            _logger.LogInformation(JsonSerializer.Serialize(new
+            {
+                Data = JsonSerializer.Serialize(request),
+                GameId = cachedGame.Id,
+                GameExternalId = cachedGame.ExternalId,
+            }));
 
             foreach (var transactionData in request.Transactions)
             {
