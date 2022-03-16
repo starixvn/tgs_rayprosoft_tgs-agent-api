@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
-                                                                                                            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
 
         public async ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode)
         {

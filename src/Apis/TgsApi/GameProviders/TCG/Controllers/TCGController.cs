@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync($"tgs_{request.ProductType}");
+            var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
@@ -290,7 +290,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync($"tgs_{request.ProductType}");
+            var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
