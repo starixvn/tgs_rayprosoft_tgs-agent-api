@@ -128,7 +128,6 @@ namespace TGS.Core.Models
             public const string WGSports = "WGFM";
             public const string WMCasino = "WM";
             public const string TFGaming = "TF";
-            public const string DreamGame = "DG";
         }
 
         public static class LocalizationContext

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
@@ -17,10 +18,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         ValueTask<BetData> CloseAsync(TCGCloseRequest source);
 
-        ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, CachedGame cachedGame, TCGConfirmReserveRequest source);
+        ValueTask<BatchBetData> ConfirmReserveAsync(Guid gameProviderId, TCGConfirmReserveRequest source);
 
         ValueTask<BetData[]> ReserveMoneyAsync(Guid gameProviderId, CachedGame cachedGame, TCGReserveMoneyRequest source);
 
-        ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, CachedGame cachedGame, TCGCreditRequest source);
+        ValueTask<BatchBetData> SettleAsync(Guid gameProviderId, IEnumerable<CachedGame> cachedGames, TCGCreditRequest source);
     }
 }

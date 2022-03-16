@@ -110,8 +110,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new BetConstructProvider(env),
                 new AviaGameProvider(env),
                 new JiliGameProvider(env),
-                new TFGameProvider(env),
-                new DreamGameGameProvider(env)
+                new TFGameProvider(env)
             };
         }
 
