@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -15,9 +16,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
 
-        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
+        ValueTask<CachedGame> GetCachedGameAsync(string externalGameId);
 
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
+
+        ValueTask<IEnumerable<CachedGame>> GetCachedGamesAsync(string externalGameId);
 
         ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
 
@@ -25,9 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
 
-        ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
-
-        string GetGameProviderCode();
+        ValueTask<(RoundRecord RoundRecord, GameActionRecord GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
 
         ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
 
