@@ -14,6 +14,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
     public sealed class TCGGameHistory : BaseBetHistory
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+
         public TCGGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
@@ -26,7 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
-
             return new ValueTask<RoundResult>(new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,

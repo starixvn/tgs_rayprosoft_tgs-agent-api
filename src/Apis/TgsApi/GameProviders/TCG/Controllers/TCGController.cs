@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
+            var cachedGame = await _service.GetCachedGameAsync($"tgs_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
@@ -182,7 +182,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 {
                     Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
                     ErrorDesc = "Please check if the order does not exist or the order has been closed.(請檢查訂單是否不存在或訂單已經關閉。)",
-
                 };
             }
             var result = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
@@ -207,8 +206,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
-            var betData = await _mapper.ConfirmReserveAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
+
+            var betData = await _mapper.ConfirmReserveAsync(gameProviderId, request).ConfigureAwait(false);
 
             foreach (var transactionData in betData.Transactions)
             {
@@ -291,7 +290,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
+            var cachedGame = await _service.GetCachedGameAsync($"tgs_{request.ProductType}");
 
             foreach (var transactionData in request.Transactions)
             {
@@ -342,7 +341,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, $"tcg_{request.ProductType}");
+            var cachedGames = await _service.GetCachedGamesAsync(request.ProductType.ToString());
 
             foreach (var transactionData in request.Transactions)
             {
@@ -351,7 +350,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                     transactionData.RefNo).ConfigureAwait(false);
             }
 
-            var betData = await _mapper.SettleAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
+            var betData = await _mapper.SettleAsync(gameProviderId, cachedGames, request).ConfigureAwait(false);
 
             var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
