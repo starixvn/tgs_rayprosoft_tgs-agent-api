@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Models.Messages;
 using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -35,6 +36,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 .ConfigureAwait(false);
 
         [HttpGet("exportPlayerContributions")]
+        [Description("Export player contributions")]
+        [ByPassAdminLog]
         public async Task<IActionResult> ExportPlayerContributionsAsync(
             [FromServices] IGetService<ExportPlayerContributionsRequest, Stream>
                 exportPlayerContributionsService,

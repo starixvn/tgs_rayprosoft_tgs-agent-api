@@ -21,6 +21,185 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasAnnotation("ProductVersion", "5.0.13")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdjustAgentRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("AdjustmentType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("adjustment_type");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<string>("TransferTarget")
+                        .HasColumnType("text")
+                        .HasColumnName("transfer_target");
+
+                    b.Property<short>("TransferType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("transfer_type");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_adjust_agent_records_id");
+
+                    b.HasIndex("CreatedOn", "BrandId", "AgentId", "Type")
+                        .HasDatabaseName("ix_adjust_agent_record_multiple_keys");
+
+                    b.ToTable("adjust_agent_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdjustPlayerRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("AdjustmentType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("adjustment_type");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<decimal>("BucketAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bucket_amount");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<string>("TransferTarget")
+                        .HasColumnType("text")
+                        .HasColumnName("transfer_target");
+
+                    b.Property<short>("TransferType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("transfer_type");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_adjust_player_record_id");
+
+                    b.HasIndex("CreatedOn", "BrandId", "PlayerCode", "Type")
+                        .HasDatabaseName("ix_adjust_player_record_multiple_keys");
+
+                    b.ToTable("adjust_player_records");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdjustTransferRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid>("TransactionFromId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_from_id");
+
+                    b.Property<Guid>("TransactionToId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_to_id");
+
+                    b.Property<string>("TransferFromUsername")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transfer_from_username");
+
+                    b.Property<string>("TransferToUsername")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transfer_to_username");
+
+                    b.Property<short>("TransferType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("transfer_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_adjust_transfer_record_id");
+
+                    b.HasIndex("CreatedOn", "TransferType", "TransferFromUsername", "TransferToUsername")
+                        .HasDatabaseName("ix_adjust_transfer_record_multiple_keys");
+
+                    b.ToTable("adjust_transfer_records");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -456,10 +635,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal>("AdjustmentAmount")
+                    b.Property<decimal>("AgentAdjustAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("adjustment_amount");
+                        .HasColumnName("agent_adjust_amount");
 
                     b.Property<decimal>("AgentDividendAmount")
                         .HasPrecision(18, 6)
@@ -503,6 +682,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("card_game_win_loss");
+
+                    b.Property<decimal>("CompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("company_adjust_amount");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -1737,8 +1921,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_provider_id");
 
-                    b.Property<int>("GameType")
-                        .HasColumnType("integer")
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
                         .HasColumnName("game_type");
 
                     b.Property<DateTimeOffset>("ReportDate")
@@ -3953,6 +4137,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
 
+                    b.Property<DateTimeOffset?>("Birthday")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birthday");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
@@ -4020,6 +4208,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset?>("RegisteredOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("registered_on");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
@@ -4094,10 +4286,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal>("AdjustmentAmount")
+                    b.Property<decimal>("AgentAdjustAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("adjustment_amount");
+                        .HasColumnName("agent_adjust_amount");
 
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
@@ -4121,6 +4313,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<decimal>("CompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("company_adjust_amount");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
@@ -4176,6 +4373,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("ReportDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
+
+                    b.Property<decimal>("SystemAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("system_adjust_amount");
 
                     b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)
@@ -6162,6 +6364,50 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_settings");
 
                     b.ToTable("settings");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SignInEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("Combo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("combo");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sign_in_events");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_sign_in_events_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_sign_in_events_player_code");
+
+                    b.ToTable("sign_in_events");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
@@ -8225,6 +8471,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SignInEvent", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_sign_in_events_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_sign_in_events_players_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>

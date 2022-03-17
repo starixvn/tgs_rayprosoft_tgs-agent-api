@@ -4,7 +4,7 @@
     {
         Deposit = 0,
         Withdrawal = 1,
-        Adjust = 2,
+        CompanyAdjust = 2,
         Bonus = 3,
         Rebate = 4,
         Dividend = 5,
@@ -54,6 +54,8 @@
         /// 調帳 5000~5999
         /// </summary>
         //Adjust = 5000,
+        AgentAdjust = 5100,
+        SystemAdjust = 5200,
 
         /// <summary>
         /// 已結算單再調整
@@ -63,6 +65,15 @@
         /// <summary>
         /// 遊戲 10000~10999
         /// </summary>
-        Game = 10000
+        Game = 10000,
+        PlaceBet = 10100,
+        WinBet = 10200,
+        LoseBet = 10200,
+        FreeBet = 10300,
+        TieBet = 10400,
+        CancelTransaction = 10500,
+        LockAmount = 10600,
+        UnlockAmount = 10700,
+        WinJackpot = 10800
     }
 }

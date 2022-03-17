@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.Infrastructures.Extensions;
@@ -24,6 +25,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <param name="objectId">The object identifier.</param>
         /// <returns></returns>
         [HttpGet("{objectId}")]
+        [ByPassAdminLog]
         public async Task<IActionResult> GetFileAsync(
             [FromServices] IFileServiceClient fileServiceClient,
             string objectId)
@@ -38,6 +40,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("upload/{prefix}")]
+        [ByPassAdminLog]
         public async Task<UploadResponse> UploadFileAsync(
             [FromServices] IFileServiceClient fileServiceClient,
             string prefix,
@@ -58,7 +61,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             var path = $"/{type}/{randomFileName}";
 
             var fileView = await fileServiceClient.UploadPublicFileAsync(path,
-                MediaTypeHeaderValue.Parse(contentType), fileStream);
+                MediaTypeHeaderValue.Parse(contentType),
+                fileStream);
             return new()
             {
                 Valid = true,

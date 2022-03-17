@@ -21,7 +21,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             var result = _tgsRepository.Players
                 .AsQueryable()
                 .Any(p => p.BrandId == query.BrandId
-                    && p.Email.ToLower() == query.Email.ToLower()
+                    && p.Email!.ToLower() == query.Email.ToLower()
                     && p.PlayerCode != query.PlayerCode);
 
             return ValueTask.FromResult(result);

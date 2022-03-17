@@ -58,9 +58,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
             return _mediator.Send(request);
         }
 
-        [HttpPost("{id}/adjust")]
-        [Description("Create an agent adjustment")]
-        public Task<MessageResponse> CreateAgentAdjustmentAsync(Guid id, CreateAgentAdjustmentRequest request)
+        [HttpPost("{id}/adjust/increase")]
+        [Description("Create an agent adjustment to increase amount")]
+        public Task<MessageResponse> CreateAgentIncreaseAmountAsync(Guid id, CreateAgentIncreaseAmountRequest request)
+        {
+            request.AgentId = id;
+            return _mediator.Send(request);
+        }
+
+        [HttpPost("{id}/adjust/reduce")]
+        [Description("Create an agent adjustment to reduce amount")]
+        public Task<MessageResponse> CreateAgentReduceAmountAsync(Guid id, CreateAgentReduceAmountRequest request)
         {
             request.AgentId = id;
             return _mediator.Send(request);

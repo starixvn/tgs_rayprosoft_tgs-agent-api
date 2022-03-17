@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
-using Tgs.Logging;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 {
@@ -24,6 +24,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
     [Parallelizable]
     public class ExceptionMiddlewareTest
     {
+        [SetUp]
+        public void Setup()
+        {
+            _requestDelegate = innerContext => Task.FromResult(0);
+            _target = new ExceptionMiddleware(
+                _requestAnalyzerMock.Object,
+                _tgsLogMock.Object,
+                _json.Object,
+                _envMock.Object,
+                new NullLogger<ExceptionMiddleware>());
+        }
+
         private readonly Mock<IWebHostEnvironment> _envMock = new();
 
         private readonly Mock<IJsonSerializationProvider> _json = new();
@@ -64,18 +76,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
                 l.Exception != string.Empty)));
         }
 
-        [SetUp]
-        public void Setup()
-        {
-            _requestDelegate = innerContext => Task.FromResult(0);
-            _target = new ExceptionMiddleware(
-                _requestAnalyzerMock.Object,
-                _tgsLogMock.Object,
-                _json.Object,
-                _envMock.Object,
-                new NullLogger<ExceptionMiddleware>());
-        }
-
         private Mock<HttpContext> SetupHttpContext(bool hasNoException = true)
         {
             //https://andrewcampey.com/2017/12/07/c-memory-stream-is-not-expandable/
@@ -97,7 +97,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
                 .Returns(streamResponse);
 
             mockHttpResponse
-                .Setup(_ => _.Body.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(),
+                .Setup(_ => _.Body.WriteAsync(It.IsAny<byte[]>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
                     It.IsAny<CancellationToken>()))
                 .Verifiable();
 
@@ -112,6 +114,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 
             var mockHttpRequest = new Mock<HttpRequest>();
             mockHttpRequest.Setup(p => p.Body).Returns(streamRequest);
+            mockHttpRequest.Setup(p => p.Path).Returns("/api/path");
             mockHttpRequest.SetupGet(p => p.Headers)
                 .Returns(new HeaderDictionary());
 
