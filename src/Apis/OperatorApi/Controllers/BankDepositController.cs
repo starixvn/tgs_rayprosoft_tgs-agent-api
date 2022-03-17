@@ -479,6 +479,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromServices] ZeroNineNinePaySerializer serializer,
             [FromBody] SubmitDepositRequest request
             )
         {
@@ -503,7 +504,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Amount,
                 "tgs.payment.zeronineninepay.deposit",
                 request.PromotionId,
-                formId => JsonSerializer.Serialize(
+                formId => serializer.Serialize(
                     new ZeroNineNinePayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
                         brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
