@@ -68,7 +68,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                 Id = x.Id.ToString(),
                 OrderNo = x.OrderNo,
                 ThirdPartyOrderNo = x.ThirdPartyOrderNo,
-                Amount = x.Amount,
+                Amount = x.ActualAmount ?? x.Amount,
                 ApplicationTime = x.CreatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
                 UpdateTime = x.UpdatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),

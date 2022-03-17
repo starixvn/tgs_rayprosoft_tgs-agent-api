@@ -137,7 +137,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     {
                         Id = form.Id,
                         Status = form.Status.ToDepositFlowState(),
-                        Amount = form.Amount,
+                        Amount = form.ActualAmount ?? form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CanUploadCerts = form.Status == PaymentFlowState.WaitPayment
                             && brandPayments.TryGetValue(form.BrandPaymentId, out var info)

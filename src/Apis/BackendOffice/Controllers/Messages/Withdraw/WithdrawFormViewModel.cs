@@ -7,6 +7,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 {
     public record WithdrawFormViewModel
     {
+        public decimal? ActualAmount { get; init; }
+
         public decimal Amount { get; init; }
 
         public Guid BrandId { get; init; }

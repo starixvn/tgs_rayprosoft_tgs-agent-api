@@ -158,7 +158,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     {
                         Id = form.Id,
                         Status = form.Status.ToWithdrawFlowState(),
-                        Amount = form.Amount,
+                        Amount = form.ActualAmount ?? form.Amount,
                         BrandPaymentId = form.BrandPaymentId,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn,
