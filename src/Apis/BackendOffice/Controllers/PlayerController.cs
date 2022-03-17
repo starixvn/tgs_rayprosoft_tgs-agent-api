@@ -3,15 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
-using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -33,10 +33,19 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
 
-        [HttpPost("{playerCode}/adjust")]
-        [Description("Create a player adjustment")]
-        public Task<MessageResponse> CreateAgentAdjustmentAsync(string playerCode,
-            CreatePlayerAdjustmentRequest request)
+        [HttpPost("{playerCode}/adjust/increase")]
+        [Description("Create a player adjustment to increase amount")]
+        public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
+            CreatePlayerIncreaseAmountRequest request)
+        {
+            request.PlayerCode = playerCode;
+            return _mediator.Send(request);
+        }
+
+        [HttpPost("{playerCode}/adjust/reduce")]
+        [Description("Create a player adjustment to reduce amount")]
+        public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
+            CreatePlayerReduceAmountRequest request)
         {
             request.PlayerCode = playerCode;
             return _mediator.Send(request);
@@ -44,7 +53,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
+        public async Task<PagedResponse<PlayerAccountChangeReportModel>?> GetAccountChangesAsync(
             [FromServices] IReportClient client,
             [FromQuery] GetPlayerAccountChangesReportRequest request)
         {
@@ -97,10 +106,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
             var response = await client.GetPlayerAccountChangesTotalAmountAsync(reportRequest);
 
-            return new PlayerAccountChangesTotalModel()
-            {
-                Amount = response
-            };
+            return new PlayerAccountChangesTotalModel { Amount = response };
         }
 
         [HttpGet("{playerCode}/joinedPromotions")]

@@ -3,7 +3,8 @@
     public record PlayerContributionReportTotalModel(
         decimal DepositAmount,
         decimal WithdrawalAmount,
-        decimal AdjustmentAmount,
+        decimal CompanyAdjustAmount,
+        decimal AgentAdjustAmount,
         decimal BonusAmount,
         decimal BetAmount,
         decimal ValidBetAmount,

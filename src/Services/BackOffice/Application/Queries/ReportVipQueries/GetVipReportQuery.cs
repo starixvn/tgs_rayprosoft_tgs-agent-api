@@ -49,7 +49,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                 DepositAmount = x.DepositAmount,
                 WithdrawalAmount = x.WithdrawalAmount,
                 BonusAmount = x.BonusAmount,
-                AdjustmentAmount = x.AdjustmentAmount,
+                CompanyAdjustAmount = x.CompanyAdjustAmount,
                 RebateAmount = x.RebateAmount,
                 BetAmount = x.BetAmount,
                 ValidBetAmount = x.ValidBetAmount,
@@ -67,7 +67,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
             var total = new VipReportTotalModel(
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
-                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.CompanyAdjustAmount),
                 response.Items.Sum(x => x.RebateAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
