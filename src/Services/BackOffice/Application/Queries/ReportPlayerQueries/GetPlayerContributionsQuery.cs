@@ -29,6 +29,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
             {
                 BrandId = request.BrandId,
                 Username = request.Username,
+                HasUpperAgent = request.HasUpperAgent,
                 Level = request.Level,
                 From = request.From,
                 To = request.To,
