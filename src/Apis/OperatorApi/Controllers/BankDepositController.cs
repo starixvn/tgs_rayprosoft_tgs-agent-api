@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
@@ -30,12 +29,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BankDepositController : ControllerBase
     {
         private static readonly Random _Random = new Random();
-        private readonly ILogger<BankDepositController> _logger;
-
-        public BankDepositController(ILogger<BankDepositController> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
 
         [HttpGet("help2pay/pay/{identityId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
@@ -487,8 +480,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
-            _logger.LogInformation($"clientIp:{clientIp}");
-
             var brandPayment = await getBrandPaymentService
                 .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
                 .ConfigureAwait(false);
@@ -528,7 +519,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
 
-            var applyInfo = JsonSerializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
+            var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
 
             if (applyInfo.Response.Code == 200)
             {
