@@ -30,11 +30,11 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BankDepositController : ControllerBase
     {
         private static readonly Random _Random = new Random();
-        private readonly ILogger<BankDepositController> _logger;
+        private readonly ILogger<BankDepositController> _loger;
 
-        public BankDepositController(ILogger<BankDepositController> logger)
+        public BankDepositController(ILogger<BankDepositController> loger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _loger = loger ?? throw new ArgumentNullException(nameof(loger));
         }
 
         [HttpGet("help2pay/pay/{identityId}")]
@@ -487,7 +487,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
-            _logger.LogInformation($"clientIp:{clientIp}");
+            _loger.LogTrace($"zeronineninepay clientIp:{clientIp}");
 
             var brandPayment = await getBrandPaymentService
                 .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
@@ -528,7 +528,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
 
-            var applyInfo = JsonSerializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
+            _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
+
+            var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
 
             if (applyInfo.Response.Code == 200)
             {
