@@ -8,6 +8,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 {
     public class WithdrawFormDetailViewModel
     {
+        public decimal? ActualAmount { get; init; }
+
         public decimal Amount { get; init; }
 
         public JsonDocument? ApplyInfo { get; init; }
