@@ -163,7 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalGameId = betOrder.ExternalGameId,
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
-                RoundClosed = true,
+                RoundClosed = false,
                 TimeStamp = DateTimeOffset.UtcNow,
                 RoundDetail = JsonSerializer.Serialize(request)
             };
@@ -206,7 +206,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Services
                 ExternalGameId = betOrder.ExternalGameId,
                 ExternalTransactionReferenceId = betOrder.ExternalTransactionId,
                 GameActionType = request.Member.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
-                RoundClosed = true,
+                RoundClosed = false,
                 TimeStamp = DateTimeOffset.UtcNow,
                 RoundDetail = JsonSerializer.Serialize(request)
             };
