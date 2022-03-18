@@ -4715,17 +4715,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
 
-                    b.Property<int>("Hour")
-                        .HasColumnType("integer")
-                        .HasColumnName("hour");
-
-                    b.Property<int>("Minute")
-                        .HasColumnType("integer")
-                        .HasColumnName("minute");
+                    b.Property<Guid>("PlayerBucketId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_bucket_id");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("text")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<string>("RoundData")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("round_data");
 
                     b.Property<DateTimeOffset>("To")
                         .HasColumnType("timestamp with time zone")
