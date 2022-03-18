@@ -193,6 +193,7 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
                         || !httpContext.Request.Path.StartsWithSegments("/swagger")
                         && !httpContext.Request.Path.StartsWithSegments("/health")
                         && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
                         && !new[]
                         {
                             "html",
@@ -211,14 +212,6 @@ namespace TGS.Apis.TgsApi.GameProviders.DreamGame
                     config.Interceptors.AddTyped<DiagnosticsInterceptor>(
                             Predicates.ForNameSpace("Tgs.*"),
                             Predicates.ForNameSpace("TGS.*"));
-
-                    config.NonAspectPredicates
-                        .AddNamespace("Tgs.Infrastructures.Json")
-                        .AddNamespace("TGS.Infrastructures.Json")
-                        .AddNamespace("Tgs.Infrastructures.Json.*")
-                        .AddNamespace("TGS.Infrastructures.Json.*")
-                        .AddNamespace("Tgs.Logging.*")
-                        .AddNamespace("TGS.Logging.*");
                 });
 
             _ = services.AddErrorMappers(new[]

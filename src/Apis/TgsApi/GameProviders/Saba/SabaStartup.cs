@@ -6,18 +6,15 @@ using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -199,6 +196,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                         || !httpContext.Request.Path.StartsWithSegments("/swagger")
                         && !httpContext.Request.Path.StartsWithSegments("/health")
                         && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
                         && !new[]
                         {
                             "html",
@@ -217,14 +215,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     config.Interceptors.AddTyped<DiagnosticsInterceptor>(
                             Predicates.ForNameSpace("Tgs.*"),
                             Predicates.ForNameSpace("TGS.*"));
-
-                    config.NonAspectPredicates
-                        .AddNamespace("Tgs.Infrastructures.Json")
-                        .AddNamespace("TGS.Infrastructures.Json")
-                        .AddNamespace("Tgs.Infrastructures.Json.*")
-                        .AddNamespace("TGS.Infrastructures.Json.*")
-                        .AddNamespace("Tgs.Logging.*")
-                        .AddNamespace("TGS.Logging.*");
                 });
 
             // custom registration of Saba
