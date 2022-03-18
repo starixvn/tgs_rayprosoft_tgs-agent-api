@@ -33,6 +33,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string Localization { get; set; }
         public string DesktopBanner { get; set; }
         public string MobileBanner { get; set; }
+        public string CampaignDetail { get; set; }
         public virtual ICollection<PromotionGameProvider> PromotionGameProviders { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }
         public virtual ICollection<PromotionParticipant> PromotionParticipants { get; set; }
