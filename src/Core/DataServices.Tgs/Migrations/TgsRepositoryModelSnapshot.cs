@@ -5509,6 +5509,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<string>("CampaignDetail")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("campaign_detail");
+
                     b.Property<string>("Content")
                         .HasColumnType("text")
                         .HasColumnName("content");
@@ -5689,6 +5696,101 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_promotion_bonus_promotion_id_from_to");
 
                     b.ToTable("promotion_bonuses");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionDistribute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("BonusAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bonus_amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Distributor")
+                        .HasColumnType("text")
+                        .HasColumnName("distributor");
+
+                    b.Property<Guid?>("PlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("PromotionType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("promotion_type");
+
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_distributes");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_distributes_promotion_id");
+
+                    b.HasIndex("PlayerCode", "PlanId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_promotion_distributes")
+                        .HasFilter("plan_id IS NOT NULL");
+
+                    b.ToTable("promotion_distributes");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionDistributePlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<long>("ConditionHash")
+                        .HasColumnType("bigint")
+                        .HasColumnName("condition_hash");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_distribute_plans");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_distribute_plans_promotion_id");
+
+                    b.HasIndex("BrandId", "PromotionId", "ConditionHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_promotion_distrubute_plans");
+
+                    b.ToTable("promotion_distribute_plans");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionGameProvider", b =>
@@ -8293,6 +8395,26 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionDistribute", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_distributes_promotions")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionDistributePlan", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_distribute_plans_promotions")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionGameProvider", b =>
