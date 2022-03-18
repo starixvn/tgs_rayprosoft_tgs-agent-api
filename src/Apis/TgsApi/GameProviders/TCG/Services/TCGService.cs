@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models;
@@ -56,14 +57,32 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
             => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode).ConfigureAwait(false);
 
-        public async ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId)
+        public async ValueTask<CachedGame> GetCachedGameAsync(string externalGameId)
         {
+            var gameProviderId = await GetGameProviderIdAsync().ConfigureAwait(false);
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
             return games.FirstOrDefault();
         }
 
         public async ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId)
         => await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameId).ConfigureAwait(false);
+
+        public async ValueTask<IEnumerable<CachedGame>> GetCachedGamesAsync(string externalGameId)
+        {
+            var games = new List<CachedGame>();
+            var gameProviderId = await GetGameProviderIdAsync().ConfigureAwait(false);
+            var gameLobby = (await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false)).FirstOrDefault();
+            if (gameLobby != null)
+            {
+                games.Add(gameLobby);
+            }
+            var game = (await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, $"tcg_{externalGameId}").ConfigureAwait(false)).FirstOrDefault();
+            if (game != null)
+            {
+                games.Add(game);
+            }
+            return games;
+        }
 
         public async ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode)
         {
@@ -84,20 +103,19 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         public async ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
         {
             var data = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId).ConfigureAwait(false);
+            if (data == null)
+            {
+                return (null, null);
+            }
             var gameAction = data.GameActions.Where(x => x.Type == GameActionType.PlaceBet).FirstOrDefault();
             return new(data.Round, gameAction);
-        }
-
-        public string GetGameProviderCode()
-        {
-            return Consts.GameProvider.TCG;
         }
 
         public async ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
 
         public async ValueTask<Guid> GetGameProviderIdAsync()
-                                                                                                            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
 
         public async ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode)
         {

@@ -12,7 +12,7 @@
 
         public decimal WithdrawalAmount { get; init; }
 
-        public decimal AdjustmentAmount { get; init; }
+        public decimal CompanyAdjustAmount { get; init; }
 
         public decimal BonusAmount { get; init; }
 

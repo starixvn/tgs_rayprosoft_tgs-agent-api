@@ -5,7 +5,7 @@
         int FirstFundInCount,
         decimal DepositAmount,
         decimal WithdrawalAmount,
-        decimal AdjustmentAmount,
+        decimal CompanyAdjustAmount,
         decimal BonusAmount,
         decimal BetAmount,
         decimal ValidBetAmount,

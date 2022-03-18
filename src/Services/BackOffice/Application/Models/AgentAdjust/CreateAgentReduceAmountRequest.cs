@@ -5,11 +5,11 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
 {
-    public class CreateAgentAdjustmentRequest : IRequest<MessageResponse>
+    public class CreateAgentReduceAmountRequest : IRequest<MessageResponse>
     {
         public AccountType? AccountType { get; set; }
 
-        public AdjustmentType AdjustmentType { get; set; }
+        public AgentReduceTransactionType TransactionType { get; set; }
 
         public Guid AgentId { get; set; }
 
@@ -18,7 +18,5 @@ namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
         public string Remark { get; set; }
 
         public string TargetName { get; set; }
-
-        public AgentAdjustmentTransactionType TransactionType { get; set; }
     }
 }

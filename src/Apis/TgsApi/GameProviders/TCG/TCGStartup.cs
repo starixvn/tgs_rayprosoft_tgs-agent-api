@@ -51,7 +51,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 => provider.GetRequiredService<TCGGameInitializer>());
             services.AddScopedWithResolver<IGameHistory>(new[] { typeof(TCGGameHistory) }, (provider, _)
                 => provider.GetRequiredService<TCGGameHistory>());
-
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
