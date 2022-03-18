@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
@@ -185,26 +187,37 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                 .AddNatsGlobPatternExchange("*");
 
             _ = services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .SetResourceBuilder(
-                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddOtlpExporter()
-                        .AddProfileViewExporter(profileViewBuilder =>
-                        {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
-                .AddProfileViewer();
+               .AddOpenTelemetryTracing(builder
+                   => builder
+                       .SetResourceBuilder(
+                           ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+                       .AddSource("TGS.*")
+                       .AddSource("Tgs.*")
+                       .AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddEntityFrameworkCoreInstrumentation(options =>
+                       {
+                           options.SetDbStatementForText = true;
+                       })
+                       .AddOtlpExporter()
+                       .AddProfileViewExporter())
+               .Configure<AspNetCoreInstrumentationOptions>(options =>
+               {
+                   options.Filter = httpContext
+                       => !httpContext.Request.Path.HasValue
+                       || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                       && !httpContext.Request.Path.StartsWithSegments("/health")
+                       && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                       && !new[]
+                       {
+                            "html",
+                            "ico",
+                            "png",
+                            "jpg"
+                       }.Any(
+                           ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+               })
+               .AddProfileViewer();
 
             _ = services
                 .AddInterceptionService()
@@ -215,10 +228,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                             Predicates.ForNameSpace("TGS.*"));
 
                     config.NonAspectPredicates
-                        .AddNamespace("Tgs.*Infrastructures.*Json*")
-                        .AddNamespace("TGS.*Infrastructures.*Json*")
-                        .AddNamespace("Tgs.Logging*")
-                        .AddNamespace("TGS.Logging*");
+                        .AddNamespace("Tgs.Infrastructures.Json")
+                        .AddNamespace("TGS.Infrastructures.Json")
+                        .AddNamespace("Tgs.Infrastructures.Json.*")
+                        .AddNamespace("TGS.Infrastructures.Json.*")
+                        .AddNamespace("Tgs.Logging.*")
+                        .AddNamespace("TGS.Logging.*");
                 });
 
             _ = services.AddErrorMappers(new[]

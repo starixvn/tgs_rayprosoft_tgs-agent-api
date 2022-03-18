@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
@@ -98,9 +99,9 @@ namespace TGS.Apis.TgsApi.Commons
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTgsRepository(Configuration, "Tgs");
+            _ = services.AddTgsRepository(Configuration, "Tgs");
 
-            services
+            _ = services
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
@@ -119,7 +120,7 @@ namespace TGS.Apis.TgsApi.Commons
                     options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
                 });
 
-            services
+            _ = services
                 .AddRedis((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -127,13 +128,13 @@ namespace TGS.Apis.TgsApi.Commons
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services.AddHttpContextAccessor();
+            _ = services.AddHttpContextAccessor();
 
             AddCustomDependencyServices(services);
 
-            services.AddFeatureManagement();
+            _ = services.AddFeatureManagement();
 
-            services
+            _ = services
                 .AddControllers(options =>
                 {
                     options.Filters.Add<ValidateModelFilter>();
@@ -145,13 +146,12 @@ namespace TGS.Apis.TgsApi.Commons
                     options.SuppressModelStateInvalidFilter = false;
                 });
 
-
-            services.AddHealthChecks()
+            _ = services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
                 .AddRedis(Configuration)
                 .ForwardToPrometheus();
 
-            services
+            _ = services
                 .AddMessageQueue()
                 .AddNatsMessageQueue(natsConfig =>
                 {
@@ -171,7 +171,7 @@ namespace TGS.Apis.TgsApi.Commons
                 })
                 .AddNatsGlobPatternExchange("*");
 
-            services
+            _ = services
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, config) =>
                 {
@@ -185,7 +185,7 @@ namespace TGS.Apis.TgsApi.Commons
                     config.GetSection("OpenTelemetry:Tracing").Bind(options);
                 });
 
-            services
+            _ = services
                 .AddOpenTelemetryTracing(builder
                     => builder
                         .SetResourceBuilder(
@@ -199,15 +199,26 @@ namespace TGS.Apis.TgsApi.Commons
                             options.SetDbStatementForText = true;
                         })
                         .AddOtlpExporter()
-                        .AddProfileViewExporter(profileViewBuilder =>
+                        .AddProfileViewExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext
+                        => !httpContext.Request.Path.HasValue
+                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                        && !httpContext.Request.Path.StartsWithSegments("/health")
+                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                        && !new[]
                         {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
+                            "html",
+                            "ico",
+                            "png",
+                            "jpg"
+                        }.Any(
+                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                })
                 .AddProfileViewer();
 
-            services
+            _ = services
                 .AddInterceptionService()
                 .ConfigureDynamicProxy(config =>
                 {
@@ -216,10 +227,12 @@ namespace TGS.Apis.TgsApi.Commons
                             Predicates.ForNameSpace("TGS.*"));
 
                     config.NonAspectPredicates
-                        .AddNamespace("Tgs.*Infrastructures.*Json*")
-                        .AddNamespace("TGS.*Infrastructures.*Json*")
-                        .AddNamespace("Tgs.Logging*")
-                        .AddNamespace("TGS.Logging*");
+                        .AddNamespace("Tgs.Infrastructures.Json")
+                        .AddNamespace("TGS.Infrastructures.Json")
+                        .AddNamespace("Tgs.Infrastructures.Json.*")
+                        .AddNamespace("TGS.Infrastructures.Json.*")
+                        .AddNamespace("Tgs.Logging.*")
+                        .AddNamespace("TGS.Logging.*");
                 });
         }
 

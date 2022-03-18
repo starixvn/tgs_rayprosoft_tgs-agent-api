@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
@@ -165,8 +166,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             });
 
             services.AddHealthChecks()
-                //.AddPostgres(_configuration, "Tgs", "tgs-db")
-                //.AddRedis(_configuration)
                 .ForwardToPrometheus();
 
             services
@@ -214,12 +213,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                             options.SetDbStatementForText = true;
                         })
                         .AddOtlpExporter()
-                        .AddProfileViewExporter(profileViewBuilder =>
+                        .AddProfileViewExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext
+                        => !httpContext.Request.Path.HasValue
+                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                        && !httpContext.Request.Path.StartsWithSegments("/health")
+                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                        && !new[]
                         {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
+                            "html",
+                            "ico",
+                            "png",
+                            "jpg"
+                        }.Any(
+                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                })
                 .AddProfileViewer();
 
             services
@@ -231,10 +241,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                             Predicates.ForNameSpace("TGS.*"));
 
                     config.NonAspectPredicates
-                        .AddNamespace("Tgs.*Infrastructures.*Json*")
-                        .AddNamespace("TGS.*Infrastructures.*Json*")
-                        .AddNamespace("Tgs.Logging*")
-                        .AddNamespace("TGS.Logging*");
+                        .AddNamespace("Tgs.Infrastructures.Json")
+                        .AddNamespace("TGS.Infrastructures.Json")
+                        .AddNamespace("Tgs.Infrastructures.Json.*")
+                        .AddNamespace("TGS.Infrastructures.Json.*")
+                        .AddNamespace("Tgs.Logging.*")
+                        .AddNamespace("TGS.Logging.*");
                 });
 
             // custom registration of WMCasino
