@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
@@ -10,6 +11,7 @@ using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
+using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using Tgs.ServiceUtility;
 
@@ -159,5 +161,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             request.Type = type;
             return _mediator.Send(request);
         }
+
+        [HttpGet("{playerCode}/playerBuckets")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
+            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
+            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
+
+        [HttpGet("{playerBucketId}/playerBucketHistories")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
+            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
+            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
     }
 }
