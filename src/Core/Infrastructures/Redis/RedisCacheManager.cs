@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 [assembly: InternalsVisibleTo("TGS.Tests.Redis.IntegrationTests")]
@@ -13,18 +14,18 @@ namespace TGS.Core.Infrastructures.Redis
     internal sealed class RedisCacheManager : IRedisCacheManager
     {
         private static readonly TimeSpan _MaxTimeSpan = TimeSpan.FromDays(1);
-        private readonly IRedisCacheManager _interface;
+        private readonly ILogger<RedisCacheManager> _logger;
         private readonly IRedisRepository _repository;
 
         public RedisCacheManager(
-            IRedisRepository repository)
+            IRedisRepository repository,
+            ILogger<RedisCacheManager> logger)
         {
             _repository = repository;
-
-            _interface = this;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        async Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, List<T> data)
+        public async Task CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, List<T> data)
         {
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
@@ -38,10 +39,10 @@ namespace TGS.Core.Infrastructures.Redis
             }
         }
 
-        Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
-            => _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
+        public Task CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
+            => CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
 
-        Task IRedisCacheManager.ClearCacheAsync(object cacheType, object key, bool fireAndForget)
+        public Task ClearCacheAsync(object cacheType, object key, bool fireAndForget)
         {
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
@@ -49,7 +50,7 @@ namespace TGS.Core.Infrastructures.Redis
             return db.KeyDeleteAsync(cacheKey, flags);
         }
 
-        async Task<int> IRedisCacheManager.ClearCacheByBatchAsync(CacheKey[] keys, bool fireAndForget)
+        public async Task<int> ClearCacheByBatchAsync(CacheKey[] keys, bool fireAndForget)
         {
             if (keys == null || keys.Length == 0)
             {
@@ -65,7 +66,7 @@ namespace TGS.Core.Infrastructures.Redis
             return keys.Length;
         }
 
-        async Task<int> IRedisCacheManager.ClearCacheByPatternAsync(object cacheType, string pattern,
+        public async Task<int> ClearCacheByPatternAsync(object cacheType, string pattern,
             bool fireAndForget)
         {
             var keyPattern = FormCacheKey(cacheType, pattern);
@@ -99,7 +100,7 @@ namespace TGS.Core.Infrastructures.Redis
             return keys.Length;
         }
 
-        async Task<List<T>> IRedisCacheManager.GetListAsync<T>(object cacheType, object key,
+        public async Task<List<T>> GetListAsync<T>(object cacheType, object key,
             Func<Task<List<T>>> createFunc)
         {
             var cacheKey = FormCacheKey(cacheType, key);
@@ -111,14 +112,35 @@ namespace TGS.Core.Infrastructures.Redis
             return values.Select(v => JsonSerializer.Deserialize<T>(v)).ToList();
         }
 
-        Task<long> IRedisCacheManager.IncrementAsync(object cacheType, object key, long value)
+        public async Task<RedisValue[]> GetSetAllMembersAsync(string cacheType, string key, bool fireAndForget = false)
+        {
+            try
+            {
+                var cacheKey = FormCacheKey(cacheType, key);
+                var db = _repository.GetDb();
+
+                var flags = GetCommandFlags(fireAndForget);
+                return await db.SetMembersAsync(cacheKey, flags);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "redis error on key '{key}'",
+                    key);
+            }
+
+            return Array.Empty<RedisValue>();
+        }
+
+        public Task<long> IncrementAsync(object cacheType, object key, long value)
         {
             var cacheKey = FormCacheKey(cacheType, key);
             var db = _repository.GetDb();
             return db.StringIncrementAsync(cacheKey, value);
         }
 
-        async Task IRedisCacheManager.SafeCacheAsync<T>(
+        public async Task SafeCacheAsync<T>(
             object cacheType,
             object key,
             TimeSpan? expiresIn,
@@ -130,12 +152,15 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
         }
 
-        async Task IRedisCacheManager.SafeCacheForeverAsync<T>(object cacheType, object key, T data)
+        public async Task SafeCacheForeverAsync<T>(object cacheType, object key, T data)
         {
             try
             {
@@ -143,12 +168,15 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
         }
 
-        async Task IRedisCacheManager.SafeCacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields,
+        public async Task SafeCacheHashSetAsync(object cacheType, object key, HashEntry[] hashFields,
             TimeSpan? expiresIn, bool fireAndForget)
         {
             try
@@ -163,12 +191,15 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
         }
 
-        async Task<HashEntry[]> IRedisCacheManager.SafeGetAllHashSetAsync(object cacheType, object key,
+        public async Task<HashEntry[]> SafeGetAllHashSetAsync(object cacheType, object key,
             bool fireAndForget)
         {
             try
@@ -181,14 +212,17 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
 
             return Array.Empty<HashEntry>();
         }
 
-        async Task<T> IRedisCacheManager.SafeGetAndCacheAsync<T>(
+        public async Task<T> SafeGetAndCacheAsync<T>(
             object cacheType,
             object key,
             TimeSpan? expiresIn,
@@ -200,13 +234,16 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
                 return await getData();
             }
         }
 
-        async Task<T> IRedisCacheManager.SafeGetAndCacheForeverAsync<T>(object cacheType, object key,
+        public async Task<T> SafeGetAndCacheForeverAsync<T>(object cacheType, object key,
             Func<Task<T>> getData)
         {
             try
@@ -215,13 +252,16 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
                 return await getData();
             }
         }
 
-        async Task<T> IRedisCacheManager.SafeGetAsync<T>(
+        public async Task<T> SafeGetAsync<T>(
             object cacheType,
             object key,
             Func<Task<T>> getData)
@@ -232,13 +272,16 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
                 return await getData();
             }
         }
 
-        async Task<RedisValue[]> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key,
+        public async Task<RedisValue[]> SafeGetHashSetAsync(object cacheType, object key,
             RedisValue[] hashFields,
             bool fireAndForget)
         {
@@ -252,14 +295,17 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
 
             return Array.Empty<RedisValue>();
         }
 
-        async Task<RedisValue> IRedisCacheManager.SafeGetHashSetAsync(object cacheType, object key,
+        public async Task<RedisValue> SafeGetHashSetAsync(object cacheType, object key,
             RedisValue hashField, bool fireAndForget)
         {
             try
@@ -272,21 +318,17 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on type '{cacheType}' with key '{key}'",
+                    cacheType,
+                    key);
             }
 
             return RedisValue.Null;
         }
 
-        Task IRedisCacheManager.SetKeyExpirationInAsync(object cacheType, object key, TimeSpan expiresIn)
-        {
-            var cacheKey = FormCacheKey(cacheType, key);
-            var db = _repository.GetDb();
-            return db.KeyExpireAsync(cacheKey, expiresIn);
-        }
-
-        async Task<long> IRedisCacheManager.SetAddAsync(string cacheType, string key, RedisValue[] values,
+        public async Task<long> SetAddAsync(string cacheType, string key, RedisValue[] values,
             TimeSpan? expiresIn,
             bool fireAndForget)
         {
@@ -306,30 +348,20 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"redis error on key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
+                _logger.LogError(
+                    ex,
+                    "redis error on key '{key}'",
+                    key);
             }
 
             return 0;
         }
 
-        public async Task<RedisValue[]> GetSetAllMembersAsync(string cacheType, string key, bool fireAndForget = false)
+        public Task SetKeyExpirationInAsync(object cacheType, object key, TimeSpan expiresIn)
         {
-            try
-            {
-                var cacheKey = FormCacheKey(cacheType, key);
-                var db = _repository.GetDb();
-
-                var flags = GetCommandFlags(fireAndForget);
-                return await db.SetMembersAsync(cacheKey, flags);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"redis error on key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
-            }
-
-            return Array.Empty<RedisValue>();
+            var cacheKey = FormCacheKey(cacheType, key);
+            var db = _repository.GetDb();
+            return db.KeyExpireAsync(cacheKey, expiresIn);
         }
 
         private static CommandFlags GetCommandFlags(bool fireAndForget)
