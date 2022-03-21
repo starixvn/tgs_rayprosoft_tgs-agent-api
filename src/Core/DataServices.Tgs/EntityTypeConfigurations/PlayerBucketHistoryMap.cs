@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -16,6 +17,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.Id)
                 .ValueGeneratedOnAdd();
 
+            builder.Property(c => c.PlayerBucketId)
+                .IsRequired();
+
+            builder.Property(c => c.PlayerCode)
+                .HasMaxLength(16)
+                .IsRequired();
+
             builder.Property(b => b.Turnover)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -27,6 +35,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
+                .IsRequired();
+
+            builder.Property(c => c.RoundData)
+                .HasColumnType(ColumnTypes.Jsonb)
+                .HasDefaultValue("{}")
                 .IsRequired();
 
             builder.HasIndex(c => c.PlayerCode)
