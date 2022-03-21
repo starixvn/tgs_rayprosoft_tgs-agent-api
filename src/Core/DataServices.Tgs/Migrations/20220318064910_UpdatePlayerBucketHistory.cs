@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System.Reflection;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
@@ -44,6 +46,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 type: "jsonb",
                 nullable: false,
                 defaultValue: "{}");
+
+            var assembly = Assembly.GetExecutingAssembly();
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_get_round_and_set_game_setting_aggregates"));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
