@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
-using TGS.Apis.TgsApi.GameProviders.DreamGame.Services;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -105,9 +104,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTgsRepository(_configuration, "Tgs");
+            _ = services.AddTgsRepository(_configuration, "Tgs");
 
-            services
+            _ = services
                 .AddWebApiServices()
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
@@ -127,7 +126,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
                 });
 
-            services
+            _ = services
                 .AddRedis((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -135,21 +134,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services.AddHttpContextAccessor();
+            _ = services.AddHttpContextAccessor();
 
-            services.AddFeatureManagement();
+            _ = services.AddFeatureManagement();
 
-            services.AddControllers(options =>
+            _ = services.AddControllers(options =>
             {
                 options.Filters.Add<ValidateModelFilter>();
             });
 
-            services.AddHealthChecks()
-                //.AddPostgres(_configuration, "Tgs", "tgs-db")
-                //.AddRedis(_configuration)
+            _ = services.AddHealthChecks()
                 .ForwardToPrometheus();
 
-            services
+            _ = services
                 .AddMessageQueue()
                 .AddNatsMessageQueue(natsConfig =>
                 {
@@ -163,7 +160,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                 })
                 .AddNatsGlobPatternExchange("*");
 
-            services
+            _ = services
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, config) =>
                 {
@@ -177,7 +174,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     config.GetSection("OpenTelemetry:Tracing").Bind(options);
                 });
 
-            services
+            _ = services
                 .AddOpenTelemetryTracing(builder
                     => builder
                         .SetResourceBuilder(
@@ -191,32 +188,38 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                             options.SetDbStatementForText = true;
                         })
                         .AddOtlpExporter()
-                        .AddProfileViewExporter(profileViewBuilder =>
+                        .AddProfileViewExporter())
+                .Configure<AspNetCoreInstrumentationOptions>(options =>
+                {
+                    options.Filter = httpContext
+                        => !httpContext.Request.Path.HasValue
+                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                        && !httpContext.Request.Path.StartsWithSegments("/health")
+                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
+                        && !new[]
                         {
-                            profileViewBuilder
-                                .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg", "js"))
-                                .AddFilter(new UrlPathFilter("/health"));
-                        }))
+                            "html",
+                            "ico",
+                            "png",
+                            "jpg"
+                        }.Any(
+                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                })
                 .AddProfileViewer();
 
-            services
+            _ = services
                 .AddInterceptionService()
                 .ConfigureDynamicProxy(config =>
                 {
                     config.Interceptors.AddTyped<DiagnosticsInterceptor>(
                             Predicates.ForNameSpace("Tgs.*"),
                             Predicates.ForNameSpace("TGS.*"));
-
-                    config.NonAspectPredicates
-                        .AddNamespace("Tgs.*Infrastructures.*Json*")
-                        .AddNamespace("TGS.*Infrastructures.*Json*")
-                        .AddNamespace("Tgs.Logging*")
-                        .AddNamespace("TGS.Logging*");
                 });
 
             // custom registration of Saba
 
-            services.AddErrorMappers(
+            _ = services.AddErrorMappers(
                 new[]
                 {
                     typeof(SabaErrorMapper)
@@ -227,21 +230,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                     _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
-            services.AddScoped<AuthorizeSabaMiddleware>();
-            services.AddScoped<HandleSabaExceptionMiddleware>();
+            _ = services.AddScoped<AuthorizeSabaMiddleware>();
+            _ = services.AddScoped<HandleSabaExceptionMiddleware>();
 
-            services.AddSingleton<GzipRequestDecompressionMiddleware>();
+            _ = services.AddSingleton<GzipRequestDecompressionMiddleware>();
 
-            services.AddScoped<ISabaServices, SabaServices>();
-            services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
+            _ = services.AddScoped<ISabaServices, SabaServices>();
+            _ = services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+            _ = services.AddScopedWithResolver<IGameInitializer>(new[]
                 {
                     typeof(SabaGameInitializer)
                 },
                 (provider, _) => provider.GetRequiredService<SabaGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[]
+            _ = services.AddScopedWithResolver<IGameHistory>(new[]
                 {
                     typeof(SabaGameHistory)
                 },
