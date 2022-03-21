@@ -34,8 +34,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerBucketQueries
                     Id = x.Id,
                     PlayerCode = x.PlayerCode,
                     BucketType = x.BucketType,
-                    BucketAmount = x.BucketAmount,
-                    CurrentBucketAmount = x.CurrentBucketAmount,
+                    WageringRequirement = x.BucketAmount,
+                    CompletedWagering = x.CurrentBucketAmount,
+                    UncompleteWagering = x.BucketAmount - x.CurrentBucketAmount,
                     CreatedOn = x.CreatedOn
                 }).ToArray()
             };

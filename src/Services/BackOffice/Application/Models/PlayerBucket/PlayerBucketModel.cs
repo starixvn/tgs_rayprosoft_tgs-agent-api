@@ -9,9 +9,11 @@ namespace TGS.Services.BackOffice.Application.Models.PlayerBucket
 
         public string PlayerCode { get; set; }
 
-        public decimal BucketAmount { get; set; }
+        public decimal WageringRequirement { get; set; }
 
-        public decimal CurrentBucketAmount { get; set; }
+        public decimal CompletedWagering { get; set; }
+
+        public decimal UncompleteWagering { get; set; }
 
         public BucketType BucketType { get; set; }
 
