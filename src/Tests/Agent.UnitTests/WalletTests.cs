@@ -26,7 +26,7 @@ namespace Agent.UnitTests
 
             var agentId = Guid.NewGuid();
 
-            moqAgentRepository.Setup(fake => fake.GetAgentByIdAsync(It.Is<Guid>(x => x == agentId)))
+            _ = moqAgentRepository.Setup(fake => fake.GetAgentByIdAsync(It.Is<Guid>(x => x == agentId)))
                 .Returns(ValueTask.FromResult(new AgentInfo(
                     agentId,
                     "TestAgent",
@@ -46,11 +46,12 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M)));
+                    0M,
+                    0)));
 
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
-            moqAgentWalletRepository
+            _ = moqAgentWalletRepository
                 .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.Is<Guid>(x => x == agentId)))
                 .Returns(ValueTask.FromResult(10000M));
 

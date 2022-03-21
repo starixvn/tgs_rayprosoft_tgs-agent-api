@@ -23,6 +23,8 @@ namespace TGS.Agent.Repositories
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
+            var playerNumber = agent.Players.Count(p => p.AgentId == id);
+
             return agent == null
                 ? null
                 : new AgentInfo(
@@ -44,7 +46,8 @@ namespace TGS.Agent.Repositories
                     agent.Status,
                     agent.Type,
                     agent.LevelType,
-                    agent.DividendPercentage);
+                    agent.DividendPercentage,
+                    playerNumber);
         }
 
         public IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId)
@@ -77,7 +80,8 @@ namespace TGS.Agent.Repositories
                             agent.Status,
                             agent.Type,
                             agent.LevelType,
-                            agent.DividendPercentage);
+                            agent.DividendPercentage,
+                            agent.Players.Count(p => p.AgentId == agent.Id));
 
             return query.ToAsyncEnumerable();
         }
@@ -106,7 +110,8 @@ namespace TGS.Agent.Repositories
                             agent.Status,
                             agent.Type,
                             agent.LevelType,
-                            agent.DividendPercentage);
+                            agent.DividendPercentage,
+                            agent.Players.Count(p => p.AgentId == agent.Id));
 
             return query.ToAsyncEnumerable();
         }
