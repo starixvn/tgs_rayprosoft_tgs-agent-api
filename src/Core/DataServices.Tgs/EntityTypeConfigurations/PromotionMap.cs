@@ -76,6 +76,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.Jsonb)
                 .HasDefaultValue("{}");
 
+            builder.Property(p => p.DisplayOrder)
+                .HasDefaultValue(1);
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)

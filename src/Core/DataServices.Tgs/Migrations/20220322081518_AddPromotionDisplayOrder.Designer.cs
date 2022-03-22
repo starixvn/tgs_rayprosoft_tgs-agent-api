@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220322075817_AddPromotionDisplayOrder")]
+    [Migration("20220322081518_AddPromotionDisplayOrder")]
     partial class AddPromotionDisplayOrder
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5541,7 +5541,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("desktop_banner");
 
                     b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasDefaultValue(1)
                         .HasColumnName("display_order");
 
                     b.Property<DateTimeOffset>("From")

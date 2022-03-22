@@ -5539,7 +5539,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("desktop_banner");
 
                     b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasDefaultValue(1)
                         .HasColumnName("display_order");
 
                     b.Property<DateTimeOffset>("From")
