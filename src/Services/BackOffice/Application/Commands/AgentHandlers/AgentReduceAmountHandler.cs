@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
 using TGS.Core.Infrastructures.Json;
@@ -14,20 +15,24 @@ using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 {
-    public class AdjustAgentAmountHandler : Handler<CreateAgentAdjustmentRequest, MessageResponse>
+    public class AgentReduceAmountHandler : Handler<CreateAgentReduceAmountRequest, MessageResponse>
     {
+        private readonly IAdjustAgentAccountService _adjustAgentAccountService;
+        private readonly IAdjustTransferService _adjustTransferService;
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly ICashServiceClient _cashServiceClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
 
-        public AdjustAgentAmountHandler(
+        public AgentReduceAmountHandler(
             IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             ICashServiceClient cashServiceClient,
             IPlayerService playerService,
             IJsonSerializationProvider jsonSerializationProvider,
+            IAdjustAgentAccountService adjustAgentAccountService,
+            IAdjustTransferService adjustTransferService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
@@ -35,13 +40,21 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _playerService = playerService;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _adjustAgentAccountService = adjustAgentAccountService;
+            _adjustTransferService = adjustTransferService;
         }
 
         public override async Task<MessageResponse> Handle(
-            CreateAgentAdjustmentRequest request,
+            CreateAgentReduceAmountRequest request,
             CancellationToken cancellationToken)
         {
-            var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId);
+            if (!Enum.IsDefined(request.TransactionType) ||
+                !Enum.IsDefined((AgentAdjustmentTransactionType)request.TransactionType))
+            {
+                return CreateInvalidResponse<MessageResponse>("is not define type");
+            }
+
+            var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId).ConfigureAwait(false);
 
             if (agent is null)
             {
@@ -49,7 +62,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             }
 
             var targetAgent = IsTransferToAgent(request)
-                ? await _agentService.GetAgentAsync(x => x.Username == request.TargetName)
+                ? await _agentService.GetAgentAsync(x => x.Username == request.TargetName).ConfigureAwait(false)
                 : null;
 
             if (IsTransferToAgent(request))
@@ -66,7 +79,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             }
 
             var targetPlayer = IsTransferToPlayer(request)
-                ? await _playerService.GetPlayerAsync(x => x.Username == request.TargetName)
+                ? await _playerService.GetPlayerAsync(x => x.Username == request.TargetName).ConfigureAwait(false)
                 : null;
 
             if (IsTransferToPlayer(request))
@@ -84,12 +97,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
             var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
 
-            if (wallet is null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Agent.WalletNotFound);
-            }
-
-            if (request.AdjustmentType == AdjustmentType.Subtract && wallet.Balance - request.Amount < 0)
+            if (wallet.Balance - request.Amount < 0)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.InsufficientBalance);
             }
@@ -102,45 +110,74 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 request.Remark
             });
 
-            await _agentWalletRepository.ExchangeAsync(
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            var response = await _agentWalletRepository.ExchangeAsync(
                 agent.BrandId,
                 agent.DefaultWalletId,
                 agent.Id,
-                TransactionTypes.Adjust,
-                request.AdjustmentType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
-                remark);
+                TransactionTypes.CompanyAdjust,
+                -request.Amount,
+                remark).ConfigureAwait(false);
+
+            await _adjustAgentAccountService.CreateAsync(
+                response.TransactionId,
+                agent.BrandId,
+                agent.Id,
+                AdjustmentType.Add,
+                (AgentAdjustmentTransactionType)request.TransactionType,
+                AdjustTransferType.None,
+                request.Amount,
+                request.Remark,
+                Username).ConfigureAwait(false);
 
             if (IsTransferToAgent(request))
             {
-                await _agentWalletRepository.ExchangeAsync(
+                var agentTargetResponse = await _agentWalletRepository.ExchangeAsync(
                     targetAgent.BrandId,
                     targetAgent.DefaultWalletId,
                     targetAgent.Id,
-                    TransactionTypes.Adjust,
-                    request.Amount);
+                    TransactionTypes.CompanyAdjust,
+                    request.Amount).ConfigureAwait(false);
+
+                await _adjustTransferService.CreateAsync(response.TransactionId,
+                    agentTargetResponse.TransactionId,
+                    AdjustTransferType.AgentToAgent,
+                    agent.Username,
+                    targetAgent.Username,
+                    request.Amount).ConfigureAwait(false);
             }
 
             if (IsTransferToPlayer(request))
             {
-                await _cashServiceClient
-                    .AdjustAsync(
+                var playerTargetResponse = await _cashServiceClient
+                    .AdjustTransferAsync(
                         targetPlayer.DefaultWalletId,
                         request.Amount,
                         request.Remark,
                         null,
                         Guid.Parse(UserId))
                     .ConfigureAwait(false);
+
+                await _adjustTransferService.CreateAsync(response.TransactionId,
+                    playerTargetResponse.TransactionId,
+                    AdjustTransferType.AgentToPlayer,
+                    agent.Username,
+                    targetPlayer.Username,
+                    request.Amount).ConfigureAwait(false);
             }
+
+            scope.Complete();
 
             return CreateValidResponse<MessageResponse>();
         }
 
-        private static bool IsTransferToAgent(CreateAgentAdjustmentRequest request) =>
-            request.AdjustmentType == AdjustmentType.Subtract &&
-            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Agent;
+        private static bool IsTransferToAgent(CreateAgentReduceAmountRequest request) =>
+            request.TransactionType == AgentReduceTransactionType.Transfer &&
+            request.AccountType == AccountType.Agent;
 
-        private static bool IsTransferToPlayer(CreateAgentAdjustmentRequest request) =>
-            request.AdjustmentType == AdjustmentType.Subtract &&
-            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Player;
+        private static bool IsTransferToPlayer(CreateAgentReduceAmountRequest request) =>
+            request.TransactionType == AgentReduceTransactionType.Transfer &&
+            request.AccountType == AccountType.Player;
     }
 }

@@ -111,6 +111,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     PaymentMethodId = formDetail.PaymentMethodId,
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
+                    ActualAmount = formDetail.ActualAmount,
                     Remark = formDetail.Remark,
                     Status = formDetail.Status.ToFlowState(),
                     ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo)
@@ -209,6 +210,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         ChannelName = form.ChannelName,
                         Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
+                        ActualAmount = form.ActualAmount,
                         Remark = form.Remark,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn,

@@ -21,6 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public FlowState Status { get; init; }
 
         public decimal Amount { get; init; }
+        public decimal? ActualAmount { get; init; }
 
         public string Remark { get; init; }
 

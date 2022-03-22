@@ -33,10 +33,19 @@ namespace TGS.Apis.BackendOffice.Controllers
         public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
 
-        [HttpPost("{playerCode}/adjust")]
-        [Description("Create a player adjustment")]
-        public Task<MessageResponse> CreateAgentAdjustmentAsync(string playerCode,
-            CreatePlayerAdjustmentRequest request)
+        [HttpPost("{playerCode}/adjust/increase")]
+        [Description("Create a player adjustment to increase amount")]
+        public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
+            CreatePlayerIncreaseAmountRequest request)
+        {
+            request.PlayerCode = playerCode;
+            return _mediator.Send(request);
+        }
+
+        [HttpPost("{playerCode}/adjust/reduce")]
+        [Description("Create a player adjustment to reduce amount")]
+        public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
+            CreatePlayerReduceAmountRequest request)
         {
             request.PlayerCode = playerCode;
             return _mediator.Send(request);
@@ -44,7 +53,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
+        public async Task<PagedResponse<PlayerAccountChangeReportModel>?> GetAccountChangesAsync(
             [FromServices] IReportClient client,
             [FromQuery] GetPlayerAccountChangesReportRequest request)
         {
@@ -79,6 +88,25 @@ namespace TGS.Apis.BackendOffice.Controllers
                     RecordedOn = x.RecordedOn
                 }).ToArray()
             };
+        }
+
+        [HttpGet("accountChanges/totalAmount", Name = "GetAccountChangesTotalAmount")]
+        [Description("Get player account changes Total Amount")]
+        public async Task<PlayerAccountChangesTotalModel> GetAccountChangesTotalAmountAsync(
+            [FromServices] IReportClient client,
+            [FromQuery] GetPlayerAccountChangesReportTotalAmountRequest request)
+        {
+            var reportRequest = new GetPlayerAccountChangesTotalRequest
+            {
+                BrandId = request.BrandId,
+                PlayerCode = request.PlayerCode,
+                AccountChangeType = (short?)request.AccountChangeType,
+                From = request.From,
+                To = request.To
+            };
+            var response = await client.GetPlayerAccountChangesTotalAmountAsync(reportRequest);
+
+            return new PlayerAccountChangesTotalModel { Amount = response };
         }
 
         [HttpGet("{playerCode}/joinedPromotions")]

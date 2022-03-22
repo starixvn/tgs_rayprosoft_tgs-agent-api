@@ -40,6 +40,7 @@ namespace TGS.Core.Models
             public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
             public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
             public static readonly string TFGaming = string.Format(Template, Consts.GameProvider.TFGaming);
+            public static readonly string DreamGame = string.Format(Template, Consts.GameProvider.DreamGame);
         }
     }
 }

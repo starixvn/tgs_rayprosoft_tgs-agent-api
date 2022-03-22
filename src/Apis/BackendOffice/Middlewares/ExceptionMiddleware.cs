@@ -8,9 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
@@ -22,7 +24,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
 {
     public class ExceptionMiddleware : IMiddleware
     {
-        private const int ResMessageSizeLimit = 1000012;
+        private const int ResMessageSizeLimit = 8000;
         private readonly IWebHostEnvironment _env;
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
@@ -115,11 +117,14 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 "/health",
                 "/metrics",
                 "/favicon.ico",
-                "/swagger",
-                "/api/fs/upload"
+                "/swagger"
             };
 
-            if (adminLogEvent.Path is null || !defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)))
+            var attribute = httpContext.Features.Get<IEndpointFeature>()?.Endpoint?.Metadata
+                .GetMetadata<ByPassAdminLogAttribute>();
+
+            if (adminLogEvent.Path is not null && !defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)) &&
+                attribute == null)
             {
                 _tgsLog.LogAdmin(adminLogEvent);
             }

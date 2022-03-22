@@ -35,7 +35,7 @@ namespace TGS.Services.Promotion.Services
             var promotions = GetPromotionsAsync(
                 query.BrandId,
                 query.PlayerCode,
-                player.Vip.Level,
+                player.Vip?.Level,
                 cancellationToken);
 
             await foreach (var promotion in promotions)
@@ -47,7 +47,7 @@ namespace TGS.Services.Promotion.Services
         private async IAsyncEnumerable<PromotionModel> GetPromotionsAsync(
             Guid brandId,
             string playerCode,
-            int vipLevel,
+            int? vipLevel,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var promotions = _promotionQueryService
@@ -55,14 +55,14 @@ namespace TGS.Services.Promotion.Services
                     new GetValidPromotionsQuery(brandId),
                     cancellationToken)
                 .Where(row => row.VipLevels.Length == 0
-                    || row.VipLevels.Contains(vipLevel));
+                    || vipLevel is null
+                    || row.VipLevels.Contains(vipLevel.Value));
 
             await foreach (var promotion in promotions)
             {
                 var checker = _promotionCheckerFactory.GetPromotionChecker(promotion.PromotionType);
 
-                if (await checker
-                    .CheckAsync(playerCode)
+                if (await checker.CheckAsync(playerCode)
                     .ConfigureAwait(false))
                     yield return promotion;
             }

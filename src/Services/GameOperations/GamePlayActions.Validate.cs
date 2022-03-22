@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Data;
@@ -93,7 +94,10 @@ namespace TGS.Services.GameOperations
 
         private async ValueTask ValidatePlayerStatusAsync(CachedPlayer player, Guid gameProviderId)
         {
-            _statusValidator.ThrowIfPlayerDisabled(player.Status);
+            if (player.Status is not PlayerStatus.Enabled)
+            {
+                throw new PlayerDisabledException(player.Status);
+            }
 
             if (!player.IsTestPlayer)
             {

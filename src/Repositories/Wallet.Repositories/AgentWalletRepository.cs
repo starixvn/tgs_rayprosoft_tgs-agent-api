@@ -15,9 +15,7 @@ namespace TGS.Wallet.Repositories
         private readonly ITgsRepository _tgsRepository;
 
         public AgentWalletRepository(ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+            => _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
         public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
             Guid brandId,
@@ -37,10 +35,10 @@ namespace TGS.Wallet.Repositories
                 sql,
                 parameters: new Dictionary<string, object>
                 {
-                    {":agent_id", agentId},
-                    {":wallet_id", walletId},
-                    {":amount", amount},
-                    {":updated_on", updatedOn}
+                    { ":agent_id", agentId },
+                    { ":wallet_id", walletId },
+                    { ":amount", amount },
+                    { ":updated_on", updatedOn }
                 }).ConfigureAwait(false);
 
             await _tgsRepository.AgentTransactions
@@ -54,15 +52,15 @@ namespace TGS.Wallet.Repositories
                     Balance = postBalance,
                     Type = transactionType switch
                     {
-                        TransactionTypes.Deposit => TransactionType.Deposit,
-                        TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                        TransactionTypes.Adjust => TransactionType.Adjust,
-                        TransactionTypes.Bonus => TransactionType.Bonus,
-                        TransactionTypes.Rebate => TransactionType.Rebate,
-                        TransactionTypes.Dividend => TransactionType.Dividend,
-                        TransactionTypes.Promotion => TransactionType.Promotion,
-                        TransactionTypes.CancelWithdrawal => TransactionType.CancelWithdrawal,
-                        _ => TransactionType.Other
+                        TransactionTypes.Deposit          => AgentTransactionType.Deposit,
+                        TransactionTypes.Withdrawal       => AgentTransactionType.Withdrawal,
+                        TransactionTypes.CompanyAdjust    => AgentTransactionType.CompanyAdjust,
+                        TransactionTypes.Bonus            => AgentTransactionType.Bonus,
+                        TransactionTypes.Rebate           => AgentTransactionType.Rebate,
+                        TransactionTypes.Dividend         => AgentTransactionType.Dividend,
+                        TransactionTypes.Promotion        => AgentTransactionType.Promotion,
+                        TransactionTypes.CancelWithdrawal => AgentTransactionType.CancelWithdrawal,
+                        _                                 => AgentTransactionType.Other
                     },
                     Description = description,
                     RecordedOn = DateTimeOffset.Now
@@ -84,8 +82,7 @@ namespace TGS.Wallet.Repositories
 
             if (agentWallet.AgentId == agentId)
                 return agentWallet.Balance;
-            else
-                throw new Exception("Can't find agent wallet.");
+            throw new Exception("Can't find agent wallet.");
         }
     }
 }

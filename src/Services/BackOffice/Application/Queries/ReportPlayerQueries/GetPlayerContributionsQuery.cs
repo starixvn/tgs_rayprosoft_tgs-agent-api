@@ -29,6 +29,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
             {
                 BrandId = request.BrandId,
                 Username = request.Username,
+                HasUpperAgent = request.HasUpperAgent,
                 Level = request.Level,
                 From = request.From,
                 To = request.To,
@@ -49,7 +50,8 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
                 Level = x.Level,
                 DepositAmount = x.DepositAmount,
                 WithdrawalAmount = x.WithdrawalAmount,
-                AdjustmentAmount = x.AdjustmentAmount,
+                CompanyAdjustAmount = x.CompanyAdjustAmount,
+                AgentAdjustAmount = x.AgentAdjustAmount,
                 BonusAmount = x.BonusAmount,
                 BetAmount = x.BetAmount,
                 ValidBetAmount = x.ValidBetAmount,
@@ -67,7 +69,8 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
             var total = new PlayerContributionReportTotalModel(
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
-                response.Items.Sum(x => x.AdjustmentAmount),
+                response.Items.Sum(x => x.CompanyAdjustAmount),
+                response.Items.Sum(x => x.AgentAdjustAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
                 response.Items.Sum(x => x.ValidBetAmount),

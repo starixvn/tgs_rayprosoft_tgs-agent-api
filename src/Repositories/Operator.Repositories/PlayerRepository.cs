@@ -67,7 +67,7 @@ namespace TGS.Operator.Repositories
                 player.Username,
                 player.RealName,
                 player.Email,
-                player.Vip.Level,
+                player.Vip?.Level ?? 0,
                 player.QQ,
                 player.Wechat,
                 player.WithdrawPassword.Length > 0);
@@ -121,7 +121,7 @@ namespace TGS.Operator.Repositories
                     playerData.Username,
                     playerData.RealName,
                     playerData.Email,
-                    playerData.Vip.Level,
+                    playerData.Vip?.Level ?? 0,
                     playerData.QQ,
                     playerData.Wechat,
                     playerData.WithdrawPassword.Length > 0);
@@ -150,7 +150,7 @@ namespace TGS.Operator.Repositories
                 playerData.Username,
                 playerData.RealName,
                 playerData.Email,
-                playerData.Vip.Level,
+                playerData.Vip?.Level ?? 0,
                 playerData.QQ,
                 playerData.Wechat,
                 playerData.WithdrawPassword.Length > 0);

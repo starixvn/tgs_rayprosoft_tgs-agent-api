@@ -60,7 +60,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.LastActiveOn)
                 .IsRequired();
 
-            builder.Property(c => c.VipId);
+            builder.Property(c => c.VipId)
+                .IsRequired(false);
 
             builder.Property(c => c.AreaCode)
                 .HasMaxLength(10);
@@ -76,6 +77,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Wechat)
                 .HasMaxLength(64);
+
+            builder.Property(p => p.Birthday);
+
+            builder.Property(p => p.Remark);
 
             builder.Property(c => c.AccumulatedDeposit)
                 .HasPrecision(18, 6)
@@ -94,8 +99,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(p => p.Agent)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.AgentId)
-                .HasConstraintName("fk_players_agents_agent_id")
-                .IsRequired(false);
+                .HasConstraintName("fk_players_agents_agent_id");
 
             builder.HasOne(p => p.Vip)
                 .WithMany(p => p.Players)
@@ -115,11 +119,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDatabaseName("ix_players_bet_limit_id");
 
             builder.HasIndex(p => new
-                {
-                    p.BrandId,
-                    p.AreaCode,
-                    p.Phone
-                })
+            {
+                p.BrandId,
+                p.AreaCode,
+                p.Phone
+            })
                 .IsUnique()
                 .HasDatabaseName("ux_players_brand_phone");
         }

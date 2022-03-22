@@ -67,7 +67,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 ThirdPartyOrderNo = row.ThirdPartyOrderNo,
                 PaymentMethod = resource.GetString(resultPaymentMethods[row.PaymentMethodId].Name),
                 PaymentName = row.ChannelName,
-                Amount = row.Amount,
+                Amount = row.ActualAmount ?? row.Amount,
                 ApplicationTime = row.CreatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
                 UpdateTime = row.UpdatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
                 Status = resource.GetString(row.Status.ToString()) ?? row.Status.ToString(),

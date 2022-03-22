@@ -20,7 +20,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
         private readonly IJiliMerchantMapper _merchantMapper;
         private readonly IPlayerOperations _playerOperations;
         private readonly IJiliService _service;
-        private readonly ISettingOperations _settingOperations;
 
         public JiliGameHistory(
             IRoundQueries roundQueries,
