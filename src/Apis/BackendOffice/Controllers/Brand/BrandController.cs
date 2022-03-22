@@ -74,20 +74,20 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
             => _mediator.Send(request);
 
-        [HttpGet("token/{brandId}")]
+        [HttpGet("token/{brandId}", Name = "GetBrandToken")]
         [Description("Get a brand's token")]
         public async Task<GetBrandTokenResponse> GetBrandTokenAsync(
             Guid brandId,
             [FromServices] IGetService<BrandTokenQuery, string> getService)
         {
             var query = new BrandTokenQuery(brandId);
-            var info = await getService
+            var token = await getService
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
             return new GetBrandTokenResponse()
             {
-                Token = info
+                Token = token
             };
         }
 
