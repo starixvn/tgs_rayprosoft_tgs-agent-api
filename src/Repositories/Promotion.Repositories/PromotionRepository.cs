@@ -52,7 +52,7 @@ namespace TGS.Promotion.Repositories
                 Unlimited = request.Unlimited,
                 GameType = request.GameType,
                 Percentage = request.Percentage,
-                TotalAmountLimit = request.TotalAmountLimit,
+                TotalAmountLimit = request.TotalAmountLimit ?? 0M,
                 TurnoverMultiple = request.TurnoverMultiple,
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
@@ -112,7 +112,7 @@ namespace TGS.Promotion.Repositories
             promotion.Unlimited = request.Unlimited;
             promotion.GameType = request.GameType;
             promotion.Percentage = request.Percentage;
-            promotion.TotalAmountLimit = request.TotalAmountLimit;
+            promotion.TotalAmountLimit = request.TotalAmountLimit ?? 0M;
             promotion.TurnoverMultiple = request.TurnoverMultiple;
 
             promotion.PromotionGameProviders =
