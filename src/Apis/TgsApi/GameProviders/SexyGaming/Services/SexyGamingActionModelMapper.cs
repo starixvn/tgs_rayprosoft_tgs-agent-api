@@ -65,9 +65,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
             foreach (var order in source)
             {
-                var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
+                var bet = await _redisCacheService.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
                 if (bet != null)
                 {
+                    var externalTransactionId = $"{order.PlatformTxId}_cancel_bet";
+                    var cancel_bet = await _redisCacheService.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, externalTransactionId).ConfigureAwait(false);
+                    if (cancel_bet != null)
+                    {
+                        continue;
+                    }
                     batchTransactionData.Add(new TransactionData()
                     {
                         Amount = 0,
@@ -75,14 +81,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalGameId = order.GameCode,
                         ExternalBetId = order.PlatformTxId,
                         ExternalRoundId = order.RoundId,
-                        ExternalTransactionId = $"{order.PlatformTxId}_cancel_bet",
+                        ExternalTransactionId = externalTransactionId,
                         ExternalTransactionReferenceId = order.PlatformTxId,
                         GameActionType = GameActionType.CancelTransaction,
                         TimeStamp = DateTimeOffset.UtcNow
                     });
                 }
             }
-
             return GetBetData(data, playCode, batchTransactionData.ToArray());
         }
 
