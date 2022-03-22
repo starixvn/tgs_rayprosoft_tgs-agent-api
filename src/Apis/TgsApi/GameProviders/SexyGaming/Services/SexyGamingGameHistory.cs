@@ -15,8 +15,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public sealed class SexyGamingGameHistory : BaseBetHistory
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ISexyGamingGameHistoryService _gameHistoryService;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public SexyGamingGameHistory(
             IRoundQueries roundQueries,

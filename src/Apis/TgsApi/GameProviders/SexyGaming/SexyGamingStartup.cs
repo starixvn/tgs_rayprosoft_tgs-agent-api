@@ -9,18 +9,19 @@ using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
 {
     public sealed class SexyGamingStartup : BaseStartup
     {
+        protected override string LogPrefix => "sexygaming";
+
         public SexyGamingStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
+                    base(configuration, env)
         {
         }
-
-        protected override string LogPrefix => "sexygaming";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -32,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
                 (provider, key) => key switch
                 {
                     GameProvider.SexyGaming => provider.GetRequiredService<SexyGamingErrorMapper>(),
-                    _                       => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 });
 
             services.AddScoped<AuthorizeSexyGamingMiddleware>();
@@ -41,6 +42,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
             services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
             services.AddScoped<ISexyGamingRedisCacheService, SexyGamingRedisCacheService>();
             services.AddScoped<ISexyGamingGameHistoryService, SexyGamingGameHistoryService>();
+
+            services.AddTransient<ISexyGamingRedisCacheService>(sp
+              => ActivatorUtilities.CreateInstance<SexyGamingRedisCacheService>(
+                  sp,
+                  sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {

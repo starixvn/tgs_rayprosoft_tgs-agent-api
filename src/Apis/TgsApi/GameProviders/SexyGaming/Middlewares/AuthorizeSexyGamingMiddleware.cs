@@ -21,10 +21,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IPlayerOperations _playerOperations;
         private readonly ISexyGamingServices _services;
+        private readonly ISettingOperations _settingOperations;
+
         public AuthorizeSexyGamingMiddleware(
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
@@ -107,7 +108,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
                         {
                             throw new MissingTokenException("empty token");
                         }
-
                     }
                 }
                 context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
@@ -116,7 +116,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             }
             await next(context);
         }
-
 
         private async Task<SexyGamingGetPlayerInfo> CheckingTokenAsync(Guid gameProviderId, string token)
         {

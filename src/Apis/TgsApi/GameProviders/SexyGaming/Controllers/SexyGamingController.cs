@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
+using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
@@ -15,10 +16,9 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Common;
+using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Shared.Game.Models.SexyGaming.Incoming;
 using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
-using TGS.Shared.Game.Models.SexyGaming.Enums;
-using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
 {
@@ -30,12 +30,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
     [FeatureGate(Consts.GameProvider.SexyGaming)]
     public sealed class SexyGamingController : ControllerBase
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IGamePlayActions _actions;
-        private readonly ISettingOperations _settingOperations;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingActionModelMapper _map;
         private readonly IReadOnlyDictionary<string, Func<JsonDocument, Task<JsonDocument>>> _methodMapper;
         private readonly ISexyGamingServices _services;
+        private readonly ISettingOperations _settingOperations;
+
         public SexyGamingController(
             IGamePlayActions actions,
             IJsonSerializationProvider jsonSerializationProvider,
@@ -44,7 +45,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             ISexyGamingServices services
         )
         {
-
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
@@ -62,38 +62,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 {"voidSettle", VoidSettleAsync},
                 {"ping", PingAsync},
             };
-
-        }
-
-        [HttpPost("entrance")]
-        public async Task<JsonDocument> EntranceAsync(
-           [FromForm] SexyGamingSingleWalletRequest baseRequest)
-        {
-            var jsonMessage = JsonDocument.Parse(baseRequest.Message);
-            var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletBaseRequest>(
-                _jsonSerializationProvider.SerializeToString(jsonMessage));
-            if (!_methodMapper.TryGetValue(data.Action, out var execute))
-            {
-                throw new InvalidOperationException();
-            }
-
-            return await execute(jsonMessage).ConfigureAwait(false);
-        }
-
-        [HttpPost("balance")]
-        public async Task<JsonDocument> GetBalanceAsync(JsonDocument request)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
-
-            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
-            {
-                Status = ((int)GameApiError.Success).ToString("d4"),
-                Desc = GameApiError.Success.Description(),
-                Balance = getBalance.Balance.Truncate(3),
-                BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
-            }));
         }
 
         [HttpPost("bet")]
@@ -136,8 +104,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                     BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
                 }));
             }
-
-
         }
 
         [HttpPost("cancelBet")]
@@ -178,38 +144,65 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             }));
         }
 
-        [HttpPost("voidBet")]
-        public async Task<JsonDocument> VoidBetAsync(JsonDocument request)
+        [HttpPost("entrance")]
+        public async Task<JsonDocument> EntranceAsync(
+           [FromForm] SexyGamingSingleWalletRequest baseRequest)
         {
-            var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletTxnsRequest<SexyGamingVoidBett>>(
-                _jsonSerializationProvider.SerializeToString(request));
+            var jsonMessage = JsonDocument.Parse(baseRequest.Message);
+            var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletBaseRequest>(
+                _jsonSerializationProvider.SerializeToString(jsonMessage));
+            if (!_methodMapper.TryGetValue(data.Action, out var execute))
+            {
+                throw new InvalidOperationException();
+            }
 
+            return await execute(jsonMessage).ConfigureAwait(false);
+        }
+
+        [HttpPost("balance")]
+        public async Task<JsonDocument> GetBalanceAsync(JsonDocument request)
+        {
             var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
 
-            var gameProviderConfigurationData = await _services
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
-
-            var betData = await _map.VoidBetAsync(gameProviderConfigurationData, data.Transaction).ConfigureAwait(false);
-            await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
-
-            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
+            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
+                Balance = getBalance.Balance.Truncate(3),
+                BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
+        }
+
+        [HttpPost("give")]
+        public Task<JsonDocument> GiveAsync(JsonDocument request)
+            => Task.FromResult(
+                JsonDocument.Parse(
+                    _jsonSerializationProvider.SerializeToString(
+                        new SexyGamingGetBalanceResponse()
+                        {
+                            Status = ((int)GameApiError.Fail).ToString("d4"),
+                            Desc = GameApiError.Fail.Description(),
+                            Balance = default(decimal),
+                            BalanceTs = string.Empty
+                        })));
+
+        [HttpPost("ping")]
+        public Task<JsonDocument> PingAsync(JsonDocument request)
+        {
+            return Task.FromResult(JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
+            {
+                Status = ((int)GameApiError.Success).ToString("d4"),
+                Desc = GameApiError.Success.Description(),
+            })));
         }
 
         [HttpPost("settle")]
         public async Task<JsonDocument> SettleAsync(JsonDocument request)
         {
-
             var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletTxnsRequest<SexyGamingSettle>>(
                 _jsonSerializationProvider.SerializeToString(request));
-
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(
@@ -259,6 +252,31 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             }));
         }
 
+        [HttpPost("voidBet")]
+        public async Task<JsonDocument> VoidBetAsync(JsonDocument request)
+        {
+            var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletTxnsRequest<SexyGamingVoidBett>>(
+                _jsonSerializationProvider.SerializeToString(request));
+
+            var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+            var gameProviderConfigurationData = await _services
+                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
+                .ConfigureAwait(false);
+
+            var betData = await _map.VoidBetAsync(gameProviderConfigurationData, data.Transaction).ConfigureAwait(false);
+            await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
+
+            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
+            {
+                Status = ((int)GameApiError.Success).ToString("d4"),
+                Desc = GameApiError.Success.Description(),
+            }));
+        }
+
         [HttpPost("voidSettle")]
         public async Task<JsonDocument> VoidSettleAsync(JsonDocument request)
         {
@@ -284,29 +302,5 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 Desc = GameApiError.Success.Description(),
             }));
         }
-
-        [HttpPost("give")]
-        public Task<JsonDocument> GiveAsync(JsonDocument request)
-            => Task.FromResult(
-                JsonDocument.Parse(
-                    _jsonSerializationProvider.SerializeToString(
-                        new SexyGamingGetBalanceResponse()
-                        {
-                            Status = ((int)GameApiError.Fail).ToString("d4"),
-                            Desc = GameApiError.Fail.Description(),
-                            Balance = default(decimal),
-                            BalanceTs = string.Empty
-                        })));
-
-        [HttpPost("ping")]
-        public Task<JsonDocument> PingAsync(JsonDocument request)
-        {
-            return Task.FromResult(JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
-            {
-                Status = ((int)GameApiError.Success).ToString("d4"),
-                Desc = GameApiError.Success.Description(),
-            })));
-        }
     }
 }
-
