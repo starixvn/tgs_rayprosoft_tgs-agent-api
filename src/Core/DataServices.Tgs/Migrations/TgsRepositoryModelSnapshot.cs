@@ -5538,6 +5538,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("desktop_banner");
 
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
+
                     b.Property<DateTimeOffset>("From")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
