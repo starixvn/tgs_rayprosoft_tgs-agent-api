@@ -10,6 +10,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
     {
         string GetGameHistory(string externalGameId, SexyGamingGameRecord source);
     }
+
     public sealed class SexyGamingGameHistoryService : ISexyGamingGameHistoryService
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
@@ -37,6 +38,49 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
               _ => GetBaccaratGameHistory(source)     //百家樂相關
           };
 
+        private string GetBaccaratGameHistory(SexyGamingGameRecord source) =>
+            _jsonSerializationProvider.SerializeToString(
+                new Dictionary<string, string>
+                {
+                    {
+                        "player", string.Join(',', _pokerMapper.Where(x => x.Key == source.Result[0]).First().Value,
+                            _pokerMapper.Where(x => x.Key ==  source.Result[1]).First().Value,
+                            _pokerMapper.Where(x => x.Key ==  source.Result[2]).First().Value)
+                    },
+                    {
+                        "banker", string.Join(',', _pokerMapper.Where(x => x.Key ==  source.Result[3]).First().Value,
+                            _pokerMapper.Where(x => x.Key ==  source.Result[4]).First().Value,
+                            _pokerMapper.Where(x => x.Key ==  source.Result[5]).First().Value)
+                    },
+                    {"outcome",source.Winner}
+                });
+
+        private string GetCard(string cardIndex) => cardIndex switch
+        {
+            "H" => "♥",
+            "C" => "♣",
+            "D" => "♦",
+            _ => "♠"
+        };
+
+        private string GetDragontigerGameHistory(SexyGamingGameRecord source) =>
+            _jsonSerializationProvider.SerializeToString(
+                new Dictionary<string, string>
+                {
+                    {"dragon", _pokerMapper.Where(x => x.Key == source.Result[0]).First().Value},
+                    {"tiger", _pokerMapper.Where(x => x.Key == source.Result[3]).First().Value},
+                    {"outcome",source.Winner}
+                });
+
+        private string GetNumber(int value) => value switch
+        {
+            1 => "A",
+            11 => "J",
+            12 => "Q",
+            13 => "K",
+            _ => value.ToString()
+        };
+
         private string GetRedBlueDuelGameHistory(SexyGamingGameRecord source)
         {
             var split = source.Result[0].Split(',');
@@ -62,32 +106,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 });
         }
 
-        private string GetDragontigerGameHistory(SexyGamingGameRecord source) =>
-            _jsonSerializationProvider.SerializeToString(
-                new Dictionary<string, string>
-                {
-                    {"dragon", _pokerMapper.Where(x => x.Key == source.Result[0]).First().Value},
-                    {"tiger", _pokerMapper.Where(x => x.Key == source.Result[3]).First().Value},
-                    {"outcome",source.Winner}
-                });
-
-        private string GetBaccaratGameHistory(SexyGamingGameRecord source) =>
-            _jsonSerializationProvider.SerializeToString(
-                new Dictionary<string, string>
-                {
-                    {
-                        "player", string.Join(',', _pokerMapper.Where(x => x.Key == source.Result[0]).First().Value,
-                            _pokerMapper.Where(x => x.Key ==  source.Result[1]).First().Value,
-                            _pokerMapper.Where(x => x.Key ==  source.Result[2]).First().Value)
-                    },
-                    {
-                        "banker", string.Join(',', _pokerMapper.Where(x => x.Key ==  source.Result[3]).First().Value,
-                            _pokerMapper.Where(x => x.Key ==  source.Result[4]).First().Value,
-                            _pokerMapper.Where(x => x.Key ==  source.Result[5]).First().Value)
-                    },
-                    {"outcome",source.Winner}
-                });
-
         private void InitoPoker()
         {
             _pokerMapper = new Dictionary<string, string>();
@@ -107,22 +125,5 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 }
             }
         }
-
-        private string GetCard(string cardIndex) => cardIndex switch
-        {
-            "H" => "♥",
-            "C" => "♣",
-            "D" => "♦",
-            _ => "♠"
-        };
-
-        private string GetNumber(int value) => value switch
-        {
-            1 => "A",
-            11 => "J",
-            12 => "Q",
-            13 => "K",
-            _ => value.ToString()
-        };
     }
 }
