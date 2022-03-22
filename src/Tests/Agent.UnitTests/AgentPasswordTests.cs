@@ -105,7 +105,8 @@ namespace Agent.UnitTests
                         AgentStatus.Enabled,
                         AgentType.Cash,
                         AgentLevelType.Agent,
-                        0M)
+                        0M,
+                        0)
                 }.ToAsyncEnumerable());
 
             fakeValidateCodeGenerator.GenerateCode()
@@ -170,7 +171,8 @@ namespace Agent.UnitTests
                         AgentStatus.Enabled,
                         AgentType.Cash,
                         AgentLevelType.Agent,
-                        0M)
+                        0M,
+                        0)
                 }.ToAsyncEnumerable());
 
             fakeValidateCodeGenerator.GenerateCode()

@@ -57,7 +57,8 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M));
+                    0M,
+                    0));
 
             await sut.ExecuteAsync(command);
 

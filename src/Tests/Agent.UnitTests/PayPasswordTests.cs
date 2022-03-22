@@ -53,7 +53,8 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                0M);
+                0M,
+                0);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -97,7 +98,7 @@ namespace Agent.UnitTests
                 "oldPassword",
                 "newPassword");
 
-            fakeCheckPayPasswordService
+            _ = fakeCheckPayPasswordService
                 .ExecuteAsync(
                     Arg.Any<CheckWithdrawPayPasswordCommand>(),
                     Arg.Any<CancellationToken>())
@@ -151,7 +152,8 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                0M);
+                0M,
+                0);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -212,7 +214,8 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M));
+                    0M,
+                    0));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -252,7 +255,8 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M));
+                    0M,
+                    0));
 
             await sut.ExecuteAsync(command);
 
@@ -296,7 +300,8 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                0M);
+                0M,
+                0);
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -351,7 +356,8 @@ namespace Agent.UnitTests
                 AgentStatus.Enabled,
                 AgentType.Cash,
                 AgentLevelType.Agent,
-                0M);
+                0M,
+                0);
 
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
