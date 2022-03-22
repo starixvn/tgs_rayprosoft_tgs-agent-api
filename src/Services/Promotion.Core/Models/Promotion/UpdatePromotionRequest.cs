@@ -30,18 +30,24 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public DateTimeOffset To { get; set; }
 
-        public decimal TotalAmountLimit { get; set; }
+        public decimal? TotalAmountLimit { get; set; }
 
         public decimal TurnoverMultiple { get; set; }
 
         public bool Unlimited { get; set; }
 
         public int[] VipLevels { get; set; } = default!;
+
         public JsonDocument? Localization { get; set; }
+
         public string? SubSubject { get; set; }
+
         public string? Content { get; set; }
+
         public string? Terms { get; set; }
+
         public string? DesktopBanner { get; set; }
+
         public string? MobileBanner { get; set; }
     }
 }

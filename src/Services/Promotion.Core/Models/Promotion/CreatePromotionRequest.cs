@@ -42,7 +42,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public DateTimeOffset To { get; set; }
 
-        public decimal TotalAmountLimit { get; set; }
+        public decimal? TotalAmountLimit { get; set; }
 
         public decimal TurnoverMultiple { get; set; }
 
