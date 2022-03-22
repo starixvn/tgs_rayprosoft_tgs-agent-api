@@ -73,6 +73,12 @@ namespace Microsoft.Extensions.DependencyInjection
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BaseUrl = config.GetValue<Uri>("BackOffice:CashBaseUrl");
+                })
+                .AddBrandCertificateClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
                 });
 
             services.AddWallet()
