@@ -382,6 +382,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] TuPaySerializer serializer,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromBody] SubmitDepositRequest request)
@@ -402,7 +403,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Amount,
                 "tgs.payment.tupay.deposit",
                 request.PromotionId,
-                formId => JsonSerializer.Serialize(
+                formId => serializer.Serialize(
                     new TuPayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
@@ -424,7 +425,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
 
-            var applyInfo = JsonSerializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
+            var applyInfo = serializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
 
             var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                 createdFormId,
