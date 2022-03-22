@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
+using Tgs.Logging;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Logging;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -124,33 +124,39 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async ValueTask<TransactionResponse> AdjustAsync(PlayerAdjustmentTransactionType type, Guid walletId,
-            decimal amount, string remark, Guid userId) => type switch
-        {
-            PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
-                .AdjustAgentAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false),
-            PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
-                .AdjustSystemAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false),
-            PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
-                .AdjustCompanyAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false)
-        };
+        private async ValueTask<TransactionResponse> AdjustAsync(
+            PlayerAdjustmentTransactionType type,
+            Guid walletId,
+            decimal amount,
+            string remark,
+            Guid userId)
+            => type switch
+            {
+                PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
+                    .AdjustAgentAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
+                    .AdjustSystemAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
+                    .AdjustCompanyAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                _ => throw new NotSupportedException()
+            };
     }
 }
