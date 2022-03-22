@@ -10,6 +10,7 @@ using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
+using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
 using Tgs.ServiceUtility;
@@ -375,6 +376,71 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        [HttpPost("tupay", Name = "SubmitTuPayDepositRequest")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromBody] SubmitDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.tupay.deposit",
+                request.PromotionId,
+                formId => JsonSerializer.Serialize(
+                    new TuPayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
+                        formId)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = JsonSerializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
+
+            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                createdFormId,
+                applyInfo.Response.TradeNo);
+
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ConfigureAwait(false);
+
+            return new DepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+            };
+        }
+
         [HttpPost("umpay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -464,7 +530,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
-        [HttpPost("zeronineninepay")]
+        [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
@@ -472,8 +538,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromBody] SubmitDepositRequest request
-            )
+            [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
