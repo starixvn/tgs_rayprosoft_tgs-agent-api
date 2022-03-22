@@ -27,6 +27,7 @@ using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
+using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -233,7 +234,8 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<UmPaySerializer>()
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
-                .AddSingleton<SkyPaySerializer>();
+                .AddSingleton<SkyPaySerializer>()
+                .AddSingleton<TuPaySerializer>();
 
             services
                 .AddMessageQueue()
