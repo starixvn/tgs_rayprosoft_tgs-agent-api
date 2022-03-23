@@ -40,6 +40,18 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
 
             var response = await _reportClient.GetVipReportAsync(reportRequest);
 
+            if (!response.Valid)
+            {
+                return new GetVipReportReportResponse
+                {
+                    Valid = response.Valid,
+                    Message = response.Message,
+                    TotalCount = response.TotalCount,
+                    Items = Array.Empty<VipReportModel>(),
+                    Total = new VipReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                };
+            }
+
             var pageArray = response.Items?.Select(x => new VipReportModel
             {
                 BrandId = x.BrandId,

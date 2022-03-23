@@ -1,6 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportAgent
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.ReportAgent
 {
-    public record GetAgentContributionsReportResponse
+    public class GetAgentContributionsReportResponse : MessageResponse
     {
         public int TotalCount { get; init; }
 
