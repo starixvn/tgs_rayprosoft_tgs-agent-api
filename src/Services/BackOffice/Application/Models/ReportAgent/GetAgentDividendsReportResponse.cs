@@ -1,6 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportAgent
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.ReportAgent
 {
-    public class GetAgentDividendsReportResponse
+    public class GetAgentDividendsReportResponse : MessageResponse
     {
         public int TotalCount { get; init; }
 

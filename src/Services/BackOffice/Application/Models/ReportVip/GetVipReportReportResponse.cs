@@ -1,6 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportVip
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.ReportVip
 {
-    public class GetVipReportReportResponse
+    public class GetVipReportReportResponse : MessageResponse
     {
         public int TotalCount { get; init; }
 

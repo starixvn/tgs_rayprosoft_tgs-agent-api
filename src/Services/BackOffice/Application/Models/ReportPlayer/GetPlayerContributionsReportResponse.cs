@@ -1,6 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
 {
-    public class GetPlayerContributionsReportResponse
+    public class GetPlayerContributionsReportResponse : MessageResponse
     {
         public int TotalCount { get; init; }
 

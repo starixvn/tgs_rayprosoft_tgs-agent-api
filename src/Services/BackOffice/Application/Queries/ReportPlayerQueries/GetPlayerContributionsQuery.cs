@@ -41,6 +41,18 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
 
             var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
 
+            if (!response.Valid)
+            {
+                return new GetPlayerContributionsReportResponse
+                {
+                    Valid = response.Valid,
+                    Message = response.Message,
+                    TotalCount = response.TotalCount,
+                    Items = Array.Empty<PlayerContributionReportModel>(),
+                    Total = new PlayerContributionReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                };
+            }
+
             var pageArray = response.Items?.Select(x => new PlayerContributionReportModel
             {
                 Username = x.Username,
