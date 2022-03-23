@@ -38,6 +38,18 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
 
             var response = await _reportClient.GetMarketsAsync(reportRequest);
 
+            if (!response.Valid)
+            {
+                return new GetMarketsReportResponse
+                {
+                    Valid = response.Valid,
+                    Message = response.Message,
+                    TotalCount = response.TotalCount,
+                    Items = Array.Empty<MarketReportModel>(),
+                    Total = new MarketReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                };
+            }
+
             var pageArray = response.Items?.Select(x => new MarketReportModel
             {
                 ReportDate = x.ReportDate,

@@ -39,6 +39,18 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
 
             var response = await _reportClient.GetAgentDividendsAsync(reportRequest);
 
+            if (!response.Valid)
+            {
+                return new GetAgentDividendsReportResponse
+                {
+                    Valid = response.Valid,
+                    Message = response.Message,
+                    TotalCount = response.TotalCount,
+                    Items = Array.Empty<AgentDividendReportModel>(),
+                    Total = new AgentDividendReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                };
+            }
+
             var pageArray = response.Items?.Select(x => new AgentDividendReportModel
             {
                 Id = x.Id,

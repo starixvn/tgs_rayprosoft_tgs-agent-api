@@ -42,6 +42,18 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
 
             var response = await _reportClient.GetAgentContributionsAsync(reportRequest);
 
+            if (!response.Valid)
+            {
+                return new GetAgentContributionsReportResponse
+                {
+                    Valid = response.Valid,
+                    Message = response.Message,
+                    TotalCount = response.TotalCount,
+                    Items = Array.Empty<AgentContributionReportModel>(),
+                    Total = new AgentContributionTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                };
+            }
+
             var pageArray = response.Items?.Select(x => new AgentContributionReportModel
             {
                 Username = x.Username,
