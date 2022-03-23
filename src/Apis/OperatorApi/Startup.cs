@@ -91,7 +91,6 @@ namespace TGS.Apis.OperatorApi
 
             app.UseTgsErrorHandler();
             app.UseBrandCertificate();
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
             app.UseRouting();
 

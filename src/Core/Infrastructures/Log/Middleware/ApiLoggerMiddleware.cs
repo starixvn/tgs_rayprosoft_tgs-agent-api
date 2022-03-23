@@ -17,7 +17,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 {
     public sealed class ApiLoggerMiddleware
     {
-        private const int _ResMessageSizeLimit = 1000012;
+        private const int _ResMessageSizeLimit = 8000;
 
         private static readonly string[] _BypassRouting =
         {
@@ -47,47 +47,6 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 
             _recyclableMemoryStreamManager = new();
         }
-
-        private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context)
-        {
-            var originalBodyStream = context.Response.Body;
-            await using var responseStream = _recyclableMemoryStreamManager.GetStream();
-            context.Response.Body = responseStream;
-
-            try
-            {
-                var sw = Stopwatch.StartNew();
-                await _next(context);
-                sw.Stop();
-                var ms = (int)sw.ElapsedMilliseconds;
-                context.Response.Body.Seek(0, SeekOrigin.Begin);
-                using var sr = new StreamReader(context.Response.Body);
-                var message = await sr.ReadToEndAsync();
-                context.Response.Body.Seek(0, SeekOrigin.Begin);
-                await context.Response.Body.CopyToAsync(originalBodyStream);
-                return (message, ms);
-            }
-            finally
-            {
-                context.Response.Body = originalBodyStream;
-            }
-        }
-
-        private async Task<string> GetRequestBodyAsync(HttpContext context)
-        {
-            context.Request.EnableBuffering();
-
-            await using var requestStream = _recyclableMemoryStreamManager.GetStream();
-            await context.Request.Body.CopyToAsync(requestStream);
-            requestStream.Seek(0, SeekOrigin.Begin);
-            using var sr = new StreamReader(requestStream);
-            var message = await sr.ReadToEndAsync();
-            context.Request.Body.Seek(0, SeekOrigin.Begin);
-            return message;
-        }
-
-        private static string CutOffResponseContent(string responseContent) =>
-            $"{responseContent.NoLongerThan(_ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
 
         public async Task InvokeAsync(HttpContext context, IRequestAnalyzer requestAnalyzer, ITgsLog log)
         {
@@ -157,6 +116,9 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                 $@"Send api log event completely with path: {url}.{Environment.NewLine}Request Body: {reqMessage}{Environment.NewLine}Response Body: {resMessage}");
         }
 
+        private static string CutOffResponseContent(string responseContent) =>
+            $"{responseContent.NoLongerThan(_ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
+
         private string GetPrefix(string path)
         {
             if (_prefix.IsNotNullOrEmpty())
@@ -166,6 +128,44 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 
             var arr = path.Split('/');
             return arr.Length < 3 ? arr[^1] : arr[2];
+        }
+
+        private async Task<string> GetRequestBodyAsync(HttpContext context)
+        {
+            context.Request.EnableBuffering();
+
+            await using var requestStream = _recyclableMemoryStreamManager.GetStream();
+            await context.Request.Body.CopyToAsync(requestStream);
+            requestStream.Seek(0, SeekOrigin.Begin);
+            using var sr = new StreamReader(requestStream);
+            var message = await sr.ReadToEndAsync();
+            context.Request.Body.Seek(0, SeekOrigin.Begin);
+            return message;
+        }
+
+        private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context)
+        {
+            var originalBodyStream = context.Response.Body;
+            await using var responseStream = _recyclableMemoryStreamManager.GetStream();
+            context.Response.Body = responseStream;
+
+            try
+            {
+                var sw = Stopwatch.StartNew();
+                await _next(context);
+                sw.Stop();
+                var ms = (int)sw.ElapsedMilliseconds;
+                context.Response.Body.Seek(0, SeekOrigin.Begin);
+                using var sr = new StreamReader(context.Response.Body);
+                var message = await sr.ReadToEndAsync();
+                context.Response.Body.Seek(0, SeekOrigin.Begin);
+                await context.Response.Body.CopyToAsync(originalBodyStream);
+                return (message, ms);
+            }
+            finally
+            {
+                context.Response.Body = originalBodyStream;
+            }
         }
     }
 }
