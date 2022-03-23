@@ -61,5 +61,7 @@ namespace TGS.Services.Promotion.Models.Promotion
         public DateTimeOffset UpdatedOn { get; set; }
 
         public int[] VipLevels { get; set; } = default!;
+
+        public int Number { get; set; }
     }
 }

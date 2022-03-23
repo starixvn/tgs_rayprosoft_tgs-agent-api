@@ -7,6 +7,7 @@ namespace TGS.Clients.Promotion.Client
 {
     public interface IPromotionClient
     {
+        Task ChangeOrderAsync(ChangeOrderRequest request);
         Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request);
 
         Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode, Guid promotionId, decimal amount);
