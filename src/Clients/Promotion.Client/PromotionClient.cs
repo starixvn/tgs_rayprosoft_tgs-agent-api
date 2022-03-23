@@ -26,6 +26,17 @@ namespace TGS.Clients.Promotion.Client
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
+        public async Task ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var prefix = $"Promotion.ChangeOrder";
+
+            await ExecuteJsonRequestAsync<ChangeOrderRequest, Task>(HttpMethod.Put,
+                $"/api/promotion/changeorder",
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
         public async Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
         {
             var prefix = $"Promotion.PromotionId.{request.PromotionId}.ChangeStatus";
@@ -63,12 +74,91 @@ namespace TGS.Clients.Promotion.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
+        public async Task<MessageResponse> DepositJoinAsync(Guid promotionId, string playerCode)
+        {
+            var prefix = $"Promotion.PromotionId.{promotionId}.DepositJoinPromotion";
+
+            return await ExecuteJsonRequestAsync<object, MessageResponse>(HttpMethod.Post,
+                $"/api/promotion/{promotionId}/depositAddPlayer/{playerCode}",
+                new
+                {
+                    promotionId,
+                    playerCode
+                },
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+            GetJoinedPromotionsRequest request)
+        {
+            var prefix = $"Promotion.PlayerCode.{request.PlayerCode}.GetJoinedPromotions";
+            var path = ClientPath.AppendWithProperties("/api/promotion/joined?", request);
+
+            return await ExecuteJsonRequestAsync<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>>(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(
+            int[] promotionPlayerIds)
+        {
+            if (promotionPlayerIds?.Length > 0)
+            {
+                var prefix = "Promotion.GetPromotionBonusOfDeposit";
+
+                var request = new { promotionPlayerIds };
+
+                var path = ClientPath.AppendWithProperties("/api/promotionBonus/bonusAmount?", request);
+
+                return await ExecuteJsonRequestAsync<object, PromotionBonusOfDepositModel[]>(HttpMethod.Get,
+                    path,
+                    request,
+                    logPrefix: prefix,
+                    options: new() { PropertyNameCaseInsensitive = true });
+            }
+
+            return Array.Empty<PromotionBonusOfDepositModel>();
+        }
+
+        public async Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request)
+        {
+            if (request.PromotionIds is null || request.PromotionIds.Length == 0)
+                return Array.Empty<PromotionNameModel>();
+
+            var prefix = "Promotion.GetPromotionNames";
+
+            var path = ClientPath.AppendWithProperties("/api/promotion/names?", request);
+
+            return await ExecuteJsonRequestAsync<GetPromotionNamesRequest, PromotionNameModel[]>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
         public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request)
         {
             var prefix = $"Promotion.BrandId.{request.BrandId}.GetPromotions";
             var path = ClientPath.AppendWithProperties("/api/promotion?", request);
 
             return await ExecuteJsonRequestAsync<GetPromotionsRequest, PagedResponse<PromotionModel>>(HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request)
+        {
+            var prefix = $"Promotion.BrandId.{request.BrandId}.GetValidPromotions";
+            var path = ClientPath.AppendWithProperties("/api/promotion/valid?", request);
+
+            return await ExecuteJsonRequestAsync<GetValidPromotionsRequest, PagedResponse<PromotionModel>>(
+                HttpMethod.Get,
                 path,
                 request,
                 logPrefix: prefix,
@@ -82,21 +172,6 @@ namespace TGS.Clients.Promotion.Client
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, MessageResponse>(HttpMethod.Post,
                 $"/api/promotion/{request.PromotionId}/addPlayer/{request.PlayerCode}",
                 request,
-                logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
-        }
-
-        public async Task<MessageResponse> DepositJoinAsync(Guid promotionId, string playerCode)
-        {
-            var prefix = $"Promotion.PromotionId.{promotionId}.DepositJoinPromotion";
-
-            return await ExecuteJsonRequestAsync<object, MessageResponse>(HttpMethod.Post,
-                $"/api/promotion/{promotionId}/depositAddPlayer/{playerCode}",
-                new
-                {
-                    promotionId,
-                    playerCode
-                },
                 logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
         }
@@ -158,70 +233,6 @@ namespace TGS.Clients.Promotion.Client
                 request,
                 logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
-        }
-
-        public async Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request)
-        {
-            var prefix = $"Promotion.BrandId.{request.BrandId}.GetValidPromotions";
-            var path = ClientPath.AppendWithProperties("/api/promotion/valid?", request);
-
-            return await ExecuteJsonRequestAsync<GetValidPromotionsRequest, PagedResponse<PromotionModel>>(
-                HttpMethod.Get,
-                path,
-                request,
-                logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
-        }
-
-        public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
-            GetJoinedPromotionsRequest request)
-        {
-            var prefix = $"Promotion.PlayerCode.{request.PlayerCode}.GetJoinedPromotions";
-            var path = ClientPath.AppendWithProperties("/api/promotion/joined?", request);
-
-            return await ExecuteJsonRequestAsync<GetJoinedPromotionsRequest, PagedResponse<JoinedPromotionModel>>(
-                HttpMethod.Get,
-                path,
-                request,
-                logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
-        }
-
-        public async Task<PromotionNameModel[]> GetPromotionNamesAsync(GetPromotionNamesRequest request)
-        {
-            if (request.PromotionIds is null || request.PromotionIds.Length == 0)
-                return Array.Empty<PromotionNameModel>();
-
-            var prefix = "Promotion.GetPromotionNames";
-
-            var path = ClientPath.AppendWithProperties("/api/promotion/names?", request);
-
-            return await ExecuteJsonRequestAsync<GetPromotionNamesRequest, PromotionNameModel[]>(HttpMethod.Get,
-                path,
-                request,
-                logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
-        }
-
-        public async Task<PromotionBonusOfDepositModel[]> GetPromotionBonusOfDepositAsync(
-            int[] promotionPlayerIds)
-        {
-            if (promotionPlayerIds?.Length > 0)
-            {
-                var prefix = "Promotion.GetPromotionBonusOfDeposit";
-
-                var request = new { promotionPlayerIds };
-
-                var path = ClientPath.AppendWithProperties("/api/promotionBonus/bonusAmount?", request);
-
-                return await ExecuteJsonRequestAsync<object, PromotionBonusOfDepositModel[]>(HttpMethod.Get,
-                    path,
-                    request,
-                    logPrefix: prefix,
-                    options: new() { PropertyNameCaseInsensitive = true });
-            }
-
-            return Array.Empty<PromotionBonusOfDepositModel>();
         }
     }
 }
