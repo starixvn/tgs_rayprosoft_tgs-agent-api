@@ -20,7 +20,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpPut("ChangeOrder",Name = "ChangeOrder")]
+        [HttpPut("ChangeOrders",Name = "ChangeOrder")]
         [Description("Change Promotion Display Order")]
         public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
