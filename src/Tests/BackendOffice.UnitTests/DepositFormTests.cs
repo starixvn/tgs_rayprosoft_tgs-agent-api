@@ -3,7 +3,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
@@ -14,11 +13,13 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
+using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
+using Tgs.ServiceUtility;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -58,6 +59,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
             var fakeBrandService = Substitute.For<IBrandService>();
+            var fakePlayerGPBalanceService = Substitute
+                .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -71,9 +74,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fakePlayerBucketRepository,
                 fakePromotionClient,
                 fakeRedisDatabaseFactory,
-                NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator,
-                fakeBrandService);
+                fakeBrandService,
+                fakePlayerGPBalanceService);
 
             fakeRedisDatabase.StringSetAsync(
                     Arg.Any<RedisKey>(),
@@ -118,6 +120,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
             var fakeBrandService = Substitute.For<IBrandService>();
+            var fakePlayerGPBalanceService = Substitute
+                .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -131,9 +135,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fakePlayerBucketRepository,
                 fakePromotionClient,
                 fakeRedisDatabaseFactory,
-                NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator,
-                fakeBrandService);
+                fakeBrandService,
+                fakePlayerGPBalanceService);
 
             fakeRedisDatabase.StringSetAsync(
                     Arg.Any<RedisKey>(),
@@ -179,6 +182,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var fakeRedisDatabaseFactory = Substitute.For<IRedisConnectionFactory>();
             var fakeMediator = Substitute.For<IMediator>();
             var moqBrandService = new Mock<IBrandService>();
+            var fakePlayerGPBalanceService = Substitute
+                .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
 
             fakeRedisDatabaseFactory.GetConnection()
                 .Returns(fakeRedisConnection);
@@ -192,9 +197,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 moqPlayerBucketRepository.Object,
                 moqPromotionClient.Object,
                 fakeRedisDatabaseFactory,
-                NullLogger<ReviewDepositFormCommandService>.Instance,
-                fakeMediator,
-                moqBrandService.Object);
+                moqBrandService.Object,
+                fakePlayerGPBalanceService);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();

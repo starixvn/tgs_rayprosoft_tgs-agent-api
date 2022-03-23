@@ -11,7 +11,7 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
 {
-    public class GetPlayerGameProviderBalanceHandler : IGetService<GetPlayerGameProviderBalanceRequest,
+    internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlayerGameProviderBalanceCommand,
         GetPlayerGameProviderBalanceResponse[]>
     {
         private readonly IBrandGameProviderService _brandGameProviderService;
@@ -19,7 +19,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
         private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
         private readonly IPlayerService _playerService;
 
-        public GetPlayerGameProviderBalanceHandler(
+        public GetPlayerGameProviderBalanceCommandService(
             IPlayerService playerService,
             ICashServiceClient cashServiceClient,
             IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient,
@@ -34,7 +34,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
         }
 
         public async ValueTask<GetPlayerGameProviderBalanceResponse[]> GetAsync(
-            GetPlayerGameProviderBalanceRequest request,
+            GetPlayerGameProviderBalanceCommand request,
             CancellationToken cancellationToken)
         {
             var gameProviderBalance = new List<GetPlayerGameProviderBalanceResponse>();
@@ -43,9 +43,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 .GetBrandGameProviderQueries(q => q.Where(x =>
                     x.BrandId == player.BrandId &&
                     x.GameProvider.TransferWallet &&
-                    x.GameProvider.Currencies
-                        .Where(Currency => Currency.CurrencyCode.Contains(player.DefaultWalletCurrencyCode)).Count() >
-                    0))
+                    x.GameProvider.Currencies.Any(currency
+                        => currency.CurrencyCode.Contains(player.DefaultWalletCurrencyCode))))
                 .Select(x => new
                 {
                     GameProviderCode = x.GameProvider.Code,
