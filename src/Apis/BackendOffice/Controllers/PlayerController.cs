@@ -128,8 +128,10 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{playerCode}/transferwallet")]
         [Description("Get Player Transfer Wallet")]
-        public Task<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode)
-            => _mediator.Send(new GetPlayerGameProviderBalanceRequest(playerCode));
+        public ValueTask<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode,
+            [FromServices]
+            IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
+            => service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
 
         [HttpGet("{playerCode}/mainwallet")]
         [Description("Get Player Main wallet")]
