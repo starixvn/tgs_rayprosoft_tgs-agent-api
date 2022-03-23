@@ -3,45 +3,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
 using Tgs.GameProviders.Pluggable.Client;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
 {
-    public class GetPlayerGameProviderBalanceHandler : Handler<GetPlayerGameProviderBalanceRequest, GetPlayerGameProviderBalanceResponse[]>
+    internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlayerGameProviderBalanceCommand,
+        GetPlayerGameProviderBalanceResponse[]>
     {
         private readonly IBrandGameProviderService _brandGameProviderService;
         private readonly ICashServiceClient _cashServiceClient;
         private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
         private readonly IPlayerService _playerService;
 
-        public GetPlayerGameProviderBalanceHandler(
-               IPlayerService playerService,
-               ICashServiceClient cashServiceClient,
-               IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient,
-               IBrandGameProviderService brandGameProviderService,
-               IHttpContextAccessor accessor) :
-            base(accessor)
+        public GetPlayerGameProviderBalanceCommandService(
+            IPlayerService playerService,
+            ICashServiceClient cashServiceClient,
+            IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient,
+            IBrandGameProviderService brandGameProviderService)
         {
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersBackofficePluggableClient));
-            _brandGameProviderService = brandGameProviderService ?? throw new ArgumentNullException(nameof(brandGameProviderService));
+            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient ??
+                throw new ArgumentNullException(nameof(gameProvidersBackofficePluggableClient));
+            _brandGameProviderService = brandGameProviderService ??
+                throw new ArgumentNullException(nameof(brandGameProviderService));
         }
 
-        public override async Task<GetPlayerGameProviderBalanceResponse[]> Handle(GetPlayerGameProviderBalanceRequest request,
+        public async ValueTask<GetPlayerGameProviderBalanceResponse[]> GetAsync(
+            GetPlayerGameProviderBalanceCommand request,
             CancellationToken cancellationToken)
         {
             var gameProviderBalance = new List<GetPlayerGameProviderBalanceResponse>();
             var player = await _playerService.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
-            var brandGameProviders = (_brandGameProviderService
+            var brandGameProviders = _brandGameProviderService
                 .GetBrandGameProviderQueries(q => q.Where(x =>
-                x.BrandId == player.BrandId &&
-                x.GameProvider.TransferWallet &&
-                x.GameProvider.Currencies.Where(Currency => Currency.CurrencyCode.Contains(player.DefaultWalletCurrencyCode)).Count() > 0)))
+                    x.BrandId == player.BrandId &&
+                    x.GameProvider.TransferWallet &&
+                    x.GameProvider.Currencies.Any(currency
+                        => currency.CurrencyCode.Contains(player.DefaultWalletCurrencyCode))))
                 .Select(x => new
                 {
                     GameProviderCode = x.GameProvider.Code,
@@ -59,8 +62,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             catch
             {
                 walletBalance = null;
-
             }
+
             gameProviderBalance.Add(new()
             {
                 IsMainWallet = true,
@@ -78,10 +81,10 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     var balance = default(decimal?);
 
                     balance = await _gameProvidersBackofficePluggableClient
-                    .GetBalanceAsync(
-                        player.PlayerCode,
-                        brandGameProvider.GameProviderCode)
-                    .ConfigureAwait(false);
+                        .GetBalanceAsync(
+                            player.PlayerCode,
+                            brandGameProvider.GameProviderCode)
+                        .ConfigureAwait(false);
 
                     gameProviderBalance.Add(new()
                     {

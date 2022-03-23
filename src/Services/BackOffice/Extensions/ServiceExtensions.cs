@@ -58,6 +58,7 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IAdjustAgentAccountService, AdjustAgentAccountService>();
             services.AddTransient<IAdjustPlayerAccountService, AdjustPlayerAccountService>();
             services.AddTransient<IAdjustTransferService, AdjustTransferService>();
+            services.AddTransient<IPlayerBucketService, PlayerBucketService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;
