@@ -1,6 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket
+﻿using TGS.Core.Models.Messages;
+
+namespace TGS.Services.BackOffice.Application.Models.ReportMarket
 {
-    public class GetMarketsReportResponse
+    public class GetMarketsReportResponse : MessageResponse
     {
         public int TotalCount { get; init; }
 
