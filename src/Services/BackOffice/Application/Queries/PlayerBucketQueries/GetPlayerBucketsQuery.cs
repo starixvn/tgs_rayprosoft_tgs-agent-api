@@ -21,7 +21,16 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerBucketQueries
         public async ValueTask<GetPlayerBucketsResponse> GetAsync(GetPlayerBucketsRequest request,
             CancellationToken cancellationToken = default)
         {
-            var before14DayDate = DateTimeOffset.UtcNow.AddDays(-14);
+            var before14DayDateTime = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-14);
+
+            var before14DayDate = new DateTimeOffset(before14DayDateTime.Year,
+                before14DayDateTime.Month,
+                before14DayDateTime.Day,
+                0,
+                0,
+                0,
+                before14DayDateTime.Offset);
+
             var playerBuckets = await _playerBucketService.GetPlayerBucketQueries()
                 .Where(x => x.CreatedOn >= before14DayDate || x.IsFull == false)
                 .Where(x => x.PlayerCode == request.PlayerCode).ToArrayAsync(cancellationToken);
