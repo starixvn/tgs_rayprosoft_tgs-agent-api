@@ -18,8 +18,8 @@ namespace TGS.Services.Promotion.Handlers
 
         public GetPromotionsQueryHandler(
             IPromotionRepository service,
-            IHttpContextAccessor accessor) :
-            base(accessor)
+            IHttpContextAccessor accessor)
+            : base(accessor)
         {
             _service = service;
         }

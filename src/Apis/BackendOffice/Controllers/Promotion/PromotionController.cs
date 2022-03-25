@@ -20,13 +20,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpPut("ChangeOrders",Name = "ChangeOrder")]
+        [HttpPut("ChangeOrders", Name = "ChangeOrder")]
         [Description("Change Promotion Display Order")]
-        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
+        public Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
-            await _client.ChangeOrderAsync(request);
-
-            return CreateValidResponse<MessageResponse>();
+            return _client.ChangeOrderAsync(request);
         }
 
         [HttpPost]
@@ -36,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
 
         [HttpGet]
         [Description("Get promotions")]
-        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) 
+        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
             => _client.GetPromotionsAsync(request);
 
         [HttpPut("{id}")]

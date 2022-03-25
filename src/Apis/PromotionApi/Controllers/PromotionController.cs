@@ -35,7 +35,7 @@ namespace TGS.Apis.PromotionApi.Controllers
 
         [HttpPut("changeorder", Name = "ChangeOrder")]
         [Description("Change promotions display order")]
-        public async Task ChangeOrderAsync(
+        public async Task<MessageResponse> ChangeOrderAsync(
             [FromServices] ICommandService<ChangeOrderCommand> commandService,
             ChangeOrderRequest request)
         {
@@ -45,6 +45,8 @@ namespace TGS.Apis.PromotionApi.Controllers
             };
 
             await commandService.ExecuteAsync(command).ConfigureAwait(false);
+
+            return new MessageResponse { Valid = true };
         }
 
         [HttpPut("{promotionId}/{status}", Name = "ChangePromotionStatus")]
