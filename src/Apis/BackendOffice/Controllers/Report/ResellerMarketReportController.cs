@@ -12,7 +12,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
     [ApiController]
     public class ResellerMarketReportController : BaseContextController
     {
-        [HttpGet("exportResellerMarkets")]
+        [HttpGet("export")]
         [Description(" Export reseller markets")]
         [ByPassAdminLog]
         public async Task<IActionResult> ExportResellerMarketsAsync(

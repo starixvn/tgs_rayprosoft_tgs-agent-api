@@ -37,7 +37,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportResellerMarketQuerie
                 ShowAll = request.ShowAll
             };
 
-            var response = await _reportClient.GetResellerMarketsAsync(reportRequest);
+            var response = await _reportClient.GetResellerMarketsAsync(reportRequest).ConfigureAwait(false);
 
             return new()
             {
