@@ -24,7 +24,7 @@ namespace TGS.Services.Promotion.Services
             var promotions = await _tgsRepository.Promotions
                 .AsQueryable()
                 .Where(q => ids.Contains(q.Id))
-                .ToListAsync()
+                .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             promotions.ForEach(p =>
@@ -38,7 +38,7 @@ namespace TGS.Services.Promotion.Services
             });
 
             _tgsRepository.Promotions.UpdateRange(promotions);
-            _ = await _tgsRepository.SaveChangesAsync();
+            _ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

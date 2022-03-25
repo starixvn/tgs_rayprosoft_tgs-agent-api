@@ -26,11 +26,11 @@ namespace TGS.Clients.Promotion.Client
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public async Task ChangeOrderAsync(ChangeOrderRequest request)
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
             var prefix = $"Promotion.ChangeOrder";
 
-            await ExecuteJsonRequestAsync<ChangeOrderRequest, Task>(HttpMethod.Put,
+            return await ExecuteJsonRequestAsync<ChangeOrderRequest, MessageResponse>(HttpMethod.Put,
                 $"/api/promotion/changeorder",
                 request,
                 logPrefix: prefix,
