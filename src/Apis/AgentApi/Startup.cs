@@ -165,7 +165,8 @@ namespace TGS.Apis.AgentApi
 
             services.AddRouting(options => options.LowercaseUrls = true);
 
-            services.AddControllers(options =>
+            services
+                .AddControllers(options =>
                 {
                     options.Filters.Add<CheckAgentEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
