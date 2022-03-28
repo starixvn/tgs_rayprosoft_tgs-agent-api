@@ -40,6 +40,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount);
 
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
+
+        Task UpdateParentPlayerAsync(string playerCode, string parentPlayerCode);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -242,6 +244,28 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
             scope.Complete();
+        }
+
+        async Task IPlayerService.UpdateParentPlayerAsync(string playerCode, string parentPlayerCode)
+        {
+            var player = await _repository.PlayerParents
+                .FirstOrDefaultAsync(pp => pp.PlayerCode == playerCode)
+                .ConfigureAwait(false);
+
+            if (player != null)
+            {
+                player.ParentPlayerCode = parentPlayerCode;
+            }
+            else
+            {
+                var playerParent = new PlayerParent 
+                { 
+                    PlayerCode = playerCode, 
+                    ParentPlayerCode = parentPlayerCode 
+                };
+                _ = await _repository.PlayerParents.AddAsync(playerParent);
+            }
+            _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

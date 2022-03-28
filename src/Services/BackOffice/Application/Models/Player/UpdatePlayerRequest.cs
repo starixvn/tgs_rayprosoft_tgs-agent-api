@@ -34,5 +34,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public Guid VipId { get; init; }
 
         public string Wechat { get; init; }
+
+        public string ParentUsername { get; init; }
     }
 }
