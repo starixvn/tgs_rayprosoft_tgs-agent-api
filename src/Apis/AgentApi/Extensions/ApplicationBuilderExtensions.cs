@@ -14,6 +14,7 @@ namespace TGS.Apis.AgentApi.Extensions
             app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
                 builder => builder
                     .UseMiddleware<VerifyCredentialsMiddleware>()
+                    .UseMiddleware<MaintenanceMiddleware>()
                     .UseMiddleware<VerifyAgentTokenMiddleware>());
 
             return app;
