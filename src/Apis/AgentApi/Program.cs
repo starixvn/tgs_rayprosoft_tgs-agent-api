@@ -13,9 +13,22 @@ namespace TGS.Apis.AgentApi
                 {
                     builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
                 })
-                .ConfigureLogging((_, builder) =>
+                .ConfigureLogging((ctx, builder) =>
                 {
-                    builder.AddTgsLog();
+                    builder
+                        .AddTgsLog()
+                        .AddOpenTelemetry(options =>
+                        {
+                            options.IncludeFormattedMessage = true;
+                            options.ParseStateValues = true;
+                            _ = options.AddFluentdForwardExporter(fluentOptions =>
+                            {
+                                var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
+                                fluentOptions.Host = nodeIp;
+                                fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+                                fluentOptions.UseMessagePack();
+                            });
+                        });
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

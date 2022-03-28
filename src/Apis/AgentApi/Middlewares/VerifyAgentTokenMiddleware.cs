@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,8 @@ namespace TGS.Apis.AgentApi.Middlewares
 {
     public sealed class VerifyAgentTokenMiddleware
     {
+        private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
+
         private readonly RequestDelegate _next;
 
         public VerifyAgentTokenMiddleware(RequestDelegate next)
@@ -33,6 +36,8 @@ namespace TGS.Apis.AgentApi.Middlewares
             IExpirationValidator expirationValidator,
             IJwtTokenHandler handler)
         {
+            using var activity = _VerifyAgentTokenMiddlewareSource.StartActivity(nameof(VerifyAgentTokenMiddleware));
+
             var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizeAgentTokenAttribute>();
 
             if (attribute == null)
