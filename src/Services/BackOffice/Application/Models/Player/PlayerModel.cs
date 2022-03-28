@@ -44,6 +44,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string Username { get; init; }
 
+        public string ParentUsername { get; init; }
+
         public Guid? VipId { get; init; }
 
         public int? VipLevel { get; init; }
