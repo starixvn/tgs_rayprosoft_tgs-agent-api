@@ -26,7 +26,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportResellerMarketQuerie
             var reportRequest = new GetResellerMarketsRequest
             {
                 CurrencyCode = request.CurrencyCode,
-                CurrencyCodes = request.CurrencyCodes!,
+                CurrencyCodes = request.CurrencyCodes,
                 ResellerId = request.ResellerId,
                 From = request.From,
                 To = request.To,

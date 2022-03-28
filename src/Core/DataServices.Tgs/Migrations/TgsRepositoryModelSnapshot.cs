@@ -132,6 +132,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
 
+                    b.Property<DateTimeOffset>("TransactionRecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("transaction_recorded_on");
+
                     b.Property<string>("TransferTarget")
                         .HasColumnType("text")
                         .HasColumnName("transfer_target");

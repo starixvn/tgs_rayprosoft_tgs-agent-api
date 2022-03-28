@@ -29,6 +29,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset CreatedOn { get; set; }
 
+        public DateTimeOffset TransactionRecordedOn { get; set; }
+
         public string CreatedByUsername { get; set; }
     }
 }
