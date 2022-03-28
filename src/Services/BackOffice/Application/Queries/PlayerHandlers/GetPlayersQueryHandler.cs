@@ -167,7 +167,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 RegisterHost = row.RegisterHost,
                 AgentName = row.AgentName,
                 IdentityFormId = row.IdentityFormId,
-                ParentUsername = row.ParentUsername ?? string.Empty,
+                ParentUsername = row.ParentUsername,
             }).CreatePagedResponseAsync(request);
         }
     }
