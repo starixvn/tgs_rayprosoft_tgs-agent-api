@@ -2,24 +2,23 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Tgs.GameProviders.Pluggable.Client;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using Microsoft.Extensions.Logging;
-using Tgs.GameProviders.Pluggable.Client;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
     {
-        private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IAgentService _agentService;
         private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
+        private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IPlayerService _service;
-
 
         public UpdatePlayerHandler(
             ILogger<UpdatePlayerHandler> logger,
@@ -72,6 +71,17 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 }
 
                 player.AgentId = agent.Id;
+            }
+
+            if (!request.ParentUsername.IsNullOrEmpty() && request.Type == updatePlayerType[0])
+            {
+                var parentPlayer = await _service
+                    .GetPlayerAsync(p => p.Username == request.ParentUsername && p.BrandId == player.BrandId)
+                    .ConfigureAwait(false);
+
+                await _service
+                    .UpdateParentPlayerAsync(player.PlayerCode, parentPlayer.PlayerCode)
+                    .ConfigureAwait(false);
             }
 
             if (request.Email.IsNotNullOrEmpty() && request.Type == updatePlayerType[1] &&
