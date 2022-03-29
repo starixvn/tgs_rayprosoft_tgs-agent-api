@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "adjust_player_records",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
 
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "transaction_recorded_on",
