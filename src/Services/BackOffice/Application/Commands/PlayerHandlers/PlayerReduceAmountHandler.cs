@@ -116,6 +116,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Remark,
                 request.BucketAmount,
                 Username,
+                request.IncludeInNetProfit,
                 targetAgent?.Username).ConfigureAwait(false);
 
             if (request.Amount > 0M)

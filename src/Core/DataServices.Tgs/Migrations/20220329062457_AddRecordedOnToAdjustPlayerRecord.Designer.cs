@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220328031629_AddRecordedOnToAdjustPlayerRecord")]
+    [Migration("20220329062457_AddRecordedOnToAdjustPlayerRecord")]
     partial class AddRecordedOnToAdjustPlayerRecord
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -120,6 +120,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("IncludeInNetProfit")
+                        .HasColumnType("boolean")
+                        .HasColumnName("include_in_net_profit");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()

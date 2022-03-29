@@ -7,6 +7,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "include_in_net_profit",
+                schema: "dbo",
+                table: "adjust_player_records",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "transaction_recorded_on",
                 schema: "dbo",
@@ -18,6 +26,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "include_in_net_profit",
+                schema: "dbo",
+                table: "adjust_player_records");
+
             migrationBuilder.DropColumn(
                 name: "transaction_recorded_on",
                 schema: "dbo",

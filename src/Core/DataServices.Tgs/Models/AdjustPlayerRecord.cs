@@ -13,6 +13,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PlayerCode { get; set; }
 
+        public bool IncludeInNetProfit { get; set; }
+
         public AdjustmentType AdjustmentType { get; set; }
 
         public PlayerAdjustmentTransactionType Type { get; set; }

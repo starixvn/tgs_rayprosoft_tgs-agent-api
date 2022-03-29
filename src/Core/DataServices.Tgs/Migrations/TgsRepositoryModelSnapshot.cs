@@ -119,6 +119,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<bool>("IncludeInNetProfit")
+                        .HasColumnType("boolean")
+                        .HasColumnName("include_in_net_profit");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("text")
