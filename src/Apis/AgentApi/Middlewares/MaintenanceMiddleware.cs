@@ -9,7 +9,7 @@ namespace TGS.Apis.AgentApi.Middlewares
 {
     public sealed class MaintenanceMiddleware
     {
-        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(MaintenanceMiddleware)}");
+        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(MaintenanceMiddleware)}");
         private readonly RequestDelegate _next;
 
         public MaintenanceMiddleware(RequestDelegate next)
