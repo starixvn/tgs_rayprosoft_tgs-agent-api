@@ -11,7 +11,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         ValueTask<AdjustPlayerRecord> CreateAsync(Guid brandId, string playerCode, AdjustmentType adjustmentType,
             PlayerAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
-            string remark, decimal bucketAmount, string username, string targetAgentUsername = null);
+            string remark, decimal bucketAmount, string username, bool includeInNetProfit,
+            string targetAgentUsername = null);
 
         Task UpdateAdjustPlayerRecordAsync(AdjustPlayerRecord record);
     }
@@ -26,12 +27,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         public async ValueTask<AdjustPlayerRecord> CreateAsync(Guid brandId, string playerCode,
             AdjustmentType adjustmentType,
             PlayerAdjustmentTransactionType transactionType, AdjustTransferType transferType, decimal amount,
-            string remark, decimal bucketAmount, string username, string targetAgentUsername)
+            string remark, decimal bucketAmount, string username, bool includeInNetProfit, string targetAgentUsername)
         {
             var vipLevel = new AdjustPlayerRecord
             {
                 BrandId = brandId,
                 PlayerCode = playerCode,
+                IncludeInNetProfit = includeInNetProfit,
                 AdjustmentType = adjustmentType,
                 Type = transactionType,
                 TransferType = transferType,

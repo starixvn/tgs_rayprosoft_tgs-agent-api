@@ -4,7 +4,7 @@ namespace TGS.Services.BackOffice.Application.Models.ReportLicenseeMarket
 {
     public record LicenseeMarketDataReportModel
     {
-        public Guid BarndId { get; init; }
+        public Guid BrandId { get; init; }
 
         public string BrandCode { get; init; } = default!;
 

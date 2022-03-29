@@ -22,6 +22,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.PlayerCode)
                 .IsRequired();
 
+            builder.Property(c => c.IncludeInNetProfit)
+                .HasDefaultValue(true)
+                .IsRequired();
+
             builder.Property(c => c.AdjustmentType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();

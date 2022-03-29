@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Tgs.CashService.Client;
-using Tgs.Logging;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -24,6 +24,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAdjustPlayerAccountService _playerAdjustAccountService;
         private readonly IPlayerService _playerService;
         private readonly ITgsLog _tgsLog;
+        private readonly ITransactionService _transactionService;
 
         public PlayerReduceAmountHandler(
             IAgentService agentService,
@@ -31,9 +32,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             ICashServiceClient cashServiceClient,
             IPlayerService playerService,
             IHttpContextAccessor accessor,
-            ITgsLog tgsLog,
             IAdjustPlayerAccountService playerAdjustAccountService,
-            IAdjustTransferService adjustTransferService) : base(accessor)
+            IAdjustTransferService adjustTransferService,
+            ITransactionService transactionService,
+            ITgsLog tgsLog) : base(accessor)
         {
             if (accessor is null)
             {
@@ -52,6 +54,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
             _adjustTransferService = adjustTransferService ??
                 throw new ArgumentNullException(nameof(adjustTransferService));
+            _transactionService = transactionService ??
+                throw new ArgumentNullException(nameof(transactionService));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -112,6 +116,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Remark,
                 request.BucketAmount,
                 Username,
+                request.IncludeInNetProfit,
                 targetAgent?.Username).ConfigureAwait(false);
 
             if (request.Amount > 0M)
@@ -122,7 +127,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     remark,
                     Guid.Parse(UserId));
 
+                var transaction = await _transactionService.GetTransactionAsync(x => x.Id == response.TransactionId);
+
                 record.TransactionId = response.TransactionId;
+                record.TransactionRecordedOn = transaction.RecordedOn;
 
                 await _playerAdjustAccountService.UpdateAdjustPlayerRecordAsync(record).ConfigureAwait(false);
 

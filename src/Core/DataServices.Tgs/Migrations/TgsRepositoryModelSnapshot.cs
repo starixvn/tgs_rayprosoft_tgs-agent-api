@@ -119,6 +119,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<bool>("IncludeInNetProfit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("include_in_net_profit");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -131,6 +137,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid?>("TransactionId")
                         .HasColumnType("uuid")
                         .HasColumnName("transaction_id");
+
+                    b.Property<DateTimeOffset>("TransactionRecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("transaction_recorded_on");
 
                     b.Property<string>("TransferTarget")
                         .HasColumnType("text")
