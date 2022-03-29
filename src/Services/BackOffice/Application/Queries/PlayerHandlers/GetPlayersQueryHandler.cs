@@ -106,11 +106,11 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 };
 
             var playerParentQuery =
-                from player in playerQuery
+                from player in _tgsRepository.Players.AsQueryable()
                 join playerParent in _tgsRepository.PlayerParents
                     on player.PlayerCode equals playerParent.PlayerCode into ppj
                 from playerParent in ppj.DefaultIfEmpty()
-                join player2 in playerQuery
+                join player2 in _tgsRepository.Players.AsQueryable()
                     on playerParent.ParentPlayerCode equals player2.PlayerCode into ppj2
                 from player2 in ppj2.DefaultIfEmpty()
                 select new
