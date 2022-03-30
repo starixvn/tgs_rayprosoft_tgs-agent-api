@@ -736,6 +736,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<decimal>("NoIncludeNetProfitAgentAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_agent_adjust_amount");
+
+                    b.Property<decimal>("NoIncludeNetProfitCompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_company_adjust_amount");
+
                     b.Property<decimal>("OriginalTurnover")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4354,6 +4364,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("Minute")
                         .HasColumnType("integer")
                         .HasColumnName("minute");
+
+                    b.Property<decimal>("NoIncludeNetProfitAgentAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_agent_adjust_amount");
+
+                    b.Property<decimal>("NoIncludeNetProfitCompanyAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_company_adjust_amount");
 
                     b.Property<decimal>("OriginalTurnover")
                         .HasPrecision(18, 6)
