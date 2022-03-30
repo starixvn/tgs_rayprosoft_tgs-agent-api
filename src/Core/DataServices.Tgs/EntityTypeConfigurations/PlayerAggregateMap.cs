@@ -87,6 +87,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(b => b.NoIncludeNetProfitCompanyAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.NoIncludeNetProfitAgentAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(b => b.ReportDate)
                 .IsRequired();
 

@@ -44,7 +44,6 @@
         MaticPayDepositNeedRealName = 410,
         PlayerCanNotWithdraw = 411,
         BrandPhoneDuplicate = 412,
-        ZeroNineNinePayDepositNeedRealName = 413,
 
         DividendConditionError = 600,
         DividendPercentageError = 601,

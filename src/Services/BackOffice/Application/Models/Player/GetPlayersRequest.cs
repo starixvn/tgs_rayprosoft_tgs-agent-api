@@ -15,6 +15,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public DateTimeOffset? EndRegisteredOn { get; init; }
 
+        public string? ParentUsername { get; init; }
+
         public string? Phone { get; init; }
 
         public string? RegisterHost { get; init; }

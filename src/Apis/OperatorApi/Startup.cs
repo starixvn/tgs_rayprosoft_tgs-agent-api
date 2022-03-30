@@ -27,8 +27,8 @@ using Tgs.Payment.LeePay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
+using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
-using Tgs.Payment.ZeroNineNinePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -70,7 +70,7 @@ namespace TGS.Apis.OperatorApi
                 var forwardedIps = string.Join(
                     ", ",
                     httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip));
-                logger.LogInformation(
+                logger.LogTrace(
                     $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
                     $"Forward-For: {forwardedIps}");
 
@@ -91,7 +91,6 @@ namespace TGS.Apis.OperatorApi
 
             app.UseTgsErrorHandler();
             app.UseBrandCertificate();
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
             app.UseRouting();
 
@@ -235,7 +234,7 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>()
-                .AddSingleton<ZeroNineNinePaySerializer>();
+                .AddSingleton<TuPaySerializer>();
 
             services
                 .AddMessageQueue()
@@ -332,6 +331,7 @@ namespace TGS.Apis.OperatorApi
                             || !httpContext.Request.Path.StartsWithSegments("/swagger")
                             && !httpContext.Request.Path.StartsWithSegments("/health")
                             && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                            && !httpContext.Request.Path.StartsWithSegments("/metrics")
                             && !new[] { "html", "ico", "png", "jpg" }.Any(
                                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                     };

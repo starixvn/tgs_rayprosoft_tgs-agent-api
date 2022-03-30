@@ -3,13 +3,12 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
+using TGS.Services.Agent.ApplicationServices.Withdraw;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.WalletService;
-using TGS.Services.Agent.ApplicationServices.Withdraw;
 
 namespace Agent.UnitTests
 {
@@ -55,7 +54,8 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M));
+                    0M,
+                    0));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -81,7 +81,7 @@ namespace Agent.UnitTests
                     expected.ShouldMatch(info);
                 });
 
-            fakeWalletRepository.ExchangeAsync(
+            _ = fakeWalletRepository.ExchangeAsync(
                     Arg.Any<Guid>(),
                     Arg.Any<Guid>(),
                     Arg.Any<Guid>(),
@@ -139,7 +139,8 @@ namespace Agent.UnitTests
                     AgentStatus.Enabled,
                     AgentType.Cash,
                     AgentLevelType.Agent,
-                    0M));
+                    0M,
+                    0));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))

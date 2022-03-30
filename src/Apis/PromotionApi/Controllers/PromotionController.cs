@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.PromotionApi.ViewModels;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.PromotionApi.Controllers
 {
@@ -23,22 +23,38 @@ namespace TGS.Apis.PromotionApi.Controllers
         public PromotionController(IMediator mediator)
             => _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
-        [HttpPost("{promotionId}/addPlayer/{playerCode}")]
-        [Description("Add player to promotion")]
-        public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode)
-            => _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
-
-        [HttpPost("{promotionId}/depositAddPlayer/{playerCode}")]
+        [HttpPost("{promotionId}/depositAddPlayer/{playerCode}", Name = "AddPlayerToDepositPromotion")]
         [Description("Add player to deposit promotion")]
         public Task<MessageResponse> AddPlayerToDepositPromotionAsync(Guid promotionId, string playerCode)
             => _mediator.Send(new CreateDepositPromotionParticipantRequest(promotionId, playerCode));
 
-        [HttpPut("{promotionId}/{status}")]
+        [HttpPost("{promotionId}/addPlayer/{playerCode}", Name = "AddPlayerToPromotion")]
+        [Description("Add player to promotion")]
+        public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode)
+            => _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
+
+        [HttpPut("changeorder", Name = "ChangeOrder")]
+        [Description("Change promotions display order")]
+        public async Task<MessageResponse> ChangeOrderAsync(
+            [FromServices] ICommandService<ChangeOrderCommand> commandService,
+            ChangeOrderRequest request)
+        {
+            var command = new ChangeOrderCommand
+            {
+                Orders = request.Orders
+            };
+
+            await commandService.ExecuteAsync(command).ConfigureAwait(false);
+
+            return new MessageResponse { Valid = true };
+        }
+
+        [HttpPut("{promotionId}/{status}", Name = "ChangePromotionStatus")]
         [Description("Change promotion status")]
         public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, PromotionStatus status)
             => _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
-        [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}")]
+        [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}", Name = "CheckCanJoinPromotion")]
         public async Task<bool> CheckCanJoinPromotionAsync(
             [FromServices] IGetService<CheckCanJoinPromotionQuery, bool> checkService,
             Guid promotionId,
@@ -57,7 +73,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             return result;
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreatePromotion")]
         [Description("Create a promotion")]
         public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
             _mediator.Send(request);
@@ -75,7 +91,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             await tagService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
-        [HttpGet("names")]
+        [HttpGet("names", Name = "GetPromotionNamesByIds")]
         [Description("Get promotion names by ids")]
         public ValueTask<PromotionNameModel[]> GetPromotionNamesByIdsAsync(
             [FromServices] IQueryService<GetPromotionNamesQuery, PromotionNameModel> queryService,
@@ -93,7 +109,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             [FromQuery] GetJoinedPromotionsRequest request)
             => _mediator.Send(request);
 
-        [HttpGet("valid")]
+        [HttpGet("valid", Name = "GetPromotionsForPlayer")]
         [Description("Get promotions fro player")]
         public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
             [FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
@@ -137,7 +153,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             };
         }
 
-        [HttpDelete("{promotionId}/{amount}")]
+        [HttpDelete("{promotionId}/{amount}", Name = "RevertPromotion")]
         public async Task RevertPromotionAsync(
             [FromServices] ICommandService<RevertPromotionAmountCommand> revertService,
             Guid promotionId,
@@ -151,7 +167,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             await revertService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdatePromotion")]
         [Description("Update a promotion")]
         public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {

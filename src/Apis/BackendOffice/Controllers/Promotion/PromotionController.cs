@@ -20,15 +20,22 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpGet]
-        [Description("Get promotions")]
-        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
-            _client.GetPromotionsAsync(request);
+        [HttpPut("ChangeOrders", Name = "ChangeOrder")]
+        [Description("Change Promotion Display Order")]
+        public Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            return _client.ChangeOrderAsync(request);
+        }
 
         [HttpPost]
         [Description("Create a promotion")]
         public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
             _client.CreatePromotionAsync(request);
+
+        [HttpGet]
+        [Description("Get promotions")]
+        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
+            => _client.GetPromotionsAsync(request);
 
         [HttpPut("{id}")]
         [Description("Update a promotion")]

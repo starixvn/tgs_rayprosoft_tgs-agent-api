@@ -13,6 +13,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public Guid? IdentityFormId { get; init; }
 
+        public string ParentUsername { get; init; } = default!;
+
         public string PlayerCode { get; init; } = default!;
 
         public DateTimeOffset? RegisteredTime { get; init; }

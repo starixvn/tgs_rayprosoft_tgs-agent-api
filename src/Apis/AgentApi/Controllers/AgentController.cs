@@ -316,6 +316,7 @@ namespace TGS.Apis.AgentApi.Controllers
                     Status = agentInfo.Status.ToString(),
                     Type = agentInfo.Type.ToString(),
                     LevelType = agentInfo.AgentLevelType.ToString(),
+                    PlayerNumber = agentInfo.PlayerNumber,
                     AgentDividendType = brand.AgentDividendType.ToString(),
                     DividendConditions = await queryDividendsService
                         .QueryAsync(new GetAgentDividendConditionsByIdQuery(brandId, agentId))

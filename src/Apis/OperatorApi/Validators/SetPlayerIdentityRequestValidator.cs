@@ -36,7 +36,7 @@ namespace TGS.Apis.OperatorApi.Validators
 
                     return identityVerifier.Verify(id);
                 })
-                .WithName(x => GetJsonPropertyName(x, nameof(x.Identity))); ;
+                .WithName(x => GetJsonPropertyName(x, nameof(x.Identity)));
         }
     }
 }

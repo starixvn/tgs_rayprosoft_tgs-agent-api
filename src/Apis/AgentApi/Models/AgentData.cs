@@ -56,6 +56,9 @@ namespace TGS.Apis.AgentApi.Models
         [JsonPropertyName("phone")]
         public string Phone { get; init; }
 
+        [JsonPropertyName("playernumber")]
+        public int PlayerNumber { get; init; }
+
         [JsonPropertyName("qq")]
         public string QQ { get; init; }
 

@@ -7,7 +7,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "SBO-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "SBO-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "SBO"
       },
@@ -19,7 +19,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Habanero-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Habanero-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "HABA"
       },
@@ -31,7 +31,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "PragmaticPlay-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "PragmaticPlay-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "PP"
       },
@@ -43,7 +43,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "KY-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "KY-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "KY"
       },
@@ -55,7 +55,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "AsiaGaming-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "AsiaGaming-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "AG"
       },
@@ -67,7 +67,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Saba-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Saba-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "SABA"
       },
@@ -79,7 +79,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "IMESports-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "IMESports-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "IMES"
       },
@@ -91,7 +91,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "VR-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "VR-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "VR"
       },
@@ -103,7 +103,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "BigGaming-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "BigGaming-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "BG"
       },
@@ -114,7 +114,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "JDB-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "JDB-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "JDB"
       },
@@ -126,7 +126,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "SexyGaming-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "SexyGaming-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "SG"
       },
@@ -138,7 +138,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Skywind-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Skywind-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "SW"
       },
@@ -150,7 +150,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "AllBet-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "AllBet-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "AB"
       },
@@ -162,7 +162,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "EVO-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "EVO-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "EVO"
       },
@@ -174,7 +174,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "WGSports-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "WGSports-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "WGFM"
       },
@@ -186,7 +186,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "WGHorse-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "WGHorse-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "WGVIA"
       },
@@ -198,7 +198,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "WMCasino-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "WMCasino-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "WM"
       },
@@ -210,7 +210,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "TCG-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "TCG-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "TCG"
       },
@@ -222,7 +222,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Card365-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Card365-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "365"
       },
@@ -234,7 +234,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "LY-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "LY-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "LY"
       },
@@ -246,7 +246,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "BetConstruct-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "BetConstruct-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "BC"
       },
@@ -258,7 +258,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Avia-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Avia-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "AVIA"
       },
@@ -270,7 +270,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "Jili-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "Jili-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "JILI"
       },
@@ -282,7 +282,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "TFGaming-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "TFGaming-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "TF"
       },
@@ -294,7 +294,7 @@
       "launchUrl": "health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "DreamGame-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "DreamGame-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "DG"
       },
@@ -465,7 +465,7 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "DreamGame-API-Local-Dev",
+        "OTEL_SERVICE_NAME": "DreamGame-API(Local)",
         "NODE_IP": "otel.rpgp.cc",
         "GameProviderCode": "DG"
       }

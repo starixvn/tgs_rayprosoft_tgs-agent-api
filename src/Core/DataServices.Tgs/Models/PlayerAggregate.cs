@@ -53,5 +53,9 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal WinLossAmount { get; set; }
 
         public decimal AllAgentRebateAmount { get; set; }
+
+        public decimal NoIncludeNetProfitCompanyAdjustAmount { get; set; }
+
+        public decimal NoIncludeNetProfitAgentAdjustAmount { get; set; }
     }
 }

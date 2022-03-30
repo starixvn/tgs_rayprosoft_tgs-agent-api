@@ -71,6 +71,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Localization)
                 .HasColumnType(ColumnTypes.Jsonb);
 
+            builder.Property(p => p.CampaignDetail)
+                .IsRequired()
+                .HasColumnType(ColumnTypes.Jsonb)
+                .HasDefaultValue("{}");
+
+            builder.Property(p => p.DisplayOrder)
+                .HasDefaultValue(1);
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)

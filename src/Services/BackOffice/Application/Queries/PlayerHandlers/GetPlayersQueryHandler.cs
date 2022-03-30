@@ -105,6 +105,21 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     identity.PlayerAuthenticationFormId
                 };
 
+            var playerParentQuery =
+                from player in _tgsRepository.Players.AsQueryable()
+                join playerParent in _tgsRepository.PlayerParents
+                    on player.PlayerCode equals playerParent.PlayerCode into ppj
+                from playerParent in ppj.DefaultIfEmpty()
+                join player2 in _tgsRepository.Players.AsQueryable()
+                    on playerParent.ParentPlayerCode equals player2.PlayerCode into ppj2
+                from player2 in ppj2.DefaultIfEmpty()
+                select new
+                {
+                    player.PlayerCode,
+                    playerParent.ParentPlayerCode,
+                    ParentUsername = player2.Username
+                };
+
             var query =
                         from player in playerQuery
                         join brand in queryableBrands
@@ -117,6 +132,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         join playerIdentity in playerIdentityQuery
                             on player.PlayerCode equals playerIdentity.PlayerCode into pij
                         from playerIdentity in pij.DefaultIfEmpty()
+                        join playerParent in playerParentQuery
+                            on player.PlayerCode equals playerParent.PlayerCode into ppj
+                        from playerParent in ppj.DefaultIfEmpty()
                         select new
                         {
                             player.PlayerCode,
@@ -127,11 +145,16 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                             player.RegisteredOn,
                             RegisterHost = ipRecord.Host,
                             AgentName = player.Agent.Username,
-                            IdentityFormId = playerIdentity.PlayerAuthenticationFormId
+                            IdentityFormId = playerIdentity.PlayerAuthenticationFormId,
+                            ParentPlayerCode = playerParent.ParentPlayerCode,
+                            ParentUsername = playerParent.ParentUsername
                         };
 
             if (!string.IsNullOrWhiteSpace(request.RegisterHost))
                 query = query.Where(row => row.RegisterHost.ToLower() == request.RegisterHost.ToLower());
+
+            if (!string.IsNullOrWhiteSpace(request.ParentUsername))
+                query = query.Where(row => row.ParentUsername == request.ParentUsername);
 
             return query.Select(row => new PlayersModel
             {
@@ -143,7 +166,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 RegisteredTime = row.RegisteredOn,
                 RegisterHost = row.RegisterHost,
                 AgentName = row.AgentName,
-                IdentityFormId = row.IdentityFormId
+                IdentityFormId = row.IdentityFormId,
+                ParentUsername = row.ParentUsername,
             }).CreatePagedResponseAsync(request);
         }
     }

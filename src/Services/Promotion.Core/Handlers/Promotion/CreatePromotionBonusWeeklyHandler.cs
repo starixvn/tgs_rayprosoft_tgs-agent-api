@@ -17,7 +17,6 @@ using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using TGS.Services.Promotion.Models.PromotionBonus;
 using TGS.Services.TgsTransaction.Core;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.Promotion.Handlers.Promotion
 {
@@ -25,6 +24,8 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         CreatePromotionBonusWeeklyHandler : Handler<CreatePromotionBonusWeeklyRequest,
             MessageResponse>
     {
+        private readonly ICashServiceClient _cashServiceClient;
+
         private readonly DateTimeOffset _now = new(DateTimeOffset.Now.Year,
             DateTimeOffset.Now.Month,
             DateTimeOffset.Now.Day,
@@ -37,7 +38,6 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
         private readonly DateTimeOffset _previousMonday;
         private readonly DateTimeOffset _previousSunday;
-        private readonly ICashServiceClient _cashServiceClient;
         private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly IPromotionRepository _promotionRepository;
         private readonly ITgsRepository _repository;
@@ -54,12 +54,14 @@ namespace TGS.Services.Promotion.Handlers.Promotion
         {
             if (accessor is null)
                 throw new ArgumentNullException(nameof(accessor));
-            _promotionBonusService = promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
+            _promotionBonusService =
+                promotionBonusService ?? throw new ArgumentNullException(nameof(promotionBonusService));
             _playerBucketService = playerBucketService ?? throw new ArgumentNullException(nameof(playerBucketService));
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-            _transactionRepository = transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _transactionRepository =
+                transactionRepository ?? throw new ArgumentNullException(nameof(transactionRepository));
             _previousSunday = _now.AddDays(-7).GetSunday();
             _previousMonday = _now.AddDays(-7).GetMonday();
         }
@@ -79,10 +81,10 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var promotionIds = promotions.Select(x => x.Id);
 
             if (await _promotionBonusService.GetPromotionBonusQueries()
-                .AnyAsync(
-                    x => promotionIds.Contains(x.PromotionId) && _previousMonday <= x.From &&
-                        _previousSunday >= x.To,
-                    cancellationToken))
+                    .AnyAsync(
+                        x => promotionIds.Contains(x.PromotionId) && _previousMonday <= x.From &&
+                            _previousSunday >= x.To,
+                        cancellationToken))
             {
                 return new()
                 {
@@ -92,14 +94,10 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 };
             }
 
-            var gameProviderIds = promotions.SelectMany(x => x.PromotionGameProviders).Select(x => x.GameProviderId)
-                .ToArray();
-
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
             var playerGameRoundAggregate = await _repository.PlayerGameAggregates.AsQueryable()
                 .Where(x => x.ReportDate >= _previousMonday && x.ReportDate <= _previousSunday)
-                .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
                 .GroupJoin(_repository.BrandGames,
                     aggregate => new
@@ -243,13 +241,15 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             var promotionLevels = promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
+            var promotionGameProviderIds = promotion.PromotionGameProviders.Select(pg => pg.GameProviderId).ToArray();
+
             var players = aggregates
                 .Where(promotionLevels.Length > 0,
                     pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
                 .Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
-                .Where(pa =>
-                    promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
-                        .Contains(pa.GameProviderId))
+                .Where(promotionGameProviderIds.Length > 0,
+                    pa =>
+                        promotionGameProviderIds.Contains(pa.GameProviderId))
                 .Where(pa => pa.ReportDate >= from)
                 .Where(pa => pa.ReportDate >= to);
 

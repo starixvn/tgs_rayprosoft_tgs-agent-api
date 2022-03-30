@@ -119,6 +119,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.BeforeDividendAmount)
                 .HasPrecision(18, 6);
 
+            builder.Property(b => b.NoIncludeNetProfitCompanyAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.NoIncludeNetProfitAgentAdjustAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(b => b.From)
                 .IsRequired();
 
