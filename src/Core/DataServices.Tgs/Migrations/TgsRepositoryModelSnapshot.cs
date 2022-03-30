@@ -120,9 +120,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on");
 
                     b.Property<bool>("IncludeInNetProfit")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
-                        .HasDefaultValue(true)
                         .HasColumnName("include_in_net_profit");
 
                     b.Property<string>("PlayerCode")
