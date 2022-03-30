@@ -23,7 +23,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.IncludeInNetProfit)
-                .HasDefaultValue(true)
                 .IsRequired();
 
             builder.Property(c => c.AdjustmentType)
