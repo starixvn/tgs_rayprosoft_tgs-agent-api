@@ -15,6 +15,7 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
@@ -54,7 +55,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddSingleton<IConfiguration>(configuration);
+            services
+                .AddSingleton<IConfiguration>(configuration)
+                .AddLogging();
 
             services.AddTgsRepository(configuration, "Tgs")
                 .AddSystemJsonSerializer()

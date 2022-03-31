@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.1" />
+    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
