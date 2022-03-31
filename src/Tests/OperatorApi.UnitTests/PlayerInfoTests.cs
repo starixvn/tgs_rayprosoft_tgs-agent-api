@@ -1,4 +1,7 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -7,10 +10,12 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using CoreEnums = TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Player;
+using PlayerInfo = TGS.Services.Operator.PlayerInfo;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -96,8 +101,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 false);
 
-            fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
-                .Returns(ValueTask.FromResult(playerInfo));
+            fakePlayerRepository
+                .GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+                .Returns(playerInfo);
 
             var brandId = Guid.NewGuid();
             var username = "username";
@@ -106,6 +112,75 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await sut.GetAsync(query);
 
             Assert.AreEqual(playerInfo, actual);
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
+
+            var sut = new GetPlayerFromClientQueryService(moqPlayerServiceClient.Object, moqVipLevelRepository.Object);
+
+            var playerCode = "abcdef123456";
+            var brandId = Guid.NewGuid();
+            var vipLevelId = Guid.NewGuid();
+
+            _ = moqPlayerServiceClient
+                .Setup(fake => fake.GetPlayerInfoAsync(
+                    It.Is<string>(x => x == playerCode)))
+                .ReturnsAsync(new Tgs.PlayerService.Client.PlayerInfo
+                {
+                    BrandId = brandId,
+                    PlayerCode = playerCode,
+                    IdentityAuthentication = false,
+                    IsSetPayPassword = false,
+                    PhoneAuthentication = true,
+                    Status = PlayerStatus.Enabled,
+                    Username = playerCode,
+                    VipLevelId = vipLevelId
+                });
+
+            _ = moqPlayerServiceClient
+                .Setup(fake => fake.GetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == playerCode)))
+                .ReturnsAsync(new Dictionary<string, string?>
+                {
+                    ["RealName"] = null,
+                    ["IdNumber"] = null,
+                    ["Wechat"] = null,
+                    ["QQ"] = null,
+                    ["AreaCode"] = "+886",
+                    ["Phone"] = "0921236478",
+                    ["Email"] = null
+                });
+
+            var query = new GetPlayerFromClientQuery(brandId, playerCode);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqPlayerServiceClient
+                .Verify(
+                    fake => fake.GetPlayerInfoAsync(
+                        It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+
+            moqPlayerServiceClient
+                .Verify(
+                    fake => fake.GetPlayerDepositedAmountAsync(
+                        It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+
+            moqPlayerServiceClient
+                .Verify(
+                    fake => fake.GetPlayerPropertiesAsync(
+                        It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+
+            moqVipLevelRepository.Verify(
+                fake => fake.GetVipLevelAsync(
+                    It.Is<Guid>(x => x == vipLevelId)),
+                Times.Exactly(1));
         }
 
         [Test]
