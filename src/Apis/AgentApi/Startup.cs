@@ -307,13 +307,7 @@ namespace TGS.Apis.AgentApi
                             || !httpContext.Request.Path.StartsWithSegments("/swagger")
                             && !httpContext.Request.Path.StartsWithSegments("/health")
                             && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                            && !new[]
-                            {
-                                "html",
-                                "ico",
-                                "png",
-                                "jpg"
-                            }.Any(
+                            && !new[] { "html", "ico", "png", "jpg" }.Any(
                                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                     };
                 });
