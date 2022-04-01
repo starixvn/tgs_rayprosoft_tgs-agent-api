@@ -128,7 +128,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 PlatformCharge = request.PlatformCharge,
                 CheckDividendActiveCount = request.CheckDividendActiveCount,
                 EnablePlayerIdentity = request.EnablePlayerIdentity,
-                AutoClearWageringRequirement = request.AutoClearWageringRequirement
+                AutoClearWageringRequirement = request.AutoClearWageringRequirement,
+                AutoClearWageringRequirementBalance = request.AutoClearWageringRequirementBalance
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
