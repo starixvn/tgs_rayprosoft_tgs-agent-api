@@ -3,14 +3,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Redis;
-using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using Tgs.ServiceUtility;
 using GetGPBalanceService =
     Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
         , TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceResponse[]>;

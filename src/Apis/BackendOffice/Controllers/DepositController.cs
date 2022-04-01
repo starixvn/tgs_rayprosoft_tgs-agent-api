@@ -249,7 +249,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.BrandId,
                 formId,
                 reviewResponse.ReviewResponse.ToReviewState(),
-                null,
+                reviewResponse.ActualAmount,
                 reviewResponse.Remark,
                 UserId,
                 Username);
