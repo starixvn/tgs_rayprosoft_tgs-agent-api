@@ -17,6 +17,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class ThirdPartyDepositController : ControllerBase
     {
         [HttpPost("malakipay", Name = "SubmitMalakiPayDepositRequest")]
+        [HttpPost("~/api/deposit/bank/malakipay", Name = "SubmitMalakiPayDepositRequest")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
