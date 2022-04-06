@@ -61,9 +61,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(query)
                     .ConfigureAwait(false);
             }
-            catch (CoreExceptions.InvalidCredentialsException)
+            catch (InvalidCredentialsException)
             {
-                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
+                throw new InvalidCredentialsException(Player.PasswordMismatched);
             }
 
             return new ChangePasswordResponse
@@ -192,7 +192,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<GetPlayerFromClientQuery, PlayerInfo> getPlayerQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
             [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {
@@ -200,7 +200,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
 
-            var query = new GetPlayerQuery(brandId, playerCode);
+            var query = new GetPlayerFromClientQuery(brandId, playerCode);
 
             var playerData = new PlayerData();
             try
