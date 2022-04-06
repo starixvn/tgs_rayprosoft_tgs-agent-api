@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.LicenseeMarket;
 using TGS.Services.BackOffice.Application.Models.ReportLicenseeMarket;
@@ -41,12 +40,12 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportLicenseeMarketQuerie
 
             return new()
             {
-                Datas = new PagedResponse<LicenseeMarketDataReportModel>
+                Datas = new()
                 {
                     TotalCount = response.Datas.TotalCount,
                     Items = response.Datas.Items.Select(x => new LicenseeMarketDataReportModel
                     {
-                        BarndId = x.BarndId,
+                        BrandId = x.BrandId,
                         BrandCode = x.BrandCode,
                         CurrencyCode = x.CurrencyCode,
                         RegisteredCount = x.RegisteredCount,

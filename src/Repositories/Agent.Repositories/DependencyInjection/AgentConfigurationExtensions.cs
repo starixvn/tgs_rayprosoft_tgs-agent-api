@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
             => configuration
                 .AddAgentRepository<AgentRepository>()
                 .AddBrandRepository<BrandRepository>()
-                .AddGameProviderRepository<GameProviderRepository>();
+                .AddGameProviderRepository<GameProviderRepository>()
+                .AddMaintenanceRedisRepository<MaintenanceRedisRepository>();
     }
 }

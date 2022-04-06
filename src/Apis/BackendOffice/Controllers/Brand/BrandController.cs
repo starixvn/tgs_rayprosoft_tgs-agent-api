@@ -5,8 +5,10 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.Controllers.Messages.BrandToken;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
+using TGS.Services.BackOffice.Application.Queries.BrandToken;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
@@ -71,6 +73,23 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         [Description("Get brands: 品牌商列表")]
         public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
             => _mediator.Send(request);
+
+        [HttpGet("token/{brandId}", Name = "GetBrandToken")]
+        [Description("Get a brand's token")]
+        public async Task<GetBrandTokenResponse> GetBrandTokenAsync(
+            Guid brandId,
+            [FromServices] IGetService<BrandTokenQuery, string> getService)
+        {
+            var query = new BrandTokenQuery(brandId);
+            var token = await getService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            return new GetBrandTokenResponse()
+            {
+                Token = token
+            };
+        }
 
         [HttpPut("logo", Name = "ModifyBrandLogoInfo")]
         public ValueTask ModifyBrandLogoInfoAsync(

@@ -7,14 +7,12 @@ namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
     {
         public Guid BrandId { get; init; }
 
-        public DateTimeOffset From { get; init; }
-
-        public bool? HasUpperAgent { get; init; }
+        public string Username { get; init; } = default!;
 
         public int? Level { get; init; }
 
-        public DateTimeOffset To { get; init; }
+        public DateTimeOffset From { get; init; }
 
-        public string Username { get; init; } = default!;
+        public DateTimeOffset To { get; init; }
     }
 }

@@ -22,6 +22,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAdjustPlayerAccountService _playerAdjustAccountService;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
+        private readonly ITransactionService _transactionService;
         private readonly ITgsLog _tgsLog;
 
         public PlayerIncreaseAmountHandler(
@@ -29,8 +30,9 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor,
-            ITgsLog tgsLog,
-            IAdjustPlayerAccountService playerAdjustAccountService) : base(accessor)
+            IAdjustPlayerAccountService playerAdjustAccountService,
+            ITransactionService transactionService,
+            ITgsLog tgsLog) : base(accessor)
         {
             if (accessor is null)
             {
@@ -46,6 +48,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
             _playerAdjustAccountService = playerAdjustAccountService ??
                 throw new ArgumentNullException(nameof(playerAdjustAccountService));
+            _transactionService = transactionService ??
+                throw new ArgumentNullException(nameof(transactionService));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -87,7 +91,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Amount,
                 request.Remark,
                 request.BucketAmount,
-                Username).ConfigureAwait(false);
+                Username,
+                request.IncludeInNetProfit).ConfigureAwait(false);
 
             if (request.Amount > 0M)
             {
@@ -97,7 +102,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     remark,
                     Guid.Parse(UserId)).ConfigureAwait(false);
 
+                var transaction = await _transactionService.GetTransactionAsync(x => x.Id == response.TransactionId);
+
                 record.TransactionId = response.TransactionId;
+                record.TransactionRecordedOn = transaction.RecordedOn;
 
                 await _playerAdjustAccountService.UpdateAdjustPlayerRecordAsync(record).ConfigureAwait(false);
 
@@ -124,33 +132,39 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async ValueTask<TransactionResponse> AdjustAsync(PlayerAdjustmentTransactionType type, Guid walletId,
-            decimal amount, string remark, Guid userId) => type switch
-        {
-            PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
-                .AdjustAgentAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false),
-            PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
-                .AdjustSystemAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false),
-            PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
-                .AdjustCompanyAsync(
-                    walletId,
-                    amount,
-                    remark,
-                    null,
-                    userId)
-                .ConfigureAwait(false)
-        };
+        private async ValueTask<TransactionResponse> AdjustAsync(
+            PlayerAdjustmentTransactionType type,
+            Guid walletId,
+            decimal amount,
+            string remark,
+            Guid userId)
+            => type switch
+            {
+                PlayerAdjustmentTransactionType.AgentAdjust => await _cashServiceClient
+                    .AdjustAgentAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                PlayerAdjustmentTransactionType.SystemAdjust => await _cashServiceClient
+                    .AdjustSystemAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                PlayerAdjustmentTransactionType.CompanyAdjust => await _cashServiceClient
+                    .AdjustCompanyAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
+                _ => throw new NotSupportedException()
+            };
     }
 }

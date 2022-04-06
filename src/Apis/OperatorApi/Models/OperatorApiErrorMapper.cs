@@ -50,7 +50,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.UserBanned] = "UserBanned",
                 [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
                 [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
-                [TgsApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName",
                 [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired",
                 [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw",
                 [TgsApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate"
@@ -92,7 +91,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
-                [TgsApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest,
                 [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest
@@ -136,7 +134,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
                 [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate,
                 [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
-                [typeof(ZeroNineNinePayDepositNeedRealNameException)] = TgsApiError.ZeroNineNinePayDepositNeedRealName,
                 [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired,
                 [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw,
                 [typeof(BrandPhoneDuplicateException)] = TgsApiError.BrandPhoneDuplicate

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,8 @@ namespace TGS.Apis.AgentApi.Middlewares
 {
     public sealed class VerifyCredentialsMiddleware
     {
+        private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
+
         private readonly RequestDelegate _next;
 
         public VerifyCredentialsMiddleware(RequestDelegate next)
@@ -29,6 +32,8 @@ namespace TGS.Apis.AgentApi.Middlewares
             IStatusValidator statusValidator,
             IJwtTokenHandler handler)
         {
+            using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
+
             if (!context.Request.Headers.TryGetValue("Authorization", out var values))
             {
                 throw new MissingTokenException("Missing Authorization Header");

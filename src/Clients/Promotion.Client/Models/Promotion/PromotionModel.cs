@@ -60,5 +60,7 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public DateTimeOffset UpdatedOn { get; set; }
 
         public int[] VipLevels { get; set; }
+
+        public int Number { get; set; }
     }
 }

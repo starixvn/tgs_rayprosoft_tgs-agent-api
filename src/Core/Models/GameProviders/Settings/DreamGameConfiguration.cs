@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.GameProviders.Settings.DreamGame;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
@@ -10,5 +11,7 @@ namespace TGS.Core.Models.GameProviders.Settings
         public string AgentName { get; init; } = default!;
 
         public string PlayerPassword { get; init; } = default!;
+
+        public DreamGameBetLimit[] BetLimits { get; init; }
     }
 }

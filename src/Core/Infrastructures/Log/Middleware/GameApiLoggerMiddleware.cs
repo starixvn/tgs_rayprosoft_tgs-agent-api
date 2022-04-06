@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -17,7 +16,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 {
     public sealed class GameApiLoggerMiddleware
     {
-        private const int _ResMessageSizeLimit = 1000012;
+        private const int _ResMessageSizeLimit = 8000;
 
         private static readonly string[] _BypassRouting =
         {

@@ -54,6 +54,19 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 .GetPlayerIpRecordsByLogin(player.BrandId, player.Username)
                 .FirstOrDefault();
 
+            var playerParentQuery = await _repository.PlayerParents.AsQueryable()
+                .Where(pp => pp.PlayerCode == request.PlayerCode)
+                .FirstOrDefaultAsync();
+
+            var parentUsername = string.Empty;
+            if (playerParentQuery != null)
+            {
+                var playerParent = await _service
+                    .GetPlayerAsync(p => p.PlayerCode == playerParentQuery.ParentPlayerCode)
+                    .ConfigureAwait(false);
+                parentUsername = playerParent.Username;
+            }
+
             return new GetPlayerResponse
             {
                 Valid = true,
@@ -90,7 +103,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     LastLoginIp = loginIp?.Ip ?? string.Empty,
                     LastLoginOn = loginIp?.RecordOn,
                     IdNumber = player.IdNumber,
-                    Remark = player.Remark
+                    Remark = player.Remark,
+                    ParentUsername = parentUsername
                 }
             };
         }

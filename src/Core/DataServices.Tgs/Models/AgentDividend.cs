@@ -69,6 +69,10 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal? BeforeDividendAmount { get; set; }
 
+        public decimal NoIncludeNetProfitCompanyAdjustAmount { get; set; }
+
+        public decimal NoIncludeNetProfitAgentAdjustAmount { get; set; }
+
         public DateTimeOffset? SentOn { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }

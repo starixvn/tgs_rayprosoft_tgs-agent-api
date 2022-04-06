@@ -18,8 +18,8 @@ namespace TGS.Services.Promotion.Handlers
 
         public GetPromotionsQueryHandler(
             IPromotionRepository service,
-            IHttpContextAccessor accessor) :
-            base(accessor)
+            IHttpContextAccessor accessor)
+            : base(accessor)
         {
             _service = service;
         }
@@ -63,7 +63,8 @@ namespace TGS.Services.Promotion.Handlers
                     DesktopBanner = x.DesktopBanner,
                     MobileBanner = x.MobileBanner,
                     LocalizationString = x.Localization,
-                    Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())
+                    Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new()),
+                    Number = x.DisplayOrder
                 })
                 .AsSingleQuery()
                 .CreatePagedResponseAsync(request)

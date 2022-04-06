@@ -22,5 +22,6 @@ namespace TGS.Services.Agent
         AgentStatus Status,
         AgentType Type,
         AgentLevelType AgentLevelType,
-        decimal DividendPercentage);
+        decimal DividendPercentage,
+        int PlayerNumber);
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.DreamGame;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -96,8 +97,69 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     VideoGameApiUrl = new Uri("https://ag.dg66.info"),
                     ApiKey = "974e8e9a072e4ad59a9e3f43a06ff9ae",
                     AgentName = "DGTE0105CO",
-                    PlayerPassword = "TgsP@ssw0rd"
-
+                    PlayerPassword = "TgsP@ssw0rd",
+                    BetLimits = new[] {
+                        new DreamGameBetLimit(){
+                            Currency="CNY",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="EUR",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="GBP",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="HKD",
+                            TableLimit="G"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="IDR_1000",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="INR",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="JPY",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="KRW",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="KRW",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="MYR",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="PHP",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="SGD",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="THB",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="USD",
+                            TableLimit="A"
+                        },
+                        new DreamGameBetLimit(){
+                            Currency="VND_1000",
+                            TableLimit="A"
+                        },
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

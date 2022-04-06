@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Redis;
@@ -13,14 +11,18 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
+using GetGPBalanceService =
+    Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
+        , TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceResponse[]>;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
     internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
     {
         private readonly IBrandService _brandService;
-        private readonly ILogger<ReviewDepositFormCommandService> _logger;
-        private readonly IMediator _mediator;
+
+        private readonly GetGPBalanceService _getPlayerGameProviderBalanceService;
+
         private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
@@ -33,9 +35,8 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             IPlayerBucketRepository playerBucketRepository,
             IPromotionClient promotionClient,
             IRedisConnectionFactory redisConnectionFactory,
-            ILogger<ReviewDepositFormCommandService> logger,
-            IMediator mediator,
-            IBrandService brandService)
+            IBrandService brandService,
+            GetGPBalanceService getPlayerGameProviderBalanceService)
         {
             if (redisConnectionFactory is null)
                 throw new ArgumentNullException(nameof(redisConnectionFactory));
@@ -47,9 +48,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
             _redisDatabase = redisConnectionFactory.GetConnection().GetDatabase();
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
+            _getPlayerGameProviderBalanceService = getPlayerGameProviderBalanceService ??
+                throw new ArgumentNullException(nameof(getPlayerGameProviderBalanceService));
         }
 
         public async ValueTask ExecuteAsync(
@@ -85,6 +86,26 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                             actualAmount: command.ActualAmount)
                         .ConfigureAwait(false);
 
+                if (command.Status == ReviewState.Approve)
+                {
+                    var brand = await _brandService.GetBrandAsync(x => x.Id == form.BrandId);
+
+                    if (brand.AutoClearWageringRequirement)
+                    {
+                        var playerAllBalances = await _getPlayerGameProviderBalanceService.GetAsync(
+                            new GetPlayerGameProviderBalanceCommand(form.PlayerCode),
+                            cancellationToken).ConfigureAwait(false);
+
+                        var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
+
+                        if (balance <= 1M)
+                        {
+                            await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode)
+                                .ConfigureAwait(false);
+                        }
+                    }
+                }
+
                 await _paymentServiceClient
                     .ReviewDepositFormAsync(
                         command.FormId,
@@ -96,23 +117,6 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 
                 if (command.Status == ReviewState.Approve)
                 {
-                    var brand = await _brandService.GetBrandAsync(x => x.Id == form.BrandId);
-
-                    if (brand.AutoClearWageringRequirement)
-                    {
-                        var playerAllBalances = await _mediator.Send(
-                            new GetPlayerGameProviderBalanceRequest(form.PlayerCode),
-                            cancellationToken).ConfigureAwait(false);
-
-                        var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
-
-                        if (balance <= 1M)
-                        {
-                            await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode)
-                                .ConfigureAwait(false);
-                        }
-                    }
-
                     var player = await _playerService
                         .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                         .ConfigureAwait(false);

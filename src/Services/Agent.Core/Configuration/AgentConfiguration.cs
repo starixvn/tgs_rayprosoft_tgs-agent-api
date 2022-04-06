@@ -36,6 +36,15 @@ namespace TGS.Services.Agent.Configuration
             return this;
         }
 
+        public AgentConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
+                    where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        {
+            Services
+                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+
+            return this;
+        }
+
         public AgentConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
             _ = Services.AddPaymentServiceClient(configure);
