@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.MaticPay;
@@ -30,6 +31,12 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BankDepositController : ControllerBase
     {
         private static readonly Random _Random = new Random();
+        private readonly ILogger<BankDepositController> _loger;
+
+        public BankDepositController(ILogger<BankDepositController> loger)
+        {
+            _loger = loger ?? throw new ArgumentNullException(nameof(loger));
+        }
 
         [HttpGet("help2pay/pay/{identityId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
@@ -531,19 +538,30 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
-        [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
+        [HttpPost("zeronineninepay")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+            [FromServices] ZeroNineNinePaySerializer serializer,
             [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+            var player = await getPlayerInfoService
+                .GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode))
+                .ConfigureAwait(false);
+
+            if (!player.IdentityAuthentication)
+                throw new ZeroNineNinePayDepositNeedRealNameException();
+
+            _loger.LogTrace($"zeronineninepay clientIp:{clientIp}");
 
             var brandPayment = await getBrandPaymentService
                 .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
