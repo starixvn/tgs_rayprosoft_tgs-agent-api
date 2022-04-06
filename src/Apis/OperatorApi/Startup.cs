@@ -29,6 +29,7 @@ using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
+using Tgs.Payment.ZeroNineNinePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -38,7 +39,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -234,7 +234,8 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>()
-                .AddSingleton<TuPaySerializer>();
+                .AddSingleton<TuPaySerializer>()
+                .AddSingleton<ZeroNineNinePaySerializer>();
 
             services
                 .AddMessageQueue()
