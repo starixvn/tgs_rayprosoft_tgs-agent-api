@@ -538,7 +538,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
         }
 
-        [HttpPost("zeronineninepay")]
+        [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
