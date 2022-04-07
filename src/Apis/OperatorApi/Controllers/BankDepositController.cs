@@ -585,7 +585,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         (ZeroNineNineDepositPayType)brandPaymentInfo.RootElement.GetProperty("payType").GetInt32(),
                         formId,
                         clientIp,
-                        PayerName: null)));
+                        player.RealName)));
 
             await createDepositFormService
                 .ExecuteAsync(command)
@@ -601,6 +601,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             var formData = await getDepositFormService
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
+
+            _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
 
             var applyInfo = JsonSerializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
 

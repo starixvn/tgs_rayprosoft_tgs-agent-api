@@ -30,6 +30,7 @@ using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
+using Tgs.Payment.ZeroNineNinePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -240,6 +241,7 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>()
+                .AddSingleton<ZeroNineNinePaySerializer>()
                 .AddSingleton<TuPaySerializer>()
                 .AddSingleton<MalakiPaySerializer>();
 
