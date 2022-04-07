@@ -65,7 +65,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
     <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.0.3" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.0" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
@@ -74,11 +74,11 @@
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.1-alpha" />
+    <PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
     <PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.15" />
-    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.10" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.22" />
+    <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.13" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,9 +15,9 @@
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.0.21" />
-    <PackageReference Include="Tgs.FileService.Client" Version="0.0.4" />
-    <PackageReference Include="Tgs.MessageQueue" Version="2.0.0" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.4.3" />
+    <PackageReference Include="Tgs.FileService.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.MessageQueue" Version="2.1.0" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.4.4" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.2.2" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
