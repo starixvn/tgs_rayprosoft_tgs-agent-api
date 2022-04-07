@@ -21,7 +21,6 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
-using Tgs.Payment.ApplePay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MalakiPay;
@@ -235,7 +234,6 @@ namespace TGS.Apis.OperatorApi
                 .Services
                 .AddSingleton<ManualDepositSerializer>()
                 .AddSingleton<PrimePaySerializer>()
-                .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
                 .AddSingleton<MaticPaySerializer>()
