@@ -245,6 +245,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.CheckDividendActiveCount = request.CheckDividendActiveCount;
             brand.EnablePlayerIdentity = request.EnablePlayerIdentity;
             brand.AutoClearWageringRequirement = request.AutoClearWageringRequirement;
+            brand.AutoClearWageringRequirementBalance = request.AutoClearWageringRequirementBalance;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 

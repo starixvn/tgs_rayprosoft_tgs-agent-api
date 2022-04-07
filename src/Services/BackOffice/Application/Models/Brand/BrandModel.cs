@@ -64,5 +64,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public bool EnablePlayerIdentity { get; set; }
 
         public bool AutoClearWageringRequirement { get; set; }
+
+        public decimal AutoClearWageringRequirementBalance { get; set; }
     }
 }
