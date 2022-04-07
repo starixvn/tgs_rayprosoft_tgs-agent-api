@@ -29,7 +29,7 @@ namespace TGS.Operator.Repositories
         {
             var dataKey = $"{_KeyPrefix}:{identityId}";
 
-            return await _database.StringSetAsync(dataKey, html, _Expire, When.NotExists)
+            return await _database.StringSetAsync(dataKey, html, _Expire, when: When.NotExists)
                 .ConfigureAwait(false);
         }
     }

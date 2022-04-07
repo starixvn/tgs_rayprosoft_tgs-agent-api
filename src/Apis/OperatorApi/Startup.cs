@@ -24,6 +24,7 @@ using Prometheus;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.MalakiPay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
@@ -239,7 +240,8 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>()
-                .AddSingleton<TuPaySerializer>();
+                .AddSingleton<TuPaySerializer>()
+                .AddSingleton<MalakiPaySerializer>();
 
             services
                 .AddMessageQueue()
