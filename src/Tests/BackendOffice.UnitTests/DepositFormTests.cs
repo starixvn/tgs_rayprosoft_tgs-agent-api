@@ -216,6 +216,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     Arg.Any<RedisKey>(),
                     Arg.Any<RedisValue>(),
                     Arg.Any<TimeSpan?>(),
+                    Arg.Any<bool>(),
                     Arg.Any<When>(),
                     Arg.Any<CommandFlags>())
                 .Returns(true);
