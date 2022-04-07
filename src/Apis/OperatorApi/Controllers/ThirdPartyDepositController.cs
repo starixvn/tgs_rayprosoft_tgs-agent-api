@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
-using Tgs.Payment.TuPay;
+using Tgs.Payment.MalakiPay;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] TuPaySerializer serializer,
+            [FromServices] MalakiPaySerializer serializer,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromBody] SubmitDepositRequest request)
@@ -45,7 +45,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 "tgs.payment.malakipay.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
-                    new TuPayDepositSettings(
+                    new MalakiPayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
@@ -66,7 +66,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(getDepositFormQuery)
                 .ConfigureAwait(false);
 
-            var applyInfo = serializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
+            var applyInfo = serializer.Deserialize<MalakiPayDepositApplyInfo>(formData.ApplyInfo!);
 
             var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                 createdFormId,
