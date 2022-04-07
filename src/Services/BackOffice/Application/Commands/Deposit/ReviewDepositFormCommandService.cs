@@ -3,16 +3,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using Tgs.Payment.Clients;
-using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Redis;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using GetGPBalanceService =
-    Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
+using Tgs.ServiceUtility;
+using GetGPBalanceService = Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
         , TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceResponse[]>;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
@@ -98,7 +97,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 
                         var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
 
-                        if (balance <= 1M)
+                        if (balance <= brand.AutoClearWageringRequirementBalance)
                         {
                             await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode)
                                 .ConfigureAwait(false);

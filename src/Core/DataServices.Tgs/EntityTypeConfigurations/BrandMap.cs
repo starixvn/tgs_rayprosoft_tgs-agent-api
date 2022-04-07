@@ -93,6 +93,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(9, 6)
                 .IsRequired();
 
+            builder.Property(c => c.AutoClearWageringRequirementBalance)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Brands)
                 .HasForeignKey(c => c.LicenseeId)

@@ -1394,6 +1394,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("auto_clear_wagering_requirement");
 
+                    b.Property<decimal>("AutoClearWageringRequirementBalance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("auto_clear_wagering_requirement_balance");
+
                     b.Property<bool>("AutoSentAgentBonus")
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_agent_bonus");
