@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             _ = builder.ToTable("player_properties");
 
-            _ = builder.HasKey(c => new { c.PlayerCode, c.Name });
+            _ = builder.HasKey(c => new { c.BrandId, c.PlayerCode, c.Name });
 
             _ = builder.Property(c => c.PlayerCode)
                 .HasMaxLength(16);
@@ -19,11 +19,23 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             _ = builder.Property(c => c.Name)
-                .HasMaxLength(64);
+                .HasMaxLength(256);
 
             _ = builder.Property(c => c.Value)
                 .IsRequired()
-                .HasMaxLength(128);
+                .HasMaxLength(512);
+
+            _ = builder.HasOne<Brand>()
+                 .WithMany()
+                 .HasForeignKey(c => c.BrandId)
+                 .HasConstraintName("fk_brand_player_property_brand_id")
+                 .OnDelete(DeleteBehavior.Cascade);
+
+            _ = builder.HasOne<Player>()
+                .WithMany()
+                .HasForeignKey(c => c.PlayerCode)
+                .HasConstraintName("fk_player_player_property_player_code")
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
