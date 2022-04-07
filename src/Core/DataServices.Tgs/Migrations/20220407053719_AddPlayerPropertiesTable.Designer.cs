@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220407051140_AddPlayerPropertiesTable")]
+    [Migration("20220407053719_AddPlayerPropertiesTable")]
     partial class AddPlayerPropertiesTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5088,6 +5088,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("name");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("Value")
                         .IsRequired()

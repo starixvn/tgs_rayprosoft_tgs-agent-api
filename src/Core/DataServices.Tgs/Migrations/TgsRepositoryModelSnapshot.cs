@@ -5087,6 +5087,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("name");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasMaxLength(128)

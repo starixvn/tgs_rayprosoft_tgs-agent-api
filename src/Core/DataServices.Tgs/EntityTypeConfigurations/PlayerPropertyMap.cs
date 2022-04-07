@@ -10,10 +10,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             _ = builder.ToTable("player_properties");
 
-            _ = builder.HasKey(c => new { c.PlayerCode, Type = c.Name });
+            _ = builder.HasKey(c => new { c.PlayerCode, c.Name });
 
             _ = builder.Property(c => c.PlayerCode)
                 .HasMaxLength(16);
+
+            _ = builder.Property(c => c.BrandId)
+                .IsRequired();
 
             _ = builder.Property(c => c.Name)
                 .HasMaxLength(64);
