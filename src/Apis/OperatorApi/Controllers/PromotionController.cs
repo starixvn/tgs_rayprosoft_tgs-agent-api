@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
-                SortBy = request.SortBy,
+                SortBy = "Number",
                 ShowAll = request.ShowAll
             };
             var response = await _client.GetValidPromotionsAsync(promotionsRequest);
@@ -80,8 +80,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Unlimited = item.Unlimited,
                     UpdatedByUsername = item.UpdatedByUsername,
                     UpdatedOn = item.UpdatedOn,
-                    VipLevels = item.VipLevels,
-                    Number = item.Number
+                    VipLevels = item.VipLevels
                 })
             };
         }

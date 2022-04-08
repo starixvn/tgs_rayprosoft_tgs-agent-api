@@ -59,7 +59,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public DateTimeOffset UpdatedOn { get; init; }
 
         public int[] VipLevels { get; init; }
-
-        public int Number { get; init; }
     }
 }
