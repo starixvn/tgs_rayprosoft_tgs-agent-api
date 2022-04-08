@@ -80,7 +80,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Unlimited = item.Unlimited,
                     UpdatedByUsername = item.UpdatedByUsername,
                     UpdatedOn = item.UpdatedOn,
-                    VipLevels = item.VipLevels
+                    VipLevels = item.VipLevels,
+                    Number = item.Number
                 })
             };
         }
