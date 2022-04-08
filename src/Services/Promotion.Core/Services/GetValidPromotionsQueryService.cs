@@ -58,7 +58,8 @@ namespace TGS.Services.Promotion.Services
                     Terms = x.Terms,
                     DesktopBanner = x.DesktopBanner,
                     MobileBanner = x.MobileBanner,
-                    Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())                    
+                    Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new()),
+                    Number = x.DisplayOrder
                 });
 
             return promotionQueryable.ToArray().ToAsyncEnumerable();
