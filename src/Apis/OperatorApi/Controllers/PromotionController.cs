@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
-                SortBy = request.SortBy,
+                SortBy = "Number",
                 ShowAll = request.ShowAll
             };
             var response = await _client.GetValidPromotionsAsync(promotionsRequest);
