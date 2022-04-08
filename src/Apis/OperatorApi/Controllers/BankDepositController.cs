@@ -604,7 +604,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
 
-            var applyInfo = JsonSerializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
+            var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
 
             if (applyInfo.Response.Code == 200)
             {
