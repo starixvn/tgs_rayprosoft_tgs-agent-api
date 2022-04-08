@@ -52,7 +52,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
                 [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired",
                 [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw",
-                [TgsApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate"
+                [TgsApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate",
+                [TgsApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -93,7 +94,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest,
-                [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest
+                [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest,
+                [TgsApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -136,7 +138,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
                 [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired,
                 [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw,
-                [typeof(BrandPhoneDuplicateException)] = TgsApiError.BrandPhoneDuplicate
+                [typeof(BrandPhoneDuplicateException)] = TgsApiError.BrandPhoneDuplicate,
+                [typeof(ZeroNineNinePayDepositNeedRealNameException)] = TgsApiError.ZeroNineNinePayDepositNeedRealName
             };
 
         public bool CanProcess(Exception exception)
