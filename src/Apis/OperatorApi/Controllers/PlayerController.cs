@@ -488,6 +488,24 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
+        /// Sets the telegram number.
+        /// </summary>
+        /// <param name="setTelegramService">The set telegram service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("telegram", Name = "SetTelegramId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetTelegramIdAsync(
+            [FromServices] ICommandService<SetTelegramCommand> setTelegramService,
+            [FromBody] SetTelegramIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetTelegramCommand(playerTokenData.PlayerCode, request.TelegramId);
+
+            await setTelegramService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Sets the we chat identifier.
         /// </summary>
         /// <param name="setWeChatService">The set we chat service.</param>

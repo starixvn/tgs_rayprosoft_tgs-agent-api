@@ -217,6 +217,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Set_Player_Telegram_Number_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetTelegramCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "TBH"
+            };
+
+            var command = new SetTelegramCommand(player.PlayerCode, "this_is_telegram_number");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                        It.Is<string>(x => x == player.PlayerCode),
+                        It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                            x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.Telegram)
+                            && x[PlayerPropertyName.Telegram] == command.TelegramId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
         public async Task Set_Player_WeChat_Number_Should_Success()
         {
             var moqPlayerOperations = new Mock<IPlayerOperations>();
