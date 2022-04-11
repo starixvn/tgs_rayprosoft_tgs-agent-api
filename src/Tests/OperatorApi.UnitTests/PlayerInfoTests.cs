@@ -184,6 +184,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Set_Player_Facebook_Messenger_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetFacebookMessengerCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetFacebookMessengerCommand(player.PlayerCode, "this_is_messenger_number");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.FacebookMessenger)
+                                && x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
         public async Task Set_Player_QQ_Number_Should_Success()
         {
             var moqPlayerOperations = new Mock<IPlayerOperations>();
@@ -195,7 +225,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "TBH"
+                DefaultWalletCurrencyCode = "THB"
             };
 
             var command = new SetQqCommand(player.PlayerCode, "this_is_qq_number");
@@ -228,7 +258,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "TBH"
+                DefaultWalletCurrencyCode = "THB"
             };
 
             var command = new SetTelegramCommand(player.PlayerCode, "this_is_telegram_number");
@@ -258,7 +288,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "TBH"
+                DefaultWalletCurrencyCode = "THB"
             };
 
             var command = new SetWeChatCommand(player.PlayerCode, "this_is_wechat_number");

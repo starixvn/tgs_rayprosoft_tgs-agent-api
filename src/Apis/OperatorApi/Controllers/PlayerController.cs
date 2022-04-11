@@ -450,6 +450,24 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
         /// <summary>
+        /// Sets the facebook messenger number.
+        /// </summary>
+        /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("facebookmessenger", Name = "SetFacebookMessengerId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetFacebookMessengerIdAsync(
+            [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
+            [FromBody] SetFacebookMessengerIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetFacebookMessengerCommand(playerTokenData.PlayerCode, request.FacebookMessenger);
+
+            await setFacebookMessengerService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Sets the player identity.
         /// </summary>
         /// <param name="setIdentityService">The set identity service.</param>
