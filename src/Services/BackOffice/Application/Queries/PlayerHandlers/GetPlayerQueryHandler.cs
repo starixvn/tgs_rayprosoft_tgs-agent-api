@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Json;
+using Tgs.PlayerService.Client;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -15,21 +15,23 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
 {
     public class GetPlayerQueryHandler : Handler<GetPlayerRequest, GetPlayerResponse>
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerIpService _playerIpService;
+        private readonly IPlayerServiceClient _playerServiceClient;
         private readonly ITgsRepository _repository;
         private readonly IPlayerService _service;
 
-        public GetPlayerQueryHandler(IPlayerService service, ITgsRepository repository, IHttpContextAccessor accessor,
+        public GetPlayerQueryHandler(
+            IPlayerService service,
+            ITgsRepository repository,
+            IHttpContextAccessor accessor,
             IPlayerIpService playerIpService,
-            IJsonSerializationProvider jsonSerializationProvider) :
-            base(accessor)
+            IPlayerServiceClient playerServiceClient)
+            : base(accessor)
         {
             _service = service;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _playerIpService = playerIpService ?? throw new ArgumentNullException(nameof(playerIpService));
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         }
 
         public override async Task<GetPlayerResponse> Handle(
@@ -67,6 +69,10 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 parentUsername = playerParent.Username;
             }
 
+            var playerProperties = await _playerServiceClient
+                .GetPlayerPropertiesAsync(player.PlayerCode)
+                .ConfigureAwait(false);
+
             return new GetPlayerResponse
             {
                 Valid = true,
@@ -94,7 +100,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         Id = p.Id,
                         PaymentChannelId = p.PaymentChannelId,
                         BankType = p.BankType,
-                        Detail = _jsonSerializationProvider.DeserializeFromString<JsonDocument>(p.Detail)
+                        Detail = JsonDocument.Parse(p.Detail)
                     }).ToArray(),
                     WageringRequirement = playerBuckets.Sum(p => p.BucketAmount)
                         - playerBuckets.Sum(p => p.CurrentBucketAmount),
