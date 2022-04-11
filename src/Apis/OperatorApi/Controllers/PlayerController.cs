@@ -524,6 +524,24 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
+        /// Sets the viber number.
+        /// </summary>
+        /// <param name="setViberSevice">The set viber service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("viber", Name = "SetViberId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetViderIdAsync(
+            [FromServices] ICommandService<SetViberCommand> setViberSevice,
+            [FromBody] SetViberIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetViberCommand(playerTokenData.PlayerCode, request.ViberId);
+
+            await setViberSevice.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Sets the we chat identifier.
         /// </summary>
         /// <param name="setWeChatService">The set we chat service.</param>

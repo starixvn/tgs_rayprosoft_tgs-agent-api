@@ -198,7 +198,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 DefaultWalletCurrencyCode = "THB"
             };
 
-            var command = new SetFacebookMessengerCommand(player.PlayerCode, "this_is_messenger_number");
+            var command = new SetFacebookMessengerCommand(player.PlayerCode, "this_is_messenger_id");
 
             await sut.ExecuteAsync(command);
 
@@ -273,6 +273,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
                             x.Count == 1
                             && x.ContainsKey(PlayerPropertyName.Telegram)
                             && x[PlayerPropertyName.Telegram] == command.TelegramId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_Viber_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetViberCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetViberCommand(player.PlayerCode, "this_is_viber_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.Viber)
+                                && x[PlayerPropertyName.Viber] == command.ViberId)),
                     Times.Exactly(1));
         }
 
