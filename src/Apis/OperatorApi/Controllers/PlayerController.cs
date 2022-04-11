@@ -192,7 +192,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerFromClientQuery, PlayerInfo> getPlayerQueryService,
+            [FromServices] IGetService<GetPlayerFromClientQuery, ClientPlayerInfo> getPlayerQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
             [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {
@@ -215,6 +215,11 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.VipLevel = player.VipLevel;
                 playerData.QQ = player.QQ;
                 playerData.Wechat = player.Wechat;
+                playerData.FacebookMessenger = player.FacebookMessenger;
+                playerData.Telegram = player.Telegram;
+                playerData.Line = player.Line;
+                playerData.WhatsApp = player.WhatsApp;
+                playerData.Viber = player.Viber;
                 playerData.IsSetPayPassword = player.IsSetPayPassword;
                 playerData.IdentityAuthentication = player.IdentityAuthentication;
                 playerData.IsAutoTransferToGame = await getAutoTransFlagService
@@ -227,14 +232,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
                 playerData.IdentityAuthenticationFormId = identityFormInfo.FormId;
 
-                if (player.IdentityAuthentication)
-                {
-                    playerData.IdentityAuthenticationFormStatus = PlayerIdentityReviewState.Approve;
-                }
-                else
-                {
-                    playerData.IdentityAuthenticationFormStatus = identityFormInfo.Status;
-                }
+                playerData.IdentityAuthenticationFormStatus = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status;
             }
             catch (CoreExceptions.PlayerNotFoundException)
             {

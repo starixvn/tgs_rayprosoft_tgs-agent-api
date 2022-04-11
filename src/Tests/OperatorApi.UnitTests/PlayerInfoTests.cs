@@ -142,45 +142,59 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 });
 
             _ = moqPlayerServiceClient
+                .Setup(fake => fake.GetPlayerDepositedAmountAsync(
+                    It.Is<string>(x => x == playerCode)))
+                .ReturnsAsync(1000m);
+
+            _ = moqPlayerServiceClient
                 .Setup(fake => fake.GetPlayerPropertiesAsync(
                     It.Is<string>(x => x == playerCode)))
                 .ReturnsAsync(new Dictionary<string, string?>
                 {
-                    ["RealName"] = null,
+                    ["RealName"] = "player1",
                     ["IdNumber"] = null,
                     ["Wechat"] = null,
                     ["QQ"] = null,
                     ["AreaCode"] = "+886",
                     ["Phone"] = "0921236478",
-                    ["Email"] = null
+                    ["Email"] = null,
+                    ["Line"] = "LineId"
                 });
+
+            _ = moqVipLevelRepository
+                .Setup(
+                    fake => fake.GetVipLevelAsync(
+                            It.Is<Guid>(x => x == vipLevelId)))
+                .ReturnsAsync(1);
+
+            var expected = new ClientPlayerInfo(
+                playerCode,
+                brandId,
+                1000m,
+                false,
+                true,
+                "0921236478",
+                "+886",
+                vipLevelId,
+                CoreEnums.PlayerStatus.Enabled,
+                playerCode,
+                "player1",
+                null,
+                1,
+                null,
+                null,
+                false,
+                null,
+                "LineId",
+                null,
+                null,
+                null);
 
             var query = new GetPlayerFromClientQuery(brandId, playerCode);
 
-            _ = await sut.GetAsync(query).ConfigureAwait(false);
+            var actual = await sut.GetAsync(query).ConfigureAwait(false);
 
-            moqPlayerServiceClient
-                .Verify(
-                    fake => fake.GetPlayerInfoAsync(
-                        It.Is<string>(x => x == playerCode)),
-                    Times.Exactly(1));
-
-            moqPlayerServiceClient
-                .Verify(
-                    fake => fake.GetPlayerDepositedAmountAsync(
-                        It.Is<string>(x => x == playerCode)),
-                    Times.Exactly(1));
-
-            moqPlayerServiceClient
-                .Verify(
-                    fake => fake.GetPlayerPropertiesAsync(
-                        It.Is<string>(x => x == playerCode)),
-                    Times.Exactly(1));
-
-            moqVipLevelRepository.Verify(
-                fake => fake.GetVipLevelAsync(
-                    It.Is<Guid>(x => x == vipLevelId)),
-                Times.Exactly(1));
+            Assert.AreEqual(expected, actual);
         }
 
         [Test]

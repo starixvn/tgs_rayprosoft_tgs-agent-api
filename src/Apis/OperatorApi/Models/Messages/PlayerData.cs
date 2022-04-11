@@ -44,5 +44,20 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("wechat")]
         public string Wechat { get; set; }
+
+        [JsonPropertyName("facebookmessenger")]
+        public string FacebookMessenger { get; set; }
+
+        [JsonPropertyName("line")]
+        public string Line { get; set; }
+
+        [JsonPropertyName("viber")]
+        public string Viber { get; set; }
+
+        [JsonPropertyName("telegram")]
+        public string Telegram { get; set; }
+
+        [JsonPropertyName("whatsapp")]
+        public string WhatsApp { get; set; }
     }
 }

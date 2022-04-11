@@ -8,7 +8,7 @@ using CoreEnums = TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    internal class GetPlayerFromClientQueryService : IGetService<GetPlayerFromClientQuery, PlayerInfo>
+    internal class GetPlayerFromClientQueryService : IGetService<GetPlayerFromClientQuery, ClientPlayerInfo>
     {
         private readonly IPlayerServiceClient _playerServiceClient;
         private readonly IVipLevelRepository _vipLevelRepository;
@@ -21,7 +21,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             _vipLevelRepository = vipLevelRepository ?? throw new ArgumentNullException(nameof(vipLevelRepository));
         }
 
-        public async ValueTask<PlayerInfo> GetAsync(
+        public async ValueTask<ClientPlayerInfo> GetAsync(
             GetPlayerFromClientQuery query,
             CancellationToken cancellationToken = default)
         {
@@ -57,7 +57,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                     .ConfigureAwait(false)
                 : null;
 
-            return new PlayerInfo(
+            return new ClientPlayerInfo(
                 player.PlayerCode,
                 player.BrandId,
                 depositedAmount,
@@ -73,7 +73,12 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 vipLevel ?? 0,
                 properties.GetValueOrDefault("QQ"),
                 properties.GetValueOrDefault("Wechat"),
-                player.IsSetPayPassword);
+                player.IsSetPayPassword,
+                properties.GetValueOrDefault("FacebookMessenger"),
+                properties.GetValueOrDefault("Line"),
+                properties.GetValueOrDefault("Viber"),
+                properties.GetValueOrDefault("Telegram"),
+                properties.GetValueOrDefault("WhatsApp"));
         }
     }
 }
