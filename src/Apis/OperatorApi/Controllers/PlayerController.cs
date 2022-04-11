@@ -454,7 +454,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
         /// <param name="request">The request.</param>
-        [HttpPatch("facebookmessenger", Name = "SetFacebookMessengerId")]
+        [HttpPatch("fb", Name = "SetFacebookMessengerId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SetFacebookMessengerIdAsync(
             [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
