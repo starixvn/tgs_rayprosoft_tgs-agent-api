@@ -368,5 +368,35 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         It.IsAny<DateTimeOffset>()),
                     Times.Exactly(1));
         }
+
+        [Test]
+        public async Task Set_Player_WhatsApp_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetWhatsAppCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetWhatsAppCommand(player.PlayerCode, "this_is_whatsapp_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.WhatsApp)
+                                && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId)),
+                    Times.Exactly(1));
+        }
     }
 }

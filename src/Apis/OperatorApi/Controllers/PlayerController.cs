@@ -450,13 +450,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
         /// <summary>
-        /// Sets the facebook messenger number.
+        /// Sets the Facebook Messenger id.
         /// </summary>
         /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
         /// <param name="request">The request.</param>
         [HttpPatch("facebookmessenger", Name = "SetFacebookMessengerId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetFacebookMessengerIdAsync(
+        public async ValueTask SetFacebookMessengerIdAsync(
             [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
             [FromBody] SetFacebookMessengerIdRequest request)
         {
@@ -465,6 +465,24 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new SetFacebookMessengerCommand(playerTokenData.PlayerCode, request.FacebookMessenger);
 
             await setFacebookMessengerService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the Line id.
+        /// </summary>
+        /// <param name="setLineService">The set line service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("line", Name = "SetLineId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetLineIdAsync(
+            [FromServices] ICommandService<SetLineCommand> setLineService,
+            [FromBody] SetLineIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
+
+            await setLineService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -488,7 +506,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the qq number.
+        /// Sets the QQ number.
         /// </summary>
         /// <param name="setQqService">The set qq service.</param>
         /// <param name="request">The request.</param>
@@ -506,13 +524,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the telegram number.
+        /// Sets the Telegram number.
         /// </summary>
         /// <param name="setTelegramService">The set telegram service.</param>
         /// <param name="request">The request.</param>
         [HttpPatch("telegram", Name = "SetTelegramId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetTelegramIdAsync(
+        public async ValueTask SetTelegramIdAsync(
             [FromServices] ICommandService<SetTelegramCommand> setTelegramService,
             [FromBody] SetTelegramIdRequest request)
         {
@@ -524,13 +542,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the viber number.
+        /// Sets the Viber id.
         /// </summary>
         /// <param name="setViberService">The set viber service.</param>
         /// <param name="request">The request.</param>
         [HttpPatch("viber", Name = "SetViberId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetViderIdAsync(
+        public async ValueTask SetViberIdAsync(
             [FromServices] ICommandService<SetViberCommand> setViberService,
             [FromBody] SetViberIdRequest request)
         {
@@ -542,25 +560,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the line id.
-        /// </summary>
-        /// <param name="setLineService">The set line service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("line", Name = "SetLineId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetViderIdAsync(
-            [FromServices] ICommandService<SetLineCommand> setLineService,
-            [FromBody] SetLineIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
-
-            await setLineService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the we chat identifier.
+        /// Sets the WeChat id.
         /// </summary>
         /// <param name="setWeChatService">The set we chat service.</param>
         /// <param name="request">The request.</param>
@@ -575,6 +575,24 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
 
             await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the WhatsApp id.
+        /// </summary>
+        /// <param name="setWhatsAppService">The set line service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("whatsapp", Name = "SetWhatsAppId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetWhatsAppIdAsync(
+            [FromServices] ICommandService<SetWhatsAppCommand> setWhatsAppService,
+            [FromBody] SetWhatsAppIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetWhatsAppCommand(playerTokenData.PlayerCode, request.WhatsAppId);
+
+            await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
