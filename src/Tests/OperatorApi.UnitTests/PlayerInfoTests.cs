@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using Tgs.PlayerService.Client;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using CoreEnums = TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Player;
+using CoreEnums = TGS.Core.Models.Enums;
 using PlayerInfo = TGS.Services.Operator.PlayerInfo;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -210,6 +210,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
                                 x.Count == 1
                                 && x.ContainsKey(PlayerPropertyName.FacebookMessenger)
                                 && x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_Line_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetLineCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetLineCommand(player.PlayerCode, "this_is_line_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.Line)
+                                && x[PlayerPropertyName.Line] == command.LineId)),
                     Times.Exactly(1));
         }
 

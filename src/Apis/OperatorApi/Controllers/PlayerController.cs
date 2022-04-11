@@ -526,19 +526,37 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Sets the viber number.
         /// </summary>
-        /// <param name="setViberSevice">The set viber service.</param>
+        /// <param name="setViberService">The set viber service.</param>
         /// <param name="request">The request.</param>
         [HttpPatch("viber", Name = "SetViberId")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task SetViderIdAsync(
-            [FromServices] ICommandService<SetViberCommand> setViberSevice,
+            [FromServices] ICommandService<SetViberCommand> setViberService,
             [FromBody] SetViberIdRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var command = new SetViberCommand(playerTokenData.PlayerCode, request.ViberId);
 
-            await setViberSevice.ExecuteAsync(command).ConfigureAwait(false);
+            await setViberService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the line id.
+        /// </summary>
+        /// <param name="setLineService">The set line service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("line", Name = "SetLineId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task SetViderIdAsync(
+            [FromServices] ICommandService<SetLineCommand> setLineService,
+            [FromBody] SetLineIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
+
+            await setLineService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
