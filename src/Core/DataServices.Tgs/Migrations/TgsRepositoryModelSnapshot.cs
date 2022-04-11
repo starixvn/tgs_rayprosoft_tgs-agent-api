@@ -3969,6 +3969,60 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("payment_channels");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentHandlingFee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<decimal>("Fee")
+                        .HasColumnType("numeric")
+                        .HasColumnName("fee");
+
+                    b.Property<Guid>("FormId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("form_id");
+
+                    b.Property<DateTime>("RecordedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("remark");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_payment_handling_fees_id");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_payment_handling_fees_brand_id");
+
+                    b.HasIndex("FormId")
+                        .HasDatabaseName("ix_payment_handling_fees_form_id")
+                        .IncludeProperties(new[] { "Amount", "Fee", "RecordedOn" });
+
+                    b.HasIndex("RecordedOn", "FormId")
+                        .HasDatabaseName("ix_payment_handling_fees_recorded_on_form_id")
+                        .IncludeProperties(new[] { "Amount", "Fee" });
+
+                    b.ToTable("payment_handling_fees");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentMethod", b =>
                 {
                     b.Property<Guid>("Id")
@@ -8219,6 +8273,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("GameProvider");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentHandlingFee", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_payment_handling_fees_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PaymentMethodChannel", b =>
