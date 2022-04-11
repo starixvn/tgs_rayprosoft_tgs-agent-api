@@ -115,86 +115,81 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Query_Player_Info_Should_Success()
+        public async Task Query_Player_Info_Should_Call_Get_Player_Main_Data()
         {
             var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
-            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
 
-            var sut = new GetPlayerFromClientQueryService(moqPlayerServiceClient.Object, moqVipLevelRepository.Object);
+            var sut = new GetPlayerMainDataQueryService(moqPlayerServiceClient.Object);
 
             var playerCode = "abcdef123456";
-            var brandId = Guid.NewGuid();
+
+            var query = new GetPlayerMainDataQuery(playerCode);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.GetPlayerInfoAsync(
+                            It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Call_Get_Player_Properties()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new GetPlayerPropertiesQueryService(moqPlayerServiceClient.Object);
+
+            var playerCode = "abcdef123456";
+
+            var query = new GetPlayerPropertiesQuery(playerCode);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.GetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Get_Player_VipLevel_When_VipLevelId_Is_Not_Null()
+        {
+            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
+
+            var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
+
             var vipLevelId = Guid.NewGuid();
 
-            _ = moqPlayerServiceClient
-                .Setup(fake => fake.GetPlayerInfoAsync(
-                    It.Is<string>(x => x == playerCode)))
-                .ReturnsAsync(new Tgs.PlayerService.Client.PlayerInfo
-                {
-                    BrandId = brandId,
-                    PlayerCode = playerCode,
-                    IdentityAuthentication = false,
-                    IsSetPayPassword = false,
-                    PhoneAuthentication = true,
-                    Status = PlayerStatus.Enabled,
-                    Username = playerCode,
-                    VipLevelId = vipLevelId
-                });
+            var query = new GetPlayerVipLevelQuery(vipLevelId);
 
-            _ = moqPlayerServiceClient
-                .Setup(fake => fake.GetPlayerDepositedAmountAsync(
-                    It.Is<string>(x => x == playerCode)))
-                .ReturnsAsync(1000m);
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
 
-            _ = moqPlayerServiceClient
-                .Setup(fake => fake.GetPlayerPropertiesAsync(
-                    It.Is<string>(x => x == playerCode)))
-                .ReturnsAsync(new Dictionary<string, string?>
-                {
-                    ["RealName"] = "player1",
-                    ["IdNumber"] = null,
-                    ["Wechat"] = null,
-                    ["QQ"] = null,
-                    ["AreaCode"] = "+886",
-                    ["Phone"] = "0921236478",
-                    ["Email"] = null,
-                    ["Line"] = "LineId"
-                });
+            moqVipLevelRepository
+                .Verify(fake =>
+                        fake.GetVipLevelAsync(
+                            It.Is<Guid>(x => x == vipLevelId)),
+                    Times.Exactly(1));
+        }
 
-            _ = moqVipLevelRepository
-                .Setup(
-                    fake => fake.GetVipLevelAsync(
-                            It.Is<Guid>(x => x == vipLevelId)))
-                .ReturnsAsync(1);
+        [Test]
+        public async Task Query_Player_Info_Should_Not_Get_Player_VipLevel_When_VipLevelId_Is_Null()
+        {
+            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
 
-            var expected = new ClientPlayerInfo(
-                playerCode,
-                brandId,
-                1000m,
-                false,
-                true,
-                "0921236478",
-                "+886",
-                vipLevelId,
-                CoreEnums.PlayerStatus.Enabled,
-                playerCode,
-                "player1",
-                null,
-                1,
-                null,
-                null,
-                false,
-                null,
-                "LineId",
-                null,
-                null,
-                null);
+            var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
 
-            var query = new GetPlayerFromClientQuery(brandId, playerCode);
+            var query = new GetPlayerVipLevelQuery(null);
 
-            var actual = await sut.GetAsync(query).ConfigureAwait(false);
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
 
-            Assert.AreEqual(expected, actual);
+            moqVipLevelRepository
+                .Verify(fake =>
+                        fake.GetVipLevelAsync(
+                            It.IsAny<Guid>()),
+                    Times.Never);
         }
 
         [Test]
