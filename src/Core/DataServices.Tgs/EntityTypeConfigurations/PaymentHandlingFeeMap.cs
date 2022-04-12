@@ -20,6 +20,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(phf => phf.Id)
                 .IsRequired();
+            builder.Property(phf => phf.Type)
+                .IsRequired();
             builder.Property(phf => phf.Amount)
                 .IsRequired();
             builder.Property(phf => phf.Fee)
