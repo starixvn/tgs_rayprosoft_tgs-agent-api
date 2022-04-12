@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +20,7 @@ using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Vip;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -191,57 +194,65 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerFromClientQuery, PlayerInfo> getPlayerQueryService,
+        public async ValueTask<IReadOnlyDictionary<string, object>> GetPlayerAsync(
+            [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
+            [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
+            [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>> getPlayerPropertiesQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
             [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {
-            var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
 
-            var query = new GetPlayerFromClientQuery(brandId, playerCode);
+            var player = await getPlayerMainDataQueryService
+                .GetAsync(new GetPlayerMainDataQuery(playerCode))
+                .ConfigureAwait(false);
 
-            var playerData = new PlayerData();
-            try
+            if (player == null)
             {
-                var player = await getPlayerQueryService.GetAsync(query).ConfigureAwait(false);
-
-                playerData.PlayerCode = player.PlayerCode;
-                playerData.Username = player.UserName;
-                playerData.RealName = player.RealName;
-                playerData.Email = player.Email;
-                playerData.Phone = player.Phone;
-                playerData.VipLevel = player.VipLevel;
-                playerData.QQ = player.QQ;
-                playerData.Wechat = player.Wechat;
-                playerData.IsSetPayPassword = player.IsSetPayPassword;
-                playerData.IdentityAuthentication = player.IdentityAuthentication;
-                playerData.IsAutoTransferToGame = await getAutoTransFlagService
-                    .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
-                    .ConfigureAwait(false);
-
-                var identityFormInfo = await getIdentityFormStatusService
-                    .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
-                    .ConfigureAwait(false);
-
-                playerData.IdentityAuthenticationFormId = identityFormInfo.FormId;
-
-                if (player.IdentityAuthentication)
-                {
-                    playerData.IdentityAuthenticationFormStatus = PlayerIdentityReviewState.Approve;
-                }
-                else
-                {
-                    playerData.IdentityAuthenticationFormStatus = identityFormInfo.Status;
-                }
-            }
-            catch (CoreExceptions.PlayerNotFoundException)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(query.PlayerCode, Player.NotFound);
+                throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
             }
 
-            return new GetPlayerResponse { Data = playerData };
+            var vipLevel = await getPlayerVipLevelQueryService
+                .GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
+                .ConfigureAwait(false);
+
+            var playerProperties = await getPlayerPropertiesQueryService
+                .GetAsync(new GetPlayerPropertiesQuery(playerCode))
+                .ConfigureAwait(false);
+
+            var isAutoTransferToGame = await getAutoTransFlagService
+                .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
+                .ConfigureAwait(false);
+
+            var identityFormInfo = await getIdentityFormStatusService
+                .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
+                .ConfigureAwait(false);
+
+            var data = new Dictionary<string, object>
+            {
+                ["playercode"] = player.PlayerCode,
+                ["identityauthentication"] = player.IdentityAuthentication,
+                ["identityformstatus"] = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status,
+                ["identityformid"] = identityFormInfo.FormId,
+                ["autotransfertogame"] = isAutoTransferToGame,
+                ["issetpaypassword"] = player.IsSetPayPassword,
+                ["username"] = player.Username,
+                ["viplevel"] = vipLevel,
+                ["realname"] = playerProperties.GetValueOrDefault("RealName"),
+                ["email"] = playerProperties.GetValueOrDefault("Email"),
+                ["phone"] = playerProperties.GetValueOrDefault("Phone"),
+                ["areacode"] = playerProperties.GetValueOrDefault("AreaCode"),
+                ["qq"] = playerProperties.GetValueOrDefault("QQ"),
+                ["wechat"] = playerProperties.GetValueOrDefault("Wechat"),
+                ["facebookmessenger"] = playerProperties.GetValueOrDefault("FacebookMessenger"),
+                ["line"] = playerProperties.GetValueOrDefault("Line"),
+                ["viber"] = playerProperties.GetValueOrDefault("Viber"),
+                ["telegram"] = playerProperties.GetValueOrDefault("Telegram"),
+                ["whatsapp"] = playerProperties.GetValueOrDefault("WhatsApp"),
+            };
+
+            return data;
         }
 
         /// <summary>
@@ -450,6 +461,42 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
         /// <summary>
+        /// Sets the Facebook Messenger id.
+        /// </summary>
+        /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("fb", Name = "SetFacebookMessengerId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetFacebookMessengerIdAsync(
+            [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
+            [FromBody] SetFacebookMessengerIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetFacebookMessengerCommand(playerTokenData.PlayerCode, request.FacebookMessenger);
+
+            await setFacebookMessengerService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the Line id.
+        /// </summary>
+        /// <param name="setLineService">The set line service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("line", Name = "SetLineId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetLineIdAsync(
+            [FromServices] ICommandService<SetLineCommand> setLineService,
+            [FromBody] SetLineIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
+
+            await setLineService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Sets the player identity.
         /// </summary>
         /// <param name="setIdentityService">The set identity service.</param>
@@ -470,7 +517,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the qq number.
+        /// Sets the QQ number.
         /// </summary>
         /// <param name="setQqService">The set qq service.</param>
         /// <param name="request">The request.</param>
@@ -488,7 +535,43 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the we chat identifier.
+        /// Sets the Telegram number.
+        /// </summary>
+        /// <param name="setTelegramService">The set telegram service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("telegram", Name = "SetTelegramId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetTelegramIdAsync(
+            [FromServices] ICommandService<SetTelegramCommand> setTelegramService,
+            [FromBody] SetTelegramIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetTelegramCommand(playerTokenData.PlayerCode, request.TelegramId);
+
+            await setTelegramService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the Viber id.
+        /// </summary>
+        /// <param name="setViberService">The set viber service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("viber", Name = "SetViberId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetViberIdAsync(
+            [FromServices] ICommandService<SetViberCommand> setViberService,
+            [FromBody] SetViberIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetViberCommand(playerTokenData.PlayerCode, request.ViberId);
+
+            await setViberService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the WeChat id.
         /// </summary>
         /// <param name="setWeChatService">The set we chat service.</param>
         /// <param name="request">The request.</param>
@@ -503,6 +586,24 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
 
             await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sets the WhatsApp id.
+        /// </summary>
+        /// <param name="setWhatsAppService">The set line service.</param>
+        /// <param name="request">The request.</param>
+        [HttpPatch("whatsapp", Name = "SetWhatsAppId")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetWhatsAppIdAsync(
+            [FromServices] ICommandService<SetWhatsAppCommand> setWhatsAppService,
+            [FromBody] SetWhatsAppIdRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetWhatsAppCommand(playerTokenData.PlayerCode, request.WhatsAppId);
+
+            await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>

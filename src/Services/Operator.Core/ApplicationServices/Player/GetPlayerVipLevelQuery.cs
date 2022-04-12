@@ -2,5 +2,5 @@
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    public record GetPlayerFromClientQuery(Guid BrandId, string PlayerCode);
+    public record GetPlayerVipLevelQuery(Guid? VipLevelId);
 }
