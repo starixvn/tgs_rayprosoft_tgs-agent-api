@@ -31,8 +31,6 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
-using Microsoft.Extensions.Logging;
-using Tgs.Logging;
 
 namespace TGS.Apis.BackendOffice
 {
@@ -40,7 +38,8 @@ namespace TGS.Apis.BackendOffice
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration) => _configuration = configuration;
+        public Startup(IConfiguration configuration)
+            => _configuration = configuration;
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -91,8 +90,8 @@ namespace TGS.Apis.BackendOffice
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDataProtection();
-            services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp
+            _ = services.AddDataProtection();
+            _ = services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp
                 => new ConfigureNamedOptions<KeyManagementOptions>(
                     string.Empty,
                     options =>
@@ -102,7 +101,7 @@ namespace TGS.Apis.BackendOffice
                             "Tgs:Bo-Api:DataProtection");
                     }));
 
-            services
+            _ = services
                 .AddRedis((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -110,14 +109,14 @@ namespace TGS.Apis.BackendOffice
                     options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
                 });
 
-            services
+            _ = services
                 .AddBackendOfficeServices(_configuration)
                 .AddBackendOfficeRepositories(
                     sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddMessageQueue()
                 .AddNatsMessageQueue(config =>
                 {
-                    config
+                    _ = config
                         .ConfigQueueOptions((options, sp) =>
                         {
                             var configuration = sp.GetRequiredService<IConfiguration>();
@@ -143,7 +142,7 @@ namespace TGS.Apis.BackendOffice
                 })
                 .AddNatsGlobPatternExchange("*");
 
-            services.AddPaymentServiceClient((options, sp) =>
+            _ = services.AddPaymentServiceClient((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
@@ -156,13 +155,13 @@ namespace TGS.Apis.BackendOffice
                 };
             });
 
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-            services
+            _ = services
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);
 
-            services
+            _ = services
                 .AddControllers(options =>
                 {
                     var policy = new AuthorizationPolicyBuilder()
@@ -175,7 +174,7 @@ namespace TGS.Apis.BackendOffice
                 .AddDataAnnotationsLocalization()
                 .AddFluentValidation(c =>
                 {
-                    c.RegisterValidatorsFromAssembly(
+                    _ = c.RegisterValidatorsFromAssembly(
                         Assembly.GetExecutingAssembly(),
                         lifetime: ServiceLifetime.Scoped);
                 })
@@ -185,17 +184,17 @@ namespace TGS.Apis.BackendOffice
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 });
 
-            services
+            _ = services
                 .AddHealthChecks()
                 .ForwardToPrometheus();
 
-            services.AddAntiforgery(options =>
+            _ = services.AddAntiforgery(options =>
             {
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.HeaderName = Consts.BackendOffice.CsrfTokenName;
             });
 
-            services
+            _ = services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -211,28 +210,34 @@ namespace TGS.Apis.BackendOffice
                     };
                 });
 
-            services.AddFileServiceClient((sp, httpClient) =>
+            _ = services.AddFileServiceClient((sp, httpClient) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
                 httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
-            services.AddGameProvidersPluggableServerClient((options, sp) =>
+            _ = services.AddGameProvidersPluggableServerClient((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
                 options.BaseUrl = config.GetValue<Uri>("BackOffice:GameProvidersPluggableBaseUrl");
             });
 
-            services.AddDomainSettingClient((options, sp) =>
+            _ = services.AddDomainSettingClient((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
                 options.DomainSettingBaseAddress = config.GetValue<Uri>("BackOffice:DomainSettingBaseAddress");
             });
 
-            services.AddSwaggerGen(c =>
+            _ = services.AddPlayerServiceClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                options.BaseUrl = config.GetValue<Uri>("BackOffice:PlayerServiceBaseUrl");
+            });
+
+            _ = services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",
                     new OpenApiInfo
@@ -252,7 +257,7 @@ namespace TGS.Apis.BackendOffice
                 }
             });
 
-            services
+            _ = services
                 .AddOptions<OtlpExporterOptions>()
                 .Configure<IConfiguration>((options, conifg) =>
                 {
@@ -264,7 +269,7 @@ namespace TGS.Apis.BackendOffice
                     conifg.GetSection("Opentelemetry:Tracing").Bind(options);
                 });
 
-            services
+            _ = services
                 .AddOpenTelemetryTracing(
                     builder => builder
                         .SetResourceBuilder(ResourceBuilder.CreateDefault()
@@ -297,7 +302,8 @@ namespace TGS.Apis.BackendOffice
                                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                     };
                 });
-            services.AddProfileViewer();
+
+            _ = services.AddProfileViewer();
         }
     }
 }

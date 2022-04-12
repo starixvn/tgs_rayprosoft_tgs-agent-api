@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -38,7 +39,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             GetPlayerRequest request,
             CancellationToken cancellationToken)
         {
-            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
+            var player = await _service
+                .GetPlayerAsync(p => p.PlayerCode == request.PlayerCode)
+                .ConfigureAwait(false);
 
             if (player == null)
             {
@@ -47,18 +50,21 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
 
             var playerBuckets = await _repository.PlayerBuckets.AsQueryable()
                 .Where(x => x.PlayerCode == player.PlayerCode)
-                .ToArrayAsync(cancellationToken);
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var registerIp = _playerIpService
                 .GetPlayerIpRecordsByRegister(player.BrandId, player.Username)
                 .FirstOrDefault();
+
             var loginIp = _playerIpService
                 .GetPlayerIpRecordsByLogin(player.BrandId, player.Username)
                 .FirstOrDefault();
 
             var playerParentQuery = await _repository.PlayerParents.AsQueryable()
                 .Where(pp => pp.PlayerCode == request.PlayerCode)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
             var parentUsername = string.Empty;
             if (playerParentQuery != null)
@@ -66,6 +72,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 var playerParent = await _service
                     .GetPlayerAsync(p => p.PlayerCode == playerParentQuery.ParentPlayerCode)
                     .ConfigureAwait(false);
+
                 parentUsername = playerParent.Username;
             }
 
@@ -87,14 +94,17 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     StatusName = player.Status.ToString(),
                     RegisteredOn = player.RegisteredOn,
                     AgentUsername = player.Agent?.Username,
-                    Balance = player.Wallets.FirstOrDefault() == null
-                        ? 0
-                        : player.Wallets.FirstOrDefault().Balance,
+                    Balance = player.Wallets.FirstOrDefault()?.Balance ?? 0,
                     AreaCode = player.AreaCode,
                     Phone = player.Phone,
                     Email = player.Email,
                     QQ = player.QQ,
                     WeChat = player.Wechat,
+                    Line = playerProperties.GetValueOrDefault("Line"),
+                    Viber = playerProperties.GetValueOrDefault("Viber"),
+                    FacebookMessenger = playerProperties.GetValueOrDefault("FacebookMessenger"),
+                    Telegram = playerProperties.GetValueOrDefault("Telegram"),
+                    WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
                     Banks = player.Banks.Select(p => new PlayerModel.BankModel
                     {
                         Id = p.Id,
