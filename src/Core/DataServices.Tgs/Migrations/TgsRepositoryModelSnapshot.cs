@@ -4003,6 +4003,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("remark");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("type");
 
