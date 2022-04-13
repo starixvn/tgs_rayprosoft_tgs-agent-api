@@ -146,41 +146,26 @@ namespace TGS.Services.Operations
 
         #region Private Methods
 
-        public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+            => _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
 
-        public async Task SetIdentityAsync(
+        public Task SetIdentityAsync(
             string playerCode,
             string realName,
             string identity,
             bool isAuthenticate,
             DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+            => _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
 
-        public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
+        public Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
             DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+            => _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
 
-        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+            => _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
 
-        public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
+            => _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
 
         private async Task CachePlayerAsync(string playerCode, CachedPlayer player)
         {
