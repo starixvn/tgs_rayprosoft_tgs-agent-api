@@ -16,7 +16,6 @@ namespace TGS.Services.Operations
 {
     public sealed class PlayerOperations : IPlayerOperations
     {
-        private readonly IAgentQueries _agentQueries;
         private readonly IRedisCacheManager _cacheManager;
 
         private readonly IPlayerOperations _interface;
@@ -28,7 +27,6 @@ namespace TGS.Services.Operations
         public PlayerOperations(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            IAgentQueries agentQueries,
             Func<IWalletQueries> walletQueriesFactory,
             Func<IPlayerQueries> playerQueriesFactory,
             IPlayerCommands playerCommands)
@@ -38,7 +36,6 @@ namespace TGS.Services.Operations
             _walletQueriesFactory = walletQueriesFactory;
             _playerQueriesFactory = playerQueriesFactory;
             _playerCommands = playerCommands;
-            _agentQueries = agentQueries;
             _interface = this;
         }
 
@@ -147,32 +144,6 @@ namespace TGS.Services.Operations
                 value => (string)value,
                 cachedPlayer => cachedPlayer?.Username);
 
-        public async Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data)
-        {
-            var record = await _playerCommands.PlayerLoginAsync(data);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
-
-            return record;
-        }
-
-        public async Task PlayerLogoutAsync(PlayerLogoutData data)
-        {
-            await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
-            await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
-            {
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.PlayerCode
-                },
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.LoginRecordId
-                }
-            });
-        }
-
         #region Private Methods
 
         public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
@@ -196,12 +167,6 @@ namespace TGS.Services.Operations
             DateTimeOffset updatedOn)
         {
             await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
-
-        public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetPhoneAsync(playerCode, phone, updatedOn);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
         }
 
