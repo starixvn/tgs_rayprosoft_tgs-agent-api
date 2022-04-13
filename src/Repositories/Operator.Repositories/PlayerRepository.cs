@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
@@ -17,6 +19,32 @@ namespace TGS.Operator.Repositories
         public PlayerRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress)
+        {
+            const int expiredSeconds = 3600 * 12;
+
+            var loginRecord = new PlayerLoginRecord
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Status = LoginStatus.Enabled,
+                PlatformType = platformType,
+                IpAddress = ipAddress,
+                CreatedOn = DateTimeOffset.UtcNow,
+                ExpiredOn = DateTimeOffset.UtcNow.AddSeconds(expiredSeconds)
+            };
+
+            _ = await _tgsRepository.PlayerLoginRecords.AddAsync(loginRecord);
+            _ = await _tgsRepository.SaveChangesAsync();
+
+            return new LoginRecordInfo(
+                loginRecord.Id,
+                loginRecord.PlatformType,
+                loginRecord.CreatedOn,
+                loginRecord.ExpiredOn);
         }
 
         public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
@@ -277,7 +305,7 @@ namespace TGS.Operator.Repositories
             _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId)
+        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId)
         {
             var identityData = await _tgsRepository.PlayerIdentity
                 .FindAsync(playerCode)
@@ -288,7 +316,7 @@ namespace TGS.Operator.Repositories
                 identityData = new PlayerIdentity
                 {
                     PlayerCode = playerCode,
-                    PlayerAuthenticationFormId = IdentityAuthenticationFormId
+                    PlayerAuthenticationFormId = identityAuthenticationFormId
                 };
 
                 _ = await _tgsRepository.PlayerIdentity
@@ -297,7 +325,7 @@ namespace TGS.Operator.Repositories
             }
             else
             {
-                identityData.PlayerAuthenticationFormId = IdentityAuthenticationFormId;
+                identityData.PlayerAuthenticationFormId = identityAuthenticationFormId;
             }
             _ = await _tgsRepository
                 .SaveChangesAsync()

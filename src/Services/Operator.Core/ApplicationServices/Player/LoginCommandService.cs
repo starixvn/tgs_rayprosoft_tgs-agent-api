@@ -4,8 +4,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -13,8 +14,6 @@ using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
@@ -72,19 +71,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
 
-            var createdOn = DateTimeOffset.UtcNow;
-            var ipAddress = command.IpAddress;
-
-            var record = await _playerOperations.PlayerLoginAsync(new()
-            {
-                BrandId = command.BrandId,
-                Username = command.UserName,
-                PlayerCode = playerCode,
-                PlatformType = command.PlatformType,
-                IpAddress = ipAddress,
-                CreatedOn = createdOn,
-                ExpiredOn = createdOn.AddSeconds(Consts.TokenExpireSeconds.PlayerLogin)
-            });
+            var record = await _playerRepository.AddPlayerLoginRecordAsync(command.BrandId, playerCode, command.PlatformType, command.IpAddress).ConfigureAwait(false);
 
             var token = await GeneratePlayerJwtTokenAsync(
                 command.BrandId,
@@ -102,7 +89,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             return new LoginInfo
             {
                 PlayerToken = token,
-                LoginTime = createdOn.ToUnixTimeMilliseconds()
+                LoginTime = record.CreatedOn.ToUnixTimeMilliseconds()
             };
         }
 
