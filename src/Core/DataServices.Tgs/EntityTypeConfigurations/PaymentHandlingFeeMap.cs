@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
@@ -27,6 +22,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(phf => phf.Fee)
                 .IsRequired();
             builder.Property(phf => phf.FormId)
+                .IsRequired();
+            builder.Property(phf => phf.UserType)
+                .IsRequired();
+            builder.Property(phf => phf.UserId)
+                .IsRequired();
+            builder.Property(phf => phf.CreatedOn)
+                .IsRequired();
+            builder.Property(phf => phf.ApprovedOn)
                 .IsRequired();
             builder.Property(phf => phf.RecordedOn)
                 .IsRequired()
