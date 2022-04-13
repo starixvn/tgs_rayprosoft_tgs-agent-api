@@ -27,7 +27,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string? Phone { get; init; }
 
-        public string? PlayerCode { get; set; } = default!;
+        public string PlayerCode { get; set; } = default!;
 
         public string? QQ { get; init; }
 

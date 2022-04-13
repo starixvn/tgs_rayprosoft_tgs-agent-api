@@ -94,10 +94,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     .ConfigureAwait(false);
             }
 
-            if (request.Email.IsNotNullOrEmpty() && request.Type == updatePlayerType[1] &&
+            if (!string.IsNullOrEmpty(request.Email) && request.Type == updatePlayerType[1] &&
                 await _service.ExistsAsync(x
                     => x.BrandId == player.BrandId && x.PlayerCode != player.PlayerCode &&
-                    x.Email.ToLower() == request.Email.ToLower()))
+                    x.Email!.ToLower() == request.Email.ToLower()))
             {
                 return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
             }

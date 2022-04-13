@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mime;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,6 @@ using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
-using TGS.Services.Operator.ApplicationServices.Vip;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -197,7 +195,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask<IReadOnlyDictionary<string, object>> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
             [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
-            [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>> getPlayerPropertiesQueryService,
+            [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
             [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
         {

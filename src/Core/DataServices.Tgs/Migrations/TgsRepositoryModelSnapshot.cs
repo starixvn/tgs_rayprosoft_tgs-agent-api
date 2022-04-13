@@ -3980,9 +3980,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("amount");
 
+                    b.Property<DateTime>("ApprovedOn")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("approved_on");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<decimal>("Fee")
                         .HasColumnType("numeric")
@@ -4006,6 +4014,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("type");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_type");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_handling_fees_id");
