@@ -15,7 +15,7 @@ namespace TGS.Services.Promotion
 
         Task<bool> ExistsAsync(Expression<Func<Core.DataServices.Tgs.Models.Promotion, bool>> predicate);
 
-        Task<Core.DataServices.Tgs.Models.Promotion> GetPromotionAsync(
+        Task<Core.DataServices.Tgs.Models.Promotion?> GetPromotionAsync(
             Expression<Func<Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
             Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>
                 ? preQuery = null);
