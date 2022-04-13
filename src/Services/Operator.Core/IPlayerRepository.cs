@@ -10,6 +10,8 @@ namespace TGS.Services.Operator
 
         ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
 
+        ValueTask DeauthorizePlayerAsync(Guid loginRecordId);
+
         ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);

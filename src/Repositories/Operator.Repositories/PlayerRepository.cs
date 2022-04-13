@@ -70,6 +70,18 @@ namespace TGS.Operator.Repositories
             return createFormId;
         }
 
+        public async ValueTask DeauthorizePlayerAsync(Guid loginRecordId)
+        {
+            var loginRecord = await _tgsRepository.PlayerLoginRecords
+                .FindAsync(loginRecordId)
+                .ConfigureAwait(false);
+
+            loginRecord.Status = LoginStatus.Deauthorized;
+
+            _ = _tgsRepository.PlayerLoginRecords.Update(loginRecord);
+            _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
         {
             var player = await _tgsRepository.Players.AsQueryable()

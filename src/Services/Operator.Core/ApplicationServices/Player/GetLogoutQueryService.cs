@@ -3,49 +3,42 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Core.Models;
-using TGS.Services.Operations;
-using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class GetLogoutQueryService : IGetService<GetLogoutQuery, LogoutInfo>
     {
-        private readonly IPlayerOperations _playerOperations;
+        private readonly IPlayerRepository _playerRepository;
         private readonly IStatusValidator _statusValidator;
 
         public GetLogoutQueryService(
             IStatusValidator statusValidator,
-            IPlayerOperations playerOperations)
+            IPlayerRepository playerRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
         public async ValueTask<LogoutInfo> GetAsync(GetLogoutQuery query, CancellationToken cancellationToken = default)
         {
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
 
-            var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(query.PlayerTokenData.PlayerCode);
-            if (cachedPlayer == null)
+            var player = await _playerRepository.GetPlayerInfoAsync(query.PlayerCode)
+                .ConfigureAwait(false);
+
+            if (player == null)
             {
                 throw new PlayerNotFoundException("");
             }
 
-            var updatedOn = DateTimeOffset.UtcNow;
-            await _playerOperations.PlayerLogoutAsync(
-                new PlayerLogoutData()
-                {
-                    Username = cachedPlayer.Username,
-                    PlayerCode = query.PlayerTokenData.PlayerCode,
-                    LoginRecordId = query.PlayerTokenData.LoginRecordId,
-                    UpdatedOn = updatedOn
-                });
+            await _playerRepository
+                .DeauthorizePlayerAsync(query.LoginRecordId)
+                .ConfigureAwait(false);
 
-            return new LogoutInfo()
+            return new LogoutInfo
             {
-                UpdateTime = updatedOn.ToUnixTimeMilliseconds()
+                UpdateTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
         }
     }
