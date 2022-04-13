@@ -7,7 +7,9 @@ using NUnit.Framework;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Services.Data;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Tests.TestsCommon;
 
@@ -19,29 +21,38 @@ namespace TGS.UnitTests.Operations
     public sealed class ExpirationValidatorTests : NUnitTestsBase
     {
         private Mock<IAgentOperations> _agentOperationsMock;
-        private IExpirationValidator _expirationValidator;
-        private Mock<IPlayerOperations> _playerOperationsMock;
+        private Mock<IPlayerQueries> _playerQueriesMock;
 
         [TestCase(null)]
         [TestCase(PlatformType.Desktop)]
         public async Task ThrowIfPlayerLoginExpiredAsync_No_Throws_When_Ok(PlatformType? platform)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var playerCode = fixture.Create<string>();
-            var loginRecord = new CachedPlayerLoginRecord
+
+            var results = new GetPlayerLoginRecordResult[]
             {
-                PlayerCode = playerCode,
-                PlatformType = platform ?? PlatformType.Desktop,
-                ExpiredOn = DateTimeOffset.UtcNow.AddHours(1)
+                new()
+                {
+                    BrandId = brandId,
+                    CreatedOn = DateTimeOffset.UtcNow.AddHours(-23),
+                    PlatformType = platform ?? PlatformType.Desktop,
+                    Status = LoginStatus.Enabled,
+                    ExpiredOn = DateTimeOffset.UtcNow.AddHours(1)
+                }
             };
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
-                .Returns(Task.FromResult(loginRecord));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled))
+                .ReturnsAsync(results);
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
+                await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
 
-            await action.Should().NotThrowAsync();
+            _ = await action.Should().NotThrowAsync();
         }
 
         [TestCase(null)]
@@ -50,21 +61,31 @@ namespace TGS.UnitTests.Operations
             PlatformType? platform)
         {
             var fixture = new Fixture();
+            var brandId = fixture.Create<Guid>();
             var playerCode = fixture.Create<string>();
-            var loginRecord = new CachedPlayerLoginRecord
+
+            var results = new GetPlayerLoginRecordResult[]
             {
-                PlayerCode = playerCode,
-                PlatformType = platform ?? PlatformType.Desktop,
-                ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
+                new()
+                {
+                    BrandId = brandId,
+                    CreatedOn = DateTimeOffset.UtcNow.AddHours(-23),
+                    PlatformType = platform ?? PlatformType.Desktop,
+                    Status = LoginStatus.Enabled,
+                    ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
+                }
             };
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
-                .Returns(Task.FromResult(loginRecord));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled))
+                .ReturnsAsync(results);
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
+                await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
 
-            await action.Should()
+            _ = await action.Should()
                 .ThrowAsync<PlayerLoginExpiredException>()
                 .WithMessage($"Player({playerCode}) login token is expired");
         }
@@ -77,13 +98,16 @@ namespace TGS.UnitTests.Operations
             var fixture = new Fixture();
             var playerCode = fixture.Create<string>();
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLatestEnabledLoginRecordAsync(playerCode, platform))
-                .Returns(Task.FromResult((CachedPlayerLoginRecord)null));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled))
+                .ReturnsAsync(Array.Empty<GetPlayerLoginRecordResult>());
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
+                await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
 
-            await action.Should()
+            _ = await action.Should()
                 .ThrowAsync<PlayerLoginExpiredException>()
                 .WithMessage($"Player({playerCode}) login token is expired");
         }
@@ -101,13 +125,16 @@ namespace TGS.UnitTests.Operations
                 ExpiredOn = DateTimeOffset.UtcNow.AddHours(1)
             };
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLoginRecordAsync(loginRecordId))
-                .Returns(Task.FromResult(loginRecord));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginRecordAsync(loginRecordId))
+                .ReturnsAsync(loginRecord);
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
+                await sut.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
-            await action.Should().NotThrowAsync();
+            _ = await action.Should().NotThrowAsync();
         }
 
         [Test]
@@ -124,13 +151,16 @@ namespace TGS.UnitTests.Operations
                 ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
             };
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLoginRecordAsync(loginRecordId))
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginRecordAsync(loginRecordId))
                 .Returns(Task.FromResult(loginRecord));
 
-            Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
-            await action.Should()
+            Func<Task> action = async () =>
+                await sut.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
+
+            _ = await action.Should()
                 .ThrowAsync<PlayerLoginExpiredException>()
                 .WithMessage($"Player({playerCode}) login token is expired");
         }
@@ -149,13 +179,16 @@ namespace TGS.UnitTests.Operations
                 ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
             };
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLoginRecordAsync(loginRecordId))
-                .Returns(Task.FromResult(loginRecord));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginRecordAsync(loginRecordId))
+                .ReturnsAsync(loginRecord);
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
+                await sut.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
-            await action.Should()
+            _ = await action.Should()
                 .ThrowAsync<PlayerLoginExpiredException>()
                 .WithMessage($"Player({playerCode}) login token is expired");
         }
@@ -168,22 +201,24 @@ namespace TGS.UnitTests.Operations
             var loginRecordId = fixture.Create<Guid>();
             var playerCode = fixture.Create<string>();
 
-            _playerOperationsMock.Setup(x => x.GetPlayerLoginRecordAsync(loginRecordId))
-                .Returns(Task.FromResult((CachedPlayerLoginRecord)null));
+            _ = _playerQueriesMock.Setup(x =>
+                    x.GetPlayerLoginRecordAsync(loginRecordId))
+                 .ReturnsAsync((CachedPlayerLoginRecord)null);
+
+            var sut = new ExpirationValidator(_playerQueriesMock.Object, _agentOperationsMock.Object);
 
             Func<Task> action = async () =>
-                await _expirationValidator.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
+                await sut.ThrowIfPlayerLoginExpiredAsync(loginRecordId, playerCode);
 
-            await action.Should()
+            _ = await action.Should()
                 .ThrowAsync<PlayerLoginExpiredException>()
                 .WithMessage($"Player({playerCode}) login token is expired");
         }
 
         protected override void InitializeBeforeEachTest()
         {
-            _playerOperationsMock = new();
-            _agentOperationsMock = new();
-            _expirationValidator = new ExpirationValidator(_playerOperationsMock.Object, _agentOperationsMock.Object);
+            _playerQueriesMock = new Mock<IPlayerQueries>();
+            _agentOperationsMock = new Mock<IAgentOperations>();
         }
     }
 }
