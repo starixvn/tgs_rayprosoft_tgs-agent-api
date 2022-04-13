@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mime;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,6 @@ using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
-using TGS.Services.Operator.ApplicationServices.Vip;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -766,7 +764,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Submits the change phone.
         /// </summary>
-        /// /// <param name="getPlayerQueryService">Get player info service.</param>
         /// /// <param name="checkService">The check player phone service.</param>
         /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
         /// <param name="request">The request.</param>
@@ -774,7 +771,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut("phone", Name = "SubmitChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitChangePhoneAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerQueryService,
             [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)
@@ -782,26 +778,8 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetPlayerQuery(brandId, playerTokenData.PlayerCode);
-
-            var player = await getPlayerQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            var checkQuery = new CheckBrandPhoneQuery(
-                brandId,
-                playerTokenData.PlayerCode,
-                player.AreaCode,
-                player.Phone);
-
-            var isBrandHasSamePhone = await checkService
-                .GetAsync(checkQuery)
-                .ConfigureAwait(false);
-
-            if (isBrandHasSamePhone)
-                throw new BrandPhoneDuplicateException();
-
             var command = new CommitSetPlayerPhoneCommand(
+                brandId,
                 playerTokenData.PlayerCode,
                 request.SecurityKey,
                 request.ValidateCode);
