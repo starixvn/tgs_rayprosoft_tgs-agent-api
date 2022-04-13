@@ -28,19 +28,22 @@ namespace TGS.Services.Promotion.Handlers
         public override async Task<MessageResponse> Handle(UpdatePromotionRequest request,
             CancellationToken cancellationToken)
         {
-            var promotion = await _service.GetPromotionAsync(q => q.Id == request.Id);
+            var promotion = await _service.GetPromotionAsync(q => q.Id == request.Id).ConfigureAwait(false);
 
             if (promotion == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NotFound);
             }
 
-            if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
+            if (await _service.ExistsAsync(x
+                        => x.BrandId == promotion.BrandId && request.Id != x.Id && x.Name == request.Name)
+                    .ConfigureAwait(false))
             {
                 return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NameExisted);
             }
 
-            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
+            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType)
+                .ConfigureAwait(false);
             var promotionTypeGroups =
                 _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
 
@@ -54,7 +57,7 @@ namespace TGS.Services.Promotion.Handlers
 
             promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
-            await _service.UpdatePromotionAsync(promotion, request);
+            await _service.UpdatePromotionAsync(promotion, request).ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
         }
