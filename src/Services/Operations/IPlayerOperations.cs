@@ -25,13 +25,6 @@ namespace TGS.Services.Operations
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
-        Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
-
-        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
-                                    PlatformType? platform = null);
-
-        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
-
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
 
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);

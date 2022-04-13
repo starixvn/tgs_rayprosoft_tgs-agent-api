@@ -116,29 +116,6 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-        public async Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode)
-        {
-            var field = "enabled";
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
-
-            return value.HasValue
-                ? _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value)
-                : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
-        }
-
-        public async Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
-            PlatformType? platform)
-        {
-            var loginRecords = await _interface.GetPlayerEnabledLoginRecordsAsync(playerCode);
-
-            return loginRecords?.OrderByDescending(r => r.ExpiredOn)
-                .FirstOrDefault(r => platform == null || r.PlatformType == platform);
-        }
-
-        public Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.PlayerLoginRecords, loginRecordId,
-                TimeSpan.FromHours(2), () => _playerQueriesFactory().GetPlayerLoginRecordAsync(loginRecordId));
-
         public Task<string> GetUsernameByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,
                 value => (string)value,
@@ -184,34 +161,6 @@ namespace TGS.Services.Operations
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2),
                 true);
-        }
-
-        private async Task<CachedPlayerLoginRecord[]> GetAndCachedPlayerLoginsRecordsAsync(string playerCode,
-            string field)
-        {
-            var results = await _playerQueriesFactory()
-                .GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled);
-            if (results == null || results.Length == 0)
-            {
-                return Array.Empty<CachedPlayerLoginRecord>();
-            }
-
-            var loginRecords = results.Select(r => new CachedPlayerLoginRecord
-            {
-                PlayerCode = playerCode,
-                PlatformType = r.PlatformType,
-                Status = r.Status,
-                ExpiredOn = r.ExpiredOn
-            }).ToArray();
-
-            var expiresIn = loginRecords.Max(r => r.ExpiredOn) - DateTimeOffset.UtcNow;
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode,
-                new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(loginRecords))
-                }, expiresIn);
-
-            return loginRecords;
         }
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)
