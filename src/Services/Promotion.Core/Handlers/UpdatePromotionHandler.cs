@@ -35,7 +35,8 @@ namespace TGS.Services.Promotion.Handlers
                 return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NotFound);
             }
 
-            if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
+            if (await _service.ExistsAsync(x
+                    => x.BrandId == promotion.BrandId && request.Id != x.Id && x.Name == request.Name))
             {
                 return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NameExisted);
             }
