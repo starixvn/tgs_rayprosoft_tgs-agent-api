@@ -14,9 +14,11 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PlayerCode { get; set; }
 
-        public DateTimeOffset Birthday { get; set; }
+        public int ExecuteYear { get; set; }
 
         public decimal Amount { get; set; }
+
+        public DateTimeOffset Birthday { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
     }

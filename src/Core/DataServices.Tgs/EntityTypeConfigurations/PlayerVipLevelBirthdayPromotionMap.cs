@@ -27,6 +27,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.Amount)
                 .HasPrecision(18, 6)
                 .IsRequired();
+            builder.Property(b => b.ExecuteYear)
+                .IsRequired();
             builder.Property(b => b.Birthday)
                 .IsRequired();
             builder.Property(b => b.CreatedOn)
@@ -35,18 +37,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasIndex(b => new
                 {
                     b.PlayerCode,
-                    b.Birthday
+                    b.ExecuteYear
                 })
-                .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_birthday");
-            builder.HasIndex(b => b.PlayerVipLevelSnapshotId)
-                .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_vip_level_snapshot_id");
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
-                    b.VipId,
-                    b.PlayerCode
-                })
-                .HasDatabaseName("ix_player_vip_level_birthday_promotions_brand_id_vip_id_player_code");
+                .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_execute_year");
         }
     }
 }

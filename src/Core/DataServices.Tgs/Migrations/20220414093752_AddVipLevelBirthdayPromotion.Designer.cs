@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220414080507_AddVipLevelBirthdayPromotion")]
+    [Migration("20220414093752_AddVipLevelBirthdayPromotion")]
     partial class AddVipLevelBirthdayPromotion
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5480,6 +5480,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<int>("ExecuteYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("execute_year");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -5497,14 +5501,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_vip_level_birthday_promotions");
 
-                    b.HasIndex("PlayerVipLevelSnapshotId")
-                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_vip_level_snapshot_id");
-
-                    b.HasIndex("PlayerCode", "Birthday")
-                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_birthday");
-
-                    b.HasIndex("BrandId", "VipId", "PlayerCode")
-                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_brand_id_vip_id_player_code");
+                    b.HasIndex("PlayerCode", "ExecuteYear")
+                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_execute_year");
 
                     b.ToTable("player_vip_level_birthday_promotions");
                 });
