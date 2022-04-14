@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
@@ -24,7 +25,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var query = new AllPaymentChannelsQuery();
 
             moqPaymentServiceClient
-                .Setup(fake => fake.GetAllPaymentChannelsAsync())
+                .Setup(fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()))
                 .Returns(new[] {
                     new PaymentChannelInfo
                     {
@@ -41,7 +42,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = await sut.GetAsync(query);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.GetAllPaymentChannelsAsync(),
+                fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -55,7 +56,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var query = new AllPaymentMethodsQuery();
 
             moqPaymentServiceClient
-                .Setup(fake => fake.GetAllPaymentMethodsAsync())
+                .Setup(fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()))
                 .Returns(new[] {
                     new PaymentMethodInfo
                     {
@@ -74,7 +75,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = await sut.GetAsync(query);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.GetAllPaymentMethodsAsync(),
+                fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -92,7 +93,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = await sut.GetAsync(query);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.GetPaymentByIdAsync(It.Is<Guid>(x => x == paymentId)),
+                fake => fake.GetPaymentByIdAsync(
+                    It.Is<Guid>(x => x == paymentId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 

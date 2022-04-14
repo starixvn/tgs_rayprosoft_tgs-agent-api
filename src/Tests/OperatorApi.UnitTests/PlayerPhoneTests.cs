@@ -312,27 +312,38 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Start_Set_Player_Phone_Should_Send_Confirm_Message()
         {
-            var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqPlayerRepository = new Mock<IPlayerRepository>();
+            var moqBrandRepository = new Mock<IBrandRepository>();
             var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
             var moqSmsServiceClient = new Mock<ISmsServiceClient>();
 
             var sut = new StartSetPlayerPhoneCommandService(
-                moqPlayerOperations.Object,
+                moqPlayerRepository.Object,
+                moqBrandRepository.Object,
                 moqValidateCodeGenerator.Object,
                 moqValidateCodeOperator.Object,
                 moqSmsServiceClient.Object);
 
             var areaCode = "886";
             var phone = "0988123456";
-            var player = new Player
-            {
-                PlayerCode = "abcdef123456",
-                Username = "Tester",
-                BrandId = Guid.NewGuid(),
-                PhoneAuthentication = true,
-                DefaultWalletCurrencyCode = "CNY"
-            };
+            var player = new PlayerInfo(
+                "abcdef123456",
+                Guid.NewGuid(),
+                0M,
+                false,
+                false,
+                null,
+                null,
+                null,
+                PlayerStatus.Enabled,
+                "Tester",
+                "Tester",
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var command = new StartSetPlayerPhoneCommand(
                 player.PlayerCode,
@@ -343,9 +354,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var validateCode = "123456";
             var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            moqPlayerOperations
-                .Setup(fake => fake.GetPlayerByCodeAsync(It.Is<string>(x => x == player.PlayerCode)))
-                .Returns(Task.FromResult(player));
+            moqPlayerRepository
+                .Setup(fake => fake.GetPlayerInfoAsync(It.Is<string>(x => x == player.PlayerCode)))
+                .Returns(ValueTask.FromResult(player));
+
+            moqBrandRepository
+                .Setup(fake => fake.GetBrandInfoAsync(It.Is<Guid>(x => x == player.BrandId)))
+                .Returns(ValueTask.FromResult(new BrandInfo(
+                    player.BrandId,
+                    "Test",
+                    new Uri("https://localhost/1.png"),
+                    new Uri("https://localhost/1.png"),
+                    new Uri("https://localhost/1.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    true,
+                    true,
+                    false)));
 
             moqValidateCodeGenerator.Setup(fake => fake.GenerateCode()).Returns(validateCode);
             moqValidateCodeGenerator.Setup(fake => fake.GenerateSecurityKey()).Returns(expectedSecurityKey);

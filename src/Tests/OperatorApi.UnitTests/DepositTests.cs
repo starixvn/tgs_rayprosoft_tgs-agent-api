@@ -40,7 +40,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == query.BrandId),
-                    It.Is<Guid>(x => x == query.FormId)))
+                    It.Is<Guid>(x => x == query.FormId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(new DepositFormInfo
                 {
                     Amount = 1000M,
@@ -117,7 +118,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.CreateDepositFormAsync(
                     It.IsAny<Guid>(),
-                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form))),
+                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form)),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -204,7 +206,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.CreateDepositFormAsync(
                     It.IsAny<Guid>(),
-                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form))),
+                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form)),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -249,7 +252,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == query.BrandId),
-                    It.Is<Guid>(x => x == query.FormId)))
+                    It.Is<Guid>(x => x == query.FormId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(new DepositFormInfo
                 {
                     Amount = 1000M,
@@ -270,7 +274,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == query.BrandId),
-                    It.Is<Guid>(x => x == query.FormId)),
+                    It.Is<Guid>(x => x == query.FormId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -286,7 +291,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = await sut.GetAsync(query);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
+                fake => fake.GetBrandPaymentByIdAsync(
+                    It.Is<Guid>(x => x == query.Id),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -342,7 +349,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == command.BrandId),
-                    It.Is<Guid>(x => x == command.FormId)))
+                    It.Is<Guid>(x => x == command.FormId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(
                     new DepositFormInfo
                     {
@@ -373,7 +381,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<decimal?>(),
                     It.IsAny<string>(),
-                    It.IsAny<int?>()),
+                    It.IsAny<int?>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -429,7 +438,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == command.BrandId),
-                    It.Is<Guid>(x => x == command.FormId)))
+                    It.Is<Guid>(x => x == command.FormId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(
                     new DepositFormInfo
                     {
@@ -460,7 +470,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<decimal?>(),
                     It.IsAny<string>(),
-                    It.IsAny<int?>()),
+                    It.IsAny<int?>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(0));
         }
 
