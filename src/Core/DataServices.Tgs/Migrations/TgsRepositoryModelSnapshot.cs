@@ -5454,6 +5454,59 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_vip_level_aggregates");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelBirthdayPromotion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("Birthday")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birthday");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PlayerVipLevelSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("player_vip_level_snapshot_id");
+
+                    b.Property<Guid>("VipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_vip_level_birthday_promotions");
+
+                    b.HasIndex("PlayerVipLevelSnapshotId")
+                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_vip_level_snapshot_id");
+
+                    b.HasIndex("PlayerCode", "Birthday")
+                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_birthday");
+
+                    b.HasIndex("BrandId", "VipId", "PlayerCode")
+                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_brand_id_vip_id_player_code");
+
+                    b.ToTable("player_vip_level_birthday_promotions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerVipLevelSeasonPromotion", b =>
                 {
                     b.Property<Guid>("Id")
