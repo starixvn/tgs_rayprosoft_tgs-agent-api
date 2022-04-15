@@ -28,9 +28,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(phf => phf.UserId)
                 .IsRequired();
             builder.Property(phf => phf.CreatedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamptz");
             builder.Property(phf => phf.ApprovedOn)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamptz");
             builder.Property(phf => phf.RecordedOn)
                 .IsRequired()
                 .HasColumnType("timestamptz")

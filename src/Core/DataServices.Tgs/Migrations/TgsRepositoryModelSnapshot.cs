@@ -3981,7 +3981,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("amount");
 
                     b.Property<DateTime>("ApprovedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("approved_on");
 
                     b.Property<Guid>("BrandId")
@@ -3989,7 +3989,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("brand_id");
 
                     b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("timestamptz")
                         .HasColumnName("created_on");
 
                     b.Property<decimal>("Fee")
