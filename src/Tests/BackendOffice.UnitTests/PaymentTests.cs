@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
@@ -22,7 +23,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
             await sut.ExecuteAsync(command);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.CreatePaymentAsync(It.IsAny<PaymentCreateInfo>()),
+                fake => fake.CreatePaymentAsync(
+                    It.IsAny<PaymentCreateInfo>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -36,7 +39,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             sut.QueryAsync(new AllPaymentQuery());
 
             moqPaymentServiceClient.Verify(
-                fake => fake.GetAllPaymentsAsync(),
+                fake => fake.GetAllPaymentsAsync(It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
     }
