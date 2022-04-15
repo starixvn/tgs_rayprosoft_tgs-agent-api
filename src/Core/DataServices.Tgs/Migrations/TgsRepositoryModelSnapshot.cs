@@ -1441,6 +1441,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_to");
 
+                    b.Property<decimal>("DepositHandlingFeeRateTenPercentile")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("deposit_handling_fee_rate_ten_percentile");
+
                     b.Property<string>("Description")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
@@ -1550,6 +1556,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on");
+
+                    b.Property<decimal>("WithdrawHandlingFeeRateTenPercentile")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("withdraw_handling_fee_rate_ten_percentile");
 
                     b.HasKey("Id")
                         .HasName("pk_brands");
