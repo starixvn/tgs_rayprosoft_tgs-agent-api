@@ -11,6 +11,8 @@ namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
 
         public int? Level { get; init; }
 
+        public bool? HasUpperAgent { get; init; }
+
         public DateTimeOffset From { get; init; }
 
         public DateTimeOffset To { get; init; }
