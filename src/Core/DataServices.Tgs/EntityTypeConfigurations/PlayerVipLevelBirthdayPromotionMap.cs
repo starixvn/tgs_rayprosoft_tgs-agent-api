@@ -40,6 +40,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                     b.ExecuteYear
                 })
                 .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_execute_year");
+
+            builder.HasIndex(b => b.Birthday)
+                .HasDatabaseName("ix_player_vip_level_birthday_promotions_birthday");
         }
     }
 }

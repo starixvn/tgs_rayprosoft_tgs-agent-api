@@ -5499,6 +5499,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_vip_level_birthday_promotions");
 
+                    b.HasIndex("Birthday")
+                        .HasDatabaseName("ix_player_vip_level_birthday_promotions_birthday");
+
                     b.HasIndex("PlayerCode", "ExecuteYear")
                         .HasDatabaseName("ix_player_vip_level_birthday_promotions_player_code_execute_year");
 

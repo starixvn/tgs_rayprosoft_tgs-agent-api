@@ -28,6 +28,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_player_vip_level_birthday_promotions_birthday",
+                schema: "dbo",
+                table: "player_vip_level_birthday_promotions",
+                column: "birthday");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_player_vip_level_birthday_promotions_player_code_execute_year",
                 schema: "dbo",
                 table: "player_vip_level_birthday_promotions",
