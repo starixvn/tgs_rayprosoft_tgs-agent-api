@@ -60,7 +60,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddEnvironmentVariables()
                 .Build();
 
-            services.AddSingleton<IConfiguration>(configuration);
+            services
+                .AddSingleton<IConfiguration>(configuration)
+                .AddLogging();
 
             services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
 

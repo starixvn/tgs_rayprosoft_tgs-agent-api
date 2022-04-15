@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
@@ -46,7 +47,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetWithdrawFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)))
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(
                     new WithdrawFormInfo
                     {
@@ -73,7 +75,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<ReviewState>(x => x == ReviewState.Reject),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -176,7 +179,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.GetWithdrawFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)),
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -199,7 +203,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetWithdrawFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)))
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(
                     new WithdrawFormInfo
                     {
@@ -218,7 +223,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.IsAny<decimal?>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -248,7 +254,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetWithdrawFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)))
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(
                     new WithdrawFormInfo
                     {
@@ -275,7 +282,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -293,7 +301,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             moqPaymentServiceClient.Verify(
                 fake => fake.CountUntreatedWithdrawFormsAsync(
-                    It.Is<Guid>(x => x == query.BrandId)),
+                    It.Is<Guid>(x => x == query.BrandId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -322,7 +331,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.QueryWithdrawFormsAsync(
                     It.IsAny<WithdrawFormQueryConditions>(),
-                    It.IsAny<Tgs.Payment.Clients.Paging>()),
+                    It.IsAny<Tgs.Payment.Clients.Paging>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
     }

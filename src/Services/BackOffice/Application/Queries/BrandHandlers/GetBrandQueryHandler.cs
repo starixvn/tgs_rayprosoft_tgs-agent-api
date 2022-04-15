@@ -51,10 +51,10 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                 return CreateInvalidResponse<GetBrandResponse>(Brand.NotFound);
             }
 
-            return new GetBrandResponse
+            return new()
             {
                 Valid = true,
-                Brand = new BrandModel
+                Brand = new()
                 {
                     Id = brand.Id,
                     LicenseeId = brand.LicenseeId,
@@ -142,7 +142,8 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     CreatedOn = brand.CreatedOn,
                     UpdatedOn = brand.UpdatedOn,
                     EnablePlayerIdentity = brand.EnablePlayerIdentity,
-                    AutoClearWageringRequirement = brand.AutoClearWageringRequirement
+                    AutoClearWageringRequirement = brand.AutoClearWageringRequirement,
+                    AutoClearWageringRequirementBalance = brand.AutoClearWageringRequirementBalance
                 }
             };
         }

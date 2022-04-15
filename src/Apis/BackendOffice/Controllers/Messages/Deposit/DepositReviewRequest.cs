@@ -9,5 +9,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public string Remark { get; init; }
 
         public ReviewResponseState ReviewResponse { get; init; }
+
+        public decimal? ActualAmount { get; init; }
     }
 }

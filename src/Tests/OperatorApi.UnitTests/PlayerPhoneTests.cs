@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
@@ -168,22 +169,58 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public void Commit_Set_Player_Phone_If_Brand_Has_Same_Phone_Should_Throw_Exception()
+        {
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeCacheManager = Substitute.For<IRedisCacheManager>();
+            var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();
+
+            var sut = new CommitSetPlayerPhoneCommandService(
+                fakeValidateCodeOperator,
+                fakePlayerRepository,
+                fakeCacheManager,
+                fakeCheckService);
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+            var areaCode = "852";
+            var phone = "67329548";
+
+            var command = new CommitSetPlayerPhoneCommand(brandId, playerCode, securityKey, validateCode);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<PhoneValidateData>(validateCode, Arg.Any<string>())
+                .Returns(new PhoneValidateData(areaCode, phone, playerCode));
+
+            fakeCheckService
+                .GetAsync(new CheckBrandPhoneQuery(brandId, playerCode, areaCode, phone))
+                .Returns(true);
+
+            Assert.ThrowsAsync<BrandPhoneDuplicateException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
         public void Commit_Set_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
         {
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
             var moqPlayerRepository = new Mock<IPlayerRepository>();
             var moqCacheManager = new Mock<IRedisCacheManager>();
+            var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
 
             var sut = new CommitSetPlayerPhoneCommandService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqCacheManager.Object);
+                moqCacheManager.Object,
+                moqCheckService.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            var command = new CommitSetPlayerPhoneCommand(playerCode, securityKey, validateCode);
+            var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
             moqValidateCodeOperator
                 .Setup(
@@ -201,11 +238,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
             var moqPlayerRepository = new Mock<IPlayerRepository>();
             var moqCacheManager = new Mock<IRedisCacheManager>();
+            var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
 
             var sut = new CommitSetPlayerPhoneCommandService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqCacheManager.Object);
+                moqCacheManager.Object,
+                moqCheckService.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
@@ -213,7 +252,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var phone = "0988123456";
             var areaCode = "886";
 
-            var command = new CommitSetPlayerPhoneCommand(playerCode, securityKey, validateCode);
+            var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
 
             moqValidateCodeOperator
                 .Setup(
@@ -312,27 +351,38 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Start_Set_Player_Phone_Should_Send_Confirm_Message()
         {
-            var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqPlayerRepository = new Mock<IPlayerRepository>();
+            var moqBrandRepository = new Mock<IBrandRepository>();
             var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
             var moqSmsServiceClient = new Mock<ISmsServiceClient>();
 
             var sut = new StartSetPlayerPhoneCommandService(
-                moqPlayerOperations.Object,
+                moqPlayerRepository.Object,
+                moqBrandRepository.Object,
                 moqValidateCodeGenerator.Object,
                 moqValidateCodeOperator.Object,
                 moqSmsServiceClient.Object);
 
             var areaCode = "886";
             var phone = "0988123456";
-            var player = new Player
-            {
-                PlayerCode = "abcdef123456",
-                Username = "Tester",
-                BrandId = Guid.NewGuid(),
-                PhoneAuthentication = true,
-                DefaultWalletCurrencyCode = "CNY"
-            };
+            var player = new PlayerInfo(
+                "abcdef123456",
+                Guid.NewGuid(),
+                0M,
+                false,
+                false,
+                null,
+                null,
+                null,
+                PlayerStatus.Enabled,
+                "Tester",
+                "Tester",
+                null,
+                1,
+                null,
+                null,
+                false);
 
             var command = new StartSetPlayerPhoneCommand(
                 player.PlayerCode,
@@ -343,9 +393,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var validateCode = "123456";
             var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            moqPlayerOperations
-                .Setup(fake => fake.GetPlayerByCodeAsync(It.Is<string>(x => x == player.PlayerCode)))
-                .Returns(Task.FromResult(player));
+            moqPlayerRepository
+                .Setup(fake => fake.GetPlayerInfoAsync(It.Is<string>(x => x == player.PlayerCode)))
+                .Returns(ValueTask.FromResult(player));
+
+            moqBrandRepository
+                .Setup(fake => fake.GetBrandInfoAsync(It.Is<Guid>(x => x == player.BrandId)))
+                .Returns(ValueTask.FromResult(new BrandInfo(
+                    player.BrandId,
+                    "Test",
+                    new Uri("https://localhost/1.png"),
+                    new Uri("https://localhost/1.png"),
+                    new Uri("https://localhost/1.png"),
+                    BrandStatus.Active,
+                    "CNY",
+                    true,
+                    true,
+                    false)));
 
             moqValidateCodeGenerator.Setup(fake => fake.GenerateCode()).Returns(validateCode);
             moqValidateCodeGenerator.Setup(fake => fake.GenerateSecurityKey()).Returns(expectedSecurityKey);

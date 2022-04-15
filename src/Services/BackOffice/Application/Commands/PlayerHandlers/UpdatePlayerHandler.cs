@@ -1,15 +1,21 @@
-﻿using System.Linq;
+﻿#nullable enable
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Tgs.GameProviders.Pluggable.Client;
+using Tgs.PlayerService.Client;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using PlayerStatus = TGS.Core.Models.Enums.PlayerStatus;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
@@ -18,6 +24,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAgentService _agentService;
         private readonly IGameProvidersBackofficePluggableClient _gameProvidersBackofficePluggableClient;
         private readonly ILogger<UpdatePlayerHandler> _logger;
+        private readonly IPlayerServiceClient _playerServiceClient;
         private readonly IPlayerService _service;
 
         public UpdatePlayerHandler(
@@ -25,13 +32,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerService service,
             IAgentService agentService,
             IHttpContextAccessor accessor,
-            IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient) :
+            IGameProvidersBackofficePluggableClient gameProvidersBackofficePluggableClient,
+            IPlayerServiceClient playerServiceClient) :
             base(accessor)
         {
-            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _service = service;
             _agentService = agentService;
-            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient ?? throw new System.ArgumentNullException(nameof(gameProvidersBackofficePluggableClient));
+            _gameProvidersBackofficePluggableClient = gameProvidersBackofficePluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersBackofficePluggableClient));
+            _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         }
 
         public override async Task<MessageResponse> Handle(
@@ -50,7 +59,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.UpdateTypeNotFound);
             }
 
-            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode).ConfigureAwait(false);
+            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode)
+                .ConfigureAwait(false);
 
             if (player == null)
             {
@@ -84,10 +94,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     .ConfigureAwait(false);
             }
 
-            if (request.Email.IsNotNullOrEmpty() && request.Type == updatePlayerType[1] &&
+            if (!string.IsNullOrEmpty(request.Email) && request.Type == updatePlayerType[1] &&
                 await _service.ExistsAsync(x
                     => x.BrandId == player.BrandId && x.PlayerCode != player.PlayerCode &&
-                    x.Email.ToLower() == request.Email.ToLower()))
+                    x.Email!.ToLower() == request.Email.ToLower()))
             {
                 return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
             }
@@ -105,6 +115,21 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             }
 
             await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
+
+            if (request.Type == updatePlayerType[1])
+            {
+                var properties = new Dictionary<PlayerPropertyName, string?>
+                {
+                    [PlayerPropertyName.Line] = request.Line,
+                    [PlayerPropertyName.Viber] = request.Viber,
+                    [PlayerPropertyName.Telegram] = request.Telegram,
+                    [PlayerPropertyName.FacebookMessenger] = request.FacebookMessenger,
+                    [PlayerPropertyName.WhatsApp] = request.WhatsApp
+                };
+
+                await _playerServiceClient.SetPlayerPropertiesAsync(player.PlayerCode, properties)
+                    .ConfigureAwait(false);
+            }
 
             if (kickPlayer)
             {

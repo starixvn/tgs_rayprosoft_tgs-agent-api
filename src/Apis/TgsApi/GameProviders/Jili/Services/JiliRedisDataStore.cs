@@ -36,7 +36,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
             var expiry = TimeSpan.FromDays(1);
 
             return await _database
-                .StringSetAsync(dataKey, value, expiry, When.NotExists)
+                .StringSetAsync(dataKey, value, expiry, when: When.NotExists)
                 .ConfigureAwait(false);
         }
     }

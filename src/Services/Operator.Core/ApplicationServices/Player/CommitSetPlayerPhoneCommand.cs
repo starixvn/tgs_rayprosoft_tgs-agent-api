@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Player
+﻿using System;
+
+namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    public record CommitSetPlayerPhoneCommand(string PlayerCode, string SecurityKey, string ValidateCode);
+    public record CommitSetPlayerPhoneCommand(Guid BrandId, string PlayerCode, string SecurityKey, string ValidateCode);
 }
