@@ -539,10 +539,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
+        [HttpPost("~/api/deposit/thirdparty/zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -553,13 +553,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-
-            var player = await getPlayerInfoService
-                .GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode))
-                .ConfigureAwait(false);
-
-            if (!player.IdentityAuthentication)
-                throw new ZeroNineNinePayDepositNeedRealNameException();
 
             _loger.LogTrace($"zeronineninepay clientIp:{clientIp}");
 
@@ -582,10 +575,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                     new ZeroNineNinePayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
                         brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
-                        (ZeroNineNineDepositPayType)brandPaymentInfo.RootElement.GetProperty("payType").GetInt32(),
+                        payType,
                         formId,
                         clientIp,
-                        player.RealName)));
+                        null)));
 
             await createDepositFormService
                 .ExecuteAsync(command)
