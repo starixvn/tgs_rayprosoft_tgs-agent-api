@@ -13,7 +13,7 @@ using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
-    partial class DataInitializer
+    public partial class DataInitializer
     {
         internal record AllBetGameProvider : IGameProvider
         {
@@ -32,7 +32,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with {EndpointPath = string.Empty};
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 

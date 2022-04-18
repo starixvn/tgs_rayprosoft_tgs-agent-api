@@ -110,11 +110,13 @@ namespace TGS.Core.Models
             public const string BetConstruct = "BC";
             public const string BigGaming = "BG";
             public const string Card365 = "365";
+            public const string DreamGame = "DG";
             public const string Evolution = "EVO";
             public const string Habanero = "HABA";
             public const string IMESports = "IMES";
             public const string JDB = "JDB";
             public const string Jili = "JILI";
+            public const string Joker = "JOKER";
             public const string KY = "KY";
             public const string LY = "LY";
             public const string PragmaticPlay = "PP";
@@ -123,12 +125,11 @@ namespace TGS.Core.Models
             public const string SexyGaming = "SG";
             public const string Skywind = "SW";
             public const string TCG = "TCG";
+            public const string TFGaming = "TF";
             public const string VR = "VR";
             public const string WGHorse = "WGVIA";
             public const string WGSports = "WGFM";
             public const string WMCasino = "WM";
-            public const string TFGaming = "TF";
-            public const string DreamGame = "DG";
         }
 
         public static class LocalizationContext
@@ -161,12 +162,12 @@ namespace TGS.Core.Models
         public static class UploadFile
         {
             public const string Banner = "banner";
+            public const string Identity = "identity";
             public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
             public const string MessengerQRCode = "messengerQRCode";
             public const string Payment = "payment";
             public const string Promotion = "promotion";
             public const string StationLetter = "stationLetter";
-            public const string Identity = "identity";
 
             public static readonly string[] Types =
             {

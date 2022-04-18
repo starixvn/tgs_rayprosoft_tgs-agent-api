@@ -110,5 +110,40 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new CNYCurrency()
             };
         }
+
+        internal record GpiHkdBrand : IBrand
+        {
+            Guid IBrand.Id => new("9f1ecf19-38cd-474f-b0d2-93638dc07d21");
+
+            string IBrand.Code => "GPI_HKD";
+
+            string IBrand.Name => "GameProvider Integration (HKD)";
+
+            string IBrand.OperationalEmail => "tgs.services@gmail.com";
+
+            string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
+
+            string IBrand.ClientId => "GPI_HKD";
+
+            string IBrand.SecretKey => "76Pw8MHtJjO8YOVA5zZQIS51DuS";
+
+            string IBrand.ApiKey => "muN0pUt3ZWP53mmRDQdn5TRtc8UxzbzQTXkEQJqaFZ5mb8N4pomQ0V";
+
+            SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+
+            int? IBrand.SettlementDay => null;
+
+            ICurrency[] IBrand.Currencies => new ICurrency[]
+            {
+                new HKDCurrency()
+            };
+
+            ILanguage[] IBrand.Languages => new ILanguage[]
+            {
+                new CNLanguage(),
+                new USLanguage(),
+                new TWLanguage(),
+            };
+        }
     }
 }
