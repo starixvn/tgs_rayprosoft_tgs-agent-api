@@ -7002,6 +7002,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("external_transaction_id");
 
+                    b.Property<decimal>("LockedBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("locked_balance");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -7295,6 +7302,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("external_currency_code");
+
+                    b.Property<decimal>("LockedBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("locked_balance");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
