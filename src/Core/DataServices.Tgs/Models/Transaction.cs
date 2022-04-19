@@ -21,6 +21,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid Id { get; set; }
 
+        public decimal LockAmount { get; set; }
+
         public decimal LockedBalance { get; set; }
 
         public string PlayerCode { get; set; }
