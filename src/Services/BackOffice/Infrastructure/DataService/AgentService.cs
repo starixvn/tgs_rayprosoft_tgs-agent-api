@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAgentService
     {
-        Task CreateAgentAsync(CreateAgentRequest request);
+        Task CreateAgentAsync(CreateAgentRequest request, Agent parentAgent = null);
 
         Task<bool> ExistsAsync(Expression<Func<Agent, bool>> predicate);
 
@@ -52,7 +52,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _repository = repository;
         }
 
-        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request)
+        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request, Agent parentAgent)
         {
             var invitationCode = InvitationCodeGenerator.NewId();
 
@@ -60,10 +60,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 invitationCode = InvitationCodeGenerator.NewId();
             }
-
-            var parentAgent =
-                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x
-                    => x.BrandId == request.BrandId && x.Username == request.ParentUsername);
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
