@@ -77,7 +77,7 @@
     <PackageReference Include="Tgs.Payment.TuPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
     <PackageReference Include="Tgs.Payment.ZeroNineNinePay.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.22" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.23" />
     <PackageReference Include="Tgs.WebApi.Toolkits" Version="0.0.13" />
   </ItemGroup>
 
