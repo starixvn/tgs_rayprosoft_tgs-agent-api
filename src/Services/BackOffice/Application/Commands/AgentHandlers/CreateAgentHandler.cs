@@ -47,7 +47,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 }
             }
 
-            await _service.CreateAgentAsync(request, parentAgent);
+            await _service.CreateAgentAsync(request, parentAgent?.Id);
 
             return CreateValidResponse<MessageResponse>();
         }
