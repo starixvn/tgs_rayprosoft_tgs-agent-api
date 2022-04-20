@@ -62,7 +62,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             }
 
             var parentAgent =
-                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
+                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x
+                    => x.BrandId == request.BrandId && x.Username == request.ParentUsername);
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
