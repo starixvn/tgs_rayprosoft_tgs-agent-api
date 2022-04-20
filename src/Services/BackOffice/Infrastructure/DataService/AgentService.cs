@@ -62,7 +62,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             }
 
             var parentAgent =
-                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x
+                await _repository.Agents.AsQueryable().FirstAsync(x
                     => x.BrandId == request.BrandId && x.Username == request.ParentUsername);
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
@@ -72,10 +72,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 Username = request.Username,
                 LevelType = request.LevelType,
-                Type = parentAgent?.Type ?? request.Type,
+                Type = parentAgent.Type,
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
-                ParentAgentId = parentAgent?.Id,
+                ParentAgentId = parentAgent.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     brand.AgentDividendType == AgentDividendType.MultipleLayer &&
