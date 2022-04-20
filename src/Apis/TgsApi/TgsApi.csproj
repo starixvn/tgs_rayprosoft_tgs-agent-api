@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.1" />
+    <PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.1.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.0" />
@@ -40,11 +40,11 @@
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="5.0.2" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="5.0.2" />
-    <PackageReference Include="StackExchange.Redis" Version="2.5.43" />
+    <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.0.21" />
     <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
-    <PackageReference Include="Tgs.MessageQueue.MongoDB" Version="2.0.3" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.0.3" />
+    <PackageReference Include="Tgs.MessageQueue.MongoDB" Version="2.1.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.4" />
   </ItemGroup>
 
   <ItemGroup>

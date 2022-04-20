@@ -1,16 +1,21 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using CoreEnums = TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Player;
+using CoreEnums = TGS.Core.Models.Enums;
+using PlayerInfo = TGS.Services.Operator.PlayerInfo;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -96,8 +101,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 false);
 
-            fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
-                .Returns(ValueTask.FromResult(playerInfo));
+            fakePlayerRepository
+                .GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+                .Returns(playerInfo);
 
             var brandId = Guid.NewGuid();
             var username = "username";
@@ -106,6 +112,144 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await sut.GetAsync(query);
 
             Assert.AreEqual(playerInfo, actual);
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Call_Get_Player_Main_Data()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new GetPlayerMainDataQueryService(moqPlayerServiceClient.Object);
+
+            var playerCode = "abcdef123456";
+
+            var query = new GetPlayerMainDataQuery(playerCode);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.GetPlayerInfoAsync(
+                            It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Call_Get_Player_Properties()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new GetPlayerPropertiesQueryService(moqPlayerServiceClient.Object);
+
+            var playerCode = "abcdef123456";
+
+            var query = new GetPlayerPropertiesQuery(playerCode);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.GetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == playerCode)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Get_Player_VipLevel_When_VipLevelId_Is_Not_Null()
+        {
+            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
+
+            var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
+
+            var vipLevelId = Guid.NewGuid();
+
+            var query = new GetPlayerVipLevelQuery(vipLevelId);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqVipLevelRepository
+                .Verify(fake =>
+                        fake.GetVipLevelAsync(
+                            It.Is<Guid>(x => x == vipLevelId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Query_Player_Info_Should_Not_Get_Player_VipLevel_When_VipLevelId_Is_Null()
+        {
+            var moqVipLevelRepository = new Mock<IVipLevelRepository>();
+
+            var sut = new GetPlayerVipLevelQueryService(moqVipLevelRepository.Object);
+
+            var query = new GetPlayerVipLevelQuery(null);
+
+            _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+            moqVipLevelRepository
+                .Verify(fake =>
+                        fake.GetVipLevelAsync(
+                            It.IsAny<Guid>()),
+                    Times.Never);
+        }
+
+        [Test]
+        public async Task Set_Player_Facebook_Messenger_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetFacebookMessengerCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetFacebookMessengerCommand(player.PlayerCode, "this_is_messenger_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.FacebookMessenger)
+                                && x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_Line_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetLineCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetLineCommand(player.PlayerCode, "this_is_line_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.Line)
+                                && x[PlayerPropertyName.Line] == command.LineId)),
+                    Times.Exactly(1));
         }
 
         [Test]
@@ -120,7 +264,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "TBH"
+                DefaultWalletCurrencyCode = "THB"
             };
 
             var command = new SetQqCommand(player.PlayerCode, "this_is_qq_number");
@@ -142,6 +286,66 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Set_Player_Telegram_Number_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetTelegramCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetTelegramCommand(player.PlayerCode, "this_is_telegram_number");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                        It.Is<string>(x => x == player.PlayerCode),
+                        It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                            x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.Telegram)
+                            && x[PlayerPropertyName.Telegram] == command.TelegramId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_Viber_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetViberCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetViberCommand(player.PlayerCode, "this_is_viber_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.Viber)
+                                && x[PlayerPropertyName.Viber] == command.ViberId)),
+                    Times.Exactly(1));
+        }
+
+        [Test]
         public async Task Set_Player_WeChat_Number_Should_Success()
         {
             var moqPlayerOperations = new Mock<IPlayerOperations>();
@@ -153,7 +357,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "TBH"
+                DefaultWalletCurrencyCode = "THB"
             };
 
             var command = new SetWeChatCommand(player.PlayerCode, "this_is_wechat_number");
@@ -171,6 +375,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         It.Is<string>(x => x == player.PlayerCode),
                         It.Is<string>(x => x == command.WeChatId),
                         It.IsAny<DateTimeOffset>()),
+                    Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_WhatsApp_Id_Should_Success()
+        {
+            var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
+
+            var sut = new SetWhatsAppCommandService(moqPlayerServiceClient.Object);
+
+            var player = new Player
+            {
+                PlayerCode = "abcdef123456",
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "THB"
+            };
+
+            var command = new SetWhatsAppCommand(player.PlayerCode, "this_is_whatsapp_id");
+
+            await sut.ExecuteAsync(command);
+
+            moqPlayerServiceClient
+                .Verify(fake =>
+                        fake.SetPlayerPropertiesAsync(
+                            It.Is<string>(x => x == player.PlayerCode),
+                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
+                                x.Count == 1
+                                && x.ContainsKey(PlayerPropertyName.WhatsApp)
+                                && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId)),
                     Times.Exactly(1));
         }
     }

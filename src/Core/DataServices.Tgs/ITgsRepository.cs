@@ -6,17 +6,13 @@ namespace TGS.Core.DataServices.Tgs
 {
     public interface ITgsRepository : IBaseRepository
     {
-        DbSet<BrandAllAgent> BrandAllAgents { get; set; }
-
-        DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
-
-        DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
-
         DbSet<AdminLog> AdminLogs { get; set; }
 
         DbSet<AgentBankInfo> AgentBankInfos { get; set; }
 
         DbSet<AgentBank> AgentBanks { get; set; }
+
+        DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
         DbSet<AgentDividend> AgentDividends { get; set; }
 
@@ -37,6 +33,14 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<Banner> Banners { get; set; }
 
         DbSet<BetLimit> BetLimits { get; set; }
+
+        DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+
+        DbSet<BrandAllAgentGameTypeCondition> BrandAllAgentGameTypeConditions { get; set; }
+
+        DbSet<BrandAllAgentGameType> BrandAllAgentGameTypes { get; set; }
+
+        DbSet<BrandAllAgent> BrandAllAgents { get; set; }
 
         DbSet<BrandBetLimit> BrandBetLimits { get; set; }
 
@@ -152,6 +156,10 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
+        DbSet<PlayerParent> PlayerParents { get; set; }
+
+        DbSet<PlayerProperty> PlayerProperties { get; set; }
+
         DbSet<PlayerRebate> PlayerRebates { get; set; }
 
         DbSet<Player> Players { get; set; }
@@ -215,11 +223,5 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<Whitelist> Whitelists { get; set; }
 
         DbSet<WithdrawForm> WithdrawForms { get; set; }
-
-        DbSet<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
-
-        DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
-
-        DbSet<PlayerParent> PlayerParents { get; set; }
     }
 }

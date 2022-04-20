@@ -1,29 +1,30 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
     {
-        private readonly IPlayerRepository _playerRepository;
         private readonly IRedisCacheManager _cacheManager;
+        private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
+        private readonly IPlayerRepository _playerRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public CommitSetPlayerPhoneCommandService(
             IValidateCodeOperator validateCodeOperator,
             IPlayerRepository playerRepository,
-            IRedisCacheManager cacheManager)
+            IRedisCacheManager cacheManager,
+            IGetService<CheckBrandPhoneQuery, bool> checkService)
         {
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
             _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+            _checkService = checkService;
         }
 
         public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command,
@@ -36,7 +37,18 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (result == null)
                 throw new ValidateCodeNotVerifyException();
 
-            var updatedOn = DateTimeOffset.UtcNow;
+            var checkQuery = new CheckBrandPhoneQuery(
+                command.BrandId,
+                command.PlayerCode,
+                result.AreaCode,
+                result.Phone);
+
+            var isBrandHasSamePhone = await _checkService
+                .GetAsync(checkQuery)
+                .ConfigureAwait(false);
+
+            if (isBrandHasSamePhone)
+                throw new BrandPhoneDuplicateException();
 
             await _playerRepository.SetPlayerPhoneAsync(
                 command.PlayerCode,

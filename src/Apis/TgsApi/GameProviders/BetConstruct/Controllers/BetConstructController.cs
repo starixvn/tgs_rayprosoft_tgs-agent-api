@@ -178,6 +178,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                         ErrorText = GameApiError.InternalError.Description()
                     };
                 }
+
+                var betResultCancelSettle = await _actions.CancelTransactionAsync(betDataCancelSettle).ConfigureAwait(false);
+
                 _ = await _actions.CancelTransactionAsync(betDataCancelSettle).ConfigureAwait(false);
 
                 var betDataSettle = await _map.ReSettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
@@ -191,6 +194,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Controllers
                     };
                 }
 
+                var betResult = await _actions.SettleBetAsync(betDataSettle).ConfigureAwait(false);
                 _ = await _actions.SettleBetAsync(betDataSettle).ConfigureAwait(false);
             }
 

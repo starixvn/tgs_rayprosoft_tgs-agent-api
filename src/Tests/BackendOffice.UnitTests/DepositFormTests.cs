@@ -20,6 +20,7 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
+using System.Threading;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -43,7 +44,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)),
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -216,6 +218,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     Arg.Any<RedisKey>(),
                     Arg.Any<RedisValue>(),
                     Arg.Any<TimeSpan?>(),
+                    Arg.Any<bool>(),
                     Arg.Any<When>(),
                     Arg.Any<CommandFlags>())
                 .Returns(true);
@@ -223,7 +226,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
                     It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == formId)))
+                    It.Is<Guid>(x => x == formId),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(new DepositFormInfo
                 {
                     Id = Guid.NewGuid(),
@@ -273,7 +277,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
 
             moqPlayerBucketRepository.Verify(
@@ -298,7 +303,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
             await sut.GetAsync(query);
 
             moqPaymentServiceClient.Verify(
-                fake => fake.CountUntreatedDepositFormsAsync(It.Is<Guid>(x => x == query.BrandId)),
+                fake => fake.CountUntreatedDepositFormsAsync(
+                    It.Is<Guid>(x => x == query.BrandId),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
 
@@ -327,7 +334,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqPaymentServiceClient.Verify(
                 fake => fake.QueryDepositFormsAsync(
                     It.IsAny<DepositFormQueryConditions>(),
-                    It.IsAny<Tgs.Payment.Clients.Paging>()),
+                    It.IsAny<Tgs.Payment.Clients.Paging>(),
+                    It.IsAny<CancellationToken>()),
                 Times.Exactly(1));
         }
     }

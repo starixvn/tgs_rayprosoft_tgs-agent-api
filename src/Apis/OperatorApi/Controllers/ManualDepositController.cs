@@ -201,6 +201,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 _ => serializer.Serialize(
                     new ManualDepositFpsApplyInfo
                     {
+                        SendBankAccount = request.BankAccount,
+                        SendBankName = request.BankName,
                         BankType = request.BankType,
                         QrCodeFileUrl = qrCodeFileUrl,
                         Email = email,

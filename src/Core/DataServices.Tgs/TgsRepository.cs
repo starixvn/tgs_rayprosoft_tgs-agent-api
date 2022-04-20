@@ -15,10 +15,6 @@ namespace TGS.Core.DataServices.Tgs
 {
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
-
         public DbSet<AdminLog> AdminLogs { get; set; }
 
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
@@ -89,8 +85,8 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<Currency> Currencies { get; set; }
 
-        public IDbContextTransaction CurrentTransaction =>
-            Database.CurrentTransaction;
+        public IDbContextTransaction CurrentTransaction
+            => Database.CurrentTransaction;
 
         public DbSet<Department> Departments { get; set; }
 
@@ -174,6 +170,8 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerParent> PlayerParents { get; set; }
 
+        public DbSet<PlayerProperty> PlayerProperties { get; set; }
+
         public DbSet<PlayerRebate> PlayerRebates { get; set; }
 
         public DbSet<Player> Players { get; set; }
@@ -238,10 +236,15 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
 
-        public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level) =>
-            Database.BeginTransactionAsync(level);
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
 
-        public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
+        public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level)
+            => Database.BeginTransactionAsync(level);
+
+        public Task<bool> CanConnectionAsync()
+            => Database.CanConnectAsync();
 
         public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {
@@ -260,17 +263,18 @@ namespace TGS.Core.DataServices.Tgs
             }
         }
 
-        public IDbConnection GetDbConnection() =>
-            Database.GetDbConnection();
+        public IDbConnection GetDbConnection()
+            => Database.GetDbConnection();
 
-        public void SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
+        public void SetTimeoutToSeconds(int seconds)
+            => Database.SetCommandTimeout(seconds);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema(Consts.Db.Schema);
-            modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+            _ = modelBuilder.HasDefaultSchema(Consts.Db.Schema);
+            _ = modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
-            modelBuilder.HasPostgresExtension("pg_trgm");
+            _ = modelBuilder.HasPostgresExtension("pg_trgm");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAgentService
     {
-        Task CreateAgentAsync(CreateAgentRequest request);
+        Task CreateAgentAsync(CreateAgentRequest request, Guid? parentAgentId = null);
 
         Task<bool> ExistsAsync(Expression<Func<Agent, bool>> predicate);
 
@@ -52,7 +52,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _repository = repository;
         }
 
-        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request)
+        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request, Guid? parentAgentId)
         {
             var invitationCode = InvitationCodeGenerator.NewId();
 
@@ -61,9 +61,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 invitationCode = InvitationCodeGenerator.NewId();
             }
 
-            var parentAgent =
-                await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
-
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
@@ -71,10 +68,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 Username = request.Username,
                 LevelType = request.LevelType,
-                Type = parentAgent?.Type ?? request.Type,
+                Type = request.Type,
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
-                ParentAgentId = parentAgent?.Id,
+                ParentAgentId = parentAgentId,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     brand.AgentDividendType == AgentDividendType.MultipleLayer &&

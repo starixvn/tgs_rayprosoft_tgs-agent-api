@@ -21,9 +21,9 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
-using Tgs.Payment.ApplePay;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.MalakiPay;
 using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.SkyPay;
@@ -186,6 +186,12 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.BaseUrl = config.GetValue<Uri>("Operator:GameProvidersPluggableBaseUrl");
+                })
+                .AddPlayerServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
                 });
 
             services
@@ -228,14 +234,14 @@ namespace TGS.Apis.OperatorApi
                 .Services
                 .AddSingleton<ManualDepositSerializer>()
                 .AddSingleton<PrimePaySerializer>()
-                .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
                 .AddSingleton<UmPaySerializer>()
                 .AddSingleton<MaticPaySerializer>()
                 .AddSingleton<Help2PaySerializer>()
                 .AddSingleton<SkyPaySerializer>()
+                .AddSingleton<ZeroNineNinePaySerializer>()
                 .AddSingleton<TuPaySerializer>()
-                .AddSingleton<ZeroNineNinePaySerializer>();
+                .AddSingleton<MalakiPaySerializer>();
 
             services
                 .AddMessageQueue()

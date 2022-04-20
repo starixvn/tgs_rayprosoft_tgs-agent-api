@@ -93,5 +93,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<VipLevel> VipLevels { get; set; }
 
         public bool AutoClearWageringRequirement { get; set; }
+
+        public decimal AutoClearWageringRequirementBalance { get; set; }
     }
 }

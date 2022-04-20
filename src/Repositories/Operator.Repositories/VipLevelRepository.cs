@@ -20,6 +20,12 @@ namespace TGS.Operator.Repositories
                 throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public async ValueTask<int?> GetVipLevelAsync(Guid vipLevelId)
+            => await _tgsRepository.VipLevels.AsQueryable()
+                .Where(vip => vip.Id == vipLevelId)
+                .Select(vip => (int?)vip.Level)
+                .FirstOrDefaultAsync();
+
         public IAsyncEnumerable<VipRecord> QueryVipLevelsAsync(Guid brandId, Paging<VipRecord> paging)
         {
             var query = QueryVipLevelsAsync(brandId)
