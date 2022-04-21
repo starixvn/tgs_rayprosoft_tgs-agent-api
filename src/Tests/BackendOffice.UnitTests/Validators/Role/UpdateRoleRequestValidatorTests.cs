@@ -15,12 +15,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Role
             _validator = new UpdateRoleRequestValidator();
         }
 
-        private UpdateRoleRequestValidator _validator;
+        private UpdateRoleRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_name_is_null()
         {
-            var model = new UpdateRoleRequest {Name = null};
+            var model = new UpdateRoleRequest { Name = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Name)
                 .WithErrorMessage(Apis.BackendOffice.Resources.Role.NameRequired);
@@ -29,7 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Role
         [Test]
         public void Should_not_have_error_when_name_is_specified()
         {
-            var model = new UpdateRoleRequest {Name = "RealName"};
+            var model = new UpdateRoleRequest { Name = "RealName" };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.Name);
         }
@@ -39,7 +39,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Role
         {
             var fixture = new Fixture();
             var name = string.Join(string.Empty, fixture.CreateMany<string>(2));
-            var model = new UpdateRoleRequest {Name = name};
+            var model = new UpdateRoleRequest { Name = name };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Name)
                 .WithErrorMessage(Apis.BackendOffice.Resources.Role.NameLengthLimit);
@@ -48,7 +48,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Role
         [Test]
         public void Should_not_have_error_when_name_length_is_not_greater_then_fifty()
         {
-            var model = new UpdateRoleRequest {Name = "Name"};
+            var model = new UpdateRoleRequest { Name = "Name" };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.Name);
         }

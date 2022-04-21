@@ -41,7 +41,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private StationLetterController _controller;
+        private StationLetterController _controller = default!;
 
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new();
         private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new();
@@ -208,7 +208,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
-                .Returns(Task.FromResult<StationLetter>(null));
+                .Returns(Task.FromResult<StationLetter>(default!));
 
             var sut = new StationLetterController(
                 queriesMock.Object,
@@ -278,7 +278,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
-                .Returns(Task.FromResult<StationLetter>(null));
+                .Returns(Task.FromResult<StationLetter>(default!));
 
             var response = await _controller.VerifyAsync(stationLetterId, "pass", request);
             response.Valid.Should().BeFalse();

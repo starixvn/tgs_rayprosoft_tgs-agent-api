@@ -14,7 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProviderBetLimit
             _validator = new GameProviderBetLimitRequestValidator();
         }
 
-        private GameProviderBetLimitRequestValidator _validator;
+        private GameProviderBetLimitRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_code_is_null()

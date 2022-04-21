@@ -24,7 +24,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private readonly Mock<IPromotionClient> _promotionClientMock = new();
 
-        private PlayerController _controller;
+        private PlayerController _controller = default!;
 
         [Test]
         public async Task Can_Get_Player()

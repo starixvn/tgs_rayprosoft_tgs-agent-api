@@ -123,7 +123,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var actual = repository.SubGameProviders.FirstOrDefault(x => x.Code == "SubGp");
 
-            Assert.IsNotNull(actual.Localization);
+            Assert.IsNotNull(actual!.Localization);
         }
 
         [Test]

@@ -33,7 +33,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private readonly Mock<IUploadService> _uploadServiceMock = new();
 
-        private BrandPaymentController _controller;
+        private BrandPaymentController _controller=default!;
 
         [Test]
         public async Task Can_Create_Payment()
@@ -230,7 +230,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     It.IsAny<Expression<Func<BrandPayment, bool>>>(),
                     It.IsAny<Func<IQueryable<BrandPayment>,
                         IQueryable<BrandPayment>>>(), true))
-                .Returns(Task.FromResult<BrandPayment>(null));
+                .Returns(Task.FromResult<BrandPayment>(default!));
 
             _paymentServiceMock.Setup(s =>
                     s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))

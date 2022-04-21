@@ -14,12 +14,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
             _validator = new BrandRequestValidator();
         }
 
-        private BrandRequestValidator _validator;
+        private BrandRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_code_is_null()
         {
-            var model = new BrandRequest {Code = null};
+            var model = new BrandRequest { Code = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Code)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CodeRequired);
@@ -28,7 +28,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when_name_is_null()
         {
-            var model = new BrandRequest {Name = null};
+            var model = new BrandRequest { Name = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Name)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.NameRequired);
@@ -37,7 +37,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when__game_providers_is_null()
         {
-            var model = new BrandRequest {GameProviders = null};
+            var model = new BrandRequest { GameProviders = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.GameProviders)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.GameProviderRequired);
@@ -46,7 +46,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when__currency_codes_is_null()
         {
-            var model = new BrandRequest {CurrencyCodes = null};
+            var model = new BrandRequest { CurrencyCodes = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.CurrencyCodes)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CurrencyRequired);
@@ -55,7 +55,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         [Test]
         public void Should_have_error_when__brand_cultures_is_null()
         {
-            var model = new BrandRequest {Languages = null};
+            var model = new BrandRequest { Languages = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Languages)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Brand.CultureRequired);
@@ -66,8 +66,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Brand
         {
             var model = new BrandRequest
             {
-                CurrencyCodes = new[] {"CNY", "RMB"},
-                BetLimits = new[] {new BrandBetLimitModel {Id = 1, CurrencyCode = "CNY", IsDefault = false}}
+                CurrencyCodes = new[] { "CNY", "RMB" },
+                BetLimits = new[] { new BrandBetLimitModel { Id = 1, CurrencyCode = "CNY", IsDefault = false } }
             };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.CurrencyCodes)

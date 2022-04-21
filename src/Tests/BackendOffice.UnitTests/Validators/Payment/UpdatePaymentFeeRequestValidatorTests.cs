@@ -14,7 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
             _validator = new UpdatePaymentFeeRequestValidator();
         }
 
-        private UpdatePaymentFeeRequestValidator _validator;
+        private UpdatePaymentFeeRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_fee_percentage_is_less_than_zero()

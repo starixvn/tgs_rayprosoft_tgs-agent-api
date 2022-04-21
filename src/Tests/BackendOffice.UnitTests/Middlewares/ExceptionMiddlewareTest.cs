@@ -48,9 +48,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 
         private readonly Mock<ITgsLog> _tgsLogMock = new();
 
-        private RequestDelegate _requestDelegate;
+        private RequestDelegate _requestDelegate = default!;
 
-        private IMiddleware _target;
+        private IMiddleware _target = default!;
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);
         [Test]

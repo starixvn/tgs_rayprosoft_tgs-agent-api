@@ -12,13 +12,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
         [SetUp]
         public void Setup() => _validator = new();
 
-        private GameProviderModelValidator _validator;
+        private GameProviderModelValidator _validator = default!;
 
 
         [Test]
         public void Should_have_error_when_code_is_null()
         {
-            var model = new GameProviderModel {Code = null};
+            var model = new GameProviderModel { Code = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Code)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.GameProvider.CodeRequired);
@@ -27,7 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
         [Test]
         public void Should_have_error_when_name_is_null()
         {
-            var model = new GameProviderModel {Name = null};
+            var model = new GameProviderModel { Name = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Name)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.GameProvider.NameRequired);
@@ -36,7 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
         [Test]
         public void Should_have_error_when_status_is_not_in_enums()
         {
-            var model = new GameProviderModel {Status = (Status)5};
+            var model = new GameProviderModel { Status = (Status)5 };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Status)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.GameProvider.StatusRequired);
@@ -45,7 +45,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
         [Test]
         public void Should_have_error_when_currency_is_null()
         {
-            var model = new GameProviderModel {Currencies = null};
+            var model = new GameProviderModel { Currencies = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Currencies)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.GameProvider.CurrencyRequired);
@@ -54,7 +54,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProvider
         [Test]
         public void Should_have_error_when_language_is_null()
         {
-            var model = new GameProviderModel {Languages = null};
+            var model = new GameProviderModel { Languages = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.Languages)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.GameProvider.LanguageRequired);

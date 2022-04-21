@@ -41,7 +41,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private RoleController _controller;
+        private RoleController _controller = default!;
         private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
         private readonly Mock<ITgsQueries<Setting>> _settingQueriesMock = new();
         private readonly Mock<ITgsCommands<Role>> _roleCommandsMock = new();
@@ -161,7 +161,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
-                .Returns(Task.FromResult<Role>(null));
+                .Returns(Task.FromResult<Role>(default!));
 
             var response = await _controller.GetSingleAsync(roleId);
             response.Valid.Should().BeFalse();
@@ -761,7 +761,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
-                .Returns(Task.FromResult<Role>(null));
+                .Returns(Task.FromResult<Role>(default!));
 
             _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
@@ -855,7 +855,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
-                .Returns(Task.FromResult<Role>(null));
+                .Returns(Task.FromResult<Role>(default!));
 
             _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(true));
@@ -984,7 +984,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
-                .Returns(Task.FromResult<Role>(null));
+                .Returns(Task.FromResult<Role>(default!));
 
             var response = await _controller.DeleteAsync(role.Id);
 
@@ -1093,7 +1093,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _settingQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult<Setting>(null));
+                .Returns(Task.FromResult<Setting>(default!));
 
             var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeFalse();
@@ -1117,7 +1117,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
-                .Returns(Task.FromResult<Role>(null));
+                .Returns(Task.FromResult<Role>(default!));
 
             var response = await _controller.GetMenuAsync(request);
             response.Valid.Should().BeFalse();

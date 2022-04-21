@@ -18,16 +18,38 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Parallelizable]
     public class BrandGameControllerTests : BaseTests
     {
-        [SetUp]
-        public override void Setup()
-        {
-            base.Setup();
-            _controller = new BrandGameController(
-                _mediatorMock.Object);
-        }
-
-        private BrandGameController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
+
+        private BrandGameController _controller = default!;
+
+        [Test]
+        public async Task Can_Get_A_Brand_Game()
+        {
+            var brandGame = CreateBrandGameResponseModelFixture().Create<BrandGameResponseModel>();
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetBrandGameRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GetBrandGameResponse
+                {
+                    Valid = true,
+                    BrandGame = brandGame
+                });
+
+            var response = await _controller.GetBrandGameAsync(It.IsAny<Guid>());
+            response.Valid.Should().BeTrue();
+            response.BrandGame.Id.Should().Be(brandGame.Id);
+            response.BrandGame.GameId.Should().Be(brandGame.GameId);
+            response.BrandGame.GameProviderName.Should().Be(brandGame.GameProviderName);
+            response.BrandGame.GameName.Should().Be(brandGame.GameName);
+            response.BrandGame.Status.Should().Be(brandGame.Status);
+            response.BrandGame.GameType.Should().Be(brandGame.GameType);
+            response.BrandGame.Platform.Should().Be(brandGame.Platform);
+            response.BrandGame.SupportHtml5.Should().Be(brandGame.SupportHtml5);
+            response.BrandGame.EffectiveBettingPercentage.Should().Be(brandGame.EffectiveBettingPercentage);
+            response.BrandGame.Rebate.Should().Be(brandGame.Rebate);
+
+            _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameRequest>(), It.IsAny<CancellationToken>()));
+        }
 
         [TestCase(true)]
         [TestCase(false)]
@@ -72,35 +94,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         }
 
         [Test]
-        public async Task Can_Get_A_Brand_Game()
-        {
-            var brandGame = CreateBrandGameResponseModelFixture().Create<BrandGameResponseModel>();
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetBrandGameRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetBrandGameResponse
-                {
-                    Valid = true,
-                    BrandGame = brandGame
-                });
-
-            var response = await _controller.GetBrandGameAsync(It.IsAny<Guid>());
-            response.Valid.Should().BeTrue();
-            response.BrandGame.Id.Should().Be(brandGame.Id);
-            response.BrandGame.GameId.Should().Be(brandGame.GameId);
-            response.BrandGame.GameProviderName.Should().Be(brandGame.GameProviderName);
-            response.BrandGame.GameName.Should().Be(brandGame.GameName);
-            response.BrandGame.Status.Should().Be(brandGame.Status);
-            response.BrandGame.GameType.Should().Be(brandGame.GameType);
-            response.BrandGame.Platform.Should().Be(brandGame.Platform);
-            response.BrandGame.SupportHtml5.Should().Be(brandGame.SupportHtml5);
-            response.BrandGame.EffectiveBettingPercentage.Should().Be(brandGame.EffectiveBettingPercentage);
-            response.BrandGame.Rebate.Should().Be(brandGame.Rebate);
-
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        [Test]
         public async Task Can_Update_A_Brand_Game()
         {
             var brandGame = CreateBrandGameResponseModelFixture().Create<BrandGameModel>();
@@ -108,7 +101,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateBrandGameRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.UpdateBrandGameAsync(brandGame.Id, request);
 
@@ -123,12 +116,20 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateBrandGameTagRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.UpdateBrandTagAsync(request.Id, request.GameTag, request.Enabled);
 
             response.Valid.Should().BeTrue();
             _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateBrandGameTagRequest>(), It.IsAny<CancellationToken>()));
+        }
+
+        [SetUp]
+        public override void Setup()
+        {
+            base.Setup();
+            _controller = new BrandGameController(
+                _mediatorMock.Object);
         }
 
         private Fixture CreateBrandGameModelFixture()

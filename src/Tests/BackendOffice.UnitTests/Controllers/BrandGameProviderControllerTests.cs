@@ -26,7 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _mediatorMock.Object);
         }
 
-        private BrandGameProviderController _controller;
+        private BrandGameProviderController _controller=default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]

@@ -14,7 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.GameProviderBetLimit
             _validator = new GameProviderBetLimitModelValidator();
         }
 
-        private GameProviderBetLimitModelValidator _validator;
+        private GameProviderBetLimitModelValidator _validator = default!;
 
 
         [Test]

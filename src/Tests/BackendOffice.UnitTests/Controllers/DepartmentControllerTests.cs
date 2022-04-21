@@ -29,7 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private DepartmentController _controller;
+        private DepartmentController _controller=default!;
         private readonly Mock<ITgsQueries<Department>> _queriesMock = new();
         private readonly Mock<ITgsCommands<Department>> _commandsMock = new();
 
@@ -140,7 +140,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
-                .Returns(Task.FromResult<Department>(null));
+                .Returns(Task.FromResult<Department>(default!));
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(false));
@@ -220,7 +220,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
-                .Returns(Task.FromResult<Department>(null));
+                .Returns(Task.FromResult<Department>(default!));
 
             var response = await _controller.DeleteAsync(departmentId);
 
