@@ -36,7 +36,6 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -101,13 +100,7 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                    });
+                endpoints.MapHealthChecks("/health");
                 endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
             });
@@ -291,10 +284,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
-                .AddRedis(_configuration)
-                .ForwardToPrometheus();
+            services.AddHealthChecks();
 
             services
                 .AddOptions<OtlpExporterOptions>()

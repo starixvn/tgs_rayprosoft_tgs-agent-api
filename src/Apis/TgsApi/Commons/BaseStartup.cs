@@ -21,7 +21,6 @@ using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.TimeZone;
@@ -67,30 +66,7 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext,
-                                result,
-                                Environment,
-                                async sp =>
-                                {
-                                    var gpCode =
-                                        Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
-
-                                    var feature = sp.GetRequiredService<IFeatureManager>();
-
-                                    var isFeatureEnabled = gpCode.IsNotNullOrEmpty() &&
-                                                           await feature.IsEnabledAsync(gpCode);
-
-                                    return new Dictionary<string, object>
-                                    {
-                                        { "GameProviderCode", gpCode }, { "FeatureEnabled", isFeatureEnabled }
-                                    };
-                                })
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
@@ -146,11 +122,7 @@ namespace TGS.Apis.TgsApi.Commons
                     options.SuppressModelStateInvalidFilter = false;
                 });
 
-            _ = services.AddHealthChecks()
-                .AddPostgres(Configuration, "Tgs", "tgs-db")
-                .AddRedis(Configuration)
-                .ForwardToPrometheus();
-
+            _ = services.AddHealthChecks();
             _ = services
                 .AddMessageQueue()
                 .AddNatsMessageQueue(natsConfig =>

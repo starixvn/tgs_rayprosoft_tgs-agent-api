@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -18,7 +17,6 @@ using TGS.Workers.Schedulers.Hangfire;
 using TGS.Workers.Schedulers.Hangfire.Filters;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
-using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
@@ -51,13 +49,7 @@ namespace TGS.Workers.Schedulers
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
 
@@ -156,11 +148,7 @@ namespace TGS.Workers.Schedulers
             services.AddGameProviderScheduleLockRepository();
 
             services
-                .AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
-                .AddRedis(_configuration)
-                .AddMongoDb(_configuration, "Hangfire", "hangfire-mongodb")
-                .ForwardToPrometheus();
+                .AddHealthChecks();
 
             // BO services
             services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
@@ -175,9 +163,6 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
             services.AddTransient<IPlayerAllAgentRebateWorkerService, PlayerAllAgentRebateWorkerService>();
-
-            // GameProviders Services
-            services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
         }
 
         private static Type[] GetModuleTypes() => new[]

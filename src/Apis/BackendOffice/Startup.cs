@@ -28,7 +28,6 @@ using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 
@@ -73,13 +72,7 @@ namespace TGS.Apis.BackendOffice
             {
                 endpoints.MapControllers();
                 endpoints.MapProfileViewer();
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result)
-                            => HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
             });
