@@ -43,7 +43,6 @@
     <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
     <PackageReference Include="FluentValidation" Version="10.4.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
-    <PackageReference Include="prometheus-net.DotNetRuntime" Version="4.2.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.17.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
