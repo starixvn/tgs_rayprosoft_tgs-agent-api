@@ -163,8 +163,8 @@ namespace TGS.Operator.Repositories
                  .ConfigureAwait(false);
 
             return new PasswordInfo(
-                playerData.Password,
-                playerData.Salt);
+                playerData!.Password,
+                playerData!.Salt);
         }
 
         public async ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host)
@@ -205,9 +205,9 @@ namespace TGS.Operator.Repositories
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            player.RegisteredOn = registeredOn;
-            player.UpdatedByUsername = playerCode;
-            player.UpdatedOn = DateTimeOffset.UtcNow;
+            player!.RegisteredOn = registeredOn;
+            player!.UpdatedByUsername = playerCode;
+            player!.UpdatedOn = DateTimeOffset.UtcNow;
 
             var datas = new PlayerIpRecord[] {
                 new() {
@@ -309,8 +309,8 @@ namespace TGS.Operator.Repositories
             var player = await _tgsRepository.Players.FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            player.Status = playerStatus;
-            player.UpdatedOn = DateTimeOffset.UtcNow;
+            player!.Status = playerStatus;
+            player!.UpdatedOn = DateTimeOffset.UtcNow;
 
             _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateDepartmentFixture()
                 .CreateMany<Department>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.Name);
@@ -76,7 +76,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<DepartmentRequest>();
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
             request.Name = "Name";
             request.ResellerId = null;
             request.LicenseeId = null;
@@ -99,7 +99,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<DepartmentRequest>();
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             _queriesMock.Setup(s => s.GetQueries())
                 .Returns(departments);
@@ -162,7 +162,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<DepartmentRequest>();
 
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             request.Name = "Name";
             department.ResellerId = null;

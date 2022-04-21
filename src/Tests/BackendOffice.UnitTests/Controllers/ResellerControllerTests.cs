@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateResellerFixture()
                 .CreateMany<Reseller>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
@@ -77,7 +77,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateResellerFixture()
                 .CreateMany<Reseller>(2)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new Fixture().Create<CreateResellerRequest>();
             request.Name = list.FirstOrDefault()?.Name;
@@ -97,7 +97,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateResellerFixture()
                 .CreateMany<Reseller>(2)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new Fixture().Create<CreateResellerRequest>();
             request.Code = list.FirstOrDefault()?.Code;

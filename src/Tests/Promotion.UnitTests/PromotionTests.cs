@@ -48,7 +48,7 @@ namespace Promotion.UnitTests
             var list = CreatePromotionFixture()
                 .CreateMany<TGS.Core.DataServices.Tgs.Models.Promotion>(20)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             foreach (var promotion in list)
             {
@@ -94,7 +94,7 @@ namespace Promotion.UnitTests
             var list = CreatePromotionFixture()
                 .CreateMany<TGS.Core.DataServices.Tgs.Models.Promotion>(10)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var index = 0;
 

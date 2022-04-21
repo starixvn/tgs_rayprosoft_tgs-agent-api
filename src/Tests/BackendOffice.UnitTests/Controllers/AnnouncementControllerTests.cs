@@ -71,7 +71,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateAnnouncementFixture()
                 .CreateMany<Announcement>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
 
@@ -438,7 +438,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateAnnouncementFixture()
                 .CreateMany<Announcement>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new ChangeOrderRequest
             {

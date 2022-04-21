@@ -39,7 +39,7 @@ namespace TGS.Tests.Schedulers.UnitTests
             var brandGameProviders = CreateBrandGameProviderFixture()
                 .CreateMany<BrandGameProvider>(2)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
 

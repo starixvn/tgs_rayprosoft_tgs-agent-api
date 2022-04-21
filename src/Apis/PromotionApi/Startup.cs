@@ -104,11 +104,6 @@ namespace TGS.Apis.PromotionApi
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
                 })
                 .AddCashServiceClient((options, sp) =>

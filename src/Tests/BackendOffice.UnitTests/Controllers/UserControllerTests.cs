@@ -62,7 +62,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var users = CreateUserFixture()
                 .CreateMany<User>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedUsers = users.OrderByDescending(p => p.Username);
@@ -106,7 +106,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var users = CreateUserFixture()
                 .CreateMany<User>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedUsers = users.OrderByDescending(p => p.Username);
@@ -141,7 +141,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<CreateUserRequest>();
             var users = CreateUserFixture().CreateMany<User>(10).AsQueryable().BuildMock();
 
-            _userQueriesMock.Setup(x => x.GetQueries()).Returns(users.Object);
+            _userQueriesMock.Setup(x => x.GetQueries()).Returns(users);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -173,7 +173,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             request.RoleId = role.Id;
 
             var users = CreateUserFixture().CreateMany<User>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
             request.Username = "username";
 
             var firstUser = users.First();

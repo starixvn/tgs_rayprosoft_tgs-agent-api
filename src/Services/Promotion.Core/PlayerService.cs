@@ -31,7 +31,7 @@ namespace TGS.Services.Promotion
         public Task<Player> GetPlayerByPlayerCodeAsync(string playerCode)
             => _repository.Players.AsQueryable()
                 .Where(player => player.PlayerCode == playerCode)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync()!;
 
         public IQueryable<Player> GetPlayerQueries(
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery,
@@ -44,7 +44,7 @@ namespace TGS.Services.Promotion
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            if (player.FirstDepositOn is null)
+            if (player!.FirstDepositOn is null)
             {
                 player.FirstDepositOn = time;
 
@@ -58,7 +58,7 @@ namespace TGS.Services.Promotion
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            if (player.FirstPromotionOn is null)
+            if (player!.FirstPromotionOn is null)
             {
                 player.FirstPromotionOn = time;
 

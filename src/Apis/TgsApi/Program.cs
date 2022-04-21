@@ -60,6 +60,8 @@ namespace TGS.Apis.TgsApi
 
         public static async Task Main(string[] args)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             PrometheusService.StartCollecting();
 
             var builder = CreateHostBuilder(args).Build();

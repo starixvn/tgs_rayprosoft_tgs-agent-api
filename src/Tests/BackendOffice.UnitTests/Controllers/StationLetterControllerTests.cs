@@ -67,7 +67,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateStationLetterFixture()
                 .CreateMany<StationLetter>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             list = list.Where(q => q.Status == request.Status);
 
@@ -104,7 +104,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var players = CreatePlayerFixture()
                 .CreateMany<Player>(200)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new StationLetterRequest
             {
@@ -311,7 +311,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var players = CreatePlayerFixture()
                 .CreateMany<Player>(100)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var playerUsernames = players.Select(p => new UploadPlayerModel
             {

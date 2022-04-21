@@ -168,8 +168,9 @@ namespace TGS.Operator.Repositories
             var fg = await _tgsRepository.PlayerFavoriteGames
                 .FindAsync(playerCode, gameId)
                 .ConfigureAwait(false);
-
-            _tgsRepository.PlayerFavoriteGames.Remove(fg);
+            
+            if (fg is not null)
+                _tgsRepository.PlayerFavoriteGames.Remove(fg);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

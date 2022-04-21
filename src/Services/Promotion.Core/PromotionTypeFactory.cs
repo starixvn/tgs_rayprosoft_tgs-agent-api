@@ -25,7 +25,7 @@ namespace TGS.Services.Promotion
                 .FirstOrDefaultAsync(x => x.Key == SettingConsts.PromotionType);
 
             var promotionTypeGroups =
-                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
+                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson!.Value);
 
             var promotionGroupType =
                 promotionTypeGroups.FirstOrDefault(x => x.Types.Select(t => t.Name).Contains(promotionType));

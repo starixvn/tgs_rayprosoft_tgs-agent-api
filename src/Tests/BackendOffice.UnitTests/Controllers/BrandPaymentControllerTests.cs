@@ -93,7 +93,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreatePaymentFixture()
                 .CreateMany<BrandPayment>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.Where(x => x.PaymentStatus == SwitchStatus.Enabled)

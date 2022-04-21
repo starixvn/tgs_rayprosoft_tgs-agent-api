@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -36,6 +37,10 @@ namespace TGS.Apis.AgentApi
                 });
 
         public static void Main(string[] args)
-            => CreateHostBuilder(args).Build().Run();
+        {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+            CreateHostBuilder(args).Build().Run();
+        }
     }
 }

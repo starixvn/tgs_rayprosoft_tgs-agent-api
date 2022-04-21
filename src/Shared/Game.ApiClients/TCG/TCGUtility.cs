@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using TGS.Core.Models;
 
 namespace TGS.Shared.Game.ApiClients.TCG
@@ -11,20 +8,20 @@ namespace TGS.Shared.Game.ApiClients.TCG
     public interface ITCGUtility
     {
         /// <summary>
-        /// Descs the encrypt.
-        /// </summary>
-        /// <param name="str">The string.</param>
-        /// <param name="key">The key.</param>
-        /// <returns></returns>
-        string DESCEncrypt(string str, string key);
-
-        /// <summary>
         /// Descs the decrypt.
         /// </summary>
         /// <param name="str">The string.</param>
         /// <param name="key">The key.</param>
         /// <returns></returns>
         string DESCDecrypt(string str, string key);
+
+        /// <summary>
+        /// Descs the encrypt.
+        /// </summary>
+        /// <param name="str">The string.</param>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        string DESCEncrypt(string str, string key);
 
         /// <summary>
         /// Gets the hash256.
@@ -41,20 +38,37 @@ namespace TGS.Shared.Game.ApiClients.TCG
         /// <returns></returns>
         string GetPrefix(string prefix);
     }
+
     public class TCGUtility : ITCGUtility
     {
+        string ITCGUtility.DESCDecrypt(string str, string key)
+        {
+            if (string.IsNullOrEmpty(str)) return null;
+
+            Byte[] toEncryptArray = Convert.FromBase64String(str);
+
+            using (var dESCrypto = DES.Create())
+            {
+                dESCrypto.Key = Encoding.UTF8.GetBytes(key);
+                dESCrypto.Mode = CipherMode.ECB;
+                dESCrypto.Padding = PaddingMode.PKCS7;
+
+                ICryptoTransform cTransform = dESCrypto.CreateDecryptor();
+                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+                return Encoding.UTF8.GetString(resultArray);
+            }
+        }
+
         string ITCGUtility.DESCEncrypt(string str, string key)
         {
             if (string.IsNullOrEmpty(str)) return null;
             Byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
 
-            using (var dESCrypto = new DESCryptoServiceProvider
+            using (var dESCrypto = DES.Create())
             {
-                Key = Encoding.UTF8.GetBytes(key),
-                Mode = CipherMode.ECB,
-                Padding = PaddingMode.PKCS7
-            })
-            {
+                dESCrypto.Key = Encoding.UTF8.GetBytes(key);
+                dESCrypto.Mode = CipherMode.ECB;
+                dESCrypto.Padding = PaddingMode.PKCS7;
 
                 ICryptoTransform cTransform = dESCrypto.CreateEncryptor();
                 Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
@@ -62,29 +76,9 @@ namespace TGS.Shared.Game.ApiClients.TCG
             }
         }
 
-        string ITCGUtility.DESCDecrypt(string str, string key)
-        {
-            if (string.IsNullOrEmpty(str)) return null;
-
-
-            Byte[] toEncryptArray = Convert.FromBase64String(str);
-
-            using (var dESCrypto = new DESCryptoServiceProvider
-            {
-                Key = Encoding.UTF8.GetBytes(key),
-                Mode = CipherMode.ECB,
-                Padding = PaddingMode.PKCS7
-            })
-            {
-                ICryptoTransform cTransform = dESCrypto.CreateDecryptor();
-                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-                return Encoding.UTF8.GetString(resultArray);
-            }
-        }
-
         string ITCGUtility.GetHash256(string datas, string hash_key)
         {
-            SHA256 sha256 = new SHA256CryptoServiceProvider();
+            SHA256 sha256 = SHA256.Create();
 
             byte[] inputBytes = Encoding.UTF8.GetBytes(datas + hash_key);
             byte[] outputBytes = sha256.ComputeHash(inputBytes);

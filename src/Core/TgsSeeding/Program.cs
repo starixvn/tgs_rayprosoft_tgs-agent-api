@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.DataInitializers;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = Host.CreateDefaultBuilder();
 
 builder
@@ -33,7 +35,6 @@ rootCommand.SetHandler<string>(
         dbOptionsBuilder
             .UseNpgsql(connectionString, serverOption =>
             {
-                serverOption.UseTrigrams();
             })
             .UseSnakeCaseNamingConvention();
 

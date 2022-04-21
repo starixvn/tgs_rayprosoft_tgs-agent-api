@@ -146,9 +146,17 @@ namespace Agent.UnitTests
                     new CoreModels.BrandCurrency
                     {
                         BrandId = brandId,
-                        CurrencyCode = "CNY"
+                        CurrencyCode = "CNY",
+                        BrandCurrencyCode = "CNY"
                     }
-                }
+                },
+                ApiKey = string.Empty,
+                ClientId = string.Empty,
+                Code = "Test",
+                CreatedByUsername = "System",
+                Name = "Test",
+                UpdatedByUsername = "System",
+                SecretKey = string.Empty
             };
 
             await repository.Brands.AddAsync(brand);
@@ -166,12 +174,21 @@ namespace Agent.UnitTests
                         ActiveNumber = 1,
                         DividendPercentage = 50
                     }
-                }
+                },
+                InvitationCode = "Test",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "agent",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
             };
             await repository.Agents.AddAsync(parentAgent);
             await repository.SaveChangesAsync();
 
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+            fakePasswordHandler.GenerateCredential(Arg.Any<string>())
+                .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
 
             var sut = new CreateAgentCommandService(repository, fakePasswordHandler);
 
@@ -222,13 +239,25 @@ namespace Agent.UnitTests
                 {
                     BrandId = brandId,
                     ParentAgentId = parentAgentId,
-                    Id = Guid.NewGuid()
+                    Id = Guid.NewGuid(),
+                    InvitationCode = "Test1",
+                    Password = Array.Empty<byte>(),
+                    Salt = Array.Empty<byte>(),
+                    Username = "agent1",
+                    WithdrawPassword = Array.Empty<byte>(),
+                    WithdrawSalt = Array.Empty<byte>()
                 },
                 new CoreModels.Agent
                 {
                     BrandId = brandId,
                     ParentAgentId = parentAgentId,
-                    Id = Guid.NewGuid()
+                    Id = Guid.NewGuid(),
+                    InvitationCode = "Test2",
+                    Password = Array.Empty<byte>(),
+                    Salt = Array.Empty<byte>(),
+                    Username = "agent2",
+                    WithdrawPassword = Array.Empty<byte>(),
+                    WithdrawSalt = Array.Empty<byte>()
                 });
 
             await repository.SaveChangesAsync();

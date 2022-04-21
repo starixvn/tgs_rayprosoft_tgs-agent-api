@@ -8,7 +8,7 @@ using TGS.Services.BackOffice.Application.Models;
 
 namespace TGS.Services.BackOffice.Application.Middlewares
 {
-    public class PipelineBehavior<TIn, TOut> : IPipelineBehavior<TIn, TOut>
+    public class PipelineBehavior<TIn, TOut> : IPipelineBehavior<TIn, TOut> where TIn : IRequest<TOut>
     {
         private readonly HttpContext _httpContext;
 

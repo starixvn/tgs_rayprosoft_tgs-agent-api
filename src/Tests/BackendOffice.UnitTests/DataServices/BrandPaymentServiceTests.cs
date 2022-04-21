@@ -43,7 +43,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
                 DepositedAmountMin = 33,
                 Reason = "source reason",
                 BrandPaymentPlayers = new BrandPaymentPlayer[0],
-                VipLevels = new BrandPaymentVipLevel[0]
+                VipLevels = new BrandPaymentVipLevel[0],
+                ExtendedData = "{}",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
             };
 
             repository.BrandPayments.Add(source);

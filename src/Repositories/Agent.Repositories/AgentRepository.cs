@@ -23,7 +23,7 @@ namespace TGS.Agent.Repositories
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
-            var playerNumber = agent.Players.Count(p => p.AgentId == id);
+            var playerNumber = agent!.Players.Count(p => p.AgentId == id);
 
             return agent == null
                 ? null
@@ -120,7 +120,7 @@ namespace TGS.Agent.Repositories
         {
             var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
 
-            return agent.Status;
+            return agent!.Status;
         }
 
         public IAsyncEnumerable<DividendCondition> QueryAgentDividendConditionsAsync(Guid agentId)
@@ -198,9 +198,9 @@ namespace TGS.Agent.Repositories
                 .FindAsync(agentId)
                 .ConfigureAwait(false);
 
-            agent.Password = newPassword;
-            agent.Salt = newSalt;
-            agent.UpdatedOn = updatedOn;
+            agent!.Password = newPassword;
+            agent!.Salt = newSalt;
+            agent!.UpdatedOn = updatedOn;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -215,9 +215,9 @@ namespace TGS.Agent.Repositories
                 .FindAsync(agentId)
                 .ConfigureAwait(false);
 
-            agent.WithdrawPassword = newPassword;
-            agent.WithdrawSalt = newSalt;
-            agent.UpdatedOn = updatedOn;
+            agent!.WithdrawPassword = newPassword;
+            agent!.WithdrawSalt = newSalt;
+            agent!.UpdatedOn = updatedOn;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

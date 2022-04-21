@@ -81,7 +81,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = fixture
                 .CreateMany<PlayerOperationModel>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
@@ -125,7 +125,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreatePlayersModelFixture()
                 .CreateMany<PlayersModel>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.Username);

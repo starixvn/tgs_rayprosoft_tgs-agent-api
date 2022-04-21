@@ -53,7 +53,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = new Fixture()
                 .CreateMany<Setting>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);

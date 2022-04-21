@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -224,12 +222,6 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
-
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                 })
                 .Services
                 .AddSingleton<ManualDepositSerializer>()

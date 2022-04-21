@@ -224,7 +224,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 BrandId = Guid.NewGuid(),
                 Email = email,
                 PhoneAuthentication = true,
-                DefaultWalletCurrencyCode = "CNY"
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
             };
 
             await fakeTgsRepository.Players.AddAsync(player);
