@@ -4,14 +4,12 @@ using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -25,7 +23,6 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -93,7 +90,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                 .AddSecurity()
                 .AddTransactions()
                 .AddOperations()
-                .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddGameOperations((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())

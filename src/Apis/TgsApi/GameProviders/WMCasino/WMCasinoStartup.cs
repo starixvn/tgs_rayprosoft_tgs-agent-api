@@ -5,7 +5,6 @@ using System.Net.Mime;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +15,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
+using Tgs.Interceptors;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -25,11 +25,9 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using Tgs.Interceptors;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.Operations.Extensions;
 
@@ -109,11 +107,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 .AddSecurity()
                 .AddTransactions()
                 .AddOperations()
-                .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
-                .AddGameOperations(sp
-                    => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+                .AddGameOperations(sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
                 .AddGameProvidersoRepository()
                 .AddCashServiceClient((options, sp) =>
                 {

@@ -4,7 +4,6 @@ using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +23,8 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
 using static TGS.Core.Models.Consts;
 
@@ -86,7 +83,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
                 .AddSecurity()
                 .AddTransactions()
                 .AddOperations()
-                .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddGameOperations(sp
