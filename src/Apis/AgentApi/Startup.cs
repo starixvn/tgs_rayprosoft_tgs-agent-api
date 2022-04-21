@@ -143,12 +143,6 @@ namespace TGS.Apis.AgentApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
-
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                 })
                 .ConfigureWallet(config =>
                 {

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.Infrastructures.Prometheus;
@@ -8,6 +9,8 @@ namespace TGS.Workers.Schedulers
     {
         public static void Main(string[] args)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             PrometheusService.StartCollecting();
 
             CreateHostBuilder(args).Build().Run();

@@ -10,7 +10,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
     [TestFixture]
     public class BrandPaymentRequestValidatorTests
     {
-        private BrandPaymentRequestValidator _validator;
+        private BrandPaymentRequestValidator _validator = default!;
 
         [SetUp]
         public void Setup()

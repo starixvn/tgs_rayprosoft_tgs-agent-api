@@ -29,7 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private DepartmentController _controller;
+        private DepartmentController _controller=default!;
         private readonly Mock<ITgsQueries<Department>> _queriesMock = new();
         private readonly Mock<ITgsCommands<Department>> _commandsMock = new();
 
@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateDepartmentFixture()
                 .CreateMany<Department>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.Name);
@@ -76,7 +76,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<DepartmentRequest>();
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
             request.Name = "Name";
             request.ResellerId = null;
             request.LicenseeId = null;
@@ -99,7 +99,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var request = new Fixture().Create<DepartmentRequest>();
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             _queriesMock.Setup(s => s.GetQueries())
                 .Returns(departments);
@@ -140,7 +140,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
-                .Returns(Task.FromResult<Department>(null));
+                .Returns(Task.FromResult<Department>(default!));
 
             _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
                 .Returns(Task.FromResult(false));
@@ -162,7 +162,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<DepartmentRequest>();
 
             var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             request.Name = "Name";
             department.ResellerId = null;
@@ -220,7 +220,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
-                .Returns(Task.FromResult<Department>(null));
+                .Returns(Task.FromResult<Department>(default!));
 
             var response = await _controller.DeleteAsync(departmentId);
 

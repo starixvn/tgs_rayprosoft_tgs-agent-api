@@ -28,7 +28,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _uploadMock.Object);
         }
 
-        private GameProviderController _controller;
+        private GameProviderController _controller=default!;
         private readonly Mock<IMediator> _mediatorMock = new();
         private readonly Mock<IUploadService> _uploadMock = new();
 

@@ -16,7 +16,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.BrandGameProviderSchedule
             _validator = new UpdateDefaultTimesRequestValidator();
         }
 
-        private UpdateDefaultTimesRequestValidator _validator;
+        private UpdateDefaultTimesRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_from_date_greater_than_to_date()

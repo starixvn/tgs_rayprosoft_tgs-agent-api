@@ -28,22 +28,108 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Parallelizable]
     public class AnnouncementControllerTests : BaseTests
     {
-        [SetUp]
-        public override void Setup()
-        {
-            base.Setup();
+        private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new();
 
-            _controller = new AnnouncementController(
-                _queriesMock.Object,
-                _commandsMock.Object,
-                _redisCacheManagerMock.Object);
-            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
+        private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new();
+
+        private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
+
+        private AnnouncementController _controller = default!;
+
+        [Test]
+        public async Task Can_Change_Announcement_Order()
+        {
+            var list = CreateAnnouncementFixture()
+                .CreateMany<Announcement>(105)
+                .AsQueryable()
+                .BuildMock();
+
+            var request = new ChangeOrderRequest
+            {
+                Orders = new[]
+                {
+                    new ChangeOrderModel
+                    {
+                        Id = (await list.FirstOrDefaultAsync())!.Id,
+                        DisplayOrder = 1
+                    },
+                    new ChangeOrderModel
+                    {
+                        Id = (await list.LastOrDefaultAsync())!.Id,
+                        DisplayOrder = 2
+                    }
+                }
+            };
+
+            _queriesMock.Setup(x => x.GetQueries())
+                .Returns(list);
+
+            var response = await _controller.ChangeOrderAsync(request);
+
+            response.Valid.Should().BeTrue();
+
+            _queriesMock.Verify(p => p.GetQueries());
+
+            _commandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Announcement[]>(d =>
+                d.Length == request.Orders.Length)));
         }
 
-        private AnnouncementController _controller;
-        private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new();
-        private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new();
-        private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
+        [TestCase(AnnounceStatus.Effective)]
+        [TestCase(AnnounceStatus.Invalid)]
+        public async Task Can_Change_Announcement_Status(AnnounceStatus status)
+        {
+            var announcement = CreateAnnouncementFixture()
+                .Create<Announcement>();
+
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult(announcement));
+
+            var response = await _controller.ChangeStatusAsync(announcement.Id, status);
+
+            response.Valid.Should().BeTrue();
+
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
+                d.Status == status)));
+        }
+
+        [Test]
+        public async Task Can_Create_Announcement()
+        {
+            var request = new AnnouncementRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Content = "test",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1D),
+                Localization = JsonDocument.Parse("{}"),
+                Subject = "subject"
+            };
+
+            _queriesMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.CreateAsync(
+                jsonSerializationProvider,
+                jsonOptionsAccessor,
+                request);
+
+            response.Valid.Should().BeTrue();
+
+            _commandsMock.Verify(p => p.CreateAsync(It.Is<Announcement>(d =>
+                d.Subject == request.Subject &&
+                d.Content == request.Content &&
+                d.From == request.From &&
+                d.To == request.To &&
+                d.Status == AnnounceStatus.InVerify)));
+        }
 
         [TestCase(true,
             new[]
@@ -71,7 +157,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateAnnouncementFixture()
                 .CreateMany<Announcement>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
 
@@ -112,39 +198,31 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _queriesMock.Verify(p => p.GetQueries());
         }
 
-        [Test]
-        public async Task Can_Create_Announcement()
+        [TestCase("invalid", AnnounceStatus.Effective, AnnounceStatus.Invalid)]
+        public async Task Can_Invalid_Announcement(
+            string type, AnnounceStatus allowedStatus,
+            AnnounceStatus verifiedStatus)
         {
-            var request = new AnnouncementRequest
-            {
-                BrandId = Guid.NewGuid(),
-                Content = "test",
-                From = DateTimeOffset.Now,
-                To = DateTimeOffset.Now.AddDays(1D),
-                Localization = JsonDocument.Parse("{}"),
-                Subject = "subject"
-            };
+            var announcement = CreateAnnouncementFixture().Create<Announcement>();
+            announcement.Status = allowedStatus;
+            var announcementId = Guid.NewGuid();
 
-            _queriesMock
-                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
-                .Returns(Task.FromResult(false));
+            var request = new Fixture().Create<VerifyRequest>();
 
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult(announcement));
 
-            var response = await _controller.CreateAsync(
-                jsonSerializationProvider,
-                jsonOptionsAccessor,
-                request);
+            var response = await _controller.VerifyAsync(announcementId, type, request);
 
             response.Valid.Should().BeTrue();
 
-            _commandsMock.Verify(p => p.CreateAsync(It.Is<Announcement>(d =>
-                d.Subject == request.Subject &&
-                d.Content == request.Content &&
-                d.From == request.From &&
-                d.To == request.To &&
-                d.Status == AnnounceStatus.InVerify)));
+            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
+
+            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
+                d.UpdatedByUsername == "admin.enabled" &&
+                d.Status == verifiedStatus)));
         }
 
         [Test]
@@ -216,7 +294,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult<Announcement>(null));
+                .Returns(Task.FromResult<Announcement>(default(Announcement)!));
 
             _queriesMock
                 .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
@@ -244,6 +322,51 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     d.To == request.To &&
                     d.Status == AnnounceStatus.InVerify)),
                 Times.Never);
+        }
+
+        [TestCase("pass", AnnounceStatus.InVerify, AnnounceStatus.Effective)]
+        [TestCase("reject", AnnounceStatus.InVerify, AnnounceStatus.Rejected)]
+        public async Task Can_Verify_Announcement(
+            string type, AnnounceStatus allowedStatus,
+            AnnounceStatus verifiedStatus)
+        {
+            var announcement = CreateAnnouncementFixture().Create<Announcement>();
+            announcement.Status = allowedStatus;
+            var announcementId = Guid.NewGuid();
+
+            var request = new Fixture().Create<VerifyRequest>();
+
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult(announcement));
+
+            var response = await _controller.VerifyAsync(announcementId, type, request);
+
+            response.Valid.Should().BeTrue();
+
+            _queriesMock.Verify(s => s.GetSingleAsync(
+                It.IsAny<Expression<Func<Announcement, bool>>>(),
+                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
+
+            _commandsMock.Verify(p => p.UpdateAsync(
+                It.Is<Announcement>(d => d.UpdatedByUsername == "admin.enabled"
+                    && d.Status == verifiedStatus
+                    && d.Remarks == request.Remarks)));
+        }
+
+        [Test]
+        public async Task Cannot_Change_Announcement_Status_Not_Found()
+        {
+            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
+                .Returns(Task.FromResult<Announcement>(default!));
+
+            var response = await _controller.ChangeStatusAsync(Guid.NewGuid(), AnnounceStatus.Invalid);
+
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
         }
 
         [Test]
@@ -296,64 +419,29 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Times.Never);
         }
 
-        [TestCase("pass", AnnounceStatus.InVerify, AnnounceStatus.Effective)]
-        [TestCase("reject", AnnounceStatus.InVerify, AnnounceStatus.Rejected)]
-        public async Task Can_Verify_Announcement(
-            string type, AnnounceStatus allowedStatus,
-            AnnounceStatus verifiedStatus)
+        [Test]
+        public async Task Cannot_Verify_Announcement_Not_Found()
         {
-            var announcement = CreateAnnouncementFixture().Create<Announcement>();
-            announcement.Status = allowedStatus;
-            var announcementId = Guid.NewGuid();
-
-            var request = new Fixture().Create<VerifyRequest>();
-
-            _queriesMock
-                .Setup(s => s.GetSingleAsync(
-                    It.IsAny<Expression<Func<Announcement, bool>>>(),
-                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult(announcement));
-
-            var response = await _controller.VerifyAsync(announcementId, type, request);
-
-            response.Valid.Should().BeTrue();
-
-            _queriesMock.Verify(s => s.GetSingleAsync(
-                It.IsAny<Expression<Func<Announcement, bool>>>(),
-                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
-
-            _commandsMock.Verify(p => p.UpdateAsync(
-                It.Is<Announcement>(d => d.UpdatedByUsername == "admin.enabled"
-                    && d.Status == verifiedStatus
-                    && d.Remarks == request.Remarks)));
-        }
-
-
-        [TestCase("invalid", AnnounceStatus.Effective, AnnounceStatus.Invalid)]
-        public async Task Can_Invalid_Announcement(
-            string type, AnnounceStatus allowedStatus,
-            AnnounceStatus verifiedStatus)
-        {
-            var announcement = CreateAnnouncementFixture().Create<Announcement>();
-            announcement.Status = allowedStatus;
             var announcementId = Guid.NewGuid();
 
             var request = new Fixture().Create<VerifyRequest>();
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult(announcement));
+                .Returns(Task.FromResult<Announcement>(default!));
 
-            var response = await _controller.VerifyAsync(announcementId, type, request);
+            var response = await _controller.VerifyAsync(announcementId, "pass", request);
 
-            response.Valid.Should().BeTrue();
+            response.Valid.Should().BeFalse();
+            response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
 
             _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
                 It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
 
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
-                d.UpdatedByUsername == "admin.enabled" &&
-                d.Status == verifiedStatus)));
+                    d.UpdatedByUsername == "admin.enabled" &&
+                    d.Remarks == request.Remarks)),
+                Times.Never);
         }
 
         [Test]
@@ -373,32 +461,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.InvalidUrl);
         }
-
-        [Test]
-        public async Task Cannot_Verify_Announcement_Not_Found()
-        {
-            var announcementId = Guid.NewGuid();
-
-            var request = new Fixture().Create<VerifyRequest>();
-
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
-                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult<Announcement>(null));
-
-            var response = await _controller.VerifyAsync(announcementId, "pass", request);
-
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
-
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
-                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
-                    d.UpdatedByUsername == "admin.enabled" &&
-                    d.Remarks == request.Remarks)),
-                Times.Never);
-        }
-
 
         [TestCase("pass", AnnounceStatus.Effective, "Only announcement in verify can be passed.")]
         [TestCase("pass", AnnounceStatus.Invalid, "Only announcement in verify can be passed.")]
@@ -432,79 +494,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Message.Should().Be(message);
         }
 
-        [Test]
-        public async Task Can_Change_Announcement_Order()
+        [SetUp]
+        public override void Setup()
         {
-            var list = CreateAnnouncementFixture()
-                .CreateMany<Announcement>(105)
-                .AsQueryable()
-                .BuildMock().Object;
+            base.Setup();
 
-            var request = new ChangeOrderRequest
-            {
-                Orders = new[]
-                {
-                    new ChangeOrderModel
-                    {
-                        Id = (await list.FirstOrDefaultAsync()).Id,
-                        DisplayOrder = 1
-                    },
-                    new ChangeOrderModel
-                    {
-                        Id = (await list.LastOrDefaultAsync()).Id,
-                        DisplayOrder = 2
-                    }
-                }
-            };
-
-            _queriesMock.Setup(x => x.GetQueries())
-                .Returns(list);
-
-            var response = await _controller.ChangeOrderAsync(request);
-
-            response.Valid.Should().BeTrue();
-
-            _queriesMock.Verify(p => p.GetQueries());
-
-            _commandsMock.Verify(p => p.BatchUpdateAsync(It.Is<Announcement[]>(d =>
-                d.Length == request.Orders.Length)));
+            _controller = new AnnouncementController(
+                _queriesMock.Object,
+                _commandsMock.Object,
+                _redisCacheManagerMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
-
-        [TestCase(AnnounceStatus.Effective)]
-        [TestCase(AnnounceStatus.Invalid)]
-        public async Task Can_Change_Announcement_Status(AnnounceStatus status)
-        {
-            var announcement = CreateAnnouncementFixture()
-                .Create<Announcement>();
-
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
-                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult(announcement));
-
-            var response = await _controller.ChangeStatusAsync(announcement.Id, status);
-
-            response.Valid.Should().BeTrue();
-
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
-                It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
-
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
-                d.Status == status)));
-        }
-
-        [Test]
-        public async Task Cannot_Change_Announcement_Status_Not_Found()
-        {
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
-                    It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
-                .Returns(Task.FromResult<Announcement>(null));
-
-            var response = await _controller.ChangeStatusAsync(Guid.NewGuid(), AnnounceStatus.Invalid);
-
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
-        }
-
 
         private Fixture CreateAnnouncementFixture()
         {

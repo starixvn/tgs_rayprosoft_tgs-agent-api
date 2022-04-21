@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <AssemblyName>TGS.Core.DataServices.Base</AssemblyName>
     <RootNamespace>TGS.Core.DataServices.Base</RootNamespace>
   </PropertyGroup>
@@ -10,20 +10,12 @@
     <PackageReference Include="Dapper" Version="2.0.123" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="EFCore.NamingConventions" Version="[5.0.2, 6.0)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="[5.0.13, 6.0)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[5.0.13, 6.0)" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="[5.0.10, 6.0)" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Trigrams" Version="[5.0.10, 6.0)" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <PackageReference Include="EFCore.NamingConventions" Version="6.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Trigrams" Version="5.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>

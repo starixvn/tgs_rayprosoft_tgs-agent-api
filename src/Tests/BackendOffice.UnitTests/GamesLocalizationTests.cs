@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Application.Queries.Game;
-using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Domain;
+using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -30,7 +30,10 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new CoreModels.GameProvider()
                 {
                     Id = gameProviderId,
-                    Code = gameProviderCode
+                    Code = gameProviderCode,
+                    Name = "KY",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System"
                 });
 
             var gpLangs = new List<CoreModels.GameProviderLanguage>
@@ -38,12 +41,14 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new CoreModels.GameProviderLanguage()
                 {
                     GameProviderId = gameProviderId,
-                    CultureCode = "zh-CN"
+                    CultureCode = "zh-CN",
+                    GameProviderCultureCode = "zh-CN"
                 },
                 new CoreModels.GameProviderLanguage()
                 {
                     GameProviderId = gameProviderId,
-                    CultureCode = "en-US"
+                    CultureCode = "en-US",
+                    GameProviderCultureCode = "en-US"
                 }
             };
 
@@ -68,8 +73,26 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-            repository.Games.Add(new CoreModels.Game() { Id = 1 });
-            repository.Games.Add(new CoreModels.Game() { Id = 2 });
+            repository.Games.Add(new CoreModels.Game()
+            {
+                Id = 1,
+                AvailableCurrencies = string.Empty,
+                Code = "Game1",
+                Name = "Game1",
+                ExternalId = "1",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
+            });
+            repository.Games.Add(new CoreModels.Game()
+            {
+                Id = 2,
+                AvailableCurrencies = string.Empty,
+                Code = "Game2",
+                Name = "Game2",
+                ExternalId = "2",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
+            });
             await repository.SaveChangesAsync();
 
             var sut = new UpdateGameLocalizationQueryService(repository);
@@ -99,8 +122,26 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-            repository.Games.Add(new CoreModels.Game() { Id = 1 });
-            repository.Games.Add(new CoreModels.Game() { Id = 2 });
+            repository.Games.Add(new CoreModels.Game()
+            {
+                Id = 1,
+                AvailableCurrencies = string.Empty,
+                Code = "Game1",
+                Name = "Game1",
+                ExternalId = "1",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
+            });
+            repository.Games.Add(new CoreModels.Game()
+            {
+                Id = 2,
+                AvailableCurrencies = string.Empty,
+                Code = "Game2",
+                Name = "Game2",
+                ExternalId = "2",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
+            });
 
             await repository.SaveChangesAsync();
 

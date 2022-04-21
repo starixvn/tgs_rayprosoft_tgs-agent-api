@@ -24,7 +24,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private LogController _controller;
+        private LogController _controller = default!;
         private readonly Mock<ILogQueries> _logQueriesMock = new();
 
         [TestCase(true)]

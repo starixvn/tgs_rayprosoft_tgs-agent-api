@@ -33,13 +33,19 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
-                        Status = 0
+                        Status = 0,
+                        Title = "Title1",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
-                        Status = 1000
+                        Status = 1000,
+                        Title = "Title2",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     }
                 });
 
@@ -84,28 +90,40 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = null
+                        EndTime = null,
+                        Title = "Title1",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = currentTime.AddDays(1)
+                        EndTime = currentTime.AddDays(1),
+                        Title = "Title2",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = currentTime.AddDays(-1)
+                        EndTime = currentTime.AddDays(-1),
+                        Title = "Title3",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 2000,
-                        EndTime = currentTime.AddDays(1)
+                        EndTime = currentTime.AddDays(1),
+                        Title = "Title4",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     }
                 });
 
@@ -150,28 +168,40 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = null
+                        EndTime = null,
+                        Title = "Title1",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = currentTime.AddDays(1)
+                        EndTime = currentTime.AddDays(1),
+                        Title = "Title2",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = currentTime.AddDays(-1)
+                        EndTime = currentTime.AddDays(-1),
+                        Title = "Title3",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 2000,
-                        EndTime = currentTime.AddDays(1)
+                        EndTime = currentTime.AddDays(1),
+                        Title = "Title4",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     }
                 });
 
@@ -216,14 +246,20 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 1000,
-                        EndTime = null
+                        EndTime = null,
+                        Title = "Title1",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     },
                     new Banner
                     {
                         Id = Guid.NewGuid(),
                         BrandId = brandId,
                         Status = 2000,
-                        EndTime = currentTime.AddDays(1)
+                        EndTime = currentTime.AddDays(1),
+                        Title = "Title2",
+                        CreatedByUserName = "System",
+                        UpdatedByUserName = "System"
                     }
                 });
 

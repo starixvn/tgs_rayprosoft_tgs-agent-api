@@ -63,7 +63,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             repository.Players.Add(new Player
             {
                 PlayerCode = playerCode,
-                Status = CoreEnums.PlayerStatus.Disabled
+                Status = CoreEnums.PlayerStatus.Disabled,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Username = "tester"
             });
 
             await repository.SaveChangesAsync();

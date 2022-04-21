@@ -31,7 +31,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                     serverOption.SetPostgresVersion(12, 5);
                     serverOption.CommandTimeout(commandTimeout);
                     serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
-                    serverOption.UseTrigrams();
                 });
 
                 option.UseSnakeCaseNamingConvention();
@@ -49,7 +48,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                         serverOption.SetPostgresVersion(12, 5);
                         serverOption.CommandTimeout(commandTimeout);
                         serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
-                        serverOption.UseTrigrams();
                     })
                     .UseSnakeCaseNamingConvention();
             });

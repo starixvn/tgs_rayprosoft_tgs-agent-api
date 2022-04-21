@@ -94,7 +94,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             repository.Brands.Add(new CoreModesl.Brand()
             {
                 Id = brandId,
-                Name = "brandName"
+                Name = "brandName",
+                ApiKey = string.Empty,
+                ClientId = string.Empty,
+                Code = "Test",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System",
+                SecretKey = string.Empty
             });
             await repository.SaveChangesAsync();
 

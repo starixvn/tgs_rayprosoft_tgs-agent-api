@@ -22,7 +22,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new();
         }
 
-        private RoundReportController _controller;
+        private RoundReportController _controller = default!;
 
         [Test]
         public async Task Can_Get_Rounds()

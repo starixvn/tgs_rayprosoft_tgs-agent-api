@@ -22,7 +22,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller = new();
         }
 
-        private MarketReportController _controller;
+        private MarketReportController _controller = default!;
 
         private readonly Mock<IGetService<GetMarketsReportRequest, GetMarketsReportResponse>> _getServiceMock =
             new();
