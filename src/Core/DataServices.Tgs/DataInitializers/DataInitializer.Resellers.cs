@@ -23,7 +23,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new EURCurrency(),
                 new GBPCurrency(),
                 new KRWCurrency(),
-                new JPYCurrency()
+                new JPYCurrency(),
+                new HKDCurrency()
             };
 
             string[] GameProviders => Array.Empty<string>();

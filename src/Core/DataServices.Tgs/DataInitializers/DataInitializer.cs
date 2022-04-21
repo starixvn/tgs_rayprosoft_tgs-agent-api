@@ -111,7 +111,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new AviaGameProvider(env),
                 new JiliGameProvider(env),
                 new TFGameProvider(env),
-                new DreamGameGameProvider(env)
+                new DreamGameGameProvider(env),
+                new JokerGameProvider(env)
             };
         }
 
@@ -432,7 +433,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 };
             }).ToArray();
 
-            var brandCurrencies = brand.Currencies.Select(b => b.Code);
+            var brandCurrencies = brand.Currencies.Select(b => b.Code).ToArray();
 
             var games = (from game in gameProviders.SelectMany(gp => gp.Games)
                          let availableCurrencies =
@@ -453,13 +454,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     DisplayOrder = 99
                 }).ToHashSet();
 
-            var betLimits = _betLimits.Select(bl => new BrandBetLimit
-            {
-                BrandId = brand.Id,
-                BetLimitId = bl.Id,
-                BetLimit = bl,
-                IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
-            }).ToHashSet();
+            var betLimits = _betLimits
+                .Where(bl => brandCurrencies.Contains(bl.CurrencyCode))
+                .Select(bl => new BrandBetLimit
+                {
+                    BrandId = brand.Id,
+                    BetLimitId = bl.Id,
+                    BetLimit = bl,
+                    IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
+                }).ToHashSet();
 
             var timeSpan = new TimeSpan(8, 0, 0);
 
@@ -593,6 +596,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var gameProviders = GetGameProviders(gameProviderCodes);
 
+            var licenseeCurrencies = licensee.Currencies.Select(c => c.Code).ToArray();
+
             return new()
             {
                 Id = licensee.Id,
@@ -628,11 +633,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             LicenseeId = licensee.Id
                         }).ToHashSet(),
                 Brands = licensee.Brands.Select(b => CreateBrand(reseller, licensee, b)).ToHashSet(),
-                BetLimits = _betLimits.Select(bl => new LicenseeBetLimit
-                {
-                    LicenseeId = licensee.Id,
-                    BetLimitId = bl.Id
-                })
+                BetLimits = _betLimits
+                    .Where(lbl => licenseeCurrencies.Contains(lbl.CurrencyCode))
+                    .Select(lbl => new LicenseeBetLimit
+                    {
+                        LicenseeId = licensee.Id,
+                        BetLimitId = lbl.Id
+                    })
                     .ToHashSet()
             };
         }
@@ -641,11 +648,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string playerCode,
             Guid brandId, Guid walletId, string username, string realName, byte[] salt,
             byte[] password, Guid vipId, PlayerType playerType,
-            Guid? agentId, string currencyCode = "CNY")
+            Guid? agentId)
         {
             var brand = _brandCreated.Values.First(b => b.Id == brandId);
+            var currencyCode = brand.Currencies.FirstOrDefault()?.CurrencyCode ?? "CNY";
 
-            var betLimitId = brand.BetLimits.Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
+            var betLimitId = brand.BetLimits
+                .Where(bl => bl.IsDefault && bl.BetLimit.CurrencyCode == currencyCode)
                 .Select(bl => bl.BetLimitId).FirstOrDefault();
 
             return new()
@@ -782,33 +791,34 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             foreach (var brand in brands)
             {
                 var chiefId = GuidExtensions.NewSequentialGuid();
+                var currencyCode = brand.Currencies.First().Code;
 
-                _agents.Add(CreateAgent($"{brand.Name}Chief",
+                _agents.Add(CreateAgent($"{brand.Code}Chief",
                     AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Chief,
                     AgentType.Cash,
                     brand.Id,
-                    "CNY",
+                    currencyCode,
                     chiefId));
 
-                _agents.Add(CreateAgent($"{brand.Name}Agent1",
+                _agents.Add(CreateAgent($"{brand.Code}Agent1",
                     AgentStatus.Enabled,
                     AgentConfigStatus.DoneForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash,
                     brand.Id,
-                    "CNY",
+                    currencyCode,
                     null,
                     chiefId));
 
-                _agents.Add(CreateAgent($"{brand.Name}Agent2",
+                _agents.Add(CreateAgent($"{brand.Code}Agent2",
                     AgentStatus.Enabled,
                     AgentConfigStatus.WaitForConfigurePercentage,
                     AgentLevelType.Agent,
                     AgentType.Cash,
                     brand.Id,
-                    "CNY",
+                    currencyCode,
                     null,
                     chiefId));
             }
@@ -840,7 +850,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         var createdOn = timestamp = timestamp.AddSeconds(1);
 
-                        var closedOn = game.Type == Sportsbook || game.Type == VirtualSports
+                        var closedOn = game.Type is Sportsbook or VirtualSports
                             ? timestamp.AddDays(1)
                             : timestamp.AddSeconds(3);
 
@@ -861,7 +871,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         await _repository.GameActions.AddAsync(placeBetAction);
 
                         var v = rand.NextDouble();
-                        var resultActionType = v > 0.5 ? LoseBet : v > 0.2 && v < 0.5 ? WinBet : CancelTransaction;
+                        var resultActionType = v > 0.5 ? LoseBet : v is > 0.2 and < 0.5 ? WinBet : CancelTransaction;
 
                         var resultAmount = resultActionType switch
                         {
@@ -917,7 +927,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new("THB", 1, 200, 1000),
                 new("USD", 1, 200, 1000),
                 new("VND", 1000, 200000, 1000000),
-                new("VND_1000", 1, 200, 1000)
+                new("VND_1000", 1, 200, 1000),
+                new("HKD", 1, 200, 1000),
             };
 
             _betLimits = limits.Select(b => new BetLimit
@@ -1119,6 +1130,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new("4ucmqplxkuyd",
                     new("3CA6CDEF-094F-EB11-8D88-70B5E82B6B8D"),
                     new("4E86719F-243F-46F6-B010-5C758B7285AF"),
+                    null),
+                new("4uf6k014jp5x",
+                    new("CF99C783-ACDF-48CC-B1CC-08D99A806DE9"),
+                    new("9F1ECF19-38CD-474F-B0D2-93638DC07D21"),
+                    null),
+                new("4uf7f15i0qtv",
+                    new("4D2B0FB3-C5AF-4490-8B0B-6FA417142ACB"),
+                    new("9F1ECF19-38CD-474F-B0D2-93638DC07D21"),
                     null)
             };
 

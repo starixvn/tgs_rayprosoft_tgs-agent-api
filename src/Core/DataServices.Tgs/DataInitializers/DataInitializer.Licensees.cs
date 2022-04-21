@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
                 new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
                 new THBCurrency(), new EURCurrency(), new GBPCurrency(),
-                new KRWCurrency(), new JPYCurrency()
+                new KRWCurrency(), new JPYCurrency(), new HKDCurrency()
             };
 
             string[] GameProviders => Array.Empty<string>();
@@ -45,7 +45,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             IBrand[] ILicensee.Brands => new IBrand[]
             {
-                new TgsBrand(), new GpiBrand()
+                new TgsBrand(), new GpiBrand(), new GpiHkdBrand()
             };
         }
     }
