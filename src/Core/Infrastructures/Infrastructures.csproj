@@ -33,7 +33,6 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <PackageReference Include="ClosedXML" Version="0.95.4" />
-    <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
     <PackageReference Include="FluentValidation" Version="10.4.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
