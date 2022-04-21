@@ -4,7 +4,6 @@ using System.Linq;
 using AspectCore.Configuration;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -21,13 +20,10 @@ using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
 
 namespace TGS.Apis.TgsApi.Commons
@@ -67,30 +63,7 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext,
-                                result,
-                                Environment,
-                                async sp =>
-                                {
-                                    var gpCode =
-                                        Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
-
-                                    var feature = sp.GetRequiredService<IFeatureManager>();
-
-                                    var isFeatureEnabled = gpCode.IsNotNullOrEmpty() &&
-                                                           await feature.IsEnabledAsync(gpCode);
-
-                                    return new Dictionary<string, object>
-                                    {
-                                        { "GameProviderCode", gpCode }, { "FeatureEnabled", isFeatureEnabled }
-                                    };
-                                })
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
@@ -108,7 +81,6 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddSecurity()
                 .AddTransactions()
                 .AddOperations()
-                .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddGameOperations((sp) => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
@@ -146,11 +118,7 @@ namespace TGS.Apis.TgsApi.Commons
                     options.SuppressModelStateInvalidFilter = false;
                 });
 
-            _ = services.AddHealthChecks()
-                .AddPostgres(Configuration, "Tgs", "tgs-db")
-                .AddRedis(Configuration)
-                .ForwardToPrometheus();
-
+            _ = services.AddHealthChecks();
             _ = services
                 .AddMessageQueue()
                 .AddNatsMessageQueue(natsConfig =>

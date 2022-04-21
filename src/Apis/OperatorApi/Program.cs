@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Prometheus;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -40,8 +39,6 @@ namespace TGS.Apis.OperatorApi
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             
-            PrometheusService.StartCollecting();
-
             var host = CreateHostBuilder(args).Build();
             await ExecuteMigrationsAndSeedingsAsync(host.Services);
             await host.RunAsync();
