@@ -2,10 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.GameProviders;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance
 {
