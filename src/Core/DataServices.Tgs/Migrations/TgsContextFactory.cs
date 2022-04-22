@@ -23,7 +23,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             var loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddConsole();
+                builder
+                    .AddConfiguration(config.GetSection("Logging"))
+                    .AddConsole();
             });
             services.AddSingleton(loggerFactory);
 
