@@ -35,8 +35,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Player
 
         public string? Telegram { get; init; }
 
-        public string? Type { get; set; } = default!;
-
         public string? Viber { get; init; }
 
         public Guid? VipId { get; init; }
