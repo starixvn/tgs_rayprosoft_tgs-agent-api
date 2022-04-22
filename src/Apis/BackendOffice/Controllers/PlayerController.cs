@@ -157,11 +157,33 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpPut("{playerCode}/{type}")]
         [Description("Update player")]
         public Task<MessageResponse> UpdateAsync(string playerCode, string type,
-            [FromBody] UpdatePlayerRequest request)
+            [FromBody] Messages.Player.UpdatePlayerRequest request)
         {
-            request.PlayerCode = playerCode;
-            request.Type = type;
-            return _mediator.Send(request);
+            var updatePlayerModel = new UpdatePlayerRequest
+            {
+                PlayerCode = playerCode,
+                Type = type,
+                AgentUsername = request.AgentUsername,
+                AreaCode = request.AreaCode,
+                ConfirmedPassword = request.ConfirmedPassword,
+                Email = request.Email,
+                FacebookMessenger = request.FacebookMessenger,
+                Line = request.Line,
+                ParentUsername = request.ParentUsername,
+                Password = request.Password,
+                Phone = request.Phone,
+                QQ = request.QQ,
+                RealName = request.RealName,
+                Remark = request.Remark,
+                Status = request.Status,
+                Telegram = request.Telegram,
+                Viber = request.Viber,
+                VipId = request.VipId,
+                Wechat = request.Wechat,
+                WhatsApp = request.WhatsApp
+            };
+
+            return _mediator.Send(updatePlayerModel);
         }
 
         [HttpGet("{playerCode}/playerBuckets")]
