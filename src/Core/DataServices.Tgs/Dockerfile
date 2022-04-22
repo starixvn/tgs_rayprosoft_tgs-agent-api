@@ -10,11 +10,10 @@ WORKDIR /src
 COPY . .
 WORKDIR "/src/src/Core/DataServices.Tgs"
 RUN dotnet tool restore
-RUN dotnet build "DataServices.Tgs.csproj" -c Release
+RUN dotnet build "DataServices.Tgs.csproj"
 
 FROM build AS publish
 RUN dotnet ef migrations bundle -o /app/efbundle
-RUN cp tgs.appsettings.json /app
 
 FROM base AS final
 WORKDIR /app
