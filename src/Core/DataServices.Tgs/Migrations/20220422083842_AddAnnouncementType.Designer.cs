@@ -12,7 +12,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220422073255_AddAnnouncementType")]
+    [Migration("20220422083842_AddAnnouncementType")]
     partial class AddAnnouncementType
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1137,7 +1137,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
-                        .HasDefaultValue("marquee")
+                        .HasDefaultValue("Marquee")
                         .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")

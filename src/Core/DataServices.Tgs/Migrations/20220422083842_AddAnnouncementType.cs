@@ -19,7 +19,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "announcements",
                 type: "text",
                 nullable: false,
-                defaultValue: "marquee");
+                defaultValue: "Marquee");
 
             migrationBuilder.AddForeignKey(
                 name: "fk_agent_bank_infos_players_player_temp_id",

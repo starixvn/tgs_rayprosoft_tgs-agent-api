@@ -56,7 +56,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Type)
                 .IsRequired()
-                .HasDefaultValue("marquee");
+                .HasDefaultValue("Marquee");
 
             builder.HasOne(c => c.Brand)
                 .WithMany(c => c.Announcements)

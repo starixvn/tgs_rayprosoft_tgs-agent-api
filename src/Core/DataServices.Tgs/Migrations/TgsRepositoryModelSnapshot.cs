@@ -1135,7 +1135,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text")
-                        .HasDefaultValue("marquee")
+                        .HasDefaultValue("Marquee")
                         .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")
