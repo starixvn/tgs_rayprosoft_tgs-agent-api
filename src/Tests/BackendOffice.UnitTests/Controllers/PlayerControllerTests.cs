@@ -185,7 +185,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     Message = Player.NotFound
                 });
 
-            var request = new Fixture().Create<UpdatePlayerRequest>();
+            var request = new Fixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
@@ -207,7 +207,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     Message = Player.UpdateTypeNotFound
                 });
 
-            var request = new Fixture().Create<UpdatePlayerRequest>();
+            var request = new Fixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
