@@ -112,7 +112,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("fund/in")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SubmitGameBalanceFundInRequestAsync(
+        public async ValueTask FundInGameBalanceAsync(
             [FromServices] ICommandService<FundInGameBalanceCommand> submitGameBalanceFundInCommandService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
             [FromBody] SubmitGameBalanceFundInRequest request)
@@ -133,6 +133,15 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
         }
+
+        [HttpPost("fund/in")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public void FundInAllGameBalance(
+            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService)
+        {
+            
+        }
+
 
         /// <summary>
         /// Transfer wallet fund out(Tgs -> Gp)

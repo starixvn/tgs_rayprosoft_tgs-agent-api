@@ -41,7 +41,7 @@ namespace TGS.Services.Operator.ApplicationServices.GameBalance
 
             await foreach (var gpCode in processGps.ConfigureAwait(false))
             {
-                if (gpCode == command.GpCode)
+                if (command.IgnoreGpCode is not null && gpCode == command.IgnoreGpCode)
                     continue;
 
                 try
