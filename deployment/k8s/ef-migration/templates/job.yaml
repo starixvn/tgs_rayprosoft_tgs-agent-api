@@ -22,10 +22,8 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: tgs
-          command:
-            - ./efbundle
-            - --connection
-            - "${ConnectionStrings__Tgs}"
+            - name: Logging__Console__FormatterName
+              value: json
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       restartPolicy: Never
