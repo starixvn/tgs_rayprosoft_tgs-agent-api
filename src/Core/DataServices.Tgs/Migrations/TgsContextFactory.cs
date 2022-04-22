@@ -13,7 +13,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         {
             var configBuilder = new ConfigurationBuilder();
             configBuilder
-                .AddJsonFile("tgs.appsettings.json", true);
+                .AddJsonFile("tgs.appsettings.json", true)
+                .AddEnvironmentVariables();
             var config = configBuilder.Build();
 
             var services = new ServiceCollection();
