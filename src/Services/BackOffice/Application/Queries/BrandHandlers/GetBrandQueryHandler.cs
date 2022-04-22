@@ -143,7 +143,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     UpdatedOn = brand.UpdatedOn,
                     EnablePlayerIdentity = brand.EnablePlayerIdentity,
                     AutoClearWageringRequirement = brand.AutoClearWageringRequirement,
-                    AutoClearWageringRequirementBalance = brand.AutoClearWageringRequirementBalance
+                    AutoClearWageringRequirementBalance = brand.AutoClearWageringRequirementBalance,
+                    DepositHandlingFeeRateTenPercentile = brand.DepositHandlingFeeRateTenPercentile,
+                    WithdrawHandlingFeeRateTenPercentile = brand.WithdrawHandlingFeeRateTenPercentile
                 }
             };
         }

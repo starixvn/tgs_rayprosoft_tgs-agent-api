@@ -66,5 +66,9 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public bool AutoClearWageringRequirement { get; set; }
 
         public decimal AutoClearWageringRequirementBalance { get; set; }
+
+        public decimal DepositHandlingFeeRateTenPercentile { get; set; }
+
+        public decimal WithdrawHandlingFeeRateTenPercentile { get; set; }
     }
 }

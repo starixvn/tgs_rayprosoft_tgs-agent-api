@@ -129,16 +129,18 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CheckDividendActiveCount = request.CheckDividendActiveCount,
                 EnablePlayerIdentity = request.EnablePlayerIdentity,
                 AutoClearWageringRequirement = request.AutoClearWageringRequirement,
-                AutoClearWageringRequirementBalance = request.AutoClearWageringRequirementBalance
+                AutoClearWageringRequirementBalance = request.AutoClearWageringRequirementBalance,
+                DepositHandlingFeeRateTenPercentile = request.DepositHandlingFeeRateTenPercentile,
+                WithdrawHandlingFeeRateTenPercentile = request.WithdrawHandlingFeeRateTenPercentile
             };
 
-            brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
-            brand.Currencies = GenerateBrandCurrencies(brand, request);
-            brand.GameProviders = await GenerateAddBrandGameProvidersAsync(brand, request);
-            brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
+            brand.Languages = await GenerateBrandLanguagesAsync(brand, request.Languages);
+            brand.Currencies = GenerateBrandCurrencies(brand, request.CurrencyCodes);
+            brand.GameProviders = await GenerateAddBrandGameProvidersAsync(brand, request.GameProviders);
+            brand.BetLimits = await GenerateBetLimitsAsync(brand, request.BetLimits);
             brand.Games = await GenerateWithCreateGamesAsync(brand);
-            brand.BrandGroups = GenerateWithCreateGroups(brand, request);
-            brand.Domains = GenerateBrandDomains(brand, request);
+            brand.BrandGroups = GenerateWithCreateGroups(brand, request.EditorUsername);
+            brand.Domains = GenerateBrandDomains(brand, request.Domains);
 
             await CreateEntityAsync(brand);
 
@@ -246,6 +248,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.EnablePlayerIdentity = request.EnablePlayerIdentity;
             brand.AutoClearWageringRequirement = request.AutoClearWageringRequirement;
             brand.AutoClearWageringRequirementBalance = request.AutoClearWageringRequirementBalance;
+            brand.DepositHandlingFeeRateTenPercentile = request.DepositHandlingFeeRateTenPercentile;
+            brand.WithdrawHandlingFeeRateTenPercentile = request.WithdrawHandlingFeeRateTenPercentile;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
@@ -255,16 +259,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(brand.BrandGroups);
             await DeleteEntitiesAsync(brand.Domains);
 
-            brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
-            brand.Currencies = GenerateBrandCurrencies(brand, request);
-            brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
-            brand.Games = await GenerateWithUpdateGamesAsync(brand, request);
-            brand.GameProviders = GenerateBrandGameProviders(brand, request);
-            brand.BrandGroups = GenerateWithUpdateGroups(brand, request);
-            brand.Domains = GenerateBrandDomains(brand, request);
+            brand.Languages = await GenerateBrandLanguagesAsync(brand, request.Languages);
+            brand.Currencies = GenerateBrandCurrencies(brand, request.CurrencyCodes);
+            brand.BetLimits = await GenerateBetLimitsAsync(brand, request.BetLimits);
+            brand.Games = await GenerateWithUpdateGamesAsync(brand, request.GameProviders);
+            brand.GameProviders = GenerateBrandGameProviders(brand, request.GameProviders);
+            brand.BrandGroups = GenerateWithUpdateGroups(brand, request.BrandGroups,request.EditorUsername);
+            brand.Domains = GenerateBrandDomains(brand, request.Domains);
 
             await UpdateEntityAsync(brand);
-            await CreateEntitiesAsync(await GenerateAddBrandGameProvidersAsync(brand, request));
+            await CreateEntitiesAsync(await GenerateAddBrandGameProvidersAsync(brand, request.GameProviders));
 
             await tran.CommitAsync();
 
@@ -311,14 +315,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         private static HashSet<BrandGameProvider> GenerateBrandGameProviders(
-            Brand brand, BrandRequest request)
+            Brand brand, BrandGameProviderModel[] brandGameProviderModels)
         {
-            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId).ToArray();
+            var gameProviderIds = brandGameProviderModels.Select(x => x.GameProviderId).ToArray();
             var brandGameProviders = brand.GameProviders.Where(x => gameProviderIds.Contains(x.GameProviderId)).Select(
                 x =>
                 {
                     var requestBrandGameProvider =
-                        request.GameProviders.First(m => m.GameProviderId == x.GameProviderId);
+                        brandGameProviderModels.First(m => m.GameProviderId == x.GameProviderId);
 
                     x.DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode;
                     x.GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId;
@@ -444,16 +448,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         private async Task<HashSet<BrandGameProvider>> GenerateAddBrandGameProvidersAsync(
-            Brand brand, BrandRequest request)
+            Brand brand, BrandGameProviderModel[] brandGameProviderModels)
         {
             var gameProviderIds =
-                request.GameProviders.Where(x => x.Id == null).Select(x => x.GameProviderId).ToArray();
+                brandGameProviderModels.Where(x => x.Id == null).Select(x => x.GameProviderId).ToArray();
 
             var gameProviders = await _repository.GameProviders.AsQueryable()
                 .Where(x => gameProviderIds.Contains(x.Id)).ToArrayAsync();
             var brandGameProviders = gameProviders.Select(x =>
                 {
-                    var requestBrandGameProvider = request.GameProviders.First(m => m.GameProviderId == x.Id);
+                    var requestBrandGameProvider = brandGameProviderModels.First(m => m.GameProviderId == x.Id);
                     var brandGameProviderId = GuidExtensions.NewSequentialGuid();
 
                     var newBrandGameProvider = new BrandGameProvider
@@ -486,25 +490,25 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandGameProviders);
         }
 
-        private async Task<HashSet<BrandBetLimit>> GenerateBetLimitsAsync(Brand brand, BrandRequest request)
+        private async Task<HashSet<BrandBetLimit>> GenerateBetLimitsAsync(Brand brand, BrandBetLimitModel[] brandBetLimitModels)
         {
             var betLimits = await _repository.BetLimits.AsQueryable()
-                .Where(x => request.BetLimits.Select(b => b.Id).Contains(x.Id)).ToArrayAsync();
+                .Where(x => brandBetLimitModels.Select(b => b.Id).Contains(x.Id)).ToArrayAsync();
             var brandBetLimits = betLimits.Select(x =>
                 new BrandBetLimit
                 {
                     BrandId = brand.Id,
                     BetLimitId = x.Id,
                     BetLimit = x,
-                    IsDefault = request.BetLimits.First(b => b.Id == x.Id).IsDefault
+                    IsDefault = brandBetLimitModels.First(b => b.Id == x.Id).IsDefault
                 });
             return new(brandBetLimits);
         }
 
-        private HashSet<BrandCurrency> GenerateBrandCurrencies(Brand brand, BrandRequest request)
+        private HashSet<BrandCurrency> GenerateBrandCurrencies(Brand brand, string[] currencyCodes)
         {
             var brandCurrencies = _repository.Currencies.AsQueryable()
-                .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
+                .Where(x => currencyCodes.Contains(x.Code)).Select(x =>
                     new BrandCurrency
                     {
                         BrandId = brand.Id,
@@ -514,9 +518,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandCurrencies);
         }
 
-        private HashSet<BrandDomain> GenerateBrandDomains(Brand brand, BrandRequest request)
+        private HashSet<BrandDomain> GenerateBrandDomains(Brand brand, string[] domains)
         {
-            var brandDomains = request.Domains.Select(x => new BrandDomain
+            var brandDomains = domains.Select(x => new BrandDomain
             {
                 Url = x,
                 BrandId = brand.Id
@@ -541,9 +545,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandGroupBetLimits);
         }
 
-        private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandRequest request)
+        private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandLanguageModel[] languageModels)
         {
-            var cultureCodes = request.Languages.Select(c => c.CultureCode);
+            var cultureCodes = languageModels.Select(c => c.CultureCode);
             var languages = await _repository.Languages.AsQueryable()
                 .Where(x => cultureCodes.Contains(x.CultureCode)).ToArrayAsync();
             var brandLanguages = languages.Select(x =>
@@ -551,7 +555,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 {
                     BrandId = brand.Id,
                     CultureCode = x.CultureCode,
-                    BrandCultureCode = request.Languages.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
+                    BrandCultureCode = languageModels.FirstOrDefault(bc => bc.CultureCode == x.CultureCode)
                         ?.BrandCultureCode
                 });
             return new(brandLanguages);
@@ -581,7 +585,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(games);
         }
 
-        private HashSet<BrandGroup> GenerateWithCreateGroups(Brand brand, BrandRequest request)
+        private HashSet<BrandGroup> GenerateWithCreateGroups(Brand brand, string editorUsername)
         {
             var groups = (from BrandGroupType type in Enum.GetValues(typeof(BrandGroupType))
                           let id = Guid.NewGuid()
@@ -601,8 +605,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                               BrandGames = GenerateBrandGroupGames(brand, id, gameIds),
                               BrandGroupBetLimits =
                                   GenerateBrandGroupBetLimits(brand, id, type == BrandGroupType.Sports),
-                              CreatedByUsername = request.EditorUsername,
-                              UpdatedByUsername = request.EditorUsername,
+                              CreatedByUsername = editorUsername,
+                              UpdatedByUsername = editorUsername,
                               CreatedOn = DateTimeOffset.Now,
                               UpdatedOn = DateTimeOffset.Now
                           }).ToList();
@@ -629,9 +633,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         private async Task<HashSet<BrandGame>> GenerateWithUpdateGamesAsync(Brand brand,
-            UpdateBrandRequest request)
+            BrandGameProviderModel[] brandGameProviderModels)
         {
-            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
+            var gameProviderIds = brandGameProviderModels.Select(x => x.GameProviderId);
 
             var brandCurrencyCodes = brand.Currencies.Select(x => x.CurrencyCode).ToArray();
 
@@ -679,9 +683,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandGames);
         }
 
-        private HashSet<BrandGroup> GenerateWithUpdateGroups(Brand brand, UpdateBrandRequest request)
+        private HashSet<BrandGroup> GenerateWithUpdateGroups(Brand brand, BrandGroupModel[] brandGroupModels, string editorUsername)
         {
-            var brandGroups = request.BrandGroups.Select(x =>
+            var brandGroups = brandGroupModels.Select(x =>
             {
                 var brandGroup = new BrandGroup
                 {
@@ -689,8 +693,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     BrandId = brand.Id,
                     Description = x.Description,
                     IsSports = x.IsSports,
-                    CreatedByUsername = request.EditorUsername,
-                    UpdatedByUsername = request.EditorUsername,
+                    CreatedByUsername = editorUsername,
+                    UpdatedByUsername = editorUsername,
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
                 };
