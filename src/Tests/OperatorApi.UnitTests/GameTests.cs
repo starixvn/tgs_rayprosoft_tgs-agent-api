@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -119,7 +118,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var command = new FundInAllGameBalanceCommand(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
-                "GpCode");
+                "gp2");
 
             fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
                 .Returns(new[]
@@ -158,7 +157,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeGameFundInService.Received(2)
+            _ = fakeGameFundInService.Received(1)
                 .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
         }
 
@@ -275,6 +274,64 @@ namespace TGS.Tests.OperatorApi.UnitTests
             await sut.ExecuteAsync(command);
 
             _ = fakeGameFundInService.Received(0)
+                .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
+        }
+
+        [Test]
+        public async Task FundInAllGameBalance_Without_Ignore_Should_Call_All_GP_FundIn()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+            var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
+
+            var sut = new FundInAllGameBalanceCommandService(
+                fakeGameProviderRepository,
+                fakeGetGameBalanceService,
+                fakeGameFundInService);
+
+            var command = new FundInAllGameBalanceCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                null);
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+                .Returns(new[]
+                {
+                    new BrandSubGameProviderInfo(
+                        "sub1",
+                        "sub1",
+                        "sub1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active,
+                        "{}"),
+                    new BrandSubGameProviderInfo(
+                        "sub2",
+                        "sub2",
+                        "sub2",
+                        Guid.NewGuid(),
+                        "gp3",
+                        true,
+                        Status.Active,
+                        "{}"),
+                    new BrandSubGameProviderInfo(
+                        "sub3",
+                        "sub3",
+                        "sub3",
+                        Guid.NewGuid(),
+                        "gp2",
+                        true,
+                        Status.Active,
+                        "{}")
+                }.ToAsyncEnumerable());
+
+            fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+                .Returns(100M);
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameFundInService.Received(3)
                 .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
         }
 
