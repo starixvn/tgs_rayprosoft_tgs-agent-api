@@ -4,6 +4,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>TGS.Core.DataServices.Tgs</AssemblyName>
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
+    <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
+    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+    <DockerfileTag Condition="$(DockerfileTag) == ''">tgs/migration</DockerfileTag>
+    <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -154,6 +159,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
   </ItemGroup>

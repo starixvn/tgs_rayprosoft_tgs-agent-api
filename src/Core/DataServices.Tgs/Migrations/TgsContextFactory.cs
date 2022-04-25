@@ -13,7 +13,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         {
             var configBuilder = new ConfigurationBuilder();
             configBuilder
-                .AddJsonFile("tgs.appsettings.json");
+                .AddJsonFile("tgs.appsettings.json", true)
+                .AddEnvironmentVariables();
             var config = configBuilder.Build();
 
             var services = new ServiceCollection();
@@ -22,9 +23,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             var loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddConsole();
+                builder
+                    .AddConfiguration(config.GetSection("Logging"))
+                    .AddConsole();
             });
-            services.AddSingleton<ILoggerFactory>(loggerFactory);
+            services.AddSingleton(loggerFactory);
 
             var serviceProvider = services.BuildServiceProvider();
 
