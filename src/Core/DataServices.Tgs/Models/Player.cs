@@ -22,7 +22,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int BetLimitId { get; set; }
 
-        public DateTimeOffset? Birthday { get; set; }
+        public DateOnly? Birthday { get; set; }
 
         public virtual Brand Brand { get; set; } = default!;
 

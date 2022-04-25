@@ -78,7 +78,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Wechat)
                 .HasMaxLength(64);
 
-            builder.Property(p => p.Birthday);
+            builder.Property(p => p.Birthday)
+                .HasColumnType("Date");
 
             builder.Property(p => p.Remark);
 

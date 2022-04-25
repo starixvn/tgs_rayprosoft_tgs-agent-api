@@ -49,6 +49,6 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string? WhatsApp { get; init; }
 
-        public DateTimeOffset? Birthday { get; init; }
+        public DateTime? Birthday { get; init; }
     }
 }

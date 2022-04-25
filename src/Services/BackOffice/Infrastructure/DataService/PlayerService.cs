@@ -204,14 +204,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
                 if (request.Birthday != null)
                 {
-                    var birthdayTimeZone8 = request.Birthday!.Value.ToOffset(new(8, 0, 0));
-                    player.Birthday = new DateTimeOffset(birthdayTimeZone8.Year,
-                        birthdayTimeZone8.Month,
-                        birthdayTimeZone8.Day,
-                        0,
-                        0,
-                        0,
-                        new(8, 0, 0));
+                    player.Birthday = DateOnly.FromDateTime(request.Birthday.Value);
                 }
             }
 

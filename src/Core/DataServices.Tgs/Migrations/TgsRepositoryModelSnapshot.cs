@@ -4267,8 +4267,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
 
-                    b.Property<DateTimeOffset?>("Birthday")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("Birthday")
+                        .HasColumnType("Date")
                         .HasColumnName("birthday");
 
                     b.Property<Guid>("BrandId")
