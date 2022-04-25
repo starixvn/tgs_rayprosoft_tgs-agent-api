@@ -76,7 +76,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     get game list of specific game provider
+        /// get game list of specific game provider
         /// </summary>
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -193,7 +193,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     get game launch url via game id
+        /// get game launch url via game id
         /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -250,7 +250,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     get game launch url for lobby type game.
+        /// get game launch url for lobby type game.
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
