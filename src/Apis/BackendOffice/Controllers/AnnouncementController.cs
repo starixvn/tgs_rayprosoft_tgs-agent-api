@@ -140,6 +140,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(hasExpiredStatus, p => now > p.To)
                 .Where(!hasExpiredStatus,
                     p => request.Status.Contains(p.Status) && now < p.To)
+                .Where(request.Type, a => a.Type == request.Type)
                 .Select(a => new AnnouncementModel
                 {
                     Id = a.Id,
