@@ -121,7 +121,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     IdNumber = player.IdNumber,
                     Remark = player.Remark,
                     ParentUsername = parentUsername,
-                    Birthday = player.Birthday?.ToDateTime(TimeOnly.Parse("00:00"))
+                    Birthday = player.Birthdate?.ToString("yyyy/MM/dd")
                 }
             };
         }

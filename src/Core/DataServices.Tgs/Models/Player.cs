@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using TGS.Core.Models.Enums;
 
 #nullable enable
@@ -22,7 +23,10 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int BetLimitId { get; set; }
 
-        public DateOnly? Birthday { get; set; }
+        public DateOnly? Birthdate { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string? Birthday { get; init; }
 
         public virtual Brand Brand { get; set; } = default!;
 

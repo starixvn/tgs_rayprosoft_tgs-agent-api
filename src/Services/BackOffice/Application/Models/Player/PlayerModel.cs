@@ -66,7 +66,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string? WhatsApp { get; init; }
 
-        public DateTime? Birthday { get; init; }
+        public string? Birthday { get; init; }
 
         public class BankModel
         {

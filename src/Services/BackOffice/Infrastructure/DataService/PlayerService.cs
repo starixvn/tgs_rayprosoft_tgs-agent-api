@@ -202,9 +202,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 player.Status = request.Status;
                 player.Remark = request.Remark;
 
-                if (request.Birthday != null)
+                if (request.Birthdate != null)
                 {
-                    player.Birthday = DateOnly.FromDateTime(request.Birthday.Value);
+                    player.Birthdate = DateOnly.Parse(request.Birthdate);
                 }
             }
 
