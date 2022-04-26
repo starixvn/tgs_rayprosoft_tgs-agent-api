@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Announcement;
 
 namespace TGS.Services.Operator.ApplicationServices.Announcement
 {
@@ -20,7 +18,6 @@ namespace TGS.Services.Operator.ApplicationServices.Announcement
             GetAnnouncementQuery query,
             CancellationToken cancellationToken = default)
             => _brandRepository
-                .QueryAnnouncementInfosAsync(query.BrandId, DateTimeOffset.Now)
-                .OrderBy(a => a.DisplayOrder);
+                .QueryAnnouncementInfosAsync(query.BrandId, DateTimeOffset.Now);
     }
 }

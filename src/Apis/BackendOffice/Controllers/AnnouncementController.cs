@@ -72,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _cacheManager = cacheManager;
         }
 
-        [HttpPut("ChangeOrders", Name = "ChangeOrder")]
+        [HttpPut("ChangeOrders", Name = "ChangeAnnouncementOrder")]
         [Description("Change Announcement Order")]
         public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
