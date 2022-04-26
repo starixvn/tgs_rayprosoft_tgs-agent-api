@@ -5,7 +5,6 @@ using System.Net;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +43,6 @@ using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
-using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -274,6 +272,10 @@ namespace TGS.Apis.OperatorApi
                     c.DisableDataAnnotationsValidation = true;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
+                })
+                .AddJsonOptions(jsonOptions =>
+                {
+                    jsonOptions.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                 });
 
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>

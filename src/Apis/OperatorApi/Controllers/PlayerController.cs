@@ -459,6 +459,25 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
         /// <summary>
+        /// Sets the birthdate asynchronous.
+        /// </summary>
+        /// <param name="setBirthdateService">The set birthdate service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPatch("birthdate", Name = "SetBirthdate")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask SetBirthdateAsync(
+            [FromServices] ICommandService<SetBirthdateCommand> setBirthdateService,
+            [FromBody] SetBirthdateRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetBirthdateCommand(playerTokenData.PlayerCode, request.Birthdate);
+
+            return setBirthdateService.ExecuteAsync(command);
+        }
+
+        /// <summary>
         /// Sets the Facebook Messenger id.
         /// </summary>
         /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>

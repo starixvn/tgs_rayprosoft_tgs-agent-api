@@ -413,5 +413,22 @@ namespace TGS.Tests.OperatorApi.UnitTests
                                 && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId)),
                     Times.Exactly(1));
         }
+
+        [Test]
+        public async Task Set_Player_Birthdate_Should_SuccessAsync()
+        {
+            var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+            var sut = new SetBirthdateCommandService(fakePlayerServiceClient);
+
+            var command = new SetBirthdateCommand("player1", DateOnly.Parse("2022/4/26"));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerServiceClient.Received(1)
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(command.PlayerCode),
+                    Arg.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        props => props[PlayerPropertyName.Birthdate] == "2022/4/26"));
+        }
     }
 }
