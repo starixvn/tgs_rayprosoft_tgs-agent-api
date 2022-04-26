@@ -31,7 +31,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly Dictionary<string, dynamic> _typeDictionary = new()
         {
             {
-                "pass", new
+                "pass",
+                new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Effective,
@@ -40,7 +41,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "reject", new
+                "reject",
+                new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Rejected,
@@ -49,7 +51,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "invalid", new
+                "invalid",
+                new
                 {
                     AllowedStatus = AnnounceStatus.Effective,
                     VerifiedStatus = AnnounceStatus.Invalid,
@@ -69,7 +72,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _cacheManager = cacheManager;
         }
 
-        [HttpPut("ChangeOrders")]
+        [HttpPut("ChangeOrders", Name = "ChangeOrder")]
         [Description("Change Announcement Order")]
         public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
@@ -82,7 +85,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost]
+        [HttpPost(Name = "Create")]
         [Description("Create a announcement")]
         public async Task<MessageResponse> CreateAsync(
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
@@ -109,7 +112,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 CreatedByUsername = Username,
                 UpdatedByUsername = Username,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                Type = request.Type,
             };
 
             await _commands.CreateAsync(announcement);
@@ -117,7 +121,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetList")]
         [Description("Get announcements")]
         public Task<PagedResponse<AnnouncementModel>> GetListAsync(
             [FromQuery] GetAnnouncementsRequest request)
@@ -151,12 +155,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                     To = a.To,
                     DisplayOrder = a.DisplayOrder,
                     UpdatedOn = a.UpdatedOn,
-                    Status = now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
+                    Status = now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString(),
+                    Type = a.Type
                 })
                 .CreatePagedResponseAsync(request);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "Update")]
         [Description("Update a announcement")]
         public async Task<MessageResponse> UpdateAsync(
             [FromServices] IJsonSerializationProvider jsonSerializationProvider,
@@ -178,6 +183,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
             }
 
+            announcement.Type = request.Type;
             announcement.Subject = request.Subject;
             announcement.Content = request.Content;
 
@@ -199,7 +205,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPut("{id}/{type}")]
+        [HttpPut("{id}/{type}", Name = "Verify")]
         [Description("Verify a announcement")]
         public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
         {

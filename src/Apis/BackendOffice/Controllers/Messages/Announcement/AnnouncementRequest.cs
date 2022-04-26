@@ -16,5 +16,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement
         public string Subject { get; set; }
 
         public DateTimeOffset To { get; set; }
+
+        public string Type { get; set; }
     }
 }

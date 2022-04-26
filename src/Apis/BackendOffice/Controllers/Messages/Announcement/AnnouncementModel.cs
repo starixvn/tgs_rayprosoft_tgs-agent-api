@@ -29,6 +29,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement
 
         public DateTimeOffset To { get; set; }
 
+        public string Type { get; set; }
+
         public DateTimeOffset UpdatedOn { get; set; }
 
         public string VerifiedByUsername { get; set; }

@@ -118,7 +118,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var command = new FundInAllGameBalanceCommand(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
-                "GpCode");
+                "gp2");
 
             fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
                 .Returns(new[]
@@ -157,7 +157,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeGameFundInService.Received(2)
+            _ = fakeGameFundInService.Received(1)
                 .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
         }
 
@@ -311,7 +311,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "sub2",
                         "sub2",
                         Guid.NewGuid(),
-                        "gp1",
+                        "gp3",
                         true,
                         Status.Active,
                         "{}"),
