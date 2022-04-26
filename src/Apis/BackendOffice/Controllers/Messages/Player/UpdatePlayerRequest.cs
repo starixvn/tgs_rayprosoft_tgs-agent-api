@@ -42,5 +42,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Player
         public string? Wechat { get; init; }
 
         public string? WhatsApp { get; init; }
+
+        public DateOnly? Birthdate { get; init; }
     }
 }

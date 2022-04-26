@@ -49,6 +49,6 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string? WhatsApp { get; init; }
 
-        public string? Birthdate { get; init; }
+        public DateOnly? Birthdate { get; init; }
     }
 }

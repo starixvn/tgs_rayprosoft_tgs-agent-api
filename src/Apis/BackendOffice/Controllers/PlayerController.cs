@@ -180,7 +180,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Viber = request.Viber,
                 VipId = request.VipId,
                 Wechat = request.Wechat,
-                WhatsApp = request.WhatsApp
+                WhatsApp = request.WhatsApp,
+                Birthdate = request.Birthdate
             };
 
             return _mediator.Send(updatePlayerModel);
