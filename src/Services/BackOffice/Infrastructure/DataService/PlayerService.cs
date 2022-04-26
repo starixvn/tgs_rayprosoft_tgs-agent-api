@@ -201,6 +201,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 player.VipId = request.VipId;
                 player.Status = request.Status;
                 player.Remark = request.Remark;
+
+                if (request.Birthdate != null)
+                {
+                    player.Birthdate = DateOnly.Parse(request.Birthdate);
+                }
             }
 
             if (request.Type == updatePlayerType[1])

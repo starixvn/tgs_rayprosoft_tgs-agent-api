@@ -4267,9 +4267,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
 
-                    b.Property<DateTimeOffset?>("Birthday")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("birthday");
+                    b.Property<DateOnly?>("Birthdate")
+                        .HasColumnType("Date")
+                        .HasColumnName("birthdate");
+
+                    b.Property<string>("Birthday")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(4)
+                        .HasColumnType("character varying(4)")
+                        .HasColumnName("birthday")
+                        .HasComputedColumnSql("lpad(extract('month' from birthdate)::text,2,'0') || lpad(extract('day' from birthdate)::text,2,'0')", true);
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")

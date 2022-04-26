@@ -78,7 +78,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Wechat)
                 .HasMaxLength(64);
 
-            builder.Property(p => p.Birthday);
+            builder.Property(p => p.Birthdate)
+                .HasColumnType("Date");
+
+            builder.Property(p => p.Birthday)
+                .HasMaxLength(4)
+                .HasComputedColumnSql("lpad(extract('month' from birthdate)::text,2,'0') || lpad(extract('day' from birthdate)::text,2,'0')", stored: true);
 
             builder.Property(p => p.Remark);
 

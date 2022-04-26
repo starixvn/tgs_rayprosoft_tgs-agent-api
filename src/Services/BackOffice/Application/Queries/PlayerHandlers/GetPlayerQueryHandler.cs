@@ -120,7 +120,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     LastLoginOn = loginIp?.RecordOn,
                     IdNumber = player.IdNumber,
                     Remark = player.Remark,
-                    ParentUsername = parentUsername
+                    ParentUsername = parentUsername,
+                    Birthday = player.Birthdate?.ToString("yyyy/MM/dd")
                 }
             };
         }
