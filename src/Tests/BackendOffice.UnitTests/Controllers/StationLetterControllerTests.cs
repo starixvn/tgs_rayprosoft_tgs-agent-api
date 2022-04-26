@@ -390,7 +390,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.SportsBetLimits,
                     new PlayerSportsBetLimit[]
                     {
-                    }));
+                    })
+                .With(s => s.Birthdate,new DateOnly()));
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
