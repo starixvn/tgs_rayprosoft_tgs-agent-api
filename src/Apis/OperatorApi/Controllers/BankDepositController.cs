@@ -554,15 +554,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
-            _loger.LogTrace($"zeronineninepay clientIp:{clientIp}");
+            _loger.LogTrace("zeronineninepay clientIp:{clientIp}", clientIp);
 
             var brandPayment = await getBrandPaymentService
                 .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
                 .ConfigureAwait(false);
 
             var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var payType = (ZeroNineNineDepositPayType)brandPaymentInfo.RootElement.GetProperty("payType").GetInt32();
 
             var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
@@ -575,7 +573,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     new ZeroNineNinePayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
                         brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
-                        payType,
+                        brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
                         formId,
                         clientIp,
                         null)));
