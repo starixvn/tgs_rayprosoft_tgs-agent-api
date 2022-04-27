@@ -206,6 +206,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             {
                                 new MenuSetting("View"),
                                 new MenuSetting("Update"),
+                                new MenuSetting("UpdateDomain"),
                                 new MenuSetting("UpdateIngress"),
                                 new MenuSetting("UpdateDnsZone"),
                             }
