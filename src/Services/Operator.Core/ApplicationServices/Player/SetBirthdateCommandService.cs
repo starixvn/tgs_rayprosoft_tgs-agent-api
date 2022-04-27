@@ -20,7 +20,7 @@ internal class SetBirthdateCommandService : ICommandService<SetBirthdateCommand>
     {
         var properties = new Dictionary<PlayerPropertyName, string?>
         {
-            [PlayerPropertyName.Birthdate] = command.Birthdate.ToString()
+            [PlayerPropertyName.Birthdate] = command.Birthdate?.ToString("yyyy/MM/dd")
         };
 
         return _playerServiceClient.SetPlayerPropertiesAsync(command.PlayerCode, properties);

@@ -428,7 +428,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .SetPlayerPropertiesAsync(
                     Arg.Is(command.PlayerCode),
                     Arg.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
-                        props => props[PlayerPropertyName.Birthdate] == "2022/4/26"));
+                        props => props[PlayerPropertyName.Birthdate] == "2022/04/26"));
         }
     }
 }
