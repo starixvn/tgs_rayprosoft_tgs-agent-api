@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
@@ -16,6 +17,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             AgentType type,
             Guid brandId,
             string currencyCode,
+            LTree path,
             Guid? agentId = null,
             Guid? parentAgentId = null)
         {
@@ -65,7 +67,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedByUsername = _AdminUsername,
                 UpdatedOn = DateTimeOffset.Now,
-                Path = new Microsoft.EntityFrameworkCore.LTree("A")
+                Path = path
             };
         }
     }
