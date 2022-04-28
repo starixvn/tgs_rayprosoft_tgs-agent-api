@@ -64,7 +64,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreatedByUsername = _AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedByUsername = _AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                Path = new Microsoft.EntityFrameworkCore.LTree("A")
             };
         }
     }

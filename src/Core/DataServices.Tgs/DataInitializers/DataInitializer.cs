@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore.Storage;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.DataServices.Base.DataInitializers;
@@ -787,7 +790,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 .Distinct()
                 .Select(brand => brand)
                 .ToArray();
-
+            var conn = _repository.GetDbConnection();
+            var transaction = _repository.CurrentTransaction?.GetDbTransaction();
             foreach (var brand in brands)
             {
                 var chiefId = GuidExtensions.NewSequentialGuid();

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.BackOffice.Application.Models.Agent
@@ -36,5 +37,6 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public AgentBankModel[] Banks { get; set; }
         public int TotalCount { get; set; }
         public AgentDividendConditionModel[] AgentDividendConditions { get; set; }
+        public LTree Path { get; set; }
     }
 }
