@@ -495,6 +495,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SecretKey = brand.SecretKey,
                 ApiKey = brand.ApiKey,
                 SettlementIntervalType = brand.Type,
+                PreviousSettlementFrom = currentFromDate,
+                PreviousSettlementTo = currentToDate,
                 CurrentSettlementFrom = currentFromDate,
                 CurrentSettlementTo = currentToDate,
                 NextSettlementFrom = nextFromDate,
