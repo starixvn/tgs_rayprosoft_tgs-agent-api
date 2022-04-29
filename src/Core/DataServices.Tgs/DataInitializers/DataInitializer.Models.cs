@@ -2,19 +2,18 @@
 
 using System;
 
-namespace TGS.Core.DataServices.Tgs.DataInitializers
+namespace TGS.Core.DataServices.Tgs.DataInitializers;
+
+public partial class DataInitializer
 {
-    public partial class DataInitializer
-    {
-        internal record CurrencyDefined(string Code, string Name, string NativeName, string Symbol);
+    internal record CurrencyDefined(string Code, string Name, string NativeName, string Symbol);
 
-        internal record BetLimitDefined(string CurrencyCode, int MinBet, int MaxBet, int MaxBetPerMatch);
+    internal record BetLimitDefined(string CurrencyCode, int MinBet, int MaxBet, int MaxBetPerMatch);
 
-        internal record GameProviderBetLimit(Guid Id, string CurrencyCode, int MinBet, int MaxBet, int MaxBetPerMatch,
-            string ExternalSetting = "");
+    internal record GameProviderBetLimit(Guid Id, string CurrencyCode, int MinBet, int MaxBet, int MaxBetPerMatch,
+        string ExternalSetting = "");
 
-        internal record PlayerDefined(string PlayerCode, Guid WalletId, Guid BrandId, Guid? AgentId);
+    internal record PlayerDefined(string PlayerCode, Guid WalletId, Guid BrandId, Guid? AgentId);
 
-        internal record SubGameProvider(string Code, string Name);
-    }
+    internal record SubGameProvider(string Code, string Name);
 }
