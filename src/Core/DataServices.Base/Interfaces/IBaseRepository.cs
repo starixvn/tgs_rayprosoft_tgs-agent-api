@@ -11,24 +11,22 @@ namespace TGS.Core.DataServices.Base.Interfaces
 {
     public interface IBaseRepository : IAsyncDisposable
     {
+        ChangeTracker ChangeTracker { get; }
+
         IDbContextTransaction CurrentTransaction { get; }
 
-        ChangeTracker ChangeTracker { get; }
+        Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level);
 
         Task<bool> CanConnectionAsync();
 
-        void SetTimeoutToSeconds(int seconds);
-
-        Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level);
+        EntityEntry<T> Entry<T>(T entity) where T : class;
 
         IDbConnection GetDbConnection();
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
-        Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env);
-
         DbSet<T> Set<T>() where T : class;
 
-        EntityEntry<T> Entry<T>(T entity) where T : class;
+        void SetTimeoutToSeconds(int seconds);
     }
 }

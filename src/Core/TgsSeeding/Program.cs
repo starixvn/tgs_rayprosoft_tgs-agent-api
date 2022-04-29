@@ -7,12 +7,8 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = Host.CreateDefaultBuilder();
 
-builder
-    .ConfigureWebHostDefaults(webHostBuilder => webHostBuilder
-        .ConfigureKestrel(serverOptions =>
-        {
-            serverOptions.ListenUnixSocket("/tgs-seeding.sock");
-        }));
+builder.ConfigureAppConfiguration(configurationBuilder =>
+    configurationBuilder.AddJsonFile($"{Directory.GetCurrentDirectory()}/appsettings.json", true));
 
 var app = builder.Build();
 
@@ -40,7 +36,7 @@ rootCommand.SetHandler<string>(
 
         var dbContext = new TgsRepository(dbOptionsBuilder.Options);
 
-        var seeding = new DataInitializer(dbContext, app.Services.GetRequiredService<IWebHostEnvironment>());
+        var seeding = new DataInitializer(dbContext);
         await seeding.SetInitialDataAsync().ConfigureAwait(false);
     },
     connectionStringOption);
