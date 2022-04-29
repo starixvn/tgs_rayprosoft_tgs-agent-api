@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAgentService
     {
-        Task CreateAgentAsync(CreateAgentRequest request, Guid? parentAgentId = null);
+        Task CreateAgentAsync(CreateAgentRequest request, Agent parentAgent = null);
 
         Task<bool> ExistsAsync(Expression<Func<Agent, bool>> predicate);
 
@@ -36,9 +36,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null,
             bool tracking = false);
 
-        Task UpdateAgentAsync(Agent agent, UpdateAgentRequest request);
+        Task UpdateAgentAsync(Agent agent, int nLevel, UpdateAgentRequest request);
 
         Task<(IEnumerable<AgentModel>, int)> GetAgentsAsync(GetAgentsRequest request);
+
+        Task<IEnumerable<AgentPathModel>> GetSubAgentsAsync(Guid agentId);
     }
 
     public class AgentService : BaseRepositoryOperations<ITgsRepository>, IAgentService
@@ -52,7 +54,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _repository = repository;
         }
 
-        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request, Guid? parentAgentId)
+        async Task IAgentService.CreateAgentAsync(CreateAgentRequest request, Agent parentAgent)
         {
             var invitationCode = InvitationCodeGenerator.NewId();
 
@@ -63,15 +65,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
+            var agentId = Guid.NewGuid();
 
             var agent = new Agent
             {
+                Id = agentId,
                 Username = request.Username,
                 LevelType = request.LevelType,
                 Type = request.Type,
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
-                ParentAgentId = parentAgentId,
+                ParentAgentId = parentAgent.Id,
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     brand.AgentDividendType == AgentDividendType.MultipleLayer &&
@@ -93,7 +97,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
-                RegisteredOn = DateTimeOffset.Now
+                RegisteredOn = DateTimeOffset.Now,
+                Path = new LTree($"{parentAgent.Path}.{agentId:N}")
             };
 
             var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
@@ -141,7 +146,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IAgentService.UpdateAgentAsync(Agent agent, UpdateAgentRequest request)
+        async Task IAgentService.UpdateAgentAsync(Agent agent, int nLevel, UpdateAgentRequest request)
         {
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
@@ -161,6 +166,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 var updateAgents = GetChildAgents(request.Id, agents);
 
                 await UpdateEntitiesAsync(updateAgents).ConfigureAwait(false);
+
+                _ = await UpdateSubAgentsPathAsync(agent, nLevel, parentAgent).ConfigureAwait(false);
             }
 
             switch (request.UpdateType)
@@ -275,6 +282,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return (results, results.Any() ? results.First().TotalCount : 0);
         }
 
+        public Task<IEnumerable<AgentPathModel>> GetSubAgentsAsync(Guid agentId)
+        {
+            const string spName = "dbo.agent_get_all_sub_agents";
+
+            return _repository.SqlQueryMultipleAsync<AgentPathModel>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    { "_agent_path", agentId.ToString("N") }
+                });
+        }
+
         private static IEnumerable<Agent> GetChildAgents(Guid parentAgentId, Agent[] agents)
         {
             var childAgents = agents.Where(x => x.ParentAgentId == parentAgentId).ToArray();
@@ -298,6 +316,20 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     }
                 }
             }
+        }
+
+        public async ValueTask<int> UpdateSubAgentsPathAsync(Agent agent,int nLevel, Agent newParentAgent)
+        {
+            const string spName = "dbo.agent_update_path";
+
+            return await _repository.ExecuteSqlCommandAsync(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    { "_agent_id", agent.Id },
+                    { "_agent_nlevel", nLevel },
+                    { "_agent_path", agent.Path.ToString() },
+                    { "_new_agent_path", newParentAgent.Path.ToString() }
+                });
         }
     }
 }

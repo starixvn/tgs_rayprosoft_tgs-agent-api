@@ -789,8 +789,7 @@ public sealed partial class DataInitializer : BaseDataInitializer
             .Distinct()
             .Select(brand => brand)
             .ToArray();
-        var conn = _repository.GetDbConnection();
-        var transaction = _repository.CurrentTransaction?.GetDbTransaction();
+
         foreach (var brand in brands)
         {
             var chiefId = GuidExtensions.NewSequentialGuid();
@@ -803,8 +802,9 @@ public sealed partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
-                new Microsoft.EntityFrameworkCore.LTree($"{brand.Code}Chief"),
+                new Microsoft.EntityFrameworkCore.LTree(chiefId.ToString("N")),
                 chiefId));
+
 
             _agents.Add(CreateAgent($"{brand.Code}Agent1",
                 AgentStatus.Enabled,
@@ -813,8 +813,8 @@ public sealed partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
-                new Microsoft.EntityFrameworkCore.LTree($"{brand.Code}Chief.{brand.Code}Agent1"),
-                null,
+                new Microsoft.EntityFrameworkCore.LTree($"{chiefId:N}.{agent1.ToString("N")}"),
+                agent1,
                 chiefId));
 
             _agents.Add(CreateAgent($"{brand.Code}Agent2",
@@ -824,8 +824,8 @@ public sealed partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
-                new Microsoft.EntityFrameworkCore.LTree($"{brand.Code}Chief.{brand.Code}Agent2"),
-                null,
+                new Microsoft.EntityFrameworkCore.LTree($"{chiefId:N}.{agent2.ToString("N")}"),
+                agent2,
                 chiefId));
         }
 

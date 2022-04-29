@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore.Migrations;
+using TGS.Core.DataServices.Base.Extensions;
 
 #nullable disable
 
@@ -27,6 +29,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "agents",
                 column: "path")
                 .Annotation("Npgsql:IndexMethod", "gist");
+
+            var assembly = Assembly.GetExecutingAssembly();
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "agent_update_path"));
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "agent_get_all_sub_agents"));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
