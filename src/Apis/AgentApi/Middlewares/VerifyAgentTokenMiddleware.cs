@@ -11,100 +11,103 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Agent.ApplicationServices.Agent;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
+using Tgs.ServiceUtility;
 
-namespace TGS.Apis.AgentApi.Middlewares
+namespace TGS.Apis.AgentApi.Middlewares;
+
+public sealed class VerifyAgentTokenMiddleware
 {
-    public sealed class VerifyAgentTokenMiddleware
+    private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
+
+    private readonly RequestDelegate _next;
+
+    public VerifyAgentTokenMiddleware(RequestDelegate next)
     {
-        private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
+        _next = next;
+    }
 
-        private readonly RequestDelegate _next;
+    public async Task InvokeAsync(
+        HttpContext context,
+        ITokenProvider tokenProvider,
+        IHashProvider hashProvider,
+        IAgentOperations agentOperations,
+        IBrandOperations brandOperations,
+        IJwtTokenHandler handler,
+        ICommandService<ValidateAgentLoginRecordCommand> loginRecordValidateService)
+    {
+        using var activity = _VerifyAgentTokenMiddlewareSource.StartActivity(nameof(VerifyAgentTokenMiddleware));
 
-        public VerifyAgentTokenMiddleware(RequestDelegate next)
+        var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizeAgentTokenAttribute>();
+
+        if (attribute == null)
         {
-            _next = next;
+            await _next(context);
+            return;
         }
 
-        public async Task InvokeAsync(
-            HttpContext context,
-            ITokenProvider tokenProvider,
-            IHashProvider hashProvider,
-            IAgentOperations agentOperations,
-            IBrandOperations brandOperations,
-            IExpirationValidator expirationValidator,
-            IJwtTokenHandler handler)
+        var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
+
+        if (string.IsNullOrEmpty(token))
         {
-            using var activity = _VerifyAgentTokenMiddlewareSource.StartActivity(nameof(VerifyAgentTokenMiddleware));
-
-            var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<AuthorizeAgentTokenAttribute>();
-
-            if (attribute == null)
-            {
-                await _next(context);
-
-                return;
-            }
-
-            var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
-
-            if (token.IsNullOrEmpty())
-            {
-                if (!attribute.AllowNullOrEmpty)
-                {
-                    throw new MissingTokenException(Resources.Agent.MissingAgentToken);
-                }
-
-                await _next(context);
-
-                return;
-            }
-
-            var jwt = handler.ReadToken(token);
-
-            var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
-
-            if (sub.IsNullOrEmpty())
+            if (!attribute.AllowNullOrEmpty)
             {
                 throw new MissingTokenException(Resources.Agent.MissingAgentToken);
             }
 
-            var data = await tokenProvider.DecryptAsync<AgentTokenData>(sub);
-            context.Items.Add(Core.Models.Consts.ContextItems.AgentToken, data);
-
-            var agentId = data.AgentId;
-            await expirationValidator.ThrowIfAgentLoginExpiredAsync(data.LoginRecordId);
-
-            if (!attribute.NeedAuthorize)
-            {
-                await _next(context);
-
-                return;
-            }
-
-            var agent = await agentOperations.GetAgentAsync(agentId);
-            var secretKey = await brandOperations.GetBrandSecretKeyAsync(agent.BrandId);
-
-            var jti = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var payload = hashProvider.Hash($"{sub}:{jti}");
-            var signature = $"{payload}:{secretKey}";
-
-            handler.ValidateToken(token,
-                new()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = Consts.Site,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                },
-                exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new AgentLoginExpiredException(agentId));
-
             await _next(context);
+            return;
         }
+
+        var jwt = handler.ReadToken(token);
+
+        var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+        if (string.IsNullOrEmpty(sub))
+        {
+            throw new MissingTokenException(Resources.Agent.MissingAgentToken);
+        }
+
+        var tokenData = await tokenProvider.DecryptAsync<AgentTokenData>(sub);
+        if (tokenData == null)
+        {
+            throw new MissingTokenException(Resources.Agent.MissingAgentToken);
+        }
+
+        context.Items.Add(Core.Models.Consts.ContextItems.AgentToken, tokenData);
+
+        var agentId = tokenData.AgentId;
+        await loginRecordValidateService.ExecuteAsync(new ValidateAgentLoginRecordCommand(tokenData.LoginRecordId));
+
+        if (!attribute.NeedAuthorize)
+        {
+            await _next(context);
+            return;
+        }
+
+        var agent = await agentOperations.GetAgentAsync(agentId);
+        var secretKey = await brandOperations.GetBrandSecretKeyAsync(agent.BrandId);
+
+        var jti = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
+        var payload = hashProvider.Hash($"{sub}:{jti}");
+        var signature = $"{payload}:{secretKey}";
+
+        _ = handler.ValidateToken(token,
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = Consts.Site,
+                ValidateAudience = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            },
+            exception => throw new InvalidCredentialsException(exception.Message),
+            _ => throw new AgentLoginExpiredException(agentId));
+
+        await _next(context);
     }
 }

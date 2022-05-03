@@ -4,45 +4,46 @@ using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 using TGS.Paging;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent;
+
+public interface IAgentRepository
 {
-    public interface IAgentRepository
-    {
-        ValueTask<AgentInfo?> GetAgentByIdAsync(Guid id);
+    ValueTask<AgentInfo?> GetAgentByIdAsync(Guid id);
 
-        IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId);
+    IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId);
 
-        IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email);
+    ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId);
 
-        IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone);
+    IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email);
 
-        ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id);
+    IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone);
 
-        IAsyncEnumerable<DividendCondition> QueryAgentDividendConditionsAsync(Guid agentId);
+    ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id);
 
-        IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfosAsync(
-            Guid agentId,
-            string? username,
-            DateTimeOffset? beginRegisteredOn,
-            DateTimeOffset? endRegisteredOn,
-            string? registerHost,
-            PlayerStatus? status,
-            Guid? vipId,
-            Paging<AgentPlayerInfo> paging);
+    IAsyncEnumerable<DividendCondition> QueryAgentDividendConditionsAsync(Guid agentId);
 
-        ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
-            Guid agentId,
-            string? username,
-            DateTimeOffset? beginRegisteredOn,
-            DateTimeOffset? endRegisteredOn,
-            string? registerHost,
-            PlayerStatus? status,
-            Guid? vipId);
+    IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfosAsync(
+        Guid agentId,
+        string? username,
+        DateTimeOffset? beginRegisteredOn,
+        DateTimeOffset? endRegisteredOn,
+        string? registerHost,
+        PlayerStatus? status,
+        Guid? vipId,
+        Paging<AgentPlayerInfo> paging);
 
-        IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
+    ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
+        Guid agentId,
+        string? username,
+        DateTimeOffset? beginRegisteredOn,
+        DateTimeOffset? endRegisteredOn,
+        string? registerHost,
+        PlayerStatus? status,
+        Guid? vipId);
 
-        ValueTask SetPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
+    IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
 
-        ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
-    }
+    ValueTask SetPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
+
+    ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
 }
