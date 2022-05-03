@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
@@ -90,7 +89,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     TransactionType = (TransactionType?)x.TransactionType,
                     GameActionType = (GameActionType?)x.GameActionType,
                     RecordedOn = x.RecordedOn,
-                    Remark = GetRemark(x.Description)
+                    Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
                 }).ToArray()
             };
         }
@@ -202,17 +201,20 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(updatePlayerModel);
         }
 
-        private static string GetRemark(string description)
+        private static string GetRemark(TransactionType? transactionType, string description)
         {
-            var utf8JsonReader = new Utf8JsonReader(Encoding.UTF8.GetBytes(description));
-            if (JsonDocument.TryParseValue(ref utf8JsonReader, out var jsonDocument))
+            switch (transactionType)
             {
-                if (jsonDocument.RootElement.TryGetProperty("Remark", out var remark))
-                {
+                case TransactionType.CompanyAdjust:
+                case TransactionType.AgentAdjust:
+                case TransactionType.SystemAdjust:
+                case TransactionType.TransferAdjust:
+                    _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                     return remark.GetString();
-                }
+
+                default:
+                    return string.Empty;
             }
-            return "";
         }
     }
 }
