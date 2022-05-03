@@ -21,7 +21,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: tgs-connections
-                  key: tgs
+                  key: tgs-migration
             - name: Logging__Console__FormatterName
               value: json
           resources:
