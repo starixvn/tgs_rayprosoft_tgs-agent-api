@@ -26,12 +26,14 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             CancellationToken cancellationToken)
         {
             var agent = await _service.GetAgentAsync(q => q.Id == request.Id);
-            var nLevel = await _service.GetAgentQueries().Where(x => x.Id == request.Id).Select(x => x.Path.NLevel)
-                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
             if (agent == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
+
+            var nLevel = await _service.GetAgentQueries().Where(x => x.Id == request.Id).Select(x => x.Path.NLevel)
+                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
             if (request.ParentUsername.IsNotNullOrEmpty())
             {

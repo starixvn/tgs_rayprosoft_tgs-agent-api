@@ -552,7 +552,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
-            var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+            var clientIp = HttpContext.Connection.RemoteIpAddress;
+
+            if (clientIp != null && clientIp.IsIPv4MappedToIPv6)
+                clientIp = clientIp.MapToIPv4();
 
             _loger.LogTrace("zeronineninepay clientIp:{clientIp}", clientIp);
 
@@ -575,7 +579,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
                         formId,
-                        clientIp,
+                        clientIp?.ToString(),
                         null)));
 
             await createDepositFormService

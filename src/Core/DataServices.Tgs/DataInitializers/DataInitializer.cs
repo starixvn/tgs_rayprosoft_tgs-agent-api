@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
@@ -21,7 +20,7 @@ using static TGS.Core.Models.Enums.GameType;
 namespace TGS.Core.DataServices.Tgs.DataInitializers;
 
 [ExcludeFromCodeCoverage]
-public sealed partial class DataInitializer : BaseDataInitializer
+public partial class DataInitializer : BaseDataInitializer
 {
     private const string _AdminUsername = "admin.enabled";
     private static readonly IRole _GpiBrandRole = new GpiBrandRole();
@@ -79,7 +78,7 @@ public sealed partial class DataInitializer : BaseDataInitializer
     private Player[] _players;
     private VipLevel[] _vipLevels;
 
-    public DataInitializer(ITgsRepository repository, IWebHostEnvironment env)
+    public DataInitializer(ITgsRepository repository)
     {
         _repository = repository;
 
@@ -89,32 +88,32 @@ public sealed partial class DataInitializer : BaseDataInitializer
 
         _gameProviders = new IGameProvider[]
         {
-            new SBOGameProvider(env),
-            new HabaneroGameProvider(env),
-            new PragmaticPlayGameProvider(env),
-            new AsiaGamingGameProvider(env),
-            new SabaGameProvider(env),
-            new KYGameProvider(env),
-            new VRGameProvider(env),
-            new IMESportsGameProvider(env),
-            new BigGamingGameProvider(env),
-            new JDBGameProvider(env),
-            new SexyGamingGameProvider(env),
-            new SkywindGameProvider(env),
-            new AllBetGameProvider(env),
-            new EvolutionGameProvider(env),
-            new WGSportsGameProvider(env),
-            new WGHorseGameProvider(env),
-            new WMCasinoGameProvider(env),
-            new TCGGameProvider(env),
-            new Card365GameProvider(env),
-            new LYGameProvider(env),
-            new BetConstructProvider(env),
-            new AviaGameProvider(env),
-            new JiliGameProvider(env),
-            new TFGameProvider(env),
-            new DreamGameGameProvider(env),
-            new JokerGameProvider(env)
+            new SBOGameProvider(),
+            new HabaneroGameProvider(),
+            new PragmaticPlayGameProvider(),
+            new AsiaGamingGameProvider(),
+            new SabaGameProvider(),
+            new KYGameProvider(),
+            new VRGameProvider(),
+            new IMESportsGameProvider(),
+            new BigGamingGameProvider(),
+            new JDBGameProvider(),
+            new SexyGamingGameProvider(),
+            new SkywindGameProvider(),
+            new AllBetGameProvider(),
+            new EvolutionGameProvider(),
+            new WGSportsGameProvider(),
+            new WGHorseGameProvider(),
+            new WMCasinoGameProvider(),
+            new TCGGameProvider(),
+            new Card365GameProvider(),
+            new LYGameProvider(),
+            new BetConstructProvider(),
+            new AviaGameProvider(),
+            new JiliGameProvider(),
+            new TFGameProvider(),
+            new DreamGameGameProvider(),
+            new JokerGameProvider()
         };
     }
 
@@ -441,8 +440,8 @@ public sealed partial class DataInitializer : BaseDataInitializer
                      let availableCurrencies =
                          game.AvailableCurrencies.Split(',', StringSplitOptions.RemoveEmptyEntries)
                      where game.AvailableToBrand &&
-                         (availableCurrencies.Length == 0 ||
-                             availableCurrencies.Any(curr => brandCurrencies.Contains(curr)))
+                           (availableCurrencies.Length == 0 ||
+                            availableCurrencies.Any(curr => brandCurrencies.Contains(curr)))
                      select game)
             .Select((g, idx) => new BrandGame
             {
@@ -497,6 +496,8 @@ public sealed partial class DataInitializer : BaseDataInitializer
             SecretKey = brand.SecretKey,
             ApiKey = brand.ApiKey,
             SettlementIntervalType = brand.Type,
+            PreviousSettlementFrom = currentFromDate,
+            PreviousSettlementTo = currentToDate,
             CurrentSettlementFrom = currentFromDate,
             CurrentSettlementTo = currentToDate,
             NextSettlementFrom = nextFromDate,
@@ -535,10 +536,10 @@ public sealed partial class DataInitializer : BaseDataInitializer
                     Description = string.Empty,
                     BrandGames =
                         games.Select(g => new BrandGroupGame
-                            {
-                                BrandGroupId = brandGroupId,
-                                BrandGameId = g.Id
-                            })
+                        {
+                            BrandGroupId = brandGroupId,
+                            BrandGameId = g.Id
+                        })
                             .ToHashSet(),
                     BrandGroupBetLimits = betLimits.Select(b =>
                     {
@@ -586,7 +587,7 @@ public sealed partial class DataInitializer : BaseDataInitializer
             };
 
         static string[] IntersectGameProviderCodes(string[] parents, string[] children) =>
-            parents.Length == 0  ? children :
+            parents.Length == 0 ? children :
             children.Length == 0 ? parents : parents.Intersect(children).ToArray();
     }
 
@@ -698,21 +699,21 @@ public sealed partial class DataInitializer : BaseDataInitializer
                         UpdatedOn = _Now
                     }
                 }
-            //Banks = new[]
-            //{
-            //    new PlayerBankInfo
-            //    {
-            //        Id = GuidExtensions.NewSequentialGuid(),
-            //        PlayerCode = playerCode,
-            //        RealName = Generator.RandomString(4),
-            //        BankName = Generator.RandomString(12),
-            //        BankAccount = Generator.RandomIntString(20),
-            //        CreatedByUsername = AdminUsername,
-            //        UpdatedByUsername = AdminUsername,
-            //        CreatedOn = Now,
-            //        UpdatedOn = Now
-            //    }
-            //}
+                //Banks = new[]
+                //{
+                //    new PlayerBankInfo
+                //    {
+                //        Id = GuidExtensions.NewSequentialGuid(),
+                //        PlayerCode = playerCode,
+                //        RealName = Generator.RandomString(4),
+                //        BankName = Generator.RandomString(12),
+                //        BankAccount = Generator.RandomIntString(20),
+                //        CreatedByUsername = AdminUsername,
+                //        UpdatedByUsername = AdminUsername,
+                //        CreatedOn = Now,
+                //        UpdatedOn = Now
+                //    }
+                //}
         };
     }
 
@@ -755,10 +756,10 @@ public sealed partial class DataInitializer : BaseDataInitializer
                         ResellerId = reseller.Id
                     }).ToHashSet(),
             BetLimits = _betLimits.Select(bl => new ResellerBetLimit
-                {
-                    ResellerId = reseller.Id,
-                    BetLimitId = bl.Id
-                })
+            {
+                ResellerId = reseller.Id,
+                BetLimitId = bl.Id
+            })
                 .ToHashSet()
         };
     }
@@ -793,6 +794,8 @@ public sealed partial class DataInitializer : BaseDataInitializer
         foreach (var brand in brands)
         {
             var chiefId = GuidExtensions.NewSequentialGuid();
+            var agent1 = GuidExtensions.NewSequentialGuid();
+            var agent2 = GuidExtensions.NewSequentialGuid();
             var currencyCode = brand.Currencies.First().Code;
 
             _agents.Add(CreateAgent($"{brand.Code}Chief",
@@ -844,73 +847,73 @@ public sealed partial class DataInitializer : BaseDataInitializer
                        select g.Take(2)).SelectMany(p => p);
 
         foreach (var p in players)
-        foreach (var gp in _gameProvidersCreated.Values.Take(3))
-        {
-            var games = (from gm in gp.Games
-                         where !gm.Type.ToString().Contains("Lobby")
-                         group gm by gm.Type
-                         into g
-                         select g.Take(1)).SelectMany(g => g);
-
-            foreach (var game in games)
+            foreach (var gp in _gameProvidersCreated.Values.Take(3))
             {
-                var createdOn = timestamp = timestamp.AddSeconds(1);
+                var games = (from gm in gp.Games
+                             where !gm.Type.ToString().Contains("Lobby")
+                             group gm by gm.Type
+                             into g
+                             select g.Take(1)).SelectMany(g => g);
 
-                var closedOn = game.Type is Sportsbook or VirtualSports
-                    ? timestamp.AddDays(1)
-                    : timestamp.AddSeconds(3);
-
-                var gameProviderConfiguration = gp.GameProviderConfigurations.First();
-                var round = CreateRound(p, gp, gameProviderConfiguration, game, createdOn, closedOn);
-
-                var externalGameActionGroupId = round.ExternalRoundId;
-                var betAmount = ((decimal)rand.Next(5, 20)).Negate();
-
-                var placeBetAction = CreateGameAction(round.PlayerCode,
-                    betAmount,
-                    round.Id,
-                    PlaceBet,
-                    externalGameActionGroupId,
-                    createdOn,
-                    createdOn);
-
-                await _repository.GameActions.AddAsync(placeBetAction);
-
-                var v = rand.NextDouble();
-                var resultActionType = v > 0.5 ? LoseBet : v is > 0.2 and < 0.5 ? WinBet : CancelTransaction;
-
-                var resultAmount = resultActionType switch
+                foreach (var game in games)
                 {
-                    LoseBet           => 0,
-                    CancelTransaction => betAmount.Negate(),
-                    _                 => betAmount.Negate() * 2
-                };
+                    var createdOn = timestamp = timestamp.AddSeconds(1);
 
-                decimal turnover = 0, winloss = 0;
+                    var closedOn = game.Type is Sportsbook or VirtualSports
+                        ? timestamp.AddDays(1)
+                        : timestamp.AddSeconds(3);
 
-                if (resultActionType != CancelTransaction)
-                {
-                    turnover = betAmount.Negate();
-                    winloss = (betAmount + resultAmount).Negate();
+                    var gameProviderConfiguration = gp.GameProviderConfigurations.First();
+                    var round = CreateRound(p, gp, gameProviderConfiguration, game, createdOn, closedOn);
 
-                    round.WinLoss = winloss;
+                    var externalGameActionGroupId = round.ExternalRoundId;
+                    var betAmount = ((decimal)rand.Next(5, 20)).Negate();
+
+                    var placeBetAction = CreateGameAction(round.PlayerCode,
+                        betAmount,
+                        round.Id,
+                        PlaceBet,
+                        externalGameActionGroupId,
+                        createdOn,
+                        createdOn);
+
+                    await _repository.GameActions.AddAsync(placeBetAction);
+
+                    var v = rand.NextDouble();
+                    var resultActionType = v > 0.5 ? LoseBet : v is > 0.2 and < 0.5 ? WinBet : CancelTransaction;
+
+                    var resultAmount = resultActionType switch
+                    {
+                        LoseBet => 0,
+                        CancelTransaction => betAmount.Negate(),
+                        _ => betAmount.Negate() * 2
+                    };
+
+                    decimal turnover = 0, winloss = 0;
+
+                    if (resultActionType != CancelTransaction)
+                    {
+                        turnover = betAmount.Negate();
+                        winloss = (betAmount + resultAmount).Negate();
+
+                        round.WinLoss = winloss;
+                    }
+
+                    var resultAction = CreateGameAction(round.PlayerCode,
+                        resultAmount,
+                        round.Id,
+                        resultActionType,
+                        externalGameActionGroupId,
+                        closedOn,
+                        closedOn,
+                        turnover,
+                        winloss,
+                        placeBetAction.Id);
+
+                    await _repository.GameActions.AddAsync(resultAction);
+                    await _repository.Rounds.AddAsync(round);
                 }
-
-                var resultAction = CreateGameAction(round.PlayerCode,
-                    resultAmount,
-                    round.Id,
-                    resultActionType,
-                    externalGameActionGroupId,
-                    closedOn,
-                    closedOn,
-                    turnover,
-                    winloss,
-                    placeBetAction.Id);
-
-                await _repository.GameActions.AddAsync(resultAction);
-                await _repository.Rounds.AddAsync(round);
             }
-        }
 
         await _repository.SaveChangesAsync();
     }
@@ -934,7 +937,7 @@ public sealed partial class DataInitializer : BaseDataInitializer
             new("USD", 1, 200, 1000),
             new("VND", 1000, 200000, 1000000),
             new("VND_1000", 1, 200, 1000),
-            new("HKD", 1, 200, 1000)
+            new("HKD", 1, 200, 1000),
         };
 
         _betLimits = limits.Select(b => new BetLimit
@@ -1068,17 +1071,17 @@ public sealed partial class DataInitializer : BaseDataInitializer
         var localizedStrings = new List<LocalizedString>();
 
         foreach (var gp in _gameProvidersCreated.Values)
-        foreach (var cultureCode in gp.Languages.Select(l => l.CultureCode))
-        {
-            var gpData = GetGameProviderLocalizedStrings(gp, cultureCode);
-            localizedStrings.AddRange(gpData);
-
-            foreach (var g in gp.Games)
+            foreach (var cultureCode in gp.Languages.Select(l => l.CultureCode))
             {
-                var gameData = GetGameLocalizedStrings(g, cultureCode);
-                localizedStrings.AddRange(gameData);
+                var gpData = GetGameProviderLocalizedStrings(gp, cultureCode);
+                localizedStrings.AddRange(gpData);
+
+                foreach (var g in gp.Games)
+                {
+                    var gameData = GetGameLocalizedStrings(g, cultureCode);
+                    localizedStrings.AddRange(gameData);
+                }
             }
-        }
 
         await _repository.LocalizedStrings.AddRangeAsync(localizedStrings);
         await _repository.SaveChangesAsync();
@@ -1271,7 +1274,10 @@ public sealed partial class DataInitializer : BaseDataInitializer
         // brands
         var brands = licensees.SelectMany(l => l.Brands).ToArray();
 
-        foreach (var b in brands) _brandCreated.Add(b.Code, b);
+        foreach (var b in brands)
+        {
+            _brandCreated.Add(b.Code, b);
+        }
 
         await _repository.Brands.AddRangeAsync(brands);
         await _repository.SaveChangesAsync();
