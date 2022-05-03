@@ -204,15 +204,18 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         private static string GetRemark(string description)
         {
-            var utf8JsonReader = new Utf8JsonReader(Encoding.UTF8.GetBytes(description));
-            if (JsonDocument.TryParseValue(ref utf8JsonReader, out var jsonDocument))
+            if (!string.IsNullOrWhiteSpace(description))
             {
-                if (jsonDocument.RootElement.TryGetProperty("Remark", out var remark))
+                var utf8JsonReader = new Utf8JsonReader(Encoding.UTF8.GetBytes(description));
+                if (JsonDocument.TryParseValue(ref utf8JsonReader, out var jsonDocument))
                 {
-                    return remark.GetString();
+                    if (jsonDocument.RootElement.TryGetProperty("Remark", out var remark))
+                    {
+                        return remark.GetString();
+                    }
                 }
             }
-            return "";
+            return null;
         }
     }
 }
