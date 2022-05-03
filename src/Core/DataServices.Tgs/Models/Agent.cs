@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
@@ -86,5 +87,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public byte[] WithdrawPassword { get; set; }
 
         public byte[] WithdrawSalt { get; set; }
+
+        public LTree Path { get; set; }
     }
 }

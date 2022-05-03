@@ -21,6 +21,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -387,6 +388,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("password");
 
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("ltree")
+                        .HasColumnName("path");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
@@ -475,6 +481,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("ParentAgentId")
                         .HasDatabaseName("ix_agents_parent_agent_id");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("ix_agents_gist_path");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Path"), "gist");
 
                     b.ToTable("agents", "dbo");
                 });

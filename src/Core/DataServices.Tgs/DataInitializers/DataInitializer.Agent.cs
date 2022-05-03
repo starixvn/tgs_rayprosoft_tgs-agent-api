@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
@@ -16,6 +17,7 @@ public partial class DataInitializer
         AgentType type,
         Guid brandId,
         string currencyCode,
+            LTree path,
         Guid? agentId = null,
         Guid? parentAgentId = null)
     {
@@ -64,7 +66,8 @@ public partial class DataInitializer
             CreatedByUsername = _AdminUsername,
             CreatedOn = DateTimeOffset.Now,
             UpdatedByUsername = _AdminUsername,
-            UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                Path = path
         };
     }
 }

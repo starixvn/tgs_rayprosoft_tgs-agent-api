@@ -252,6 +252,7 @@ namespace TGS.Core.DataServices.Tgs
             _ = modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
             _ = modelBuilder.HasPostgresExtension("pg_trgm");
+            _ = modelBuilder.HasPostgresExtension("ltree");
         }
     }
 }

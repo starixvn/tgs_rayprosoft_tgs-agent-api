@@ -377,7 +377,7 @@ services:
       - ./localstack/bin:/docker-entrypoint-initaws.d
 
   postgres:
-    image: postgres:13.2-alpine
+    image: postgres:13.2
     container_name: postgres
     environment:
       POSTGRES_USER: "tgs"

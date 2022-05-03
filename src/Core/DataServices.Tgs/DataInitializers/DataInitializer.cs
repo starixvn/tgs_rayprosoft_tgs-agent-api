@@ -5,12 +5,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.Core.Infrastructures.Utility;
+using Dapper;
+using Microsoft.EntityFrameworkCore.Storage;
 using TGS.Core.DataServices.Base.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameActionType;
 using static TGS.Core.Models.Enums.GameType;
@@ -792,6 +794,8 @@ public partial class DataInitializer : BaseDataInitializer
         foreach (var brand in brands)
         {
             var chiefId = GuidExtensions.NewSequentialGuid();
+            var agent1 = GuidExtensions.NewSequentialGuid();
+            var agent2 = GuidExtensions.NewSequentialGuid();
             var currencyCode = brand.Currencies.First().Code;
 
             _agents.Add(CreateAgent($"{brand.Code}Chief",
@@ -801,7 +805,9 @@ public partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
+                new Microsoft.EntityFrameworkCore.LTree(chiefId.ToString("N")),
                 chiefId));
+
 
             _agents.Add(CreateAgent($"{brand.Code}Agent1",
                 AgentStatus.Enabled,
@@ -810,7 +816,8 @@ public partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
-                null,
+                new Microsoft.EntityFrameworkCore.LTree($"{chiefId:N}.{agent1.ToString("N")}"),
+                agent1,
                 chiefId));
 
             _agents.Add(CreateAgent($"{brand.Code}Agent2",
@@ -820,7 +827,8 @@ public partial class DataInitializer : BaseDataInitializer
                 AgentType.Cash,
                 brand.Id,
                 currencyCode,
-                null,
+                new Microsoft.EntityFrameworkCore.LTree($"{chiefId:N}.{agent2.ToString("N")}"),
+                agent2,
                 chiefId));
         }
 

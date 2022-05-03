@@ -32,6 +32,9 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
 
+            var nLevel = await _service.GetAgentQueries().Where(x => x.Id == request.Id).Select(x => x.Path.NLevel)
+                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
             if (request.ParentUsername.IsNotNullOrEmpty())
             {
                 var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
@@ -48,6 +51,15 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent
                         .DividendPercentageMustLessThanOrEqualToUpperLayer);
                 }
+
+                if (await _service.GetAgentQueries()
+                        .Where(x => x.Path.IsDescendantOf(new LTree(agent.Path)))
+                        .AnyAsync(x => x.Path.Subpath(0, nLevel).MatchesLTxtQuery(agent.Id.ToString("N")), cancellationToken: cancellationToken)
+                        .ConfigureAwait(false))
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.UnderSubAgentInvalid);
+                }
+
             }
 
             if (agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
@@ -80,7 +92,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 }
             }
 
-            await _service.UpdateAgentAsync(agent, request);
+            await _service.UpdateAgentAsync(agent, nLevel, request);
 
             return CreateValidResponse<MessageResponse>();
         }
