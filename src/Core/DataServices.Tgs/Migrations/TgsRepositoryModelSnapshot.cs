@@ -1010,6 +1010,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("external_transaction_id");
 
+                    b.Property<decimal>("LockAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("lock_amount");
+
+                    b.Property<decimal>("LockedBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("locked_balance");
+
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_on");

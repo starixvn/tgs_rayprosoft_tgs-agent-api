@@ -22,6 +22,15 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(c => c.LockAmount)
+                .HasPrecision(18, 6)
+                .HasDefaultValue(0);
+
+            builder.Property(c => c.LockedBalance)
+                .HasPrecision(18, 6)
+                .IsRequired()
+                .HasDefaultValue(0M);
+
             builder.Property(c => c.Type)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
