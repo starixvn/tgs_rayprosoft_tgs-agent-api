@@ -1,19 +1,21 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -87,7 +89,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Balance = x.Balance,
                     TransactionType = (TransactionType?)x.TransactionType,
                     GameActionType = (GameActionType?)x.GameActionType,
-                    RecordedOn = x.RecordedOn
+                    RecordedOn = x.RecordedOn,
+                    Remark = GetRemark(x.Description)
                 }).ToArray()
             };
         }
@@ -125,6 +128,18 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
             => _mediator.Send(request);
+
+        [HttpGet("{playerBucketId}/playerBucketHistories")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
+            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
+            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+
+        [HttpGet("{playerCode}/playerBuckets")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
+            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
+            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
 
         [HttpGet("{playerCode}/transferwallet")]
         [Description("Get Player Transfer Wallet")]
@@ -187,16 +202,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(updatePlayerModel);
         }
 
-        [HttpGet("{playerCode}/playerBuckets")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
-            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
-            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
-
-        [HttpGet("{playerBucketId}/playerBucketHistories")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
-            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
-            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+        private static string GetRemark(string description)
+        {
+            var utf8JsonReader = new Utf8JsonReader(Encoding.UTF8.GetBytes(description));
+            if (JsonDocument.TryParseValue(ref utf8JsonReader, out var jsonDocument))
+            {
+                if (jsonDocument.RootElement.TryGetProperty("Remark", out var remark))
+                {
+                    return remark.GetString();
+                }
+            }
+            return "";
+        }
     }
 }
