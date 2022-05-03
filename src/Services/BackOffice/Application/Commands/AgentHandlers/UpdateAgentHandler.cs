@@ -53,14 +53,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 }
 
                 if (await _service.GetAgentQueries()
-                        .Where(x => x.Id != agent.Id)
-                        .Where(x => x.Path.IsDescendantOf(new LTree(agent.Path)))
-                        .AnyAsync(x => x.Path.Subpath(nLevel, nLevel+1).MatchesLTxtQuery(agent.Id.ToString("N")), cancellationToken: cancellationToken)
+                        .Where(x => x.Id == parentAgent.Id)
+                        .AnyAsync(x => x.Path.MatchesLTxtQuery(agent.Id.ToString("N")), cancellationToken: cancellationToken)
                         .ConfigureAwait(false))
                 {
                     return CreateInvalidResponse<MessageResponse>(Agent.UnderSubAgentInvalid);
                 }
-
             }
 
             if (agent.Brand.AgentDividendType == AgentDividendType.OneLayer)
