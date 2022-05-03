@@ -9,7 +9,5 @@ namespace TGS.Services.Operations.Validators
         Task ThrowIfAgentLoginExpiredAsync(Guid loginRecordId);
 
         Task ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform = null);
-
-        Task ThrowIfPlayerLoginExpiredAsync(Guid loginRecordId, string playerCode);
     }
 }

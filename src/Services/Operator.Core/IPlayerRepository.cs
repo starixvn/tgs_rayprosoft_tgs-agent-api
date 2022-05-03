@@ -24,6 +24,8 @@ namespace TGS.Services.Operator
 
         ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 
+        ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId);
+
         ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host);
 
         ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn);

@@ -43,14 +43,6 @@ namespace TGS.Services.Operations.Validators
             VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
         }
 
-        public async Task ThrowIfPlayerLoginExpiredAsync(Guid loginRecordId, string playerCode)
-        {
-            var loginRecord = await _playerQueries.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);
-            VerifyLoginRecordPlayer(loginRecord?.PlayerCode, playerCode);
-            VerifyLoginRecordStatus(loginRecord?.Status, playerCode);
-            VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
-        }
-
         private static void VerifyLoginRecordExpiredTime(DateTimeOffset? expiredOn, string playerCode)
         {
             if (!expiredOn.HasValue || expiredOn.Value < DateTimeOffset.UtcNow)
