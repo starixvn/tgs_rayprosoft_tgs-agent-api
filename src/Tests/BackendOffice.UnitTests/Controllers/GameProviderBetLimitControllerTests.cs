@@ -25,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _mediatorMock.Object);
         }
 
-        private GameProviderBetLimitController _controller;
+        private GameProviderBetLimitController _controller = default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
@@ -36,11 +36,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .CreateMany<GameProviderBetLimitModel>(99)
                 .ToArray();
 
-            var request = new GetGameProviderBetLimitsRequest {GameProviderIds = new[] {Guid.NewGuid()}};
+            var request = new GetGameProviderBetLimitsRequest { GameProviderIds = new[] { Guid.NewGuid() } };
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetGameProviderBetLimitsRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetGameProviderBetLimitsResponse {Valid = true, BetLimits = list});
+                .ReturnsAsync(new GetGameProviderBetLimitsResponse { Valid = true, BetLimits = list });
 
             var response = await _controller.GetGameProviderBetLimitsAsync(request);
             response.Valid.Should().BeTrue();
@@ -64,7 +64,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderBetLimitRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.CreateGameProviderBetLimitAsync(request);
             response.Valid.Should().BeTrue();
@@ -81,9 +81,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateGameProviderBetLimitRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
-            var response = await _controller.UpdateGameProviderBetLimitAsync(gameProviderBetLimit.Id.Value, request);
+            var response = await _controller.UpdateGameProviderBetLimitAsync(gameProviderBetLimit.Id!.Value, request);
 
             response.Valid.Should().BeTrue();
             _mediatorMock.Verify(x =>

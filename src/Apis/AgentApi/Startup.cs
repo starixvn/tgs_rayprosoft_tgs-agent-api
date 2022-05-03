@@ -26,7 +26,6 @@ using TGS.Apis.AgentApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
@@ -78,13 +77,7 @@ namespace TGS.Apis.AgentApi
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                    });
+                endpoints.MapHealthChecks("/health");
                 endpoints.MapMetrics();
                 endpoints.MapSwagger();
             });
@@ -143,12 +136,6 @@ namespace TGS.Apis.AgentApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
-
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                 })
                 .ConfigureWallet(config =>
                 {
@@ -186,10 +173,7 @@ namespace TGS.Apis.AgentApi
             services.AddMediatR(typeof(Startup).Assembly);
 
             services
-                .AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
-                .AddRedis(_configuration)
-                .ForwardToPrometheus();
+                .AddHealthChecks();
 
             services
                 .AddMessageQueue()

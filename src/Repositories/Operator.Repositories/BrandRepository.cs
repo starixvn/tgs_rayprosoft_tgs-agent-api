@@ -81,7 +81,9 @@ namespace TGS.Operator.Repositories
                     a.From,
                     a.To,
                     a.Localization,
-                    a.DisplayOrder
+                    a.DisplayOrder,
+                    a.Type,
+                    a.CreatedOn
                 })
                 .ToAsyncEnumerable()
                 .Select(a => new AnnouncementInfo(
@@ -93,7 +95,9 @@ namespace TGS.Operator.Repositories
                     a.Localization == null
                         ? null
                         : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
-                            a.Localization)));
+                            a.Localization),
+                    a.Type,
+                    a.CreatedOn));
         }
 
         public IAsyncEnumerable<BannerInfo> QueryBrandBannersAsync(Guid brandId)

@@ -256,6 +256,46 @@ namespace TGS.Apis.OperatorApi.Controllers
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
+        [HttpPut("usdt", Name = "SubmitDepositUsdtRequest")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<Guid> SubmitDepositUsdtRequestAsync(
+           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+           [FromServices] ManualDepositSerializer serializer,
+           [FromBody] SubmitManualDepositUsdtRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositUsdtApplyInfo
+                    {
+                        BankType = request.BankType,
+                        Address = brandPaymentBankInfo.RootElement.GetProperty("address").GetString(),
+                        QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString()
+                    }));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+
         private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)
         {
             return bankType switch

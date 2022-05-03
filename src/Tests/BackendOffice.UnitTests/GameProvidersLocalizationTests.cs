@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Migrations;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
 using TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
@@ -20,6 +18,32 @@ namespace TGS.Tests.BackendOffice.UnitTests
     [TestFixture]
     public class GameProvidersLocalizationTests
     {
+        [Test]
+        public async Task Can_Query_SubGameProvider_Data()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+            await repository.SubGameProviders.AddRangeAsync(
+                new CoreModels.SubGameProvider
+                {
+                    Code = "Test",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System",
+                    Name = "Test"
+                });
+            await repository.SaveChangesAsync();
+
+            var sut = new GetGameProvidersLocalizationQueryService(repository);
+
+            var actual = await sut.QueryAsync(new GetGameProvidersLocalizationQuery()).CountAsync();
+
+            Assert.AreEqual(1, actual);
+        }
+
         [Test]
         public async Task GameProviders_Language_Should_Get_Distinct_Culture_Code_Count()
         {
@@ -33,17 +57,20 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new CoreModels.GameProviderLanguage()
                 {
                     GameProviderId = Guid.NewGuid(),
-                    CultureCode = "en-US"
+                    CultureCode = "en-US",
+                    GameProviderCultureCode = "en-US"
                 },
                 new CoreModels.GameProviderLanguage()
                 {
                     GameProviderId = Guid.NewGuid(),
-                    CultureCode = "en-US"
+                    CultureCode = "en-US",
+                    GameProviderCultureCode = "en-US"
                 },
                 new CoreModels.GameProviderLanguage()
                 {
                     GameProviderId = Guid.NewGuid(),
-                    CultureCode = "zh-CN"
+                    CultureCode = "zh-CN",
+                    GameProviderCultureCode = "zh-CN"
                 });
             await repository.SaveChangesAsync();
 
@@ -52,29 +79,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var actual = await sut.QueryAsync(new GetAllSupportLanguagesQuery()).CountAsync();
 
             Assert.AreEqual(2, actual);
-        }
-
-        [Test]
-        public async Task Can_Query_SubGameProvider_Data()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            await repository.SubGameProviders.AddRangeAsync(
-                new CoreModels.SubGameProvider
-                {
-                    Code = "Test"
-                });
-            await repository.SaveChangesAsync();
-
-            var sut = new GetGameProvidersLocalizationQueryService(repository);
-
-            var actual = await sut.QueryAsync(new GetGameProvidersLocalizationQuery()).CountAsync();
-
-            Assert.AreEqual(1, actual);
         }
 
         [Test]
@@ -89,7 +93,10 @@ namespace TGS.Tests.BackendOffice.UnitTests
             await repository.SubGameProviders.AddAsync(
                 new CoreModels.SubGameProvider()
                 {
-                    Code = "SubGp"
+                    Code = "SubGp",
+                    Name = "SubGp",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System"
                 });
             await repository.SaveChangesAsync();
 
@@ -116,7 +123,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var actual = repository.SubGameProviders.FirstOrDefault(x => x.Code == "SubGp");
 
-            Assert.IsNotNull(actual.Localization);
+            Assert.IsNotNull(actual!.Localization);
         }
 
         [Test]

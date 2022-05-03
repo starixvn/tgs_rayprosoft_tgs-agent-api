@@ -41,7 +41,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private StationLetterController _controller;
+        private StationLetterController _controller = default!;
 
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock = new();
         private readonly Mock<ITgsQueries<StationLetter>> _queriesMock = new();
@@ -67,7 +67,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateStationLetterFixture()
                 .CreateMany<StationLetter>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             list = list.Where(q => q.Status == request.Status);
 
@@ -104,7 +104,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var players = CreatePlayerFixture()
                 .CreateMany<Player>(200)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new StationLetterRequest
             {
@@ -208,7 +208,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Setup(s => s.GetSingleAsync(
                     It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
-                .Returns(Task.FromResult<StationLetter>(null));
+                .Returns(Task.FromResult<StationLetter>(default!));
 
             var sut = new StationLetterController(
                 queriesMock.Object,
@@ -278,7 +278,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
-                .Returns(Task.FromResult<StationLetter>(null));
+                .Returns(Task.FromResult<StationLetter>(default!));
 
             var response = await _controller.VerifyAsync(stationLetterId, "pass", request);
             response.Valid.Should().BeFalse();
@@ -311,7 +311,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var players = CreatePlayerFixture()
                 .CreateMany<Player>(100)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var playerUsernames = players.Select(p => new UploadPlayerModel
             {
@@ -390,7 +390,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.SportsBetLimits,
                     new PlayerSportsBetLimit[]
                     {
-                    }));
+                    })
+                .With(s => s.Birthdate,new DateOnly()));
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 

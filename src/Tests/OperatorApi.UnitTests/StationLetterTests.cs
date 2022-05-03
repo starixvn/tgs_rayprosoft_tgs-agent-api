@@ -53,7 +53,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = StationLetterStatus.InVerify
+                    Status = StationLetterStatus.InVerify,
+                    Localization = "{}",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System"
                 }
             });
             stationLetterPlayers.Add(new StationLetterPlayer()
@@ -61,7 +64,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = StationLetterStatus.Published
+                    Status = StationLetterStatus.Published,
+                    Localization = "{}",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System"
                 }
             });
             stationLetterPlayers.Add(new StationLetterPlayer()
@@ -69,7 +75,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = StationLetterStatus.Rejected
+                    Status = StationLetterStatus.Rejected,
+                    Localization = "{}",
+                    CreatedByUsername = "System",
+                    UpdatedByUsername = "System"
                 }
             });
 
@@ -133,7 +142,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var stationLetter1 = new Core.DataServices.Tgs.Models.StationLetter()
             {
                 Status = StationLetterStatus.Published,
-                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 20))
+                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 20)),
+                Localization = "{}",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
             };
             stationLetterPlayers.Add(new StationLetterPlayer()
             {
@@ -144,7 +156,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var stationLetter2 = new Core.DataServices.Tgs.Models.StationLetter()
             {
                 Status = StationLetterStatus.Published,
-                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 25))
+                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 25)),
+                Localization = "{}",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
             };
             stationLetterPlayers.Add(new StationLetterPlayer()
             {
@@ -155,7 +170,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var stationLetter3 = new Core.DataServices.Tgs.Models.StationLetter()
             {
                 Status = StationLetterStatus.Published,
-                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 28))
+                CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 28)),
+                Localization = "{}",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
             };
             stationLetterPlayers.Add(new StationLetterPlayer()
             {
@@ -198,7 +216,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Id = letterId,
                 BrandId = Guid.NewGuid(),
                 Subject = "test",
-                Content = "content"
+                Content = "content",
+                Localization = "{}",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
             });
 
             var targetPlayerLetter = new StationLetterPlayer

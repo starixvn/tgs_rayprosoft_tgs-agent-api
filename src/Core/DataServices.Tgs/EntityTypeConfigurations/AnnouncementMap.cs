@@ -54,6 +54,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .IsRequired();
 
+            builder.Property(c => c.Type)
+                .IsRequired()
+                .HasDefaultValue("Marquee");
+
             builder.HasOne(c => c.Brand)
                 .WithMany(c => c.Announcements)
                 .HasForeignKey(c => c.BrandId)

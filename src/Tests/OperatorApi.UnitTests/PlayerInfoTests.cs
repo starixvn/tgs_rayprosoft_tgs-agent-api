@@ -63,7 +63,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             repository.Players.Add(new Player
             {
                 PlayerCode = playerCode,
-                Status = CoreEnums.PlayerStatus.Disabled
+                Status = CoreEnums.PlayerStatus.Disabled,
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Username = "tester"
             });
 
             await repository.SaveChangesAsync();
@@ -406,6 +412,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
                                 && x.ContainsKey(PlayerPropertyName.WhatsApp)
                                 && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId)),
                     Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Set_Player_Birthdate_Should_SuccessAsync()
+        {
+            var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+            var sut = new SetBirthdateCommandService(fakePlayerServiceClient);
+
+            var command = new SetBirthdateCommand("player1", DateOnly.Parse("2022/4/26"));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerServiceClient.Received(1)
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(command.PlayerCode),
+                    Arg.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        props => props[PlayerPropertyName.Birthdate] == "2022/04/26"));
         }
     }
 }

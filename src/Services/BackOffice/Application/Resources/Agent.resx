@@ -186,4 +186,7 @@
   <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
     <value>Dividend percentage must less than or equal to upper layer.</value>
   </data>
+  <data name="UnderSubAgentInvalid" xml:space="preserve">
+    <value>Can not to be under sub agent.</value>
+  </data>
 </root>

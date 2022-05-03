@@ -14,7 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.User
             _validator = new UpdatePasswordRequestValidator();
         }
 
-        private UpdatePasswordRequestValidator _validator;
+        private UpdatePasswordRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_name_is_null()

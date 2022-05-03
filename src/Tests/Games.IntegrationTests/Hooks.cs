@@ -45,6 +45,8 @@ namespace TGS.Tests.Games.IntegrationTests
         [BeforeFeature]
         public static void BeforeFeature(FeatureContext featureContext)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             var fakeAnalyzer = new Mock<IRequestAnalyzer>();
             fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
 

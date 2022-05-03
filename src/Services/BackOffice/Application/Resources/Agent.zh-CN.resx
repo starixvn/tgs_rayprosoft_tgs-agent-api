@@ -186,4 +186,7 @@
   <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
     <value>分红百分比必须小于或等于上层</value>
   </data>
+  <data name="UnderSubAgentInvalid" xml:space="preserve">
+    <value>不能在子代理之下</value>
+  </data>
 </root>

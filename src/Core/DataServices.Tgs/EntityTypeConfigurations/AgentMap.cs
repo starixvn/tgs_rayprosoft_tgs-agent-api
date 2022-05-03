@@ -92,6 +92,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(c => c.Path)
+                .HasColumnType("ltree")
+                .IsRequired();
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)
@@ -110,6 +114,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_agents_brand_id");
+
+            builder.HasIndex(c => c.Path)
+                .HasMethod("gist")
+                .HasDatabaseName("ix_agents_gist_path");
         }
     }
 }

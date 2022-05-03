@@ -80,7 +80,7 @@ namespace TGS.Wallet.Repositories
                 .FindAsync(walletId)
                 .ConfigureAwait(false);
 
-            if (agentWallet.AgentId == agentId)
+            if (agentWallet!.AgentId == agentId)
                 return agentWallet.Balance;
             throw new Exception("Can't find agent wallet.");
         }

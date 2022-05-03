@@ -32,7 +32,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private SettingController _controller;
+        private SettingController _controller = default!;
         private readonly Mock<ITgsQueries<Setting>> _queriesMock = new();
         private readonly Mock<ITgsCommands<Setting>> _commandsMock = new();
         private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
@@ -53,7 +53,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = new Fixture()
                 .CreateMany<Setting>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
@@ -112,7 +112,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult<Setting>(null));
+                .Returns(Task.FromResult<Setting>(default!));
 
             var response = await _controller.GetSingleAsync(key);
             response.Valid.Should().BeFalse();
@@ -126,7 +126,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Setting, bool>>>(),
                     It.IsAny<Func<IQueryable<Setting>, IQueryable<Setting>>>()))
-                .Returns(Task.FromResult<Setting>(null));
+                .Returns(Task.FromResult<Setting>(default!));
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();

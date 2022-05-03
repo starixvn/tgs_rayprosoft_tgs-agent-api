@@ -2,113 +2,147 @@
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.DataServices.Tgs.DataInitializers
+namespace TGS.Core.DataServices.Tgs.DataInitializers;
+
+public partial class DataInitializer
 {
-    public partial class DataInitializer
+    internal interface IBrand
     {
-        internal interface IBrand
+        string ApiKey { get; }
+
+        string ClientId { get; }
+
+        string Code { get; }
+
+        ICurrency[] Currencies { get; }
+
+        string[] GameProviders => Array.Empty<string>();
+
+        string[] Groups => new[]
         {
-            string ApiKey { get; }
+            "Normal"
+        };
 
-            string ClientId { get; }
+        Guid Id { get; }
 
-            string Code { get; }
-
-            ICurrency[] Currencies { get; }
-
-            string[] GameProviders => Array.Empty<string>();
-
-            string[] Groups => new[]
-            {
-                "Normal"
-            };
-
-            Guid Id { get; }
-
-            ILanguage[] Languages => new ILanguage[]
-            {
-                new CNLanguage(),
-                new USLanguage(),
-                new IDLanguage(),
-                new VNLanguage(),
-                new THLanguage(),
-                new TWLanguage(),
-                new JPLanguage(),
-                new KRLanguage()
-            };
-
-            string Name { get; }
-
-            string OperationalEmail { get; }
-
-            string SecretKey { get; }
-
-            int? SettlementDay { get; }
-
-            string TimeZoneId { get; }
-
-            SettlementIntervalType Type { get; }
-        }
-
-        internal record TgsBrand : IBrand
+        ILanguage[] Languages => new ILanguage[]
         {
-            Guid IBrand.Id => new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A");
+            new CNLanguage(),
+            new USLanguage(),
+            new IDLanguage(),
+            new VNLanguage(),
+            new THLanguage(),
+            new TWLanguage(),
+            new JPLanguage(),
+            new KRLanguage()
+        };
 
-            string IBrand.Code => "TGS";
+        string Name { get; }
 
-            string IBrand.Name => "Turnkey Game System";
+        string OperationalEmail { get; }
 
-            string IBrand.OperationalEmail => "tgs.services@gmail.com";
+        string SecretKey { get; }
 
-            string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
+        int? SettlementDay { get; }
 
-            string IBrand.ClientId => "TGS";
+        string TimeZoneId { get; }
 
-            string IBrand.SecretKey => "GcHmUWH0WVqWq5JcSPS5qkeoDcTmkBBE";
+        SettlementIntervalType Type { get; }
+    }
 
-            string IBrand.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
+    internal record TgsBrand : IBrand
+    {
+        Guid IBrand.Id => new("D71AC5ED-B7D9-49F2-A129-8709FA4CC02A");
 
-            SettlementIntervalType IBrand.Type => SettlementIntervalType.Monthly;
+        string IBrand.Code => "TGS";
 
-            int? IBrand.SettlementDay => 13;
+        string IBrand.Name => "Turnkey Game System";
 
-            string[] IBrand.GameProviders => new[]
-            {
-                Consts.GameProvider.SBOBET
-            };
+        string IBrand.OperationalEmail => "tgs.services@gmail.com";
 
-            ICurrency[] IBrand.Currencies => new ICurrency[]
-            {
-                new CNYCurrency()
-            };
-        }
+        string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
 
-        internal record GpiBrand : IBrand
+        string IBrand.ClientId => "TGS";
+
+        string IBrand.SecretKey => "GcHmUWH0WVqWq5JcSPS5qkeoDcTmkBBE";
+
+        string IBrand.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
+
+        SettlementIntervalType IBrand.Type => SettlementIntervalType.Monthly;
+
+        int? IBrand.SettlementDay => 13;
+
+        string[] IBrand.GameProviders => new[]
         {
-            Guid IBrand.Id => new("4E86719F-243F-46F6-B010-5C758B7285AF");
+            Consts.GameProvider.SBOBET
+        };
 
-            string IBrand.Code => "GPI";
+        ICurrency[] IBrand.Currencies => new ICurrency[]
+        {
+            new CNYCurrency()
+        };
+    }
 
-            string IBrand.Name => "GameProvider Integration";
+    internal record GpiBrand : IBrand
+    {
+        Guid IBrand.Id => new("4E86719F-243F-46F6-B010-5C758B7285AF");
 
-            string IBrand.OperationalEmail => "tgs.services@gmail.com";
+        string IBrand.Code => "GPI";
 
-            string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
+        string IBrand.Name => "GameProvider Integration";
 
-            string IBrand.ClientId => "GPI";
+        string IBrand.OperationalEmail => "tgs.services@gmail.com";
 
-            string IBrand.SecretKey => "L5SdeH9DuREUjoG3FN9vtkBY4FtKFitI";
+        string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
 
-            string IBrand.ApiKey => "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
+        string IBrand.ClientId => "GPI";
 
-            SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+        string IBrand.SecretKey => "L5SdeH9DuREUjoG3FN9vtkBY4FtKFitI";
 
-            int? IBrand.SettlementDay => null;
+        string IBrand.ApiKey => "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
 
-            ICurrency[] IBrand.Currencies => new ICurrency[]
-            {
-                new CNYCurrency()
-            };
-        }
+        SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+
+        int? IBrand.SettlementDay => null;
+
+        ICurrency[] IBrand.Currencies => new ICurrency[]
+        {
+            new CNYCurrency()
+        };
+    }
+
+    internal record GpiHkdBrand : IBrand
+    {
+        Guid IBrand.Id => new("9f1ecf19-38cd-474f-b0d2-93638dc07d21");
+
+        string IBrand.Code => "GPI_HKD";
+
+        string IBrand.Name => "GameProvider Integration (HKD)";
+
+        string IBrand.OperationalEmail => "tgs.services@gmail.com";
+
+        string IBrand.TimeZoneId => "Asia/Taipei"; // Linux ts timezone
+
+        string IBrand.ClientId => "GPI_HKD";
+
+        string IBrand.SecretKey => "76Pw8MHtJjO8YOVA5zZQIS51DuS";
+
+        string IBrand.ApiKey => "muN0pUt3ZWP53mmRDQdn5TRtc8UxzbzQTXkEQJqaFZ5mb8N4pomQ0V";
+
+        SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+
+        int? IBrand.SettlementDay => null;
+
+        ICurrency[] IBrand.Currencies => new ICurrency[]
+        {
+            new HKDCurrency()
+        };
+
+        ILanguage[] IBrand.Languages => new ILanguage[]
+        {
+            new CNLanguage(),
+            new USLanguage(),
+            new TWLanguage(),
+        };
     }
 }

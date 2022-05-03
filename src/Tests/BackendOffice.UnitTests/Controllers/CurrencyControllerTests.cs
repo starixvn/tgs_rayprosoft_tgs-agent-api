@@ -27,7 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private CurrencyController _controller;
+        private CurrencyController _controller=default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]

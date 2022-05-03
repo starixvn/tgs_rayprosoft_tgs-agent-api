@@ -25,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _mediatorMock.Object);
         }
 
-        private BetLimitController _controller;
+        private BetLimitController _controller = default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
@@ -73,7 +73,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateBetLimitRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.CreateBetLimitAsync(request);
             response.Valid.Should().BeTrue();
@@ -89,7 +89,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateBetLimitRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.UpdateBetLimitAsync(betLimit.Id, request);
 

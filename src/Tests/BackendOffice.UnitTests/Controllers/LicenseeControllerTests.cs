@@ -29,7 +29,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
-        private LicenseeController _controller;
+        private LicenseeController _controller = default!;
         private readonly Mock<ILicenseeService> _licenseeServiceMock = new();
 
         [TestCase(true)]
@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateLicenseeFixture()
                 .CreateMany<Licensee>(33)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
@@ -77,7 +77,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateLicenseeFixture()
                 .CreateMany<Licensee>(2)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new Fixture().Create<CreateLicenseeRequest>();
             request.Name = list.FirstOrDefault()?.Name;
@@ -97,7 +97,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreateLicenseeFixture()
                 .CreateMany<Licensee>(2)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var request = new Fixture().Create<CreateLicenseeRequest>();
             request.Code = list.FirstOrDefault()?.Code;
@@ -162,7 +162,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     It.IsAny<Expression<Func<Licensee, bool>>>(),
                     It.IsAny<Func<IQueryable<Licensee>,
                         IQueryable<Licensee>>>(), true))
-                .Returns(Task.FromResult<Licensee>(null));
+                .Returns(Task.FromResult<Licensee>(default!));
 
             _licenseeServiceMock.Setup(s =>
                     s.ExistsAsync(It.IsAny<Expression<Func<Licensee, bool>>>()))

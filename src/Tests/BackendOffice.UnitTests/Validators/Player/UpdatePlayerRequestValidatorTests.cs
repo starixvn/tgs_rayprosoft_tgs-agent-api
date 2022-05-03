@@ -11,7 +11,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [SetUp]
         public void Setup() => _validator = new();
 
-        private UpdatePlayerRequestValidator _validator;
+        private UpdatePlayerRequestValidator _validator = default!;
 
         [Test]
         public void Should_not_have_error_when_password_is_null()

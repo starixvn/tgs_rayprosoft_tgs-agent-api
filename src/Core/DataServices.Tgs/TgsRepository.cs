@@ -1,14 +1,8 @@
 ﻿using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 
 namespace TGS.Core.DataServices.Tgs
@@ -246,23 +240,6 @@ namespace TGS.Core.DataServices.Tgs
         public Task<bool> CanConnectionAsync()
             => Database.CanConnectAsync();
 
-        public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
-        {
-            var isMigrate = !await Database.GetService<IRelationalDatabaseCreator>().ExistsAsync() ||
-                (await Database.GetPendingMigrationsAsync()).Any();
-
-            if (isMigrate)
-            {
-                await Database.MigrateAsync();
-            }
-
-            if (env.IsDevelopmentOrDocker())
-            {
-                IDataInitializer data = new DataInitializer(this, env);
-                await data.SetInitialDataAsync();
-            }
-        }
-
         public IDbConnection GetDbConnection()
             => Database.GetDbConnection();
 
@@ -275,6 +252,7 @@ namespace TGS.Core.DataServices.Tgs
             _ = modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
             _ = modelBuilder.HasPostgresExtension("pg_trgm");
+            _ = modelBuilder.HasPostgresExtension("ltree");
         }
     }
 }

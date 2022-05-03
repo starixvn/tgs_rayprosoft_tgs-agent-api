@@ -28,7 +28,6 @@ using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 
@@ -73,13 +72,7 @@ namespace TGS.Apis.BackendOffice
             {
                 endpoints.MapControllers();
                 endpoints.MapProfileViewer();
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result)
-                            => HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
             });
@@ -148,11 +141,6 @@ namespace TGS.Apis.BackendOffice
 
                 options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
 
-                options.JsonSerializerOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters = { new JsonStringEnumConverter() }
-                };
             });
 
             _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -181,7 +169,8 @@ namespace TGS.Apis.BackendOffice
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                    options.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 });
 
             _ = services

@@ -15,7 +15,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Role
             _validator = new CopyRoleRequestValidator();
         }
 
-        private CopyRoleRequestValidator _validator;
+        private CopyRoleRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_name_is_null()

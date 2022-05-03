@@ -26,7 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _mediatorMock.Object);
         }
 
-        private LanguageController _controller;
+        private LanguageController _controller = default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
@@ -84,7 +84,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = Language.CultureCodeExisted});
+                .ReturnsAsync(new MessageResponse { Valid = false, Message = Language.CultureCodeExisted });
 
             var response = await _controller.CreateLanguageAsync(request);
             response.Valid.Should().BeFalse();
@@ -100,7 +100,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.CreateLanguageAsync(request);
             response.Valid.Should().BeTrue();
@@ -116,7 +116,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.UpdateLanguageAsync(language.CultureCode, request);
 
