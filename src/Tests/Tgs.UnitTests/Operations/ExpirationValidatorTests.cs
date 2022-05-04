@@ -17,41 +17,6 @@ namespace TGS.UnitTests.Operations;
 [Parallelizable]
 public class ExpirationValidatorTests
 {
-    //[TestCase(null)]
-    //[TestCase(PlatformType.Desktop)]
-    //public async Task ThrowIfPlayerLoginExpiredAsync_Throws_PlayerLoginExpiredException_When_LoginRecord_Is_Expired(
-    //    PlatformType? platform)
-    //{
-    //    var fixture = new Fixture();
-    //    var brandId = fixture.Create<Guid>();
-    //    var playerCode = fixture.Create<string>();
-
-    //    var results = new GetPlayerLoginRecordResult[]
-    //    {
-    //        new()
-    //        {
-    //            BrandId = brandId,
-    //            CreatedOn = DateTimeOffset.UtcNow.AddHours(-23),
-    //            PlatformType = platform ?? PlatformType.Desktop,
-    //            Status = LoginStatus.Enabled,
-    //            ExpiredOn = DateTimeOffset.UtcNow.AddHours(-1)
-    //        }
-    //    };
-
-    //    _ = _playerQueriesMock.Setup(x =>
-    //            x.GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled))
-    //        .ReturnsAsync(results);
-
-    //    var sut = new ExpirationValidator(TODO);
-
-    //    Func<Task> action = async () =>
-    //        await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platform);
-
-    //    _ = await action.Should()
-    //        .ThrowAsync<PlayerLoginExpiredException>()
-    //        .WithMessage($"Player({playerCode}) login token is expired");
-    //}
-
     [Test]
     public void Validate_PlayerLoginRecord_With_PlayerCode_And_Platform_No_Throws_When_Is_Valid()
     {

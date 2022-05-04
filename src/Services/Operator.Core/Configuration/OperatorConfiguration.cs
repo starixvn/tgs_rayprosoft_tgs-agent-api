@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Tgs.CashService.Client;
@@ -7,126 +8,145 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.Operator.StationLetters;
 
-namespace TGS.Services.Operator.Configuration
+namespace TGS.Services.Operator.Configuration;
+
+public class OperatorConfiguration
 {
-    public class OperatorConfiguration
+    public IServiceCollection Services { get; }
+
+    public OperatorConfiguration(IServiceCollection services)
     {
-        public IServiceCollection Services { get; }
+        Services = services ?? throw new ArgumentNullException(nameof(services));
+    }
 
-        public OperatorConfiguration(IServiceCollection services)
-        {
-            Services = services ?? throw new ArgumentNullException(nameof(services));
-        }
+    public OperatorConfiguration AddAgentRepository<TAgentRepository>()
+        where TAgentRepository : class, IAgentRepository
+    {
+        Services.AddTransient<IAgentRepository, TAgentRepository>();
 
-        public OperatorConfiguration AddAgentRepository<TAgentRepository>()
-            where TAgentRepository : class, IAgentRepository
-        {
-            Services.AddTransient<IAgentRepository, TAgentRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddBrandRepository<TBrandRepository>()
+        where TBrandRepository : class, IBrandRepository
+    {
+        Services.AddTransient<IBrandRepository, TBrandRepository>();
 
-        public OperatorConfiguration AddBrandRepository<TBrandRepository>()
-                    where TBrandRepository : class, IBrandRepository
-        {
-            Services.AddTransient<IBrandRepository, TBrandRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddGameProviderRepository<TGameProviderRepository>()
+        where TGameProviderRepository : class, IGameProviderRepository
+    {
+        Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
-        public OperatorConfiguration AddGameProviderRepository<TGameProviderRepository>()
-                    where TGameProviderRepository : class, IGameProviderRepository
-        {
-            Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRepository>(
+        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+        where THelp2PayRepository : class, IHelp2PayRepository
+    {
+        Services.AddTransient<IHelp2PayRepository>(sp =>
+            ActivatorUtilities.CreateInstance<THelp2PayRepository>(sp, redisDatabaseResolver(sp)));
 
-        public OperatorConfiguration AddHelp2PayRedisRepository<THelp2PayRepository>(
-            Func<IServiceProvider, IDatabase> redisDatabaseResolver)
-            where THelp2PayRepository : class, IHelp2PayRepository
-        {
-            Services.AddTransient<IHelp2PayRepository>(sp =>
-                ActivatorUtilities.CreateInstance<THelp2PayRepository>(sp, redisDatabaseResolver(sp)));
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
+        where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+    {
+        Services
+            .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
 
-        public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
-            where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
-        {
-            Services
-                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddPaymentServiceClient(
+        Action<PaymentServiceClientOptions, IServiceProvider> configure)
+    {
+        Services.AddPaymentServiceClient(configure);
 
-        public OperatorConfiguration AddPaymentServiceClient(
-                            Action<PaymentServiceClientOptions, IServiceProvider> configure)
-        {
-            Services.AddPaymentServiceClient(configure);
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddPlayerLoginRecordRepository<TPlayerLoginRecordRepository>()
+        where TPlayerLoginRecordRepository : class, IPlayerLoginRecordRepository
+    {
+        _ = Services
+            .AddTransient<TPlayerLoginRecordRepository>()
+            .AddTransient<IPlayerLoginRecordRepository>(sp =>
+            {
+                var playerLoginRecordRepository = sp.GetRequiredService<TPlayerLoginRecordRepository>();
+                var redisDatabase = sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase();
 
-        public OperatorConfiguration AddStationLetterRepository<TStationLetterRepository>()
-            where TStationLetterRepository : class, IStationLetterRepository
-        {
-            Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+                var redisCacheRepository =
+                    new RedisPlayerLoginRecordRepository(playerLoginRecordRepository, redisDatabase);
 
-            return this;
-        }
+                var memoryCache = sp.GetRequiredService<IMemoryCache>();
+                return new MemoryCachedPlayerLoginRecordRepository(redisCacheRepository, memoryCache);
+            });
 
-        public OperatorConfiguration AddSysRepository<TSysRepository>()
-            where TSysRepository : class, ISysRepository
-        {
-            Services.AddTransient<ISysRepository, TSysRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddStationLetterRepository<TStationLetterRepository>()
+        where TStationLetterRepository : class, IStationLetterRepository
+    {
+        Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
 
-        public OperatorConfiguration AddVipLevelRepository<TVipLevelRepository>()
-                            where TVipLevelRepository : class, IVipLevelRepository
-        {
-            Services.AddTransient<IVipLevelRepository, TVipLevelRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddSysRepository<TSysRepository>()
+        where TSysRepository : class, ISysRepository
+    {
+        Services.AddTransient<ISysRepository, TSysRepository>();
 
-        public OperatorConfiguration AddWalletRepository<TWalletRepository>()
-            where TWalletRepository : class, IPlayerRepository
-        {
-            Services
-                .AddTransient<IPlayerRepository, TWalletRepository>();
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddVipLevelRepository<TVipLevelRepository>()
+        where TVipLevelRepository : class, IVipLevelRepository
+    {
+        Services.AddTransient<IVipLevelRepository, TVipLevelRepository>();
 
-        public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure)
-            where TDep : class
-        {
-            Services
-                .AddOptions<EmailConfiguration>()
-                .Configure(configure);
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration AddWalletRepository<TWalletRepository>()
+        where TWalletRepository : class, IPlayerRepository
+    {
+        Services
+            .AddTransient<IPlayerRepository, TWalletRepository>();
 
-        public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure)
-            where TDep : class
-        {
-            Services
-                .AddOptions<OperatorOptions>()
-                .Configure(configure);
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure)
+        where TDep : class
+    {
+        Services
+            .AddOptions<EmailConfiguration>()
+            .Configure(configure);
 
-        public OperatorConfiguration ConfigureWallet(Action<CashServiceClientOptions, IServiceProvider> configure)
-        {
-            Services.AddCashServiceClient(configure);
+        return this;
+    }
 
-            return this;
-        }
+    public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure)
+        where TDep : class
+    {
+        Services
+            .AddOptions<OperatorOptions>()
+            .Configure(configure);
+
+        return this;
+    }
+
+    public OperatorConfiguration ConfigureWallet(Action<CashServiceClientOptions, IServiceProvider> configure)
+    {
+        Services.AddCashServiceClient(configure);
+
+        return this;
     }
 }

@@ -22,6 +22,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
         private readonly IBrandOperations _brandOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IJwtTokenHandler _jwtTokenHandler;
+        private readonly IPlayerLoginRecordRepository _loginRecordRepository;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPlayerQueries _playerQueries;
@@ -38,7 +39,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             IHashProvider hashProvider,
             IJwtTokenHandler jwtTokenHandler,
             IBrandOperations brandOperations,
-            IPlayerRepository playerRepository)
+            IPlayerRepository playerRepository,
+            IPlayerLoginRecordRepository loginRecordRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -49,6 +51,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
         }
 
         public async ValueTask<LoginInfo> GetAsync(LoginCommand command, CancellationToken cancellationToken = default)
@@ -71,7 +74,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
 
-            var record = await _playerRepository.AddPlayerLoginRecordAsync(command.BrandId, playerCode, command.PlatformType, command.IpAddress).ConfigureAwait(false);
+            var record = await _loginRecordRepository.AddPlayerLoginRecordAsync(command.BrandId, playerCode, command.PlatformType, command.IpAddress).ConfigureAwait(false);
 
             var token = await GeneratePlayerJwtTokenAsync(
                 command.BrandId,

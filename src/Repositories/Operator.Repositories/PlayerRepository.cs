@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
@@ -19,34 +17,6 @@ internal class PlayerRepository : IPlayerRepository
     public PlayerRepository(ITgsRepository tgsRepository)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
-
-    public async ValueTask<LoginRecordInfo> AddPlayerLoginRecordAsync(Guid brandId, string playerCode, PlatformType platformType, string ipAddress)
-    {
-        const int expiredSeconds = 3600 * 12;
-
-        var loginRecord = new PlayerLoginRecord
-        {
-            Id = GuidExtensions.NewSequentialGuid(),
-            PlayerCode = playerCode,
-            BrandId = brandId,
-            Status = LoginStatus.Enabled,
-            PlatformType = platformType,
-            IpAddress = ipAddress,
-            CreatedOn = DateTimeOffset.UtcNow,
-            ExpiredOn = DateTimeOffset.UtcNow.AddSeconds(expiredSeconds)
-        };
-
-        _ = await _tgsRepository.PlayerLoginRecords.AddAsync(loginRecord);
-        _ = await _tgsRepository.SaveChangesAsync();
-
-        return new LoginRecordInfo(
-            loginRecord.Id,
-            loginRecord.PlayerCode,
-            loginRecord.Status,
-            loginRecord.PlatformType,
-            loginRecord.CreatedOn,
-            loginRecord.ExpiredOn);
     }
 
     public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
@@ -70,18 +40,6 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
 
         return createFormId;
-    }
-
-    public async ValueTask DeauthorizePlayerAsync(Guid loginRecordId)
-    {
-        var loginRecord = await _tgsRepository.PlayerLoginRecords
-            .FindAsync(loginRecordId)
-            .ConfigureAwait(false);
-
-        loginRecord.Status = LoginStatus.Deauthorized;
-
-        _ = _tgsRepository.PlayerLoginRecords.Update(loginRecord);
-        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
@@ -207,23 +165,6 @@ internal class PlayerRepository : IPlayerRepository
         return new PasswordInfo(
             playerData!.Password,
             playerData!.Salt);
-    }
-
-    public async ValueTask<LoginRecordInfo?> GetPlayerLoginRecordAsync(Guid loginRecordId)
-    {
-        var loginRecord = await _tgsRepository.PlayerLoginRecords
-            .FindAsync(loginRecordId)
-            .ConfigureAwait(false);
-
-        return loginRecord == null
-            ? null
-            : new LoginRecordInfo(
-                loginRecord.Id,
-                loginRecord.PlayerCode,
-                loginRecord.Status,
-                loginRecord.PlatformType,
-                loginRecord.CreatedOn,
-                loginRecord.ExpiredOn);
     }
 
     public async ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host)

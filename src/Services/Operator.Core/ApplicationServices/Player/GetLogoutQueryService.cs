@@ -9,15 +9,18 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class GetLogoutQueryService : IGetService<GetLogoutQuery, LogoutInfo>
     {
+        private readonly IPlayerLoginRecordRepository _loginRecordRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IStatusValidator _statusValidator;
 
         public GetLogoutQueryService(
             IStatusValidator statusValidator,
-            IPlayerRepository playerRepository)
+            IPlayerRepository playerRepository,
+            IPlayerLoginRecordRepository loginRecordRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
         }
 
         public async ValueTask<LogoutInfo> GetAsync(GetLogoutQuery query, CancellationToken cancellationToken = default)
@@ -32,7 +35,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 throw new PlayerNotFoundException("");
             }
 
-            await _playerRepository
+            await _loginRecordRepository
                 .DeauthorizePlayerAsync(query.LoginRecordId)
                 .ConfigureAwait(false);
 

@@ -144,6 +144,8 @@ namespace TGS.Apis.OperatorApi
 
             services.AddTgsRepository(_configuration, "Tgs");
 
+            services.AddMemoryCache();
+
             services
                 .AddWebApiServices()
                 .AddTgsLog()

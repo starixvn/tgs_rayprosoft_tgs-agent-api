@@ -9,17 +9,18 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class ValidatePlayerLoginRecordCommandService : ICommandService<ValidatePlayerLoginRecordCommand>
 {
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerLoginRecordRepository _loginRecordRepository;
 
     public ValidatePlayerLoginRecordCommandService(
-        IPlayerRepository playerRepository)
+        IPlayerLoginRecordRepository loginRecordRepository)
     {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
     }
 
     public async ValueTask ExecuteAsync(ValidatePlayerLoginRecordCommand command, CancellationToken cancellationToken = default)
     {
-        var loginRecord = await _playerRepository.GetPlayerLoginRecordAsync(command.LoginRecordId)
+        var loginRecord = await _loginRecordRepository
+            .GetPlayerLoginRecordAsync(command.LoginRecordId)
             .ConfigureAwait(false);
 
         if (loginRecord == null)
