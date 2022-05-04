@@ -8,7 +8,7 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class GetPlayerPropertiesQueryService
-        : IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string?>>
+        : IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>>
     {
         private readonly IPlayerServiceClient _client;
 
@@ -18,8 +18,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public ValueTask<IReadOnlyDictionary<string, string?>> GetAsync(GetPlayerPropertiesQuery query,
+        public ValueTask<IReadOnlyDictionary<string, string>> GetAsync(GetPlayerPropertiesQuery query,
             CancellationToken cancellationToken = default)
-            => _client.GetPlayerPropertiesAsync(query.PlayerCode);
+            => _client.GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken);
     }
 }
