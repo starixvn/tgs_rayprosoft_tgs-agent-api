@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator
 {

@@ -1,47 +1,43 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.Infrastructures.Json;
-using TGS.Services.Operations;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.PlayerBucket;
-using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw
 {
     internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
     {
         private readonly ICashServiceClient _cashServiceClient;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerBucketRepository _playerBucketRepository;
-        private readonly IPlayerOperations _playerOperations;
+        private readonly IPlayerServiceClient _playerServiceClient;
 
         public CreateWithdrawFormCommandService(
             IPaymentServiceClient paymentServiceClient,
             ICashServiceClient cashServiceClient,
-            IPlayerOperations playerOperations,
-            IPlayerBucketRepository playerBucketRepository,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IOptions<JsonOptions> jsonOptionsAccessor)
+            IPlayerServiceClient playerServiceClient,
+            IPlayerBucketRepository playerBucketRepository)
         {
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
         }
 
         public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
         {
+            var playerInfo = await _playerServiceClient
+                .GetPlayerInfoAsync(command.PlayerCode)
+                .ConfigureAwait(false);
+
+            if (playerInfo is null)
+                throw new PlayerNotFoundException("Can't find player.");
+
             var isBucketFull = await _playerBucketRepository
                 .IsBucketFullAsync(command.PlayerCode)
                 .ConfigureAwait(false);
@@ -49,12 +45,14 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
             if (!isBucketFull)
                 throw new InsufficientBucketException();
 
-            var playerData = await _playerOperations
-                .GetCachedPlayerAsync(command.PlayerCode)
+            var playerProps = await _playerServiceClient
+                .GetPlayerPropertiesAsync(command.PlayerCode)
                 .ConfigureAwait(false);
 
+            var playerWalletId = Guid.Parse(playerProps["DefaultWalletId"]!);
+
             var balance = await _cashServiceClient
-                .GetBalanceAsync(playerData.DefaultWalletId)
+                .GetBalanceAsync(playerWalletId)
                 .ConfigureAwait(false);
 
             if (balance - command.Amount < 0)
@@ -68,14 +66,14 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
                         BrandId = command.BrandId,
                         BankInfoId = command.BankInfoId,
                         UserId = command.PlayerCode,
-                        UserName = playerData.Username,
+                        UserName = playerInfo.UserName,
                         UserType = UserType.Player
                     })
                 .ConfigureAwait(false);
 
             var result = await _cashServiceClient
                 .WithdrawalAsync(
-                    playerData.DefaultWalletId,
+                    playerWalletId,
                     command.Amount,
                     null,
                     null)
@@ -84,7 +82,7 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
             if (result.Balance < 0)
             {
                 await _cashServiceClient.CancelWithdrawalAsync(
-                    playerData.DefaultWalletId,
+                    playerWalletId,
                     command.Amount,
                     null,
                     null,

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
@@ -11,6 +12,7 @@ using NUnit.Framework;
 using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
@@ -29,22 +31,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class WithdrawTests
     {
         [Test]
-        public void Player_Balance_Not_Enough_Withdraw_Will_Throw_Exception()
+        public void Create_Withdraw_Form_Not_Found_Player_Will_Throw_Exception()
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerService = Substitute.For<IPlayerServiceClient>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
             var sut = new CreateWithdrawFormCommandService(
                 fakePaymentServiceClient,
                 fakeCashServiceClient,
-                fakePlayerOperations,
-                fakePlayerBucketRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePlayerService,
+                fakePlayerBucketRepository);
 
             var command = new CreateWithdrawFormCommand(
                 "ThisIsPlayerCode",
@@ -52,12 +50,50 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 1000M);
 
-            fakePlayerOperations
-                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
-                .Returns(new CachedPlayer
+            Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public void Player_Balance_Not_Enough_Withdraw_Will_Throw_Exception()
+        {
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+            var fakePlayerService = Substitute.For<IPlayerServiceClient>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+
+            var sut = new CreateWithdrawFormCommandService(
+                fakePaymentServiceClient,
+                fakeCashServiceClient,
+                fakePlayerService,
+                fakePlayerBucketRepository);
+
+            var command = new CreateWithdrawFormCommand(
+                "ThisIsPlayerCode",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                1000M);
+
+            var walletId = Guid.NewGuid();
+
+            fakePlayerService
+                .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Tgs.PlayerService.Client.PlayerInfo
                 {
                     PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid()
+                    BrandId = command.BrandId,
+                    IdentityAuthentication = false,
+                    IsSetPayPassword = false,
+                    PhoneAuthentication = false,
+                    Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                    UserName = "Tester",
+                    VipLevelId = null
+                });
+
+            fakePlayerService
+                .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Dictionary<string, string>
+                {
+                    ["DefaultWalletId"] = walletId.ToString()
                 });
 
             fakeCashServiceClient
@@ -85,18 +121,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerService = Substitute.For<IPlayerServiceClient>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
             var sut = new CreateWithdrawFormCommandService(
                 fakePaymentServiceClient,
                 fakeCashServiceClient,
-                fakePlayerOperations,
-                fakePlayerBucketRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePlayerService,
+                fakePlayerBucketRepository);
 
             var command = new CreateWithdrawFormCommand(
                 "ThisIsPlayerCode",
@@ -104,12 +136,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 1000M);
 
-            fakePlayerOperations
-                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
-                .Returns(new CachedPlayer
+            fakePlayerService
+                .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Tgs.PlayerService.Client.PlayerInfo
                 {
                     PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid()
+                    BrandId = command.BrandId,
+                    IdentityAuthentication = false,
+                    IsSetPayPassword = false,
+                    PhoneAuthentication = false,
+                    Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                    UserName = "Tester",
+                    VipLevelId = null
                 });
 
             fakeCashServiceClient
@@ -137,20 +175,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerService = Substitute.For<IPlayerServiceClient>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(
-                new JsonOptions());
 
             var sut = new CreateWithdrawFormCommandService(
                 fakePaymentServiceClient,
                 fakeCashServiceClient,
-                fakePlayerOperations,
-                fakePlayerBucketRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePlayerService,
+                fakePlayerBucketRepository);
 
             var command = new CreateWithdrawFormCommand(
                 "ThisIsPlayerCode",
@@ -158,13 +190,27 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 1000M);
 
-            fakePlayerOperations
-                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
-                .Returns(new CachedPlayer
+            var walletId = Guid.NewGuid();
+
+            fakePlayerService
+                .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Tgs.PlayerService.Client.PlayerInfo
                 {
                     PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid(),
-                    Username = "ThisIsPlayerName"
+                    BrandId = command.BrandId,
+                    IdentityAuthentication = false,
+                    IsSetPayPassword = false,
+                    PhoneAuthentication = false,
+                    Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                    UserName = "ThisIsPlayerName",
+                    VipLevelId = null
+                });
+
+            fakePlayerService
+                .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Dictionary<string, string>
+                {
+                    ["DefaultWalletId"] = walletId.ToString()
                 });
 
             fakeCashServiceClient
@@ -288,7 +334,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
-                .Returns(new PlayerInfo(
+                .Returns(new Services.Operator.PlayerInfo(
                     playerCode,
                     brandId,
                     0m,
@@ -297,7 +343,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled,
+                    Core.Models.Enums.PlayerStatus.Enabled,
                     "username",
                     null,
                     null,
@@ -372,7 +418,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
-                .Returns(new PlayerInfo(
+                .Returns(new Services.Operator.PlayerInfo(
                     playerCode,
                     brandId,
                     0m,
@@ -381,7 +427,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     null,
                     null,
-                    PlayerStatus.Enabled, "username",
+                    Core.Models.Enums.PlayerStatus.Enabled,
+                    "username",
                     null,
                     null,
                     1,
@@ -401,18 +448,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerService = Substitute.For<IPlayerServiceClient>();
             var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
             var sut = new CreateWithdrawFormCommandService(
                 fakePaymentServiceClient,
                 fakeCashServiceClient,
-                fakePlayerOperations,
-                fakePlayerBucketRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePlayerService,
+                fakePlayerBucketRepository);
 
             var command = new CreateWithdrawFormCommand(
                 "ThisIsPlayerCode",
@@ -420,12 +463,27 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 1000M);
 
-            fakePlayerOperations
-                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
-                .Returns(new CachedPlayer
+            var walletId = Guid.NewGuid();
+
+            fakePlayerService
+                .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Tgs.PlayerService.Client.PlayerInfo
                 {
                     PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid()
+                    BrandId = command.BrandId,
+                    IdentityAuthentication = false,
+                    IsSetPayPassword = false,
+                    PhoneAuthentication = false,
+                    Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                    UserName = "Tester",
+                    VipLevelId = null
+                });
+
+            fakePlayerService
+                .GetPlayerPropertiesAsync(Arg.Is(command.PlayerCode))
+                .Returns(new Dictionary<string, string>
+                {
+                    ["DefaultWalletId"] = walletId.ToString()
                 });
 
             fakeCashServiceClient
