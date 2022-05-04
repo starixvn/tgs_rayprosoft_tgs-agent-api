@@ -49,7 +49,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 formData.UserId,
                 formData.Amount,
                 formData.Amount,
-                command.PaidUserName).ConfigureAwait(false);
+                command.PaidUserId).ConfigureAwait(false);
         }
     }
 }
