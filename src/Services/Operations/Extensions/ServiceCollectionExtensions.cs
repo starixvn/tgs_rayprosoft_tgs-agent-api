@@ -9,7 +9,7 @@ using TGS.Services.Operations.Validators;
 
 namespace TGS.Services.Operations.Extensions
 {
-    public static class ServiceExtensions
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
@@ -70,7 +70,6 @@ namespace TGS.Services.Operations.Extensions
             services.AddSingleton<IAmountValidator, AmountValidator>();
 
             services.AddScoped<IStatusValidator, StatusValidator>();
-            services.AddScoped<IExpirationValidator, ExpirationValidator>();
 
             return services;
         }

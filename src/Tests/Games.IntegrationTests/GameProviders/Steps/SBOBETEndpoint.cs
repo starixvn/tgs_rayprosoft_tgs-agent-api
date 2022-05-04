@@ -14,18 +14,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using Tgs.Logging;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Tokens;
-using Tgs.Logging;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -128,24 +126,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenBrandHasStatusSetToAsync(BrandStatus status)
         {
             return ChangeBrandStatusAsync(_serviceProvider, status);
-        }
-
-        [Given(@"clear all redis token cache")]
-        public Task GivenClearAllRedisTokenCache()
-        {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var platformType = Get<PlatformType>(SR.PlatformType);
-
-            var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
-            var tokenData = Get<PlayerTokenData>(tokenKey);
-
-            var manager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
-
-            return manager.ClearCacheByBatchAsync(new CacheKey[]
-            {
-                new() { CacheType = RedisCacheType.PlayerLoginRecords, Key = playerCode },
-                new() { CacheType = RedisCacheType.PlayerLoginRecords, Key = tokenData.LoginRecordId }
-            });
         }
 
         [Given(@"game ""(.*)"" has status set to ""(.*)""")]

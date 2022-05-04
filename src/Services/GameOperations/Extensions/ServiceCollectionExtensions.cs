@@ -21,22 +21,25 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddGameOperations(this IServiceCollection services,
             Func<IServiceProvider, IDatabase> redisDatabaseResolver)
         {
-            services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
-            services.AddScoped<IGameActionProcessor, GameActionProcessor>();
+            _ = services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
+            _ = services.AddScoped<IGameActionProcessor, GameActionProcessor>();
 
-            services.AddScoped<IGamePlayActions, GamePlayActions>();
-            services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
+            _ = services.AddScoped<IGamePlayActions, GamePlayActions>();
+            _ = services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
 
-            services.AddScoped<IGameAccessor, GameAccessor>();
+            _ = services.AddScoped<IGameAccessor, GameAccessor>();
 
-            services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
-            services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
-            services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
+            _ = services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
 
-            services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
+            _ = services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
+            _ = services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
 
-            services
+            _ = services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
+
+            _ = services
                 .AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(sp, redisDatabaseResolver(sp)));
+
+            _ = services.AddTransient<IExpirationValidator, ExpirationValidator>();
 
             return services;
         }

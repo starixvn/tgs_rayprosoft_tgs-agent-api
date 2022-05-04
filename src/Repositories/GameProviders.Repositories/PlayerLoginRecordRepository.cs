@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Drawing.ChartDrawing;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
@@ -53,6 +52,5 @@ namespace TGS.GameProviders.Repositories
                  ExpiredOn = x.ExpiredOn
              }).ToArrayAsync();
         }
-
     }
 }

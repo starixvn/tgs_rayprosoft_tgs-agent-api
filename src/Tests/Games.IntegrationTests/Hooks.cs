@@ -24,6 +24,7 @@ using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
+using TGS.Services.GameOperations;
 
 namespace TGS.Tests.Games.IntegrationTests
 {
@@ -213,8 +214,13 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
+
                 .Build();
 
             _TgsApiHost.StartAsync();
@@ -246,6 +252,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
@@ -280,6 +290,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
@@ -313,6 +327,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
@@ -346,6 +364,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
@@ -380,6 +402,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
@@ -413,6 +439,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient(sp
+                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                                    sp,
+                                    typeof(StubRedisPlayerLoginRecordService)));
                         });
                 })
                 .Build();
