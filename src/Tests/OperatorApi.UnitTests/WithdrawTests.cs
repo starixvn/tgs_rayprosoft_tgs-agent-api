@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.CashService.Client;
@@ -14,10 +12,7 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Caches;
-using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -218,8 +213,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(2000M);
 
             fakeCashServiceClient
-                .WithdrawalAsync(
-                    Arg.Any<Guid>(),
+                .LockWithdrawAsync(
+                    Arg.Is(walletId),
                     Arg.Is(command.Amount),
                     Arg.Any<string>(),
                     Arg.Any<string>())
@@ -491,8 +486,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(1000M);
 
             fakeCashServiceClient
-                .WithdrawalAsync(
-                    Arg.Any<Guid>(),
+                .LockWithdrawAsync(
+                    Arg.Is(walletId),
                     Arg.Any<decimal>(),
                     Arg.Any<string>(),
                     Arg.Any<string>())

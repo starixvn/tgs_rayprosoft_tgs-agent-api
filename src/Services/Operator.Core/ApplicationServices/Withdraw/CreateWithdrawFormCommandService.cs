@@ -72,7 +72,7 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
                 .ConfigureAwait(false);
 
             var result = await _cashServiceClient
-                .WithdrawalAsync(
+                .LockWithdrawAsync(
                     playerWalletId,
                     command.Amount,
                     null,
@@ -81,7 +81,7 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
 
             if (result.Balance < 0)
             {
-                await _cashServiceClient.CancelWithdrawalAsync(
+                await _cashServiceClient.RollbackWithdrawAsync(
                     playerWalletId,
                     command.Amount,
                     null,
