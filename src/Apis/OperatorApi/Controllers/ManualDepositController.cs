@@ -274,11 +274,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
+            var rate = brandPaymentBankInfo.RootElement.GetProperty("rate").GetDecimal();
+
             var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
-                request.Amount,
+                request.Amount * rate,
                 "tgs.payment.manual.deposit",
                 request.PromotionId,
                 _ => serializer.Serialize(
@@ -286,7 +288,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                     {
                         BankType = request.BankType,
                         Address = brandPaymentBankInfo.RootElement.GetProperty("address").GetString(),
-                        QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString()
+                        QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString(),
+                        Rate = rate,
+                        SendAmount = request.Amount
                     }));
 
             await createDepositFormService
