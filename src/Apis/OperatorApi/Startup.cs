@@ -17,7 +17,6 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Prometheus;
 using Tgs.Payment.Help2Pay;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.MalakiPay;
@@ -77,7 +76,6 @@ namespace TGS.Apis.OperatorApi
 
             app.UseRouting();
 
-            app.UseHttpMetrics();
             app.UseCors();
 
             app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
@@ -87,7 +85,6 @@ namespace TGS.Apis.OperatorApi
                 endpoints.MapControllers();
 
                 endpoints.MapHealthChecks("/health");
-                endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
             });
 
@@ -108,14 +105,12 @@ namespace TGS.Apis.OperatorApi
                     if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
                         options.ForwardedForHeaderName = forwardedForHeaderName;
 
-                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ??
-                        Array.Empty<string>();
+                    var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
 
                     foreach (var knownProxie in knownProxies)
                         options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
-                    var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ??
-                        Array.Empty<string>();
+                    var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? Array.Empty<string>();
 
                     foreach (var cidr in knownNetworks)
                     {
