@@ -15,5 +15,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid Id { get; set; }
 
         public string PlayerCode { get; set; }
+
+        public Guid PromotionId { get; set; }
     }
 }

@@ -6777,6 +6777,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
                     b.HasKey("Id")
                         .HasName("pk_sign_in_events");
 
@@ -6785,6 +6789,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_sign_in_events_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_sign_in_events_promotion_id");
 
                     b.ToTable("sign_in_events", "dbo");
                 });
@@ -8935,6 +8942,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_sign_in_events_players_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sign_in_events_promotions_promotion_id");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>
