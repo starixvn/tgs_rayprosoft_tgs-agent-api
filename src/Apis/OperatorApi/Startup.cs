@@ -252,6 +252,7 @@ namespace TGS.Apis.OperatorApi
                     options.Filters.Add<ValidateModelFilter>();
                     options.AddWebApiToolkitFilters();
                     options.Filters.Add<TgsResponseWrapperAttribute>();
+                    options.Filters.Add<ErrorMessageMapperFilter>();
                 })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
