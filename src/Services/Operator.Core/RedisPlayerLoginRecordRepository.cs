@@ -71,11 +71,11 @@ internal class RedisPlayerLoginRecordRepository : IPlayerLoginRecordRepository
 
         var loginRecord = await _loginRecordRepository.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);
 
-        json = JsonSerializer.Serialize(loginRecord, _SerializerOptions);
+        var value = JsonSerializer.Serialize(loginRecord, _SerializerOptions);
 
         _ = await _redisDatabase.StringSetAsync(
             key,
-            json,
+            value,
             _Expiry,
             when: When.NotExists).ConfigureAwait(false);
 

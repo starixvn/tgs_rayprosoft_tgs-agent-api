@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using Tgs.CashService.Client;
@@ -74,18 +73,16 @@ public class OperatorConfiguration
         where TPlayerLoginRecordRepository : class, IPlayerLoginRecordRepository
     {
         _ = Services
-            .AddTransient<TPlayerLoginRecordRepository>()
-            .AddTransient<IPlayerLoginRecordRepository>(sp =>
+            .AddTransient<IPlayerLoginRecordRepository, TPlayerLoginRecordRepository>()
+            .Decorate<IPlayerLoginRecordRepository>((repository, sp) =>
             {
-                var playerLoginRecordRepository = sp.GetRequiredService<TPlayerLoginRecordRepository>();
                 var redisDatabase = sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase();
-
-                var redisCacheRepository =
-                    new RedisPlayerLoginRecordRepository(playerLoginRecordRepository, redisDatabase);
-
-                var memoryCache = sp.GetRequiredService<IMemoryCache>();
-                return new MemoryCachedPlayerLoginRecordRepository(redisCacheRepository, memoryCache);
-            });
+                return ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordRepository>(
+                    sp,
+                    repository,
+                    redisDatabase);
+            })
+            .Decorate<IPlayerLoginRecordRepository, MemoryCachedPlayerLoginRecordRepository>();
 
         return this;
     }
