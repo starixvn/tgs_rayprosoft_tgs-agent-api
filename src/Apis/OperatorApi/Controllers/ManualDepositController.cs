@@ -280,7 +280,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
-                request.Amount * rate,
+                request.Amount / rate,
                 "tgs.payment.manual.deposit",
                 request.PromotionId,
                 _ => serializer.Serialize(
