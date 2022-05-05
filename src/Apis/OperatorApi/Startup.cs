@@ -60,18 +60,6 @@ namespace TGS.Apis.OperatorApi
         public void Configure(IApplicationBuilder app, ILogger<Startup> logger)
         {
             app.UseForwardedHeaders();
-            app.Use((httpContext, next) =>
-            {
-                var forwardedIps = string.Join(
-                    ", ",
-                    httpContext.Request.Headers["X-Forwarded-For"].Select(ip => ip));
-                logger.LogTrace(
-                    $"Request Ip: {httpContext.Connection.RemoteIpAddress}, " +
-                    $"Forward-For: {forwardedIps}");
-
-                return next();
-            });
-
             app.UseRequestLocalization(options =>
             {
                 var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
