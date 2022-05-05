@@ -17,16 +17,13 @@ public sealed class ExpirationValidator : IExpirationValidator
 
     public async Task ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform)
     {
+        var current = DateTimeOffset.UtcNow;
+
         var loginRecord = platform == null
-            ? await _playerLoginRecordService.GetLastAsync(playerCode).ConfigureAwait(false)
-            : await _playerLoginRecordService.GetLastAsync(playerCode, platform.Value).ConfigureAwait(false);
+            ? await _playerLoginRecordService.GetLastAsync(playerCode, current).ConfigureAwait(false)
+            : await _playerLoginRecordService.GetLastAsync(playerCode, platform.Value, current).ConfigureAwait(false);
 
         if (loginRecord == null)
-        {
-            throw new PlayerLoginExpiredException(playerCode);
-        }
-
-        if (loginRecord.ExpiredOn < DateTimeOffset.UtcNow)
         {
             throw new PlayerLoginExpiredException(playerCode);
         }

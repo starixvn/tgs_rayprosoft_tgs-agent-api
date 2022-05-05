@@ -53,6 +53,18 @@ namespace TGS.Services.GameOperations
             return datas.Where(x => x.PlatformType == platform).FirstOrDefault();
         }
 
+        public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, DateTimeOffset current)
+        {
+            var record = await CachedQueryEnabledAsync(playerCode).ConfigureAwait(false);
+            return record.FirstOrDefault(r => r.ExpiredOn > current);
+        }
+
+        public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform, DateTimeOffset current)
+        {
+            var record = await CachedQueryEnabledAsync(playerCode).ConfigureAwait(false);
+            return record.FirstOrDefault(r => r.PlatformType == platform && r.ExpiredOn > current);
+        }
+
         public Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode)
             => CachedQueryEnabledAsync(playerCode);
 

@@ -35,12 +35,13 @@ namespace TGS.GameProviders.Repositories
         public Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode)
         {
             var expiredOn = DateTimeOffset.UtcNow.AddDays(-1);
+
             return _repository.PlayerLoginRecords
              .Where(x => x.PlayerCode == playerCode &&
                      x.Status == LoginStatus.Enabled &&
                      x.ExpiredOn > expiredOn)
              .OrderByDescending(x => x.ExpiredOn)
-             .Select(x => new PlayerLoginRecordModel()
+             .Select(x => new PlayerLoginRecordModel
              {
                  Id = x.Id,
                  PlayerCode = x.PlayerCode,

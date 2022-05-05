@@ -27,10 +27,22 @@ internal class StubRedisPlayerLoginRecordService : IRedisPlayerLoginRecordServic
         return loginRecords.FirstOrDefault();
     }
 
+    public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, DateTimeOffset current)
+    {
+        var loginRecords = await QueryEnabledAsync(playerCode).ConfigureAwait(false);
+        return loginRecords.FirstOrDefault(r => r.ExpiredOn > current);
+    }
+
     public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform)
     {
         var loginRecords = await QueryEnabledAsync(playerCode).ConfigureAwait(false);
         return loginRecords.FirstOrDefault(r => r.PlatformType == platform);
+    }
+
+    public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform, DateTimeOffset current)
+    {
+        var loginRecords = await QueryEnabledAsync(playerCode).ConfigureAwait(false);
+        return loginRecords.FirstOrDefault(r => r.PlatformType == platform && r.ExpiredOn > current);
     }
 
     public Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode)

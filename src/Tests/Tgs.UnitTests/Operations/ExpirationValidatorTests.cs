@@ -38,42 +38,12 @@ public class ExpirationValidatorTests
         var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
 
         _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode, platformType))
+                x.GetLastAsync(playerCode, platformType, It.IsAny<DateTimeOffset>()))
             .ReturnsAsync(playerLoginRecord);
 
         var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
 
         Assert.DoesNotThrowAsync(async ()
-            => await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType).ConfigureAwait(false));
-    }
-
-    [Test]
-    public void Validate_PlayerLoginRecord_With_PlayerCode_And_Platform_Throws_Exception_When_Is_Expired()
-    {
-        var brandId = Guid.NewGuid();
-        var playerCode = "player1";
-        var platformType = PlatformType.Desktop;
-
-        var playerLoginRecord = new PlayerLoginRecordModel
-        {
-            Id = Guid.NewGuid(),
-            BrandId = brandId,
-            PlayerCode = playerCode,
-            PlatformType = PlatformType.Desktop,
-            Status = LoginStatus.Enabled,
-            CreatedOn = DateTimeOffset.UtcNow.AddHours(-24),
-            ExpiredOn = DateTimeOffset.UtcNow.AddHours(-12)
-        };
-
-        var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
-
-        _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode, platformType))
-            .ReturnsAsync(playerLoginRecord);
-
-        var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
-
-        _ = Assert.ThrowsAsync<PlayerLoginExpiredException>(async ()
             => await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType).ConfigureAwait(false));
     }
 
@@ -86,42 +56,13 @@ public class ExpirationValidatorTests
         var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
 
         _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode, platformType))
+                x.GetLastAsync(playerCode, platformType, It.IsAny<DateTimeOffset>()))
             .ReturnsAsync((PlayerLoginRecordModel?)null);
 
         var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
 
         _ = Assert.ThrowsAsync<PlayerLoginExpiredException>(async ()
               => await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, platformType).ConfigureAwait(false));
-    }
-
-    [Test]
-    public void Validate_PlayerLoginRecord_With_PlayerCode_Only_No_Throws_Exception_When_Is_Expired()
-    {
-        var brandId = Guid.NewGuid();
-        var playerCode = "player1";
-
-        var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
-
-        var playerLoginRecord = new PlayerLoginRecordModel
-        {
-            Id = Guid.NewGuid(),
-            BrandId = brandId,
-            PlayerCode = playerCode,
-            PlatformType = PlatformType.Desktop,
-            Status = LoginStatus.Enabled,
-            CreatedOn = DateTimeOffset.UtcNow.AddHours(-24),
-            ExpiredOn = DateTimeOffset.UtcNow.AddHours(-12)
-        };
-
-        _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode))
-            .ReturnsAsync(playerLoginRecord);
-
-        var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
-
-        _ = Assert.ThrowsAsync<PlayerLoginExpiredException>(async ()
-            => await sut.ThrowIfPlayerLoginExpiredAsync(playerCode, null).ConfigureAwait(false));
     }
 
     [Test]
@@ -132,7 +73,7 @@ public class ExpirationValidatorTests
         var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
 
         _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode))
+                x.GetLastAsync(playerCode, It.IsAny<DateTimeOffset>()))
             .ReturnsAsync((PlayerLoginRecordModel?)null);
 
         var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
@@ -161,7 +102,7 @@ public class ExpirationValidatorTests
         var playerLoginRecordServiceMock = new Mock<IRedisPlayerLoginRecordService>();
 
         _ = playerLoginRecordServiceMock.Setup(x =>
-                x.GetLastAsync(playerCode))
+                x.GetLastAsync(playerCode, It.IsAny<DateTimeOffset>()))
             .ReturnsAsync(playerLoginRecord);
 
         var sut = new ExpirationValidator(playerLoginRecordServiceMock.Object);
