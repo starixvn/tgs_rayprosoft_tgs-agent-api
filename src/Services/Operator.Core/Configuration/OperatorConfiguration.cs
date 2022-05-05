@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Operator.GameProviders;
 using TGS.Services.Operator.StationLetters;
 
@@ -74,12 +75,12 @@ public class OperatorConfiguration
     {
         _ = Services
             .AddTransient<IPlayerLoginRecordRepository, TPlayerLoginRecordRepository>()
-            .Decorate<IPlayerLoginRecordRepository>((repository, sp) =>
+            .Decorate<IPlayerLoginRecordRepository>((innerRepository, sp) =>
             {
-                var redisDatabase = sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase();
+                var redisDatabase = sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase();
                 return ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordRepository>(
                     sp,
-                    repository,
+                    innerRepository,
                     redisDatabase);
             })
             .Decorate<IPlayerLoginRecordRepository, MemoryCachedPlayerLoginRecordRepository>();

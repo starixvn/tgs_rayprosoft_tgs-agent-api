@@ -57,22 +57,6 @@ internal class AgentRepository : IAgentRepository
             .Select(ad => ad.DomainName)
             .ToAsyncEnumerable();
 
-    public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
-    {
-        var loginRecord = await _tgsRepository.AgentLoginRecords
-            .FindAsync(loginRecordId)
-            .ConfigureAwait(false);
-
-        return loginRecord == null ?
-            null :
-            new AgentLoginRecordInfo(
-                loginRecord.Id,
-                loginRecord.AgentId,
-                loginRecord.Status,
-                loginRecord.CreatedOn,
-                loginRecord.ExpiredOn);
-    }
-
     public IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email)
     {
         var query = from agent in _tgsRepository.Agents.AsQueryable()

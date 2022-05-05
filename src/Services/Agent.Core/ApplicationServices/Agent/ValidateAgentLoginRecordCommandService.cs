@@ -7,18 +7,18 @@ namespace TGS.Services.Agent.ApplicationServices.Agent;
 
 internal class ValidateAgentLoginRecordCommandService : ICommandService<ValidateAgentLoginRecordCommand>
 {
-    private readonly IAgentRepository _agentRepository;
+    private readonly IAgentLoginRecordRepository _loginRecordRepository;
 
     public ValidateAgentLoginRecordCommandService(
-        IAgentRepository agentRepository)
+        IAgentLoginRecordRepository loginRecordRepository)
     {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
     }
 
     public async ValueTask ExecuteAsync(ValidateAgentLoginRecordCommand command,
         CancellationToken cancellationToken = default)
     {
-        var loginRecord = await _agentRepository.GetAgentLoginRecordByIdAsync(command.LoginRecordId)
+        var loginRecord = await _loginRecordRepository.GetAgentLoginRecordByIdAsync(command.LoginRecordId)
             .ConfigureAwait(false);
 
         if (loginRecord is null || loginRecord.ExpiredOn < DateTimeOffset.UtcNow)

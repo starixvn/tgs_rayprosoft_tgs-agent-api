@@ -55,13 +55,13 @@ internal class MemoryCachedPlayerLoginRecordRepository : IPlayerLoginRecordRepos
         var loginRecord = await _memoryCache.GetOrCreateAsync(key,
             async entry =>
             {
-                var loginRecord = await _loginRecordRepository
+                var loginRecordInfo = await _loginRecordRepository
                     .GetPlayerLoginRecordAsync(loginRecordId)
                     .ConfigureAwait(false);
 
                 _ = entry.SetAbsoluteExpiration(_Expiry);
 
-                return loginRecord;
+                return loginRecordInfo;
             });
 
         return loginRecord;

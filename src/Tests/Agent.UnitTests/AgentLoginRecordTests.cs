@@ -14,7 +14,7 @@ internal class AgentLoginRecordTests
     [Test]
     public void Validate_AgentLoginRecord_Throw_Exception_When_Is_Expired()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeLoginRecordRepository = Substitute.For<IAgentLoginRecordRepository>();
 
         var loginRecordInfo = new AgentLoginRecordInfo(
             Guid.NewGuid(),
@@ -23,12 +23,12 @@ internal class AgentLoginRecordTests
             DateTimeOffset.UtcNow.AddDays(-2),
             DateTimeOffset.UtcNow.AddDays(-1));
 
-        _ = fakeAgentRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordInfo.LoginRecordId))
+        _ = fakeLoginRecordRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordInfo.LoginRecordId))
             .Returns(loginRecordInfo);
 
         var command = new ValidateAgentLoginRecordCommand(loginRecordInfo.LoginRecordId);
 
-        var sut = new ValidateAgentLoginRecordCommandService(fakeAgentRepository);
+        var sut = new ValidateAgentLoginRecordCommandService(fakeLoginRecordRepository);
 
         _ = Assert.ThrowsAsync<Exception>(async () => await sut.ExecuteAsync(command).ConfigureAwait(false));
     }
@@ -36,16 +36,16 @@ internal class AgentLoginRecordTests
     [Test]
     public void Validate_AgentLoginRecord_Throw_Exception_When_Is_Null()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeLoginRecordRepository = Substitute.For<IAgentLoginRecordRepository>();
 
         var loginRecordId = Guid.NewGuid();
 
-        _ = fakeAgentRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordId))
+        _ = fakeLoginRecordRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordId))
             .Returns((AgentLoginRecordInfo?)null);
 
         var command = new ValidateAgentLoginRecordCommand(loginRecordId);
 
-        var sut = new ValidateAgentLoginRecordCommandService(fakeAgentRepository);
+        var sut = new ValidateAgentLoginRecordCommandService(fakeLoginRecordRepository);
 
         _ = Assert.ThrowsAsync<Exception>(async () => await sut.ExecuteAsync(command).ConfigureAwait(false));
     }
@@ -53,7 +53,7 @@ internal class AgentLoginRecordTests
     [Test]
     public void Validate_AgentLoginRecord_When_Is_Valid()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeLoginRecordRepository = Substitute.For<IAgentLoginRecordRepository>();
 
         var loginRecordInfo = new AgentLoginRecordInfo(
             Guid.NewGuid(),
@@ -62,12 +62,12 @@ internal class AgentLoginRecordTests
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow.AddHours(12));
 
-        _ = fakeAgentRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordInfo.LoginRecordId))
+        _ = fakeLoginRecordRepository.GetAgentLoginRecordByIdAsync(Arg.Is(loginRecordInfo.LoginRecordId))
             .Returns(loginRecordInfo);
 
         var command = new ValidateAgentLoginRecordCommand(loginRecordInfo.LoginRecordId);
 
-        var sut = new ValidateAgentLoginRecordCommandService(fakeAgentRepository);
+        var sut = new ValidateAgentLoginRecordCommandService(fakeLoginRecordRepository);
 
         Assert.DoesNotThrowAsync(async () => await sut.ExecuteAsync(command).ConfigureAwait(false));
     }

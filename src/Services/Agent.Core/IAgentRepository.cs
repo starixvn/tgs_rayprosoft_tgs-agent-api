@@ -12,8 +12,6 @@ public interface IAgentRepository
 
     IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId);
 
-    ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId);
-
     IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email);
 
     IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone);
