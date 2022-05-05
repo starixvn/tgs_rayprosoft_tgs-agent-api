@@ -156,7 +156,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpGet("status")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public Task<Dictionary<int, string>> GetDepositFormStatusAsync()
         {
             var dict = Enum.GetValues(typeof(FlowState))
