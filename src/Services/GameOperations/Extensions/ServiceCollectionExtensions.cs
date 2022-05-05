@@ -37,7 +37,10 @@ namespace Microsoft.Extensions.DependencyInjection
             _ = services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
 
             _ = services
-                .AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(sp, redisDatabaseResolver(sp)));
+                .AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                    sp,
+                    redisDatabaseResolver(sp),
+                    TimeSpan.FromMinutes(1)));
 
             _ = services.AddTransient<IExpirationValidator, ExpirationValidator>();
 

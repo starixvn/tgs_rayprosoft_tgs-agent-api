@@ -22,6 +22,7 @@ using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.GameOperations;
@@ -148,6 +149,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -181,6 +186,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -214,10 +223,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
 
@@ -252,10 +261,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -290,10 +299,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -327,10 +336,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -364,10 +373,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -402,10 +411,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
-                                    sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
+                                sp,
+                                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
@@ -439,10 +448,10 @@ namespace TGS.Tests.Games.IntegrationTests
                         .ConfigureTestServices(srv =>
                         {
                             srv.AddTransient(_ => fakeAnalyzer.Object);
-                            srv.AddTransient(sp
-                                => (IRedisPlayerLoginRecordService)ActivatorUtilities.CreateInstance(
+                            srv.AddTransient<IRedisPlayerLoginRecordService>(sp => ActivatorUtilities.CreateInstance<RedisPlayerLoginRecordService>(
                                     sp,
-                                    typeof(StubRedisPlayerLoginRecordService)));
+                                    sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase(),
+                                    TimeSpan.FromMilliseconds(1)));
                         });
                 })
                 .Build();
