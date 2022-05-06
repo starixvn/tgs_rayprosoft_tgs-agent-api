@@ -54,7 +54,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("accountChanges", Name = "GetAccountChanges")]
+        [HttpGet("accountChanges", Name = "GetPlayerAccountChanges")]
         [Description("Get player account changes")]
         public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
             [FromServices] IReportClient client,
