@@ -9,6 +9,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class GetPlayersRequest : PageableRequest, IRequest<PagedResponse<PlayersModel>>
     {
+        public string? AgentName { get; init; }
+
         public DateTimeOffset? BeginRegisteredOn { get; init; }
 
         public Guid? BrandId { get; init; }
