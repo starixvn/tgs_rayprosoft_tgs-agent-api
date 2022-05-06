@@ -1,19 +1,20 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -30,12 +31,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             _client = client;
         }
 
-        [HttpPut("{playerCode}/clear")]
+        [HttpPut("{playerCode}/clear", Name = "ClearPlayerBuckets")]
         [Description("Clear player buckets")]
         public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
 
-        [HttpPost("{playerCode}/adjust/increase")]
+        [HttpPost("{playerCode}/adjust/increase", Name = "CreatePlayerIncreaseAmount")]
         [Description("Create a player adjustment to increase amount")]
         public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
             CreatePlayerIncreaseAmountRequest request)
@@ -44,7 +45,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpPost("{playerCode}/adjust/reduce")]
+        [HttpPost("{playerCode}/adjust/reduce", Name = "CreatePlayerReduceAmount")]
         [Description("Create a player adjustment to reduce amount")]
         public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
             CreatePlayerReduceAmountRequest request)
@@ -53,7 +54,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("accountChanges")]
+        [HttpGet("accountChanges", Name = "GetPlayerAccountChanges")]
         [Description("Get player account changes")]
         public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
             [FromServices] IReportClient client,
@@ -87,7 +88,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Balance = x.Balance,
                     TransactionType = (TransactionType?)x.TransactionType,
                     GameActionType = (GameActionType?)x.GameActionType,
-                    RecordedOn = x.RecordedOn
+                    RecordedOn = x.RecordedOn,
+                    Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
                 }).ToArray()
             };
         }
@@ -111,7 +113,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return new PlayerAccountChangesTotalModel { Amount = response };
         }
 
-        [HttpGet("{playerCode}/joinedPromotions")]
+        [HttpGet("{playerCode}/joinedPromotions", Name = "GetJoinedPromotions")]
         [Description("Get player operation")]
         public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
             string playerCode,
@@ -121,26 +123,38 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _client.GetJoinedPromotionsAsync(request);
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPlayerList")]
         [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
             => _mediator.Send(request);
 
-        [HttpGet("{playerCode}/transferwallet")]
+        [HttpGet("{playerBucketId}/playerBucketHistories", Name = "GetPlayerBucketHistories")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
+            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
+            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+
+        [HttpGet("{playerCode}/playerBuckets", Name = "GetPlayerBuckets")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
+            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
+            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
+
+        [HttpGet("{playerCode}/transferwallet", Name = "GetPlayerGameProviderBalances")]
         [Description("Get Player Transfer Wallet")]
         public ValueTask<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode,
             [FromServices]
             IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
             => service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
 
-        [HttpGet("{playerCode}/mainwallet")]
+        [HttpGet("{playerCode}/mainwallet", Name = "GetPlayerMainWalletBalance")]
         [Description("Get Player Main wallet")]
         public ValueTask<decimal> GetPlayerMainWalletBalanceAsync(
             [FromServices] IGetService<GetPlayerMainWalletBalance, decimal> service,
             string playerCode)
             => service.GetAsync(new(playerCode));
 
-        [HttpGet("{playerCode}/operations")]
+        [HttpGet("{playerCode}/operations", Name = "GetPlayerOperations")]
         [Description("Get player operation")]
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode,
             [FromQuery] GetPlayerOperationRequest request)
@@ -149,12 +163,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("{playerCode}")]
+        [HttpGet("{playerCode}", Name = "GetSinglePlayer")]
         [Description("Get player")]
         public Task<GetPlayerResponse> GetSingleAsync(string playerCode) =>
             _mediator.Send(new GetPlayerRequest(playerCode));
 
-        [HttpPut("{playerCode}/{type}")]
+        [HttpPut("{playerCode}/{type}", Name = "UpdatePlayer")]
         [Description("Update player")]
         public Task<MessageResponse> UpdateAsync(string playerCode, string type,
             [FromBody] Messages.Player.UpdatePlayerRequest request)
@@ -187,16 +201,20 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(updatePlayerModel);
         }
 
-        [HttpGet("{playerCode}/playerBuckets")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
-            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
-            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
+        private static string GetRemark(TransactionType? transactionType, string description)
+        {
+            switch (transactionType)
+            {
+                case TransactionType.CompanyAdjust:
+                case TransactionType.AgentAdjust:
+                case TransactionType.SystemAdjust:
+                case TransactionType.TransferAdjust:
+                    _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
+                    return remark.GetString();
 
-        [HttpGet("{playerBucketId}/playerBucketHistories")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
-            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
-            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+                default:
+                    return string.Empty;
+            }
+        }
     }
 }

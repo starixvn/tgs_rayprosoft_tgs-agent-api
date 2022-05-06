@@ -8,136 +8,107 @@ using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 
-namespace TGS.Operator.Repositories
+namespace TGS.Operator.Repositories;
+
+internal class PlayerRepository : IPlayerRepository
 {
-    internal class PlayerRepository : IPlayerRepository
+    private readonly ITgsRepository _tgsRepository;
+
+    public PlayerRepository(ITgsRepository tgsRepository)
     {
-        private readonly ITgsRepository _tgsRepository;
+        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    }
 
-        public PlayerRepository(ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+    public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
+    {
+        var createFormId = Guid.NewGuid();
+        var currentDate = DateTimeOffset.UtcNow;
 
-        public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
-        {
-            var createFormId = Guid.NewGuid();
-            var currentDate = DateTimeOffset.UtcNow;
+        await _tgsRepository.PlayerAuthenticationForms
+            .AddAsync(new PlayerAuthenticationForm
+            {
+                Id = createFormId,
+                CreatedOn = currentDate,
+                BrandId = brandId,
+                PlayerCode = playerCode,
+                Data = data
+            })
+            .ConfigureAwait(false);
 
-            await _tgsRepository.PlayerAuthenticationForms
-                .AddAsync(new PlayerAuthenticationForm
-                {
-                    Id = createFormId,
-                    CreatedOn = currentDate,
-                    BrandId = brandId,
-                    PlayerCode = playerCode,
-                    Data = data
-                })
-                .ConfigureAwait(false);
+        _ = await _tgsRepository
+            .SaveChangesAsync()
+            .ConfigureAwait(false);
 
-            _ = await _tgsRepository
-                .SaveChangesAsync()
-                .ConfigureAwait(false);
+        return createFormId;
+    }
 
-            return createFormId;
-        }
+    public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
+    {
+        var player = await _tgsRepository.Players.AsQueryable()
+            .Where(player => player.BrandId == brandId
+                             && player.AreaCode == areaCode
+                             && player.Phone == phone)
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
 
-        public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
-        {
-            var player = await _tgsRepository.Players.AsQueryable()
-                .Where(player => player.BrandId == brandId
-                    && player.AreaCode == areaCode
-                    && player.Phone == phone)
-                .FirstOrDefaultAsync()
-                .ConfigureAwait(false);
+        if (player == null)
+            return null;
 
-            if (player == null)
-                return null;
+        return new PlayerInfo(
+            player.PlayerCode,
+            player.BrandId,
+            player.AccumulatedDeposit,
+            player.IdentityAuthentication,
+            player.PhoneAuthentication,
+            player.Phone,
+            player.AreaCode,
+            player.VipId,
+            player.Status,
+            player.Username,
+            player.RealName,
+            player.Email,
+            player.Vip?.Level ?? 0,
+            player.QQ,
+            player.Wechat,
+            player.WithdrawPassword.Length > 0);
+    }
 
-            return new PlayerInfo(
-                player.PlayerCode,
-                player.BrandId,
-                player.AccumulatedDeposit,
-                player.IdentityAuthentication,
-                player.PhoneAuthentication,
-                player.Phone,
-                player.AreaCode,
-                player.VipId,
-                player.Status,
-                player.Username,
-                player.RealName,
-                player.Email,
-                player.Vip?.Level ?? 0,
-                player.QQ,
-                player.Wechat,
-                player.WithdrawPassword.Length > 0);
-        }
+    public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
+    {
+        var settingData = await _tgsRepository.PlayerGameSettings
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
 
-        public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
-        {
-            var settingData = await _tgsRepository.PlayerGameSettings
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
+        return settingData?.IsAutoTransferToGame ?? true;
+    }
 
-            return settingData?.IsAutoTransferToGame ?? true;
-        }
+    public ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode)
+    {
+        var query = from playerIdentity in _tgsRepository.PlayerIdentity.AsQueryable()
+                    where playerIdentity.PlayerCode == playerCode
+                    join authForm in _tgsRepository.PlayerAuthenticationForms on playerIdentity.PlayerAuthenticationFormId equals authForm.Id
+                    select new
+                    {
+                        authForm.Id,
+                        authForm.Status
+                    };
 
-        public ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode)
-        {
-            var query = from playerIdentity in _tgsRepository.PlayerIdentity.AsQueryable()
-                        where playerIdentity.PlayerCode == playerCode
-                        join authForm in _tgsRepository.PlayerAuthenticationForms on playerIdentity.PlayerAuthenticationFormId equals authForm.Id
-                        select new
-                        {
-                            authForm.Id,
-                            authForm.Status
-                        };
+        var formData = query.FirstOrDefault();
 
-            var formData = query.FirstOrDefault();
+        var status = formData == null
+            ? PlayerIdentityReviewState.WaitingVerify
+            : (PlayerIdentityReviewState)formData.Status;
 
-            var status = formData == null
-                ? PlayerIdentityReviewState.WaitingVerify
-                : (PlayerIdentityReviewState)formData.Status;
+        return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
+    }
 
-            return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
-        }
+    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
+    {
+        var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-        public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
-        {
-            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
-
-            return playerData == null
-                ? null
-                : new PlayerInfo(
-                    playerData.PlayerCode,
-                    playerData.BrandId,
-                    playerData.AccumulatedDeposit,
-                    playerData.IdentityAuthentication,
-                    playerData.PhoneAuthentication,
-                    playerData.Phone,
-                    playerData.AreaCode,
-                    playerData.VipId,
-                    playerData.Status,
-                    playerData.Username,
-                    playerData.RealName,
-                    playerData.Email,
-                    playerData.Vip?.Level ?? 0,
-                    playerData.QQ,
-                    playerData.Wechat,
-                    playerData.WithdrawPassword.Length > 0);
-        }
-
-        public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
-        {
-            var playerData = await _tgsRepository.Players.AsQueryable()
-                .FirstOrDefaultAsync(p => p.BrandId == brandId
-                    && p.Username.ToLower() == userName.ToLower())
-                .ConfigureAwait(false);
-
-            if (playerData == null)
-                return null;
-
-            return new PlayerInfo(
+        return playerData == null
+            ? null
+            : new PlayerInfo(
                 playerData.PlayerCode,
                 playerData.BrandId,
                 playerData.AccumulatedDeposit,
@@ -154,165 +125,193 @@ namespace TGS.Operator.Repositories
                 playerData.QQ,
                 playerData.Wechat,
                 playerData.WithdrawPassword.Length > 0);
-        }
+    }
 
-        public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)
+    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
+    {
+        var playerData = await _tgsRepository.Players.AsQueryable()
+            .FirstOrDefaultAsync(p => p.BrandId == brandId
+                                      && p.Username.ToLower() == userName.ToLower())
+            .ConfigureAwait(false);
+
+        if (playerData == null)
+            return null;
+
+        return new PlayerInfo(
+            playerData.PlayerCode,
+            playerData.BrandId,
+            playerData.AccumulatedDeposit,
+            playerData.IdentityAuthentication,
+            playerData.PhoneAuthentication,
+            playerData.Phone,
+            playerData.AreaCode,
+            playerData.VipId,
+            playerData.Status,
+            playerData.Username,
+            playerData.RealName,
+            playerData.Email,
+            playerData.Vip?.Level ?? 0,
+            playerData.QQ,
+            playerData.Wechat,
+            playerData.WithdrawPassword.Length > 0);
+    }
+
+    public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)
+    {
+        var playerData = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        return new PasswordInfo(
+            playerData!.Password,
+            playerData!.Salt);
+    }
+
+    public async ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host)
+    {
+        var data = _tgsRepository.PlayerIpRecords
+            .AsQueryable()
+            .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
+            .FirstOrDefault();
+
+        if (data == null)
         {
-            var playerData = await _tgsRepository.Players
-                 .FindAsync(playerCode)
-                 .ConfigureAwait(false);
-
-            return new PasswordInfo(
-                playerData!.Password,
-                playerData!.Salt);
-        }
-
-        public async ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host)
-        {
-            var data = _tgsRepository.PlayerIpRecords
-                .AsQueryable()
-                .Where(x => x.PlayerCode == playerCode && x.IpType == 2)
-                .FirstOrDefault();
-
-            if (data == null)
+            data = new PlayerIpRecord
             {
-                data = new PlayerIpRecord
-                {
-                    PlayerCode = playerCode,
-                    IpType = 2,
-                    Ip = ip,
-                    Host = host,
-                    RecordOn = DateTimeOffset.UtcNow
-                };
+                PlayerCode = playerCode,
+                IpType = 2,
+                Ip = ip,
+                Host = host,
+                RecordOn = DateTimeOffset.UtcNow
+            };
 
-                _tgsRepository.PlayerIpRecords.Add(data);
-            }
-            else
+            _tgsRepository.PlayerIpRecords.Add(data);
+        }
+        else
+        {
+            data.Ip = ip;
+            data.Host = host;
+            data.RecordOn = DateTimeOffset.UtcNow;
+
+            _tgsRepository.PlayerIpRecords.Update(data);
+        }
+
+        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn)
+    {
+        var player = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        player!.RegisteredOn = registeredOn;
+        player!.UpdatedByUsername = playerCode;
+        player!.UpdatedOn = DateTimeOffset.UtcNow;
+
+        var datas = new PlayerIpRecord[] {
+            new() {
+                PlayerCode = playerCode,
+                IpType = (int)IpType.RegisterIp,
+                Ip = ip,
+                Host = host,
+                RecordOn = registeredOn
+            } ,
+            new()
             {
-                data.Ip = ip;
-                data.Host = host;
-                data.RecordOn = DateTimeOffset.UtcNow;
+                PlayerCode = playerCode,
+                IpType = (int)IpType.LoginIp,
+                Ip = ip,
+                Host = host,
+                RecordOn = registeredOn
+            } };
 
-                _tgsRepository.PlayerIpRecords.Update(data);
-            }
+        await _tgsRepository.PlayerIpRecords
+            .AddRangeAsync(datas)
+            .ConfigureAwait(false);
 
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
+        await _tgsRepository
+            .SaveChangesAsync()
+            .ConfigureAwait(false);
+    }
 
-        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn)
+    public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)
+    {
+        var playerData = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (playerData == null)
+            return;
+
+        playerData.AreaCode = areaCode;
+        playerData.Phone = phone;
+        playerData.PhoneAuthentication = true;
+
+        playerData.UpdatedOn = DateTimeOffset.UtcNow;
+
+        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
+    {
+        var settingData = await _tgsRepository.PlayerGameSettings
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (settingData == null)
         {
-            var player = await _tgsRepository.Players
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            player!.RegisteredOn = registeredOn;
-            player!.UpdatedByUsername = playerCode;
-            player!.UpdatedOn = DateTimeOffset.UtcNow;
-
-            var datas = new PlayerIpRecord[] {
-                new() {
-                    PlayerCode = playerCode,
-                    IpType = (int)IpType.RegisterIp,
-                    Ip = ip,
-                    Host = host,
-                    RecordOn = registeredOn
-                } ,
-                new()
-                {
-                    PlayerCode = playerCode,
-                    IpType = (int)IpType.LoginIp,
-                    Ip = ip,
-                    Host = host,
-                    RecordOn = registeredOn
-                } };
-
-            await _tgsRepository.PlayerIpRecords
-                .AddRangeAsync(datas)
-                .ConfigureAwait(false);
-
-            await _tgsRepository
-                .SaveChangesAsync()
-                .ConfigureAwait(false);
-        }
-
-        public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)
-        {
-            var playerData = await _tgsRepository.Players
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            if (playerData == null)
-                return;
-
-            playerData.AreaCode = areaCode;
-            playerData.Phone = phone;
-            playerData.PhoneAuthentication = true;
-
-            playerData.UpdatedOn = DateTimeOffset.UtcNow;
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
-
-        public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
-        {
-            var settingData = await _tgsRepository.PlayerGameSettings
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            if (settingData == null)
+            settingData = new PlayerGameSetting
             {
-                settingData = new PlayerGameSetting
-                {
-                    PlayerCode = playerCode,
-                    IsAutoTransferToGame = false
-                };
+                PlayerCode = playerCode,
+                IsAutoTransferToGame = false
+            };
 
-                await _tgsRepository.PlayerGameSettings
-                    .AddAsync(settingData)
-                    .ConfigureAwait(false);
-            }
-
-            settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
-
-            _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            await _tgsRepository.PlayerGameSettings
+                .AddAsync(settingData)
+                .ConfigureAwait(false);
         }
 
-        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId)
+        settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId)
+    {
+        var identityData = await _tgsRepository.PlayerIdentity
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (identityData == null)
         {
-            var identityData = await _tgsRepository.PlayerIdentity
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            if (identityData == null)
+            identityData = new PlayerIdentity
             {
-                identityData = new PlayerIdentity
-                {
-                    PlayerCode = playerCode,
-                    PlayerAuthenticationFormId = IdentityAuthenticationFormId
-                };
+                PlayerCode = playerCode,
+                PlayerAuthenticationFormId = identityAuthenticationFormId
+            };
 
-                _ = await _tgsRepository.PlayerIdentity
-                    .AddAsync(identityData)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                identityData.PlayerAuthenticationFormId = IdentityAuthenticationFormId;
-            }
-            _ = await _tgsRepository
-                .SaveChangesAsync()
+            _ = await _tgsRepository.PlayerIdentity
+                .AddAsync(identityData)
                 .ConfigureAwait(false);
         }
-
-        public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
+        else
         {
-            var player = await _tgsRepository.Players.FindAsync(playerCode)
-                .ConfigureAwait(false);
-
-            player!.Status = playerStatus;
-            player!.UpdatedOn = DateTimeOffset.UtcNow;
-
-            _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            identityData.PlayerAuthenticationFormId = identityAuthenticationFormId;
         }
+        _ = await _tgsRepository
+            .SaveChangesAsync()
+            .ConfigureAwait(false);
+    }
+
+    public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
+    {
+        var player = await _tgsRepository.Players.FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        player!.Status = playerStatus;
+        player!.UpdatedOn = DateTimeOffset.UtcNow;
+
+        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 }

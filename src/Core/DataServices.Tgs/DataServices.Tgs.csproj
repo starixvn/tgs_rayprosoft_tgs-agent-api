@@ -28,6 +28,8 @@
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
     <None Remove="SqlScripts\Functions\agent_get_agents_with_team_counts.sql" />
+    <None Remove="SqlScripts\Functions\agent_get_all_sub_agents.sql" />
+    <None Remove="SqlScripts\Functions\agent_update_path.sql" />
     <None Remove="SqlScripts\Functions\brand_game_providers_status_changes.sql" />
     <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
@@ -80,6 +82,8 @@
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WM.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\agent_get_all_sub_agents.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\agent_update_path.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_game_providers_status_changes.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
@@ -155,6 +159,7 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="27.2.1" />
+    <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

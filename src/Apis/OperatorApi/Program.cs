@@ -38,20 +38,9 @@ namespace TGS.Apis.OperatorApi
         public static async Task Main(string[] args)
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            
+
             var host = CreateHostBuilder(args).Build();
-            await ExecuteMigrationsAndSeedingsAsync(host.Services);
             await host.RunAsync();
-        }
-
-        private static async Task ExecuteMigrationsAndSeedingsAsync(IServiceProvider services)
-        {
-            using var scope = services.CreateScope();
-            var sp = scope.ServiceProvider;
-            var env = sp.GetRequiredService<IWebHostEnvironment>();
-
-            await using var tgsRepo = sp.GetRequiredService<ITgsRepository>();
-            await tgsRepo.ExecuteMigrationAndSeedingAsync(env);
         }
     }
 }

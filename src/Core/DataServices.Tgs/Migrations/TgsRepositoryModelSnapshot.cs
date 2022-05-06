@@ -21,6 +21,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasAnnotation("ProductVersion", "6.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -387,6 +388,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("password");
 
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("ltree")
+                        .HasColumnName("path");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
@@ -475,6 +481,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("ParentAgentId")
                         .HasDatabaseName("ix_agents_parent_agent_id");
+
+                    b.HasIndex("Path")
+                        .HasDatabaseName("ix_agents_gist_path");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Path"), "gist");
 
                     b.ToTable("agents", "dbo");
                 });
@@ -998,6 +1009,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("ExternalTransactionId")
                         .HasColumnType("text")
                         .HasColumnName("external_transaction_id");
+
+                    b.Property<decimal>("LockAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("lock_amount");
+
+                    b.Property<decimal>("LockedBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("locked_balance");
 
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("timestamp with time zone")
@@ -6752,6 +6777,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
                     b.HasKey("Id")
                         .HasName("pk_sign_in_events");
 
@@ -6760,6 +6789,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_sign_in_events_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_sign_in_events_promotion_id");
 
                     b.ToTable("sign_in_events", "dbo");
                 });
@@ -8910,6 +8942,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_sign_in_events_players_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sign_in_events_promotions_promotion_id");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>

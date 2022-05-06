@@ -12,16 +12,18 @@ namespace TGS.Services.GameOperations
     internal class RedisPlayerLoginRecordService : IRedisPlayerLoginRecordService
     {
         private readonly IDatabase _database;
+        private readonly TimeSpan _expiry;
         private readonly IPlayerLoginRecordRepository _playerLoginRecordRepository;
         private readonly string _redisKey = "GameProvider:PlayerLoginRecords:{0}";
 
         public RedisPlayerLoginRecordService(
             IDatabase database,
-            IPlayerLoginRecordRepository playerLoginRecordRepository
-            )
+            IPlayerLoginRecordRepository playerLoginRecordRepository,
+            TimeSpan expiry)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _playerLoginRecordRepository = playerLoginRecordRepository ?? throw new ArgumentNullException(nameof(playerLoginRecordRepository));
+            _expiry = expiry;
         }
 
         public async Task<PlayerLoginRecordModel> GetAsync(Guid loginRecordId)
@@ -29,15 +31,17 @@ namespace TGS.Services.GameOperations
             var key = string.Format(_redisKey, loginRecordId);
             if (await _database.KeyExistsAsync(key).ConfigureAwait(false))
             {
-                var value = await _database.StringGetAsync(string.Format(_redisKey, loginRecordId)).ConfigureAwait(false);
+                var value = await _database.StringGetAsync(key).ConfigureAwait(false);
                 return JsonSerializer.Deserialize<PlayerLoginRecordModel>(value);
             }
+
             var data = await _playerLoginRecordRepository.GetAsync(loginRecordId).ConfigureAwait(false);
             if (data == null)
             {
                 return null;
             }
-            await _database.StringSetAsync(key, JsonSerializer.Serialize(data), TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+
+            await _database.StringSetAsync(key, JsonSerializer.Serialize(data), _expiry).ConfigureAwait(false);
             return data;
         }
 
@@ -53,6 +57,18 @@ namespace TGS.Services.GameOperations
             return datas.Where(x => x.PlatformType == platform).FirstOrDefault();
         }
 
+        public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, DateTimeOffset current)
+        {
+            var record = await CachedQueryEnabledAsync(playerCode).ConfigureAwait(false);
+            return record.FirstOrDefault(r => r.ExpiredOn > current);
+        }
+
+        public async Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform, DateTimeOffset current)
+        {
+            var record = await CachedQueryEnabledAsync(playerCode).ConfigureAwait(false);
+            return record.FirstOrDefault(r => r.PlatformType == platform && r.ExpiredOn > current);
+        }
+
         public Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode)
             => CachedQueryEnabledAsync(playerCode);
 
@@ -65,6 +81,7 @@ namespace TGS.Services.GameOperations
                 var values = await _database.HashGetAsync(key, "enabled").ConfigureAwait(false);
                 return JsonSerializer.Deserialize<PlayerLoginRecordModel[]>(values);
             }
+
             var datas = await _playerLoginRecordRepository.QueryEnabledAsync(playerCode).ConfigureAwait(false);
 
             await _database.HashSetAsync(key,
@@ -73,7 +90,7 @@ namespace TGS.Services.GameOperations
                     new( "enabled",JsonSerializer.Serialize(datas))
                 });
 
-            await _database.KeyExpireAsync(key, TimeSpan.FromMinutes(1));
+            await _database.KeyExpireAsync(key, _expiry);
 
             return datas;
         }

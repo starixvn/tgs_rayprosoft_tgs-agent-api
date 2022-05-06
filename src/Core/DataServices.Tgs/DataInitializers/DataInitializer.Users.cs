@@ -3,40 +3,39 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.DataServices.Tgs.DataInitializers
+namespace TGS.Core.DataServices.Tgs.DataInitializers;
+
+public partial class DataInitializer
 {
-    public partial class DataInitializer
+    private const string DefaultTimeZone = "+0800";
+    private const string UserPassword = "TgsP@ssw0rd";
+
+    private User CreateUser(
+        string userName,
+        UserStatus status,
+        Guid roleId,
+        Guid departmentId,
+        Guid? userId = null,
+        RoleType roleType = RoleType.Admin)
     {
-        private const string DefaultTimeZone = "+0800";
-        private const string UserPassword = "TgsP@ssw0rd";
+        var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);
+        userId ??= GuidExtensions.NewSequentialGuid();
 
-        private User CreateUser(
-            string userName,
-            UserStatus status,
-            Guid roleId,
-            Guid departmentId,
-            Guid? userId = null,
-            RoleType roleType = RoleType.Admin)
+        return new()
         {
-            var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);
-            userId ??= GuidExtensions.NewSequentialGuid();
-
-            return new()
-            {
-                Id = userId.Value,
-                RoleId = roleId,
-                DepartmentId = departmentId,
-                Username = userName,
-                Password = passwordHash,
-                Salt = salt,
-                Name = userName,
-                Status = status,
-                TimeZone = DefaultTimeZone,
-                CreatedByUsername = _AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = _AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
-            };
-        }
+            Id = userId.Value,
+            RoleId = roleId,
+            DepartmentId = departmentId,
+            Username = userName,
+            Password = passwordHash,
+            Salt = salt,
+            Name = userName,
+            Status = status,
+            TimeZone = DefaultTimeZone,
+            CreatedByUsername = _AdminUsername,
+            CreatedOn = DateTimeOffset.Now,
+            UpdatedByUsername = _AdminUsername,
+            UpdatedOn = DateTimeOffset.Now
+        };
     }
 }

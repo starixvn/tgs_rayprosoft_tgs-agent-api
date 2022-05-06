@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -24,7 +25,13 @@ namespace TGS.Services.BackOffice.Domain
                 agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
         }
 
-        public async ValueTask CancelWithdrawAsync(Guid brandId, UserType userType, string userId, decimal amount, string reviewUserId)
+        public async ValueTask CancelWithdrawAsync(
+            Guid brandId,
+            UserType userType,
+            string userId,
+            decimal amount,
+            string reviewUserId,
+            CancellationToken cancellationToken = default)
         {
             switch (userType)
             {
@@ -50,11 +57,75 @@ namespace TGS.Services.BackOffice.Domain
             }
         }
 
-        private async ValueTask ExchangeAgentWalletAsync(
+        public async ValueTask CommitWithdrawAsync(
             Guid brandId,
+            UserType userType,
+            string userId,
+            decimal amount,
+            decimal actualAmount,
+            string reviewUserId,
+            CancellationToken cancellationToken = default)
+        {
+            switch (userType)
+            {
+                case UserType.Player:
+                    await _playerWalletExchangeService.CommitWithdrawalAsync(
+                        userId,
+                        amount,
+                        actualAmount,
+                        null,
+                        null,
+                        Guid.Parse(reviewUserId),
+                        cancellationToken).ConfigureAwait(false);
+                    return;
+
+                case UserType.Agent:
+                    return;
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public async ValueTask RollbackWithdrawAsync(
+            Guid brandId,
+            UserType userType,
+            string userId,
+            decimal amount,
+            string reviewUserId,
+            CancellationToken cancellationToken = default)
+        {
+            switch (userType)
+            {
+                case UserType.Player:
+                    await _playerWalletExchangeService.RollbackWithdrawalAsync(
+                        userId,
+                        amount,
+                        null,
+                        null,
+                        Guid.Parse(reviewUserId),
+                        cancellationToken).ConfigureAwait(false);
+                    return;
+
+                case UserType.Agent:
+                    await ExchangeAgentWalletAsync(
+                        brandId,
+                        Guid.Parse(userId),
+                        TransactionTypes.CancelWithdrawal,
+                        amount).ConfigureAwait(false);
+                    return;
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private async ValueTask ExchangeAgentWalletAsync(
+                            Guid brandId,
             Guid agentId,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            CancellationToken cancellationToken = default)
         {
             var agent = await _agentService
                 .GetAgentAsync(x => x.Id == agentId)

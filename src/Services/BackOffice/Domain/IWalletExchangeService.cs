@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 
@@ -11,6 +12,24 @@ namespace TGS.Services.BackOffice.Domain
             UserType userType,
             string userId,
             decimal amount,
-            string reviewUserId);
+            string reviewUserId,
+            CancellationToken cancellationToken = default);
+
+        ValueTask CommitWithdrawAsync(
+            Guid brandId,
+            UserType userType,
+            string userId,
+            decimal amount,
+            decimal actualAmount,
+            string reviewUserId,
+            CancellationToken cancellationToken = default);
+
+        ValueTask RollbackWithdrawAsync(
+            Guid brandId,
+            UserType userType,
+            string userId,
+            decimal amount,
+            string reviewUserId,
+            CancellationToken cancellationToken = default);
     }
 }

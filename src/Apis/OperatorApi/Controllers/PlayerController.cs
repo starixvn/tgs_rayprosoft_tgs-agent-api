@@ -192,7 +192,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<IReadOnlyDictionary<string, object>> GetPlayerAsync(
+        public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
             [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
             [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
@@ -227,30 +227,33 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
                 .ConfigureAwait(false);
 
-            var data = new Dictionary<string, object>
+            var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
+
+            var playerInfo = new PlayerInfoViewModel
             {
-                ["playercode"] = player.PlayerCode,
-                ["identityauthentication"] = player.IdentityAuthentication,
-                ["identityformstatus"] = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status,
-                ["identityformid"] = identityFormInfo.FormId,
-                ["autotransfertogame"] = isAutoTransferToGame,
-                ["issetpaypassword"] = player.IsSetPayPassword,
-                ["username"] = player.Username,
-                ["viplevel"] = vipLevel,
-                ["realname"] = playerProperties.GetValueOrDefault("RealName"),
-                ["email"] = playerProperties.GetValueOrDefault("Email"),
-                ["phone"] = playerProperties.GetValueOrDefault("Phone"),
-                ["areacode"] = playerProperties.GetValueOrDefault("AreaCode"),
-                ["qq"] = playerProperties.GetValueOrDefault("QQ"),
-                ["wechat"] = playerProperties.GetValueOrDefault("Wechat"),
-                ["facebookmessenger"] = playerProperties.GetValueOrDefault("FacebookMessenger"),
-                ["line"] = playerProperties.GetValueOrDefault("Line"),
-                ["viber"] = playerProperties.GetValueOrDefault("Viber"),
-                ["telegram"] = playerProperties.GetValueOrDefault("Telegram"),
-                ["whatsapp"] = playerProperties.GetValueOrDefault("WhatsApp"),
+                PlayerCode = player.PlayerCode,
+                IdentityAuthentication = player.IdentityAuthentication,
+                IdentityAuthenticationFormStatus = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status,
+                IdentityAuthenticationFormId = identityFormInfo.FormId,
+                IsAutoTransferToGame = isAutoTransferToGame,
+                IsSetPayPassword = player.IsSetPayPassword,
+                Username = player.UserName,
+                Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.Parse(birthdateValue),
+                VipLevel = vipLevel,
+                RealName = playerProperties.GetValueOrDefault("RealName"),
+                Email = playerProperties.GetValueOrDefault("Email"),
+                Phone = playerProperties.GetValueOrDefault("Phone"),
+                PhoneAreaCode = playerProperties.GetValueOrDefault("AreaCode"),
+                QQ = playerProperties.GetValueOrDefault("QQ"),
+                Wechat = playerProperties.GetValueOrDefault("Wechat"),
+                FacebookMessenger = playerProperties.GetValueOrDefault("FacebookMessenger"),
+                Line = playerProperties.GetValueOrDefault("Line"),
+                Viber = playerProperties.GetValueOrDefault("Viber"),
+                Telegram = playerProperties.GetValueOrDefault("Telegram"),
+                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp")
             };
 
-            return data;
+            return playerInfo;
         }
 
         /// <summary>
@@ -327,7 +330,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetLogoutQuery(brandId, playerTokenData);
+            var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
             LogoutInfo info;
             try
             {
@@ -457,6 +460,25 @@ namespace TGS.Apis.OperatorApi.Controllers
             => await resetService
                 .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
                 .ConfigureAwait(false);
+
+        /// <summary>
+        /// Sets the birthdate asynchronous.
+        /// </summary>
+        /// <param name="setBirthdateService">The set birthdate service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPatch("birthdate", Name = "SetBirthdate")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask SetBirthdateAsync(
+            [FromServices] ICommandService<SetBirthdateCommand> setBirthdateService,
+            [FromBody] SetBirthdateRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new SetBirthdateCommand(playerTokenData.PlayerCode, request.Birthdate);
+
+            return setBirthdateService.ExecuteAsync(command);
+        }
 
         /// <summary>
         /// Sets the Facebook Messenger id.

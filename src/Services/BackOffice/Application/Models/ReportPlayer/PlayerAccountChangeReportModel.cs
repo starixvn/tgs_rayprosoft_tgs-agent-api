@@ -18,5 +18,7 @@ namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
         public GameActionType? GameActionType { get; init; }
 
         public DateTimeOffset RecordedOn { get; init; }
+
+        public string Remark { get; set; }
     }
 }

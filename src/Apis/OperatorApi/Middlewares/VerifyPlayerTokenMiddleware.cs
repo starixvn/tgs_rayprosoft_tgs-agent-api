@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Resources;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Middlewares
 {
@@ -34,8 +34,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             IHashProvider hashProvider,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            IExpirationValidator expirationValidator,
-            IJwtTokenHandler handler)
+            IJwtTokenHandler handler,
+            ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
         {
             using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
 
@@ -44,13 +44,12 @@ namespace TGS.Apis.OperatorApi.Middlewares
             if (attribute == null)
             {
                 await _next(context);
-
                 return;
             }
 
             var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
 
-            if (token.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(token))
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
@@ -58,7 +57,6 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 }
 
                 await _next(context);
-
                 return;
             }
 
@@ -66,16 +64,22 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
-            if (sub.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(sub))
             {
                 throw new MissingTokenException(Player.MissingPlayerToken);
             }
 
             var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
+            if (data == null)
+            {
+                throw new MissingTokenException(Player.MissingPlayerToken);
+            }
+
             context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
 
             var playerCode = data.PlayerCode;
-            await expirationValidator.ThrowIfPlayerLoginExpiredAsync(data.LoginRecordId, playerCode);
+
+            await loginRecordValidateService.ExecuteAsync(new ValidatePlayerLoginRecordCommand(data.LoginRecordId, playerCode));
 
             if (!attribute.NeedAuthorize)
             {
@@ -91,19 +95,19 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            handler.ValidateToken(token,
-                new()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = Consts.Site,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                },
-                exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new PlayerLoginExpiredException(playerCode));
+            _ = handler.ValidateToken(token,
+                 new TokenValidationParameters
+                 {
+                     ValidateIssuer = true,
+                     ValidIssuer = Consts.Site,
+                     ValidateAudience = false,
+                     ValidateIssuerSigningKey = true,
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                     ValidateLifetime = true,
+                     ClockSkew = TimeSpan.Zero
+                 },
+                 exception => throw new InvalidCredentialsException(exception.Message),
+                 _ => throw new PlayerLoginExpiredException(playerCode));
 
             await _next(context);
         }
