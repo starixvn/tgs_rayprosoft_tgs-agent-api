@@ -67,7 +67,6 @@ namespace TGS.Core.Infrastructures.WebApiServices
                         if (exception == null)
                             return;
 
-                        var log = context.RequestServices.GetRequiredService<ITgsLog>();
                         var logger = context.RequestServices.GetRequiredService<ILogger<ExceptionHandlerOptions>>();
                         var errorMapper = context.RequestServices.GetRequiredService<IErrorMapper>();
                         var error = errorMapper.GetApiErrorByException(exception);
@@ -78,9 +77,6 @@ namespace TGS.Core.Infrastructures.WebApiServices
                         if (statusCode >= 500)
                         {
                             logger.LogError(exception, "Caught global error!");
-                            log.LogError(
-                                $"Caught global error on :{context.Request.Host} " +
-                                $"with message: {message}", exception);
                         }
                         else
                             logger.LogWarning(exception, "Caught global exception!");

@@ -60,8 +60,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
-    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
     <PackageReference Include="Scrutor" Version="4.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
@@ -71,7 +69,7 @@
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.11" />
     <PackageReference Include="Tgs.Payment.MalakiPay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />    
-    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.6" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.7" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.SkyPay.Client" Version="0.0.6" />
@@ -90,9 +88,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Update="Resources\Player.Designer.cs">
       <DependentUpon>Player.resx</DependentUpon>
       <DesignTime>True</DesignTime>
