@@ -16,7 +16,6 @@ namespace TGS.Services.Operations
 {
     public sealed class PlayerOperations : IPlayerOperations
     {
-        private readonly IAgentQueries _agentQueries;
         private readonly IRedisCacheManager _cacheManager;
 
         private readonly IPlayerOperations _interface;
@@ -28,7 +27,6 @@ namespace TGS.Services.Operations
         public PlayerOperations(
             IRedisCacheManager cacheManager,
             IJsonSerializationProvider json,
-            IAgentQueries agentQueries,
             Func<IWalletQueries> walletQueriesFactory,
             Func<IPlayerQueries> playerQueriesFactory,
             IPlayerCommands playerCommands)
@@ -38,7 +36,6 @@ namespace TGS.Services.Operations
             _walletQueriesFactory = walletQueriesFactory;
             _playerQueriesFactory = playerQueriesFactory;
             _playerCommands = playerCommands;
-            _agentQueries = agentQueries;
             _interface = this;
         }
 
@@ -119,103 +116,33 @@ namespace TGS.Services.Operations
             return playerCode;
         }
 
-        public async Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode)
-        {
-            var field = "enabled";
-            var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode, field);
-
-            return value.HasValue
-                ? _json.DeserializeFromString<CachedPlayerLoginRecord[]>(value)
-                : await GetAndCachedPlayerLoginsRecordsAsync(playerCode, field);
-        }
-
-        public async Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
-            PlatformType? platform)
-        {
-            var loginRecords = await _interface.GetPlayerEnabledLoginRecordsAsync(playerCode);
-
-            return loginRecords?.OrderByDescending(r => r.ExpiredOn)
-                .FirstOrDefault(r => platform == null || r.PlatformType == platform);
-        }
-
-        public Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.PlayerLoginRecords, loginRecordId,
-                TimeSpan.FromHours(2), () => _playerQueriesFactory().GetPlayerLoginRecordAsync(loginRecordId));
-
         public Task<string> GetUsernameByPlayerCodeAsync(string playerCode) =>
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,
                 value => (string)value,
                 cachedPlayer => cachedPlayer?.Username);
 
-        public async Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data)
-        {
-            var record = await _playerCommands.PlayerLoginAsync(data);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, data.PlayerCode);
-
-            return record;
-        }
-
-        public async Task PlayerLogoutAsync(PlayerLogoutData data)
-        {
-            await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
-            await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
-            {
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.PlayerCode
-                },
-                new()
-                {
-                    CacheType = RedisCacheType.PlayerLoginRecords,
-                    Key = data.LoginRecordId
-                }
-            });
-        }
-
         #region Private Methods
 
-        public async Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+            => _playerCommands.SetEmailAsync(playerCode, email, updatedOn);
 
-        public async Task SetIdentityAsync(
+        public Task SetIdentityAsync(
             string playerCode,
             string realName,
             string identity,
             bool isAuthenticate,
             DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+            => _playerCommands.SetIdentityAsync(playerCode, realName, identity, isAuthenticate, updatedOn);
 
-        public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
+        public Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
             DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+            => _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
 
-        public async Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetPhoneAsync(playerCode, phone, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
+            => _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
 
-        public async Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetQqAsync(playerCode, qqId, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
-
-        public async Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
-        {
-            await _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
+        public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
+            => _playerCommands.SetWeChatAsync(playerCode, weChatId, updatedOn);
 
         private async Task CachePlayerAsync(string playerCode, CachedPlayer player)
         {
@@ -234,34 +161,6 @@ namespace TGS.Services.Operations
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Player, playerCode, fields, TimeSpan.FromHours(2),
                 true);
-        }
-
-        private async Task<CachedPlayerLoginRecord[]> GetAndCachedPlayerLoginsRecordsAsync(string playerCode,
-            string field)
-        {
-            var results = await _playerQueriesFactory()
-                .GetPlayerLoginsRecordsInOneDayAsync(playerCode, LoginStatus.Enabled);
-            if (results == null || results.Length == 0)
-            {
-                return Array.Empty<CachedPlayerLoginRecord>();
-            }
-
-            var loginRecords = results.Select(r => new CachedPlayerLoginRecord
-            {
-                PlayerCode = playerCode,
-                PlatformType = r.PlatformType,
-                Status = r.Status,
-                ExpiredOn = r.ExpiredOn
-            }).ToArray();
-
-            var expiresIn = loginRecords.Max(r => r.ExpiredOn) - DateTimeOffset.UtcNow;
-            await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode,
-                new HashEntry[]
-                {
-                    new(field, _json.SerializeToString(loginRecords))
-                }, expiresIn);
-
-            return loginRecords;
         }
 
         private async Task<CachedPlayer> GetCachedPlayerOrNullAsync(string playerCode)

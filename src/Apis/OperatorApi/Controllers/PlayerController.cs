@@ -330,7 +330,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetLogoutQuery(brandId, playerTokenData);
+            var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
             LogoutInfo info;
             try
             {

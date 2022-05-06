@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
@@ -11,11 +12,11 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
         {
-            services.RegisterAllServiceUtilityTypes(
+            _ = services.RegisterAllServiceUtilityTypes(
                 typeof(OperatorServiceCollectionExtensions).Assembly,
                 ServiceLifetime.Transient);
 
-            services
+            _ = services
                 .AddOptions<OperatorOptions>()
                 .Services
                 .AddValidateCodeClient((options, sp) =>

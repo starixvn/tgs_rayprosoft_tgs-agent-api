@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Extensions\ServiceExtensions.cs" />
+    <Compile Include="Extensions\ServiceCollectionExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
