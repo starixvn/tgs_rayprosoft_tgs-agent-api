@@ -89,10 +89,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Description("Join a promotion")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid id)
+        public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid promotionId)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
+            var response = await _client.JoinAsync(new(promotionId, playerTokenData.PlayerCode));
 
             return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
         }
