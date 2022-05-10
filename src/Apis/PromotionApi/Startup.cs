@@ -18,7 +18,6 @@ using Prometheus;
 using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -53,13 +52,7 @@ namespace TGS.Apis.PromotionApi
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                    });
+                endpoints.MapHealthChecks("/health");
 
                 endpoints.MapMetrics();
             });
@@ -104,11 +97,6 @@ namespace TGS.Apis.PromotionApi
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
                 })
                 .AddCashServiceClient((options, sp) =>
@@ -146,9 +134,7 @@ namespace TGS.Apis.PromotionApi
                 .AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers();
 
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db");
-
+            services.AddHealthChecks();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1",

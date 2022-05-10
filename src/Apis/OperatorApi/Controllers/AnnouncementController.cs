@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Extensions;
@@ -19,7 +19,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpGet("announcement/list")]
         [HttpGet("announcement/list/{language}")]
-        public IAsyncEnumerable<Announcement> GetAnnouncementsAsync(
+        public async ValueTask<AnnouncementResponse> GetAnnouncementsAsync(
             [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService,
             string language = "en-US")
         {
@@ -28,7 +28,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var query = new GetAnnouncementQuery(brandId);
 
-            return getAnnouncementQueryService.QueryAsync(query)
+            var result = await getAnnouncementQueryService.QueryAsync(query).ToArrayAsync();
+
+            var marquees = result
+                .Where(a => a.Type == "Marquee")
+                .OrderBy(a => a.DisplayOrder)
                 .Select(item => new Announcement
                 {
                     Content = item.Content,
@@ -37,8 +41,51 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Subject = item.Subject,
                     Localization = item.Localization.ContainsKey(currentCultureName) == true
                         ? item.Localization[currentCultureName]
-                        : JsonDocument.Parse("{}")
-                });
+                        : JsonDocument.Parse("{}"),
+                    Type = item.Type
+                })
+                .ToArray();
+
+            var main = result
+                .Where(a => a.Type == "Main")
+                .OrderBy(a => a.CreatedOn)
+                .Take(1)
+                .Select(item => new Announcement
+                {
+                    Content = item.Content,
+                    From = item.From.ToUnixTimeMilliseconds(),
+                    To = item.To.ToUnixTimeMilliseconds(),
+                    Subject = item.Subject,
+                    Localization = item.Localization.ContainsKey(currentCultureName) == true
+                        ? item.Localization[currentCultureName]
+                        : JsonDocument.Parse("{}"),
+                    Type = item.Type
+                })
+                .ToArray();
+
+            var deposit = result
+                .Where(a => a.Type == "Deposit")
+                .OrderBy(a => a.CreatedOn)
+                .Take(1)
+                .Select(item => new Announcement
+                {
+                    Content = item.Content,
+                    From = item.From.ToUnixTimeMilliseconds(),
+                    To = item.To.ToUnixTimeMilliseconds(),
+                    Subject = item.Subject,
+                    Localization = item.Localization.ContainsKey(currentCultureName) == true
+                        ? item.Localization[currentCultureName]
+                        : JsonDocument.Parse("{}"),
+                    Type = item.Type
+                })
+                .ToArray();
+
+            return new AnnouncementResponse
+            {
+                Marquees = marquees,
+                Mains = main,
+                Deposits = deposit
+            };
         }
     }
 }

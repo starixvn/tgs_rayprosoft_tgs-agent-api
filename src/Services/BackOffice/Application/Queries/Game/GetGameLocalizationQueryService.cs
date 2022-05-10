@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
 using Tgs.ServiceUtility;
+using Microsoft.EntityFrameworkCore;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {

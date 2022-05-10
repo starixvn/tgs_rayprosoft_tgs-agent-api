@@ -1,19 +1,20 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Player;
+using Tgs.ServiceUtility;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Player;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -87,7 +88,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Balance = x.Balance,
                     TransactionType = (TransactionType?)x.TransactionType,
                     GameActionType = (GameActionType?)x.GameActionType,
-                    RecordedOn = x.RecordedOn
+                    RecordedOn = x.RecordedOn,
+                    Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
                 }).ToArray()
             };
         }
@@ -125,6 +127,18 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
             => _mediator.Send(request);
+
+        [HttpGet("{playerBucketId}/playerBucketHistories")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
+            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
+            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+
+        [HttpGet("{playerCode}/playerBuckets")]
+        [Description("Get player buckets")]
+        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
+            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
+            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
 
         [HttpGet("{playerCode}/transferwallet")]
         [Description("Get Player Transfer Wallet")]
@@ -180,22 +194,27 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Viber = request.Viber,
                 VipId = request.VipId,
                 Wechat = request.Wechat,
-                WhatsApp = request.WhatsApp
+                WhatsApp = request.WhatsApp,
+                Birthdate = request.Birthdate
             };
 
             return _mediator.Send(updatePlayerModel);
         }
 
-        [HttpGet("{playerCode}/playerBuckets")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
-            [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
-            => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
+        private static string GetRemark(TransactionType? transactionType, string description)
+        {
+            switch (transactionType)
+            {
+                case TransactionType.CompanyAdjust:
+                case TransactionType.AgentAdjust:
+                case TransactionType.SystemAdjust:
+                case TransactionType.TransferAdjust:
+                    _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
+                    return remark.GetString();
 
-        [HttpGet("{playerBucketId}/playerBucketHistories")]
-        [Description("Get player buckets")]
-        public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
-            [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
-            => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
+                default:
+                    return string.Empty;
+            }
+        }
     }
 }

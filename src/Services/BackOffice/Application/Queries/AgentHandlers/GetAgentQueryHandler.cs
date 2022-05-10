@@ -87,7 +87,8 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                         NetProfit = x.NetProfit,
                         ActiveNumber = x.ActiveNumber,
                         DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray()
+                    }).OrderBy(x => x.Rank).ToArray(),
+                    Path = agent.Path
                 }
             };
         }

@@ -34,7 +34,7 @@ namespace TGS.Services.BackOffice.Domain
                         amount,
                         null,
                         null,
-                        Guid.Parse(reviewUserId)).ConfigureAwait(false);
+                        string.IsNullOrWhiteSpace(reviewUserId) ? null : Guid.Parse(reviewUserId)).ConfigureAwait(false);
                     return;
 
                 case UserType.Agent:

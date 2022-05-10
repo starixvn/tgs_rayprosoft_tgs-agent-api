@@ -31,6 +31,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset To { get; set; }
 
+        public string Type { get; set; }
+
         public string UpdatedByUsername { get; set; }
 
         public DateTimeOffset UpdatedOn { get; set; }

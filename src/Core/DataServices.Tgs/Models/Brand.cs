@@ -12,6 +12,10 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string ApiKey { get; set; }
 
+        public bool AutoClearWageringRequirement { get; set; }
+
+        public decimal AutoClearWageringRequirementBalance { get; set; }
+
         public bool AutoSentAgentBonus { get; set; }
 
         public bool AutoSentPlayerBonus { get; set; }
@@ -34,17 +38,19 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<Department> Departments { get; set; }
 
+        public decimal DepositHandlingFeeRateTenPercentile { get; set; }
+
         public string Description { get; set; }
 
         public virtual ICollection<BrandDomain> Domains { get; set; }
 
         public bool EnableAgentSms { get; set; }
 
+        public bool EnablePlayerIdentity { get; set; }
+
         public bool EnableSms { get; set; }
 
         public bool EnableSmsRegisterFlow { get; set; }
-
-        public bool EnablePlayerIdentity { get; set; }
 
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
@@ -92,8 +98,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
 
-        public bool AutoClearWageringRequirement { get; set; }
-
-        public decimal AutoClearWageringRequirementBalance { get; set; }
+        public decimal WithdrawHandlingFeeRateTenPercentile { get; set; }
     }
 }

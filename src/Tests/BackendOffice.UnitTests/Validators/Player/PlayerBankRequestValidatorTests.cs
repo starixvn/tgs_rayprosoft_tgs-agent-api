@@ -11,12 +11,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [SetUp]
         public void Setup() => _validator = new();
 
-        private PlayerBankRequestValidator _validator;
+        private PlayerBankRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_username_is_null()
         {
-            var model = new PlayerBankRequest {RealName = null};
+            var model = new PlayerBankRequest { RealName = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.RealName)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankRealNameRequired);
@@ -25,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_not_have_error_when_username_is_specified()
         {
-            var model = new PlayerBankRequest {RealName = "Username"};
+            var model = new PlayerBankRequest { RealName = "Username" };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.RealName);
         }
@@ -33,7 +33,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_have_error_when_bank_name_is_null()
         {
-            var model = new PlayerBankRequest {BankName = null};
+            var model = new PlayerBankRequest { BankName = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.BankName)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankNameRequired);
@@ -42,7 +42,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_not_have_error_when_bank_name_is_specified()
         {
-            var model = new PlayerBankRequest {BankName = "BankName"};
+            var model = new PlayerBankRequest { BankName = "BankName" };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.BankName);
         }
@@ -50,7 +50,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_have_error_when_bank_account_is_null()
         {
-            var model = new PlayerBankRequest {BankAccount = null};
+            var model = new PlayerBankRequest { BankAccount = null };
             var result = _validator.TestValidate(model);
             result.ShouldHaveValidationErrorFor(request => request.BankAccount)
                 .WithErrorMessage(Services.BackOffice.Application.Resources.Player.BankAccountRequired);
@@ -59,7 +59,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Player
         [Test]
         public void Should_not_have_error_when_bank_account_is_specified()
         {
-            var model = new PlayerBankRequest {BankAccount = "BankAccount"};
+            var model = new PlayerBankRequest { BankAccount = "BankAccount" };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.BankAccount);
         }

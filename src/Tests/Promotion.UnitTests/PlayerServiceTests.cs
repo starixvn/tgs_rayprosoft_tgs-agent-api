@@ -33,7 +33,13 @@ namespace Promotion.UnitTests
             await tgsRepository.Players
                 .AddAsync(new TGS.Core.DataServices.Tgs.Models.Player
                 {
-                    PlayerCode = playerCode
+                    PlayerCode = playerCode,
+                    DefaultWalletCurrencyCode = "CNY",
+                    Password = Array.Empty<byte>(),
+                    Salt = Array.Empty<byte>(),
+                    WithdrawPassword = Array.Empty<byte>(),
+                    WithdrawSalt = Array.Empty<byte>(),
+                    Username = "Tester"
                 });
 
             await tgsRepository.SaveChangesAsync();
@@ -64,7 +70,13 @@ namespace Promotion.UnitTests
                 .AddAsync(new TGS.Core.DataServices.Tgs.Models.Player
                 {
                     PlayerCode = playerCode,
-                    FirstDepositOn = DateTimeOffset.Parse("2021/1/1")
+                    FirstDepositOn = DateTimeOffset.Parse("2021/1/1"),
+                    DefaultWalletCurrencyCode = "CNY",
+                    Password = Array.Empty<byte>(),
+                    Salt = Array.Empty<byte>(),
+                    WithdrawPassword = Array.Empty<byte>(),
+                    WithdrawSalt = Array.Empty<byte>(),
+                    Username = "Tester"
                 });
 
             await tgsRepository.SaveChangesAsync();

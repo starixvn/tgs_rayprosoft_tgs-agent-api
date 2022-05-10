@@ -49,7 +49,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == brandId),
                     It.Is<Guid>(x => x == formId),
                     It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.FromResult(
+                .Returns(ValueTask.FromResult<WithdrawFormInfo?>(
                     new WithdrawFormInfo
                     {
                         Id = formId,
@@ -205,7 +205,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == brandId),
                     It.Is<Guid>(x => x == formId),
                     It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.FromResult(
+                .Returns(ValueTask.FromResult<WithdrawFormInfo?>(
                     new WithdrawFormInfo
                     {
                         Id = formId,
@@ -256,7 +256,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == brandId),
                     It.Is<Guid>(x => x == formId),
                     It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.FromResult(
+                .Returns(ValueTask.FromResult<WithdrawFormInfo?>(
                     new WithdrawFormInfo
                     {
                         Id = formId,

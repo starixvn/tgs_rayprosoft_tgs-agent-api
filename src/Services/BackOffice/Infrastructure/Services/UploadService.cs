@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
@@ -71,7 +72,7 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
                 }
 
                 var json = _jsonSerializationProvider.SerializeToString(obj,
-                    new JsonSerializerOptions {IgnoreNullValues = true});
+                    new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
 
                 var model = _jsonSerializationProvider.DeserializeFromString<T>(json);
 

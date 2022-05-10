@@ -25,13 +25,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             repository.Brands.Add(new CoreModels.Brand()
             {
-                Id = brandId
+                Id = brandId,
+                ApiKey = string.Empty,
+                ClientId = string.Empty,
+                Code = "Test",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System",
+                Name = "Test",
+                SecretKey = string.Empty
             });
 
             repository.BrandLanguages.Add(new CoreModels.BrandLanguage()
             {
                 BrandId = brandId,
-                CultureCode = "zh-TW"
+                CultureCode = "zh-TW",
+                BrandCultureCode = "zh-TW"
             });
 
             await repository.SaveChangesAsync();

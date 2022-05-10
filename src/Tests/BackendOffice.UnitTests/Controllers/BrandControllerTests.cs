@@ -26,7 +26,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _mediatorMock.Object);
         }
 
-        private BrandController _controller;
+        private BrandController _controller = default!;
         private readonly Mock<IMediator> _mediatorMock = new();
 
         [TestCase(true)]
@@ -83,7 +83,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateBrandRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = Brand.CodeExisted});
+                .ReturnsAsync(new MessageResponse { Valid = false, Message = Brand.CodeExisted });
 
             var response = await _controller.CreateBrandAsync(request);
             response.Valid.Should().BeFalse();
@@ -99,7 +99,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateBrandRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.CreateBrandAsync(request);
             response.Valid.Should().BeTrue();
@@ -115,7 +115,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateBrandRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse { Valid = true });
 
             var response = await _controller.UpdateBrandAsync(brand.Id, request);
 

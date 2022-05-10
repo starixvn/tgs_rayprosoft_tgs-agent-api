@@ -10,6 +10,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.WalletService;
 using TGS.Services.Operator.ApplicationServices.Wallet;
+using System.Threading;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -44,7 +45,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
             moqCashServiceClient
-                .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>()))
+                .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(10000M));
 
             moqPlayerOnlineRepository.Setup(fake => fake.SetAsync(brandId, playerCode));

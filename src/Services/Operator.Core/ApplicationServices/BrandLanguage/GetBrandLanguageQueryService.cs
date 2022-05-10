@@ -6,6 +6,7 @@ using System.Threading;
 using TGS.Core.DataServices.Tgs;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.BrandLanguage;
+using Microsoft.EntityFrameworkCore;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandLanguage
 {

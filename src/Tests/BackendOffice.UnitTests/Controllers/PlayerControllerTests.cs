@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private readonly Mock<IPromotionClient> _promotionClientMock = new();
 
-        private PlayerController _controller;
+        private PlayerController _controller = default!;
 
         [Test]
         public async Task Can_Get_Player()
@@ -81,7 +82,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = fixture
                 .CreateMany<PlayerOperationModel>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
@@ -125,7 +126,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var list = CreatePlayersModelFixture()
                 .CreateMany<PlayersModel>(105)
                 .AsQueryable()
-                .BuildMock().Object;
+                .BuildMock();
 
             var (skip, take) = GetPage(request);
             var orderedPlayers = list.OrderByDescending(p => p.Username);
@@ -185,7 +186,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     Message = Player.NotFound
                 });
 
-            var request = new Fixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
+            var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
             var response = await _controller.UpdateAsync(playerCode, "info", request);
 
@@ -207,7 +208,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     Message = Player.UpdateTypeNotFound
                 });
 
-            var request = new Fixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
+            var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
             var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
@@ -233,6 +234,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Banks, new PlayerModel.BankModel[]
                 {
                 }));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            return fixture;
+        }
+
+        private Fixture CreateUpdatePlayerRequestFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Customize<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>(u => u
+                .With(s => s.Birthdate, new DateOnly()));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

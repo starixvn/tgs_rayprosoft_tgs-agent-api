@@ -2,10 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.GameProviders;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.GameBalance;
 
 namespace TGS.Services.Operator.ApplicationServices.GameBalance
 {
@@ -41,7 +40,7 @@ namespace TGS.Services.Operator.ApplicationServices.GameBalance
 
             await foreach (var gpCode in processGps.ConfigureAwait(false))
             {
-                if (gpCode == command.GpCode)
+                if (command.IgnoreGpCode is not null && gpCode == command.IgnoreGpCode)
                     continue;
 
                 try

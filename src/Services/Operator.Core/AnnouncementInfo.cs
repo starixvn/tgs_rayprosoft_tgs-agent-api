@@ -10,5 +10,7 @@ namespace TGS.Services.Operator
         DateTimeOffset From,
         DateTimeOffset To,
         int DisplayOrder,
-        IDictionary<string, JsonDocument>? Localization);
+        IDictionary<string, JsonDocument>? Localization,
+        string Type,
+        DateTimeOffset CreatedOn);
 }

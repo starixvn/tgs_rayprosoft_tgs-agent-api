@@ -6,13 +6,12 @@ using TGS.Apis.TgsApi.GameProviders.Avia;
 using TGS.Apis.TgsApi.GameProviders.BetConstruct;
 using TGS.Apis.TgsApi.GameProviders.BigGaming;
 using TGS.Apis.TgsApi.GameProviders.Card365;
+using TGS.Apis.TgsApi.GameProviders.DreamGame;
 using TGS.Apis.TgsApi.GameProviders.Evolution;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.IMESports;
 using TGS.Apis.TgsApi.GameProviders.JDB;
 using TGS.Apis.TgsApi.GameProviders.Jili;
-using TGS.Apis.TgsApi.GameProviders.KY;
-using TGS.Apis.TgsApi.GameProviders.LY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
@@ -20,11 +19,7 @@ using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
 using TGS.Apis.TgsApi.GameProviders.TCG;
 using TGS.Apis.TgsApi.GameProviders.TF;
-using TGS.Apis.TgsApi.GameProviders.VR;
-using TGS.Apis.TgsApi.GameProviders.WGHorse;
-using TGS.Apis.TgsApi.GameProviders.WGSports;
 using TGS.Apis.TgsApi.GameProviders.WMCasino;
-using TGS.Apis.TgsApi.GameProviders.DreamGame;
 using static TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi
@@ -68,20 +63,15 @@ namespace TGS.Apis.TgsApi
             { AsiaGaming, typeof(AsiaGamingStartup) },
             { JDB, typeof(JDBStartup) },
             { Saba, typeof(SabaStartup) },
-            { KY, typeof(KYStartup) },
-            { VR, typeof(VRStartup) },
             { IMESports, typeof(IMESportsStartup) },
             { BigGaming, typeof(BigGamingStartup) },
             { SexyGaming, typeof(SexyGamingStartup) },
             { Skywind, typeof(SkywindStartup) },
             { AllBet, typeof(AllBetStartup) },
             { Evolution, typeof(EvolutionStartup) },
-            { WGSports, typeof(WGSportsStartup) },
-            { WGHorse, typeof(WGHorseStartup) },
             { WMCasino, typeof(WMCasinoStartup) },
             { TCG, typeof(TCGStartup) },
             { Card365, typeof(Card365Startup) },
-            { LY, typeof(LYStartup) },
             { BetConstruct, typeof(BetConstructStartup) },
             { Avia, typeof(AviaStartup) },
             { Jili, typeof(JiliStartup) },

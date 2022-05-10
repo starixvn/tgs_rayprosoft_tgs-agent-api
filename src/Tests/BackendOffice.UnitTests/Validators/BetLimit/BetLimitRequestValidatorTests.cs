@@ -14,7 +14,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.BetLimit
             _validator = new BetLimitRequestValidator();
         }
 
-        private BetLimitRequestValidator _validator;
+        private BetLimitRequestValidator _validator = default!;
 
         [Test]
         public void Should_have_error_when_currency_code_is_null()

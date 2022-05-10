@@ -116,6 +116,17 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
 
+            if (request.Type == updatePlayerType[0] && request.Birthdate != null)
+            {
+                var properties = new Dictionary<PlayerPropertyName, string?>
+                {
+                    [PlayerPropertyName.Birthdate] = request.Birthdate.ToString()
+                };
+
+                await _playerServiceClient.SetPlayerPropertiesAsync(player.PlayerCode, properties)
+                    .ConfigureAwait(false);
+            }
+
             if (request.Type == updatePlayerType[1])
             {
                 var properties = new Dictionary<PlayerPropertyName, string?>

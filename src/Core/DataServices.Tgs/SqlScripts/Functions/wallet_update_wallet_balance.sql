@@ -1,31 +1,35 @@
 ﻿CREATE OR REPLACE FUNCTION dbo.wallet_update_wallet_balance(
-	player_code varchar, 
-	wallet_id uuid, 
-	amount decimal, 
-	updated_on timestamptz)
+    player_code varchar, 
+    wallet_id uuid, 
+    amount decimal, 
+    updated_on timestamptz)
 RETURNS numeric
 LANGUAGE plpgsql
 AS $$
-declare 
-	row_count int;
-	bal decimal;
+DECLARE 
+    updatedCount int;
+    bal decimal;
 BEGIN
-	
-	set lock_timeout to 3000;
     
-    update dbo.wallets w
-    set balance = w.balance + $3,
-    	updated_on = $4
-    where w.id = $2 and w.player_code = $1
-	returning balance into bal;
+    SET LOCK_TIMEOUT TO 3000;
+    
+    UPDATE dbo.wallets w
+    SET 
+        balance = w.balance + $3,
+        updated_on = $4
+    WHERE 
+        w.id = $2 
+        AND 
+        w.player_code = $1
+    RETURNING balance INTO bal;
 
-	get diagnostics row_count = ROW_COUNT;
+    GET diagnostics updatedCount = ROW_COUNT;
 
-	if row_count = 0 then
-		raise exception 'wallet not found.' using ERRCODE = '5000';
-	end if;
-	
-	return bal;
-	
+    IF updatedCount = 0 THEN
+        RAISE EXCEPTION 'wallet not found.' USING ERRCODE = '5000';
+    END IF;
+    
+    RETURN bal;
+    
 END;
 $$

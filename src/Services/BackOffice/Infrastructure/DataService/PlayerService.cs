@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;

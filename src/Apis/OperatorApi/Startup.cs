@@ -3,11 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +35,6 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -47,7 +43,6 @@ using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
-using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -103,13 +98,7 @@ namespace TGS.Apis.OperatorApi
             {
                 endpoints.MapControllers();
 
-                endpoints.MapHealthChecks("/health",
-                    new HealthCheckOptions
-                    {
-                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                        ResponseWriter = (httpContext, result) =>
-                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                    });
+                endpoints.MapHealthChecks("/health");
                 endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
             });
@@ -224,12 +213,6 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
-
-                    options.JsonSerializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = { new JsonStringEnumConverter() }
-                    };
                 })
                 .Services
                 .AddSingleton<ManualDepositSerializer>()
@@ -289,6 +272,10 @@ namespace TGS.Apis.OperatorApi
                     c.DisableDataAnnotationsValidation = true;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
+                })
+                .AddJsonOptions(jsonOptions =>
+                {
+                    jsonOptions.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                 });
 
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
@@ -299,10 +286,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db")
-                .AddRedis(_configuration)
-                .ForwardToPrometheus();
+            services.AddHealthChecks();
 
             services
                 .AddOptions<OtlpExporterOptions>()

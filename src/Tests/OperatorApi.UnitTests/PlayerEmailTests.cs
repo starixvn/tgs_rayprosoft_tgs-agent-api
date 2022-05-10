@@ -88,7 +88,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             {
                 PlayerCode = "playerCode",
                 BrandId = new Guid("4e86719f-243f-46f6-b010-5c758b7285af"),
-                Email = "test@mail.com"
+                Email = "test@mail.com",
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Username = "tester"                
             });
 
             await repository.SaveChangesAsync();
@@ -116,7 +122,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             {
                 PlayerCode = "playerCode",
                 BrandId = new Guid("4e86719f-243f-46f6-b010-5c758b7285af"),
-                Email = "test@mail.com"
+                Email = "test@mail.com",
+                DefaultWalletCurrencyCode = "CNY",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>(),
+                Username = "tester"
             });
 
             await repository.SaveChangesAsync();
