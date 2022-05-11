@@ -5,6 +5,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 using TGS.Services.Operator.ValidateCode;
+using Tgs.RouletteServices.Clients;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
