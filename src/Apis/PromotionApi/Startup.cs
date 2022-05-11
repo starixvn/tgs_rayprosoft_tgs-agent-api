@@ -1,10 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +17,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models;
 using TGS.Services.Promotion.MessageQueue;
 
 namespace TGS.Apis.PromotionApi
@@ -78,12 +74,12 @@ namespace TGS.Apis.PromotionApi
                 .AddPlayerBucketRepositoriesServices();
 
             services
-                .AddRedis((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
-                });
+                .AddOptions<RedisOptions>()
+                .Configure<IConfiguration>((options, config)
+                    => options.ConnectionString = config.GetConnectionString("RedisConfigurationString"))
+                .Services
+                .AddRedisServices()
+                .RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
             services
                 .AddPromotionCore()
