@@ -166,10 +166,13 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                 })
                 .ToArrayAsync(cancellationToken);
 
-            var playerBuckets = autoSentPlayerBonuses
+            await _promotionRepository.UpdatePromotionsAsync(promotions);
+            var bonus = await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+
+            var playerBuckets = bonus
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players,
+                    return x.PromotionPlayers.Join(players,
                             pb => pb.PlayerCode,
                             p => p.PlayerCode,
                             (pb, p) => new
@@ -179,6 +182,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                             })
                         .Select(p => new
                         {
+                            p.pb.Id,
                             x.BrandId,
                             p.p.PlayerCode,
                             p.p.DefaultWalletId,
@@ -190,11 +194,6 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                             x.PromotionType
                         });
                 }).ToArray();
-
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            await _promotionRepository.UpdatePromotionsAsync(promotions);
-            await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
 
             await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
                 new CreatePlayerBucketRequest(x.BrandId,
@@ -212,8 +211,9 @@ namespace TGS.Services.Promotion.Handlers.Promotion
                         createPlayerBucketRequest.DefaultWalletId,
                         createPlayerBucketRequest.BonusAmount,
                         null,
+                        createPlayerBucketRequest.Id.ToString(),
                         null,
-                        null)
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 transactionPromotions.Add(new()
@@ -226,8 +226,6 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             }
 
             await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
-
-            scope.Complete();
 
             return CreateValidResponse<MessageResponse>();
         }
