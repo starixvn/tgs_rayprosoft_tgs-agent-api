@@ -1,16 +1,19 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Player;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
+using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -39,6 +42,58 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Remark = info.Remark,
                 ReviewedOn = info.ReviewedOn,
                 ReviewedUserName = info.ReviewedUserName
+            };
+        }
+
+        [HttpGet(Name = "GetPlayerIdentityAuthenticationForms")]
+        [Description("Get player identity authentication forms")]
+        public async Task<PagedResponse<PlayerIdentityAuthenticationsModel>> GetPlayerIdentityAuthenticationFormsAsync(
+            [FromServices] IGetService<GetPlayerIdentityAuthenticationFormsQuery, int> countService,
+            [FromServices] IQueryService<GetPlayerIdentityAuthenticationFormsQuery, PlayerIdentityAuthenticationInfo> queryService,
+            [FromQuery] GetPlayerIdentityAuthenticationListRequest request,
+            [FromQuery] PageableRequest pagingRequest)
+        {
+            var paging = new Paging<PlayerIdentityAuthenticationInfo>
+            {
+                RowCount = pagingRequest.Rows,
+                Page = pagingRequest.Page
+            };
+
+            paging.SortByPropertyName(
+                string.IsNullOrWhiteSpace(pagingRequest.SortBy)
+                    ? nameof(PlayerIdentityAuthenticationInfo.CreatedOn)
+                    : pagingRequest.SortBy,
+                pagingRequest.IsDesc);
+
+            var query = new GetPlayerIdentityAuthenticationFormsQuery(
+                request.BrandId,
+                request.Status,
+                request.Username,
+                request.BeginCreatedOn,
+                request.EndCreatedOn,
+                request.BeginReviewedOn,
+                request.EndReviewedOn,
+                paging);
+            
+            return new PagedResponse<PlayerIdentityAuthenticationsModel>
+            {
+                Valid = true,
+                TotalCount = await countService
+                    .GetAsync(query)
+                    .ConfigureAwait(false),
+                Items = await queryService.QueryAsync(query)
+                    .Select(info => new PlayerIdentityAuthenticationsModel
+                    {
+                        IdNumber = info.IdNumber,
+                        RealName = info.RealName,
+                        Remark = info.Remark,
+                        Status = info.Status,
+                        Username = info.Username,
+                        Data = info.Data,
+                        FormId = info.PlayerAuthenticationFormId
+                    })
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
             };
         }
 
