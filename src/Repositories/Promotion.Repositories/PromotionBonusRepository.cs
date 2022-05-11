@@ -20,8 +20,9 @@ namespace TGS.Promotion.Repositories
 
         ITgsRepository IPromotionBonusRepository.Repository => _repository;
 
-        Task IPromotionBonusRepository.CreatePromotionBonusAsync(PromotionBonusModel[] models) =>
-            CreateEntitiesAsync(models.Select(model => new PromotionBonus
+        async Task<PromotionBonus[]> IPromotionBonusRepository.CreatePromotionBonusAsync(PromotionBonusModel[] models)
+        {
+            var bonus = models.Select(model => new PromotionBonus
             {
                 Id = model.Id,
                 BrandId = model.BrandId,
@@ -42,7 +43,13 @@ namespace TGS.Promotion.Repositories
                     BonusAmount = x.BonusAmount,
                     SentOn = model.SentOn
                 }).ToHashSet()
-            }).ToArray());
+            }).ToArray();
+
+            await CreateEntitiesAsync(bonus);
+
+            return bonus;
+        }
+            
 
         IQueryable<PromotionPlayer> IPromotionBonusRepository.GetPromotionBonusPlayersQueries(
             Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>> preQuery, bool tracking)
