@@ -193,7 +193,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 .Returns(new[]
                 {
                     new PlayerIdentityAuthenticationInfo(
-                        "",
+                        "{}",
                         "IdNumber",
                         "RealName",
                         "Remark",
@@ -202,7 +202,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         DateTimeOffset.UtcNow,
                         Guid.NewGuid()),
                     new PlayerIdentityAuthenticationInfo(
-                        "",
+                        "{}",
                         "IdNumber1",
                         "RealName1",
                         "Remark1",
