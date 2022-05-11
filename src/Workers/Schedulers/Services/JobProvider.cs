@@ -36,7 +36,7 @@ namespace TGS.Workers.Schedulers.Services
                     typeof(AgentDividendWorker),
                     TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("123E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"),
-                    Cron.Daily(0, 31),
+                    Cron.Daily(10, 15),
                     null,
                     typeof(PlayerRebateWorker),
                     TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
