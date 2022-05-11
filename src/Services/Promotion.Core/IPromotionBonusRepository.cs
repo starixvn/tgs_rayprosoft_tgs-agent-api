@@ -11,7 +11,7 @@ namespace TGS.Services.Promotion
     {
         ITgsRepository Repository { get; }
 
-        Task CreatePromotionBonusAsync(PromotionBonusModel[] model);
+        Task<PromotionBonus[]> CreatePromotionBonusAsync(PromotionBonusModel[] model);
 
         IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
             Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
