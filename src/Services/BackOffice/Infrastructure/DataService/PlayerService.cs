@@ -165,6 +165,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 player.IdentityAuthentication = true;
                 player.RealName = realName;
                 player.IdNumber = idNumber;
+                player.UpdatedByUsername = reviewUserName;
+                player.UpdatedOn = DateTimeOffset.Now;
             }
 
             _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
