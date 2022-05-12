@@ -11,6 +11,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string IdNumber { get; set; }
 
+        public string PlayerCode { get; set; }
+
         public string RealName { get; init; }
 
         public string Remark { get; set; }

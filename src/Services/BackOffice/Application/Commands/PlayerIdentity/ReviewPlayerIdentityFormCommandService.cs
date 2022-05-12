@@ -35,7 +35,9 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerIdentity
                     command.Status,
                     command.ReviewUserId,
                     command.ReviewUserName,
-                    command.Remark)
+                    command.Remark,
+                    command.RealName,
+                    command.IdNumber)
                 .ConfigureAwait(false);
         }
     }

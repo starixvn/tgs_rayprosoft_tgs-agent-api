@@ -201,7 +201,7 @@ namespace TGS.BackOffice.Repositories
         }
 
         public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
-                            Guid brandId,
+            Guid brandId,
             PlayerIdentityReviewState? status,
             string username,
             DateTimeOffset? beginCreatedOn,
@@ -264,7 +264,8 @@ namespace TGS.BackOffice.Repositories
                     (PlayerIdentityReviewState)info.Status,
                     info.Username,
                     info.CreatedOn,
-                    info.PlayerAuthenticationFormId))
+                    info.PlayerAuthenticationFormId,
+                    info.PlayerCode))
                 .ToAsyncEnumerable();
         }
 
