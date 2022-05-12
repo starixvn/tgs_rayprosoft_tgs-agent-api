@@ -89,7 +89,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Remark = info.Remark,
                         Status = info.Status,
                         Username = info.Username,
-                        Data = info.Data,
+                        Data = string.IsNullOrEmpty(info.Data)
+                            ? JsonDocument.Parse("{}")
+                            : JsonDocument.Parse(info.Data),
                         FormId = info.PlayerAuthenticationFormId,
                         PlayerCode = info.PlayerCode
                     })
