@@ -5,7 +5,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class PlayerIdentityAuthenticationsModel
     {
-        public string FileId { get; set; }
+        public string AttachmentId { get; set; }
 
         public Guid FormId { get; set; }
 
