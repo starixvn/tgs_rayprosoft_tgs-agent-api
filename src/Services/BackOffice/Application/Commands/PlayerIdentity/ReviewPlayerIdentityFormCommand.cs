@@ -8,5 +8,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerIdentity
         PlayerIdentityReviewState Status,
         string Remark,
         string ReviewUserId,
-        string ReviewUserName);
+        string ReviewUserName,
+        string RealName,
+        string IdNumber);
 }

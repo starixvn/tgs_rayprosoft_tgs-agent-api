@@ -11,5 +11,6 @@ namespace TGS.Services.BackOffice.Domain
         PlayerIdentityReviewState Status,
         string Username,
         DateTimeOffset CreatedOn,
-        Guid PlayerAuthenticationFormId);
+        Guid PlayerAuthenticationFormId,
+        string PlayerCode);
 }

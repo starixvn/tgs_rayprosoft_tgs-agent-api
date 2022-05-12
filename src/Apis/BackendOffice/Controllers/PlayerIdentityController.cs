@@ -74,7 +74,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.BeginReviewedOn,
                 request.EndReviewedOn,
                 paging);
-            
+
             return new PagedResponse<PlayerIdentityAuthenticationsModel>
             {
                 Valid = true,
@@ -90,7 +90,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Status = info.Status,
                         Username = info.Username,
                         Data = info.Data,
-                        FormId = info.PlayerAuthenticationFormId
+                        FormId = info.PlayerAuthenticationFormId,
+                        PlayerCode = info.PlayerCode
                     })
                     .ToArrayAsync()
                     .ConfigureAwait(false)
@@ -109,7 +110,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.ReviewResponse.ToReviewState(),
                 reviewResponse.Remark,
                 UserId,
-                Username);
+                Username,
+                reviewResponse.RealName,
+                reviewResponse.IdNumber);
 
             await reviewCommandService
                 .ExecuteAsync(command)

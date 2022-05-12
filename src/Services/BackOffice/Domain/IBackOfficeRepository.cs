@@ -25,7 +25,14 @@ namespace TGS.Services.BackOffice.Domain
 
         IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
-        IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(Guid brandId, PlayerIdentityReviewState? status, string username, DateTimeOffset? beginCreatedOn, DateTimeOffset? endCreatedOn, DateTimeOffset? beginReviewedOn, DateTimeOffset? endReviewedOn);
+        IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
+            Guid brandId, 
+            PlayerIdentityReviewState? status, 
+            string username, 
+            DateTimeOffset? beginCreatedOn, 
+            DateTimeOffset? endCreatedOn, 
+            DateTimeOffset? beginReviewedOn, 
+            DateTimeOffset? endReviewedOn);
         
 
         IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);

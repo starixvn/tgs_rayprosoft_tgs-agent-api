@@ -39,7 +39,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 PlayerIdentityReviewState.Approve,
                 "remark",
                 "reviewUserId",
-                "reviewUserName");
+                "reviewUserName",
+                "realName",
+                "idNumber");
 
             await sut.ExecuteAsync(command);
 
@@ -51,7 +53,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     PlayerIdentityReviewState.Approve,
                     "reviewUserId",
                     "reviewUserName",
-                    "remark");
+                    "remark",
+                    "realName",
+                    "idNumber");
         }
 
         [Test]
@@ -78,7 +82,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 PlayerIdentityReviewState.Approve,
                 "remark",
                 "reviewUserId",
-                "reviewUserName");
+                "reviewUserName",
+                "realName",
+                "idNumber");
 
             await sut.ExecuteAsync(command);
 
@@ -90,7 +96,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     PlayerIdentityReviewState.Approve,
                     "reviewUserId",
                     "reviewUserName",
-                    "remark");
+                    "remark",
+                    "realName",
+                    "idNumber");
         }
 
         [Test]
@@ -138,7 +146,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         PlayerIdentityReviewState.WaitingVerify,
                         "Username",
                         DateTimeOffset.UtcNow,
-                        Guid.NewGuid()),
+                        Guid.NewGuid(),
+                        "PlayerCode"),
                     new PlayerIdentityAuthenticationInfo(
                         "",
                         "IdNumber1",
@@ -147,7 +156,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         PlayerIdentityReviewState.Approve,
                         "Username1",
                         DateTimeOffset.UtcNow,
-                        Guid.NewGuid())
+                        Guid.NewGuid(),
+                        "PlayerCode1")
                 }.ToAsyncEnumerable());
 
             var actual = await sut.GetAsync(query);
@@ -200,7 +210,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         PlayerIdentityReviewState.WaitingVerify,
                         "Username",
                         DateTimeOffset.UtcNow,
-                        Guid.NewGuid()),
+                        Guid.NewGuid(),
+                        "PlayerCode"),
                     new PlayerIdentityAuthenticationInfo(
                         "{}",
                         "IdNumber1",
@@ -209,7 +220,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         PlayerIdentityReviewState.Approve,
                         "Username1",
                         DateTimeOffset.UtcNow,
-                        Guid.NewGuid())
+                        Guid.NewGuid(),
+                        "PlayerCode1")
                 }.ToAsyncEnumerable());
 
             await sut.QueryAsync(query).ToArrayAsync();
@@ -270,7 +282,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 PlayerIdentityReviewState.Reject,
                 "remark",
                 "reviewUserId",
-                "reviewUserName");
+                "reviewUserName",
+                "realName",
+                "idNumber");
 
             await sut.ExecuteAsync(command);
 
@@ -282,7 +296,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     PlayerIdentityReviewState.Reject,
                     "reviewUserId",
                     "reviewUserName",
-                    "remark");
+                    "remark",
+                    "realName",
+                    "idNumber");
         }
     }
 }
