@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Text.Json;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 
 namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class PlayerIdentityAuthenticationsModel
     {
-        public JsonDocument Data { get; set; }
+        public string FileId { get; set; }
 
         public Guid FormId { get; set; }
 
