@@ -43,7 +43,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
-                .AddPaymentClient();
+                .AddPaymentClient()
+                .AddRouletteSignInClient();
 
             var opConfiguration = new OperatorConfiguration(services);
 
