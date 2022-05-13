@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 using TGS.Services.BackOffice.Application.Models.Player;
@@ -163,6 +166,76 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var actual = await sut.GetAsync(query);
 
             Assert.AreEqual(2, actual);
+        }
+
+        [Test]
+        public async Task Can_Create_Player_Identity_Auth_Form()
+        {
+            var fakeBrandService = Substitute.For<IBrandService>();
+            var fakePlayerService = Substitute.For<IPlayerService>();
+
+            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+            var playerCode = "playerCode";
+
+            fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
+                .Returns(new Brand()
+                {
+                    Id = brandId,
+                    EnablePlayerIdentity = true,
+                    Status = BrandStatus.Active
+                });
+
+            var sut = new CreateIdentityAuthenticationFormCommandService(
+                fakeBrandService,
+                fakePlayerService);
+
+            var command = new CreateIdentityAuthenticationFormCommand(
+                playerCode,
+                brandId,
+                "620dff81110125f95bb9ccbb");
+
+            var actual = await sut.GetAsync(command);
+
+            _ = fakePlayerService
+                .Received(1)
+                .CreatePlayerAuthenticationFormAsync(
+                    Arg.Any<Guid>(),
+                    Arg.Any<string>(),
+                    Arg.Any<string>());
+
+            _ = fakePlayerService
+                .Received(1)
+                .UpdatePlayerIdentityAsync(Arg.Any<string>(), Arg.Any<Guid>());
+
+            Assert.IsTrue(actual.Valid);
+        }
+
+        [Test]
+        public async Task Can_Not_Create_Player_Identity_Auth_Form_When_Brand_EnablePlayerIdentity_Is_False()
+        {
+            var fakeBrandService = Substitute.For<IBrandService>();
+            var fakePlayerService = Substitute.For<IPlayerService>();
+
+            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+
+            fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
+                .Returns(new Brand()
+                {
+                    Id = brandId,
+                    EnablePlayerIdentity = false,
+                    Status = BrandStatus.Active
+                });
+
+            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandService, fakePlayerService);
+
+            var command = new CreateIdentityAuthenticationFormCommand(
+                "playerCode",
+                brandId,
+                "620dff81110125f95bb9ccbb");
+
+            var actual = await sut.GetAsync(command);
+
+            Assert.IsFalse(actual.Valid);
         }
 
         [Test]
