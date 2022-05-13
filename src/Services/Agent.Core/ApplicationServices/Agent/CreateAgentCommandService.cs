@@ -68,8 +68,11 @@ namespace TGS.Services.Agent.ApplicationServices.Agent
 
             var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
+            var agentId = Guid.NewGuid();
+
             var agent = new CoreModels.Agent
             {
+                Id = agentId,
                 Username = query.Username,
                 LevelType = AgentLevelType.Agent,
                 BrandId = parentAgent.BrandId,
@@ -99,7 +102,8 @@ namespace TGS.Services.Agent.ApplicationServices.Agent
                 UpdatedByUsername = parentAgent!.Username,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
-                RegisteredOn = DateTimeOffset.Now
+                RegisteredOn = DateTimeOffset.Now,
+                Path = new LTree($"{parentAgent.Path}.{agentId:N}")
             };
 
             if (brand.AgentDividendType == AgentDividendType.MultipleLayer)
