@@ -18,6 +18,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IPlayerService
     {
+        ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
+
         Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
 
         Task<Player> GetPlayerAsync(
@@ -51,6 +53,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task UpdateParentPlayerAsync(string playerCode, string parentPlayerCode);
 
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
+
+        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -70,8 +74,31 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _cacheManager = cacheManager;
         }
 
+        public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
+        {
+            var createFormId = Guid.NewGuid();
+            var currentDate = DateTimeOffset.UtcNow;
+
+            _ = await _repository.PlayerAuthenticationForms
+                .AddAsync(new PlayerAuthenticationForm
+                {
+                    Id = createFormId,
+                    CreatedOn = currentDate,
+                    BrandId = brandId,
+                    PlayerCode = playerCode,
+                    Data = data
+                })
+                .ConfigureAwait(false);
+
+            _ = await _repository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
+
+            return createFormId;
+        }
+
         Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
-            ExistsAsync(predicate);
+                    ExistsAsync(predicate);
 
         Task<Player> IPlayerService.GetPlayerAsync(
                     Expression<Func<Player, bool>> predicate,
@@ -289,6 +316,33 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
             scope.Complete();
+        }
+
+        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId)
+        {
+            var identityData = await _repository.PlayerIdentity
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+            if (identityData == null)
+            {
+                identityData = new PlayerIdentity
+                {
+                    PlayerCode = playerCode,
+                    PlayerAuthenticationFormId = identityAuthenticationFormId
+                };
+
+                _ = await _repository.PlayerIdentity
+                    .AddAsync(identityData)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                identityData.PlayerAuthenticationFormId = identityAuthenticationFormId;
+            }
+            _ = await _repository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
     }
 }

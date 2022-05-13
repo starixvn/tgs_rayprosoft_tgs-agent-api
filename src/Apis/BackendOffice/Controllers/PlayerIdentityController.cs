@@ -1,12 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.FileService.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Player;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
@@ -21,6 +25,38 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class PlayerIdentityController : BaseContextController
     {
+        [HttpPost("{brandId}/{playerCode}/upload", Name = "CreatePlayerIdentityForm")]
+        public async Task<MessageResponse> CreatePlayerIdentityFormAsync(
+            [FromForm(Name = "file")] IFormFile identityFile,
+            [FromServices] IFileServiceClient fileServiceClient,
+            [FromServices] IGetService<CreateIdentityAuthenticationFormCommand, MessageResponse> commandService,
+            Guid brandId,
+            string playerCode)
+        {
+            var contentType = identityFile.ContentType;
+            await using var fileStream = identityFile.OpenReadStream();
+
+            var randomFileName = StringGenerator.GenerateAlphanumericString(32);
+
+            var uploadResult = await fileServiceClient
+                .UploadFileAsync(
+                    $"/{randomFileName}",
+                    MediaTypeHeaderValue.Parse(contentType),
+                    fileStream)
+                .ConfigureAwait(false);
+
+            var fileId = uploadResult.Id;
+
+            var command = new CreateIdentityAuthenticationFormCommand(
+                playerCode,
+                brandId,
+                fileId);
+
+            return await commandService
+                .GetAsync(command)
+                .ConfigureAwait(false);
+        }
+
         [HttpGet("{playerCode}/identity", Name = "GetPlayerIdentityAuthenticationForm")]
         [Description("Get a player identity authentication form")]
         public async ValueTask<PlayerIdentityForm> GetPlayerIdentityAuthenticationFormAsync(
