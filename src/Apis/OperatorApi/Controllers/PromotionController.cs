@@ -85,7 +85,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [HttpPost("{id}/join")]
+        [HttpPost("{promotionId}/join")]
         [Description("Join a promotion")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
