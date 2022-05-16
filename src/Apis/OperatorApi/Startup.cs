@@ -71,13 +71,9 @@ namespace TGS.Apis.OperatorApi
                 options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
             });
 
-            app.UseTgsErrorHandler();
             app.UseBrandCertificate();
-
             app.UseRouting();
-
             app.UseCors();
-
             app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
 
             app.UseEndpoints(endpoints =>
