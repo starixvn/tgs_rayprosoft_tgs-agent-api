@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.Promotion;
+using TGS.Core.Models.Enums;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.Promotion;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -39,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 PlayerCode = playerTokenData.PlayerCode,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
@@ -61,7 +62,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     DesktopBanner = item.DesktopBanner,
                     From = item.From,
                     GameProviderIds = item.GameProviderIds,
-                    GameType = item.GameType,
+                    GameType = (GameType?)item.GameType,
                     Id = item.Id,
                     Localization = item.Localization?.ContainsKey(language) == true
                         ? item.Localization[language]
@@ -70,7 +71,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Name = item.Name,
                     Percentage = item.Percentage,
                     PromotionType = item.PromotionType,
-                    Status = item.Status,
+                    Status = (SwitchStatus)item.Status,
                     SubSubject = item.SubSubject,
                     Terms = item.Terms,
                     To = item.To,
@@ -103,7 +104,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 To = request.To,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };

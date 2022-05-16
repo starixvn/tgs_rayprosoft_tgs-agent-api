@@ -63,10 +63,10 @@
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />

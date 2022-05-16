@@ -17,8 +17,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Repositories\Promotion.Repositories\Promotion.Repositories.csproj" />
-  </ItemGroup>
-
 </Project>

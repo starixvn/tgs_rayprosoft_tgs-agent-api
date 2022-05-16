@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Services\Promotion.Core\Promotion.Core.csproj" />
   </ItemGroup>
 
 </Project>
