@@ -2,10 +2,10 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.Promotion;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
 {
@@ -22,32 +22,50 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
 
         [HttpPut("ChangeOrders", Name = "ChangeOrder")]
         [Description("Change Promotion Display Order")]
-        public Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
-            return _client.ChangeOrderAsync(request);
+            var response = await _client.ChangeOrderAsync(request);
+            return new MessageResponse{Valid= response.Valid,Message= response.Message };
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreatePromotion")]
         [Description("Create a promotion")]
-        public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
-            _client.CreatePromotionAsync(request);
+        public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
+        {
+            var response = await _client.CreatePromotionAsync(request);
+            return new MessageResponse { Valid = response.Valid, Message = response.Message };
+        }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPromotions")]
         [Description("Get promotions")]
-        public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
-            => _client.GetPromotionsAsync(request);
+        public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
+        {
+            var response = await _client.GetPromotionsAsync(request);
+            return new PagedResponse<PromotionModel>
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items
+            };
+        }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdatePromotion")]
         [Description("Update a promotion")]
-        public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
+        public async Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {
             request.Id = id;
-            return _client.UpdatePromotionAsync(request);
+            var response = await _client.UpdatePromotionAsync(request);
+            return new MessageResponse { Valid = response.Valid, Message = response.Message };
         }
 
-        [HttpPut("{promotionId:guid}/{status}")]
+        [HttpPut("{promotionId:guid}/{status}", Name = "UpdatePromotionStatus")]
         [Description("change a Promotion's status")]
-        public Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, PromotionStatus status) =>
-            _client.ChangePromotionStatusAsync(new(promotionId, status));
+        public async Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, PromotionStatus status)
+        {
+            var response = await _client.ChangePromotionStatusAsync(new(promotionId, (short)status));
+            return new MessageResponse { Valid = response.Valid, Message = response.Message };
+        }
+
     }
 }

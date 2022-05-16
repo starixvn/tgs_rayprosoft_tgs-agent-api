@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.Promotion;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -115,12 +115,21 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{playerCode}/joinedPromotions", Name = "GetJoinedPromotions")]
         [Description("Get player operation")]
-        public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+        public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
             string playerCode,
             [FromQuery] GetJoinedPromotionsRequest request)
         {
             request.PlayerCode = playerCode;
-            return _client.GetJoinedPromotionsAsync(request);
+
+            var response = await _client.GetJoinedPromotionsAsync(request);
+
+            return new PagedResponse<JoinedPromotionModel>
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items
+            };
         }
 
         [HttpGet(Name = "GetPlayerList")]

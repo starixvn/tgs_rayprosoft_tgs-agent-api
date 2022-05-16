@@ -17,8 +17,4 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Services\Promotion.Core\Promotion.Core.csproj" />
-  </ItemGroup>
-
 </Project>

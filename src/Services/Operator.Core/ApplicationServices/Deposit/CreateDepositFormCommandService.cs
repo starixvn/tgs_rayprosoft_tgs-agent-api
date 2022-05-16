@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using Tgs.Promotion.Client;
 using Tgs.ServiceUtility;
-using TGS.Clients.Promotion.Client;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit
 {
