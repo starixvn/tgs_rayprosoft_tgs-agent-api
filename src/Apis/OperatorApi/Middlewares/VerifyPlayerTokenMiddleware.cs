@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ApplicationServices.Player;
@@ -21,11 +23,13 @@ namespace TGS.Apis.OperatorApi.Middlewares
     {
         private static readonly ActivitySource _VerifyPlayerTokenMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
 
+        private readonly ILogger<VerifyPlayerTokenMiddleware> _logger;
         private readonly RequestDelegate _next;
 
-        public VerifyPlayerTokenMiddleware(RequestDelegate next)
+        public VerifyPlayerTokenMiddleware(RequestDelegate next, ILogger<VerifyPlayerTokenMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(
@@ -95,21 +99,34 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            _ = handler.ValidateToken(token,
-                 new TokenValidationParameters
-                 {
-                     ValidateIssuer = true,
-                     ValidIssuer = Consts.Site,
-                     ValidateAudience = false,
-                     ValidateIssuerSigningKey = true,
-                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                     ValidateLifetime = true,
-                     ClockSkew = TimeSpan.Zero
-                 },
-                 exception => throw new InvalidCredentialsException(exception.Message),
-                 _ => throw new PlayerLoginExpiredException(playerCode));
+            var result = handler.ValidateToken(
+                token,
+                new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = Consts.Site,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                },
+                exception => _logger.LogDebug(exception, "Token validation failed"),
+                _ => _logger.LogDebug("{playerCode} jwt validate expired", playerCode));
 
-            await _next(context);
+            if (result.IsValid)
+                await _next(context);
+            else
+            {
+                await context.Response.WriteAsJsonAsync(new TgsResponse
+                {
+                    Error = 102,
+                    ErrorMessage = "InvalidOrExpiredPlayerToken",
+                    ErrorMessageKey = "InvalidOrExpiredPlayerToken"
+                }).ConfigureAwait(false);
+
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
         }
     }
 }

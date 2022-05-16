@@ -30,9 +30,7 @@ public class ErrorMessageMapperFilter : IAsyncExceptionFilter
         var messageKey = _errorMapper.GetMessageKeyByException(exception);
 
         if (statusCode >= 500)
-        {
             _logger.LogError(exception, "Caught global error!");
-        }
         else
             _logger.LogWarning(exception, "Caught global exception!");
 

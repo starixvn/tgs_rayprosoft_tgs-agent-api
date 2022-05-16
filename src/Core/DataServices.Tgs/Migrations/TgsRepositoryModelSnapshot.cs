@@ -5763,6 +5763,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount_used");
 
+                    b.Property<Guid?>("AmountUsedSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("amount_used_snapshot_id");
+
                     b.Property<bool>("AutoSentPlayerBonus")
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_player_bonus");
