@@ -27,7 +27,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _client = client;
         }
 
-        [HttpGet("{language}")]
+        [HttpGet("{language}", Name = "GetPromotions")]
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -86,7 +86,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [HttpPost("{promotionId}/join")]
+        [HttpPost("{promotionId}/join", Name = "JoinPromotion")]
         [Description("Join a promotion")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]

@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         public PlayerPromotionController(IPromotionClient client) => _client = client;
 
-        [HttpGet("{language}")]
+        [HttpGet("{language}", Name = "GetPlayerPromotions")]
         [Description("Get player's promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -88,7 +88,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get promotions that the player has already joined in.
         /// </summary>
-        [HttpGet("joined")]
+        [HttpGet("joined", Name = "GetJoinedPromotions")]
         [Description("Get promotions that the player has already joined in")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]

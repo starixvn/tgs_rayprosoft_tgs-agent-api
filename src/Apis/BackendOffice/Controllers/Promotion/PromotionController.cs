@@ -28,7 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             return new MessageResponse{Valid= response.Valid,Message= response.Message };
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreatePromotion")]
         [Description("Create a promotion")]
         public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
         {
@@ -36,7 +36,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             return new MessageResponse { Valid = response.Valid, Message = response.Message };
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPromotions")]
         [Description("Get promotions")]
         public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
         {
@@ -50,7 +50,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             };
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdatePromotion")]
         [Description("Update a promotion")]
         public async Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {
@@ -59,7 +59,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             return new MessageResponse { Valid = response.Valid, Message = response.Message };
         }
 
-        [HttpPut("{promotionId:guid}/{status}")]
+        [HttpPut("{promotionId:guid}/{status}", Name = "UpdatePromotionStatus")]
         [Description("change a Promotion's status")]
         public async Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, PromotionStatus status)
         {

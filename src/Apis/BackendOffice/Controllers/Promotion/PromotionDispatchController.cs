@@ -19,7 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPromotions")]
         [Description("Get promotion dispatches")]
         public async Task<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
             [FromQuery] GetPromotionDispatchesRequest request)
@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             };
         }
 
-        [HttpPost]
+        [HttpPost(Name = "DispatchPromotions")]
         [Description("Dispatch promotion")]
         public async Task<MessageResponse> DispatchPromotionsAsync(
             [FromBody] DispatchPromotionBonusRequest request)
