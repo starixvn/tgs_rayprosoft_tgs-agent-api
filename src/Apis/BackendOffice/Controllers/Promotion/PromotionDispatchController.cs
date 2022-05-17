@@ -19,9 +19,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpGet(Name = "GetPromotions")]
+        [HttpGet(Name = "GetPromotionDispatches")]
         [Description("Get promotion dispatches")]
-        public async Task<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
+        public async Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(
             [FromQuery] GetPromotionDispatchesRequest request)
         {
             var response = await _client.GetPromotionDispatchesAsync(request);
