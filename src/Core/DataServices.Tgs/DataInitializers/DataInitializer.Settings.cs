@@ -178,6 +178,14 @@ public partial class DataInitializer
                             new MenuSetting("RealnameFilter")
                         }
                     },
+                    new MenuSetting("PlayerIdentity")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update")
+                        }
+                    },
                     new MenuSetting("BalanceAdjustment")
                     {
                         SubMenus = new[]

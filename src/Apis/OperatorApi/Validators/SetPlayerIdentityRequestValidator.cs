@@ -21,14 +21,15 @@ namespace TGS.Apis.OperatorApi.Validators
                 .WithName(x => GetJsonPropertyName(x, nameof(x.RealName)));
 
             RuleFor(x => x.Identity)
-                .MustAsync(async (id, _) =>
+                .Must(id =>
                 {
                     var httpContext = httpContextAccessor.HttpContext;
                     var playerTokenData = httpContext.Items.GetPlayerTokenData();
 
-                    var player = await playerOperations
+                    var player = playerOperations
                         .GetPlayerByCodeAsync(playerTokenData.PlayerCode)
-                        .ConfigureAwait(false);
+                        .GetAwaiter()
+                        .GetResult();
 
                     var playerCurrency = player.DefaultWalletCurrencyCode;
 

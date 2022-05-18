@@ -22,7 +22,5 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public string ReviewedUserName { get; set; }
 
         public PlayerIdentityReviewState Status { get; set; }
-
-
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using TGS.Paging;
+using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 
 namespace TGS.Services.BackOffice.Domain
 {
@@ -21,6 +24,16 @@ namespace TGS.Services.BackOffice.Domain
             IEnumerable<LocalizationStringInfo> localizationStrings);
 
         IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
+
+        IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
+            Guid brandId, 
+            PlayerIdentityReviewState? status, 
+            string username, 
+            DateTimeOffset? beginCreatedOn, 
+            DateTimeOffset? endCreatedOn, 
+            DateTimeOffset? beginReviewedOn, 
+            DateTimeOffset? endReviewedOn);
+        
 
         IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
 

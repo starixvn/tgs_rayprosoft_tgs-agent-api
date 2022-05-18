@@ -172,7 +172,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpGet("status")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
         {
             var dict = Enum.GetValues(typeof(FlowState))

@@ -118,8 +118,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(ModelBindingException)] = TgsApiError.InvalidArguments,
                 [typeof(FormatException)] = TgsApiError.IncorrectFormat,
                 [typeof(BrandUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
-                [typeof(GameProviderUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
-                [typeof(GameUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
                 [typeof(InvalidStatusException)] = TgsApiError.InvalidStatus,
                 [typeof(InvalidOperationException)] = TgsApiError.SystemError,
                 [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,

@@ -5,15 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Resources;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Middlewares
 {
@@ -21,11 +23,13 @@ namespace TGS.Apis.OperatorApi.Middlewares
     {
         private static readonly ActivitySource _VerifyPlayerTokenMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyPlayerTokenMiddleware)}");
 
+        private readonly ILogger<VerifyPlayerTokenMiddleware> _logger;
         private readonly RequestDelegate _next;
 
-        public VerifyPlayerTokenMiddleware(RequestDelegate next)
+        public VerifyPlayerTokenMiddleware(RequestDelegate next, ILogger<VerifyPlayerTokenMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(
@@ -34,8 +38,8 @@ namespace TGS.Apis.OperatorApi.Middlewares
             IHashProvider hashProvider,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            IExpirationValidator expirationValidator,
-            IJwtTokenHandler handler)
+            IJwtTokenHandler handler,
+            ICommandService<ValidatePlayerLoginRecordCommand> loginRecordValidateService)
         {
             using var activity = _VerifyPlayerTokenMiddlewareSource.StartActivity(nameof(VerifyPlayerTokenMiddleware));
 
@@ -44,13 +48,12 @@ namespace TGS.Apis.OperatorApi.Middlewares
             if (attribute == null)
             {
                 await _next(context);
-
                 return;
             }
 
             var token = context.Request.Headers.TryGetValue("Token", out var value) ? value.FirstOrDefault() : null;
 
-            if (token.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(token))
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
@@ -58,7 +61,6 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 }
 
                 await _next(context);
-
                 return;
             }
 
@@ -66,16 +68,22 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
-            if (sub.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(sub))
             {
                 throw new MissingTokenException(Player.MissingPlayerToken);
             }
 
             var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
+            if (data == null)
+            {
+                throw new MissingTokenException(Player.MissingPlayerToken);
+            }
+
             context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
 
             var playerCode = data.PlayerCode;
-            await expirationValidator.ThrowIfPlayerLoginExpiredAsync(data.LoginRecordId, playerCode);
+
+            await loginRecordValidateService.ExecuteAsync(new ValidatePlayerLoginRecordCommand(data.LoginRecordId, playerCode));
 
             if (!attribute.NeedAuthorize)
             {
@@ -91,8 +99,9 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            handler.ValidateToken(token,
-                new()
+            var result = handler.ValidateToken(
+                token,
+                new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidIssuer = Consts.Site,
@@ -102,10 +111,22 @@ namespace TGS.Apis.OperatorApi.Middlewares
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 },
-                exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new PlayerLoginExpiredException(playerCode));
+                exception => _logger.LogDebug(exception, "Token validation failed"),
+                _ => _logger.LogDebug("{playerCode} jwt validate expired", playerCode));
 
-            await _next(context);
+            if (result.IsValid)
+                await _next(context);
+            else
+            {
+                await context.Response.WriteAsJsonAsync(new TgsResponse
+                {
+                    Error = 102,
+                    ErrorMessage = "InvalidOrExpiredPlayerToken",
+                    ErrorMessageKey = "InvalidOrExpiredPlayerToken"
+                }).ConfigureAwait(false);
+
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
         }
     }
 }

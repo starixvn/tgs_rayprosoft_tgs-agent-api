@@ -5,14 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper;
-using Microsoft.EntityFrameworkCore.Storage;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.DataServices.Base.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameActionType;
 using static TGS.Core.Models.Enums.GameType;
@@ -113,7 +111,8 @@ public partial class DataInitializer : BaseDataInitializer
             new JiliGameProvider(),
             new TFGameProvider(),
             new DreamGameGameProvider(),
-            new JokerGameProvider()
+            new JokerGameProvider(),
+            new PragmaticPlayTransferGameProvider()
         };
     }
 
@@ -807,7 +806,6 @@ public partial class DataInitializer : BaseDataInitializer
                 currencyCode,
                 new Microsoft.EntityFrameworkCore.LTree(chiefId.ToString("N")),
                 chiefId));
-
 
             _agents.Add(CreateAgent($"{brand.Code}Agent1",
                 AgentStatus.Enabled,

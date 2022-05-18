@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Agent.Configuration
@@ -13,6 +14,25 @@ namespace TGS.Services.Agent.Configuration
         public AgentConfiguration(IServiceCollection services)
         {
             Services = services ?? throw new ArgumentNullException(nameof(services));
+        }
+
+        public AgentConfiguration AddAgentLoginRecordRepository<TAgentLoginRecordRepository>()
+            where TAgentLoginRecordRepository : class, IAgentLoginRecordRepository
+        {
+            _ = Services.AddTransient<IAgentLoginRecordRepository, TAgentLoginRecordRepository>()
+                .Decorate<IAgentLoginRecordRepository>((innerRepository, sp)
+                    =>
+                {
+                    var redisDatabase = sp
+                        .GetRequiredService<IRedisConnectionFactory>()
+                        .GetConnection()
+                        .GetDatabase();
+
+                    return ActivatorUtilities.CreateInstance<RedisAgentLoginRecordRepository>(sp, innerRepository, redisDatabase);
+                })
+                .Decorate<IAgentLoginRecordRepository, MemoryCachedAgentLoginRecordRepository>();
+
+            return this;
         }
 
         public AgentConfiguration AddAgentRepository<TAgentRepository>() where TAgentRepository : class, IAgentRepository

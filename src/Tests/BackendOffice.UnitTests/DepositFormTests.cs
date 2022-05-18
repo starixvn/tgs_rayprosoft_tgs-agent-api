@@ -7,7 +7,6 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using StackExchange.Redis;
-using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
@@ -21,6 +20,7 @@ using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
 using System.Threading;
+using Tgs.Promotion.Client;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.Promotion;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -31,12 +31,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             _client = client;
         }
 
-        [HttpPut("{playerCode}/clear")]
+        [HttpPut("{playerCode}/clear", Name = "ClearPlayerBuckets")]
         [Description("Clear player buckets")]
         public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
 
-        [HttpPost("{playerCode}/adjust/increase")]
+        [HttpPost("{playerCode}/adjust/increase", Name = "CreatePlayerIncreaseAmount")]
         [Description("Create a player adjustment to increase amount")]
         public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
             CreatePlayerIncreaseAmountRequest request)
@@ -45,7 +45,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpPost("{playerCode}/adjust/reduce")]
+        [HttpPost("{playerCode}/adjust/reduce", Name = "CreatePlayerReduceAmount")]
         [Description("Create a player adjustment to reduce amount")]
         public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
             CreatePlayerReduceAmountRequest request)
@@ -54,7 +54,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("accountChanges")]
+        [HttpGet("accountChanges", Name = "GetPlayerAccountChanges")]
         [Description("Get player account changes")]
         public async Task<PagedResponse<PlayerAccountChangeReportModel>> GetAccountChangesAsync(
             [FromServices] IReportClient client,
@@ -113,48 +113,57 @@ namespace TGS.Apis.BackendOffice.Controllers
             return new PlayerAccountChangesTotalModel { Amount = response };
         }
 
-        [HttpGet("{playerCode}/joinedPromotions")]
+        [HttpGet("{playerCode}/joinedPromotions", Name = "GetJoinedPromotions")]
         [Description("Get player operation")]
-        public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
+        public async Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(
             string playerCode,
             [FromQuery] GetJoinedPromotionsRequest request)
         {
             request.PlayerCode = playerCode;
-            return _client.GetJoinedPromotionsAsync(request);
+
+            var response = await _client.GetJoinedPromotionsAsync(request);
+
+            return new PagedResponse<JoinedPromotionModel>
+            {
+                Valid = response.Valid,
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items
+            };
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPlayerList")]
         [Description("Get player list")]
         public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
             => _mediator.Send(request);
 
-        [HttpGet("{playerBucketId}/playerBucketHistories")]
+        [HttpGet("{playerBucketId}/playerBucketHistories", Name = "GetPlayerBucketHistories")]
         [Description("Get player buckets")]
         public ValueTask<GetPlayerBucketHistoriesResponse> GetPlayerBucketHistoriesAsync(Guid playerBucketId,
             [FromServices] IGetService<GetPlayerBucketHistoriesRequest, GetPlayerBucketHistoriesResponse> service)
             => service.GetAsync(new GetPlayerBucketHistoriesRequest(playerBucketId));
 
-        [HttpGet("{playerCode}/playerBuckets")]
+        [HttpGet("{playerCode}/playerBuckets", Name = "GetPlayerBuckets")]
         [Description("Get player buckets")]
         public ValueTask<GetPlayerBucketsResponse> GetPlayerBucketsAsync(string playerCode,
             [FromServices] IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse> service)
             => service.GetAsync(new GetPlayerBucketsRequest(playerCode));
 
-        [HttpGet("{playerCode}/transferwallet")]
+        [HttpGet("{playerCode}/transferwallet", Name = "GetPlayerGameProviderBalances")]
         [Description("Get Player Transfer Wallet")]
         public ValueTask<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode,
             [FromServices]
             IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
             => service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
 
-        [HttpGet("{playerCode}/mainwallet")]
+        [HttpGet("{playerCode}/mainwallet", Name = "GetPlayerMainWalletBalance")]
         [Description("Get Player Main wallet")]
         public ValueTask<decimal> GetPlayerMainWalletBalanceAsync(
             [FromServices] IGetService<GetPlayerMainWalletBalance, decimal> service,
             string playerCode)
             => service.GetAsync(new(playerCode));
 
-        [HttpGet("{playerCode}/operations")]
+        [HttpGet("{playerCode}/operations", Name = "GetPlayerOperations")]
         [Description("Get player operation")]
         public Task<PagedResponse<PlayerOperationModel>> GetPlayerOperationsAsync(string playerCode,
             [FromQuery] GetPlayerOperationRequest request)
@@ -163,12 +172,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpGet("{playerCode}")]
+        [HttpGet("{playerCode}", Name = "GetSinglePlayer")]
         [Description("Get player")]
         public Task<GetPlayerResponse> GetSingleAsync(string playerCode) =>
             _mediator.Send(new GetPlayerRequest(playerCode));
 
-        [HttpPut("{playerCode}/{type}")]
+        [HttpPut("{playerCode}/{type}", Name = "UpdatePlayer")]
         [Description("Update player")]
         public Task<MessageResponse> UpdateAsync(string playerCode, string type,
             [FromBody] Messages.Player.UpdatePlayerRequest request)

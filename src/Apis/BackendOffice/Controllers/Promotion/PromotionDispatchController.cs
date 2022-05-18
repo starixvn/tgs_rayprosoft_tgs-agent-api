@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.PromotionDispatch;
 using TGS.Core.Models.Messages;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.PromotionDispatch;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
 {
@@ -19,20 +19,32 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             _client = client;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPromotionDispatches")]
         [Description("Get promotion dispatches")]
-        public Task<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
-            [FromQuery] GetPromotionDispatchesRequest request) =>
-            _client.GetPromotionDispatchesAsync(request);
+        public async Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(
+            [FromQuery] GetPromotionDispatchesRequest request)
+        {
+            var response = await _client.GetPromotionDispatchesAsync(request);
 
-        [HttpPost]
+            return new PagedResponse<PromotionDispatchModel>
+            {
+                Valid = response.Valid, 
+                Message = response.Message,
+                TotalCount = response.TotalCount,
+                Items = response.Items
+            };
+        }
+
+        [HttpPost(Name = "DispatchPromotions")]
         [Description("Dispatch promotion")]
-        public Task<MessageResponse> DispatchPromotionsAsync(
+        public async Task<MessageResponse> DispatchPromotionsAsync(
             [FromBody] DispatchPromotionBonusRequest request)
         {
             request.OperatorUserId = Guid.Parse(UserId);
 
-            return _client.DispatchPromotionAsync(request);
+            var response = await _client.DispatchPromotionAsync(request);
+
+            return new MessageResponse { Valid = response.Valid, Message = response.Message };
         }
     }
 }

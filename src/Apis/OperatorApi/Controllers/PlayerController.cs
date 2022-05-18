@@ -237,7 +237,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 IdentityAuthenticationFormId = identityFormInfo.FormId,
                 IsAutoTransferToGame = isAutoTransferToGame,
                 IsSetPayPassword = player.IsSetPayPassword,
-                Username = player.Username,
+                Username = player.UserName,
                 Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.Parse(birthdateValue),
                 VipLevel = vipLevel,
                 RealName = playerProperties.GetValueOrDefault("RealName"),
@@ -330,7 +330,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetLogoutQuery(brandId, playerTokenData);
+            var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
             LogoutInfo info;
             try
             {

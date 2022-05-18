@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator
 {
@@ -29,7 +28,7 @@ namespace TGS.Services.Operator
 
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid IdentityAuthenticationFormId);
+        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
 
         ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
     }
