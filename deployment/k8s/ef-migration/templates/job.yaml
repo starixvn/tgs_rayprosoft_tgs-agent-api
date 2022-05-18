@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "ef-migration.labels" . | nindent 4 }}
 spec:
+  ttlSecondsAfterFinished: 30
   template:
     spec:
       {{- with .Values.imagePullSecrets }}
