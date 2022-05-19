@@ -85,6 +85,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 Username,
                 HttpContext.RequestAborted).ConfigureAwait(false);
 
+            await promotionServiceClient.SetPromotionStatusAsync(
+                promotionId,
+                request.Status switch
+                {
+                    SwitchStatus.Enabled => Tgs.Promotion.Clients.PromotionStatus.Enabled,
+                    SwitchStatus.Disabled => Tgs.Promotion.Clients.PromotionStatus.Disabled,
+                    _ => throw new NotImplementedException()
+                },
+                Username,
+                HttpContext.RequestAborted).ConfigureAwait(false);
+
             return new MessageResponse { Valid = true };
         }
 
