@@ -63,7 +63,7 @@
     <PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.2.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.0" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -251,6 +251,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Messages\Promotion\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

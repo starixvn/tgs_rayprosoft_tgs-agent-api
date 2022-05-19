@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using TGS.Core.Models.Messages;
-using Tgs.Promotion.Client;
+using Tgs.Promotion.Clients;
 
 namespace TGS.Workers.Schedulers.Jobs.Promotion
 {
