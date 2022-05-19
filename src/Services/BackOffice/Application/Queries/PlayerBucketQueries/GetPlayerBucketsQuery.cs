@@ -3,14 +3,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PlayerBucketQueries
 {
-    public class
-        GetPlayerBucketsQuery : IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse>
+    public class GetPlayerBucketsQuery : IGetService<GetPlayerBucketsRequest, GetPlayerBucketsResponse>
     {
         private readonly IPlayerBucketService _playerBucketService;
 
@@ -33,7 +32,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerBucketQueries
 
             var playerBuckets = await _playerBucketService.GetPlayerBucketQueries()
                 .Where(x => x.CreatedOn >= before14DayDate || x.IsFull == false)
-                .Where(x => x.PlayerCode == request.PlayerCode).ToArrayAsync(cancellationToken);
+                .Where(x => x.PlayerCode == request.PlayerCode)
+                .OrderByDescending(x => x.CreatedOn)
+                .ToArrayAsync(cancellationToken);
 
             return new GetPlayerBucketsResponse
             {
