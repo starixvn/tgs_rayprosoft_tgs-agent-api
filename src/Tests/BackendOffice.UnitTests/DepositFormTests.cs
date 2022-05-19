@@ -20,7 +20,7 @@ using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
 using System.Threading;
-using Tgs.Promotion.Client;
+using Tgs.Promotion.Clients;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

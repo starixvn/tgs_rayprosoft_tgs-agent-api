@@ -11,7 +11,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Core.Models.Messages;
-using Tgs.Promotion.Client;
+using Tgs.Promotion.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 
