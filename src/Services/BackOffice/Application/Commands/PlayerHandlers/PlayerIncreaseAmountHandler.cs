@@ -164,6 +164,14 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                         null,
                         userId)
                     .ConfigureAwait(false),
+                PlayerAdjustmentTransactionType.BonusAdjust => await _cashServiceClient
+                    .AdjustBonusAsync(
+                        walletId,
+                        amount,
+                        remark,
+                        null,
+                        userId)
+                    .ConfigureAwait(false),
                 _ => throw new NotSupportedException()
             };
     }
