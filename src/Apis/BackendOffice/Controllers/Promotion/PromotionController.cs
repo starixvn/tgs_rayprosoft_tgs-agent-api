@@ -8,6 +8,7 @@ using Tgs.Promotion.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using PromotionStatus = TGS.Core.Models.Enums.PromotionStatus;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
 {
@@ -113,7 +114,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 From = request.From,
                 To = request.To,
                 Status = (short?)request.Status,
-                Type = request.Type
+                Type = request.Type,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
             };
 
             var response = await _client.GetPromotionsAsync(promotionRequest);

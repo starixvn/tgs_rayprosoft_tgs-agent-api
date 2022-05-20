@@ -32,7 +32,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 PromotionName = request.PromotionName,
                 Username = request.Username,
                 From = request.From,
-                To = request.To
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
             };
 
             var response = await _client.GetPromotionDispatchesAsync(promotionRequest);
