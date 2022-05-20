@@ -401,6 +401,26 @@ public partial class DataInitializer
                     }
                 }
             },
+            new MenuSetting("Marketing")
+            {
+                SubMenus = new[]
+                {
+                    new MenuSetting("PlayerDeposit")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View")
+                        }
+                    },
+                    new MenuSetting("MarketingReport")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View")
+                        }
+                    }
+                }
+            },
             new MenuSetting("System")
             {
                 SubMenus = new[]
