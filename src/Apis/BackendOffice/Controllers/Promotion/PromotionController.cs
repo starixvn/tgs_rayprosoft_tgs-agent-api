@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Promotion;
 using Tgs.Promotion.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Core.Models.Enums;
@@ -78,9 +79,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 promotionId,
                 new
                 {
+                    request.GameProviderIds,
                     request.BonusAmountLimit,
                     request.Percentage,
-                    request.TurnoverMultiple
+                    request.TurnoverMultiple,
+                    request.GameType
                 },
                 Username,
                 HttpContext.RequestAborted).ConfigureAwait(false);
