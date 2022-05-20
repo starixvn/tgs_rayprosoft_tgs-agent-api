@@ -62,8 +62,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalBetId = source.BetId.ToString(),
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalGameId = "sportsbook",
-                GameActionType = GameActionType.PlaceBet,                
+                GameActionType = GameActionType.PlaceBet,
                 TimeStamp = DateTimeOffset.UtcNow,
+                RoundDetail = JsonSerializer.Serialize(new { Bet = source.Selections })
             };
 
             return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
@@ -95,8 +96,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                     GameActionType = GameActionType.CancelTransaction,
                     ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
                     TimeStamp = DateTimeOffset.UtcNow,
-                    RoundClosed = false,
-                    RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+                    RoundClosed = false
                 };
             }
 
@@ -139,8 +139,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 GameActionType = gameActionType,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
-                RoundClosed = true,
-                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+                RoundClosed = true
             };
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
@@ -176,7 +175,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, "sportsbook").ConfigureAwait(false);
             var cachedGame = cachedGames.First();
 
-            string externalRoundId = source.BetId.ToString();
+            var externalRoundId = source.BetId.ToString();
 
             var autoCloseRound = data.AutoCloseRound;
             var gameActionType = source.BetState switch
@@ -213,8 +212,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
                 GameActionType = gameActionType,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
-                TimeStamp = DateTimeOffset.UtcNow,
-                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+                TimeStamp = DateTimeOffset.UtcNow
             };
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
