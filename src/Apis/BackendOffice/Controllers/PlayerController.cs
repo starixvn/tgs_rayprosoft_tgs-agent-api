@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Promotion.Clients;
-using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -119,16 +119,30 @@ namespace TGS.Apis.BackendOffice.Controllers
             string playerCode,
             [FromQuery] GetJoinedPromotionsRequest request)
         {
-            request.PlayerCode = playerCode;
+            var promotionRequest = new Tgs.Promotion.Clients.Models.Promotion.GetJoinedPromotionsRequest
+            {
+                PlayerCode = playerCode,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
 
-            var response = await _client.GetJoinedPromotionsAsync(request);
+            var response = await _client.GetJoinedPromotionsAsync(promotionRequest);
 
             return new PagedResponse<JoinedPromotionModel>
             {
                 Valid = response.Valid,
                 Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = response.Items
+                Items = response.Items.Select(x => new JoinedPromotionModel
+                {
+                    PromotionName = x.PromotionName,
+                    CreatedOn = x.CreatedOn
+                }).ToArray()
             };
         }
 
