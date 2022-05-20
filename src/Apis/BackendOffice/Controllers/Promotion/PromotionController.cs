@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Promotion;
 using Tgs.Promotion.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Core.Models.Enums;
@@ -57,6 +56,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             var promotionId = await promotionServiceClient.CreatePromotionAsync(
                 request.BrandId,
                 createInfo,
+                Username,
+                HttpContext.RequestAborted).ConfigureAwait(false);
+
+            await promotionServiceClient.SetPromotionVipLevelsAsync(
+                promotionId,
+                request.VipLevels,
                 Username,
                 HttpContext.RequestAborted).ConfigureAwait(false);
 
