@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using Tgs.MessageQueue;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -27,14 +29,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
     public class BetConstructActionModelMapper : IBetConstructActionModelMapper
     {
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IMessageSender _messageSender;
         private readonly IBetConstructService _service;
 
         public BetConstructActionModelMapper(
             IBetConstructService service,
-            IGameProviderOperations gameProviderOperations)
+            IGameProviderOperations gameProviderOperations,
+            IMessageSender messageSender)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         }
 
         async ValueTask<BetData> IBetConstructActionModelMapper.BetAsync(
@@ -98,6 +103,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                     RoundClosed = false,
                     RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
                 };
+                await _messageSender
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .ConfigureAwait(false);
             }
 
             return GetBetData(data, playerCode, transaction, data.AutoCloseRound);
@@ -142,6 +150,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 RoundClosed = true,
                 RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
             };
+            await _messageSender
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .ConfigureAwait(false);
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
         }
@@ -216,6 +227,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 TimeStamp = DateTimeOffset.UtcNow,
                 RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
             };
+
+            await _messageSender
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .ConfigureAwait(false);
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
         }
