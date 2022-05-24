@@ -747,11 +747,34 @@ public partial class DataInitializer
                 {
                     new PromotionType
                     {
-                        Name = "NewUser",
+                        Name = "Register",
+                        SettlementIntervalType = "Instantly",
                         Trans = new()
                         {
-                            Zh = "新用戶",
-                            En = "New User"
+                            Zh = "首次註冊",
+                            En = "Register"
+                        }
+                    }
+                }
+            },
+            new PromotionTypeGroup
+            {
+                Name = "Lottery",
+                Trans = new()
+                {
+                    Zh = "抽獎",
+                    En = "Lottery"
+                },
+                Types = new[]
+                {
+                    new PromotionType
+                    {
+                        Name = "Roulette",
+                        SettlementIntervalType = "Instantly",
+                        Trans = new()
+                        {
+                            Zh = "輪盤",
+                            En = "Roulette"
                         }
                     }
                 }
