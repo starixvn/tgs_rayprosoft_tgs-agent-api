@@ -4468,6 +4468,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
+                    b.Property<decimal>("BonusAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bonus_adjust_amount");
+
                     b.Property<decimal>("BonusAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4512,6 +4517,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("no_include_net_profit_agent_adjust_amount");
+
+                    b.Property<decimal>("NoIncludeNetProfitBonusAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_bonus_adjust_amount");
 
                     b.Property<decimal>("NoIncludeNetProfitCompanyAdjustAmount")
                         .HasPrecision(18, 6)
