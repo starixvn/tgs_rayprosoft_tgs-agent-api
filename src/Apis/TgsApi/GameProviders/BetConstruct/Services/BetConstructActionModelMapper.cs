@@ -103,8 +103,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                     TimeStamp = DateTimeOffset.UtcNow,
                     RoundClosed = false
                 };
+
+                var roundDetailData = new BetConstructRoundDetailData(
+                    roundRecord.Id,
+                    JsonSerializer.Serialize(new { Settle = source.BetSelectionState }));
+
                 await _messageSender
-                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", roundDetailData.ToBson())
                     .ConfigureAwait(false);
             }
 
@@ -149,8 +154,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 TimeStamp = DateTimeOffset.UtcNow,
                 RoundClosed = true
             };
+
+            var roundDetailData = new BetConstructRoundDetailData(
+                   roundRecord.Id,
+                   JsonSerializer.Serialize(new { Settle = source.BetSelectionState }));
+
             await _messageSender
-                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", roundDetailData.ToBson())
                     .ConfigureAwait(false);
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
@@ -226,8 +236,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BetConstruct.Services
                 TimeStamp = DateTimeOffset.UtcNow
             };
 
+            var roundDetailData = new BetConstructRoundDetailData(
+                   roundRecord.Id,
+                   JsonSerializer.Serialize(new { Settle = source.BetSelectionState }));
+
             await _messageSender
-                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", new { Settle = source.BetSelectionState }.ToBson())
+                    .PublishAsync("tgs.gp.gamerecord.database.detail.bc", roundDetailData.ToBson())
                     .ConfigureAwait(false);
 
             return GetBetData(data, playCode, transaction, autoCloseRound);
