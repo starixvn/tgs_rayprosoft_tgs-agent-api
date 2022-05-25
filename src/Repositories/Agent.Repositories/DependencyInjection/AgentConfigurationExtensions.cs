@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static AgentConfiguration AddTgsAgentRepository(this AgentConfiguration configuration)
             => configuration
                 .AddAgentRepository<AgentRepository>()
+                .AddAgentLoginRecordRepository<AgentLoginRecordRepository>()
                 .AddBrandRepository<BrandRepository>()
                 .AddGameProviderRepository<GameProviderRepository>()
                 .AddMaintenanceRedisRepository<MaintenanceRedisRepository>();

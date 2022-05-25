@@ -11,7 +11,11 @@ namespace TGS.Services.GameOperations
 
         Task<PlayerLoginRecordModel> GetLastAsync(string playerCode);
 
+        Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, DateTimeOffset current);
+
         Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform);
+
+        Task<PlayerLoginRecordModel> GetLastAsync(string playerCode, PlatformType platform, DateTimeOffset current);
 
         Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode);
     }

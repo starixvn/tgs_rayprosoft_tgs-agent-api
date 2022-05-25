@@ -8,6 +8,8 @@ namespace TGS.Core.DataServices.Tgs.Models
     {
         public decimal AmountUsed { get; set; }
 
+        public Guid? AmountUsedSnapshotId { get; set; }
+
         public bool AutoSentPlayerBonus { get; set; }
 
         public decimal BonusAmountLimit { get; set; }

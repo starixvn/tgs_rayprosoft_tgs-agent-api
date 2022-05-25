@@ -25,18 +25,7 @@ namespace TGS.Services.Operations
 
         Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
 
-        Task<CachedPlayerLoginRecord[]> GetPlayerEnabledLoginRecordsAsync(string playerCode);
-
-        Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
-                                    PlatformType? platform = null);
-
-        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
-
         Task<string> GetUsernameByPlayerCodeAsync(string playerCode);
-
-        Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data);
-
-        Task PlayerLogoutAsync(PlayerLogoutData data);
 
         Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
 
@@ -48,8 +37,6 @@ namespace TGS.Services.Operations
             DateTimeOffset updatedOn);
 
         Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
-
-        Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
 
         Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn);
 

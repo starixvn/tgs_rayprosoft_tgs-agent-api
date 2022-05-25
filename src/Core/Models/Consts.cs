@@ -120,6 +120,7 @@ namespace TGS.Core.Models
             public const string KY = "KY";
             public const string LY = "LY";
             public const string PragmaticPlay = "PP";
+            public const string PragmaticPlayTransfer = "PPTF";
             public const string Saba = "SABA";
             public const string SBOBET = "SBO";
             public const string SexyGaming = "SG";

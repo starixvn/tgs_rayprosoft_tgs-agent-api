@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Clients.Promotion.Client;
-using TGS.Clients.Promotion.Client.Models.Promotion;
+using TGS.Core.Models.Enums;
+using Tgs.Promotion.Client;
+using Tgs.Promotion.Client.Models.Promotion;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -26,7 +27,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             _client = client;
         }
 
-        [HttpGet("{language}")]
+        [HttpGet("{language}", Name = "GetPromotions")]
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -41,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Language = language,
                 Page = request.Page,
                 Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
                 SortBy = "Number",
                 ShowAll = request.ShowAll
             };
@@ -62,7 +63,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     DesktopBanner = item.DesktopBanner,
                     From = item.From,
                     GameProviderIds = item.GameProviderIds,
-                    GameType = item.GameType,
+                    GameType = (GameType?)item.GameType,
                     Id = item.Id,
                     Localization = item.Localization?.ContainsKey(language) == true
                         ? item.Localization[language]
@@ -71,7 +72,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Name = item.Name,
                     Percentage = item.Percentage,
                     PromotionType = item.PromotionType,
-                    Status = item.Status,
+                    Status = (SwitchStatus)item.Status,
                     SubSubject = item.SubSubject,
                     Terms = item.Terms,
                     To = item.To,
@@ -85,14 +86,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [HttpPost("{id}/join")]
+        [HttpPost("{promotionId}/join", Name = "JoinPromotion")]
         [Description("Join a promotion")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid id)
+        public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid promotionId)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
+            var response = await _client.JoinAsync(new(promotionId, playerTokenData.PlayerCode));
 
             return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
         }

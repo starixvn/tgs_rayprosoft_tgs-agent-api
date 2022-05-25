@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
 
 namespace TGS.Apis.OperatorApi.Middlewares
@@ -26,7 +27,16 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
             {
-                throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+                await context.Response.WriteAsJsonAsync(new TgsResponse
+                {
+                    Error = 403,
+                    ErrorMessage = "UnderMaintenance",
+                    ErrorMessageKey = "UnderMaintenance"
+                }).ConfigureAwait(false);
+
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+
+                return;
             }
             await _next(context);
         }

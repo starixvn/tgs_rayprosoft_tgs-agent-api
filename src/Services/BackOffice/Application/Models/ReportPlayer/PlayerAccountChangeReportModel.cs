@@ -19,6 +19,6 @@ namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
 
         public DateTimeOffset RecordedOn { get; init; }
 
-        public string? Remark { get; set; }
+        public string Remark { get; set; }
     }
 }

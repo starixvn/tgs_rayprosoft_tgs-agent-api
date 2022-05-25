@@ -1010,6 +1010,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("external_transaction_id");
 
+                    b.Property<decimal>("LockAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("lock_amount");
+
+                    b.Property<decimal>("LockedBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("locked_balance");
+
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_on");
@@ -5749,6 +5763,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount_used");
 
+                    b.Property<Guid?>("AmountUsedSnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("amount_used_snapshot_id");
+
                     b.Property<bool>("AutoSentPlayerBonus")
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_player_bonus");
@@ -6393,6 +6411,55 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("roles", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RouletteSignInEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<int>("ItemIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_index");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_roulette_sign_in_events");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_roulette_sign_in_events_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_roulette_sign_in_events_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_roulette_sign_in_events_promotion_id");
+
+                    b.ToTable("roulette_sign_in_events", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Round", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6763,6 +6830,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
                     b.HasKey("Id")
                         .HasName("pk_sign_in_events");
 
@@ -6771,6 +6842,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_sign_in_events_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_sign_in_events_promotion_id");
 
                     b.ToTable("sign_in_events", "dbo");
                 });
@@ -8894,6 +8968,30 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Reseller");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RouletteSignInEvent", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_roulette_sign_in_events_brands_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_roulette_sign_in_events_players_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_roulette_sign_in_events_promotions_promotion_id");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundDetail", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Round", "Round")
@@ -8921,6 +9019,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_sign_in_events_players_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sign_in_events_promotions_promotion_id");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SportMarketType", b =>

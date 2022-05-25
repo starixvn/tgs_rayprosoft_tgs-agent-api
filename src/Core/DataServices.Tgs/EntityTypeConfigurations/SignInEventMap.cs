@@ -31,6 +31,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(1);
 
+            builder.Property(s => s.PromotionId)
+                .IsRequired();
+
             builder.HasOne<Brand>()
                 .WithMany()
                 .HasForeignKey(s => s.BrandId)
@@ -40,6 +43,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .WithMany()
                 .HasForeignKey(s => s.PlayerCode)
                 .HasConstraintName("fk_sign_in_events_players_brand_id")
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne<Promotion>()
+                .WithMany()
+                .HasForeignKey(s => s.PromotionId)
+                .HasConstraintName("fk_sign_in_events_promotions_promotion_id")
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Core.Models.Enums;
 using TGS.GameProviders.Repositories.Models;
 
 namespace TGS.GameProviders.Repositories

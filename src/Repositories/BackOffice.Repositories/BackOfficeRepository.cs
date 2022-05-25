@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories
@@ -30,6 +31,19 @@ namespace TGS.BackOffice.Repositories
 
             banner.UpdatedByUserName = modifier;
             banner.UpdatedOn = _systemClock.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask ChangeStatusAsync(Guid id, int status, string modifier)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.Status = status;
+            banner.UpdatedByUserName = modifier;
+            banner.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -157,6 +171,11 @@ namespace TGS.BackOffice.Repositories
             return query.ToAsyncEnumerable();
         }
 
+        public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryApprovePlayerIdentityAuthenticationsAsync(Guid brandId)
+        {
+            throw new NotImplementedException();
+        }
+
         public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
         {
             var currentTime = _systemClock.UtcNow;
@@ -181,6 +200,75 @@ namespace TGS.BackOffice.Repositories
             return query.ToAsyncEnumerable();
         }
 
+        public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
+            Guid brandId,
+            PlayerIdentityReviewState? status,
+            string username,
+            DateTimeOffset? beginCreatedOn,
+            DateTimeOffset? endCreatedOn,
+            DateTimeOffset? beginReviewedOn,
+            DateTimeOffset? endReviewedOn)
+        {
+            var playerQuery = _tgsRepository.Players
+                .AsQueryable()
+                .Where(p => p.BrandId == brandId);
+
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                playerQuery = playerQuery.Where(p => p.Username == username);
+            }
+
+            var playerIdentityQuery =
+                from playerIdentity in _tgsRepository.PlayerIdentity.AsQueryable()
+                join player in playerQuery
+                    on playerIdentity.PlayerCode equals player.PlayerCode
+                join authForms in _tgsRepository.PlayerAuthenticationForms.AsQueryable()
+                    on playerIdentity.PlayerAuthenticationFormId equals authForms.Id into authFormsGroup
+                from authForms in authFormsGroup.DefaultIfEmpty()
+                select new
+                {
+                    playerIdentity.PlayerCode,
+                    playerIdentity.PlayerAuthenticationFormId,
+                    authForms.Status,
+                    authForms.CreatedOn,
+                    authForms.ReviewedOn,
+                    authForms.Data,
+                    authForms.Remark,
+                    player.IdNumber,
+                    player.RealName,
+                    player.Username
+                };
+
+            if (status != null)
+            {
+                var queryStatus = (int)status;
+                playerIdentityQuery = playerIdentityQuery.Where(p => p.Status == queryStatus);
+            }
+
+            if (beginCreatedOn != null && endCreatedOn != null)
+            {
+                playerIdentityQuery = playerIdentityQuery.Where(paf => paf.CreatedOn > beginCreatedOn && paf.CreatedOn <= endCreatedOn);
+            }
+
+            if (beginReviewedOn != null && endReviewedOn != null)
+            {
+                playerIdentityQuery = playerIdentityQuery.Where(paf => paf.ReviewedOn > beginReviewedOn && paf.ReviewedOn <= endReviewedOn);
+            }
+
+            return playerIdentityQuery.Select(info =>
+                new PlayerIdentityAuthenticationInfo(
+                    info.Data,
+                    info.IdNumber,
+                    info.RealName,
+                    info.Remark,
+                    (PlayerIdentityReviewState)info.Status,
+                    info.Username,
+                    info.CreatedOn,
+                    info.PlayerAuthenticationFormId,
+                    info.PlayerCode))
+                .ToAsyncEnumerable();
+        }
+
         public IAsyncEnumerable<BannerInfo> QueryRejectedBannersAsync(Guid brandId)
         {
             var query = from banner in _tgsRepository.Banners.AsQueryable()
@@ -200,6 +288,11 @@ namespace TGS.BackOffice.Repositories
                             banner.UpdatedOn);
 
             return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryRejectPlayerIdentityAuthenticationsAsync(Guid brandId)
+        {
+            throw new NotImplementedException();
         }
 
         public IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId)
@@ -247,6 +340,11 @@ namespace TGS.BackOffice.Repositories
             return query.ToAsyncEnumerable();
         }
 
+        public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryWaitingVerifyPlayerIdentityAuthenticationsAsync(Guid brandId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
         {
             var banner = await _tgsRepository.Banners
@@ -256,8 +354,8 @@ namespace TGS.BackOffice.Repositories
             banner.Status = reviewState switch
             {
                 BannerReviewState.Approve => 1000,
-                BannerReviewState.Reject  => 2000,
-                _                         => 9000
+                BannerReviewState.Reject => 2000,
+                _ => 9000
             };
 
             banner.UpdatedByUserName = reviewer;
@@ -315,26 +413,13 @@ namespace TGS.BackOffice.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async ValueTask ChangeStatusAsync(Guid id, int status, string modifier)
-        {
-            var banner = await _tgsRepository.Banners
-                .FindAsync(id)
-                .ConfigureAwait(false);
-
-            banner.Status = status;
-            banner.UpdatedByUserName = modifier;
-            banner.UpdatedOn = DateTimeOffset.UtcNow;
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
-
         private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {
-                0    => BannerFlowStatus.WaitApproving,
+                0 => BannerFlowStatus.WaitApproving,
                 1000 => BannerFlowStatus.Approved,
                 2000 => BannerFlowStatus.Rejected,
-                _    => BannerFlowStatus.Unknown
+                _ => BannerFlowStatus.Unknown
             };
     }
 }

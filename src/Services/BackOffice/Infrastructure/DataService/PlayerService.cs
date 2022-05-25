@@ -18,6 +18,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IPlayerService
     {
+        ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
+
         Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
 
         Task<Player> GetPlayerAsync(
@@ -29,20 +31,30 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormByIdAsync(Guid formId);
 
         IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
-                    Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
+            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
             bool tracking = false);
 
         IQueryable<Player> GetPlayerQueries(
             Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
             bool tracking = false);
 
-        ValueTask SignOffPlayerIdentityFormAsync(Guid brandId, Guid formId, PlayerIdentityReviewState? reviewStatus, string reviewUserId, string reviewUserName, string remark);
+        ValueTask SignOffPlayerIdentityFormAsync(
+            Guid brandId,
+            Guid formId,
+            PlayerIdentityReviewState? reviewStatus,
+            string reviewUserId,
+            string reviewUserName,
+            string remark,
+            string realName,
+            string idNumber);
 
         Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount);
 
+        Task UpdateParentPlayerAsync(string playerCode, string parentPlayerCode);
+
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
 
-        Task UpdateParentPlayerAsync(string playerCode, string parentPlayerCode);
+        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -62,8 +74,31 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _cacheManager = cacheManager;
         }
 
+        public async ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data)
+        {
+            var createFormId = Guid.NewGuid();
+            var currentDate = DateTimeOffset.UtcNow;
+
+            _ = await _repository.PlayerAuthenticationForms
+                .AddAsync(new PlayerAuthenticationForm
+                {
+                    Id = createFormId,
+                    CreatedOn = currentDate,
+                    BrandId = brandId,
+                    PlayerCode = playerCode,
+                    Data = data
+                })
+                .ConfigureAwait(false);
+
+            _ = await _repository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
+
+            return createFormId;
+        }
+
         Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
-            ExistsAsync(predicate);
+                    ExistsAsync(predicate);
 
         Task<Player> IPlayerService.GetPlayerAsync(
                     Expression<Func<Player, bool>> predicate,
@@ -112,17 +147,26 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         IQueryable<PlayerAuditLog> IPlayerService.GetPlayerOperationQueries(
-                    Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
+            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking)
+                => GetQueriesAsync(preQuery, tracking);
 
         IQueryable<Player> IPlayerService.GetPlayerQueries(
-                            Func<IQueryable<Player>, IQueryable<Player>> preQuery,
-            bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
+            Func<IQueryable<Player>, IQueryable<Player>> preQuery, bool tracking)
+                => GetQueriesAsync(preQuery, tracking);
 
-        async ValueTask IPlayerService.SignOffPlayerIdentityFormAsync(Guid brandId, Guid formId, PlayerIdentityReviewState? status, string reviewUserId, string reviewUserName, string remark)
+        async ValueTask IPlayerService.SignOffPlayerIdentityFormAsync(
+            Guid brandId,
+            Guid formId,
+            PlayerIdentityReviewState? status,
+            string reviewUserId,
+            string reviewUserName,
+            string remark,
+            string realName,
+            string idNumber)
         {
-            var brand = await _repository.Brands.SingleAsync(b => b.Id == brandId).ConfigureAwait(false);
+            var brand = await _repository.Brands
+                .SingleAsync(b => b.Id == brandId)
+                .ConfigureAwait(false);
 
             if (!brand.EnablePlayerIdentity)
                 return;
@@ -140,11 +184,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             formData.ReviewedOn = DateTimeOffset.UtcNow;
             formData.Remark = remark;
             formData.ReviewedUserId = reviewUserId;
+            formData.ReviewedUserName = reviewUserName;
 
             if (status == PlayerIdentityReviewState.Approve)
             {
                 var player = await _repository.Players.SingleAsync(p => p.PlayerCode == playerCode);
                 player.IdentityAuthentication = true;
+                player.RealName = realName;
+                player.IdNumber = idNumber;
+                player.UpdatedByUsername = reviewUserName;
+                player.UpdatedOn = DateTimeOffset.Now;
             }
 
             _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
@@ -182,8 +231,30 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .ConfigureAwait(false);
         }
 
+        async Task IPlayerService.UpdateParentPlayerAsync(string playerCode, string parentPlayerCode)
+        {
+            var player = await _repository.PlayerParents
+                .FirstOrDefaultAsync(pp => pp.PlayerCode == playerCode)
+                .ConfigureAwait(false);
+
+            if (player != null)
+            {
+                player.ParentPlayerCode = parentPlayerCode;
+            }
+            else
+            {
+                var playerParent = new PlayerParent
+                {
+                    PlayerCode = playerCode,
+                    ParentPlayerCode = parentPlayerCode
+                };
+                _ = await _repository.PlayerParents.AddAsync(playerParent);
+            }
+            _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         async Task IPlayerService.UpdatePlayerAsync(
-                    Player player, UpdatePlayerRequest request)
+                            Player player, UpdatePlayerRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -247,26 +318,31 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             scope.Complete();
         }
 
-        async Task IPlayerService.UpdateParentPlayerAsync(string playerCode, string parentPlayerCode)
+        public async ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId)
         {
-            var player = await _repository.PlayerParents
-                .FirstOrDefaultAsync(pp => pp.PlayerCode == playerCode)
-                .ConfigureAwait(false);
+            var identityData = await _repository.PlayerIdentity
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
 
-            if (player != null)
+            if (identityData == null)
             {
-                player.ParentPlayerCode = parentPlayerCode;
+                identityData = new PlayerIdentity
+                {
+                    PlayerCode = playerCode,
+                    PlayerAuthenticationFormId = identityAuthenticationFormId
+                };
+
+                _ = await _repository.PlayerIdentity
+                    .AddAsync(identityData)
+                    .ConfigureAwait(false);
             }
             else
             {
-                var playerParent = new PlayerParent 
-                { 
-                    PlayerCode = playerCode, 
-                    ParentPlayerCode = parentPlayerCode 
-                };
-                _ = await _repository.PlayerParents.AddAsync(playerParent);
+                identityData.PlayerAuthenticationFormId = identityAuthenticationFormId;
             }
-            _ = await _repository.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _repository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -133,11 +134,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query).ConfigureAwait(false);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.GetPlayerInfoAsync(
-                            It.Is<string>(x => x == playerCode)),
-                    Times.Exactly(1));
+            moqPlayerServiceClient.Verify(
+                fake => fake.GetPlayerInfoAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -153,11 +154,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query).ConfigureAwait(false);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.GetPlayerPropertiesAsync(
-                            It.Is<string>(x => x == playerCode)),
-                    Times.Exactly(1));
+            moqPlayerServiceClient.Verify(
+                fake => fake.GetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -199,6 +200,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Set_Player_Birthdate_Should_SuccessAsync()
+        {
+            var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+            var sut = new SetBirthdateCommandService(fakePlayerServiceClient);
+
+            var command = new SetBirthdateCommand("player1", DateOnly.Parse("2022/4/26"));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerServiceClient.Received(1)
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(command.PlayerCode),
+                    Arg.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        props => props[PlayerPropertyName.Birthdate] == "2022/04/26"));
+        }
+
+        [Test]
         public async Task Set_Player_Facebook_Messenger_Id_Should_Success()
         {
             var moqPlayerServiceClient = new Mock<IPlayerServiceClient>();
@@ -217,15 +235,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.SetPlayerPropertiesAsync(
-                            It.Is<string>(x => x == player.PlayerCode),
-                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
-                                x.Count == 1
-                                && x.ContainsKey(PlayerPropertyName.FacebookMessenger)
-                                && x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId)),
-                    Times.Exactly(1));
+            moqPlayerServiceClient.Verify(
+                fake => fake.SetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == player.PlayerCode),
+                    It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        x => x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.FacebookMessenger)
+                            && x[PlayerPropertyName.FacebookMessenger] == command.FacebookMessengerId),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -247,15 +265,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.SetPlayerPropertiesAsync(
-                            It.Is<string>(x => x == player.PlayerCode),
-                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
-                                x.Count == 1
-                                && x.ContainsKey(PlayerPropertyName.Line)
-                                && x[PlayerPropertyName.Line] == command.LineId)),
-                    Times.Exactly(1));
+            moqPlayerServiceClient.Verify(
+                fake => fake.SetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == player.PlayerCode),
+                    It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        x => x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.Line)
+                            && x[PlayerPropertyName.Line] == command.LineId),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -310,15 +328,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.SetPlayerPropertiesAsync(
-                        It.Is<string>(x => x == player.PlayerCode),
-                        It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
-                            x.Count == 1
+            moqPlayerServiceClient.Verify(
+                fake => fake.SetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == player.PlayerCode),
+                    It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        x => x.Count == 1
                             && x.ContainsKey(PlayerPropertyName.Telegram)
-                            && x[PlayerPropertyName.Telegram] == command.TelegramId)),
-                    Times.Exactly(1));
+                            && x[PlayerPropertyName.Telegram] == command.TelegramId),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -340,15 +358,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.SetPlayerPropertiesAsync(
-                            It.Is<string>(x => x == player.PlayerCode),
-                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
-                                x.Count == 1
-                                && x.ContainsKey(PlayerPropertyName.Viber)
-                                && x[PlayerPropertyName.Viber] == command.ViberId)),
-                    Times.Exactly(1));
+            moqPlayerServiceClient.Verify(
+                fake => fake.SetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == player.PlayerCode),
+                    It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        x => x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.Viber)
+                            && x[PlayerPropertyName.Viber] == command.ViberId),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -403,32 +421,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerServiceClient
-                .Verify(fake =>
-                        fake.SetPlayerPropertiesAsync(
-                            It.Is<string>(x => x == player.PlayerCode),
-                            It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(x =>
-                                x.Count == 1
-                                && x.ContainsKey(PlayerPropertyName.WhatsApp)
-                                && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId)),
-                    Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Set_Player_Birthdate_Should_SuccessAsync()
-        {
-            var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
-            var sut = new SetBirthdateCommandService(fakePlayerServiceClient);
-
-            var command = new SetBirthdateCommand("player1", DateOnly.Parse("2022/4/26"));
-
-            await sut.ExecuteAsync(command);
-
-            _ = fakePlayerServiceClient.Received(1)
-                .SetPlayerPropertiesAsync(
-                    Arg.Is(command.PlayerCode),
-                    Arg.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
-                        props => props[PlayerPropertyName.Birthdate] == "2022/04/26"));
+            moqPlayerServiceClient.Verify(
+                fake => fake.SetPlayerPropertiesAsync(
+                    It.Is<string>(x => x == player.PlayerCode),
+                    It.Is<IReadOnlyDictionary<PlayerPropertyName, string?>>(
+                        x => x.Count == 1
+                            && x.ContainsKey(PlayerPropertyName.WhatsApp)
+                            && x[PlayerPropertyName.WhatsApp] == command.WhatsAppId),
+                    It.IsAny<CancellationToken>()),
+                Times.Exactly(1));
         }
     }
 }

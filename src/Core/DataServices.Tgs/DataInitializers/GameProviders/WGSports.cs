@@ -15,7 +15,6 @@ public partial class DataInitializer
 {
     internal record WGSportsGameProvider : IGameProvider
     {
-        private readonly IWebHostEnvironment _env;
         private readonly IGame[] _games;
 
         public WGSportsGameProvider()

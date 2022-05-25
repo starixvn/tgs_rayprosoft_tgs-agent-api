@@ -33,8 +33,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                 });
 
                 option.UseSnakeCaseNamingConvention();
-
-
             }, poolSize);
 
             services.AddDbContextFactory<TRepository>(option =>
@@ -44,7 +42,6 @@ namespace TGS.Core.DataServices.Base.Extensions
                 option
                     .UseNpgsql(connectionString, serverOption =>
                     {
-                        serverOption.SetPostgresVersion(12, 5);
                         serverOption.CommandTimeout(commandTimeout);
                         serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
                     })

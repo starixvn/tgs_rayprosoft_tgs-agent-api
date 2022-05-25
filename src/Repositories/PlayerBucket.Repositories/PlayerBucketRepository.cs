@@ -62,7 +62,7 @@ namespace PlayerBucket.Repositories
             var depositBonusAmount = request.DepositAmount;
             var promotionPlayerId = default(int?);
 
-            await _cashServiceClient.DepositAsync(
+            await _cashServiceClient.DepositedAsync(
                 request.DefaultWalletId,
                 request.DepositAmount,
                 request.Remark,

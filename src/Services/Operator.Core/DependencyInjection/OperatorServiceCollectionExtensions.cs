@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 using TGS.Services.Operator.ValidateCode;
+using Tgs.RouletteServices.Clients;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -11,11 +13,11 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
         {
-            services.RegisterAllServiceUtilityTypes(
+            _ = services.RegisterAllServiceUtilityTypes(
                 typeof(OperatorServiceCollectionExtensions).Assembly,
                 ServiceLifetime.Transient);
 
-            services
+            _ = services
                 .AddOptions<OperatorOptions>()
                 .Services
                 .AddValidateCodeClient((options, sp) =>
@@ -41,7 +43,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
-                .AddPaymentClient();
+                .AddPaymentClient()
+                .AddRouletteSignInClient();
 
             var opConfiguration = new OperatorConfiguration(services);
 

@@ -156,6 +156,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             if (!string.IsNullOrWhiteSpace(request.ParentUsername))
                 query = query.Where(row => row.ParentUsername == request.ParentUsername);
 
+            if (!string.IsNullOrWhiteSpace(request.AgentName))
+                query = query.Where(row => row.AgentName == request.AgentName);
+
             return query.Select(row => new PlayersModel
             {
                 PlayerCode = row.PlayerCode,

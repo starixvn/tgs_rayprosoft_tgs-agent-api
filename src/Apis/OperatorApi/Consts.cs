@@ -11,14 +11,5 @@
 
         public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger", "/profiler"};
 
-        public static class ClaimName
-        {
-            public const string Currency = "curr";
-        }
-
-        public static class UserInfo
-        {
-            public const string PlayerCodeKey = "PlayerCode";
-        }
     }
 }

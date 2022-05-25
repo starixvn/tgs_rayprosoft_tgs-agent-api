@@ -1,16 +1,23 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.FileService.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Player;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
+using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -18,6 +25,38 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class PlayerIdentityController : BaseContextController
     {
+        [HttpPost("{brandId}/{playerCode}/upload", Name = "CreatePlayerIdentityForm")]
+        public async Task<MessageResponse> CreatePlayerIdentityFormAsync(
+            [FromForm(Name = "file")] IFormFile identityFile,
+            [FromServices] IFileServiceClient fileServiceClient,
+            [FromServices] IGetService<CreateIdentityAuthenticationFormCommand, MessageResponse> commandService,
+            Guid brandId,
+            string playerCode)
+        {
+            var contentType = identityFile.ContentType;
+            await using var fileStream = identityFile.OpenReadStream();
+
+            var randomFileName = StringGenerator.GenerateAlphanumericString(32);
+
+            var uploadResult = await fileServiceClient
+                .UploadFileAsync(
+                    $"/{randomFileName}",
+                    MediaTypeHeaderValue.Parse(contentType),
+                    fileStream)
+                .ConfigureAwait(false);
+
+            var fileId = uploadResult.Id;
+
+            var command = new CreateIdentityAuthenticationFormCommand(
+                playerCode,
+                brandId,
+                fileId);
+
+            return await commandService
+                .GetAsync(command)
+                .ConfigureAwait(false);
+        }
+
         [HttpGet("{playerCode}/identity", Name = "GetPlayerIdentityAuthenticationForm")]
         [Description("Get a player identity authentication form")]
         public async ValueTask<PlayerIdentityForm> GetPlayerIdentityAuthenticationFormAsync(
@@ -42,6 +81,61 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
+        [HttpGet(Name = "GetPlayerIdentityAuthenticationForms")]
+        [Description("Get player identity authentication forms")]
+        public async Task<PagedResponse<PlayerIdentityAuthenticationsModel>> GetPlayerIdentityAuthenticationFormsAsync(
+            [FromServices] IGetService<GetPlayerIdentityAuthenticationFormsQuery, int> countService,
+            [FromServices] IQueryService<GetPlayerIdentityAuthenticationFormsQuery, PlayerIdentityAuthenticationInfo> queryService,
+            [FromQuery] GetPlayerIdentityAuthenticationListRequest request,
+            [FromQuery] PageableRequest pagingRequest)
+        {
+            var paging = new Paging<PlayerIdentityAuthenticationInfo>
+            {
+                RowCount = pagingRequest.Rows,
+                Page = pagingRequest.Page
+            };
+
+            paging.SortByPropertyName(
+                string.IsNullOrWhiteSpace(pagingRequest.SortBy)
+                    ? nameof(PlayerIdentityAuthenticationInfo.CreatedOn)
+                    : pagingRequest.SortBy,
+                pagingRequest.IsDesc);
+
+            var query = new GetPlayerIdentityAuthenticationFormsQuery(
+                request.BrandId,
+                request.Status,
+                request.Username,
+                request.BeginCreatedOn,
+                request.EndCreatedOn,
+                request.BeginReviewedOn,
+                request.EndReviewedOn,
+                paging);
+
+            return new PagedResponse<PlayerIdentityAuthenticationsModel>
+            {
+                Valid = true,
+                TotalCount = await countService
+                    .GetAsync(query)
+                    .ConfigureAwait(false),
+                Items = await queryService.QueryAsync(query)
+                    .Select(info => new PlayerIdentityAuthenticationsModel
+                    {
+                        IdNumber = info.IdNumber,
+                        RealName = info.RealName,
+                        Remark = info.Remark,
+                        Status = info.Status,
+                        Username = info.Username,
+                        AttachmentId = string.IsNullOrEmpty(info.Data)
+                            ? string.Empty
+                            : JsonDocument.Parse(info.Data).RootElement.GetProperty("PlayerIdentityFileId").GetString(),
+                        FormId = info.PlayerAuthenticationFormId,
+                        PlayerCode = info.PlayerCode
+                    })
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
+        }
+
         [HttpPost("{formId}", Name = "ReviewPlayerIdentityForm")]
         public async Task<MessageResponse> ReviewPlayerIdentityFormAsync(
             [FromServices] ICommandService<ReviewPlayerIdentityFormCommand> reviewCommandService,
@@ -54,7 +148,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.ReviewResponse.ToReviewState(),
                 reviewResponse.Remark,
                 UserId,
-                Username);
+                Username,
+                reviewResponse.RealName,
+                reviewResponse.IdNumber);
 
             await reviewCommandService
                 .ExecuteAsync(command)
