@@ -34,6 +34,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(rs => rs.ItemIndex)
                 .IsRequired();
 
+            builder.Property(rs => rs.Bonus)
+                .HasDefaultValue(0M)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.HasOne<Brand>()
                 .WithMany()
                 .HasForeignKey(rs => rs.BrandId)
