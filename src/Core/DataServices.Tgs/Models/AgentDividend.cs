@@ -29,6 +29,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal AgentAdjustAmount { get; set; }
 
+        public decimal BonusAdjustAmount { get; set; }
+
         public decimal BonusAmount { get; set; }
 
         public decimal BetAmount { get; set; }

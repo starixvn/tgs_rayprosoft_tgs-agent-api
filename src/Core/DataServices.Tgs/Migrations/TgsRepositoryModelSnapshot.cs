@@ -692,6 +692,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
+                    b.Property<decimal>("BonusAdjustAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bonus_adjust_amount");
+
                     b.Property<decimal>("BonusAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
