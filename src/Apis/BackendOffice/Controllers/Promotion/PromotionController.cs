@@ -81,18 +81,29 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 Username,
                 HttpContext.RequestAborted).ConfigureAwait(false);
 
-            await promotionServiceClient.SetPromotionRuleAsync(
-                promotionId,
-                new
-                {
-                    request.GameProviderIds,
-                    request.BonusAmountLimit,
-                    request.Percentage,
-                    request.TurnoverMultiple,
-                    request.GameType
-                },
-                Username,
-                HttpContext.RequestAborted).ConfigureAwait(false);
+            if (request.Rule == null)
+            {
+                await promotionServiceClient.SetPromotionRuleAsync(
+                    promotionId,
+                    new
+                    {
+                        request.GameProviderIds,
+                        request.BonusAmountLimit,
+                        request.Percentage,
+                        request.TurnoverMultiple,
+                        request.GameType
+                    },
+                    Username,
+                    HttpContext.RequestAborted).ConfigureAwait(false);
+            }
+            else
+            {
+                await promotionServiceClient.SetPromotionRuleAsync(
+                    promotionId,
+                    request.Rule,
+                    Username,
+                    HttpContext.RequestAborted).ConfigureAwait(false);
+            }
 
             await promotionServiceClient.SetPromotionStatusAsync(
                 promotionId,
@@ -211,18 +222,29 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
                 Username,
                 HttpContext.RequestAborted).ConfigureAwait(false);
 
-            await promotionServiceClient.SetPromotionRuleAsync(
-                promotionId,
-                new
-                {
-                    request.GameProviderIds,
-                    request.BonusAmountLimit,
-                    request.Percentage,
-                    request.TurnoverMultiple,
-                    request.GameType
-                },
-                Username,
-                HttpContext.RequestAborted).ConfigureAwait(false);
+            if (request.Rule == null)
+            {
+                await promotionServiceClient.SetPromotionRuleAsync(
+                    promotionId,
+                    new
+                    {
+                        request.GameProviderIds,
+                        request.BonusAmountLimit,
+                        request.Percentage,
+                        request.TurnoverMultiple,
+                        request.GameType
+                    },
+                    Username,
+                    HttpContext.RequestAborted).ConfigureAwait(false);
+            }
+            else
+            {
+                await promotionServiceClient.SetPromotionRuleAsync(
+                    promotionId,
+                    request.Rule,
+                    Username,
+                    HttpContext.RequestAborted).ConfigureAwait(false);
+            }
 
             await promotionServiceClient.SetPromotionStatusAsync(
                 promotionId,
