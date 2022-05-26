@@ -26,7 +26,7 @@ public class AutoPaidWithdrawProcessor : IMessageHandler
     {
         _logger.LogInformation("Receive AutoPaidWithdraw request.");
 
-        var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
+        var request = PaidWithdrawRequest.Parser.ParseFrom(data.Span);
 
         var formId = request.FormId.ToGuid();
         var brandId = request.BrandId.ToGuid();

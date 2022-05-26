@@ -131,8 +131,8 @@ namespace TGS.Apis.BackendOffice
                             "tgs.payment.withdraw.reject",
                             "tgs.payment.withdraw.reject")
                         .AddReplyHandler<AutoPaidWithdrawProcessor>(
-                            "tgs.payment.withdraw.paid",
-                            "tgs.payment.withdraw.paid");
+                            "tgs.payment.withdraw.paid_ex",
+                            "tgs.payment.withdraw.paid_ex");
                 })
                 .AddNatsGlobPatternExchange("*");
 
