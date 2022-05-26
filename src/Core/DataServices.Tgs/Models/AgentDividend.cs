@@ -75,6 +75,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal NoIncludeNetProfitAgentAdjustAmount { get; set; }
 
+        public decimal NoIncludeNetProfitBonusAdjustAmount { get; set; }
+
         public DateTimeOffset? SentOn { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
