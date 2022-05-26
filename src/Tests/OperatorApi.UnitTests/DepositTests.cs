@@ -93,7 +93,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.DepositAsync(
                     It.IsAny<string>(),
                     It.Is<decimal>(x => x == command.Amount),
-                    It.IsAny<string>()))
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
             var expected = new DepositFormCreateInfo
@@ -169,7 +170,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.DepositAsync(
                     It.IsAny<string>(),
                     It.Is<decimal>(x => x == command.Amount),
-                    It.IsAny<string>()))
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
             var expected = new DepositFormCreateInfo

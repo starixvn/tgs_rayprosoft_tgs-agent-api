@@ -49,7 +49,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 formData.UserId,
                 formData.Amount,
                 formData.Amount,
-                command.PaidUserId).ConfigureAwait(false);
+                string.IsNullOrWhiteSpace(command.PaidUserId)
+                    ? Guid.Empty.ToString()
+                    : command.PaidUserId).ConfigureAwait(false);
         }
     }
 }
