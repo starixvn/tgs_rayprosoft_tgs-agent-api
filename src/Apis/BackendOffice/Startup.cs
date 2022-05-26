@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -131,7 +129,10 @@ namespace TGS.Apis.BackendOffice
                             "tgs.payment.deposit.reject")
                         .AddReplyHandler<AutoRejectWithdrawProcessor>(
                             "tgs.payment.withdraw.reject",
-                            "tgs.payment.withdraw.reject");
+                            "tgs.payment.withdraw.reject")
+                        .AddReplyHandler<AutoPaidWithdrawProcessor>(
+                            "tgs.payment.withdraw.paid",
+                            "tgs.payment.withdraw.paid");
                 })
                 .AddNatsGlobPatternExchange("*");
 
@@ -140,7 +141,6 @@ namespace TGS.Apis.BackendOffice
                 var config = sp.GetRequiredService<IConfiguration>();
 
                 options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
-
             });
 
             _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
