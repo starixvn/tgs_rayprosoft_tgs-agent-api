@@ -103,7 +103,7 @@ namespace TGS.Services.BackOffice.Domain
                         amount,
                         null,
                         null,
-                        Guid.Parse(reviewUserId),
+                        string.IsNullOrWhiteSpace(reviewUserId) ? Guid.Empty : Guid.Parse(reviewUserId),
                         cancellationToken).ConfigureAwait(false);
                     return;
 
