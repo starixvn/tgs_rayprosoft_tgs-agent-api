@@ -7,14 +7,14 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using TGS.Apis.AgentApi.Attributes;
-using TGS.Apis.AgentApi.Extensions;
-using TGS.Apis.AgentApi.Models;
-using TGS.Core.Models.Enums;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Agent;
 using Tgs.Report.Client.Models.Round;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -227,6 +227,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
                 response.Items.Sum(x => x.CompanyAdjustAmount),
+                response.Items.Sum(x => x.BonusAdjustAmount),
                 response.Items.Sum(x => x.AgentAdjustAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
@@ -242,7 +243,6 @@ namespace TGS.Apis.AgentApi.Controllers
                 Total = total
             };
         }
-
 
         /// <summary>
         ///     Get agent dividends
@@ -307,6 +307,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
                 response.Items.Sum(x => x.CompanyAdjustAmount),
+                response.Items.Sum(x => x.BonusAdjustAmount),
                 response.Items.Sum(x => x.AgentAdjustAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
