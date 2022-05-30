@@ -7,6 +7,7 @@
         decimal WithdrawalAmount,
         decimal CompanyAdjustAmount,
         decimal AgentAdjustAmount,
+        decimal BonusAdjustAmount,
         decimal BonusAmount,
         decimal BetAmount,
         decimal ValidBetAmount,
