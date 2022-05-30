@@ -6057,6 +6057,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<decimal>("Bucket")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bucket");
+
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
@@ -6077,11 +6081,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("PromotionId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
-
-                    b.Property<string>("PromotionType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("promotion_type");
 
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
