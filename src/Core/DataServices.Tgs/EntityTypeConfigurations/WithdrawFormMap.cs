@@ -52,6 +52,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(w => w.Remark);
 
+            builder.Property(w => w.Note);
+
             builder.Property(w => w.BankInfoId)
                 .IsRequired();
 

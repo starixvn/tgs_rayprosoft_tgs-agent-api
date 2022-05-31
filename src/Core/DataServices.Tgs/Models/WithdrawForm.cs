@@ -36,6 +36,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Remark { get; set; }
 
+        public string Note { get; set; }
+
         public DateTimeOffset? ReviewedOn { get; set; }
 
         public string ReviewedUserId { get; set; }
