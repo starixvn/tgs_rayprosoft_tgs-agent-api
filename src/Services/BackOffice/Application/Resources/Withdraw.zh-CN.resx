@@ -139,4 +139,7 @@
   <data name="Paid" xml:space="preserve">
     <value>已支付</value>
   </data>
+  <data name="Invalid" xml:space="preserve">
+    <value>无效</value>
+  </data>
 </root>
