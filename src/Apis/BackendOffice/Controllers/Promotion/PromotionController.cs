@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Promotion.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using PromotionStatus = TGS.Core.Models.Enums.PromotionStatus;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
 {
@@ -46,7 +49,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             [FromServices] IPromotionServiceClient promotionServiceClient,
             [FromBody] CreatePromotionRequest request)
         {
-            var createInfo = new PromotionMainInfo
+            var createInfo = new CreatePromotionMainInfo
             {
                 Name = request.Name,
                 EventDuring = (request.From.UtcDateTime, request.To.UtcDateTime),
@@ -119,6 +122,18 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             return new MessageResponse { Valid = true };
         }
 
+        [HttpGet("rule/{promotionId}", Name = "GetPromotionRule")]
+        public async Task<JsonDocument> GetPromotionRuleAsync(
+            [FromServices] IGetService<GetPromotionRuleQuery, PromotionRuleInfo> getService,
+            Guid promotionId)
+        {
+            var query = new GetPromotionRuleQuery(promotionId);
+
+            var rule = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return rule?.CompaignDetail;
+        }
+
         [HttpGet(Name = "GetPromotions")]
         [Description("Get promotions")]
         public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request)
@@ -186,7 +201,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             Guid promotionId,
             [FromBody] UpdatePromotionRequest request)
         {
-            var updateInfo = new PromotionMainInfo
+            var updateInfo = new CreatePromotionMainInfo
             {
                 Name = request.Name,
                 EventDuring = (request.From.UtcDateTime, request.To.UtcDateTime),
