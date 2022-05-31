@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Extensions
             return status switch
             {
                 FlowState.WaitingPayment => new[] { PaymentFlowState.WaitPayment },
-                FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
+                FlowState.Review => new[] { PaymentFlowState.WaitApprove },
                 FlowState.Approved => new[] { PaymentFlowState.Approved },
                 FlowState.WaitingPaid => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
