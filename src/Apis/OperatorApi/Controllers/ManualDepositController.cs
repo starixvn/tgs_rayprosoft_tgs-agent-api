@@ -183,6 +183,44 @@ namespace TGS.Apis.OperatorApi.Controllers
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
+        [HttpPut("pulsa", Name = "SubmitDepositPulsaRequest")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<Guid> SubmitDepositPulsaRequestAsync(
+           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+           [FromServices] ManualDepositSerializer serializer,
+           [FromBody] SubmitManualDepositPulsaRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);            
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositPulsaApplyInfo
+                    {                        
+                        Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString()                        
+                    }));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+
         [HttpPost("{id}")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
