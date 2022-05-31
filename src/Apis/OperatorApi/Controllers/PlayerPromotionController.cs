@@ -5,12 +5,12 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
-using Tgs.Promotion.Client;
-using Tgs.Promotion.Client.Models.Promotion;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -22,6 +22,43 @@ namespace TGS.Apis.OperatorApi.Controllers
         private readonly IPromotionClient _client;
 
         public PlayerPromotionController(IPromotionClient client) => _client = client;
+
+        /// <summary>
+        /// Get promotions that the player has already joined in.
+        /// </summary>
+        [HttpGet("joined", Name = "GetJoinedPromotions")]
+        [Description("Get promotions that the player has already joined in")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
+            [FromQuery] GetPlayerPromotionRecordRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var joinedPromotionRequest = new GetJoinedPromotionsRequest
+            {
+                PlayerCode = playerTokenData.PlayerCode,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+
+            var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
+
+            return new PagingResponse<JoinedPromotionsResponse>
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items.Select(item => new JoinedPromotionsResponse
+                {
+                    PromotionName = item.PromotionName,
+                    JoinedOn = item.CreatedOn
+                })
+            };
+        }
 
         [HttpGet("{language}", Name = "GetPlayerPromotions")]
         [Description("Get player's promotions")]
@@ -81,43 +118,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     UpdatedByUsername = item.UpdatedByUsername,
                     UpdatedOn = item.UpdatedOn,
                     VipLevels = item.VipLevels
-                })
-            };
-        }
-
-        /// <summary>
-        /// Get promotions that the player has already joined in.
-        /// </summary>
-        [HttpGet("joined", Name = "GetJoinedPromotions")]
-        [Description("Get promotions that the player has already joined in")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<JoinedPromotionsResponse>> GetJoinedPromotionsAsync(
-            [FromQuery] GetPlayerPromotionRecordRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var joinedPromotionRequest = new GetJoinedPromotionsRequest
-            {
-                PlayerCode = playerTokenData.PlayerCode,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
-
-            var response = await _client.GetJoinedPromotionsAsync(joinedPromotionRequest);
-
-            return new PagingResponse<JoinedPromotionsResponse>
-            {
-                TotalCount = response.TotalCount,
-                Items = response.Items.Select(item => new JoinedPromotionsResponse
-                {
-                    PromotionName = item.PromotionName,
-                    JoinedOn = item.CreatedOn
                 })
             };
         }
