@@ -141,6 +141,48 @@ namespace TGS.Apis.OperatorApi.Controllers
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
 
+        [HttpPut("ewallet", Name = "SubmitDepositEWalletRequest")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<Guid> SubmitDepositEWalletRequestAsync(
+           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+           [FromServices] ManualDepositSerializer serializer,
+           [FromBody] SubmitManualDepositEWalletRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var qrCode = JsonElementExtenstion.GetPropertyValue(brandPaymentBankInfo.RootElement, "qrCode");
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositEWalletApplyInfo
+                    {
+                        EMoneyName = brandPaymentBankInfo.RootElement.GetProperty("eMoneyName").GetString(),
+                        Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString(),
+                        QrCode = qrCode
+                    }));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+
         [HttpPost("{id}")]
         [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
