@@ -18,5 +18,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("banktype")]
         public string BankType { get; init; } = default!;
+
+        [JsonPropertyName("note")]
+        public string? Note { get; init; }
     }
 }
