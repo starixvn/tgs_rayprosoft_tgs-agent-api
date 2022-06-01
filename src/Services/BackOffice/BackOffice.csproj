@@ -48,9 +48,9 @@
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.20" />    
     <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.6" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.4.0" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.4.1" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.14" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.15" />
     <PackageReference Include="Tgs.Report.Client" Version="0.0.25" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
     <PackageReference Include="Tgs.Report.Aggregate.Client" Version="0.0.8" />
