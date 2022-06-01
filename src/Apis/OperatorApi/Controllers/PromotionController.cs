@@ -6,12 +6,12 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
-using Tgs.Promotion.Client;
-using Tgs.Promotion.Client.Models.Promotion;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

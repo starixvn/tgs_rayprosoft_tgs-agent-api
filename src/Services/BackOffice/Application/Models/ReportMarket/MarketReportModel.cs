@@ -15,6 +15,7 @@ namespace TGS.Services.BackOffice.Application.Models.ReportMarket
         public decimal WithdrawalAmount { get; init; }
 
         public decimal CompanyAdjustAmount { get; init; }
+        public decimal BonusAdjustAmount { get; init; }
 
         public decimal BonusAmount { get; init; }
 

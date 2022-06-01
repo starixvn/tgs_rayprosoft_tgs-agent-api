@@ -118,37 +118,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Amount" xml:space="preserve">
-    <value>提款金额</value>
+    <value>提款金額</value>
   </data>
   <data name="ApplicationTime" xml:space="preserve">
-    <value>申请时间</value>
+    <value>申請時間</value>
   </data>
   <data name="Id" xml:space="preserve">
-    <value>订单号</value>
+    <value>訂單號</value>
   </data>
   <data name="UseType" xml:space="preserve">
-    <value>用户类型</value>
+    <value>用戶類型</value>
   </data>
   <data name="ThirdPartyOrderNo" xml:space="preserve">
-    <value>三方单号</value>
+    <value>三方單號</value>
   </data>
   <data name="Status" xml:space="preserve">
-    <value>状态</value>
+    <value>狀態</value>
   </data>
   <data name="Sequence" xml:space="preserve">
     <value>序</value>
   </data>
   <data name="UpdateTime" xml:space="preserve">
-    <value>更新时间</value>
+    <value>更新時間</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>用户名</value>
   </data>
   <data name="Remark" xml:space="preserve">
-    <value>备注</value>
+    <value>備註</value>
   </data>
   <data name="Review" xml:space="preserve">
-    <value>审核中</value>
+    <value>審核中</value>
   </data>
   <data name="Approved" xml:space="preserve">
     <value>待支付</value>
@@ -158,5 +158,8 @@
   </data>
   <data name="Paid" xml:space="preserve">
     <value>已支付</value>
+  </data>
+  <data name="Invalid" xml:space="preserve">
+    <value>無效</value>
   </data>
 </root>

@@ -10,7 +10,11 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid BrandId { get; set; }
 
+        public decimal Bucket { get; set; }
+
         public DateTimeOffset CreatedOn { get; set; }
+
+        public string? Distributor { get; set; }
 
         public Guid Id { get; set; }
 
@@ -19,10 +23,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string PlayerCode { get; set; } = default!;
 
         public Guid PromotionId { get; set; }
-
-        public string PromotionType { get; set; } = default!;
-
-        public string? Distributor { get; set; }
 
         public DateTimeOffset? SentOn { get; set; }
     }

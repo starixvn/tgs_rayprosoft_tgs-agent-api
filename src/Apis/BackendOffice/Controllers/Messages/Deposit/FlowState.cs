@@ -7,6 +7,7 @@
         Review,
         Approved,
         Rejected,
-        Paid
+        Paid,
+        Invalid
     }
 }

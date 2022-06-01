@@ -106,7 +106,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ReviewedUserName = formDetail.ReviewedUserName,
                     PaidOn = formDetail.PaidOn,
                     PaidUserId = formDetail.PaidUserId,
-                    PaidUserName = formDetail.PaidUserName
+                    PaidUserName = formDetail.PaidUserName,
+                    Note = formDetail.Note
                 }
             };
         }

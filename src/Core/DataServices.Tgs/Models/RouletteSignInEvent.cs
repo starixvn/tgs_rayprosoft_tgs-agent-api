@@ -17,5 +17,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string PlayerCode { get; set; }
 
         public Guid PromotionId { get; set; }
+
+        public decimal Bonus { get; set; }
     }
 }

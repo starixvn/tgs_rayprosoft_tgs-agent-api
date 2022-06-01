@@ -43,7 +43,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                1000M);
+                1000M,
+                "ThisIsPlayerNote");
 
             Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.ExecuteAsync(command));
         }
@@ -66,7 +67,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                1000M);
+                1000M,
+                "ThisIsPlayerNote");
 
             var walletId = Guid.NewGuid();
 
@@ -129,7 +131,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                1000M);
+                1000M,
+                "ThisIsPlayerNote");
 
             fakePlayerService
                 .GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
@@ -183,7 +186,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                1000M);
+                1000M,
+                "ThisIsPlayerNote");
 
             var walletId = Guid.NewGuid();
 
@@ -244,7 +248,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 BrandId = command.BrandId,
                 UserId = command.PlayerCode,
                 UserName = "ThisIsPlayerName",
-                UserType = UserType.Player
+                UserType = UserType.Player,
+                Note = command.Note,
             }.ToExpectedObject();
 
             fakePaymentServiceClient
@@ -456,7 +461,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                1000M);
+                1000M,
+                "ThisIsPlayerNote");
 
             var walletId = Guid.NewGuid();
 

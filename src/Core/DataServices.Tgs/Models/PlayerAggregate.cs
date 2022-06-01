@@ -34,6 +34,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal SystemAdjustAmount { get; set; }
 
+        public decimal BonusAdjustAmount { get; set; }
+
         public decimal BonusAmount { get; set; }
 
         public decimal RebateAmount { get; set; }
@@ -57,5 +59,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal NoIncludeNetProfitCompanyAdjustAmount { get; set; }
 
         public decimal NoIncludeNetProfitAgentAdjustAmount { get; set; }
+
+        public decimal NoIncludeNetProfitBonusAdjustAmount { get; set; }
     }
 }
