@@ -268,7 +268,8 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddSystemMemory(90);
 
             services
                 .AddOptions<OtlpExporterOptions>()
