@@ -262,18 +262,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("login", Name = "Login")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
-            [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-
-            var isBanned = await getService
-                .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
-                .ConfigureAwait(false);
-
-            if (isBanned)
-                throw new UserBannedException();
 
             try
             {
@@ -306,7 +298,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         _logger.LogWarning(playerNotFoundException, $"{request.Username} not found.");
                         break;
 
-                    case CoreExceptions.InvalidCredentialsException invalidCredException:
+                    case InvalidCredentialsException invalidCredException:
                         _logger.LogWarning(invalidCredException, Player.PasswordMismatched);
                         break;
 
