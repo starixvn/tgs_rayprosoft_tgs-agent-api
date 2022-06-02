@@ -63,7 +63,6 @@
     <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.13" />
-    <PackageReference Include="Tgs.HealthChecks" Version="0.0.5" />
     <PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.6" />
     <PackageReference Include="Tgs.Payment.Help2Pay.Client" Version="0.0.5" />
