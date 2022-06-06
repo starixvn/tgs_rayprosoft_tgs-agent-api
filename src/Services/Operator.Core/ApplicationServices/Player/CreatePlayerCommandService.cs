@@ -74,6 +74,13 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                         command.HostName,
                         DateTimeOffset.UtcNow)
                     .ConfigureAwait(false);
+
+                await _playerRepository
+                    .PlayerLoginIpAsync(
+                        resultPlayerCode,
+                        command.IpAddress,
+                        command.HostName)
+                    .ConfigureAwait(false);
             }
 
             return new CreatePlayerInfo(resultPlayerCode, true);

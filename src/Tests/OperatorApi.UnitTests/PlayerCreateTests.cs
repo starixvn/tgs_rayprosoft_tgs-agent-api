@@ -81,6 +81,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(command.IpAddress),
                     Arg.Is(command.HostName),
                     Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository.Received(1)
+                .PlayerLoginIpAsync(
+                Arg.Any<string>(),
+                Arg.Is(command.IpAddress),
+                Arg.Is(command.HostName));
         }
 
         [Test]
@@ -144,6 +150,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(command.IpAddress),
                     Arg.Is(command.HostName),
                     Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository.Received(0)
+                 .PlayerLoginIpAsync(
+                     Arg.Any<string>(),
+                     Arg.Is(command.IpAddress),
+                     Arg.Is(command.HostName));
         }
 
         [Test]
@@ -180,6 +192,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         false,
                         false)));
 
+            fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+                .Returns("TestPlayerCode");
+
             var sut = new CreateAgentInvitationPlayerCommandService(
                 fakePlayerOperations,
                 fakePasswordHandler,
@@ -203,6 +218,79 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // assert
             Assert.IsTrue(actual.IsNew);
+        }
+
+        [Test]
+        public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Not_Use_SmsRegisterFlow_Must_Record_Ip_Address()
+        {
+            // arrange
+            var brandId = Guid.NewGuid();
+            var invitationCode = "6rd4mq";
+
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            fakeAgentOperations
+                .GetAgentByInvitationCodeAsync(
+                    Arg.Is(brandId),
+                    Arg.Is(invitationCode))
+                .Returns(Task.FromResult(new Agent()));
+
+            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        Core.Models.Enums.BrandStatus.Active,
+                        "CNY",
+                        false,
+                        false,
+                        false)));
+
+            fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+                .Returns("TestPlayerCode");
+
+            var sut = new CreateAgentInvitationPlayerCommandService(
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandOperations,
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeBrandRepository);
+
+            var command = new CreatePlayerWithAgentInvitationCodeCommand(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                invitationCode,
+                false,
+                "::1",
+                "localhost");
+
+            // act
+            var actual = await sut.GetAsync(command);
+
+            // assert
+            _ = fakePlayerRepository.Received(1)
+                .PlayerRegisterIpAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
+                    Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository.Received(1)
+                .PlayerLoginIpAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName));
         }
 
         [Test]
@@ -271,6 +359,88 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // assert
             Assert.IsTrue(actual.IsNew);
+        }
+
+        [Test]
+        public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Not_Use_SmsRegisterFlow_Must_Record_Ip_Address()
+        {
+            var brandId = Guid.NewGuid();
+            var upperPlayerCode = "upper";
+
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        Core.Models.Enums.BrandStatus.Active,
+                        "CNY",
+                        false,
+                        false,
+                        false)));
+
+            fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+                .Returns(new PlayerInfo(
+                    upperPlayerCode,
+                    brandId,
+                    100000M,
+                    false,
+                    false,
+                    null,
+                    null,
+                    null,
+                    PlayerStatus.Enabled,
+                    "username",
+                    null,
+                    null,
+                    1,
+                    null,
+                    null,
+                    false));
+
+            fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
+                .Returns("TestPlayerCode");
+
+            var sut = new CreatePlayerInvitationPlayerCommandService(
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandOperations,
+                fakePlayerRepository,
+                fakeBrandRepository);
+
+            var command = new CreatePlayerWithPlayerInvitationCommand(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                upperPlayerCode,
+                false,
+                "::1",
+                "localhost");
+
+            var actual = await sut.GetAsync(command);
+
+            // assert
+            _ = fakePlayerRepository.Received(1)
+                .PlayerRegisterIpAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
+                    Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository.Received(1)
+                .PlayerLoginIpAsync(
+                    Arg.Any<string>(),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName));
         }
 
         [Test]

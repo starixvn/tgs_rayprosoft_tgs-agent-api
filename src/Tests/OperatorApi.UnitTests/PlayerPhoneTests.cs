@@ -105,6 +105,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.Is<string>(x => x == command.HostName),
                     It.IsAny<DateTimeOffset>()),
                 Times.Exactly(1));
+
+            moqPlayerRepository.Verify(
+                fake => fake.PlayerLoginIpAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.Is<string>(x => x == command.IpAddress),
+                    It.Is<string>(x => x == command.HostName)),
+                Times.Exactly(1));
         }
 
         [Test]

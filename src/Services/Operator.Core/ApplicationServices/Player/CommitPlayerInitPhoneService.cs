@@ -41,7 +41,6 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             }
 
             var playerCode = result.PlayerCode;
-            var updatedOn = DateTimeOffset.UtcNow;
 
             var checkQuery = new CheckBrandPhoneQuery(
                 command.BrandId,
@@ -70,6 +69,10 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                     command.IpAddress,
                     command.HostName,
                     DateTimeOffset.UtcNow)
+                .ConfigureAwait(false);
+
+            await _playerRepository
+                .PlayerLoginIpAsync(result.PlayerCode, command.IpAddress, command.HostName)
                 .ConfigureAwait(false);
 
             await _cacheManager

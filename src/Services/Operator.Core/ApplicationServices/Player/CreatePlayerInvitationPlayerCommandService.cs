@@ -7,7 +7,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
@@ -74,6 +73,13 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                         command.IpAddress,
                         command.HostName,
                         DateTimeOffset.UtcNow)
+                    .ConfigureAwait(false);
+
+                await _playerRepository
+                    .PlayerLoginIpAsync(
+                        resultPlayerCode,
+                        command.IpAddress,
+                        command.HostName)
                     .ConfigureAwait(false);
             }
 
