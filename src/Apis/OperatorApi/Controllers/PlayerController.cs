@@ -17,6 +17,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
@@ -635,9 +636,56 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new StartSetPlayerEmailCommand(
                 playerTokenData.PlayerCode,
                 request.Email,
-                CultureInfo.CurrentUICulture);
+                CultureInfo.CurrentUICulture,
+                false);
 
             return setPlayerEmailService.GetAsync(command);
+        }
+
+        /// <summary>
+        /// Starts the change email of register flow.
+        /// </summary>
+        /// <param name="getBrandInfoService">The get brand info service.</param>
+        /// <param name="getPlayerInfoService">The get player info service.</param>
+        /// <param name="checkService">The check player email service.</param>
+        /// <param name="setPlayerEmailService">The set player email service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBanned]
+        public async ValueTask<string> StartChangeEmailAsync(
+            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+            [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
+            [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+            [FromBody] StartInitEmailRequest request)
+        {
+            var brandId = HttpContext.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+            var playerInfo = await getPlayerInfoService
+                .GetAsync(new GetPlayerQuery(brandInfo.BrandId, playerTokenData.PlayerCode))
+                .ConfigureAwait(false);
+
+            var isBrandHasSameEmail = await checkService
+                .GetAsync(new CheckBrandEmailQuery(
+                    brandInfo.BrandId,
+                    request.Email,
+                    playerInfo.PlayerCode))
+                .ConfigureAwait(false);
+
+            if (isBrandHasSameEmail)
+                throw new BrandEmailDuplicateException();
+
+            var command = new StartSetPlayerEmailCommand(
+                playerTokenData.PlayerCode,
+                request.Email,
+                CultureInfo.CurrentUICulture,
+                brandInfo.EmailRegisterFlowEnabled);
+
+            return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -738,6 +786,30 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return await startSetPlayerPhoneService
                 .GetAsync(startSetPlayerPhoneCommand)
+                .ConfigureAwait(false);
+        }
+
+        [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBanned]
+        public async ValueTask SubmitChangeEmailAsync(
+            [FromServices] ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+            [FromBody] SubmitInitEmailRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress;
+            var hostName = Request.Host.Host;
+
+            var command = new CommitInitPlayerEmailCommand(
+                request.SecurityKey,
+                request.ValidateCode,
+                ipAddress.ToString(),
+                hostName,
+                brandId);
+
+            await commitPlayerEmailService
+                .ExecuteAsync(command)
                 .ConfigureAwait(false);
         }
 

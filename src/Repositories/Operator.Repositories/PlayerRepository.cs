@@ -227,6 +227,21 @@ internal class PlayerRepository : IPlayerRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask SetPlayerEmailAsync(string playerCode, string email)
+    {
+        var playerData = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (playerData == null)
+            return;
+
+        playerData.Email = email;
+        playerData.UpdatedOn = DateTimeOffset.UtcNow;
+
+        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
     public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)
     {
         var playerData = await _tgsRepository.Players
