@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
+using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using Tgs.Promotion.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -232,6 +232,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 case TransactionType.AgentAdjust:
                 case TransactionType.SystemAdjust:
                 case TransactionType.TransferAdjust:
+                case TransactionType.BonusAdjust:
                     _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                     return remark.GetString();
 
