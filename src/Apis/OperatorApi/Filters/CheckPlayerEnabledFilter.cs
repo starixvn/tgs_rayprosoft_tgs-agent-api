@@ -59,6 +59,12 @@ public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
         }
         else if (status == PlayerStatus.InBlacklist)
         {
+            var ignoreBannedAttr = context.ActionDescriptor.EndpointMetadata
+                .OfType<IgnoreUserBannedAttribute>().LastOrDefault();
+
+            if (ignoreBannedAttr is not null)
+                return;
+
             context.Result = new ObjectResult(
                 new FailResponse
                 {

@@ -12,7 +12,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
@@ -261,6 +260,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost("login", Name = "Login")]
         [Consumes(MediaTypeNames.Application.Json)]
+        [IgnoreUserBanned]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
@@ -696,6 +696,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </returns>
         [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBanned]
         public async ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
@@ -800,6 +801,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBanned]
         public async ValueTask SubmitChangePhoneAsync(
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
             [FromBody] SubmitInitPhoneRequest request)

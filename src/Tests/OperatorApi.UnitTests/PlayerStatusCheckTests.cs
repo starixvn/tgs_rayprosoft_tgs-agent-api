@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -182,6 +183,47 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actionDescriptor = new ActionDescriptor();
             var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
+            await sut.OnAuthorizationAsync(context);
+
+            Assert.IsNull(context.Result);
+        }
+
+        [Test]
+        public async Task When_Player_Status_BlackList_And_Api_Has_IgnoreUserBannedAttribute_Should_Execute()
+        {
+            var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
+
+            fakeService
+                .GetAsync(new GetPlayerStatusQuery("playerCode"))
+                .Returns(PlayerStatus.InBlacklist);
+
+            var sut = new CheckPlayerEnabledFilter(fakeService);
+
+            var fakeHttpContext = new DefaultHttpContext();
+
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
+            {
+                PlayerCode = "playerCode"
+            });
+
+            var routeData = new RouteData();
+            var actionDescriptor = new ActionDescriptor();
+            var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
+            var context = new AuthorizationFilterContext(actionContext, Array.Empty<IFilterMetadata>())
+            {
+                ActionDescriptor = {
+                    EndpointMetadata = new List<object>
+                    {
+                        new AuthorizePlayerTokenAttribute
+                        {
+                            AllowNullOrEmpty = false,
+                            NeedAuthorize = true
+                        },
+                        new IgnoreUserBannedAttribute()
+                    }
+                }
+            };
+
             await sut.OnAuthorizationAsync(context);
 
             Assert.IsNull(context.Result);
