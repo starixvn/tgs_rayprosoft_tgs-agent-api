@@ -100,7 +100,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPut]
         [HttpPut("bank")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositBankRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -142,7 +142,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut("ewallet", Name = "SubmitDepositEWalletRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositEWalletRequestAsync(
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -186,7 +186,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("{id}")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
@@ -213,7 +213,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut("fps", Name = "SubmitDepositFpsRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositFpsRequestAsync(
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -262,7 +262,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut("pulsa", Name = "SubmitDepositPulsaRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositPulsaRequestAsync(
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -302,7 +302,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut("thirdparty")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositThirdPartyRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -341,7 +341,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPut("usdt", Name = "SubmitDepositUsdtRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<Guid> SubmitDepositUsdtRequestAsync(
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,

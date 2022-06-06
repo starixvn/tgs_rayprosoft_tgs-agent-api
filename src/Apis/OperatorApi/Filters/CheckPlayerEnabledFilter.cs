@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,61 +11,64 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Player;
 
-namespace TGS.Apis.OperatorApi.Filters
-{
-    public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
-    {
-        private readonly IGetService<GetPlayerStatusQuery, PlayerStatus> _getService;
+namespace TGS.Apis.OperatorApi.Filters;
 
-        public CheckPlayerEnabledFilter(
-            IGetService<GetPlayerStatusQuery, PlayerStatus> getService)
+public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
+{
+    private readonly IGetService<GetPlayerStatusQuery, PlayerStatus> _getService;
+
+    public CheckPlayerEnabledFilter(
+        IGetService<GetPlayerStatusQuery, PlayerStatus> getService)
+    {
+        _getService = getService ?? throw new ArgumentNullException(nameof(getService));
+    }
+
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+    {
+        var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizePlayerTokenAttribute>().LastOrDefault();
+
+        if (authAttr == null || authAttr.AllowNullOrEmpty)
         {
-            _getService = getService ?? throw new System.ArgumentNullException(nameof(getService));
+            return;
         }
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        var playerTokenData = context.HttpContext.Items.GetPlayerTokenData();
+
+        var playerCode = playerTokenData.PlayerCode;
+
+        var status = await _getService.GetAsync(new GetPlayerStatusQuery(playerCode));
+
+        if (status == PlayerStatus.Disabled)
         {
-            var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizePlayerTokenAttribute>().LastOrDefault();
+            var enableBlockedAttr = context.ActionDescriptor.EndpointMetadata
+                .OfType<EnableUserBlockedAttribute>().LastOrDefault();
 
-            if (authAttr == null || authAttr.AllowNullOrEmpty)
-            {
+            if (enableBlockedAttr is null)
                 return;
-            }
 
-            var playerCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<PlayerCheckEnabledAttribute>().LastOrDefault();
-
-            var playerTokenData = context.HttpContext.Items.GetPlayerTokenData();
-
-            var playerCode = playerTokenData.PlayerCode;
-
-            var status = await _getService.GetAsync(new GetPlayerStatusQuery(playerCode));
-
-            if (status == PlayerStatus.Disabled && playerCheckEnabledAttr != null)
-            {
-                context.Result = new ObjectResult(
-                    new FailResponse()
-                    {
-                        Error = (int)TgsApiError.UserBlocked,
-                        ErrorMessage = string.Empty,
-                        ErrorMessageKey = "UserBlocked"
-                    })
+            context.Result = new ObjectResult(
+                new FailResponse
                 {
-                    StatusCode = StatusCodes.Status403Forbidden
-                };
-            }
-            else if (status == PlayerStatus.InBlacklist)
+                    Error = (int)TgsApiError.UserBlocked,
+                    ErrorMessage = string.Empty,
+                    ErrorMessageKey = "UserBlocked"
+                })
             {
-                context.Result = new ObjectResult(
-                    new FailResponse()
-                    {
-                        Error = (int)TgsApiError.UserBanned,
-                        ErrorMessage = string.Empty,
-                        ErrorMessageKey = "AccessDenied"
-                    })
+                StatusCode = StatusCodes.Status403Forbidden
+            };
+        }
+        else if (status == PlayerStatus.InBlacklist)
+        {
+            context.Result = new ObjectResult(
+                new FailResponse
                 {
-                    StatusCode = StatusCodes.Status403Forbidden
-                };
-            }
+                    Error = (int)TgsApiError.UserBanned,
+                    ErrorMessage = string.Empty,
+                    ErrorMessageKey = "AccessDenied"
+                })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
         }
     }
 }

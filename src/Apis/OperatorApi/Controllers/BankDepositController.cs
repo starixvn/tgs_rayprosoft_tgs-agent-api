@@ -61,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("help2pay")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -144,7 +144,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("maticpay")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
@@ -237,7 +237,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("primepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         public async Task<DepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -317,7 +317,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("skypay-{fragment}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -384,7 +384,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("tupay", Name = "SubmitTuPayDepositRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -450,7 +450,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("umpay")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
@@ -540,7 +540,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
         [HttpPost("~/api/deposit/thirdparty/zeronineninepay", Name = "SubmitZeroNineNinePayThirdPartyDepositRequest")]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,

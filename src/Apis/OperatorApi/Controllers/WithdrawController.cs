@@ -24,7 +24,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
+        [EnableUserBlocked]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
