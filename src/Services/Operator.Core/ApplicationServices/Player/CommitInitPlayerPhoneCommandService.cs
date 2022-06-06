@@ -8,27 +8,30 @@ using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    public class CommitPlayerInitPhoneService : ICommandService<CommitPlayerInitPhoneCommand>
+    public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPlayerPhoneCommand>
     {
+        private readonly IBrandRepository _brandRepository;
         private readonly IRedisCacheManager _cacheManager;
         private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
         private readonly IPlayerRepository _playerRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
-        public CommitPlayerInitPhoneService(
+        public CommitInitPlayerPhoneCommandService(
             IValidateCodeOperator validateCodeOperator,
+            IBrandRepository brandRepository,
             IPlayerRepository playerRepository,
             IRedisCacheManager cacheManager,
             IGetService<CheckBrandPhoneQuery, bool> checkService)
         {
             _validateCodeOperator =
                 validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
             _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
             _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
         }
 
-        public async ValueTask ExecuteAsync(CommitPlayerInitPhoneCommand command,
+        public async ValueTask ExecuteAsync(CommitInitPlayerPhoneCommand command,
             CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
@@ -55,9 +58,16 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (isBrandHasSamePhone)
                 throw new BrandPhoneDuplicateException();
 
+            var brand = await _brandRepository
+                .GetBrandInfoAsync(command.BrandId)
+                .ConfigureAwait(false);
+
             await _playerRepository
                 .SetPlayerPhoneAsync(result.PlayerCode, result.AreaCode, result.Phone)
                 .ConfigureAwait(false);
+
+            if (brand!.SmsRegisterFlowEnabled is false)
+                return;
 
             await _playerRepository
                 .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)

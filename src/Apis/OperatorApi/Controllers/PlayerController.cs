@@ -803,7 +803,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [IgnoreUserBanned]
         public async ValueTask SubmitChangePhoneAsync(
-            [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
+            [FromServices] ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
             [FromBody] SubmitInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -811,7 +811,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var ipAddress = HttpContext.Connection.RemoteIpAddress;
             var hostName = Request.Host.Host;
 
-            var command = new CommitPlayerInitPhoneCommand(
+            var command = new CommitInitPlayerPhoneCommand(
                 request.SecurityKey,
                 request.ValidateCode,
                 ipAddress.ToString(),

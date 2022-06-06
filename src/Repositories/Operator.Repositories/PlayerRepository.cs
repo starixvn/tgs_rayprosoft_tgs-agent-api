@@ -218,9 +218,9 @@ internal class PlayerRepository : IPlayerRepository
             RecordOn = registeredOn
         };
 
-        await _tgsRepository.PlayerIpRecords
-            .AddAsync(registerIpRecord)
-            .ConfigureAwait(false);
+        _ = await _tgsRepository.PlayerIpRecords
+             .AddAsync(registerIpRecord)
+             .ConfigureAwait(false);
 
         _ = await _tgsRepository
             .SaveChangesAsync()
