@@ -424,6 +424,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     true,
                     true,
+                    false,
                     false)));
 
             moqValidateCodeGenerator.Setup(fake => fake.GenerateCode()).Returns(validateCode);

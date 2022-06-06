@@ -177,7 +177,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 

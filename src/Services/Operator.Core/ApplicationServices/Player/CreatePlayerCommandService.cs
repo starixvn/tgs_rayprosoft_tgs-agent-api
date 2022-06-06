@@ -65,7 +65,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 betLimitId,
                 playerStatus).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(resultPlayerCode) && !brand.SmsRegisterFlowEnabled)
+            if (!string.IsNullOrEmpty(resultPlayerCode) && !brand.SmsRegisterFlowEnabled
+                && !brand.EmailRegisterFlowEnabled)
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(

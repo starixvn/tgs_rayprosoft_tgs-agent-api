@@ -32,7 +32,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 false,
                 false,
-                PlayerIdentityEnabled: false);
+                PlayerIdentityEnabled: false,
+                false);
 
             fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
 
@@ -115,7 +116,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 false,
                 false,
-                PlayerIdentityEnabled: true);
+                PlayerIdentityEnabled: true,
+                false);
 
             _ = fakeBrandRepository
                 .GetBrandInfoAsync(Arg.Is(brandId))
