@@ -89,6 +89,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     TransactionType = (TransactionType?)x.TransactionType,
                     GameActionType = (GameActionType?)x.GameActionType,
                     RecordedOn = x.RecordedOn,
+                    IncludeInNetProfit = x.IncludeInNetProfit,
                     Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
                 }).ToArray()
             };
