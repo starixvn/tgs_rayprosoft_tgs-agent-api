@@ -38,7 +38,7 @@ WITH depositinterval
      AS (SELECT T.player_code,
                 T.amount,
                 T.created_on,
-                COUNT(d) total_COUNT
+                COUNT(t) total_COUNT
          FROM   depositinterval T
                 LEFT JOIN dbo.deposit_forms D
                        ON D.player_code = T.player_code
