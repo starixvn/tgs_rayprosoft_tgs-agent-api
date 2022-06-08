@@ -46,7 +46,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     playerData.PlayerCode,
                     brandId,
                     request.BankInfoId,
-                    request.Amount);
+                    request.Amount,
+                    request.Note);
 
                 await createFormService.ExecuteAsync(command).ConfigureAwait(false);
 

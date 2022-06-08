@@ -17,8 +17,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(pd => pd.PlayerCode);
             builder.Property(pd => pd.BrandId);
             builder.Property(pd => pd.PromotionId);
-            builder.Property(pd => pd.PromotionType);
             builder.Property(pd => pd.BonusAmount);
+            builder.Property(pd => pd.Bucket);
             builder.Property(pd => pd.Distributor);
             builder.Property(pd => pd.SentOn);
             builder.Property(pd => pd.CreatedOn);

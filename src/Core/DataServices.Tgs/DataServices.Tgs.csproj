@@ -36,6 +36,8 @@
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\Functions\report_generate_brand_game_provider_aggregate_by_closed_on.sql" />
     <None Remove="SqlScripts\Functions\report_generate_game_provider_aggregate_by_closed_on.sql" />
+    <None Remove="SqlScripts\Functions\report_get_player_first_deposit_details.sql" />
+    <None Remove="SqlScripts\Functions\report_get_player_no_second_deposit_details.sql" />
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
@@ -84,6 +86,8 @@
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WM.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_get_player_no_second_deposit_details.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_get_player_first_deposit_details.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_get_all_sub_agents.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_update_path.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_game_providers_status_changes.sql" />
@@ -162,7 +166,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="27.2.1" />
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

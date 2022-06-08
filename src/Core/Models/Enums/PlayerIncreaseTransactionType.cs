@@ -4,6 +4,7 @@
     {
         CompanyAdjust = 2,
         AgentAdjust = 5100,
-        SystemAdjust = 5200
+        SystemAdjust = 5200,
+        BonusAdjust = 5400
     }
 }

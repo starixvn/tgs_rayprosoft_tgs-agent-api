@@ -67,7 +67,8 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
                         BankInfoId = command.BankInfoId,
                         UserId = command.PlayerCode,
                         UserName = playerInfo.UserName,
-                        UserType = UserType.Player
+                        UserType = UserType.Player,
+                        Note = command.Note,
                     })
                 .ConfigureAwait(false);
 

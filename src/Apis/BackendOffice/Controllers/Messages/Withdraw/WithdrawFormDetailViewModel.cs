@@ -26,6 +26,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public Guid Id { get; init; }
 
+        public string? Note { get; init; }
+
         public string OrderNo { get; init; } = default!;
 
         public DateTimeOffset? PaidOn { get; init; }

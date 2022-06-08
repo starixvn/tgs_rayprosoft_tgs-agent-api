@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Vip;
-using TGS.Services.BackOffice.Application.Models.ReportVip;
 using Tgs.ServiceUtility;
+using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.ReportVip;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
 {
@@ -48,7 +48,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                     Message = response.Message,
                     TotalCount = response.TotalCount,
                     Items = Array.Empty<VipReportModel>(),
-                    Total = new VipReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    Total = new VipReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                 };
             }
 
@@ -62,6 +62,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                 WithdrawalAmount = x.WithdrawalAmount,
                 BonusAmount = x.BonusAmount,
                 CompanyAdjustAmount = x.CompanyAdjustAmount,
+                BonusAdjustAmount = x.BonusAdjustAmount,
                 RebateAmount = x.RebateAmount,
                 BetAmount = x.BetAmount,
                 ValidBetAmount = x.ValidBetAmount,
@@ -80,6 +81,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportVipQueries
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
                 response.Items.Sum(x => x.CompanyAdjustAmount),
+                response.Items.Sum(x => x.BonusAdjustAmount),
                 response.Items.Sum(x => x.RebateAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),

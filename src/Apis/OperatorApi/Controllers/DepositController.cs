@@ -9,6 +9,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Deposit;
@@ -46,40 +47,48 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ToArrayAsync()
                 .ConfigureAwait(false);
 
-            foreach (var bp in brandPayments)
-            {
-                if (bp.TransferType != TransferType.Deposit)
-                    continue;
-
-                var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
-
-                var paymentInfo = await getPaymentService
-                    .GetAsync(getPaymentQuery)
-                    .ConfigureAwait(false);
-
-                var paymentMethod = paymentMethods[bp.MethodId];
-
-                yield return new BrandPaymentResponse
+            var brandPaymentQuery = await brandPayments
+                .Where(bp => bp.TransferType == TransferType.Deposit)
+                .AsParallel()
+                .WithCancellation(HttpContext.RequestAborted)
+                .Select(async bp =>
                 {
-                    Id = bp.Id,
-                    ChannelId = bp.ChannelId,
-                    ChannelName = bp.ChannelName,
-                    ChannelCode = bp.ChannelCode,
-                    TransferLimit = new Models.ValueRange<decimal>
+                    var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
+
+                    var paymentInfo = await getPaymentService
+                        .GetAsync(getPaymentQuery)
+                        .ConfigureAwait(false);
+
+                    var paymentMethod = paymentMethods[bp.MethodId];
+
+                    return new BrandPaymentResponse
                     {
-                        From = bp.TransferLimit.From,
-                        To = bp.TransferLimit.To
-                    },
-                    ExtendedData = paymentInfo.Code == "Manual"
-                        ? JsonDocument.Parse(bp.ExtendedData)
-                        : JsonDocument.Parse("{}"),
-                    PaymentId = bp.PaymentId,
-                    PaymentCode = paymentInfo.Code,
-                    MethodId = bp.MethodId,
-                    MethodCode = paymentMethod.Name,
-                    BankType = paymentMethod.BankType,
-                    DisplayOrder = bp.DisplayOrder
-                };
+                        Id = bp.Id,
+                        ChannelId = bp.ChannelId,
+                        ChannelName = bp.ChannelName,
+                        ChannelCode = bp.ChannelCode,
+                        TransferLimit = new Models.ValueRange<decimal>
+                        {
+                            From = bp.TransferLimit.From,
+                            To = bp.TransferLimit.To
+                        },
+                        ExtendedData = paymentInfo.Code == "Manual"
+                            ? JsonDocument.Parse(bp.ExtendedData)
+                            : JsonDocument.Parse("{}"),
+                        PaymentId = bp.PaymentId,
+                        PaymentCode = paymentInfo.Code,
+                        MethodId = bp.MethodId,
+                        MethodCode = paymentMethod.Name,
+                        BankType = paymentMethod.BankType,
+                        DisplayOrder = bp.DisplayOrder
+                    };
+                })
+                .WhenAll()
+                .ConfigureAwait(false);
+
+            foreach (var bp in brandPaymentQuery)
+            {
+                yield return bp;
             }
         }
 

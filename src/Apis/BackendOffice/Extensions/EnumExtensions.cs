@@ -17,17 +17,19 @@ namespace TGS.Apis.BackendOffice.Extensions
                 PaymentFlowState.Reject => FlowState.Rejected,
                 PaymentFlowState.Approved => FlowState.Approved,
                 PaymentFlowState.Paid => FlowState.Paid,
-                _ => FlowState.Unkown,
+                PaymentFlowState.Init => FlowState.Invalid,
+                _ => FlowState.Unkown
             };
 
         public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState status)
             => status switch
             {
                 FlowState.WaitingPayment => new[] { PaymentFlowState.WaitPayment },
-                FlowState.Review => new[] { PaymentFlowState.Init, PaymentFlowState.WaitApprove },
+                FlowState.Review => new[] { PaymentFlowState.WaitApprove },
                 FlowState.Approved => new[] { PaymentFlowState.Approved },
                 FlowState.Rejected => new[] { PaymentFlowState.Reject },
                 FlowState.Paid => new[] { PaymentFlowState.Paid },
+                FlowState.Invalid => new[] { PaymentFlowState.Init },
                 _ => new[] {
                     PaymentFlowState.WaitPayment,
                     PaymentFlowState.WaitApprove,

@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "6.0.4")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
@@ -692,6 +692,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
+                    b.Property<decimal>("BonusAdjustAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bonus_adjust_amount");
+
                     b.Property<decimal>("BonusAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -753,6 +757,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("no_include_net_profit_agent_adjust_amount");
+
+                    b.Property<decimal>("NoIncludeNetProfitBonusAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_bonus_adjust_amount");
 
                     b.Property<decimal>("NoIncludeNetProfitCompanyAdjustAmount")
                         .HasPrecision(18, 6)
@@ -2760,6 +2769,54 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("deposit_forms", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DistributeRegisterEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Bonus")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("bonus");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_distribute_register_events");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_distribute_register_events_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_distribute_register_events_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_distribute_register_events_promotion_id");
+
+                    b.ToTable("distribute_register_events", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.FailedGameRecordOperation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4468,6 +4525,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bet_amount");
 
+                    b.Property<decimal>("BonusAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bonus_adjust_amount");
+
                     b.Property<decimal>("BonusAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4512,6 +4574,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("no_include_net_profit_agent_adjust_amount");
+
+                    b.Property<decimal>("NoIncludeNetProfitBonusAdjustAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("no_include_net_profit_bonus_adjust_amount");
 
                     b.Property<decimal>("NoIncludeNetProfitCompanyAdjustAmount")
                         .HasPrecision(18, 6)
@@ -5990,6 +6057,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<decimal>("Bucket")
+                        .HasColumnType("numeric")
+                        .HasColumnName("bucket");
+
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
@@ -6010,11 +6081,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("PromotionId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
-
-                    b.Property<string>("PromotionType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("promotion_type");
 
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
@@ -6417,6 +6483,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<decimal>("Bonus")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("bonus");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
@@ -7583,6 +7656,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
                     b.Property<string>("OrderNo")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
@@ -8252,6 +8329,30 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("BrandPayment");
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DistributeRegisterEvent", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_distribute_register_events_brands_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_distribute_register_events_players_brand_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_distribute_register_events_promotions_promotion_id");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>

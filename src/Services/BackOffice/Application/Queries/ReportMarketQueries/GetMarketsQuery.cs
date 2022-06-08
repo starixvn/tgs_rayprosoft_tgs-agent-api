@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Models.Messages;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Market;
-using TGS.Services.BackOffice.Application.Models.ReportMarket;
 using Tgs.ServiceUtility;
+using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.ReportMarket;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
 {
@@ -46,7 +46,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
                     Message = response.Message,
                     TotalCount = response.TotalCount,
                     Items = Array.Empty<MarketReportModel>(),
-                    Total = new MarketReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                    Total = new MarketReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                 };
             }
 
@@ -58,6 +58,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
                 DepositAmount = x.DepositAmount,
                 WithdrawalAmount = x.WithdrawalAmount,
                 CompanyAdjustAmount = x.CompanyAdjustAmount,
+                BonusAdjustAmount = x.BonusAdjustAmount,
                 BonusAmount = x.BonusAmount,
                 BetAmount = x.BetAmount,
                 ValidBetAmount = x.ValidBetAmount,
@@ -79,6 +80,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
                 response.Items.Sum(x => x.DepositAmount),
                 response.Items.Sum(x => x.WithdrawalAmount),
                 response.Items.Sum(x => x.CompanyAdjustAmount),
+                response.Items.Sum(x => x.BonusAdjustAmount),
                 response.Items.Sum(x => x.BonusAmount),
                 response.Items.Sum(x => x.BetAmount),
                 response.Items.Sum(x => x.ValidBetAmount),

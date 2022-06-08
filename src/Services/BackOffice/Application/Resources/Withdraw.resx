@@ -139,4 +139,7 @@
   <data name="Paid" xml:space="preserve">
     <value>Paid</value>
   </data>
+  <data name="Invalid" xml:space="preserve">
+    <value>Invalid</value>
+  </data>
 </root>
