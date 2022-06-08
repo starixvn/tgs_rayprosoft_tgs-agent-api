@@ -166,6 +166,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     true,
                     true,
+                    false,
                     false));
 
             var expected = $"Your ID verification code is : {validateCode}";

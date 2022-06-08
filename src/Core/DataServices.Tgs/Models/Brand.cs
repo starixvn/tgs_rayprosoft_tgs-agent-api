@@ -46,6 +46,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool EnableAgentSms { get; set; }
 
+        public bool EnableEmailRegisterFlow { get; set; }
+
         public bool EnablePlayerIdentity { get; set; }
 
         public bool EnableSms { get; set; }
