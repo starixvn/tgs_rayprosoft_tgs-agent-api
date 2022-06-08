@@ -28,6 +28,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     false,
                     false,
+                    false,
                     false));
 
             var sut = new GetBrandQueryService(fakeBrandRepository);

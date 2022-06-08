@@ -209,30 +209,37 @@ internal class PlayerRepository : IPlayerRepository
         player!.UpdatedByUsername = playerCode;
         player!.UpdatedOn = DateTimeOffset.UtcNow;
 
-        var datas = new PlayerIpRecord[] {
-            new() {
-                PlayerCode = playerCode,
-                IpType = (int)IpType.RegisterIp,
-                Ip = ip,
-                Host = host,
-                RecordOn = registeredOn
-            } ,
-            new()
-            {
-                PlayerCode = playerCode,
-                IpType = (int)IpType.LoginIp,
-                Ip = ip,
-                Host = host,
-                RecordOn = registeredOn
-            } };
+        var registerIpRecord = new PlayerIpRecord
+        {
+            PlayerCode = playerCode,
+            IpType = (int)IpType.RegisterIp,
+            Ip = ip,
+            Host = host,
+            RecordOn = registeredOn
+        };
 
-        await _tgsRepository.PlayerIpRecords
-            .AddRangeAsync(datas)
-            .ConfigureAwait(false);
+        _ = await _tgsRepository.PlayerIpRecords
+             .AddAsync(registerIpRecord)
+             .ConfigureAwait(false);
 
-        await _tgsRepository
+        _ = await _tgsRepository
             .SaveChangesAsync()
             .ConfigureAwait(false);
+    }
+
+    public async ValueTask SetPlayerEmailAsync(string playerCode, string email)
+    {
+        var playerData = await _tgsRepository.Players
+            .FindAsync(playerCode)
+            .ConfigureAwait(false);
+
+        if (playerData == null)
+            return;
+
+        playerData.Email = email;
+        playerData.UpdatedOn = DateTimeOffset.UtcNow;
+
+        _ = await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)

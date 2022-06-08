@@ -18,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost("skypay-{fragment}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
+        [EnableUserBlockedCheck]
         public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

@@ -1505,6 +1505,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("enable_agent_sms");
 
+                    b.Property<bool>("EnableEmailRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_email_register_flow");
+
                     b.Property<bool>("EnablePlayerIdentity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")

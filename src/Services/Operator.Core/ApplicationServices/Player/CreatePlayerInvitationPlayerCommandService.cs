@@ -7,7 +7,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
@@ -54,7 +53,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 .GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
                 .ConfigureAwait(false);
 
-            var playerStatus = brand.SmsRegisterFlowEnabled
+            var playerStatus = brand.SmsRegisterFlowEnabled || brand.EmailRegisterFlowEnabled
                 ? PlayerStatus.InBlacklist
                 : PlayerStatus.Enabled;
 
@@ -66,7 +65,9 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 betLimitId,
                 playerStatus).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(resultPlayerCode) && !brand.SmsRegisterFlowEnabled)
+            if (!string.IsNullOrEmpty(resultPlayerCode)
+                && !brand.SmsRegisterFlowEnabled
+                && !brand.EmailRegisterFlowEnabled)
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(
@@ -74,6 +75,13 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                         command.IpAddress,
                         command.HostName,
                         DateTimeOffset.UtcNow)
+                    .ConfigureAwait(false);
+
+                await _playerRepository
+                    .PlayerLoginIpAsync(
+                        resultPlayerCode,
+                        command.IpAddress,
+                        command.HostName)
                     .ConfigureAwait(false);
             }
 

@@ -330,7 +330,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     false,
                     false,
-                    PlayerIdentityEnabled: true));
+                    PlayerIdentityEnabled: true,
+                    false));
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
@@ -380,17 +381,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     false,
                     false,
-                    PlayerIdentityEnabled: false));
+                    PlayerIdentityEnabled: false,
+                    false));
 
             var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
 
-            var acutal = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
+            var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
             _ = fakePlayerRepository
                 .Received(0)
                 .GetPlayerInfoAsync(playerCode);
 
-            Assert.IsTrue(acutal);
+            Assert.IsTrue(actual);
         }
 
         [Test]
@@ -414,7 +416,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     false,
                     false,
-                    PlayerIdentityEnabled: true));
+                    PlayerIdentityEnabled: true,
+                    false));
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
