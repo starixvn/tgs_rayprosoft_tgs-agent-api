@@ -23,44 +23,24 @@ WITH depositinterval
                   ELSE df.actual_amount
                 END                          AMOUNT,
                 df.created_on,
-                Row_number()
+                COUNT(df.player_code)
                   OVER (
-                    partition BY df.player_code
-                    ORDER BY df.created_on ASC) ROW_NUM
+                    partition BY df.player_code) ROWCOUNT
          FROM   dbo.deposit_forms df
 		 JOIN   dbo.players p ON p.player_code = df.player_code
          WHERE  df.brand_id = _brand_id
                 AND p.agent_id = _agent_id
                 AND df.status = 8000
-                AND df.created_on >= _from
-                AND df.created_on < _to),
-     checkfirstdeposit
+                ),
+     totaldeposit
      AS (SELECT T.player_code,
                 T.amount,
                 T.created_on,
-                COUNT(d) total_COUNT
+		        T.amount TOTAL_DEPOSIT
          FROM   depositinterval T
-                LEFT JOIN dbo.deposit_forms D
-                       ON D.player_code = T.player_code
-                          AND D.created_on < _from
-                          AND D.status = 8000
-         WHERE  row_num = 1
-         GROUP  BY 1,
-                   2,
-				   3),
-     totaldeposit
-     AS (SELECT T2.player_code,
-                T2.amount,
-                T2.created_on,
-                Sum(D2.amount) TOTAL_DEPOSIT
-         FROM   checkfirstdeposit T2
-                LEFT JOIN dbo.deposit_forms D2
-                       ON D2.player_code = T2.player_code
-                          AND D2.status = 8000
-         WHERE  total_COUNT = 1
-         GROUP  BY 1,
-                   2,
-		           3),
+         WHERE  ROWCOUNT = 1 
+		        AND t.created_on >= _from
+                AND t.created_on < _to),
      totalwithdraw
      AS (SELECT T3.*,
                 COALESCE(Sum(CASE
