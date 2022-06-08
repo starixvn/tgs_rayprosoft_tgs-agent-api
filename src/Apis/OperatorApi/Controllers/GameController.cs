@@ -197,7 +197,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlocked]
+        [EnableUserBlockedCheck]
         public async Task<GetGameUrlResponse> GetGameUrlAsync(
             [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetGameUrlQuery, Uri> getGameUrlQueryService,
@@ -254,7 +254,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlocked]
+        [EnableUserBlockedCheck]
         public async Task<GetGameUrlResponse> GetLobbyGameUrlAsync(
             [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetLobbyGameUrlQuery, Uri> getLobbyGameUrlQueryService,

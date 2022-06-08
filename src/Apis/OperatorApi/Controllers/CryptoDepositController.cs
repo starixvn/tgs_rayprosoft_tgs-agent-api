@@ -103,7 +103,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPut("leepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlocked]
+        [EnableUserBlockedCheck]
         public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -174,7 +174,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("umpay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlocked]
+        [EnableUserBlockedCheck]
         public async ValueTask<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

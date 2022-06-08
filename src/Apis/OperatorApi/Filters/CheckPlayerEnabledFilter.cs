@@ -41,7 +41,7 @@ public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
         if (status == PlayerStatus.Disabled)
         {
             var enableBlockedAttr = context.ActionDescriptor.EndpointMetadata
-                .OfType<EnableUserBlockedAttribute>().LastOrDefault();
+                .OfType<EnableUserBlockedCheckAttribute>().LastOrDefault();
 
             if (enableBlockedAttr is null)
                 return;
@@ -60,7 +60,7 @@ public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
         else if (status == PlayerStatus.InBlacklist)
         {
             var ignoreBannedAttr = context.ActionDescriptor.EndpointMetadata
-                .OfType<IgnoreUserBannedAttribute>().LastOrDefault();
+                .OfType<IgnoreUserBlacklistCheckAttribute>().LastOrDefault();
 
             if (ignoreBannedAttr is not null)
                 return;

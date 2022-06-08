@@ -18,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost("malakipay", Name = "SubmitMalakiPayDepositRequest")]
         [HttpPost("~/api/deposit/bank/malakipay", Name = "SubmitMalakiPayBankDepositRequest")]
-        [EnableUserBlocked]
+        [EnableUserBlockedCheck]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,

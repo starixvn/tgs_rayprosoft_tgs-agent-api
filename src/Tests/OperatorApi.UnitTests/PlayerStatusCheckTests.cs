@@ -189,7 +189,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Player_Status_BlackList_And_Api_Has_IgnoreUserBannedAttribute_Should_Execute()
+        public async Task When_Player_Status_Blacklist_And_Api_Has_IgnoreUserBlacklistCheckAttribute_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
 
@@ -219,7 +219,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                             AllowNullOrEmpty = false,
                             NeedAuthorize = true
                         },
-                        new IgnoreUserBannedAttribute()
+                        new IgnoreUserBlacklistCheckAttribute()
                     }
                 }
             };
@@ -294,7 +294,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     AllowNullOrEmpty = false,
                     NeedAuthorize = true
                 },
-                new EnableUserBlockedAttribute()
+                new EnableUserBlockedCheckAttribute()
             };
             await sut.OnAuthorizationAsync(context);
 
