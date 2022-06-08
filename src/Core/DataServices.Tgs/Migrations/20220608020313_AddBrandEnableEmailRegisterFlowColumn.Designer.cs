@@ -12,7 +12,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220606065044_AddBrandEnableEmailRegisterFlowColumn")]
+    [Migration("20220608020313_AddBrandEnableEmailRegisterFlowColumn")]
     partial class AddBrandEnableEmailRegisterFlowColumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
