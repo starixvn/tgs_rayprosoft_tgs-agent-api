@@ -724,6 +724,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DepositHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_handling_fee");
+
                     b.Property<decimal>("ESportsWinLoss")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -829,6 +834,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("win_loss_amount");
+
+                    b.Property<decimal>("WithdrawHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("withdraw_handling_fee");
 
                     b.Property<decimal>("WithdrawalAmount")
                         .HasPrecision(18, 6)
@@ -4559,6 +4569,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DepositHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_handling_fee");
+
                     b.Property<decimal>("DividendAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4639,6 +4654,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("win_loss_amount");
+
+                    b.Property<decimal>("WithdrawHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("withdraw_handling_fee");
 
                     b.Property<decimal>("WithdrawalAmount")
                         .HasPrecision(18, 6)
