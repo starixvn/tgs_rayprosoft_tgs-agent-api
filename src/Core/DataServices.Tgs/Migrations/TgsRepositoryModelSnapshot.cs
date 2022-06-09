@@ -4884,6 +4884,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<bool>("Default")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("default");
+
                     b.Property<string>("Detail")
                         .HasColumnType("jsonb")
                         .HasColumnName("detail");
