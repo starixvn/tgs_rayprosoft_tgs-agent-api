@@ -27,6 +27,7 @@ public class
         {
             BrandId = request.BrandId,
             AgentUsername = request.AgentUsername,
+            PlayerUsername = request.PlayerUsername,
             Date = request.Date,
             Page = request.Page,
             Rows = request.Rows,
