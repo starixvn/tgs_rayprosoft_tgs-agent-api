@@ -33,7 +33,7 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
-                ShowAll = true
+                ShowAll = request.ShowAll
             };
 
             var response = await _reportClient.GetMarketsAsync(reportRequest);
