@@ -31,7 +31,8 @@ public class
             Page = request.Page,
             Rows = request.Rows,
             OrderBy = request.OrderBy,
-            SortBy = request.SortBy
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
         };
 
         var response = await _reportClient.GetPlayerNoSecondDepositDetailsAsync(reportRequest);
