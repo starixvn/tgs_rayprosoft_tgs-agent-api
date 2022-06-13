@@ -52,6 +52,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool EnableSmsRegisterFlow { get; set; }
 
+        public string PlayerRegisterFlowSettings { get; set; }
+
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }
