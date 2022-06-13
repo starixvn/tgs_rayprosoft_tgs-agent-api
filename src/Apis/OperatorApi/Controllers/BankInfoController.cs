@@ -18,12 +18,10 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BankInfoController : ControllerBase
     {
-        [HttpPost]
+        [HttpPost(Name = "CreatePlayerBankInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task CreateBankInfoAsync(
             [FromServices] ICommandService<CreateBankInfoCommand> createService,
-            [FromServices] IOptions<JsonOptions> options,
-            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
             CreateBankInfoRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -34,12 +32,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.PlayerCode,
                 request.PaymentChannelId,
                 request.BankType,
-                jsonSerializationProvider.SerializeToString(request.Detail, options.Value.JsonSerializerOptions));
+                request.Detail);
 
             await createService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
-        [HttpDelete("{bankInfoId}")]
+        [HttpDelete("{bankInfoId}", Name = "DeletePlayerBankInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task DeleteBankInfoAsync(
             [FromServices] ICommandService<DeleteBankInfoCommand> deleteService,
@@ -54,7 +52,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             await deleteService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetPlayerBankInfos")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
             [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryService)

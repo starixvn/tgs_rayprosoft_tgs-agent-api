@@ -28,7 +28,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 bankAccount = "0987654321"
             };
 
-            var command = new CreateBankInfoCommand(brandId, playerCode, paymentChannelId, bankType, JsonSerializer.Serialize(detail));
+            var command = new CreateBankInfoCommand(
+                brandId,
+                playerCode,
+                paymentChannelId,
+                bankType,
+                JsonSerializer.SerializeToDocument(detail));
 
             await sut.ExecuteAsync(command);
 
