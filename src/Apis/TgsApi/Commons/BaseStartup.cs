@@ -16,10 +16,12 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Interceptors;
+using Tgs.Logging;
 using Tgs.MessageQueue.Nats.Configuration;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -158,8 +160,9 @@ namespace TGS.Apis.TgsApi.Commons
                     => builder
                         .SetResourceBuilder(
                             ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
+                        .AddSource(
+                            "Tgs.Interceptors.DiagnosticsInterceptor",
+                            "Tgs.MessageQueue.*")
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddEntityFrameworkCoreInstrumentation(options =>
@@ -191,9 +194,18 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddInterceptionService()
                 .ConfigureDynamicProxy(config =>
                 {
+                    var namespaceCheckTgs = Predicates.ForNameSpace("Tgs.*");
+                    var namespaceCheckTGS = Predicates.ForNameSpace("TGS.*");
+                    var tgsLogCheck = Predicates.Implement(typeof(ITgsLog));
+                    var redisCheck = Predicates.Implement(typeof(IRedisConnectionFactory));
+                    var jsonSerializerCheck = Predicates.Implement(typeof(IJsonSerializationProvider));
+
                     config.Interceptors.AddTyped<DiagnosticsInterceptor>(
-                            Predicates.ForNameSpace("Tgs.*"),
-                            Predicates.ForNameSpace("TGS.*"));
+                        m => namespaceCheckTGS(m)
+                            && namespaceCheckTgs(m)
+                            && !tgsLogCheck(m)
+                            && !redisCheck(m)
+                            && !jsonSerializerCheck(m));
                 });
         }
 
