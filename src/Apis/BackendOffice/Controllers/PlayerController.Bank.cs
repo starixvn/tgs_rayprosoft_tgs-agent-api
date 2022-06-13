@@ -2,36 +2,88 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Commands.PlayerBank;
 using TGS.Services.BackOffice.Application.Models.PlayerBank;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+public partial class PlayerController
 {
-    public partial class PlayerController
+    [HttpPost("{playerCode}/bank", Name = "CreatePlayerBankInfo")]
+    [Description("Create a player bank info")]
+    public async Task<MessageResponse> CreatePlayerBankAsync(
+        [FromServices] ICommandService<CreatePlayerBankInfoCommand> commandService,
+        string playerCode,
+        [FromBody] CreatePlayerBankRequest request)
     {
-        [HttpPost("{playerCode}/bank")]
-        [Description("Create a player bank")]
-        public Task<MessageResponse> CreatePlayerBankAsync(string playerCode,
-            [FromBody] CreatePlayerBankRequest request)
-        {
-            request.PlayerCode = playerCode;
-            return _mediator.Send(request);
-        }
+        var command = new CreatePlayerBankInfoCommand(
+            playerCode,
+            request.BrandId,
+            request.PaymentChannelId,
+            request.BankType,
+            request.Detail,
+            Username);
 
-        [Route("{playerCode}/bank/{id}")]
-        [HttpDelete]
-        [Description("Delete a player bank")]
-        public Task<MessageResponse> DeletePlayerBankAsync(string playerCode, Guid id) =>
-            _mediator.Send(new DeletePlayerBankRequest(playerCode, id));
+        await commandService.ExecuteAsync(command, Request.HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
-        [HttpPut("{playerCode}/bank/{id}")]
-        [Description("Update player bank")]
-        public Task<MessageResponse> UpdatePlayerBankAsync(string playerCode, Guid id,
-            [FromBody] UpdatePlayerBankRequest request)
-        {
-            request.PlayerCode = playerCode;
-            request.Id = id;
-            return _mediator.Send(request);
-        }
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [Route("{playerCode}/bank/{bankInfoId}", Name = "DeletePlayerBankInfo")]
+    [HttpDelete]
+    [Description("Delete a player bank info")]
+    public async Task<MessageResponse> DeletePlayerBankAsync(
+        [FromServices] ICommandService<DeletePlayerBankInfoCommand> commandService,
+        string playerCode,
+        Guid bankInfoId)
+    {
+        var command = new DeletePlayerBankInfoCommand(playerCode, bankInfoId);
+
+        await commandService.ExecuteAsync(command, Request.HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [Route("{playerCode}/bank/{bankInfoId}/default", Name = "SetDefaultPlayerBankInfo")]
+    [HttpPut]
+    [Description("Set a player default bank info")]
+    public async Task<MessageResponse> SetDefaultPlayerBankAsync(
+        [FromServices] ICommandService<SetDefaultPlayerBankInfoCommand> commandService,
+        string playerCode,
+        Guid bankInfoId)
+    {
+        var command = new SetDefaultPlayerBankInfoCommand(playerCode, bankInfoId, Username);
+
+        await commandService.ExecuteAsync(command, Request.HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPut("{playerCode}/bank/{bankInfoId}", Name = "UpdatePlayerBankInfo")]
+    [Description("Update player bank")]
+    public async Task<MessageResponse> UpdatePlayerBankAsync(
+        [FromServices] ICommandService<UpdatePlayerBankInfoCommand> commandService,
+        string playerCode,
+        Guid bankInfoId,
+        [FromBody] UpdatePlayerBankRequest request)
+    {
+        var command = new UpdatePlayerBankInfoCommand(
+            playerCode,
+            bankInfoId,
+            request.BrandId,
+            request.PaymentChannelId,
+            request.BankType,
+            request.Detail,
+            Username);
+
+        await commandService.ExecuteAsync(command, Request.HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }
