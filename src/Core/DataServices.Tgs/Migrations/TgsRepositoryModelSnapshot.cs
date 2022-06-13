@@ -1571,6 +1571,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(9,6)")
                         .HasColumnName("platform_charge");
 
+                    b.Property<string>("PlayerRegisterFlowSettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("player_register_flow_settings");
+
                     b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");

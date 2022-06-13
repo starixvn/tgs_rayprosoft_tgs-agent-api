@@ -109,6 +109,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(0M);
 
+            builder.Property(c => c.PlayerRegisterFlowSettings)
+                .HasColumnType(ColumnTypes.Jsonb);
+
             builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Brands)
                 .HasForeignKey(c => c.LicenseeId)
