@@ -54,7 +54,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddScoped(sp => new RegisterFlowBuilder(
                     sp,
-                    _FlowTypes.ToImmutableDictionary()));
+                    _FlowTypes.ToImmutableDictionary()))
+                .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>();
 
             var opConfiguration = new OperatorConfiguration(services);
 
