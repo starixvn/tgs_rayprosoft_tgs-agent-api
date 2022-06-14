@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Tgs.BrandCertificate;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -13,11 +14,11 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
@@ -178,7 +179,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -344,7 +345,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create", Name = "RegisterPlayer")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> RegisterPlayerAsync(
-            [FromServices] IBrandRepository brandRepository,
+            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
             [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
             [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
             [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
@@ -353,7 +354,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
 
-            var brand = await brandRepository.GetBrandInfoAsync(brandId).ConfigureAwait(false);
+            var brand = await getBrandService
+                .GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+                .ConfigureAwait(false);
 
             if (brand == null)
                 throw new InvalidStatusException("Brand doesn't exist");

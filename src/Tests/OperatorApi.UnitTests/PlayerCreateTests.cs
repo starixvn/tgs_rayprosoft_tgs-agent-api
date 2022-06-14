@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
@@ -30,21 +31,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
                 .Returns("TestPlayerCode");
@@ -60,7 +56,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var command = new CreatePlayerCommand(
                 brandId,
@@ -93,21 +89,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        true,
-                        true,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY",
+                        SmsEnabled = true,
+                        SmsRegisterFlowEnabled = true
+                    }));
 
             fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
                 .Returns("TestPlayerCode");
@@ -123,7 +116,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var command = new CreatePlayerCommand(
                 brandId,
@@ -158,7 +151,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             fakeAgentOperations
                 .GetAgentByInvitationCodeAsync(
@@ -166,19 +159,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(invitationCode))
                 .Returns(Task.FromResult(new Agent()));
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -186,7 +174,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeAgentOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var command = new CreatePlayerWithAgentInvitationCodeCommand(
                 brandId,
@@ -215,21 +203,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
                 .Returns(new PlayerInfo(
@@ -255,7 +238,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var command = new CreatePlayerWithPlayerInvitationCommand(
                 brandId,
@@ -282,34 +265,25 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
-            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             var sut = new CreatePlayerCommandService(
                 fakePlayerOperations,
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var password = "password";
 
@@ -341,21 +315,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -363,7 +332,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeAgentOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var password = "password";
             var invitationCode = "NonExistentCode";
@@ -391,28 +360,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             var sut = new CreatePlayerInvitationPlayerCommandService(
                 fakePlayerOperations,
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var command = new CreatePlayerWithPlayerInvitationCommand(
                 brandId,
@@ -439,7 +403,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             fakeAgentOperations
                 .GetAgentByInvitationCodeAsync(
@@ -447,19 +411,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(invitationCode))
                 .Returns(Task.FromResult(default(Agent)));
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        Core.Models.Enums.BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             var sut = new CreateAgentInvitationPlayerCommandService(
                 fakePlayerOperations,
@@ -467,7 +426,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeAgentOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var query = new CreatePlayerWithAgentInvitationCodeCommand(
                 brandId,
@@ -494,21 +453,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId))
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(ValueTask.FromResult(
-                    new BrandInfo(
-                        brandId,
-                        "code",
-                        new Uri("http://image.com/img01"),
-                        new Uri("http://image.com/img02"),
-                        new Uri("http://image.com/img03"),
-                        BrandStatus.Active,
-                        "CNY",
-                        false,
-                        false,
-                        false)));
+                    new Tgs.BrandCertificate.Clients.BrandInfo
+                    {
+                        Id = brandId,
+                        Code = "code",
+                        Currency = "CNY"
+                    }));
 
             fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
                 .Returns(new PlayerInfo(
@@ -534,7 +488,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandOperations,
                 fakePlayerRepository,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var query = new CreatePlayerWithPlayerInvitationCommand(
                 brandId,

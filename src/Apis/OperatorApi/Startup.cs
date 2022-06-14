@@ -151,6 +151,12 @@ namespace TGS.Apis.OperatorApi
 
                     options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
                 })
+                .AddBrandServiceClient((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.BrandCertificateBaseUrl = config.GetValue<Uri>("Operator:BrandCertificateBaseUrl");
+                })
                 .AddGameProvidersPluggableServerClient((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
@@ -14,7 +15,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
     internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>
     {
         private readonly IBrandOperations _brandOperations;
-        private readonly IBrandRepository _brandRepository;
+        private readonly IBrandServiceClient _brandServiceClient;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IPlayerRepository _playerRepository;
@@ -24,13 +25,13 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             IPasswordHandler passwordHandler,
             IBrandOperations brandOperations,
             IPlayerRepository playerRepository,
-            IBrandRepository brandRepository)
+            IBrandServiceClient brandServiceClient)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+            _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         }
 
         public async ValueTask<CreatePlayerInfo> GetAsync(
@@ -46,7 +47,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
-            var brand = await _brandRepository
+            var brand = await _brandServiceClient
                 .GetBrandInfoAsync(command.BrandId)
                 .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 

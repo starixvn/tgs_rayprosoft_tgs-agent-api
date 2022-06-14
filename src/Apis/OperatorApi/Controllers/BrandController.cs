@@ -35,7 +35,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 HasInvitationCode = !string.IsNullOrWhiteSpace(invitationCode),
                 LoadingUrl = brandInfo.LoadingUrl,
                 MobileLogoUrl = brandInfo.MobileLogoUrl,
-                SmsEnable = brandInfo.SmsEnabled
+                SmsEnable = brandInfo.SmsEnabled,
+                PlayerRegisterFlowSettings = brandInfo.PlayerRegisterFlowSettings
             };
         }
     }

@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
 using Tgs.CashService.Client;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Models.Enums;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -312,25 +312,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Not_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_False()
         {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
             var brandId = Guid.NewGuid();
             var playerCode = "playerCode";
 
-            _ = fakeBrandRepository
-                .GetBrandInfoAsync(brandId)
-                .Returns(new BrandInfo(
-                    brandId,
-                    "GPI",
-                    new Uri("https://img.org/1.png"),
-                    new Uri("https://img.org/2.png"),
-                    new Uri("https://img.org/3.png"),
-                    BrandStatus.Active,
-                    "CNY",
-                    false,
-                    false,
-                    PlayerIdentityEnabled: true));
+            _ = fakeBrandServiceClient
+                .GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+                {
+                    Id = brandId,
+                    Code = "GPI",
+                    Currency = "CNY",
+                    PlayerIdentityEnabled = true
+                });
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
@@ -352,7 +348,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     false));
 
-            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
             var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
@@ -362,27 +358,22 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_False()
         {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
             var brandId = Guid.NewGuid();
             var playerCode = "playerCode";
 
-            _ = fakeBrandRepository
+            _ = fakeBrandServiceClient
                 .GetBrandInfoAsync(brandId)
-                .Returns(new BrandInfo(
-                    brandId,
-                    "GPI",
-                    new Uri("https://img.org/1.png"),
-                    new Uri("https://img.org/2.png"),
-                    new Uri("https://img.org/3.png"),
-                    BrandStatus.Active,
-                    "CNY",
-                    false,
-                    false,
-                    PlayerIdentityEnabled: false));
+                .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+                {
+                    Id = brandId,
+                    Code = "GPI",
+                    Currency = "CNY"
+                });
 
-            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
             var acutal = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
@@ -396,25 +387,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_True()
         {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 
             var brandId = Guid.NewGuid();
             var playerCode = "playerCode";
 
-            _ = fakeBrandRepository
+            _ = fakeBrandServiceClient
                 .GetBrandInfoAsync(brandId)
-                .Returns(new BrandInfo(
-                    brandId,
-                    "GPI",
-                    new Uri("https://img.org/1.png"),
-                    new Uri("https://img.org/2.png"),
-                    new Uri("https://img.org/3.png"),
-                    BrandStatus.Active,
-                    "CNY",
-                    false,
-                    false,
-                    PlayerIdentityEnabled: true));
+                .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+                {
+                    Id = brandId,
+                    Code = "GPI",
+                    Currency = "CNY",
+                    PlayerIdentityEnabled = true
+                });
 
             _ = fakePlayerRepository
                 .GetPlayerInfoAsync(playerCode)
@@ -436,7 +423,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     false));
 
-            var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
+            var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
             var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 

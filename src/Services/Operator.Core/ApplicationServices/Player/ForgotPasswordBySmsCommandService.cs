@@ -7,6 +7,7 @@ using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
 using TGS.Services.Operator.ApplicationServices.Player;
+using Tgs.BrandCertificate.Clients;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
@@ -15,20 +16,20 @@ namespace TGS.Services.Operator.ApplicationServices.Player
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IPlayerRepository _playerRepository;
         private readonly ISmsServiceClient _smsServiceClient;
-        private readonly IBrandRepository _brandRepository;
+        private readonly IBrandServiceClient _brandServiceClient;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ForgotPasswordBySmsCommandService(
             IPlayerRepository playerRepository,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
-            IBrandRepository brandRepository,
+            IBrandServiceClient brandServiceClient,
             ISmsServiceClient smsServiceClient)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+            _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
         }
 
@@ -60,7 +61,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var brandInfo = await _brandRepository
+            var brandInfo = await _brandServiceClient
                 .GetBrandInfoAsync(command.BrandId)
                 .ConfigureAwait(false);
 

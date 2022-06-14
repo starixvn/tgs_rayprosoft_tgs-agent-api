@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Brand;
 
 namespace TGS.Services.Operator.ApplicationServices.Brand
 {
     internal class GetBrandQueryService : IGetService<BrandQuery, BrandInfo>
     {
-        private readonly IBrandRepository _brandRepository;
+        private readonly IBrandServiceClient _brandServiceClient;
 
-        public GetBrandQueryService(IBrandRepository brandRepository)
+        public GetBrandQueryService(IBrandServiceClient brandServiceClient)
         {
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+            _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         }
 
         public async ValueTask<BrandInfo> GetAsync(
             BrandQuery query,
             CancellationToken cancellationToken = default)
         {
-            var brandInfo = await _brandRepository
-                .GetBrandInfoAsync(query.BrandId)
+            var brandInfo = await _brandServiceClient
+                .GetBrandInfoAsync(query.BrandId, cancellationToken)
                 .ConfigureAwait(false);
 
             if (brandInfo == null)
@@ -28,7 +28,26 @@ namespace TGS.Services.Operator.ApplicationServices.Brand
                 throw new BrandNotFoundException();
             }
 
-            return brandInfo;
+            var frontendInfo = await _brandServiceClient
+                .GetBrandFrontendInfoAsync(query.BrandId, cancellationToken)
+                .ConfigureAwait(false)!;
+
+            var status = await _brandServiceClient
+                .GetBrandStatusAsync(query.BrandId, cancellationToken)
+                .ConfigureAwait(false);
+
+            return new BrandInfo(
+                brandInfo.Id,
+                brandInfo.Code,
+                frontendInfo.DesktopLogoUrl,
+                frontendInfo.LoadingUrl,
+                frontendInfo.MobileLogoUrl,
+                status,
+                brandInfo.Currency,
+                brandInfo.SmsEnabled,
+                brandInfo.SmsRegisterFlowEnabled,
+                brandInfo.PlayerIdentityEnabled,
+                frontendInfo.PlayerRegisterFlowSettings);
         }
     }
 }

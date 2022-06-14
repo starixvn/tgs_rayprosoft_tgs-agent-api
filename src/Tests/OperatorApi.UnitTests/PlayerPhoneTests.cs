@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -360,14 +361,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Start_Set_Player_Phone_Should_Send_Confirm_Message()
         {
             var moqPlayerRepository = new Mock<IPlayerRepository>();
-            var moqBrandRepository = new Mock<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
             var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
             var moqSmsServiceClient = new Mock<ISmsServiceClient>();
 
             var sut = new StartSetPlayerPhoneCommandService(
                 moqPlayerRepository.Object,
-                moqBrandRepository.Object,
+                fakeBrandServiceClient,
                 moqValidateCodeGenerator.Object,
                 moqValidateCodeOperator.Object,
                 moqSmsServiceClient.Object);
@@ -405,19 +406,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.GetPlayerInfoAsync(It.Is<string>(x => x == player.PlayerCode)))
                 .Returns(ValueTask.FromResult(player));
 
-            moqBrandRepository
-                .Setup(fake => fake.GetBrandInfoAsync(It.Is<Guid>(x => x == player.BrandId)))
-                .Returns(ValueTask.FromResult(new BrandInfo(
-                    player.BrandId,
-                    "Test",
-                    new Uri("https://localhost/1.png"),
-                    new Uri("https://localhost/1.png"),
-                    new Uri("https://localhost/1.png"),
-                    BrandStatus.Active,
-                    "CNY",
-                    true,
-                    true,
-                    false)));
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(player.BrandId))
+                .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+                {
+                    Id = player.BrandId,
+                    Code = "Test",
+                    Currency = "CNY",
+                    SmsEnabled = true,
+                    SmsRegisterFlowEnabled = true
+                });
 
             moqValidateCodeGenerator.Setup(fake => fake.GenerateCode()).Returns(validateCode);
             moqValidateCodeGenerator.Setup(fake => fake.GenerateSecurityKey()).Returns(expectedSecurityKey);

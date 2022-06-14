@@ -6,11 +6,16 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 using TGS.Services.Operator.ValidateCode;
 using Tgs.RouletteServices.Clients;
+using System.Collections.Generic;
+using System;
+using System.Collections.Immutable;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OperatorServiceCollectionExtensions
     {
+        private static readonly Dictionary<string, Type> _FlowTypes = new();
+
         public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
         {
             _ = services.RegisterAllServiceUtilityTypes(
@@ -45,6 +50,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .AddPaymentClient()
                 .AddRouletteSignInClient();
+
+            services
+                .AddScoped(sp => new RegisterFlowBuilder(
+                    sp,
+                    _FlowTypes.ToImmutableDictionary()));
 
             var opConfiguration = new OperatorConfiguration(services);
 

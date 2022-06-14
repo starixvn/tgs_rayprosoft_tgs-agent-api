@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 #nullable enable
 
@@ -19,5 +20,7 @@ namespace TGS.Apis.OperatorApi.Models
         public Uri? MobileLogoUrl { get; set; }
 
         public bool SmsEnable { get; set; }
+
+        public JsonDocument? PlayerRegisterFlowSettings { get; set; }
     }
 }

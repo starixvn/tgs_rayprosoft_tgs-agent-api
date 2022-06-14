@@ -180,6 +180,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                     .AdjustSystemAsync(
                         walletId,
                         amount,
+                        null,
                         remark,
                         null,
                         userId)

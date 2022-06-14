@@ -5,16 +5,17 @@ using ExpectedObjects;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Mail;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.PayPassowrd;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.ApplicationServices.PayPassowrd;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -186,7 +187,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
@@ -194,7 +195,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeOperator,
                 fakeEmailClient,
                 fakeSmsServiceClient,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             var email = "email@test.com";
 
@@ -246,18 +247,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 }))
                 .Returns(ValueTask.FromResult(new SendEmailResponse()));
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Any<Guid>())
-                .Returns(new BrandInfo(
-                    player.BrandId,
-                    "brandCode",
-                    new Uri("http://img.org/1.png"),
-                    new Uri("http://img.org/2.png"),
-                    new Uri("http://img.org/3.png"),
-                    Core.Models.Enums.BrandStatus.Active,
-                    "CNY",
-                    false,
-                    false,
-                    false));
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>())
+                .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+                {
+                    Id = player.BrandId,
+                    Code = "brandCode",
+                    Currency = "CNY"
+                });
 
             var actualSecurityKey = await sut.GetAsync(command);
 
@@ -287,7 +283,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             var command = new StartChangePayPasswordCommand(
                 player.PlayerCode,
@@ -299,7 +295,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeOperator,
                 fakeEmailClient,
                 fakeSmsServiceClient,
-                fakeBrandRepository);
+                fakeBrandServiceClient);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
         }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
@@ -17,26 +18,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Create_Player_Identity_Should_Failed_When_Brand_Enable_Player_Identity_Is_False()
         {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var brandId = Guid.NewGuid();
 
-            var brandInfo = new BrandInfo(
-                brandId,
-                "GPI",
-                new Uri("http://img.org/1.png"),
-                new Uri("http://img.org/1.png"),
-                new Uri("http://img.org/1.png"),
-                BrandStatus.Active,
-                "CNY",
-                false,
-                false,
-                PlayerIdentityEnabled: false);
+            var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "GPI",
+                Currency = "CNY"
+            };
 
-            fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
+            fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
 
-            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandRepository, fakePlayerRepository);
+            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
             Assert.ThrowsAsync<BrandEnablePlayerIdentityNotSetException>(
                 async () => await sut.ExecuteAsync(new CreateIdentityAuthenticationFormCommand("playerCode", brandId, "fileId")));
@@ -100,24 +96,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task When_Brand_Enable_Player_Identity_Equals_True_Should_Create_Player_Identity_Success()
         {
-            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var brandId = Guid.NewGuid();
 
-            var brandInfo = new BrandInfo(
-                brandId,
-                "GPI",
-                new Uri("http://img.org/1.png"),
-                new Uri("http://img.org/1.png"),
-                new Uri("http://img.org/1.png"),
-                BrandStatus.Active,
-                "CNY",
-                false,
-                false,
-                PlayerIdentityEnabled: true);
+            var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "GPI",
+                Currency = "CNY",
+                PlayerIdentityEnabled = true
+            };
 
-            _ = fakeBrandRepository
+            _ = fakeBrandServiceClient
                 .GetBrandInfoAsync(Arg.Is(brandId))
                 .Returns(brandInfo);
 
@@ -128,7 +120,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .CreatePlayerAuthenticationFormAsync(Arg.Is(brandId), Arg.Is(playerCode), Arg.Is("{}"))
                 .Returns(authFormId);
 
-            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandRepository, fakePlayerRepository);
+            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandServiceClient, fakePlayerRepository);
 
             var command = new CreateIdentityAuthenticationFormCommand(playerCode, brandId, "620c6db1110125f95bb9ccb2");
 

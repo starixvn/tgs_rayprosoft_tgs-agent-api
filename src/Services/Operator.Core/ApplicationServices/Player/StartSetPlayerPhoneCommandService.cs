@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
@@ -11,7 +12,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPhoneCommand, string>
     {
-        private readonly IBrandRepository _brandRepository;
+        private readonly IBrandServiceClient _brandServiceClient;
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IPlayerRepository _playerRepository;
         private readonly ISmsServiceClient _smsServiceClient;
@@ -19,13 +20,13 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
         public StartSetPlayerPhoneCommandService(
             IPlayerRepository playerRepository,
-            IBrandRepository brandRepository,
+            IBrandServiceClient brandServiceClient,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
             ISmsServiceClient smsServiceClient)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+            _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
             _validateCodeOperator =
@@ -43,7 +44,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (player is null)
                 throw new PlayerNotFoundException(command.PlayerCode);
 
-            var brand = await _brandRepository
+            var brand = await _brandServiceClient
                 .GetBrandInfoAsync(player.BrandId)
                 .ConfigureAwait(false);
 

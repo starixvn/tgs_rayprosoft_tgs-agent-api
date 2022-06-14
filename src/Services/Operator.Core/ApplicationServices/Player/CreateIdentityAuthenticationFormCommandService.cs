@@ -2,20 +2,21 @@
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class CreateIdentityAuthenticationFormCommandService : ICommandService<CreateIdentityAuthenticationFormCommand>
     {
-        private readonly IBrandRepository _brandRepository;
+        private readonly IBrandServiceClient _brandServiceClient;
         private readonly IPlayerRepository _playerRepository;
 
         public CreateIdentityAuthenticationFormCommandService(
-            IBrandRepository brandRepository,
+            IBrandServiceClient brandServiceClient,
             IPlayerRepository playerRepository)
         {
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+            _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
@@ -23,8 +24,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             CreateIdentityAuthenticationFormCommand command,
             CancellationToken cancellationToken = default)
         {
-            var brandInfo = await _brandRepository
-                .GetBrandInfoAsync(command.BrandId)
+            var brandInfo = await _brandServiceClient
+                .GetBrandInfoAsync(command.BrandId, cancellationToken)
                 .ConfigureAwait(false);
 
             if (!brandInfo!.PlayerIdentityEnabled)
