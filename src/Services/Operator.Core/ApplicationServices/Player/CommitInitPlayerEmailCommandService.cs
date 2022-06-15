@@ -34,6 +34,13 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         CommitInitPlayerEmailCommand command,
         CancellationToken cancellationToken = default)
     {
+        var brand = await _brandRepository
+            .GetBrandInfoAsync(command.BrandId)
+            .ConfigureAwait(false);
+
+        if (brand!.EmailRegisterFlowEnabled is false)
+            return;
+
         var result = await _validateCodeOperator
             .GetValidateCodeDataAsync<EmailValidateData>(
                 command.ValidateCode,
@@ -48,21 +55,17 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         var checkQuery = new CheckBrandEmailQuery(command.BrandId, result.Email, playerCode);
 
         var isBrandHasSameEmail = await _checkService
-            .GetAsync(checkQuery)
+            .GetAsync(checkQuery, cancellationToken)
             .ConfigureAwait(false);
 
         if (isBrandHasSameEmail)
             throw new BrandEmailDuplicateException();
 
-        var brand = await _brandRepository
-            .GetBrandInfoAsync(command.BrandId)
-            .ConfigureAwait(false);
-
         await _playerRepository
             .SetPlayerEmailAsync(playerCode, result.Email)
             .ConfigureAwait(false);
 
-        if (brand!.EmailRegisterFlowEnabled is false)
+        if (brand.BankInfoRegisterFlowEnabled)
             return;
 
         await _playerRepository
