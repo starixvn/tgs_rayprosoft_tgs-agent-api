@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
@@ -20,17 +21,18 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class PromotionController : ControllerBase
     {
-        private readonly IPromotionClient _client;
+        private readonly IPromotionClient _promotionClient;
 
-        public PromotionController(IPromotionClient client)
+        public PromotionController(IPromotionClient promotionClient)
         {
-            _client = client;
+            _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
         }
 
         [HttpGet("{language}", Name = "GetPromotions")]
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [Obsolete("預計淘汰")]
         public async ValueTask<PagingResponse<PromotionResponse>> GetPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
         {
@@ -46,7 +48,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 SortBy = "Number",
                 ShowAll = request.ShowAll
             };
-            var response = await _client.GetValidPromotionsAsync(promotionsRequest);
+            var response = await _promotionClient.GetValidPromotionsAsync(promotionsRequest);
 
             return new PagingResponse<PromotionResponse>
             {
@@ -93,9 +95,54 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid promotionId)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var response = await _client.JoinAsync(new(promotionId, playerTokenData.PlayerCode));
+            var response = await _promotionClient.JoinAsync(new(promotionId, playerTokenData.PlayerCode));
 
             return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
+        }
+
+        [HttpGet(Name = "ListPromotions")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        public IAsyncEnumerable<PromotionViewModel> ListPromotionsAsync(
+            [FromServices] IPromotionServiceClient promotionServiceClient)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            return playerTokenData is null
+                ? promotionServiceClient
+                    .ListPromotionsAsync(brandId, HttpContext.RequestAborted)
+                    .Select(promotion => new PromotionViewModel
+                    {
+                        Id = promotion.Id,
+                        Name = promotion.Name,
+                        From = promotion.EventDuring.From,
+                        To = promotion.EventDuring.To,
+                        PromotionType = promotion.PromotionType,
+                        Content = promotion.Content,
+                        DesktopBanner = promotion.PersonalComputerBanner,
+                        MobileBanner = promotion.MobileBanner,
+                        Localization = promotion.Localization,
+                        SubSubject = promotion.SubSubject,
+                        Terms = promotion.Convention,
+                        VipLevels = promotion.VipLevels
+                    })
+                : promotionServiceClient
+                    .ListPromotionsAsync(brandId, playerTokenData.PlayerCode, HttpContext.RequestAborted)
+                    .Select(promotion => new PromotionViewModel
+                    {
+                        Id = promotion.Id,
+                        Name = promotion.Name,
+                        From = promotion.EventDuring.From,
+                        To = promotion.EventDuring.To,
+                        PromotionType = promotion.PromotionType,
+                        Content = promotion.Content,
+                        DesktopBanner = promotion.PersonalComputerBanner,
+                        MobileBanner = promotion.MobileBanner,
+                        Localization = promotion.Localization,
+                        SubSubject = promotion.SubSubject,
+                        Terms = promotion.Convention,
+                        VipLevels = promotion.VipLevels
+                    });
         }
     }
 }
