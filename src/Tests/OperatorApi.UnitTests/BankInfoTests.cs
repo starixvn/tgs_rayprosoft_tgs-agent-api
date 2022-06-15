@@ -81,7 +81,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Player_Create_Init_BankInfo_If_Brand_Not_Use_BankInfoRegisterFlow_Should_Create_Default_BankInfo_Only()
+        public async Task Player_Init_BankInfo_If_Brand_Not_Use_BankInfoRegisterFlow_Should_Not_Process()
         {
             var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
@@ -139,14 +139,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
             await sut.ExecuteAsync(command);
 
             _ = fakePaymentServiceClient
-                .Received(1)
+                .DidNotReceive()
                 .CreatePlayerBankInfoAsync(
                     Arg.Is(brandInfo.BrandId),
                     Arg.Is(playerCode),
                     Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
 
             _ = fakePaymentServiceClient
-                .Received(1)
+                .DidNotReceive()
                 .SetDefaultPlayerBankInfoAsync(
                     Arg.Is(playerCode),
                     Arg.Is(bankInfoId),
@@ -182,7 +182,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Player_Create_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Record_Ip()
+        public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Record_Ip()
         {
             var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
@@ -270,7 +270,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Player_Create_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Success()
+        public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Success()
         {
             var fakeBrandRepository = Substitute.For<IBrandRepository>();
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();

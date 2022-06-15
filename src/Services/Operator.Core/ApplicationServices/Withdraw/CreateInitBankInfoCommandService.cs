@@ -27,12 +27,16 @@ internal class CreateInitBankInfoCommandService : ICommandService<CreateInitBank
         _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
     }
 
-    public async ValueTask ExecuteAsync(CreateInitBankInfoCommand command,
+    public async ValueTask ExecuteAsync(
+        CreateInitBankInfoCommand command,
         CancellationToken cancellationToken = default)
     {
         var brand = await _brandRepository
             .GetBrandInfoAsync(command.BrandId)
             .ConfigureAwait(false);
+
+        if (brand!.BankInfoRegisterFlowEnabled is false)
+            return;
 
         var playerCode = command.PlayerCode;
 
@@ -58,9 +62,6 @@ internal class CreateInitBankInfoCommandService : ICommandService<CreateInitBank
                 playerCode,
                 cancellationToken)
             .ConfigureAwait(false);
-
-        if (brand!.BankInfoRegisterFlowEnabled is false)
-            return;
 
         await _playerRepository
             .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)

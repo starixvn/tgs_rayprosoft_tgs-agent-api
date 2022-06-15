@@ -35,31 +35,6 @@ public class BankInfoController : ControllerBase
         await createService.ExecuteAsync(command).ConfigureAwait(false);
     }
 
-    [HttpPost("init", Name = "CreatePlayerBankInfoOfPlayerRegister")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    [IgnoreUserBlacklistCheck]
-    public async Task CreateBankInfoAsync(
-        [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
-        CreateInitBankInfoRequest request)
-    {
-        var brandId = HttpContext.GetBrandId();
-        var playerData = HttpContext.Items.GetPlayerTokenData();
-
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-        var hostName = Request.Host.Host;
-
-        var command = new CreateInitBankInfoCommand(
-            brandId!.Value,
-            playerData.PlayerCode,
-            request.PaymentChannelId,
-            request.BankType,
-            request.Detail,
-            ipAddress,
-            hostName);
-
-        await createService.ExecuteAsync(command).ConfigureAwait(false);
-    }
-
     [HttpDelete("{bankInfoId}", Name = "DeletePlayerBankInfo")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task DeleteBankInfoAsync(

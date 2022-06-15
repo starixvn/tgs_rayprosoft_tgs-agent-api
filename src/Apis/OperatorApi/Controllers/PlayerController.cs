@@ -17,8 +17,8 @@ using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -113,6 +113,37 @@ namespace TGS.Apis.OperatorApi.Controllers
             var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CheckUsernameResponse { Exists = isExist };
+        }
+
+        /// <summary>
+        /// Create default withdraw bankinfo of register flow.
+        /// </summary>
+        /// <param name="createService"></param>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
+        [HttpPost("init-bankinfo", Name = "CreatePlayerBankInfoOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
+        public async Task CreateBankInfoAsync(
+            [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
+            CreateInitBankInfoViewModel viewModel)
+        {
+            var brandId = HttpContext.GetBrandId();
+            var playerData = HttpContext.Items.GetPlayerTokenData();
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            var hostName = Request.Host.Host;
+
+            var command = new CreateInitBankInfoCommand(
+                brandId!.Value,
+                playerData.PlayerCode,
+                viewModel.PaymentChannelId,
+                viewModel.BankType,
+                viewModel.Detail,
+                ipAddress,
+                hostName);
+
+            await createService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
