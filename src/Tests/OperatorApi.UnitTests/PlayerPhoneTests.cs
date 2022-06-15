@@ -54,7 +54,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 true,
                 false,
                 false,
-                true);
+                true,
+                false);
 
             var command = new CommitInitPlayerPhoneCommand(
                 securityKey,
@@ -128,7 +129,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 true,
                 false,
                 false,
-                true);
+                true,
+                false);
 
             var command = new CommitInitPlayerPhoneCommand(
                 securityKey,
@@ -199,6 +201,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 true,
                 true,
+                false,
                 false,
                 false);
 
@@ -273,6 +276,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "CNY",
                 true,
                 true,
+                false,
                 false,
                 false);
 
@@ -606,6 +610,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "CNY",
                     true,
                     true,
+                    false,
                     false,
                     false)));
 
