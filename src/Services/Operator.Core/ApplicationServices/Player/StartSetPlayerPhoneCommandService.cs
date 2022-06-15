@@ -11,7 +11,6 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 {
     internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPhoneCommand, string>
     {
-        private readonly IBrandRepository _brandRepository;
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IPlayerRepository _playerRepository;
         private readonly ISmsServiceClient _smsServiceClient;
@@ -19,13 +18,11 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
         public StartSetPlayerPhoneCommandService(
             IPlayerRepository playerRepository,
-            IBrandRepository brandRepository,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
             ISmsServiceClient smsServiceClient)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
             _validateCodeOperator =
@@ -43,13 +40,9 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (player is null)
                 throw new PlayerNotFoundException(command.PlayerCode);
 
-            var brand = await _brandRepository
-                .GetBrandInfoAsync(player.BrandId)
-                .ConfigureAwait(false);
+            var generateCode = () => _codeGenerator.GenerateCode();
 
-            Func<string> generateCode = () => _codeGenerator.GenerateCode();
-
-            if (brand!.SmsEnabled is false)
+            if (!command.SmsEnabled)
                 generateCode = () => "123456";
 
             var saveResult = await Policy
@@ -76,7 +69,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            if (brand.SmsEnabled)
+            if (command.SmsEnabled)
             {
                 var shortMessage = string.Format(
                     Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
