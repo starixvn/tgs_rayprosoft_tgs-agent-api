@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using Tgs.BrandCertificate.Clients;
@@ -19,10 +20,10 @@ namespace TGS.Tests.Games.IntegrationTests
             _signingCredentials = new SigningCredentials(_SecurityKey, SecurityAlgorithms.RsaSha256);
         }
 
-        public Task<SecurityKey> GetSystemValidateSecurityKeyAsync()
+        public Task<SecurityKey> GetSystemValidateSecurityKeyAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_SecurityKey);
 
-        public Task<string> MakeJsonWebTokenAsync(Guid brandId)
+        public Task<string> MakeJsonWebTokenAsync(Guid brandId, CancellationToken cancellationToken = default)
         {
             var id = new ClaimsIdentity(new[]{
                 new Claim(JwtRegisteredClaimNames.Name, "GPI"),
