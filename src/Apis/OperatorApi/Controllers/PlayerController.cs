@@ -645,7 +645,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Starts the change email of register flow.
         /// </summary>
-        /// <param name="getBrandInfoService">The get brand info service.</param>
         /// <param name="getPlayerInfoService">The get player info service.</param>
         /// <param name="checkService">The check player email service.</param>
         /// <param name="setPlayerEmailService">The set player email service.</param>
@@ -655,7 +654,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [IgnoreUserBlacklistCheck]
         public async ValueTask<string> StartChangeEmailAsync(
-            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
             [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
@@ -664,14 +662,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
             var playerInfo = await getPlayerInfoService
-                .GetAsync(new GetPlayerQuery(brandInfo.BrandId, playerTokenData.PlayerCode))
+                .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
                 .ConfigureAwait(false);
 
             var isBrandHasSameEmail = await checkService
                 .GetAsync(new CheckBrandEmailQuery(
-                    brandInfo.BrandId,
+                    brandId!.Value,
                     request.Email,
                     playerInfo.PlayerCode))
                 .ConfigureAwait(false);
@@ -683,7 +680,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 request.Email,
                 CultureInfo.CurrentUICulture,
-                brandInfo.EmailRegisterFlowEnabled);
+                true);
 
             return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
         }

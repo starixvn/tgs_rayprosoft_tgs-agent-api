@@ -10,17 +10,20 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitPlayerEmailCommand>
 {
+    private readonly IBrandRepository _brandRepository;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandEmailQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public CommitInitPlayerEmailCommandService(
+       IBrandRepository brandRepository,
        IPlayerRepository playerRepository,
        IGetService<CheckBrandEmailQuery, bool> checkService,
        IValidateCodeOperator validateCodeOperator,
        IRedisCacheManager cacheManager)
     {
+        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
         _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
@@ -51,9 +54,16 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         if (isBrandHasSameEmail)
             throw new BrandEmailDuplicateException();
 
+        var brand = await _brandRepository
+            .GetBrandInfoAsync(command.BrandId)
+            .ConfigureAwait(false);
+
         await _playerRepository
             .SetPlayerEmailAsync(playerCode, result.Email)
             .ConfigureAwait(false);
+
+        if (brand!.EmailRegisterFlowEnabled is false)
+            return;
 
         await _playerRepository
             .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)

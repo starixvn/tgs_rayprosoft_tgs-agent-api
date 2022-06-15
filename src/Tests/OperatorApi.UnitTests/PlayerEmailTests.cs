@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Microsoft.EntityFrameworkCore;
@@ -29,16 +28,33 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-            var brandId = Guid.NewGuid();
-            var email = "test @mail.com";
+            var email = "test@mail.com";
+
+            var brandInfo = new BrandInfo(
+                Guid.NewGuid(),
+                "code",
+                new Uri("http://image.com/img01"),
+                new Uri("http://image.com/img02"),
+                new Uri("http://image.com/img03"),
+                Core.Models.Enums.BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                true,
+                false);
 
             _ = fakeCheckBrandEmailService.GetAsync(
-                    Arg.Is(new CheckBrandEmailQuery(brandId, email, playerCode)))
+                    Arg.Is(new CheckBrandEmailQuery(brandInfo.BrandId, email, playerCode)))
                 .Returns(true);
+
+            _ = fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandInfo.BrandId))
+                .Returns(brandInfo);
 
             _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
                     Arg.Is(validateCode),
@@ -50,9 +66,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 validateCode,
                 "127.0.0.1",
                 "localhost",
-                brandId);
+                brandInfo.BrandId);
 
             var sut = new CommitInitPlayerEmailCommandService(
+                fakeBrandRepository,
                 fakePlayerRepository,
                 fakeCheckBrandEmailService,
                 fakeValidateCodeOperator,
@@ -62,61 +79,39 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Commit_Init_Player_Email_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        public async Task Commit_Init_Player_Email_If_Brand_Not_Use_EmailRegisterFlow_Should_Only_Set_Email()
         {
             var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
             var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-            var brandId = Guid.NewGuid();
-            var email = "test @mail.com";
+            var email = "test@mail.com";
+
+            var brandInfo = new BrandInfo(
+                Guid.NewGuid(),
+                "code",
+                new Uri("http://image.com/img01"),
+                new Uri("http://image.com/img02"),
+                new Uri("http://image.com/img03"),
+                Core.Models.Enums.BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                false,
+                true);
 
             _ = fakeCheckBrandEmailService.GetAsync(
-                    Arg.Is(new CheckBrandEmailQuery(brandId, email, playerCode)))
+                    Arg.Is(new CheckBrandEmailQuery(brandInfo.BrandId, email, playerCode)))
                 .Returns(false);
 
-            _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
-                    Arg.Is(validateCode),
-                    Arg.Is(securityKey))
-                .Returns((EmailValidateData)null);
-
-            var command = new CommitInitPlayerEmailCommand(
-                securityKey,
-                validateCode,
-                "127.0.0.1",
-                "localhost",
-                brandId);
-
-            var sut = new CommitInitPlayerEmailCommandService(
-                fakePlayerRepository,
-                fakeCheckBrandEmailService,
-                fakeValidateCodeOperator,
-                fakeRedisCacheManager);
-
-            _ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-        }
-
-        [Test]
-        public async Task Commit_Init_Player_Email_Should_Success()
-        {
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
-            var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-
-            var playerCode = "testPlayerCode";
-            var validateCode = "123456";
-            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
-            var brandId = Guid.NewGuid();
-            var email = "test @mail.com";
-
-            _ = fakeCheckBrandEmailService.GetAsync(
-                    Arg.Is(new CheckBrandEmailQuery(brandId, email, playerCode)))
-                .Returns(false);
+            _ = fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandInfo.BrandId))
+                .Returns(brandInfo);
 
             _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
                     Arg.Is(validateCode),
@@ -128,9 +123,173 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 validateCode,
                 "127.0.0.1",
                 "localhost",
-                brandId);
+                brandInfo.BrandId);
 
             var sut = new CommitInitPlayerEmailCommandService(
+                fakeBrandRepository,
+                fakePlayerRepository,
+                fakeCheckBrandEmailService,
+                fakeValidateCodeOperator,
+                fakeRedisCacheManager);
+
+            await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .SetPlayerEmailAsync(
+                    Arg.Is(playerCode),
+                    Arg.Is(email));
+
+            _ = fakePlayerRepository
+                .DidNotReceive()
+                .UpdatePlayerStatusAsync(
+                Arg.Is(playerCode),
+                Arg.Is(PlayerStatus.Enabled));
+
+            _ = fakePlayerRepository
+                .DidNotReceive()
+                .PlayerRegisterIpAsync(
+                    Arg.Is(playerCode),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
+                    Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository
+                .DidNotReceive()
+                .PlayerLoginIpAsync(
+                    Arg.Is(playerCode),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName));
+
+            _ = fakeRedisCacheManager
+                  .DidNotReceive()
+                  .ClearCacheAsync(
+                      Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
+                  Arg.Is<string>(x => x == playerCode),
+                      Arg.Any<bool>());
+        }
+
+        [Test]
+        public async Task Commit_Init_Player_Email_If_Brand_Use_EmailRegisterFlow_Should_Record_Ip()
+        {
+            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var email = "test@mail.com";
+
+            var brandInfo = new BrandInfo(
+                Guid.NewGuid(),
+                "code",
+                new Uri("http://image.com/img01"),
+                new Uri("http://image.com/img02"),
+                new Uri("http://image.com/img03"),
+                Core.Models.Enums.BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                true,
+                false);
+
+            _ = fakeCheckBrandEmailService.GetAsync(
+                    Arg.Is(new CheckBrandEmailQuery(brandInfo.BrandId, email, playerCode)))
+                .Returns(false);
+
+            _ = fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandInfo.BrandId))
+                .Returns(brandInfo);
+
+            _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
+                    Arg.Is(validateCode),
+                    Arg.Is(securityKey))
+                .Returns(new EmailValidateData(email, playerCode));
+
+            var command = new CommitInitPlayerEmailCommand(
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost",
+                brandInfo.BrandId);
+
+            var sut = new CommitInitPlayerEmailCommandService(
+                fakeBrandRepository,
+                fakePlayerRepository,
+                fakeCheckBrandEmailService,
+                fakeValidateCodeOperator,
+                fakeRedisCacheManager);
+
+            await sut.ExecuteAsync(command).ConfigureAwait(false);
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .PlayerRegisterIpAsync(
+                    Arg.Is(playerCode),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName),
+                    Arg.Any<DateTimeOffset>());
+
+            _ = fakePlayerRepository
+                .Received(1)
+                .PlayerLoginIpAsync(
+                    Arg.Is(playerCode),
+                    Arg.Is(command.IpAddress),
+                    Arg.Is(command.HostName));
+        }
+
+        [Test]
+        public async Task Commit_Init_Player_Email_If_Brand_Use_EmailRegisterFlow_Should_Success()
+        {
+            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var email = "test@mail.com";
+
+            var brandInfo = new BrandInfo(
+                Guid.NewGuid(),
+                "code",
+                new Uri("http://image.com/img01"),
+                new Uri("http://image.com/img02"),
+                new Uri("http://image.com/img03"),
+                Core.Models.Enums.BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                true,
+                false);
+
+            _ = fakeCheckBrandEmailService.GetAsync(
+                    Arg.Is(new CheckBrandEmailQuery(brandInfo.BrandId, email, playerCode)))
+                .Returns(false);
+
+            _ = fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandInfo.BrandId))
+                .Returns(brandInfo);
+
+            _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
+                    Arg.Is(validateCode),
+                    Arg.Is(securityKey))
+                .Returns(new EmailValidateData(email, playerCode));
+
+            var command = new CommitInitPlayerEmailCommand(
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost",
+                brandInfo.BrandId);
+
+            var sut = new CommitInitPlayerEmailCommandService(
+                fakeBrandRepository,
                 fakePlayerRepository,
                 fakeCheckBrandEmailService,
                 fakeValidateCodeOperator,
@@ -150,27 +309,66 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Arg.Is(playerCode),
                 Arg.Is(PlayerStatus.Enabled));
 
-            _ = fakePlayerRepository
-                .Received(1)
-                .PlayerRegisterIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName),
-                    Arg.Any<DateTimeOffset>());
-
-            _ = fakePlayerRepository
-                .Received(1)
-                .PlayerLoginIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName));
-
             _ = fakeRedisCacheManager
                   .Received(1)
                   .ClearCacheAsync(
                       Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
                   Arg.Is<string>(x => x == playerCode),
                       Arg.Any<bool>());
+        }
+
+        [Test]
+        public void Commit_Init_Player_Email_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeBrandRepository = Substitute.For<IBrandRepository>();
+
+            var playerCode = "testPlayerCode";
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var email = "test@mail.com";
+
+            var brandInfo = new BrandInfo(
+                Guid.NewGuid(),
+                "code",
+                new Uri("http://image.com/img01"),
+                new Uri("http://image.com/img02"),
+                new Uri("http://image.com/img03"),
+                Core.Models.Enums.BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                true,
+                false);
+
+            _ = fakeCheckBrandEmailService.GetAsync(
+                    Arg.Is(new CheckBrandEmailQuery(brandInfo.BrandId, email, playerCode)))
+                .Returns(false);
+
+            _ = fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
+                    Arg.Is(validateCode),
+                    Arg.Is(securityKey))
+                .Returns((EmailValidateData)null);
+
+            var command = new CommitInitPlayerEmailCommand(
+                securityKey,
+                validateCode,
+                "127.0.0.1",
+                "localhost",
+                brandInfo.BrandId);
+
+            var sut = new CommitInitPlayerEmailCommandService(
+                fakeBrandRepository,
+                fakePlayerRepository,
+                fakeCheckBrandEmailService,
+                fakeValidateCodeOperator,
+                fakeRedisCacheManager);
+
+            _ = Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
 
         [Test]
