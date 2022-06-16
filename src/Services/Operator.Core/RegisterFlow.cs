@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,12 +35,16 @@ internal class RegisterFlow : IRegisterFlowStep
         return true;
     }
 
-    public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(JsonDocument input, CancellationToken cancellationToken = default)
+    public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
+        Guid brandId,
+        JsonDocument input,
+        PlayerLocationInfo locationInfo,
+        CancellationToken cancellationToken = default)
     {
         var currentStep = _flowSteps.Peek();
 
         var result = await currentStep
-            .ProcessInputAsync(input)
+            .ProcessInputAsync(brandId, input, locationInfo, cancellationToken)
             .ConfigureAwait(false);
 
         if (result.IsCompleted)

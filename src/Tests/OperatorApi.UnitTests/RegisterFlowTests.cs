@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 using TGS.Services.Operator;
 
@@ -106,12 +107,15 @@ public class RegisterFlowTests
     [Test]
     public async Task Process_Input_If_Step_Undone_Will_Return_CurrentStepInfo()
     {
+        var brandId = Guid.NewGuid();
+        var locationInfo = new PlayerLocationInfo("127.0.0.1", null, null);
+
         var step1 = new StubRegisterFlowStep()
         {
             Type = "Step1"
         };
         var stepResponse = JsonDocument.Parse("{}");
-        step1.SetProcessInputDelegate(_ => Task.FromResult(
+        step1.SetProcessInputDelegate((_, _, _) => Task.FromResult(
             new RegisterFlowProcessResult(false, null, stepResponse)));
         var step2 = new StubRegisterFlowStep()
         {
@@ -128,7 +132,7 @@ public class RegisterFlowTests
             step3
         });
 
-        var actual = await sut.ProcessInputAsync(JsonDocument.Parse("{}"));
+        var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
         Assert.IsFalse(actual.IsCompleted);
         Assert.AreEqual("Step1", actual.NextStepType);
@@ -138,11 +142,14 @@ public class RegisterFlowTests
     [Test]
     public async Task Process_Input_Will_Return_NextStepInfo()
     {
+        var brandId = Guid.NewGuid();
+        var locationInfo = new PlayerLocationInfo("127.0.0.1", null, null);
+
         var step1 = new StubRegisterFlowStep()
         {
             Type = "Step1"
         };
-        step1.SetProcessInputDelegate(_ => Task.FromResult(
+        step1.SetProcessInputDelegate((_, _, _) => Task.FromResult(
             new RegisterFlowProcessResult(true, null, null)));
         var step2 = new StubRegisterFlowStep()
         {
@@ -159,7 +166,7 @@ public class RegisterFlowTests
             step3
         });
 
-        var actual = await sut.ProcessInputAsync(JsonDocument.Parse("{}"));
+        var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
         Assert.IsFalse(actual.IsCompleted);
         Assert.AreEqual("Step2", actual.NextStepType);

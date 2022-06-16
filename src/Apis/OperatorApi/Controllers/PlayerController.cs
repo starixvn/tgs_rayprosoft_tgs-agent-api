@@ -471,6 +471,11 @@ public class PlayerController : ControllerBase
         }
     }
 
+    [HttpPost("register", Name = "RegisterPlayerFlow")]
+    public void RegisterPlayer()
+    {
+    }
+
     /// <summary>
     /// Resets the password.
     /// </summary>

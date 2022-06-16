@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,5 +11,9 @@ public interface IRegisterFlowStep
 
     ValueTask<bool> ConfirmCompletedAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<RegisterFlowProcessResult> ProcessInputAsync(JsonDocument input, CancellationToken cancellationToken = default);
+    ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
+        Guid brandId,
+        JsonDocument input,
+        PlayerLocationInfo locationInfo,
+        CancellationToken cancellationToken = default);
 }
