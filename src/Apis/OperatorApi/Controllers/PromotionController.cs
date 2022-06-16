@@ -108,26 +108,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            return playerTokenData is null
+            return (playerTokenData is null
                 ? promotionServiceClient
                     .ListPromotionsAsync(brandId, HttpContext.RequestAborted)
-                    .Select(promotion => new PromotionViewModel
-                    {
-                        Id = promotion.Id,
-                        Name = promotion.Name,
-                        From = promotion.EventDuring.From,
-                        To = promotion.EventDuring.To,
-                        PromotionType = promotion.PromotionType,
-                        Content = promotion.Content,
-                        DesktopBanner = promotion.PersonalComputerBanner,
-                        MobileBanner = promotion.MobileBanner,
-                        Localization = promotion.Localization,
-                        SubSubject = promotion.SubSubject,
-                        Terms = promotion.Convention,
-                        VipLevels = promotion.VipLevels
-                    })
                 : promotionServiceClient
-                    .ListPromotionsAsync(brandId, playerTokenData.PlayerCode, HttpContext.RequestAborted)
+                    .ListPromotionsAsync(brandId, playerTokenData.PlayerCode, HttpContext.RequestAborted))
                     .Select(promotion => new PromotionViewModel
                     {
                         Id = promotion.Id,
@@ -141,7 +126,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Localization = promotion.Localization,
                         SubSubject = promotion.SubSubject,
                         Terms = promotion.Convention,
-                        VipLevels = promotion.VipLevels
+                        VipLevels = promotion.VipLevels,
+                        CampaignDetail = promotion.CampaignDetail
                     });
         }
     }
