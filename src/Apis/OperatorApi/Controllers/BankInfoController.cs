@@ -65,7 +65,8 @@ public class BankInfoController : ControllerBase
                 Id = info.Id,
                 PaymentChannelId = info.PaymentChannelId,
                 BankType = info.BankType,
-                Detail = info.Detail
+                Detail = info.Detail,
+                IsDefault = info.IsDefault
             });
     }
 }

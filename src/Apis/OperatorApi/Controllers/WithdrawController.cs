@@ -61,10 +61,11 @@ public class WithdrawController : ControllerBase
 
     [HttpGet]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
     public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
         [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
         [FromServices]
-        IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
         [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
     {
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -190,8 +191,8 @@ public class WithdrawController : ControllerBase
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
         var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
-        var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+        var wageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
 
-        return WageringRequirement;
+        return wageringRequirement;
     }
 }

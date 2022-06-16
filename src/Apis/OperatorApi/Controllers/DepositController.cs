@@ -28,7 +28,7 @@ public class DepositController : ControllerBase
     /// <param name="getPaymentService">The get payment service.</param>
     /// <returns></returns>
     [HttpGet]
-    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
         [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
         [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,

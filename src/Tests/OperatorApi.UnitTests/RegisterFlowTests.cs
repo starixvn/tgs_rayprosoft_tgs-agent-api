@@ -79,6 +79,11 @@ public class RegisterFlowTests
     public void Create_RegisterFlowDefinition_From_RegisterFlowBuilder()
     {
         var serviceProvider = new ServiceCollection()
+            .AddSingleton(Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>())
+            .AddSingleton(Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>())
+            .AddSingleton(Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>())
+            .AddSingleton(Substitute.For<IPlayerServiceClient>())
+            .AddSingleton(Substitute.For<IBrandServiceClient>())
             .BuildServiceProvider();
         var sut = new RegisterFlowBuilder(
             serviceProvider,
@@ -97,7 +102,7 @@ public class RegisterFlowTests
             .GetValue(actual) as List<IRegisterFlowStep>;
 
         Assert.IsNotNull(privateList);
-        Assert.AreEqual(1, privateList.Count);
+        Assert.AreEqual(2, privateList.Count);
     }
 
     [Test]
