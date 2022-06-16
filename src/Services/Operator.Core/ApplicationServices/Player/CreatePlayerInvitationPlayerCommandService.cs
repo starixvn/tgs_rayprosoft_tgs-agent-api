@@ -82,7 +82,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                     .PlayerLoginIpAsync(
                         resultPlayerCode,
                         command.IpAddress,
-                        command.HostName)
+                        command.HostName!)
                     .ConfigureAwait(false);
             }
 
@@ -101,7 +101,9 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 .GetPlayerInfoAsync(command.UpperPlayerCode)
                 .ConfigureAwait(false);
 
-            if (upperPlayer == null || upperPlayer.BrandId != command.BrandId || upperPlayer.Status != PlayerStatus.Enabled)
+            if (upperPlayer == null 
+                || upperPlayer.BrandId != command.BrandId 
+                || upperPlayer.Status != PlayerStatus.Enabled)
                 throw new InvalidInvitationCodeException(
                     command.UpperPlayerCode,
                     "Can't find the player info");

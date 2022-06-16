@@ -85,7 +85,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                     .PlayerLoginIpAsync(
                         resultPlayerCode,
                         command.IpAddress,
-                        command.HostName)
+                        command.HostName!)
                     .ConfigureAwait(false);
             }
 
