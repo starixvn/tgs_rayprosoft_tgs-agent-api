@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,7 @@ using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
+using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
@@ -224,12 +226,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
         public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
             [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
             [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
-            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
+            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
+            [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
@@ -261,6 +265,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
+            var bankInfoAuthentication = await getBankInfoQueryService
+                .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
+                .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
+            
             var playerInfo = new PlayerInfoViewModel
             {
                 PlayerCode = player.PlayerCode,
@@ -282,7 +290,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Line = playerProperties.GetValueOrDefault("Line"),
                 Viber = playerProperties.GetValueOrDefault("Viber"),
                 Telegram = playerProperties.GetValueOrDefault("Telegram"),
-                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp")
+                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
+                BankInfoAuthentication = bankInfoAuthentication
             };
 
             return playerInfo;

@@ -61,6 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
             [FromServices]
@@ -190,9 +191,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
-            var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+            var wageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
 
-            return WageringRequirement;
+            return wageringRequirement;
         }
     }
 }

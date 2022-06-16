@@ -6,6 +6,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public class PlayerInfoViewModel
     {
+        [JsonPropertyName("bankinfoauthentication")]
+        public bool BankInfoAuthentication { get; set; }
+
         [JsonPropertyName("birthdate")]
         public DateOnly? Birthdate { get; set; }
 
