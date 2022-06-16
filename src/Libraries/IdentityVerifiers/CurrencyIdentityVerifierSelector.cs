@@ -1,11 +1,10 @@
-﻿namespace TGS.IdentityVerifiers
+﻿namespace TGS.IdentityVerifiers;
+
+public class CurrencyIdentityVerifierSelector : IIdentityVerifierSelector<string>
 {
-    public class CurrencyIdentityVerifierSelector : IIdentityVerifierSelector<string>
+    public IIdentityVerifier GetIdentityVerifier(string currency) => currency switch
     {
-        public IIdentityVerifier GetIdentityVerifier(string currency) => currency switch
-        {
-            "CNY" => new ChineseIdentityVerifier(),
-            _ => new SoutheastAsiaIdentityVerifier()
-        };
-    }
+        "CNY" => new ChineseIdentityVerifier(),
+        _ => new SoutheastAsiaIdentityVerifier()
+    };
 }

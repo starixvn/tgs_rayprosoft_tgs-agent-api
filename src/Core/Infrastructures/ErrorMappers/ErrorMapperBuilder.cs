@@ -4,35 +4,34 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TGS.Core.Models.Interfaces;
 
-namespace TGS.Core.Infrastructures.ErrorMappers
+namespace TGS.Core.Infrastructures.ErrorMappers;
+
+public class ErrorMapperBuilder
 {
-    public class ErrorMapperBuilder
+    private ErrorMapperTypeCollection _mapperTypes;
+
+    public IServiceCollection Services { get; }
+
+    public ErrorMapperBuilder(IServiceCollection services)
     {
-        private ErrorMapperTypeCollection _mapperTypes;
+        Services = services ?? throw new ArgumentNullException(nameof(services));
 
-        public IServiceCollection Services { get; }
+        var desc = services
+            .Where(desc => desc.ServiceType == typeof(ErrorMapperTypeCollection))
+            .FirstOrDefault();
 
-        public ErrorMapperBuilder(IServiceCollection services)
-        {
-            Services = services ?? throw new ArgumentNullException(nameof(services));
+        _mapperTypes = desc?.ImplementationInstance as ErrorMapperTypeCollection ?? new ErrorMapperTypeCollection();
 
-            var desc = services
-                .Where(desc => desc.ServiceType == typeof(ErrorMapperTypeCollection))
-                .FirstOrDefault();
+        if (desc == null)
+            services.AddSingleton(_mapperTypes);
 
-            _mapperTypes = desc?.ImplementationInstance as ErrorMapperTypeCollection ?? new ErrorMapperTypeCollection();
+        services.TryAddSingleton<IErrorMapper, CompositeErrorMapper>();
+    }
 
-            if (desc == null)
-                services.AddSingleton(_mapperTypes);
+    public ErrorMapperBuilder AddErrorMapper<TMapper>() where TMapper : IErrorMapper
+    {
+        _mapperTypes.Add(typeof(TMapper));
 
-            services.TryAddSingleton<IErrorMapper, CompositeErrorMapper>();
-        }
-
-        public ErrorMapperBuilder AddErrorMapper<TMapper>() where TMapper : IErrorMapper
-        {
-            _mapperTypes.Add(typeof(TMapper));
-
-            return this;
-        }
+        return this;
     }
 }

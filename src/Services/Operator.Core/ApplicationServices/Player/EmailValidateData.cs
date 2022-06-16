@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Player
-{
-    record EmailValidateData(string Email, string PlayerCode);
-}
+﻿namespace TGS.Services.Operator.ApplicationServices.Player;
+
+record EmailValidateData(string Email, string PlayerCode);

@@ -1,16 +1,15 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Jili.Outgoing
+namespace TGS.Shared.Game.Models.Jili.Outgoing;
+
+public record JiliGetGameDetailUrlResponse
 {
-    public record JiliGetGameDetailUrlResponse
-    {
-        [JsonPropertyName("ErrorCode")]
-        public int ErrorCode { get; init; }
+    [JsonPropertyName("ErrorCode")]
+    public int ErrorCode { get; init; }
 
-        [JsonPropertyName("Message")]
-        public string ErrorMessage { get; init; }
+    [JsonPropertyName("Message")]
+    public string ErrorMessage { get; init; }
 
-        [JsonPropertyName("Data")]
-        public JiliGetGameDetailUrlData Data { get; init; }
-    }
+    [JsonPropertyName("Data")]
+    public JiliGetGameDetailUrlData Data { get; init; }
 }

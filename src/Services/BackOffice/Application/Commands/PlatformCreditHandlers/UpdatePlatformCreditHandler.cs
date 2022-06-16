@@ -6,31 +6,30 @@ using TGS.Services.BackOffice.Application.Models.PlatformCredit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.PlatformCreditHandlers
+namespace TGS.Services.BackOffice.Application.Commands.PlatformCreditHandlers;
+
+public class UpdatePlatformCreditHandler : Handler<UpdatePlatformCreditRequest, MessageResponse>
 {
-    public class UpdatePlatformCreditHandler : Handler<UpdatePlatformCreditRequest, MessageResponse>
+    private readonly IPlatformCreditService _service;
+
+    public UpdatePlatformCreditHandler(IPlatformCreditService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IPlatformCreditService _service;
+        _service = service;
+    }
 
-        public UpdatePlatformCreditHandler(IPlatformCreditService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<MessageResponse> Handle(UpdatePlatformCreditRequest request,
+        CancellationToken cancellationToken)
+    {
+        var brandQuota = await _service.GetPlatformCreditAsync(q => q.Id == request.Id);
+
+        if (brandQuota == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdatePlatformCreditRequest request,
-            CancellationToken cancellationToken)
-        {
-            var brandQuota = await _service.GetPlatformCreditAsync(q => q.Id == request.Id);
+        await _service.UpdatePlatformCreditAsync(brandQuota, request);
 
-            if (brandQuota == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
-            }
-
-            await _service.UpdatePlatformCreditAsync(brandQuota, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

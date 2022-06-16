@@ -1,43 +1,42 @@
 ﻿using System.ComponentModel;
 
-namespace TGS.Shared.Game.Models.TF.Enums
+namespace TGS.Shared.Game.Models.TF.Enums;
+
+public enum GameApiError
 {
-    public enum GameApiError
-    {
-        [Description("Undefined")]
-        Undefined = 1,
+    [Description("Undefined")]
+    Undefined = 1,
 
-        [Description("Withdrawal is not allowed within 3sec after member's last transaction")]
-        WithdrawalIsNotAllowedWithin3secAfterMemberLastTransaction = 2,
+    [Description("Withdrawal is not allowed within 3sec after member's last transaction")]
+    WithdrawalIsNotAllowedWithin3secAfterMemberLastTransaction = 2,
 
-        [Description("Unknown or invalid member id/code")]
-        UnknownOrInvalidMemberId = 3,
+    [Description("Unknown or invalid member id/code")]
+    UnknownOrInvalidMemberId = 3,
 
-        [Description("Invalid amount for withdrawal/deposit")]
-        InvalidAmountForWithdrawalDeposit = 4,
+    [Description("Invalid amount for withdrawal/deposit")]
+    InvalidAmountForWithdrawalDeposit = 4,
 
-        [Description("Trying to withdraw more than current balance")]
-        TryingToWithdrawMoreThanCurrentBalance = 5,
+    [Description("Trying to withdraw more than current balance")]
+    TryingToWithdrawMoreThanCurrentBalance = 5,
 
-        [Description("Invalid operator id")]
-        InvalidOperatorId = 6,
+    [Description("Invalid operator id")]
+    InvalidOperatorId = 6,
 
-        [Description("Value requested is more or less than the allowed range")]
-        ValueRequestedIsMoreOrLessThanTheAllowedRange = 7,
+    [Description("Value requested is more or less than the allowed range")]
+    ValueRequestedIsMoreOrLessThanTheAllowedRange = 7,
 
-        [Description("Post-data currency and Partner's currency is not matched")]
-        PostDataCurrencyAndPartnerCurrencyIsNotMatched = 8,
+    [Description("Post-data currency and Partner's currency is not matched")]
+    PostDataCurrencyAndPartnerCurrencyIsNotMatched = 8,
 
-        [Description("Invalid authentication credential")]
-        InvalidAuthenticationCredential = 9,
+    [Description("Invalid authentication credential")]
+    InvalidAuthenticationCredential = 9,
 
-        [Description("Account is frozen")]
-        AccountIsFrozen = 10,
+    [Description("Account is frozen")]
+    AccountIsFrozen = 10,
 
-        [Description("Missing required fields")]
-        MissingRequiredFields = 11,
+    [Description("Missing required fields")]
+    MissingRequiredFields = 11,
 
-        [Description("Authentication credentials were not provided")]
-        AuthenticationCredentialsWereNotProvided = 12
-    }
+    [Description("Authentication credentials were not provided")]
+    AuthenticationCredentialsWereNotProvided = 12
 }

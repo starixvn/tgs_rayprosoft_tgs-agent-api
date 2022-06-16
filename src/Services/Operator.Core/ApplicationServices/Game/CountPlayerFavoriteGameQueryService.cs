@@ -6,20 +6,19 @@ using TGS.Services.Operator.GameProviders;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Game;
 
-namespace TGS.Services.Operator.ApplicationServices.Game
+namespace TGS.Services.Operator.ApplicationServices.Game;
+
+internal class CountPlayerFavoriteGameQueryService : IGetService<CountPlayerFavoriteGameQuery, int>
 {
-    internal class CountPlayerFavoriteGameQueryService : IGetService<CountPlayerFavoriteGameQuery, int>
+    private readonly IGameProviderRepository _gameProviderRepository;
+
+    public CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository)
     {
-        private readonly IGameProviderRepository _gameProviderRepository;
-
-        public CountPlayerFavoriteGameQueryService(IGameProviderRepository gameProviderRepository)
-        {
-            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-        }
-
-        public ValueTask<int> GetAsync(CountPlayerFavoriteGameQuery query, CancellationToken cancellationToken = default)
-            => _gameProviderRepository
-                .QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode)
-                .CountAsync(cancellationToken);
+        _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
     }
+
+    public ValueTask<int> GetAsync(CountPlayerFavoriteGameQuery query, CancellationToken cancellationToken = default)
+        => _gameProviderRepository
+            .QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode)
+            .CountAsync(cancellationToken);
 }

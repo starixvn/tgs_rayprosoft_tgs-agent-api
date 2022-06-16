@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class CannotJoinPromotionException : Exception
 {
-    public class CannotJoinPromotionException : Exception
+    public CannotJoinPromotionException()
     {
-        public CannotJoinPromotionException()
-        {
-        }
     }
 }

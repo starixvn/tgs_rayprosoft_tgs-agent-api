@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Promotion
-{
-    public class ChangeOrderModel
-    {
-        public int DisplayOrder { get; set; }
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 
-        public Guid Id { get; set; }
-    }
+public class ChangeOrderModel
+{
+    public int DisplayOrder { get; set; }
+
+    public Guid Id { get; set; }
 }

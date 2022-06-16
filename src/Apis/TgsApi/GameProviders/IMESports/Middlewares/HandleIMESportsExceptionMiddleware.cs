@@ -12,31 +12,30 @@ using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.IMESports.Enums;
 using TGS.Shared.Game.Models.IMESports.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.IMESports.Middlewares
+namespace TGS.Apis.TgsApi.GameProviders.IMESports.Middlewares;
+
+public sealed class HandleIMESportsExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
 {
-    public sealed class HandleIMESportsExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
+    public HandleIMESportsExceptionMiddleware(
+        Func<string, IErrorMapper> mapper,
+        ITgsLog log)
+        : base(mapper, Consts.GameProvider.IMESports, log, "imesports")
     {
-        public HandleIMESportsExceptionMiddleware(
-            Func<string, IErrorMapper> mapper,
-            ITgsLog log)
-            : base(mapper, Consts.GameProvider.IMESports, log, "imesports")
+       
+    }
+
+    protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode, Exception exception)
+    {
+        var error = (GameApiError)errorCode;
+        var message = ErrorMapper.GetMessageByException(exception);
+
+        var res = new BaseResponse
         {
-           
-        }
+            ErrorCode = (int)error,
+            ErrorMessage = message,
+        };
 
-        protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode, Exception exception)
-        {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
-
-            var res = new BaseResponse
-            {
-                ErrorCode = (int)error,
-                ErrorMessage = message,
-            };
-
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(res);
-        }
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(res);
     }
 }

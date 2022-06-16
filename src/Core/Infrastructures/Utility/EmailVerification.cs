@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Infrastructures.Utility
+namespace TGS.Core.Infrastructures.Utility;
+
+class EmailVerification
 {
-    class EmailVerification
-    {
-    }
 }

@@ -1,9 +1,8 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
+
+public class PaymentFeeModel
 {
-    public class PaymentFeeModel
-    {
-        public decimal? FeePercentage { get; set; }
-        public decimal? LowestFee { get; set; }
-        public decimal? HighestFee { get; set; }
-    }
+    public decimal? FeePercentage { get; set; }
+    public decimal? LowestFee { get; set; }
+    public decimal? HighestFee { get; set; }
 }

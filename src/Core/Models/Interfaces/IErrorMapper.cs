@@ -1,18 +1,17 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Interfaces
+namespace TGS.Core.Models.Interfaces;
+
+public interface IErrorMapper
 {
-    public interface IErrorMapper
-    {
-        bool CanProcess(Exception exception) => true;
+    bool CanProcess(Exception exception) => true;
 
-        int GetApiErrorByException(Exception exception);
+    int GetApiErrorByException(Exception exception);
 
-        int GetHttpStatusByException(Exception exception);
+    int GetHttpStatusByException(Exception exception);
 
-        string GetMessageByException(Exception exception);
+    string GetMessageByException(Exception exception);
 
-        string GetMessageKeyByException(Exception exception) => null;
-    }
+    string GetMessageKeyByException(Exception exception) => null;
 }

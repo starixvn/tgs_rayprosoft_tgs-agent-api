@@ -8,55 +8,54 @@ using TGS.Services.BackOffice.Application.Models.BrandAgentDividend;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandAgentDividendHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandAgentDividendHandlers;
+
+public class UpdateBrandAgentDividendHandler : Handler<UpdateBrandAgentDividendConditionRequest, MessageResponse>
 {
-    public class UpdateBrandAgentDividendHandler : Handler<UpdateBrandAgentDividendConditionRequest, MessageResponse>
+    private readonly IBrandService _brandService;
+    private readonly IBrandAgentDividendConditionService _service;
+
+    public UpdateBrandAgentDividendHandler(IBrandAgentDividendConditionService service, IBrandService brandService,
+        IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IBrandService _brandService;
-        private readonly IBrandAgentDividendConditionService _service;
+        _service = service;
+        _brandService = brandService;
+    }
 
-        public UpdateBrandAgentDividendHandler(IBrandAgentDividendConditionService service, IBrandService brandService,
-            IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateBrandAgentDividendConditionRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!await _brandService.ExistsAsync(x
+            => x.Id == request.BrandId && x.AgentDividendType == AgentDividendType.MultipleLayer))
         {
-            _service = service;
-            _brandService = brandService;
+            return CreateInvalidResponse<MessageResponse>(BrandAgentDividendCondition.AgentDividendTypeInvalid);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateBrandAgentDividendConditionRequest request,
-            CancellationToken cancellationToken)
+        foreach (var condition in request.BrandAgentDividendConditions.OrderBy(x => x.Rank))
         {
-            if (!await _brandService.ExistsAsync(x
-                => x.Id == request.BrandId && x.AgentDividendType == AgentDividendType.MultipleLayer))
+            var previous = request.BrandAgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
+
+            if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                condition.ActiveNumber < previous.ActiveNumber ||
+                condition.DividendPercentage < previous.DividendPercentage))
             {
-                return CreateInvalidResponse<MessageResponse>(BrandAgentDividendCondition.AgentDividendTypeInvalid);
+                return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
+                    condition.Rank));
             }
-
-            foreach (var condition in request.BrandAgentDividendConditions.OrderBy(x => x.Rank))
-            {
-                var previous = request.BrandAgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
-
-                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
-                    condition.ActiveNumber < previous.ActiveNumber ||
-                    condition.DividendPercentage < previous.DividendPercentage))
-                {
-                    return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
-                        condition.Rank));
-                }
-            }
-
-            var brandAgentDividendConditions = request.BrandAgentDividendConditions.Select(x
-                => new Core.DataServices.Tgs.Models.BrandAgentDividendCondition
-                {
-                    BrandId = request.BrandId,
-                    Rank = x.Rank,
-                    ActiveNumber = x.ActiveNumber,
-                    NetProfit = x.NetProfit,
-                    DividendPercentage = x.DividendPercentage
-                }).ToArray();
-
-            await _service.UpdateBrandAgentDividendConditionsAsync(request.BrandId, brandAgentDividendConditions);
-
-            return CreateValidResponse<MessageResponse>();
         }
+
+        var brandAgentDividendConditions = request.BrandAgentDividendConditions.Select(x
+            => new Core.DataServices.Tgs.Models.BrandAgentDividendCondition
+            {
+                BrandId = request.BrandId,
+                Rank = x.Rank,
+                ActiveNumber = x.ActiveNumber,
+                NetProfit = x.NetProfit,
+                DividendPercentage = x.DividendPercentage
+            }).ToArray();
+
+        await _service.UpdateBrandAgentDividendConditionsAsync(request.BrandId, brandAgentDividendConditions);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

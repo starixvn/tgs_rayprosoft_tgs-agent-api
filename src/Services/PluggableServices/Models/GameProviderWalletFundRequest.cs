@@ -7,16 +7,15 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Models.Tokens;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record GameProviderWalletFundRequest
 {
-    public record GameProviderWalletFundRequest
-    {
-        [JsonPropertyName("gpcode")]
-        public string GameProviderCode { get; init; }
-        [JsonPropertyName("playercode")]
-        public string PlayerCode { get; init; }
-        [JsonPropertyName("amount")]
-        [Column(TypeName = "decimal(12, 2)")]
-        public decimal Amount { get; init; }
-    }
+    [JsonPropertyName("gpcode")]
+    public string GameProviderCode { get; init; }
+    [JsonPropertyName("playercode")]
+    public string PlayerCode { get; init; }
+    [JsonPropertyName("amount")]
+    [Column(TypeName = "decimal(12, 2)")]
+    public decimal Amount { get; init; }
 }

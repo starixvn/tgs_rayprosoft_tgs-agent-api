@@ -9,59 +9,58 @@ using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 
-namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
-{
-    public interface ICard365Services
-    {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+namespace TGS.Apis.TgsApi.GameProviders.Card365.Services;
 
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId);
+public interface ICard365Services
+{
+    ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+
+    ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
+        string externalRoundId);
+}
+
+public class Card365Services : ICard365Services
+{
+    private readonly IGameActionQueries _gameActionQueries;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly HttpContext _httpContext;
+
+    public Card365Services(
+        IHttpContextAccessor httpContextAccessor,
+        IGameProviderOperations gameProviderOperations,
+        IGameActionQueries gameActionQueries)
+    {
+        _httpContext = httpContextAccessor?.HttpContext ??
+            throw new ArgumentNullException(nameof(httpContextAccessor));
+
+        _gameProviderOperations =
+            gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+        _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
     }
 
-    public class Card365Services : ICard365Services
+    public ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
+        string externalRoundId) => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+        gameProviderId,
+        playerCode, externalRoundId);
+
+    public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync()
     {
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
+        var items = _httpContext?.Items ??
+            throw new InvalidOperationException("Can not get http context items");
 
-        public Card365Services(
-            IHttpContextAccessor httpContextAccessor,
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+        var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+            .ConfigureAwait(false);
+
+        return new()
         {
-            _httpContext = httpContextAccessor?.HttpContext ??
-                throw new ArgumentNullException(nameof(httpContextAccessor));
-
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
-        }
-
-        public ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId) => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
-            gameProviderId,
-            playerCode, externalRoundId);
-
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync()
-        {
-            var items = _httpContext?.Items ??
-                throw new InvalidOperationException("Can not get http context items");
-
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                .ConfigureAwait(false);
-
-            return new()
-            {
-                GameProviderId = gameProviderId,
-                GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
-            };
-        }
+            GameProviderId = gameProviderId,
+            GameProviderConfigurationId = gameProviderConfigurationId,
+            AutoCloseRound = autoCloseRound,
+            PlatformType = platformType
+        };
     }
 }

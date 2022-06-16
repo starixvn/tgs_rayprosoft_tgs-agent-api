@@ -1,8 +1,7 @@
-﻿namespace TGS.Shared.Game.Models.Habanero.Enums
+﻿namespace TGS.Shared.Game.Models.Habanero.Enums;
+
+public enum PlayerType
 {
-    public enum PlayerType
-    {
-        Regular = 0,
-        Test = 1
-    }
+    Regular = 0,
+    Test = 1
 }

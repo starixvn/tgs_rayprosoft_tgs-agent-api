@@ -1,7 +1,6 @@
-﻿namespace TGS.Shared.Game.Models.AsiaGaming.Common
+﻿namespace TGS.Shared.Game.Models.AsiaGaming.Common;
+
+public class GameHistory
 {
-    public class GameHistory
-    {
-        public string RoundResult { get; set; }
-    }
+    public string RoundResult { get; set; }
 }

@@ -4,32 +4,31 @@ using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.WalletService;
 
-namespace TGS.Services.Agent.ApplicationServices.Wallet
+namespace TGS.Services.Agent.ApplicationServices.Wallet;
+
+internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
 {
-    internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
+    private readonly IAgentRepository _agentRepository;
+    private readonly IAgentWalletRepository _agentWalletRepository;
+
+    public GetBalanceQueryService(
+        IAgentRepository agentRepository,
+        IAgentWalletRepository agentWalletRepository)
     {
-        private readonly IAgentRepository _agentRepository;
-        private readonly IAgentWalletRepository _agentWalletRepository;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
+    }
 
-        public GetBalanceQueryService(
-            IAgentRepository agentRepository,
-            IAgentWalletRepository agentWalletRepository)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-            _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
-        }
+    public async ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
+    {
+        var agentData = await _agentRepository
+            .GetAgentByIdAsync(query.AgentId)
+            .ConfigureAwait(false);
 
-        public async ValueTask<BalanceInfo> GetAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
-        {
-            var agentData = await _agentRepository
-                .GetAgentByIdAsync(query.AgentId)
-                .ConfigureAwait(false);
+        var balance = await _agentWalletRepository
+            .GetBalanceAsync(agentData!.DefaultWalletId, query.AgentId)
+            .ConfigureAwait(false);
 
-            var balance = await _agentWalletRepository
-                .GetBalanceAsync(agentData!.DefaultWalletId, query.AgentId)
-                .ConfigureAwait(false);
-
-            return new BalanceInfo(balance);
-        }
+        return new BalanceInfo(balance);
     }
 }

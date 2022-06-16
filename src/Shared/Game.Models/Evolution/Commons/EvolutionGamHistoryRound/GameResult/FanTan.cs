@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult;
+
+public record FanTan
 {
-    public record FanTan
-    {
-        [JsonPropertyName("buttonsCount")]
-        public int ButtonsCount { get; set; }
-    }
+    [JsonPropertyName("buttonsCount")]
+    public int ButtonsCount { get; set; }
 }

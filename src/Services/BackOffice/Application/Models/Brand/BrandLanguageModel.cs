@@ -1,8 +1,7 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.Brand
+﻿namespace TGS.Services.BackOffice.Application.Models.Brand;
+
+public class BrandLanguageModel
 {
-    public class BrandLanguageModel
-    {
-        public string CultureCode { get; set; }
-        public string BrandCultureCode { get; set; }
-    }
+    public string CultureCode { get; set; }
+    public string BrandCultureCode { get; set; }
 }

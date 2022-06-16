@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class BrandLiveChat
 {
-    public class BrandLiveChat
-    {
-        public Guid BrandId { get; set; }
-        public virtual Brand Brand { get; set; }
-        public string ChatName { get; set; }
-        public string ChatSetting { get; set; }
-    }
+    public Guid BrandId { get; set; }
+    public virtual Brand Brand { get; set; }
+    public string ChatName { get; set; }
+    public string ChatSetting { get; set; }
 }

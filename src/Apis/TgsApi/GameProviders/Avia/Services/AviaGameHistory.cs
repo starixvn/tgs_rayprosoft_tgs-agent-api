@@ -7,35 +7,34 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 
-namespace TGS.Apis.TgsApi.GameProviders.Avia.Services
-{
-    public sealed class AviaGameHistory : BaseBetHistory
-    {
-        public AviaGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations
-        ) : base(roundQueries, gameProviderOperations)
-        {
-        }
+namespace TGS.Apis.TgsApi.GameProviders.Avia.Services;
 
-        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
-            string playerCode,
-            Round round,
-            CachedGameProvider cachedGameProvider,
-            CachedGame cachedGame,
-            string language)
+public sealed class AviaGameHistory : BaseBetHistory
+{
+    public AviaGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations
+    ) : base(roundQueries, gameProviderOperations)
+    {
+    }
+
+    protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+        string playerCode,
+        Round round,
+        CachedGameProvider cachedGameProvider,
+        CachedGame cachedGame,
+        string language)
+    {
+        return ValueTask.FromResult(new RoundResult
         {
-            return ValueTask.FromResult(new RoundResult
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new JsonData {Value = round.RoundDetail.AdditionalData}
-                }
-            });
-        }
+                new JsonData {Value = round.RoundDetail.AdditionalData}
+            }
+        });
     }
 }

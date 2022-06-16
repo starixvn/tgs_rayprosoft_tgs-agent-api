@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.IMESports.Incoming
+﻿namespace TGS.Shared.Game.Models.IMESports.Incoming;
+
+public record GetBalanceRequest : BaseRequest
 {
-    public record GetBalanceRequest : BaseRequest
-    {
-    }
 }

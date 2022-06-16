@@ -1,9 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket
-{
-    public record AdditionalExpensesReportModel
-    {
-        public AdditionalExpensesType AdditionalExpensesType { get; init; }
+﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket;
 
-        public decimal Amount { get; init; }
-    }
+public record AdditionalExpensesReportModel
+{
+    public AdditionalExpensesType AdditionalExpensesType { get; init; }
+
+    public decimal Amount { get; init; }
 }

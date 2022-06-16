@@ -6,33 +6,32 @@ using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers;
+
+public class CreateBrandHandler : Handler<CreateBrandRequest, MessageResponse>
 {
-    public class CreateBrandHandler : Handler<CreateBrandRequest, MessageResponse>
+    private readonly IBrandService _service;
+
+    public CreateBrandHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IBrandService _service;
+        _service = service;
+    }
 
-        public CreateBrandHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(CreateBrandRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (await _service.ExistsAsync(x => x.Name == request.Name))
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(Brand.NameExisted);
         }
 
-        public override async Task<MessageResponse> Handle(CreateBrandRequest request,
-            CancellationToken cancellationToken)
+        if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
         {
-            if (await _service.ExistsAsync(x => x.Name == request.Name))
-            {
-                return CreateInvalidResponse<MessageResponse>(Brand.NameExisted);
-            }
-
-            if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
-            {
-                return CreateInvalidResponse<MessageResponse>(Brand.CodeExisted);
-            }
-
-            await _service.CreateBrandAsync(request);
-
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Brand.CodeExisted);
         }
+
+        await _service.CreateBrandAsync(request);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

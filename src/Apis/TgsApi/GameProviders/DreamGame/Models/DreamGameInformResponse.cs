@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Apis.TgsApi.GameProviders.DreamGame.Models.Commons;
 
-namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Models
+namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Models;
+
+public record DreamGameInformResponse : DreamGameResponse
 {
-    public record DreamGameInformResponse : DreamGameResponse
-    {
-        [JsonPropertyName("data")]
-        public string Data { get; init; }
-        [JsonPropertyName("member")]
-        public MemberInfo Member { get; init; }
-    }
+    [JsonPropertyName("data")]
+    public string Data { get; init; }
+    [JsonPropertyName("member")]
+    public MemberInfo Member { get; init; }
 }

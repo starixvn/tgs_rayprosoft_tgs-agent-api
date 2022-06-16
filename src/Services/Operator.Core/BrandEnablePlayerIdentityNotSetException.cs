@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class BrandEnablePlayerIdentityNotSetException : Exception
 {
-    public class BrandEnablePlayerIdentityNotSetException : Exception
+    public BrandEnablePlayerIdentityNotSetException()
     {
-        public BrandEnablePlayerIdentityNotSetException()
-        {
-        }
     }
 }

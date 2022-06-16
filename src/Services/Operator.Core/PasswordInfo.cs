@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator
-{
-    public record PasswordInfo(byte[] Password, byte[] Salt);
-}
+﻿namespace TGS.Services.Operator;
+
+public record PasswordInfo(byte[] Password, byte[] Salt);

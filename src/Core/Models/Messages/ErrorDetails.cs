@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Messages
+﻿namespace TGS.Core.Models.Messages;
+
+public class ErrorDetails
 {
-    public class ErrorDetails
-    {
-        public int StatusCode { get; set; }
-        public string Message { get; set; }
-    }
+    public int StatusCode { get; set; }
+    public string Message { get; set; }
 }

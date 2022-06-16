@@ -6,135 +6,134 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.AgentApi.Attributes
+namespace TGS.Apis.AgentApi.Attributes;
+
+public class TgsResponseWrapperAttribute : ActionFilterAttribute
 {
-    public class TgsResponseWrapperAttribute : ActionFilterAttribute
+    public override void OnResultExecuting(ResultExecutingContext context)
     {
-        public override void OnResultExecuting(ResultExecutingContext context)
+        if (!context.ModelState.IsValid)
         {
-            if (!context.ModelState.IsValid)
-            {
-                return;
-            }
+            return;
+        }
 
-            switch (context.Result)
-            {
-                case EmptyResult:
-                    context.Result = new ObjectResult(new TgsResponse());
-                    break;
+        switch (context.Result)
+        {
+            case EmptyResult:
+                context.Result = new ObjectResult(new TgsResponse());
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<object> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<object> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<int> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<int> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<long> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<long> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<float> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<float> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<double> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<double> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<decimal> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<decimal> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<Guid> ae:
+            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<Guid> ae:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = ae.ToEnumerable()
-                        });
+                        Data = ae.ToEnumerable()
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
+                    context.Result = adjustResult;
+                }
+                break;
 
-                case ObjectResult result when result.Value is not TgsResponse:
+            case ObjectResult result when result.Value is not TgsResponse:
+                {
+                    var adjustResult = new ObjectResult(new SuccessResponse<object>
                     {
-                        var adjustResult = new ObjectResult(new SuccessResponse<object>
-                        {
-                            Data = result.Value
-                        });
+                        Data = result.Value
+                    });
 
-                        adjustResult.StatusCode = result.StatusCode;
-                        adjustResult.Formatters = result.Formatters;
+                    adjustResult.StatusCode = result.StatusCode;
+                    adjustResult.Formatters = result.Formatters;
 
-                        context.Result = adjustResult;
-                    }
-                    break;
-            }
+                    context.Result = adjustResult;
+                }
+                break;
         }
     }
 }

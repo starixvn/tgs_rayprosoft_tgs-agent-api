@@ -9,100 +9,99 @@ using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.BankInfos;
 
-namespace Agent.UnitTests
+namespace Agent.UnitTests;
+
+[TestFixture]
+public class BankInfoTests
 {
-    [TestFixture]
-    public class BankInfoTests
+    [Test]
+    public async Task Player_Can_Create_BankInfo()
     {
-        [Test]
-        public async Task Player_Can_Create_BankInfo()
-        {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-            var sut = new CreateBankInfoCommandService(fakePaymentServiceClient, fakeAgentRepository);
+        var sut = new CreateBankInfoCommandService(fakePaymentServiceClient, fakeAgentRepository);
 
-            var brandId = Guid.NewGuid();
-            var agentId = Guid.NewGuid();
-            var paymentChannelId = Guid.NewGuid();
-            var bankType = "Transfer";
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var paymentChannelId = Guid.NewGuid();
+        var bankType = "Transfer";
 
-            var detail = new { bankAccount = "0987654321" };
+        var detail = new { bankAccount = "0987654321" };
 
-            var command = new CreateBankInfoCommand(
-                brandId,
+        var command = new CreateBankInfoCommand(
+            brandId,
+            agentId,
+            paymentChannelId,
+            bankType,
+            JsonSerializer.Serialize(detail));
+
+        fakeAgentRepository
+            .GetAgentByIdAsync(Arg.Is(agentId))
+            .Returns(new AgentInfo(
                 agentId,
-                paymentChannelId,
-                bankType,
-                JsonSerializer.Serialize(detail));
+                "Tester",
+                null,
+                null,
+                Guid.NewGuid(),
+                "test@gmail.com",
+                null,
+                null,
+                "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                null,
+                DateTimeOffset.Now,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                0M,
+                0));
 
-            fakeAgentRepository
-                .GetAgentByIdAsync(Arg.Is(agentId))
-                .Returns(new AgentInfo(
-                    agentId,
-                    "Tester",
-                    null,
-                    null,
-                    Guid.NewGuid(),
-                    "test@gmail.com",
-                    null,
-                    null,
-                    "aaabbb",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0M,
-                    0));
+        await sut.ExecuteAsync(command);
 
-            await sut.ExecuteAsync(command);
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .CreateAgentBankInfoAsync(
+                Arg.Is(command.BrandId),
+                Arg.Is(command.AgentId),
+                Arg.Any<string>(),
+                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
+    }
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .CreateAgentBankInfoAsync(
-                    Arg.Is(command.BrandId),
-                    Arg.Is(command.AgentId),
-                    Arg.Any<string>(),
-                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
-        }
+    [Test]
+    public async Task Player_Can_Delete_BankInfo()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-        [Test]
-        public async Task Player_Can_Delete_BankInfo()
-        {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
 
-            var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
+        var agentId = Guid.NewGuid();
+        var bankInfoId = Guid.NewGuid();
+        var command = new DeleteBankInfoCommand(agentId, bankInfoId);
 
-            var agentId = Guid.NewGuid();
-            var bankInfoId = Guid.NewGuid();
-            var command = new DeleteBankInfoCommand(agentId, bankInfoId);
+        await sut.ExecuteAsync(command);
 
-            await sut.ExecuteAsync(command);
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .DeleteAgentBankInfoAsync(Arg.Is(agentId), Arg.Is(bankInfoId));
+    }
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .DeleteAgentBankInfoAsync(Arg.Is(agentId), Arg.Is(bankInfoId));
-        }
+    [Test]
+    public void Player_Can_List_Self_BankInfos()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-        [Test]
-        public void Player_Can_List_Self_BankInfos()
-        {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var sut = new GetAgentBankInfosQueryService(fakePaymentServiceClient);
 
-            var sut = new GetAgentBankInfosQueryService(fakePaymentServiceClient);
+        var agentId = Guid.NewGuid();
 
-            var agentId = Guid.NewGuid();
+        sut.QueryAsync(new GetAgentBankInfosQuery(agentId));
 
-            sut.QueryAsync(new GetAgentBankInfosQuery(agentId));
-
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .GetAgentBankInfosAsync(Arg.Is(agentId));
-        }
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .GetAgentBankInfosAsync(Arg.Is(agentId));
     }
 }

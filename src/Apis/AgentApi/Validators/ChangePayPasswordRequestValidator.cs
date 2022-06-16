@@ -2,16 +2,15 @@
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Infrastructures.WebApiServices;
 
-namespace TGS.Apis.AgentApi.Validators
+namespace TGS.Apis.AgentApi.Validators;
+
+public class ChangePayPasswordRequestValidator : BaseFluentValidator<ChangePayPasswordRequest>
 {
-    public class ChangePayPasswordRequestValidator : BaseFluentValidator<ChangePayPasswordRequest>
+    public ChangePayPasswordRequestValidator()
     {
-        public ChangePayPasswordRequestValidator()
-        {
-            RuleFor(request => request.NewPassword)
-                .NotEmpty()
-                .Length(6, 20)
-                .WithName(x => GetBindPropertyName(x, nameof(x.NewPassword)));
-        }
+        RuleFor(request => request.NewPassword)
+            .NotEmpty()
+            .Length(6, 20)
+            .WithName(x => GetBindPropertyName(x, nameof(x.NewPassword)));
     }
 }

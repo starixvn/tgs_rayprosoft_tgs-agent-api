@@ -24,152 +24,151 @@ using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
 using GlobalConsts = TGS.Core.Models.Consts;
 
-namespace TGS.Workers.Schedulers
+namespace TGS.Workers.Schedulers;
+
+public class Startup
 {
-    public class Startup
+    private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _env;
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment env)
     {
-        private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
+        _configuration = configuration;
+        _env = env;
+    }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseGlobalExceptionHandler();
+
+        app.UseHangfireScheduler();
+
+        app.UseRouting();
+
+        app.UseHttpMetrics();
+
+        app.UseEndpoints(endpoints =>
         {
-            _configuration = configuration;
-            _env = env;
-        }
+            endpoints.MapHealthChecks("/health");
 
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
+            endpoints.MapMetrics();
 
-            app.UseHangfireScheduler();
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/health");
-
-                endpoints.MapMetrics();
-
-                endpoints.MapHangfireDashboard("/hangfire",
-                    new DashboardOptions
+            endpoints.MapHangfireDashboard("/hangfire",
+                new DashboardOptions
+                {
+                    Authorization = new[]
                     {
-                        Authorization = new[]
-                        {
-                            new IgnoreHangfireAuthorizationFilter()
-                        }
-                    });
-            });
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddTgsRepository(_configuration, "Tgs")
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddSystemJsonSerializer()
-                .AddSecurity()
-                .AddTransactions()
-                .AddApiClient()
-                .AddGameApiClients()
-                .AddOperations()
-                .AddReportAggregateClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.BaseUrl = config.GetValue<Uri>("ReportAggregate:Url");
-                })
-                .AddPromotionClientServices((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    config.GetSection("Promotion").Bind(options);
-                })
-                .AddHangfireScheduler(
-                    _configuration,
-                    jobProvider: new JobProvider(),
-                    typesToUseManagementPage: GetModuleTypes())
-                .AddMail(_configuration)
-                .AddProfitRebateClient(_configuration);
-
-            services
-                .AddRedis((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                        new IgnoreHangfireAuthorizationFilter()
+                    }
                 });
+        });
+    }
 
-            services
-                .AddMessageQueue()
-                .AddNatsMessageQueue(natsConfig =>
-                {
-                    natsConfig
-                        .ConfigQueueOptions((options, sp) =>
-                        {
-                            var config = sp.GetRequiredService<IConfiguration>();
-
-                            options.Url = config.GetValue<string>("NatsSetting:Urls");
-                        });
-                });
-
-            services.AddHangfireServer((sp, options) =>
-            {
-                var setting = sp.GetRequiredService<HangfireSettings>();
-
-                options.Queues = new[]
-                {
-                    Consts.Queue.Schedule,
-                    Consts.Queue.GameProvider,
-                    Consts.Queue.Report,
-                    Consts.Queue.ArrearsEmail
-                };
-
-                options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
-            });
-
-            services.AddControllers();
-
-            services.AddGameProvidersMognoRepository((options, sp) =>
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services
+            .AddTgsRepository(_configuration, "Tgs")
+            .AddWebApiServices()
+            .AddTgsLog()
+            .AddSystemJsonSerializer()
+            .AddSecurity()
+            .AddTransactions()
+            .AddApiClient()
+            .AddGameApiClients()
+            .AddOperations()
+            .AddReportAggregateClient((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-                options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
-            });
 
-            services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+                options.BaseUrl = config.GetValue<Uri>("ReportAggregate:Url");
+            })
+            .AddPromotionClientServices((options, sp) =>
             {
-                var url = _configuration.GetSection("Email:Url");
-                c.BaseAddress = new Uri(url.Value);
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                config.GetSection("Promotion").Bind(options);
+            })
+            .AddHangfireScheduler(
+                _configuration,
+                jobProvider: new JobProvider(),
+                typesToUseManagementPage: GetModuleTypes())
+            .AddMail(_configuration)
+            .AddProfitRebateClient(_configuration);
+
+        services
+            .AddRedis((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
             });
 
-            services.AddGameProviderScheduleLockRepository();
+        services
+            .AddMessageQueue()
+            .AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
 
-            services
-                .AddHealthChecks();
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    });
+            });
 
-            // BO services
-            services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
-
-            // job
-            services.AddTransient<IPlayerAggregateReportWorkerService, PlayerAggregateReportWorkerService>();
-            services.AddTransient<IRoundAggregateWorkerService, RoundAggregateWorkerService>();
-            services.AddTransient<IPlayerRebateWorkerService, PlayerRebateWorkerService>();
-            services.AddTransient<IAgentDividendWorkerService, AgentDividendWorkerService>();
-            services.AddTransient<IPromotionSettlementDailyWorkerService, PromotionSettlementDailyWorkerService>();
-            services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
-            services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
-            services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
-            services.AddTransient<IPlayerAllAgentRebateWorkerService, PlayerAllAgentRebateWorkerService>();
-        }
-
-        private static Type[] GetModuleTypes() => new[]
+        services.AddHangfireServer((sp, options) =>
         {
-            typeof(AggregateJobManagement),
-            typeof(RebateAndDividendJobManagement),
-            typeof(PromotionJobManagement)
-        };
+            var setting = sp.GetRequiredService<HangfireSettings>();
+
+            options.Queues = new[]
+            {
+                Consts.Queue.Schedule,
+                Consts.Queue.GameProvider,
+                Consts.Queue.Report,
+                Consts.Queue.ArrearsEmail
+            };
+
+            options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
+        });
+
+        services.AddControllers();
+
+        services.AddGameProvidersMognoRepository((options, sp) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
+        });
+
+        services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+        {
+            var url = _configuration.GetSection("Email:Url");
+            c.BaseAddress = new Uri(url.Value);
+        });
+
+        services.AddGameProviderScheduleLockRepository();
+
+        services
+            .AddHealthChecks();
+
+        // BO services
+        services.AddTransient<IBrandGameProviderService, BrandGameProviderService>();
+
+        // job
+        services.AddTransient<IPlayerAggregateReportWorkerService, PlayerAggregateReportWorkerService>();
+        services.AddTransient<IRoundAggregateWorkerService, RoundAggregateWorkerService>();
+        services.AddTransient<IPlayerRebateWorkerService, PlayerRebateWorkerService>();
+        services.AddTransient<IAgentDividendWorkerService, AgentDividendWorkerService>();
+        services.AddTransient<IPromotionSettlementDailyWorkerService, PromotionSettlementDailyWorkerService>();
+        services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
+        services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
+        services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
+        services.AddTransient<IPlayerAllAgentRebateWorkerService, PlayerAllAgentRebateWorkerService>();
     }
+
+    private static Type[] GetModuleTypes() => new[]
+    {
+        typeof(AggregateJobManagement),
+        typeof(RebateAndDividendJobManagement),
+        typeof(PromotionJobManagement)
+    };
 }

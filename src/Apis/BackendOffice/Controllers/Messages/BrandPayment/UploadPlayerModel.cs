@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
+
+public class UploadPlayerModel
 {
-    public class UploadPlayerModel
-    {
-        public string Username { get; set; }
-    }
+    public string Username { get; set; }
 }

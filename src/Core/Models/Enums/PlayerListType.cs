@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum PlayerListType
 {
-    public enum PlayerListType
-    {
-        White = 0,
-        Black = 1
-    }
+    White = 0,
+    Black = 1
 }

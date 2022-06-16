@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.Commons;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult;
+
+public record InstantRoulette
 {
-    public record InstantRoulette
-    {
-        [JsonPropertyName("outcomes")]
-        public InstantRouletteOutcome[] Outcomes { get; set; }
-    }
+    [JsonPropertyName("outcomes")]
+    public InstantRouletteOutcome[] Outcomes { get; set; }
 }

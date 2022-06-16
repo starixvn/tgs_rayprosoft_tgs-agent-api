@@ -3,20 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.Agent
+namespace TGS.Services.Agent.ApplicationServices.Agent;
+
+internal class GetAgentInfoQueryService : IGetService<GetAgentInfoQuery, AgentInfo?>
 {
-    internal class GetAgentInfoQueryService : IGetService<GetAgentInfoQuery, AgentInfo?>
+    private readonly IAgentRepository _agentRepository;
+
+    public GetAgentInfoQueryService(IAgentRepository agentRepository)
     {
-        private readonly IAgentRepository _agentRepository;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    }
 
-        public GetAgentInfoQueryService(IAgentRepository agentRepository)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        }
-
-        public ValueTask<AgentInfo?> GetAsync(GetAgentInfoQuery query, CancellationToken cancellationToken = default)
-        {
-            return _agentRepository.GetAgentByIdAsync(query.AgentId);
-        }
+    public ValueTask<AgentInfo?> GetAsync(GetAgentInfoQuery query, CancellationToken cancellationToken = default)
+    {
+        return _agentRepository.GetAgentByIdAsync(query.AgentId);
     }
 }

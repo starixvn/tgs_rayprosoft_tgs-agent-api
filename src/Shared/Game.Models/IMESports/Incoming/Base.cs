@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.IMESports.Incoming
+namespace TGS.Shared.Game.Models.IMESports.Incoming;
+
+public record Base
 {
-    public record Base
-    {
-        [JsonPropertyName("ProductWallet")]
-        public string ProductWallet { get; init; }
-    }
+    [JsonPropertyName("ProductWallet")]
+    public string ProductWallet { get; init; }
 }

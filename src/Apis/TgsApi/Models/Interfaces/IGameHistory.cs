@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using TGS.Services.PluggableServices.Models;
 
-namespace TGS.Apis.TgsApi.Models.Interfaces
+namespace TGS.Apis.TgsApi.Models.Interfaces;
+
+public interface IGameHistory
 {
-    public interface IGameHistory
-    {
-        ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(GetRoundHistoryRequest request);
-    }
+    ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(GetRoundHistoryRequest request);
 }

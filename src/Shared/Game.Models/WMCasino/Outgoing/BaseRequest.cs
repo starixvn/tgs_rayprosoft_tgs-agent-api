@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.WMCasino.Outgoing
+namespace TGS.Shared.Game.Models.WMCasino.Outgoing;
+
+public abstract record BaseRequest
 {
-    public abstract record BaseRequest
-    {
-        [JsonPropertyName("cmd")]
-        public abstract string Action { get; }
+    [JsonPropertyName("cmd")]
+    public abstract string Action { get; }
 
-        [JsonPropertyName("vendorId")]
-        public string VendorId { get; init; }
+    [JsonPropertyName("vendorId")]
+    public string VendorId { get; init; }
 
-        [JsonPropertyName("signature")]
-        public string Signature { get; init; }
+    [JsonPropertyName("signature")]
+    public string Signature { get; init; }
 
-        [JsonPropertyName("timestamp")]
-        public string Timestamp => DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-    }
+    [JsonPropertyName("timestamp")]
+    public string Timestamp => DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 }

@@ -5,41 +5,40 @@ using Microsoft.AspNetCore.Http;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.SubGameProviderHandlers
+namespace TGS.Services.BackOffice.Application.Queries.SubGameProviderHandlers;
+
+public class
+    GetSubGameProviderQueryHandler : Handler<GetSubGameProviderRequest, GetSubGameProviderResponse>
 {
-    public class
-        GetSubGameProviderQueryHandler : Handler<GetSubGameProviderRequest, GetSubGameProviderResponse>
+    private readonly ISubGameProviderService _service;
+
+    public GetSubGameProviderQueryHandler(ISubGameProviderService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly ISubGameProviderService _service;
+        _service = service;
+    }
 
-        public GetSubGameProviderQueryHandler(ISubGameProviderService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<GetSubGameProviderResponse> Handle(GetSubGameProviderRequest request,
+        CancellationToken cancellationToken)
+    {
+        var subGameProvider = await _service
+            .GetSubGameProviderAsync(x => x.Code == request.Code)
+            .ConfigureAwait(false);
+
+        if (subGameProvider is null)
         {
-            _service = service;
+            return CreateInvalidResponse<GetSubGameProviderResponse>("");
         }
 
-        public override async Task<GetSubGameProviderResponse> Handle(GetSubGameProviderRequest request,
-            CancellationToken cancellationToken)
+        return new GetSubGameProviderResponse
         {
-            var subGameProvider = await _service
-                .GetSubGameProviderAsync(x => x.Code == request.Code)
-                .ConfigureAwait(false);
-
-            if (subGameProvider is null)
-            {
-                return CreateInvalidResponse<GetSubGameProviderResponse>("");
-            }
-
-            return new GetSubGameProviderResponse
-            {
-                Name = subGameProvider.Name,
-                Code = subGameProvider.Code,
-                Description = subGameProvider.Description,
-                GameProviderId = subGameProvider.GameProviderId,
-                Localization = subGameProvider.Localization == null
-                    ? null
-                    : JsonDocument.Parse(subGameProvider.Localization)
-            };
-        }
+            Name = subGameProvider.Name,
+            Code = subGameProvider.Code,
+            Description = subGameProvider.Description,
+            GameProviderId = subGameProvider.GameProviderId,
+            Localization = subGameProvider.Localization == null
+                ? null
+                : JsonDocument.Parse(subGameProvider.Localization)
+        };
     }
 }

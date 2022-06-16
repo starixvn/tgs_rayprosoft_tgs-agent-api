@@ -1,15 +1,14 @@
 ﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
 
-namespace TGS.Services.BackOffice.Validation.BrandGame
+namespace TGS.Services.BackOffice.Validation.BrandGame;
+
+public class UpdateBrandGameTagRequestValidator : AbstractValidator<UpdateBrandGameTagRequest>
 {
-    public class UpdateBrandGameTagRequestValidator : AbstractValidator<UpdateBrandGameTagRequest>
+    public UpdateBrandGameTagRequestValidator()
     {
-        public UpdateBrandGameTagRequestValidator()
-        {
-            RuleFor(x => x.GameTag)
-                .IsInEnum()
-                .WithMessage(Application.Resources.BrandGame.GameTagNotFound);
-        }
+        RuleFor(x => x.GameTag)
+            .IsInEnum()
+            .WithMessage(Application.Resources.BrandGame.GameTagNotFound);
     }
 }

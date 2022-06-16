@@ -7,26 +7,25 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
+namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
+
+public class
+    GetPlayerOperationsQueryHandler : Handler<GetPlayerOperationRequest, PagedResponse<PlayerOperationModel>>
 {
-    public class
-        GetPlayerOperationsQueryHandler : Handler<GetPlayerOperationRequest, PagedResponse<PlayerOperationModel>>
+    private readonly IPlayerService _service;
+
+    public GetPlayerOperationsQueryHandler(IPlayerService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IPlayerService _service;
-
-        public GetPlayerOperationsQueryHandler(IPlayerService service, IHttpContextAccessor accessor) :
-            base(accessor)
-        {
-            _service = service;
-        }
-
-        public override Task<PagedResponse<PlayerOperationModel>> Handle(GetPlayerOperationRequest request,
-            CancellationToken cancellationToken) =>
-            _service.GetPlayerOperationQueries(q => q.Where(p =>
-                    p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == request.PlayerCode))
-                .Select(x => new PlayerOperationModel
-                {
-                    CreatedOn = x.CreatedOn, CreatedByUsername = x.CreatedByUsername, Operation = x.Operation
-                }).CreatePagedResponseAsync(request);
+        _service = service;
     }
+
+    public override Task<PagedResponse<PlayerOperationModel>> Handle(GetPlayerOperationRequest request,
+        CancellationToken cancellationToken) =>
+        _service.GetPlayerOperationQueries(q => q.Where(p =>
+                p.CreatedOn >= request.From && p.CreatedOn <= request.To && p.Username == request.PlayerCode))
+            .Select(x => new PlayerOperationModel
+            {
+                CreatedOn = x.CreatedOn, CreatedByUsername = x.CreatedByUsername, Operation = x.Operation
+            }).CreatePagedResponseAsync(request);
 }

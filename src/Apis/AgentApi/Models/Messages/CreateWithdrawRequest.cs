@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace TGS.Apis.AgentApi.Models.Messages
+namespace TGS.Apis.AgentApi.Models.Messages;
+
+public class CreateWithdrawRequest
 {
-    public class CreateWithdrawRequest
-    {
-        [JsonPropertyName("amount")]
-        public decimal Amount { get; init; }
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; init; }
 
-        [JsonPropertyName("bankinfoid")]
-        public Guid BankInfoId { get; init; }
+    [JsonPropertyName("bankinfoid")]
+    public Guid BankInfoId { get; init; }
 
-        [JsonPropertyName("paypassword")]
-        public string PayPassword { get; init; }
-    }
+    [JsonPropertyName("paypassword")]
+    public string PayPassword { get; init; }
 }

@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace TGS.BackOffice.Repositories
+namespace TGS.BackOffice.Repositories;
+
+public interface ISystemClock
 {
-    public interface ISystemClock
-    {
-        DateTimeOffset UtcNow { get; }
-    }
+    DateTimeOffset UtcNow { get; }
 }

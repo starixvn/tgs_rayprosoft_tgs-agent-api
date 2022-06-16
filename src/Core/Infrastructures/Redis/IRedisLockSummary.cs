@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace TGS.Core.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis;
+
+public interface IRedisLockSummary : IDisposable
 {
-    public interface IRedisLockSummary : IDisposable
-    {
-        bool IsAcquired { get; }
-        bool IsReleased { get; }
-    }
+    bool IsAcquired { get; }
+    bool IsReleased { get; }
 }

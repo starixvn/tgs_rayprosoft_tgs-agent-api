@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.VR.Commons
+namespace TGS.Shared.Game.Models.VR.Commons;
+
+public record VRErrorCodeResponse
 {
-    public record VRErrorCodeResponse
-    {
-        public int errorCode { get; set; }
-    }
+    public int errorCode { get; set; }
 }

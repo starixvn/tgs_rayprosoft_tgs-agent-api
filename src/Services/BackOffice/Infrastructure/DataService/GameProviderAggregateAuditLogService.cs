@@ -5,34 +5,33 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 
-namespace TGS.Services.BackOffice.Infrastructure.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService;
+
+public interface IGameProviderAggregateAuditLogService
 {
-    public interface IGameProviderAggregateAuditLogService
+    ValueTask<int> CreateGameProviderAggregateAuditLogAsync(
+        CreateGameProviderAggregateAuditLogRequest request);
+}
+
+public class GameProviderAggregateAuditLogService : BaseRepositoryOperations<ITgsRepository>,
+    IGameProviderAggregateAuditLogService
+{
+    public GameProviderAggregateAuditLogService(ITgsRepository repository) : base(repository)
     {
-        ValueTask<int> CreateGameProviderAggregateAuditLogAsync(
-            CreateGameProviderAggregateAuditLogRequest request);
     }
 
-    public class GameProviderAggregateAuditLogService : BaseRepositoryOperations<ITgsRepository>,
-        IGameProviderAggregateAuditLogService
+    async ValueTask<int> IGameProviderAggregateAuditLogService.CreateGameProviderAggregateAuditLogAsync(
+        CreateGameProviderAggregateAuditLogRequest request)
     {
-        public GameProviderAggregateAuditLogService(ITgsRepository repository) : base(repository)
+        var log = new GameProviderAggregateAuditLog
         {
-        }
+            GameProviderId = request.GameProviderId,
+            CreatedByUserId = request.UserId,
+            CreatedOn = DateTimeOffset.UtcNow
+        };
 
-        async ValueTask<int> IGameProviderAggregateAuditLogService.CreateGameProviderAggregateAuditLogAsync(
-            CreateGameProviderAggregateAuditLogRequest request)
-        {
-            var log = new GameProviderAggregateAuditLog
-            {
-                GameProviderId = request.GameProviderId,
-                CreatedByUserId = request.UserId,
-                CreatedOn = DateTimeOffset.UtcNow
-            };
+        await CreateEntityAsync(log);
 
-            await CreateEntityAsync(log);
-
-            return log.Id;
-        }
+        return log.Id;
     }
 }

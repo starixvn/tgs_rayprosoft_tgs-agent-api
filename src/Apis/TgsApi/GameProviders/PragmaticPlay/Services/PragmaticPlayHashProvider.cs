@@ -10,68 +10,67 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Shared.Game.Models.PragmaticPlay.Common;
 
-namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
-{
-    public interface IPragmaticPlayHashProvider
-    {
-        string ComputeHash(IFormCollection collections, params string[] additionalData);
+namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 
-        string ComputeHash<T>(T request, params string[] additionalData) where T : HashRequest;
+public interface IPragmaticPlayHashProvider
+{
+    string ComputeHash(IFormCollection collections, params string[] additionalData);
+
+    string ComputeHash<T>(T request, params string[] additionalData) where T : HashRequest;
+}
+
+public sealed class PragmaticPlayHashProvider : IPragmaticPlayHashProvider
+{
+    private readonly string[] _bypassHashKeys =
+    {
+        PragmaticPlayConsts.Parameters.Hash,
+        PragmaticPlayConsts.Parameters.BypassHashVerify
+    };
+
+    private readonly IHashProvider _hashProvider;
+    private readonly IJsonSerializationProvider _json;
+
+    public PragmaticPlayHashProvider(IHashProvider hashProvider, IJsonSerializationProvider json)
+    {
+        _hashProvider = hashProvider;
+        _json = json;
     }
 
-    public sealed class PragmaticPlayHashProvider : IPragmaticPlayHashProvider
+    string IPragmaticPlayHashProvider.ComputeHash(IFormCollection collections, params string[] additionalData)
     {
-        private readonly string[] _bypassHashKeys =
+        var parameters = collections.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
+            .ToDictionary(c => c.Key, c => c.Value.ToString());
+
+        return ComputeHash(parameters, additionalData);
+    }
+
+    string IPragmaticPlayHashProvider.ComputeHash<T>(T request, params string[] additionalData)
+    {
+        var options = new JsonSerializerOptions
         {
-            PragmaticPlayConsts.Parameters.Hash,
-            PragmaticPlayConsts.Parameters.BypassHashVerify
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        private readonly IHashProvider _hashProvider;
-        private readonly IJsonSerializationProvider _json;
+        var value = _json.SerializeToString(request, options);
+        var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
 
-        public PragmaticPlayHashProvider(IHashProvider hashProvider, IJsonSerializationProvider json)
+        var parameters = items.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
+            .ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
+
+        return ComputeHash(parameters, additionalData);
+    }
+
+    private string ComputeHash(Dictionary<string, string> collections, string[] additionalData)
+    {
+        var sortedParameters = new SortedDictionary<string, string>(collections, StringComparer.OrdinalIgnoreCase);
+        var raw = sortedParameters.Select(p => $"{p.Key}={p.Value}").JoinAsString("&");
+
+        if (additionalData?.Length > 0)
         {
-            _hashProvider = hashProvider;
-            _json = json;
+            raw += additionalData.JoinAsString(string.Empty);
         }
 
-        string IPragmaticPlayHashProvider.ComputeHash(IFormCollection collections, params string[] additionalData)
-        {
-            var parameters = collections.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
-                .ToDictionary(c => c.Key, c => c.Value.ToString());
-
-            return ComputeHash(parameters, additionalData);
-        }
-
-        string IPragmaticPlayHashProvider.ComputeHash<T>(T request, params string[] additionalData)
-        {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = false,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            var value = _json.SerializeToString(request, options);
-            var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
-
-            var parameters = items.Where(c => _bypassHashKeys.IgnoreCaseNotContains(c.Key))
-                .ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
-
-            return ComputeHash(parameters, additionalData);
-        }
-
-        private string ComputeHash(Dictionary<string, string> collections, string[] additionalData)
-        {
-            var sortedParameters = new SortedDictionary<string, string>(collections, StringComparer.OrdinalIgnoreCase);
-            var raw = sortedParameters.Select(p => $"{p.Key}={p.Value}").JoinAsString("&");
-
-            if (additionalData?.Length > 0)
-            {
-                raw += additionalData.JoinAsString(string.Empty);
-            }
-
-            return _hashProvider.Hash(raw, HashAlgorithmKind.Md5);
-        }
+        return _hashProvider.Hash(raw, HashAlgorithmKind.Md5);
     }
 }

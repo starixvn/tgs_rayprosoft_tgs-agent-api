@@ -6,46 +6,45 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using Tgs.FileService.Clients;
 
-namespace TGS.Apis.BackendOffice.DataService.Services
+namespace TGS.Apis.BackendOffice.DataService.Services;
+
+public interface IStationLetterService
 {
-    public interface IStationLetterService
+    Task CreateStationLetterAsync(StationLetter stationLetter,
+        StationLetterPlayer[] stationLetterPlayers);
+}
+
+public class StationLetterService : IStationLetterService
+{
+    private readonly IFileServiceClient _fileServiceClient;
+    private readonly ITgsRepository _repository;
+
+    public StationLetterService(ITgsRepository repository,
+        IFileServiceClient fileServiceClient)
     {
-        Task CreateStationLetterAsync(StationLetter stationLetter,
-            StationLetterPlayer[] stationLetterPlayers);
+        _repository = repository;
+        _fileServiceClient = fileServiceClient;
     }
 
-    public class StationLetterService : IStationLetterService
+    async Task IStationLetterService.CreateStationLetterAsync(StationLetter stationLetter,
+        StationLetterPlayer[] stationLetterPlayers)
     {
-        private readonly IFileServiceClient _fileServiceClient;
-        private readonly ITgsRepository _repository;
+        var imageNames = stationLetter.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
 
-        public StationLetterService(ITgsRepository repository,
-            IFileServiceClient fileServiceClient)
+        await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
+        stationLetter.Players = stationLetterPlayers;
+        await _repository.StationLetters.AddAsync(stationLetter);
+
+        await _repository.SaveChangesAsync();
+
+        if (imageNames.Length > 0)
         {
-            _repository = repository;
-            _fileServiceClient = fileServiceClient;
+            await _fileServiceClient.UpdateStationLetterFileAsync(Consts.UploadFile.StationLetter,
+                stationLetter.Id.ToString(),
+                new(imageNames));
         }
 
-        async Task IStationLetterService.CreateStationLetterAsync(StationLetter stationLetter,
-            StationLetterPlayer[] stationLetterPlayers)
-        {
-            var imageNames = stationLetter.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
-
-            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-
-            stationLetter.Players = stationLetterPlayers;
-            await _repository.StationLetters.AddAsync(stationLetter);
-
-            await _repository.SaveChangesAsync();
-
-            if (imageNames.Length > 0)
-            {
-                await _fileServiceClient.UpdateStationLetterFileAsync(Consts.UploadFile.StationLetter,
-                    stationLetter.Id.ToString(),
-                    new(imageNames));
-            }
-
-            await tran.CommitAsync();
-        }
+        await tran.CommitAsync();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
@@ -10,22 +11,22 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPlayerPhoneCommand>
 {
-    private readonly IBrandRepository _brandRepository;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
+    private readonly IBrandServiceClient _brandServiceClient;
 
     public CommitInitPlayerPhoneCommandService(
         IValidateCodeOperator validateCodeOperator,
-        IBrandRepository brandRepository,
+        IBrandServiceClient brandServiceClient,
         IPlayerRepository playerRepository,
         IRedisCacheManager cacheManager,
         IGetService<CheckBrandPhoneQuery, bool> checkService)
     {
         _validateCodeOperator =
             validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
         _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
@@ -34,7 +35,7 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
     public async ValueTask ExecuteAsync(CommitInitPlayerPhoneCommand command,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandRepository
+        var brand = await _brandServiceClient
             .GetBrandInfoAsync(command.BrandId)
             .ConfigureAwait(false);
 

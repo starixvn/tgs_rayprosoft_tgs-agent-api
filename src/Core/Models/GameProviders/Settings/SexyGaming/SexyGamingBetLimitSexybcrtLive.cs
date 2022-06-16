@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Models.GameProviders.Settings.SexyGaming
+namespace TGS.Core.Models.GameProviders.Settings.SexyGaming;
+
+public record SexyGamingBetLimitSexybcrtLive
 {
-    public record SexyGamingBetLimitSexybcrtLive
-    {
-        [JsonPropertyName("limitId")]
-        public int[] LimitId { get; set; }
-    }
+    [JsonPropertyName("limitId")]
+    public int[] LimitId { get; set; }
 }

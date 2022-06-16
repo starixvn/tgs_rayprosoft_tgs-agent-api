@@ -7,49 +7,48 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Tests.TestsCommon;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
+
+[Category(Named.Unit)]
+public class BaseTests
 {
-    [Category(Named.Unit)]
-    public class BaseTests
+    protected readonly Mock<HttpContext> HttpContextMock = new();
+    protected string Username = "admin.enabled";
+
+    public virtual void Setup()
     {
-        protected readonly Mock<HttpContext> HttpContextMock = new();
-        protected string Username = "admin.enabled";
+        Login();
+    }
 
-        public virtual void Setup()
-        {
-            Login();
-        }
+    private void Login(
+        string username = "admin.enabled",
+        string rolename = "Admin",
+        RoleType roleType = RoleType.Admin)
+    {
+        HttpContextMock.Setup(p => p.User)
+            .Returns(GetUserClaimsPrincipal(username, rolename, roleType));
+    }
 
-        private void Login(
-            string username = "admin.enabled",
-            string rolename = "Admin",
-            RoleType roleType = RoleType.Admin)
+    protected ClaimsPrincipal GetUserClaimsPrincipal(
+        string username = "admin.enabled",
+        string rolename = "Admin",
+        RoleType roleType = RoleType.Admin)
+    {
+        return new(new[]
         {
-            HttpContextMock.Setup(p => p.User)
-                .Returns(GetUserClaimsPrincipal(username, rolename, roleType));
-        }
-
-        protected ClaimsPrincipal GetUserClaimsPrincipal(
-            string username = "admin.enabled",
-            string rolename = "Admin",
-            RoleType roleType = RoleType.Admin)
-        {
-            return new(new[]
+            new ClaimsIdentity(new[]
             {
-                new ClaimsIdentity(new[]
-                {
-                    new Claim(Consts.BackendOffice.UserInfo.UsernameKey, username),
-                    new Claim(Consts.BackendOffice.UserInfo.RolenameKey, rolename),
-                    new Claim(Consts.BackendOffice.UserInfo.PortalKey, roleType.ToString())
-                })
-            });
-        }
+                new Claim(Consts.BackendOffice.UserInfo.UsernameKey, username),
+                new Claim(Consts.BackendOffice.UserInfo.RolenameKey, rolename),
+                new Claim(Consts.BackendOffice.UserInfo.PortalKey, roleType.ToString())
+            })
+        });
+    }
 
-        protected (int, int) GetPage(PageableRequest request)
-        {
-            var page = request.Page <= 0 ? 0 : request.Page - 1;
-            var pageSize = request.Rows <= 0 ? 10 : request.Rows;
-            return (page * pageSize, pageSize);
-        }
+    protected (int, int) GetPage(PageableRequest request)
+    {
+        var page = request.Page <= 0 ? 0 : request.Page - 1;
+        var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+        return (page * pageSize, pageSize);
     }
 }

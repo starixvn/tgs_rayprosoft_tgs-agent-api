@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.Exceptions
+namespace TGS.Services.Agent.Exceptions;
+
+public class UsernameException : Exception
 {
-    public class UsernameException : Exception
+    public UsernameException()
+        : base("NameExisted")
     {
-        public UsernameException()
-            : base("NameExisted")
-        {
-        }
     }
 }

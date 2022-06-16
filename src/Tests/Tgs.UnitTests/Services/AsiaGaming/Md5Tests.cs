@@ -4,26 +4,25 @@ using NUnit.Framework;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.Core.Infrastructures.Security.Enums;
 
-namespace TGS.UnitTests.Services.AsiaGaming
+namespace TGS.UnitTests.Services.AsiaGaming;
+
+[TestFixture]
+public class Md5Tests
 {
-    [TestFixture]
-    public class Md5Tests
+    private readonly IHashProvider _hashProvider;
+
+    public Md5Tests()
     {
-        private readonly IHashProvider _hashProvider;
+        _hashProvider = new HashProvider();
+    }
 
-        public Md5Tests()
-        {
-            _hashProvider = new HashProvider();
-        }
+    [Test]
+    public void Can_Encrypt()
+    {
+        var plainText = "aaa";
+        var expectedResult = "47bce5c74f589f4867dbd57e9ca9f808";
 
-        [Test]
-        public void Can_Encrypt()
-        {
-            var plainText = "aaa";
-            var expectedResult = "47bce5c74f589f4867dbd57e9ca9f808";
-
-            var result = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
-            result.Should().BeEquivalentTo(expectedResult);
-        }
+        var result = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
+        result.Should().BeEquivalentTo(expectedResult);
     }
 }

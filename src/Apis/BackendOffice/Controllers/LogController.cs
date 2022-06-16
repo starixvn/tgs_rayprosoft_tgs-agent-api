@@ -7,69 +7,68 @@ using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class LogController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LogController : BaseContextController
+    private readonly ILogQueries _logQueries;
+
+    public LogController(
+        ILogQueries logQueries)
+        => _logQueries = logQueries;
+
+    [HttpGet("admin")]
+    [ByPassAdminLog]
+    public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
     {
-        private readonly ILogQueries _logQueries;
+        var (logs, totalCount) = await _logQueries.GetAdminLogsAsync(request);
 
-        public LogController(
-            ILogQueries logQueries)
-            => _logQueries = logQueries;
+        return await logs.CreatePagedResponseAsync(totalCount);
+    }
 
-        [HttpGet("admin")]
-        [ByPassAdminLog]
-        public async Task<PagedResponse<AdminLogModel>> GetAdminLogsAsync([FromQuery] AdminLogRequest request)
+    [HttpGet("admin/{id:Guid}")]
+    [ByPassAdminLog]
+    public async Task<LogDetailResponse> GetAdminLogAsync(Guid id)
+    {
+        var logDetail = await _logQueries.GetAdminLogAsync(id);
+
+        return new LogDetailResponse
         {
-            var (logs, totalCount) = await _logQueries.GetAdminLogsAsync(request);
+            Valid = true,
+            LogDetail = logDetail
+        };
+    }
 
-            return await logs.CreatePagedResponseAsync(totalCount);
-        }
+    [HttpGet("api")]
+    [ByPassAdminLog]
+    public async Task<PagedResponse<ApiLogModel>> GetApiLogsAsync([FromQuery] ApiLogRequest request)
+    {
+        var (logs, totalCount) = await _logQueries.GetApiLogsAsync(request);
 
-        [HttpGet("admin/{id:Guid}")]
-        [ByPassAdminLog]
-        public async Task<LogDetailResponse> GetAdminLogAsync(Guid id)
+        return await logs.CreatePagedResponseAsync(totalCount);
+    }
+
+    [HttpGet("api/{id:Guid}")]
+    [ByPassAdminLog]
+    public async Task<LogDetailResponse> GetApiLogAsync(Guid id)
+    {
+        var logDetail = await _logQueries.GetApiLogAsync(id);
+
+        return new LogDetailResponse
         {
-            var logDetail = await _logQueries.GetAdminLogAsync(id);
+            Valid = true,
+            LogDetail = logDetail
+        };
+    }
 
-            return new LogDetailResponse
-            {
-                Valid = true,
-                LogDetail = logDetail
-            };
-        }
+    [HttpGet("log")]
+    [ByPassAdminLog]
+    public async Task<PagedResponse<LogRecordModel>> GetLogRecordsAsync([FromQuery] LogRecordRequest request)
+    {
+        var (logs, totalCount) = await _logQueries.GetLogRecordsAsync(request);
 
-        [HttpGet("api")]
-        [ByPassAdminLog]
-        public async Task<PagedResponse<ApiLogModel>> GetApiLogsAsync([FromQuery] ApiLogRequest request)
-        {
-            var (logs, totalCount) = await _logQueries.GetApiLogsAsync(request);
-
-            return await logs.CreatePagedResponseAsync(totalCount);
-        }
-
-        [HttpGet("api/{id:Guid}")]
-        [ByPassAdminLog]
-        public async Task<LogDetailResponse> GetApiLogAsync(Guid id)
-        {
-            var logDetail = await _logQueries.GetApiLogAsync(id);
-
-            return new LogDetailResponse
-            {
-                Valid = true,
-                LogDetail = logDetail
-            };
-        }
-
-        [HttpGet("log")]
-        [ByPassAdminLog]
-        public async Task<PagedResponse<LogRecordModel>> GetLogRecordsAsync([FromQuery] LogRecordRequest request)
-        {
-            var (logs, totalCount) = await _logQueries.GetLogRecordsAsync(request);
-
-            return await logs.CreatePagedResponseAsync(totalCount);
-        }
+        return await logs.CreatePagedResponseAsync(totalCount);
     }
 }

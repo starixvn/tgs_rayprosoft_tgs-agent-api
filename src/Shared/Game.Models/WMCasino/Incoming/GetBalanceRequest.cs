@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.WMCasino.Incoming
+namespace TGS.Shared.Game.Models.WMCasino.Incoming;
+
+public record GetBalanceRequest : BaseRequest
 {
-    public record GetBalanceRequest : BaseRequest
-    {
-        [JsonPropertyName("user")]
-        public string User { get; set; }
-    }
+    [JsonPropertyName("user")]
+    public string User { get; set; }
 }

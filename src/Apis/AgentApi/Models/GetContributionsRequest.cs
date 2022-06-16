@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace TGS.Apis.AgentApi.Models
+namespace TGS.Apis.AgentApi.Models;
+
+public record GetContributionsRequest : PagingRequest
 {
-    public record GetContributionsRequest : PagingRequest
-    {
-        public DateTimeOffset From { get; init; }
-        public DateTimeOffset To { get; init; }
-    }
+    public DateTimeOffset From { get; init; }
+    public DateTimeOffset To { get; init; }
 }

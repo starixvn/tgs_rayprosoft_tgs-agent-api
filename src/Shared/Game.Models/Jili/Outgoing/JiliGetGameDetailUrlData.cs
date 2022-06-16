@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Jili.Outgoing
+namespace TGS.Shared.Game.Models.Jili.Outgoing;
+
+public record JiliGetGameDetailUrlData
 {
-    public record JiliGetGameDetailUrlData
-    {
-        [JsonPropertyName("Url")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("Url")]
+    public string Url { get; init; }
 }

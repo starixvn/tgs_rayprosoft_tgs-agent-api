@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
@@ -10,20 +11,20 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitPlayerEmailCommand>
 {
-    private readonly IBrandRepository _brandRepository;
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandEmailQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public CommitInitPlayerEmailCommandService(
-       IBrandRepository brandRepository,
+       IBrandServiceClient brandServiceClient,
        IPlayerRepository playerRepository,
        IGetService<CheckBrandEmailQuery, bool> checkService,
        IValidateCodeOperator validateCodeOperator,
        IRedisCacheManager cacheManager)
     {
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
         _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
@@ -34,8 +35,8 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         CommitInitPlayerEmailCommand command,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandRepository
-            .GetBrandInfoAsync(command.BrandId)
+        var brand = await _brandServiceClient
+            .GetBrandInfoAsync(command.BrandId, cancellationToken)
             .ConfigureAwait(false);
 
         if (brand!.EmailRegisterFlowEnabled is false)

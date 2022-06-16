@@ -1,9 +1,8 @@
-﻿namespace TGS.Shared.Game.Models.Habanero.Enums
+﻿namespace TGS.Shared.Game.Models.Habanero.Enums;
+
+public enum CancelStatus
 {
-    public enum CancelStatus
-    {
-        None = 0,
-        Cancelled = 1,
-        TransactionNotFound = 2
-    }
+    None = 0,
+    Cancelled = 1,
+    TransactionNotFound = 2
 }

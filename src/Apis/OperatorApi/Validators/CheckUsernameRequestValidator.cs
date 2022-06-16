@@ -2,16 +2,15 @@
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.WebApiServices;
 
-namespace TGS.Apis.OperatorApi.Validators
+namespace TGS.Apis.OperatorApi.Validators;
+
+public sealed class CheckUsernameRequestValidator : BaseFluentValidator<CheckUsernameRequest>
 {
-    public sealed class CheckUsernameRequestValidator : BaseFluentValidator<CheckUsernameRequest>
+    public CheckUsernameRequestValidator()
     {
-        public CheckUsernameRequestValidator()
-        {
-            RuleFor(x => x.Username)
-                .NotEmpty()
-                .Length(6, 32)
-                .WithName(x => GetBindPropertyName(x, nameof(x.Username)));
-        }
+        RuleFor(x => x.Username)
+            .NotEmpty()
+            .Length(6, 32)
+            .WithName(x => GetBindPropertyName(x, nameof(x.Username)));
     }
 }

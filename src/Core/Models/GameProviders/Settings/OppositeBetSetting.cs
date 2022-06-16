@@ -1,12 +1,11 @@
-﻿namespace TGS.Core.Models.GameProviders.Settings
+﻿namespace TGS.Core.Models.GameProviders.Settings;
+
+public record OppositeBetSetting
 {
-    public record OppositeBetSetting
-    {
-        // game external ids
-        public string[] Games { get; init; }
+    // game external ids
+    public string[] Games { get; init; }
 
-        public Pattern[] Patterns { get; init; }
+    public Pattern[] Patterns { get; init; }
 
-        public record Pattern(string BetType, int GroupId);
-    }
+    public record Pattern(string BetType, int GroupId);
 }

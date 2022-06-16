@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum AgentConfigStatus
 {
-    public enum AgentConfigStatus
-    {
-        DoneForConfigurePercentage = 1,
-        WaitForConfigurePercentage = 2
-    }
+    DoneForConfigurePercentage = 1,
+    WaitForConfigurePercentage = 2
 }

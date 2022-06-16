@@ -5,13 +5,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.Skywind.Outgoing
+namespace TGS.Shared.Game.Models.Skywind.Outgoing;
+
+public record SkywindGamHistoryRoundDetailsRequest
 {
-    public record SkywindGamHistoryRoundDetailsRequest
-    {
-        [JsonPropertyName("roundId")]
-        public string RoundId { get; set; }
-        [JsonPropertyName("language")]
-        public string Language { get; set; } = "zh-cn";
-    }
+    [JsonPropertyName("roundId")]
+    public string RoundId { get; set; }
+    [JsonPropertyName("language")]
+    public string Language { get; set; } = "zh-cn";
 }

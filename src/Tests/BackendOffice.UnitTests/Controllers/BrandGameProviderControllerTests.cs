@@ -12,129 +12,128 @@ using TGS.Apis.BackendOffice.Controllers.Brand;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
+
+[TestFixture]
+[Parallelizable]
+public class BrandGameProviderControllerTests : BaseTests
 {
-    [TestFixture]
-    [Parallelizable]
-    public class BrandGameProviderControllerTests : BaseTests
+    [SetUp]
+    public override void Setup()
     {
-        [SetUp]
-        public override void Setup()
+        base.Setup();
+        _controller = new BrandGameProviderController(
+            _mediatorMock.Object);
+    }
+
+    private BrandGameProviderController _controller=default!;
+    private readonly Mock<IMediator> _mediatorMock = new();
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Can_Get_Schedules(bool showAll)
+    {
+        var list = CreateScheduleModelFixture()
+            .CreateMany<BrandGameProviderModel>(99)
+            .ToArray();
+
+        var request = new GetBrandGameProvidersRequest
         {
-            base.Setup();
-            _controller = new BrandGameProviderController(
-                _mediatorMock.Object);
-        }
+            Keyword = "keyword",
+            Page = 1,
+            Rows = 10,
+            SortBy = "updatedOn",
+            OrderBy = SortOrder.Descending,
+            ShowAll = showAll
+        };
+        var (skip, take) = GetPage(request);
+        var orderedRoles = list.OrderByDescending(p => p.GameProviderName);
 
-        private BrandGameProviderController _controller=default!;
-        private readonly Mock<IMediator> _mediatorMock = new();
+        var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Schedules(bool showAll)
-        {
-            var list = CreateScheduleModelFixture()
-                .CreateMany<BrandGameProviderModel>(99)
-                .ToArray();
-
-            var request = new GetBrandGameProvidersRequest
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<BrandGameProviderModel>
             {
-                Keyword = "keyword",
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
-            var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.GameProviderName);
+                Valid = true,
+                Items = expectedRoles
+            });
 
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
+        var response = await _controller.GetBrandGameProvidersAsync(request);
+        response.Valid.Should().BeTrue();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<BrandGameProviderModel>
-                {
-                    Valid = true,
-                    Items = expectedRoles
-                });
+        for (var i = 0; i < response.Items.Length; i++)
+        {
+            response.Items[i].Id.Should().Be(expectedRoles[i].Id);
+            response.Items[i].GameProviderName.Should().Be(expectedRoles[i].GameProviderName);
+        }
 
-            var response = await _controller.GetBrandGameProvidersAsync(request);
-            response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            for (var i = 0; i < response.Items.Length; i++)
+    [Test]
+    public async Task Can_Get_Default_Times()
+    {
+        var list = CreateScheduleModelFixture()
+            .CreateMany<DefaultTimeModel>(99)
+            .ToArray();
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetDefaultTimesRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetDefaultTimesResponse
             {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].GameProviderName.Should().Be(expectedRoles[i].GameProviderName);
-            }
+                Valid = true,
+                DefaultTimes = list
+            });
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetBrandGameProvidersRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.GetBrandGameProviderDefaultTimesAsync(It.IsAny<Guid>());
+        response.Valid.Should().BeTrue();
 
-        [Test]
-        public async Task Can_Get_Default_Times()
+        for (var i = 0; i < response.DefaultTimes.Length; i++)
         {
-            var list = CreateScheduleModelFixture()
-                .CreateMany<DefaultTimeModel>(99)
-                .ToArray();
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetDefaultTimesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetDefaultTimesResponse
-                {
-                    Valid = true,
-                    DefaultTimes = list
-                });
-
-            var response = await _controller.GetBrandGameProviderDefaultTimesAsync(It.IsAny<Guid>());
-            response.Valid.Should().BeTrue();
-
-            for (var i = 0; i < response.DefaultTimes.Length; i++)
-            {
-                response.DefaultTimes[i].From.Should().Be(list[i].From);
-                response.DefaultTimes[i].To.Should().Be(list[i].To);
-            }
-
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetDefaultTimesRequest>(), It.IsAny<CancellationToken>()));
+            response.DefaultTimes[i].From.Should().Be(list[i].From);
+            response.DefaultTimes[i].To.Should().Be(list[i].To);
         }
 
-        [Test]
-        public async Task Can_Update_Schedule()
-        {
-            var schedule = CreateScheduleModelFixture().Create<BrandGameProviderModel>();
-            var request = new Fixture().Create<UpdateBrandGameProviderRequest>();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetDefaultTimesRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+    [Test]
+    public async Task Can_Update_Schedule()
+    {
+        var schedule = CreateScheduleModelFixture().Create<BrandGameProviderModel>();
+        var request = new Fixture().Create<UpdateBrandGameProviderRequest>();
 
-            var response = await _controller.UpdateBrandGameProviderAsync(schedule.Id, request);
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse {Valid = true});
 
-            response.Valid.Should().BeTrue();
-            _mediatorMock.Verify(x =>
-                x.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.UpdateBrandGameProviderAsync(schedule.Id, request);
 
-        [Test]
-        public async Task Can_Update_Default_Times()
-        {
-            var request = new Fixture().Create<UpdateDefaultTimesRequest>();
+        response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x =>
+            x.Send(It.IsAny<UpdateBrandGameProviderRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdateDefaultTimesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+    [Test]
+    public async Task Can_Update_Default_Times()
+    {
+        var request = new Fixture().Create<UpdateDefaultTimesRequest>();
 
-            var response =
-                await _controller.UpdateBrandGameProviderDefaultTimesAsync(request.BrandGameProviderId, request);
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdateDefaultTimesRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse {Valid = true});
 
-            response.Valid.Should().BeTrue();
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateDefaultTimesRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response =
+            await _controller.UpdateBrandGameProviderDefaultTimesAsync(request.BrandGameProviderId, request);
 
-        private Fixture CreateScheduleModelFixture()
-        {
-            var fixture = new Fixture();
-            return fixture;
-        }
+        response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateDefaultTimesRequest>(), It.IsAny<CancellationToken>()));
+    }
+
+    private Fixture CreateScheduleModelFixture()
+    {
+        var fixture = new Fixture();
+        return fixture;
     }
 }

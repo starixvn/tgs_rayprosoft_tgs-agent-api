@@ -1,13 +1,12 @@
-﻿namespace TGS.Services.BackOffice.Domain
+﻿namespace TGS.Services.BackOffice.Domain;
+
+public class GameData
 {
-    public class GameData
-    {
-        public int GameId { get; set; }
+    public int GameId { get; set; }
 
-        public string GameCode { get; set; }
+    public string GameCode { get; set; }
 
-        public string GameName { get; set; }
+    public string GameName { get; set; }
 
-        public string Localization { get; set; }
-    }
+    public string Localization { get; set; }
 }

@@ -18,145 +18,144 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
-{
-    [Route("api/jdb")]
-    [ApiController]
-    [Consumes("application/x-www-form-urlencoded")]
-    [Produces(MediaTypeNames.Application.Json)]
-    [AllowAnonymous]
-    [FeatureGate(Consts.GameProvider.JDB)]
-    public sealed class JDBGameController : ControllerBase
-    {
-        private readonly IGamePlayActions _actions;
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IJDBActionModelMapper _map;
-        private readonly IJDBServices _services;
-        private readonly ISettingOperations _settingOperations;
+namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers;
 
-        public JDBGameController(
-            IGamePlayActions actions,
-            IJDBServices services,
-            IJDBActionModelMapper map,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries,
-            ISettingOperations settingOperations)
+[Route("api/jdb")]
+[ApiController]
+[Consumes("application/x-www-form-urlencoded")]
+[Produces(MediaTypeNames.Application.Json)]
+[AllowAnonymous]
+[FeatureGate(Consts.GameProvider.JDB)]
+public sealed class JDBGameController : ControllerBase
+{
+    private readonly IGamePlayActions _actions;
+    private readonly IGameActionQueries _gameActionQueries;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly IJsonSerializationProvider _jsonSerializationProvider;
+    private readonly IJDBActionModelMapper _map;
+    private readonly IJDBServices _services;
+    private readonly ISettingOperations _settingOperations;
+
+    public JDBGameController(
+        IGamePlayActions actions,
+        IJDBServices services,
+        IJDBActionModelMapper map,
+        IJsonSerializationProvider jsonSerializationProvider,
+        IGameProviderOperations gameProviderOperations,
+        IGameActionQueries gameActionQueries,
+        ISettingOperations settingOperations)
+    {
+        _actions = actions;
+        _services = services;
+        _map = map;
+        _jsonSerializationProvider = jsonSerializationProvider;
+        _gameProviderOperations = gameProviderOperations;
+        _gameActionQueries = gameActionQueries;
+        _settingOperations = settingOperations;
+    }
+
+    [HttpPost]
+    [Route("entrance")]
+    public async Task<BaseActionResponse> ExecuteGameActionAsync(
+        [FromForm(Name = "action")] ActionType actionType,
+        [FromForm(Name = "value")] string json)
+        => actionType switch
         {
-            _actions = actions;
-            _services = services;
-            _map = map;
-            _jsonSerializationProvider = jsonSerializationProvider;
-            _gameProviderOperations = gameProviderOperations;
-            _gameActionQueries = gameActionQueries;
-            _settingOperations = settingOperations;
+            ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
+                .DeserializeFromString<GetBalanceRequest>(json)),
+
+            ActionType.PlaceAndSettleBet => await PlaceAndSettleBetAsync(
+                _jsonSerializationProvider.DeserializeFromString<PlaceAndSettleBetRequest>(json)),
+
+            ActionType.CancelTransaction => await CancelTransactionAsync(
+                _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(json)),
+
+            _ => new()
+            {
+                Status = GameApiStatus.InvalidParameters.Description(),
+                ErrorMessage = "Invalid action"
+            }
+        };
+
+    private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
+    {
+        Request.Path = new($"{Request.Path}/cancel");
+
+        var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
+        var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
+            request.UserId,
+            request.TransferId.ToString());
+
+        if (gameActionExternalIds == null)
+        {
+            return new()
+            {
+                Status = GameApiStatus.DataDoesNotExist.Description(),
+                ErrorMessage = "Transfer id not found."
+            };
         }
 
-        [HttpPost]
-        [Route("entrance")]
-        public async Task<BaseActionResponse> ExecuteGameActionAsync(
-            [FromForm(Name = "action")] ActionType actionType,
-            [FromForm(Name = "value")] string json)
-            => actionType switch
-            {
-                ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
-                    .DeserializeFromString<GetBalanceRequest>(json)),
+        var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
+        var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+        return _map.Response(betResult);
+    }
 
-                ActionType.PlaceAndSettleBet => await PlaceAndSettleBetAsync(
-                    _jsonSerializationProvider.DeserializeFromString<PlaceAndSettleBetRequest>(json)),
+    private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
+    {
+        Request.Path = new($"{Request.Path}/getbalance");
 
-                ActionType.CancelTransaction => await CancelTransactionAsync(
-                    _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(json)),
+        var result = await _actions.GetBalanceAsync(Consts.GameProvider.JDB, request.UserId)
+            .ConfigureAwait(false);
 
-                _ => new()
-                {
-                    Status = GameApiStatus.InvalidParameters.Description(),
-                    ErrorMessage = "Invalid action"
-                }
-            };
+        return _map.Response(result);
+    }
 
-        private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
+    private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
+    {
+        Request.Path = new($"{Request.Path}/betandsettle");
+
+        var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
+        var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
+            .ConfigureAwait(false);
+
+        var gameProviderId = data.GameProviderId;
+        var externalGameId = $"{request.GameType}_{request.MachineType}";
+        var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId)
+            .ConfigureAwait(false);
+
+        if (games.Length == 0)
         {
-            Request.Path = new($"{Request.Path}/cancel");
+            throw new InvalidGameActionException($"Game '{externalGameId}' is not found.",
+                InvalidGameActionErrorCode.GameNotFound);
+        }
 
-            var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
-            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
-                request.UserId,
-                request.TransferId.ToString());
+        var externalRoundId = request.GameSequenceNo.ToString();
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var gameActionData = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId,
+            playerCode, externalRoundId, games[0].Id).ConfigureAwait(false);
 
-            if (gameActionExternalIds == null)
+        if (gameActionData != null && gameActionData.Round.Status == RoundStatus.Closed)
+        {
+            var bet = gameActionData.GameActions.FirstOrDefault(t =>
+                t.ExternalTransactionId == request.TransferId.ToString());
+
+            if (bet != null)
             {
                 return new()
                 {
-                    Status = GameApiStatus.DataDoesNotExist.Description(),
-                    ErrorMessage = "Transfer id not found."
+                    Status = GameApiStatus.DuplicateTransactions.Description(),
+                    ErrorMessage = "Duplicate Transaction."
                 };
             }
-
-            var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
-            return _map.Response(betResult);
         }
 
-        private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
-        {
-            Request.Path = new($"{Request.Path}/getbalance");
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
+                .GameProviderConfigurations.JDB);
 
-            var result = await _actions.GetBalanceAsync(Consts.GameProvider.JDB, request.UserId)
-                .ConfigureAwait(false);
+        var betData = _map.Request(data, request, platformType, configuration.TimezoneHour);
 
-            return _map.Response(result);
-        }
-
-        private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
-        {
-            Request.Path = new($"{Request.Path}/betandsettle");
-
-            var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
-            var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
-                .ConfigureAwait(false);
-
-            var gameProviderId = data.GameProviderId;
-            var externalGameId = $"{request.GameType}_{request.MachineType}";
-            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId)
-                .ConfigureAwait(false);
-
-            if (games.Length == 0)
-            {
-                throw new InvalidGameActionException($"Game '{externalGameId}' is not found.",
-                    InvalidGameActionErrorCode.GameNotFound);
-            }
-
-            var externalRoundId = request.GameSequenceNo.ToString();
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameActionData = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId,
-                playerCode, externalRoundId, games[0].Id).ConfigureAwait(false);
-
-            if (gameActionData != null && gameActionData.Round.Status == RoundStatus.Closed)
-            {
-                var bet = gameActionData.GameActions.FirstOrDefault(t =>
-                    t.ExternalTransactionId == request.TransferId.ToString());
-
-                if (bet != null)
-                {
-                    return new()
-                    {
-                        Status = GameApiStatus.DuplicateTransactions.Description(),
-                        ErrorMessage = "Duplicate Transaction."
-                    };
-                }
-            }
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
-
-            var betData = _map.Request(data, request, platformType, configuration.TimezoneHour);
-
-            var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
-            return _map.Response(betResult);
-        }
+        var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
+        return _map.Response(betResult);
     }
 }

@@ -5,28 +5,27 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 
-namespace TGS.Services.PluggableServices
+namespace TGS.Services.PluggableServices;
+
+public interface IPluggableOperations
 {
-    public interface IPluggableOperations
+    Task<Uri> GetEndpointUrlByGameProviderCodeAsync(string gameProviderCode);
+}
+
+public sealed class PluggableOperations : IPluggableOperations
+{
+    private readonly ISettingOperations _settingOperations;
+
+    public PluggableOperations(ISettingOperations settingOperations)
     {
-        Task<Uri> GetEndpointUrlByGameProviderCodeAsync(string gameProviderCode);
+        _settingOperations = settingOperations;
     }
 
-    public sealed class PluggableOperations : IPluggableOperations
+    async Task<Uri> IPluggableOperations.GetEndpointUrlByGameProviderCodeAsync(string gameProviderCode)
     {
-        private readonly ISettingOperations _settingOperations;
+        var config = await _settingOperations.GetValueFromJsonByKeyAsync<PluggableConfigurationBase>(
+            SettingConsts.GameProviderConfigurations.Template.Args(gameProviderCode));
 
-        public PluggableOperations(ISettingOperations settingOperations)
-        {
-            _settingOperations = settingOperations;
-        }
-
-        async Task<Uri> IPluggableOperations.GetEndpointUrlByGameProviderCodeAsync(string gameProviderCode)
-        {
-            var config = await _settingOperations.GetValueFromJsonByKeyAsync<PluggableConfigurationBase>(
-                SettingConsts.GameProviderConfigurations.Template.Args(gameProviderCode));
-
-            return config.ServiceEndpointUrl;
-        }
+        return config.ServiceEndpointUrl;
     }
 }

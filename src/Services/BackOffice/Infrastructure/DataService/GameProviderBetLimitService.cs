@@ -8,76 +8,75 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 
-namespace TGS.Services.BackOffice.Infrastructure.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService;
+
+public interface IGameProviderBetLimitService
 {
-    public interface IGameProviderBetLimitService
+    Task<GameProviderBetLimit> GetGameProviderBetLimitAsync(
+        Expression<Func<GameProviderBetLimit, bool>> predicate,
+        Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery =
+            null);
+
+    IQueryable<GameProviderBetLimit> GetGameProviderBetLimitQueries(
+        Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery = null,
+        bool tracking = false);
+
+    Task CreateGameProviderBetLimitAsync(CreateGameProviderBetLimitRequest request);
+
+    Task UpdateGameProviderBetLimitAsync(GameProviderBetLimit gameProviderBetLimit,
+        UpdateGameProviderBetLimitRequest request);
+
+    Task<string[]> GetInUseBrandsAsync(Guid id);
+}
+
+public class GameProviderBetLimitService : BaseRepositoryOperations<ITgsRepository>,
+    IGameProviderBetLimitService
+{
+    private readonly ITgsRepository _repository;
+
+    public GameProviderBetLimitService(ITgsRepository tgsRepository) : base(tgsRepository)
     {
-        Task<GameProviderBetLimit> GetGameProviderBetLimitAsync(
-            Expression<Func<GameProviderBetLimit, bool>> predicate,
-            Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery =
-                null);
-
-        IQueryable<GameProviderBetLimit> GetGameProviderBetLimitQueries(
-            Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery = null,
-            bool tracking = false);
-
-        Task CreateGameProviderBetLimitAsync(CreateGameProviderBetLimitRequest request);
-
-        Task UpdateGameProviderBetLimitAsync(GameProviderBetLimit gameProviderBetLimit,
-            UpdateGameProviderBetLimitRequest request);
-
-        Task<string[]> GetInUseBrandsAsync(Guid id);
+        _repository = tgsRepository;
     }
 
-    public class GameProviderBetLimitService : BaseRepositoryOperations<ITgsRepository>,
-        IGameProviderBetLimitService
+    Task IGameProviderBetLimitService.CreateGameProviderBetLimitAsync(CreateGameProviderBetLimitRequest request)
     {
-        private readonly ITgsRepository _repository;
-
-        public GameProviderBetLimitService(ITgsRepository tgsRepository) : base(tgsRepository)
+        var betLimit = new GameProviderBetLimit
         {
-            _repository = tgsRepository;
-        }
+            GameProviderId = request.GameProviderId,
+            CurrencyCode = request.CurrencyCode,
+            MinBet = request.MinBet,
+            MaxBet = request.MaxBet,
+            MaxBetPerMatch = request.MaxBetPerMatch,
+            ExternalSetting = request.ExternalSetting
+        };
 
-        Task IGameProviderBetLimitService.CreateGameProviderBetLimitAsync(CreateGameProviderBetLimitRequest request)
-        {
-            var betLimit = new GameProviderBetLimit
-            {
-                GameProviderId = request.GameProviderId,
-                CurrencyCode = request.CurrencyCode,
-                MinBet = request.MinBet,
-                MaxBet = request.MaxBet,
-                MaxBetPerMatch = request.MaxBetPerMatch,
-                ExternalSetting = request.ExternalSetting
-            };
+        return CreateEntityAsync(betLimit);
+    }
 
-            return CreateEntityAsync(betLimit);
-        }
+    Task<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitAsync(
+        Expression<Func<GameProviderBetLimit, bool>> predicate,
+        Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery) =>
+        GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        Task<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitAsync(
-            Expression<Func<GameProviderBetLimit, bool>> predicate,
-            Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery) =>
-            GetEntityFirstOrDefaultAsync(predicate, preQuery);
+    IQueryable<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitQueries(
+        Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery,
+        bool tracking) =>
+        GetQueriesAsync(preQuery, tracking);
 
-        IQueryable<GameProviderBetLimit> IGameProviderBetLimitService.GetGameProviderBetLimitQueries(
-            Func<IQueryable<GameProviderBetLimit>, IQueryable<GameProviderBetLimit>> preQuery,
-            bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
+    Task<string[]> IGameProviderBetLimitService.GetInUseBrandsAsync(Guid id) =>
+        _repository.BrandGroupGameProviderBetLimits.AsQueryable()
+            .Where(x => x.GameProviderBetLimitId == id)
+            .Select(x => x.BrandGroupBetLimit.BrandGroup.Brand.Name).Distinct().ToArrayAsync();
 
-        Task<string[]> IGameProviderBetLimitService.GetInUseBrandsAsync(Guid id) =>
-            _repository.BrandGroupGameProviderBetLimits.AsQueryable()
-                .Where(x => x.GameProviderBetLimitId == id)
-                .Select(x => x.BrandGroupBetLimit.BrandGroup.Brand.Name).Distinct().ToArrayAsync();
+    Task IGameProviderBetLimitService.UpdateGameProviderBetLimitAsync(GameProviderBetLimit gameProviderBetLimit,
+        UpdateGameProviderBetLimitRequest request)
+    {
+        gameProviderBetLimit.MinBet = request.MinBet;
+        gameProviderBetLimit.MaxBet = request.MaxBet;
+        gameProviderBetLimit.MaxBetPerMatch = request.MaxBetPerMatch;
+        gameProviderBetLimit.ExternalSetting = request.ExternalSetting;
 
-        Task IGameProviderBetLimitService.UpdateGameProviderBetLimitAsync(GameProviderBetLimit gameProviderBetLimit,
-            UpdateGameProviderBetLimitRequest request)
-        {
-            gameProviderBetLimit.MinBet = request.MinBet;
-            gameProviderBetLimit.MaxBet = request.MaxBet;
-            gameProviderBetLimit.MaxBetPerMatch = request.MaxBetPerMatch;
-            gameProviderBetLimit.ExternalSetting = request.ExternalSetting;
-
-            return UpdateEntityAsync(gameProviderBetLimit);
-        }
+        return UpdateEntityAsync(gameProviderBetLimit);
     }
 }

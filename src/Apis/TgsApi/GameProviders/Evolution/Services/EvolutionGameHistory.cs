@@ -11,53 +11,40 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.Evolution;
 using TGS.Shared.Game.Models.Evolution.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
+namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services;
+
+public sealed class EvolutionGameHistory : BaseBetHistory
 {
-    public sealed class EvolutionGameHistory : BaseBetHistory
+    private readonly IEvolutionApiClient _client;
+    private readonly IEvolutionGameHistoryService _gameHistoryService;
+    private readonly IEvolutionService _service;
+
+    public EvolutionGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        IEvolutionApiClient client,
+        IEvolutionService service,
+        IEvolutionGameHistoryService gameHistoryService
+    ) : base(roundQueries, gameProviderOperations)
     {
-        private readonly IEvolutionApiClient _client;
-        private readonly IEvolutionGameHistoryService _gameHistoryService;
-        private readonly IEvolutionService _service;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
+    }
 
-        public EvolutionGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            IEvolutionApiClient client,
-            IEvolutionService service,
-            IEvolutionGameHistoryService gameHistoryService
-        ) : base(roundQueries, gameProviderOperations)
-        {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
-        }
-
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
-        {
-            var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-            var response = await _client.GetGamHistoryRoundAsync(configuration,
-                new EvolutionGamHistoryRoundRequest
-                {
-                    PlayerCode = playerCode,
-                    RoundId = round.ExternalRoundId
-                }).ConfigureAwait(false);
-
-            if (cachedGame.Type == GameType.Slot)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
+        var response = await _client.GetGamHistoryRoundAsync(configuration,
+            new EvolutionGamHistoryRoundRequest
             {
-                return new RoundResult
-                {
-                    BetAmount = round.BetAmount ?? 0,
-                    Turnover = round.Turnover ?? 0,
-                    Winloss = round.WinLoss ?? 0,
-                    GameResult = round.ClientStatus.ToString(),
-                    Data = new BaseData[]
-                    {
-                        new UrlData {Url = _gameHistoryService.GetGameHistorySlot(configuration,response)}
-                    }
-                };
-            }
+                PlayerCode = playerCode,
+                RoundId = round.ExternalRoundId
+            }).ConfigureAwait(false);
 
+        if (cachedGame.Type == GameType.Slot)
+        {
             return new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
@@ -66,9 +53,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                 {
-                    new JsonData {Value = _gameHistoryService.GetGameHistory(response)}
+                    new UrlData {Url = _gameHistoryService.GetGameHistorySlot(configuration,response)}
                 }
             };
         }
+
+        return new RoundResult
+        {
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
+            {
+                new JsonData {Value = _gameHistoryService.GetGameHistory(response)}
+            }
+        };
     }
 }

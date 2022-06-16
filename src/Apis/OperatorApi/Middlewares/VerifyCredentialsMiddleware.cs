@@ -6,35 +6,34 @@ using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations.Validators;
 
-namespace TGS.Apis.OperatorApi.Middlewares
+namespace TGS.Apis.OperatorApi.Middlewares;
+
+public sealed class VerifyCredentialsMiddleware
 {
-    public sealed class VerifyCredentialsMiddleware
+    private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
+
+    private readonly RequestDelegate _next;
+
+    public VerifyCredentialsMiddleware(RequestDelegate next)
     {
-        private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
+        _next = next;
+    }
 
-        private readonly RequestDelegate _next;
+    public async Task InvokeAsync(
+        HttpContext context,
+        IStatusValidator statusValidator)
+    {
+        using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
 
-        public VerifyCredentialsMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
+        var brandId = context.GetBrandId();
 
-        public async Task InvokeAsync(
-            HttpContext context,
-            IStatusValidator statusValidator)
-        {
-            using var activity = _VerifyCredentialsMiddlewareSource.StartActivity(nameof(VerifyCredentialsMiddleware));
+        if (brandId is null)
+            throw new MissingTokenException("Missing Authorization Header");
 
-            var brandId = context.GetBrandId();
+        await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId.Value, ValidStatus.Default);
 
-            if (brandId is null)
-                throw new MissingTokenException("Missing Authorization Header");
+        context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
-            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId.Value, ValidStatus.Default);
-
-            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
-
-            await _next(context);
-        }
+        await _next(context);
     }
 }

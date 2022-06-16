@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.OperatorApi.Models
+﻿namespace TGS.Apis.OperatorApi.Models;
+
+public class CorsDomain
 {
-    public class CorsDomain
-    {
-        public string[] Urls { get; set; }
-    }
+    public string[] Urls { get; set; }
 }

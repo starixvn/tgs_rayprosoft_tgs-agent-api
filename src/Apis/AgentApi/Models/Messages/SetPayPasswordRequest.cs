@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.AgentApi.Models.Messages
+namespace TGS.Apis.AgentApi.Models.Messages;
+
+public record SetPayPasswordRequest
 {
-    public record SetPayPasswordRequest
-    {
-        [JsonPropertyName("pwd")]
-        public string Password { get; init; }
-    }
+    [JsonPropertyName("pwd")]
+    public string Password { get; init; }
 }

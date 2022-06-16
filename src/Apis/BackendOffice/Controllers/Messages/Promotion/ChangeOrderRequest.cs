@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Promotion
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
+
+public class ChangeOrderRequest
 {
-    public class ChangeOrderRequest
-    {
-        public ChangeOrderModel[] Orders { get; set; }
-    }
+    public ChangeOrderModel[] Orders { get; set; }
 }

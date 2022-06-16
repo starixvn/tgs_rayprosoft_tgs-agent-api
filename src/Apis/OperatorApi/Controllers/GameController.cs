@@ -19,347 +19,346 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Game;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+public class GameController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
-    public class GameController : ControllerBase
+    [HttpGet("bc")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask<ContentResult> BCSportsHtmlAsync(
+        [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
+        [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
     {
-        [HttpGet("bc")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<ContentResult> BCSportsHtmlAsync(
-            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
-            [FromServices] IGetService<GetBetConstructHtmlContentQuery, BetConstructHtmlContentInfo> getService)
-        {
-            var currentCultureName = CultureInfo.CurrentUICulture.Name;
+        var currentCultureName = CultureInfo.CurrentUICulture.Name;
 
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
 
-            await fundInAllService
-                .ExecuteAsync(new FundInAllGameBalanceCommand(
-                    brandId,
-                    playerTokenData.PlayerCode,
-                    ""))
-                .ConfigureAwait(false);
-
-            var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
-
-            var result = await getService.GetAsync(query).ConfigureAwait(false);
-
-            return new ContentResult
-            {
-                Content = result.Html,
-                ContentType = "text/html",
-                StatusCode = StatusCodes.Status200OK
-            };
-        }
-
-        [HttpGet("favorite/{gameType}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public IAsyncEnumerable<int> GetFavoriteGamesAsync(
-                    [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
-                    GameType gameType)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new ListFavoriteGameIdsQuery(
+        await fundInAllService
+            .ExecuteAsync(new FundInAllGameBalanceCommand(
                 brandId,
                 playerTokenData.PlayerCode,
-                gameType);
+                ""))
+            .ConfigureAwait(false);
 
-            return listService.QueryAsync(query)
-                .Select(fg => fg.GameId);
-        }
+        var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
 
-        /// <summary>
-        /// get game list of specific game provider
-        /// </summary>
-        [HttpGet("list")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public async IAsyncEnumerable<GameModel> GetGamesAsync(
-            [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            [FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
-            [FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
-            [FromServices] IPlayerOperations playerOperations,
-            [FromQuery] GetGamesRequest request)
+        var result = await getService.GetAsync(query).ConfigureAwait(false);
+
+        return new ContentResult
         {
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            Content = result.Html,
+            ContentType = "text/html",
+            StatusCode = StatusCodes.Status200OK
+        };
+    }
 
-            var currentCultureInfo = CultureInfo.CurrentUICulture;
+    [HttpGet("favorite/{gameType}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public IAsyncEnumerable<int> GetFavoriteGamesAsync(
+                [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
+                GameType gameType)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            var cultureCode = await brandLanguageCodeMapper
-                .ExternalToInternalAsync(currentCultureInfo.Name, brandId)
+        var query = new ListFavoriteGameIdsQuery(
+            brandId,
+            playerTokenData.PlayerCode,
+            gameType);
+
+        return listService.QueryAsync(query)
+            .Select(fg => fg.GameId);
+    }
+
+    /// <summary>
+    /// get game list of specific game provider
+    /// </summary>
+    [HttpGet("list")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+    public async IAsyncEnumerable<GameModel> GetGamesAsync(
+        [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+        [FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
+        [FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
+        [FromServices] IPlayerOperations playerOperations,
+        [FromQuery] GetGamesRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var currentCultureInfo = CultureInfo.CurrentUICulture;
+
+        var cultureCode = await brandLanguageCodeMapper
+            .ExternalToInternalAsync(currentCultureInfo.Name, brandId)
+            .ConfigureAwait(false);
+
+        var playerType = PlayerType.RealPlayer;
+        var platformType = request.PlatformType;
+
+        if (playerTokenData != null)
+        {
+            var cachedPlayer = await playerOperations
+                .GetCachedPlayerAsync(playerTokenData.PlayerCode)
                 .ConfigureAwait(false);
 
-            var playerType = PlayerType.RealPlayer;
-            var platformType = request.PlatformType;
-
-            if (playerTokenData != null)
-            {
-                var cachedPlayer = await playerOperations
-                    .GetCachedPlayerAsync(playerTokenData.PlayerCode)
-                    .ConfigureAwait(false);
-
-                playerType = cachedPlayer.Type;
-                platformType = playerTokenData.PlatformType;
-            }
-
-            if (string.IsNullOrWhiteSpace(request.SubGameProviderCode))
-            {
-                var query = new GetAllGamesByGameTypeQuery(
-                    brandId,
-                    playerType,
-                    platformType,
-                    request.Types ?? Array.Empty<GameType>());
-
-                var games = from info in queryAllGameService.QueryAsync(query)
-                            let lang = info.Localization.ContainsKey(cultureCode)
-                                ? info.Localization[cultureCode]
-                                : JsonDocument.Parse("{}")
-                            orderby info.DisplayOrder, info.Code
-                            select new GameModel
-                            {
-                                Code = info.Code,
-                                GameProviderCode = info.GameProviderCode,
-                                Description = GetLocalization(
-                                    lang.RootElement,
-                                    "description",
-                                    info.Description),
-                                DisplayOrder = info.DisplayOrder,
-                                Id = info.Id,
-                                IsActive = info.IsActive,
-                                Name = GetLocalization(
-                                    lang.RootElement,
-                                    "name",
-                                    info.Name),
-                                Tag = new Tag
-                                {
-                                    Hot = info.Tag.Hot,
-                                    New = info.Tag.New,
-                                    Recommend = info.Tag.Recommend
-                                },
-                                Type = info.Type
-                            };
-
-                await foreach (var game in games)
-                    yield return game;
-            }
-            else
-            {
-                var query = new GetGamesQuery(
-                    brandId,
-                    request.SubGameProviderCode,
-                    playerType,
-                    platformType,
-                    request.Types ?? Array.Empty<GameType>());
-
-                var games = from info in getGamesQueryService.QueryAsync(query)
-                            let lang = info.Localization.ContainsKey(cultureCode)
-                                ? info.Localization[cultureCode]
-                                : JsonDocument.Parse("{}")
-                            orderby info.DisplayOrder, info.Code
-                            select new GameModel
-                            {
-                                Code = info.Code,
-                                GameProviderCode = info.GameProviderCode,
-                                Description = GetLocalization(
-                                    lang.RootElement,
-                                    "description",
-                                    info.Description),
-                                DisplayOrder = info.DisplayOrder,
-                                Id = info.Id,
-                                IsActive = info.IsActive,
-                                Name = GetLocalization(
-                                    lang.RootElement,
-                                    "name",
-                                    info.Name),
-                                Tag = new Tag
-                                {
-                                    Hot = info.Tag.Hot,
-                                    New = info.Tag.New,
-                                    Recommend = info.Tag.Recommend
-                                },
-                                Type = info.Type
-                            };
-
-                await foreach (var game in games)
-                    yield return game;
-            }
+            playerType = cachedPlayer.Type;
+            platformType = playerTokenData.PlatformType;
         }
 
-        /// <summary>
-        /// get game launch url via game id
-        /// </summary>
-        [HttpPost("geturl")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlockedCheck]
-        public async Task<GetGameUrlResponse> GetGameUrlAsync(
-            [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
-            [FromServices] IGetService<GetGameUrlQuery, Uri> getGameUrlQueryService,
-            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
-            [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
-            [FromBody] GetGameUrlRequest request)
+        if (string.IsNullOrWhiteSpace(request.SubGameProviderCode))
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            var query = new GetAllGamesByGameTypeQuery(
+                brandId,
+                playerType,
+                platformType,
+                request.Types ?? Array.Empty<GameType>());
 
-            var subGp = await getGpCodeService
-                .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
-                .ConfigureAwait(false);
+            var games = from info in queryAllGameService.QueryAsync(query)
+                        let lang = info.Localization.ContainsKey(cultureCode)
+                            ? info.Localization[cultureCode]
+                            : JsonDocument.Parse("{}")
+                        orderby info.DisplayOrder, info.Code
+                        select new GameModel
+                        {
+                            Code = info.Code,
+                            GameProviderCode = info.GameProviderCode,
+                            Description = GetLocalization(
+                                lang.RootElement,
+                                "description",
+                                info.Description),
+                            DisplayOrder = info.DisplayOrder,
+                            Id = info.Id,
+                            IsActive = info.IsActive,
+                            Name = GetLocalization(
+                                lang.RootElement,
+                                "name",
+                                info.Name),
+                            Tag = new Tag
+                            {
+                                Hot = info.Tag.Hot,
+                                New = info.Tag.New,
+                                Recommend = info.Tag.Recommend
+                            },
+                            Type = info.Type
+                        };
 
-            await fundInAllService
-                .ExecuteAsync(new FundInAllGameBalanceCommand(
+            await foreach (var game in games)
+                yield return game;
+        }
+        else
+        {
+            var query = new GetGamesQuery(
+                brandId,
+                request.SubGameProviderCode,
+                playerType,
+                platformType,
+                request.Types ?? Array.Empty<GameType>());
+
+            var games = from info in getGamesQueryService.QueryAsync(query)
+                        let lang = info.Localization.ContainsKey(cultureCode)
+                            ? info.Localization[cultureCode]
+                            : JsonDocument.Parse("{}")
+                        orderby info.DisplayOrder, info.Code
+                        select new GameModel
+                        {
+                            Code = info.Code,
+                            GameProviderCode = info.GameProviderCode,
+                            Description = GetLocalization(
+                                lang.RootElement,
+                                "description",
+                                info.Description),
+                            DisplayOrder = info.DisplayOrder,
+                            Id = info.Id,
+                            IsActive = info.IsActive,
+                            Name = GetLocalization(
+                                lang.RootElement,
+                                "name",
+                                info.Name),
+                            Tag = new Tag
+                            {
+                                Hot = info.Tag.Hot,
+                                New = info.Tag.New,
+                                Recommend = info.Tag.Recommend
+                            },
+                            Type = info.Type
+                        };
+
+            await foreach (var game in games)
+                yield return game;
+        }
+    }
+
+    /// <summary>
+    /// get game launch url via game id
+    /// </summary>
+    [HttpPost("geturl")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<GetGameUrlResponse> GetGameUrlAsync(
+        [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
+        [FromServices] IGetService<GetGameUrlQuery, Uri> getGameUrlQueryService,
+        [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
+        [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
+        [FromBody] GetGameUrlRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var subGp = await getGpCodeService
+            .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
+            .ConfigureAwait(false);
+
+        await fundInAllService
+            .ExecuteAsync(new FundInAllGameBalanceCommand(
+                brandId,
+                playerTokenData.PlayerCode,
+                subGp.Code))
+            .ConfigureAwait(false);
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+        var query = new GetGameUrlQuery(
+            brandId,
+            playerTokenData,
+            request.GameId,
+            CultureInfo.CurrentUICulture.Name,
+            ipAddress,
+            request.ExtendedData);
+
+        var gameUrl = await getGameUrlQueryService
+            .GetAsync(query)
+            .ConfigureAwait(false);
+
+        if (subGp.IsTransferWallet)
+        {
+            await fundService
+                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     brandId,
                     playerTokenData.PlayerCode,
                     subGp.Code))
                 .ConfigureAwait(false);
-
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-
-            var query = new GetGameUrlQuery(
-                brandId,
-                playerTokenData,
-                request.GameId,
-                CultureInfo.CurrentUICulture.Name,
-                ipAddress,
-                request.ExtendedData);
-
-            var gameUrl = await getGameUrlQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            if (subGp.IsTransferWallet)
-            {
-                await fundService
-                    .ExecuteAsync(new FundOutBeforeEnterGameCommand(
-                        brandId,
-                        playerTokenData.PlayerCode,
-                        subGp.Code))
-                    .ConfigureAwait(false);
-            }
-
-            return new GetGameUrlResponse
-            {
-                Url = gameUrl?.OriginalString
-            };
         }
 
-        /// <summary>
-        /// get game launch url for lobby type game.
-        /// </summary>
-        [HttpPost("lobby/geturl")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlockedCheck]
-        public async Task<GetGameUrlResponse> GetLobbyGameUrlAsync(
-            [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
-            [FromServices] IGetService<GetLobbyGameUrlQuery, Uri> getLobbyGameUrlQueryService,
-            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
-            [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
-            [FromBody] GetLobbyGameUrlRequest request)
+        return new GetGameUrlResponse
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            Url = gameUrl?.OriginalString
+        };
+    }
 
-            var subGp = await getGpCodeService
-                .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
-                .ConfigureAwait(false);
+    /// <summary>
+    /// get game launch url for lobby type game.
+    /// </summary>
+    [HttpPost("lobby/geturl")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<GetGameUrlResponse> GetLobbyGameUrlAsync(
+        [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
+        [FromServices] IGetService<GetLobbyGameUrlQuery, Uri> getLobbyGameUrlQueryService,
+        [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
+        [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
+        [FromBody] GetLobbyGameUrlRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var subGp = await getGpCodeService
+            .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
+            .ConfigureAwait(false);
 
-            var query = new GetLobbyGameUrlQuery(
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+        var query = new GetLobbyGameUrlQuery(
+            brandId,
+            subGp.GameProviderId,
+            playerTokenData,
+            request.GameType,
+            CultureInfo.CurrentUICulture.Name,
+            ipAddress,
+            request.Extends);
+
+        var gameUrl = await getLobbyGameUrlQueryService
+            .GetAsync(query)
+            .ConfigureAwait(false);
+
+        await fundInAllService
+            .ExecuteAsync(new FundInAllGameBalanceCommand(
                 brandId,
-                subGp.GameProviderId,
-                playerTokenData,
-                request.GameType,
-                CultureInfo.CurrentUICulture.Name,
-                ipAddress,
-                request.Extends);
+                playerTokenData.PlayerCode,
+                subGp.Code))
+            .ConfigureAwait(false);
 
-            var gameUrl = await getLobbyGameUrlQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            await fundInAllService
-                .ExecuteAsync(new FundInAllGameBalanceCommand(
+        if (subGp.IsTransferWallet)
+        {
+            await fundService
+                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     brandId,
                     playerTokenData.PlayerCode,
                     subGp.Code))
                 .ConfigureAwait(false);
-
-            if (subGp.IsTransferWallet)
-            {
-                await fundService
-                    .ExecuteAsync(new FundOutBeforeEnterGameCommand(
-                        brandId,
-                        playerTokenData.PlayerCode,
-                        subGp.Code))
-                    .ConfigureAwait(false);
-            }
-
-            return new GetGameUrlResponse
-            {
-                Url = gameUrl?.OriginalString
-            };
         }
 
-        [HttpDelete("favorite/{gameId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask RemoveGameFromFavoriteAsync(
-            [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
-            int gameId)
+        return new GetGameUrlResponse
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            Url = gameUrl?.OriginalString
+        };
+    }
 
-            var command = new RemoveFavoriteGameCommand(
-                playerTokenData.PlayerCode,
-                gameId);
+    [HttpDelete("favorite/{gameId}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask RemoveGameFromFavoriteAsync(
+        [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
+        int gameId)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            return removeService.ExecuteAsync(command);
-        }
+        var command = new RemoveFavoriteGameCommand(
+            playerTokenData.PlayerCode,
+            gameId);
 
-        [HttpPut("favorite/{gameId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetGameToFavoriteAsync(
-            [FromServices] ICommandService<SetFavoriteGameCommand> setService,
-            [FromServices] IGetService<CountPlayerFavoriteGameQuery, int> countService,
-            int gameId)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+        return removeService.ExecuteAsync(command);
+    }
 
-            var count = await countService
-                .GetAsync(new CountPlayerFavoriteGameQuery(
-                    brandId,
-                    playerTokenData.PlayerCode))
-                .ConfigureAwait(false);
+    [HttpPut("favorite/{gameId}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetGameToFavoriteAsync(
+        [FromServices] ICommandService<SetFavoriteGameCommand> setService,
+        [FromServices] IGetService<CountPlayerFavoriteGameQuery, int> countService,
+        int gameId)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            if (count >= 100)
-                throw new FavoriteCountFullException();
-
-            var command = new SetFavoriteGameCommand(
+        var count = await countService
+            .GetAsync(new CountPlayerFavoriteGameQuery(
                 brandId,
-                playerTokenData.PlayerCode,
-                gameId);
+                playerTokenData.PlayerCode))
+            .ConfigureAwait(false);
 
-            await setService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-        }
+        if (count >= 100)
+            throw new FavoriteCountFullException();
 
-        private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+        var command = new SetFavoriteGameCommand(
+            brandId,
+            playerTokenData.PlayerCode,
+            gameId);
+
+        await setService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+    {
+        if (!element.TryGetProperty(propertyName, out var value))
         {
-            if (!element.TryGetProperty(propertyName, out var value))
-            {
-                return defaultValue;
-            }
-
-            var val = value.GetString();
-            return string.IsNullOrEmpty(val) ? defaultValue : val;
+            return defaultValue;
         }
+
+        var val = value.GetString();
+        return string.IsNullOrEmpty(val) ? defaultValue : val;
     }
 }

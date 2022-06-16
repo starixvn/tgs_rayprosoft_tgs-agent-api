@@ -12,60 +12,59 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.GameOperations.Calculators;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.AllBet
+namespace TGS.Apis.TgsApi.GameProviders.AllBet;
+
+public class AllBetStartup : BaseStartup
 {
-    public class AllBetStartup : BaseStartup
+    public AllBetStartup(IConfiguration configuration, IWebHostEnvironment env) : base(configuration, env)
     {
-        public AllBetStartup(IConfiguration configuration, IWebHostEnvironment env) : base(configuration, env)
-        {
-        }
+    }
 
-        protected override string LogPrefix => "allbet";
+    protected override string LogPrefix => "allbet";
 
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(new[]
-                {
-                    typeof(AllBetErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.AllBet => provider.GetRequiredService<AllBetErrorMapper>(),
-                    _                   => provider.GetRequiredService<TgsErrorMapper>()
-                });
-
-            services.AddScoped<AuthorizeAllBetMiddleware>();
-            services.AddScoped<HandleAllBetExceptionMiddleware>();
-
-            services.AddScoped<IAllBetActionModelMapper, AllBetActionModelMapper>();
-            services.AddScoped<IAllBetServices, AllBetServices>();
-            services.AddScoped<IAllBetCacheServices, AllBetCacheServices>();
-            services.AddScoped<IAllBetAgentMapper, AllBetAgentMapper>();
-            services.AddScoped<IAllBetPlayerServices, AllBetPlayerServices>();
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(new[]
             {
-                typeof(AllBetGameInitializer)
-            }, (provider, _) => provider.GetRequiredService<AllBetGameInitializer>());
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
+                typeof(AllBetErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(AllBetGameHistory)
-            }, (provider, _) => provider.GetRequiredService<AllBetGameHistory>());
+                GameProvider.AllBet => provider.GetRequiredService<AllBetErrorMapper>(),
+                _                   => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-            services.AddSingleton<IBetValuesCalculator, AllBetBetValuesCalculator>();
-        }
+        services.AddScoped<AuthorizeAllBetMiddleware>();
+        services.AddScoped<HandleAllBetExceptionMiddleware>();
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<IAllBetActionModelMapper, AllBetActionModelMapper>();
+        services.AddScoped<IAllBetServices, AllBetServices>();
+        services.AddScoped<IAllBetCacheServices, AllBetCacheServices>();
+        services.AddScoped<IAllBetAgentMapper, AllBetAgentMapper>();
+        services.AddScoped<IAllBetPlayerServices, AllBetPlayerServices>();
+
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/api/ab";
+            typeof(AllBetGameInitializer)
+        }, (provider, _) => provider.GetRequiredService<AllBetGameInitializer>());
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleAllBetExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeAllBetMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IGameHistory>(new[]
+        {
+            typeof(AllBetGameHistory)
+        }, (provider, _) => provider.GetRequiredService<AllBetGameHistory>());
+
+        services.AddSingleton<IBetValuesCalculator, AllBetBetValuesCalculator>();
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/ab";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleAllBetExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeAllBetMiddleware>();
+            });
     }
 }

@@ -5,25 +5,24 @@ using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.Player
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+internal class SetTelegramCommandService : ICommandService<SetTelegramCommand>
 {
-    internal class SetTelegramCommandService : ICommandService<SetTelegramCommand>
+    private readonly IPlayerServiceClient _client;
+
+    public SetTelegramCommandService(IPlayerServiceClient client)
     {
-        private readonly IPlayerServiceClient _client;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+    }
 
-        public SetTelegramCommandService(IPlayerServiceClient client)
+    public ValueTask ExecuteAsync(SetTelegramCommand command, CancellationToken cancellationToken = default)
+    {
+        var properties = new Dictionary<PlayerPropertyName, string?>
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-        }
+            [PlayerPropertyName.Telegram] = command.TelegramId
+        };
 
-        public ValueTask ExecuteAsync(SetTelegramCommand command, CancellationToken cancellationToken = default)
-        {
-            var properties = new Dictionary<PlayerPropertyName, string?>
-            {
-                [PlayerPropertyName.Telegram] = command.TelegramId
-            };
-
-            return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
-        }
+        return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
     }
 }

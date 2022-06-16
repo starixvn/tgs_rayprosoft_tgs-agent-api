@@ -1,10 +1,9 @@
 ﻿using Tgs.Payment.Clients;
 
-namespace TGS.Services.Operator.BrandPayment.PaymentConditions
+namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
+
+internal class ShowOnAllPlayersCondition : IBrandPaymentCondition
 {
-    internal class ShowOnAllPlayersCondition : IBrandPaymentCondition
-    {
-        public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-            => brandPayment.IsAllPlayers;
-    }
+    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+        => brandPayment.IsAllPlayers;
 }

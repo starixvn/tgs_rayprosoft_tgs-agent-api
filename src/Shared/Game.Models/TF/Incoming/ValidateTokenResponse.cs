@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.TF.Incoming
+namespace TGS.Shared.Game.Models.TF.Incoming;
+
+public class ValidateTokenResponse
 {
-    public class ValidateTokenResponse
-    {
-        [JsonPropertyName("loginName")]
-        public string LoginName { get; set; }
-    }
+    [JsonPropertyName("loginName")]
+    public string LoginName { get; set; }
 }

@@ -6,15 +6,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Common
+namespace TGS.Shared.Game.Models.SexyGaming.Common;
+
+public record SexyGamingSingleWalletRequest
 {
-    public record SexyGamingSingleWalletRequest
-    {
-        [JsonPropertyName("key")]
-        public string Key { get; set; }
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
-        [JsonPropertyName("extension1")]
-        public string Extension1 { get; set; }
-    }
+    [JsonPropertyName("key")]
+    public string Key { get; set; }
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
+    [JsonPropertyName("extension1")]
+    public string Extension1 { get; set; }
 }

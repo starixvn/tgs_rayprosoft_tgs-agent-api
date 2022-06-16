@@ -6,19 +6,18 @@ using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Agent;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Commands.ReportExportAgent
+namespace TGS.Services.BackOffice.Application.Commands.ReportExportAgent;
+
+public class
+    ExportAgentContributionsQuery : IGetService<ExportAgentContributionsRequest,
+        Stream>
 {
-    public class
-        ExportAgentContributionsQuery : IGetService<ExportAgentContributionsRequest,
-            Stream>
-    {
-        private readonly IReportClient _reportClient;
+    private readonly IReportClient _reportClient;
 
-        public ExportAgentContributionsQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+    public ExportAgentContributionsQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
-        public async ValueTask<Stream> GetAsync(ExportAgentContributionsRequest request,
-            CancellationToken cancellationToken = default)
-            => await _reportClient.ExportAgentContributionsAsync(request).ConfigureAwait(false);
-    }
+    public async ValueTask<Stream> GetAsync(ExportAgentContributionsRequest request,
+        CancellationToken cancellationToken = default)
+        => await _reportClient.ExportAgentContributionsAsync(request).ConfigureAwait(false);
 }

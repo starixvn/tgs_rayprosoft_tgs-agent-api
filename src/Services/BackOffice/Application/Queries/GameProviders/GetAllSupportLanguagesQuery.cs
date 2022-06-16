@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
-{
-    public record GetAllSupportLanguagesQuery();
-}
+﻿namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
+
+public record GetAllSupportLanguagesQuery();

@@ -9,32 +9,31 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandCommunication;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BrandCommunicationController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandCommunicationController : ControllerBase
+    [HttpGet]
+    [Description("Get a brand's communications")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
+        [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
     {
-        [HttpGet]
-        [Description("Get a brand's communications")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
-            [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            var query = new BrandCommunicationQuery(brandId);
-            var info = queryService.QueryAsync(query);
+        var query = new BrandCommunicationQuery(brandId);
+        var info = queryService.QueryAsync(query);
 
-            return info.Select(x =>
-                new BrandCommunicationModel()
-                {
-                    Type = x.CommunicationType,
-                    Phone = x.Phone,
-                    AppId = x.AppId,
-                    QRCodeUrl = x.QRCodeUrl
-                })
-                .Take(5);
-        }
+        return info.Select(x =>
+            new BrandCommunicationModel()
+            {
+                Type = x.CommunicationType,
+                Phone = x.Phone,
+                AppId = x.AppId,
+                QRCodeUrl = x.QRCodeUrl
+            })
+            .Take(5);
     }
 }

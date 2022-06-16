@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.WMCasino.Common;
 
-namespace TGS.Shared.Game.Models.WMCasino.Outgoing
+namespace TGS.Shared.Game.Models.WMCasino.Outgoing;
+
+public record GetDateTimeReportResponse : ErrorResponse
 {
-    public record GetDateTimeReportResponse : ErrorResponse
-    {
-        [JsonPropertyName("result")]
-        public GameBetResult[] Results { get; init; }
-    }
+    [JsonPropertyName("result")]
+    public GameBetResult[] Results { get; init; }
 }

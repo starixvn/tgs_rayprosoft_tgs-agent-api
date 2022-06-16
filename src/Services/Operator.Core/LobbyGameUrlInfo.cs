@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator
-{
-    public record LobbyGameUrlInfo(int Error, string ErrorMessage, string Url);
-}
+﻿namespace TGS.Services.Operator;
+
+public record LobbyGameUrlInfo(int Error, string ErrorMessage, string Url);

@@ -16,136 +16,135 @@ using TGS.Shared.Game.ApiClients.Evolution;
 using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGameUrl;
 using TGS.Shared.Game.Models.Evolution.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
+namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services;
+
+public sealed class EvolutionGameInitializer : IGameInitializer
 {
-    public sealed class EvolutionGameInitializer : IGameInitializer
+    private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+    private readonly IEvolutionApiClient _client;
+    private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly IRequestAnalyzer _requestAnalyzer;
+    private readonly IEvolutionService _service;
+    private readonly ISettingOperations _settingOperations;
+    private readonly ITokenProvider _tokenProvider;
+
+    public EvolutionGameInitializer(
+        IBrandGameProviderOperations brandGameProviderOperations,
+        IEvolutionApiClient client,
+        IPlayerOperations playerOperations,
+        IEvolutionService service,
+        ISettingOperations settingOperations,
+        IGameProviderCurrencyCodeMapper currencyCodeMapper,
+        ITokenProvider tokenProvider,
+        IGameProviderOperations gameProviderOperations,
+        IRequestAnalyzer requestAnalyzer,
+        IHttpContextAccessor httpContextAccessor
+    )
     {
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IEvolutionApiClient _client;
-        private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IRequestAnalyzer _requestAnalyzer;
-        private readonly IEvolutionService _service;
-        private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
+        _brandGameProviderOperations = brandGameProviderOperations ??
+            throw new ArgumentNullException(nameof(brandGameProviderOperations));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
 
-        public EvolutionGameInitializer(
-            IBrandGameProviderOperations brandGameProviderOperations,
-            IEvolutionApiClient client,
-            IPlayerOperations playerOperations,
-            IEvolutionService service,
-            ISettingOperations settingOperations,
-            IGameProviderCurrencyCodeMapper currencyCodeMapper,
-            ITokenProvider tokenProvider,
-            IGameProviderOperations gameProviderOperations,
-            IRequestAnalyzer requestAnalyzer,
-            IHttpContextAccessor httpContextAccessor
-        )
+        _gameProviderOperations =
+            gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+        _requestAnalyzer = requestAnalyzer ?? throw new ArgumentNullException(nameof(requestAnalyzer));
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    }
+
+    async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+    {
+        var token = request.Token;
+        var loginTokenId = token.LoginRecordId;
+        var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
+        var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
+        var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
+        var brandId = player.BrandId;
+
+        var cultureCode =
+            await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
+
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<EvolutionConfiguration>(SettingConsts
+                .GameProviderConfigurations.Evolution);
+
+        var currencyCode =
+            await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+
+        var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId)
+            .ConfigureAwait(false);
+        var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
+
+        var category = "slots";
+
+        var table = new EvolutionGameUrlConfigGameTable
         {
-            _brandGameProviderOperations = brandGameProviderOperations ??
-                throw new ArgumentNullException(nameof(brandGameProviderOperations));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+            Id = cachedGame.ExternalId
+        };
 
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _requestAnalyzer = requestAnalyzer ?? throw new ArgumentNullException(nameof(requestAnalyzer));
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        if (cachedGame.Type == GameType.LiveDealerLobby)
+        {
+            category = "baccarat_sicbo";
+            table = null;
         }
 
-        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        var playerGroup = default(EvolutionGameUrlPlayerGroup);
+
+        var data = new EvolutionGameUrlRequest
         {
-            var token = request.Token;
-            var loginTokenId = token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
-            var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
-            var brandId = player.BrandId;
-
-            var cultureCode =
-                await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<EvolutionConfiguration>(SettingConsts
-                    .GameProviderConfigurations.Evolution);
-
-            var currencyCode =
-                await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
-
-            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId)
-                .ConfigureAwait(false);
-            var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
-
-            var category = "slots";
-
-            var table = new EvolutionGameUrlConfigGameTable
+            Uuid = GuidExtensions.NewSequentialGuid().ToString(),
+            Player = new EvolutionGameUrlPlayer
             {
-                Id = cachedGame.ExternalId
-            };
-
-            if (cachedGame.Type == GameType.LiveDealerLobby)
-            {
-                category = "baccarat_sicbo";
-                table = null;
-            }
-
-            var playerGroup = default(EvolutionGameUrlPlayerGroup);
-
-            var data = new EvolutionGameUrlRequest
-            {
-                Uuid = GuidExtensions.NewSequentialGuid().ToString(),
-                Player = new EvolutionGameUrlPlayer
+                Id = player.PlayerCode,
+                Update = false,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                Nickname = player.PlayerCode,
+                Country = "CN",
+                Language = cultureCode,
+                Currency = currencyCode,
+                Session = new EvolutionGameUrlPlayerSession
                 {
-                    Id = player.PlayerCode,
-                    Update = false,
-                    FirstName = string.Empty,
-                    LastName = string.Empty,
-                    Nickname = player.PlayerCode,
-                    Country = "CN",
-                    Language = cultureCode,
-                    Currency = currencyCode,
-                    Session = new EvolutionGameUrlPlayerSession
-                    {
-                        Id = encryptedToken,
-                        Ip = ip
-                    },
-                    Group = playerGroup
+                    Id = encryptedToken,
+                    Ip = ip
                 },
-                Config = new EvolutionGameUrlConfig
+                Group = playerGroup
+            },
+            Config = new EvolutionGameUrlConfig
+            {
+                Game = new EvolutionGameUrlConfigGame
                 {
-                    Game = new EvolutionGameUrlConfigGame
-                    {
-                        Category = category,
-                        Table = table
-                    },
-                    Channel = new EvolutionGameUrlConfigChannel
-                    {
-                        Wrapped = true,
-                        Mobile = token.PlatformType == PlatformType.Mobile
-                    }
+                    Category = category,
+                    Table = table
+                },
+                Channel = new EvolutionGameUrlConfigChannel
+                {
+                    Wrapped = true,
+                    Mobile = token.PlatformType == PlatformType.Mobile
                 }
-            };
-
-            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-
-            if (responseGameUrl.Errors != null)
-            {
-                throw new GameProviderApiErrorException(responseGameUrl.Errors[0].Message);
             }
+        };
 
-            var path = responseGameUrl.Entry.Substring(1, responseGameUrl.Entry.Length - 1);
-            var url = $"{configuration.ApiUrl}{path}";
+        var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
 
-            return new()
-            {
-                Url = url
-            };
+        if (responseGameUrl.Errors != null)
+        {
+            throw new GameProviderApiErrorException(responseGameUrl.Errors[0].Message);
         }
+
+        var path = responseGameUrl.Entry.Substring(1, responseGameUrl.Entry.Length - 1);
+        var url = $"{configuration.ApiUrl}{path}";
+
+        return new()
+        {
+            Url = url
+        };
     }
 }

@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace TGS.Services.BackOffice.Application.Queries.GameProviders
+namespace TGS.Services.BackOffice.Application.Queries.GameProviders;
+
+public class UpdateGameProvidersLocationInfo
 {
-    public class UpdateGameProvidersLocationInfo
-    {
-        public Guid[] DiffGameProviderIds { get; set; }
-    }
+    public Guid[] DiffGameProviderIds { get; set; }
 }

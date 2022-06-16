@@ -4,61 +4,60 @@ using System.Linq;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 
-namespace TGS.Tests.TestsCommon.Extensions
-{
-    public static class TableExtensions
-    {
-        public static IEnumerable<T> CreateList<T>(this Table table)
-        {          
-            var pivotTable = new TableWrapper(table);
-            var count = table.Rows.Count;
-            for (var index = 0; index < count; index++)
-            {
-                var instance = pivotTable.GetInstanceTable(index).CreateInstance<T>();
-                yield return instance;
-            }
-        }
+namespace TGS.Tests.TestsCommon.Extensions;
 
-        public static IEnumerable<T> CreateList<T>(this Table table, Func<TableRow, T> methodToCreateEachInstance)
+public static class TableExtensions
+{
+    public static IEnumerable<T> CreateList<T>(this Table table)
+    {          
+        var pivotTable = new TableWrapper(table);
+        var count = table.Rows.Count;
+        for (var index = 0; index < count; index++)
         {
-            return table.Rows
-                .Select(methodToCreateEachInstance);
+            var instance = pivotTable.GetInstanceTable(index).CreateInstance<T>();
+            yield return instance;
         }
     }
 
-    internal class TableWrapper
+    public static IEnumerable<T> CreateList<T>(this Table table, Func<TableRow, T> methodToCreateEachInstance)
     {
-        private readonly Table _table;
+        return table.Rows
+            .Select(methodToCreateEachInstance);
+    }
+}
 
-        public TableWrapper(Table table)
+internal class TableWrapper
+{
+    private readonly Table _table;
+
+    public TableWrapper(Table table)
+    {
+        _table = table;
+    }
+
+    public Table GetInstanceTable(int index)
+    {
+        AssertItemExistsInTheSet(index);
+
+        return CreateAnInstanceTableForThisItemInTheSet(index);
+    }
+
+    private Table CreateAnInstanceTableForThisItemInTheSet(int index)
+    {
+        var instanceTable = new Table("Field", "Value");
+        foreach (var header in _table.Header)
         {
-            _table = table;
+            instanceTable.AddRow(header, _table.Rows[index][header]);
         }
 
-        public Table GetInstanceTable(int index)
+        return instanceTable;
+    }
+
+    private void AssertItemExistsInTheSet(int index)
+    {
+        if (_table.Rows.Count <= index)
         {
-            AssertItemExistsInTheSet(index);
-
-            return CreateAnInstanceTableForThisItemInTheSet(index);
-        }
-
-        private Table CreateAnInstanceTableForThisItemInTheSet(int index)
-        {
-            var instanceTable = new Table("Field", "Value");
-            foreach (var header in _table.Header)
-            {
-                instanceTable.AddRow(header, _table.Rows[index][header]);
-            }
-
-            return instanceTable;
-        }
-
-        private void AssertItemExistsInTheSet(int index)
-        {
-            if (_table.Rows.Count <= index)
-            {
-                throw new IndexOutOfRangeException();
-            }
+            throw new IndexOutOfRangeException();
         }
     }
 }

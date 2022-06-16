@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.IMESports.Enums
+namespace TGS.Shared.Game.Models.IMESports.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum OutcomeType
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum OutcomeType
-    {
-        Missed = 0,
-        Hit = 1
-    }
+    Missed = 0,
+    Hit = 1
 }

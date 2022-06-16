@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound;
+
+public record EvolutionGamHistoryRoundParticipantHands
 {
-    public record EvolutionGamHistoryRoundParticipantHands
-    {
-        [JsonPropertyName("hand1")]
-        public EvolutionGamHistoryRoundParticipantHand Hand1 { get; set; }
-    }
+    [JsonPropertyName("hand1")]
+    public EvolutionGamHistoryRoundParticipantHand Hand1 { get; set; }
 }

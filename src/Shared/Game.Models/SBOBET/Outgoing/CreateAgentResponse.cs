@@ -1,4 +1,3 @@
-﻿namespace TGS.Shared.Game.Models.SBOBET.Outgoing
-{
-    public record CreateAgentResponse : BaseResponse;
-}
+﻿namespace TGS.Shared.Game.Models.SBOBET.Outgoing;
+
+public record CreateAgentResponse : BaseResponse;

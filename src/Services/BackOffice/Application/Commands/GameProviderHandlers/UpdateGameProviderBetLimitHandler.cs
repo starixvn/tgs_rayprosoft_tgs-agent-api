@@ -6,31 +6,30 @@ using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
+namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers;
+
+public class UpdateGameProviderBetLimitHandler : Handler<UpdateGameProviderBetLimitRequest, MessageResponse>
 {
-    public class UpdateGameProviderBetLimitHandler : Handler<UpdateGameProviderBetLimitRequest, MessageResponse>
+    private readonly IGameProviderBetLimitService _service;
+
+    public UpdateGameProviderBetLimitHandler(IGameProviderBetLimitService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IGameProviderBetLimitService _service;
+        _service = service;
+    }
 
-        public UpdateGameProviderBetLimitHandler(IGameProviderBetLimitService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateGameProviderBetLimitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var getLimit = await _service.GetGameProviderBetLimitAsync(x => x.Id == request.Id);
+
+        if (getLimit == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(GameProviderBetLimit.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateGameProviderBetLimitRequest request,
-            CancellationToken cancellationToken)
-        {
-            var getLimit = await _service.GetGameProviderBetLimitAsync(x => x.Id == request.Id);
+        await _service.UpdateGameProviderBetLimitAsync(getLimit, request);
 
-            if (getLimit == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(GameProviderBetLimit.NotFound);
-            }
-
-            await _service.UpdateGameProviderBetLimitAsync(getLimit, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

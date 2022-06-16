@@ -7,17 +7,16 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.BackOffice.Repositories
-{
-    public class SettingRepository : BaseRepositoryOperations<ITgsRepository>, ISettingRepository
-    {
-        public SettingRepository(ITgsRepository tgsRepository) : base(
-            tgsRepository)
-        {
-        }
+namespace TGS.BackOffice.Repositories;
 
-        Task<Setting> ISettingRepository.GetSettingAsync(Expression<Func<Setting, bool>> predicate,
-            Func<IQueryable<Setting>, IQueryable<Setting>> preQuery) =>
-            GetEntityFirstOrDefaultAsync(predicate, preQuery);
+public class SettingRepository : BaseRepositoryOperations<ITgsRepository>, ISettingRepository
+{
+    public SettingRepository(ITgsRepository tgsRepository) : base(
+        tgsRepository)
+    {
     }
+
+    Task<Setting> ISettingRepository.GetSettingAsync(Expression<Func<Setting, bool>> predicate,
+        Func<IQueryable<Setting>, IQueryable<Setting>> preQuery) =>
+        GetEntityFirstOrDefaultAsync(predicate, preQuery);
 }

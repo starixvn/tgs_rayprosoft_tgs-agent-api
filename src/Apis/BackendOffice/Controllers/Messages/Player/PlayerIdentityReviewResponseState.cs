@@ -1,9 +1,8 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Player
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Player;
+
+public enum PlayerIdentityReviewResponseState
 {
-    public enum PlayerIdentityReviewResponseState
-    {
-        WaitingVerify,
-        Approve,
-        Reject
-    }
+    WaitingVerify,
+    Approve,
+    Reject
 }

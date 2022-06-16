@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Outgoing
+namespace TGS.Shared.Game.Models.PragmaticPlay.Outgoing;
+
+public record OpenHistoryExtendedResponse : ErrorResponse
 {
-    public record OpenHistoryExtendedResponse : ErrorResponse
-    {
-        [JsonPropertyName("url")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("url")]
+    public string Url { get; init; }
 }

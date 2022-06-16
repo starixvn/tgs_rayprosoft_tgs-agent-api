@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.IMESports.Incoming
+namespace TGS.Shared.Game.Models.IMESports.Incoming;
+
+public record BetResponse : BaseResponse
 {
-    public record BetResponse : BaseResponse
-    {
-        [JsonPropertyName("Results")]
-        public TransactionResponse[] Results { get; init; }
-    }
+    [JsonPropertyName("Results")]
+    public TransactionResponse[] Results { get; init; }
 }

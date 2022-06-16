@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Apis.TgsApi.GameProviders.AllBet.Exceptions
+namespace TGS.Apis.TgsApi.GameProviders.AllBet.Exceptions;
+
+public class InvalidOperatorIdException : Exception
 {
-    public class InvalidOperatorIdException : Exception
+    public InvalidOperatorIdException(string message) : base(message)
     {
-        public InvalidOperatorIdException(string message) : base(message)
-        {
-        }
     }
 }

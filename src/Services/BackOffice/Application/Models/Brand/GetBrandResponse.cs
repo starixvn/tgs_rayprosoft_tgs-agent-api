@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.Brand
+namespace TGS.Services.BackOffice.Application.Models.Brand;
+
+public class GetBrandResponse : MessageResponse
 {
-    public class GetBrandResponse : MessageResponse
-    {
-        public BrandModel Brand { get; set; }
-    }
+    public BrandModel Brand { get; set; }
 }

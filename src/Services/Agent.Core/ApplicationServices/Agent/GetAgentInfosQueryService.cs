@@ -5,57 +5,56 @@ using System.Threading;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 
-namespace TGS.Services.Agent.ApplicationServices.Agent
+namespace TGS.Services.Agent.ApplicationServices.Agent;
+
+internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, AgentInfos>
 {
-    internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, AgentInfos>
+    private readonly ITgsRepository _tgsRepository;
+
+    public GetAgentInfosQueryService(ITgsRepository tgsRepository)
     {
-        private readonly ITgsRepository _tgsRepository;
+        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    }
 
-        public GetAgentInfosQueryService(ITgsRepository tgsRepository)
+    public IAsyncEnumerable<AgentInfos> QueryAsync(
+        GetAgentInfosQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var agents = from agent in _tgsRepository.Agents.AsQueryable()
+                     where agent.BrandId == query.BrandId
+                        && agent.ParentAgentId == query.ParentAgentId
+                     select new AgentInfos
+                     {
+                         AgentStatus = agent.AgentStatus,
+                         Balance = agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id) != null
+                            ? agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id)!.Balance
+                            : 0,
+                         CardGameRebatePercentage = agent.CardGameRebatePercentage,
+                         CommissionPercentage = agent.CommissionPercentage,
+                         DividendPercentage = agent.DividendPercentage,
+                         LevelType = agent.LevelType,
+                         LiveDealerRebatePercentage = agent.LiveDealerRebatePercentage,
+                         LotteryRebatePercentage = agent.LotteryRebatePercentage,
+                         RegisteredOn = agent.RegisteredOn,
+                         SlotRebatePercentage = agent.SlotRebatePercentage,
+                         SportsRebatePercentage = agent.SportsRebatePercentage,
+                         Status = agent.Status,
+                         TeamNumber = 1 + agent.Players.Count(x => x.AgentId == agent.Id),
+                         Type = agent.Type,
+                         Username = agent.Username,
+                         VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
+                         AgentId = agent.Id
+                     };
+
+        if (query.Status != null)
         {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            agents = agents.Where(x => x.Status == query.Status);
+        }
+        if (!string.IsNullOrWhiteSpace(query.Username))
+        {
+            agents = agents.Where(x => x.Username == query.Username);
         }
 
-        public IAsyncEnumerable<AgentInfos> QueryAsync(
-            GetAgentInfosQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var agents = from agent in _tgsRepository.Agents.AsQueryable()
-                         where agent.BrandId == query.BrandId
-                            && agent.ParentAgentId == query.ParentAgentId
-                         select new AgentInfos
-                         {
-                             AgentStatus = agent.AgentStatus,
-                             Balance = agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id) != null
-                                ? agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id)!.Balance
-                                : 0,
-                             CardGameRebatePercentage = agent.CardGameRebatePercentage,
-                             CommissionPercentage = agent.CommissionPercentage,
-                             DividendPercentage = agent.DividendPercentage,
-                             LevelType = agent.LevelType,
-                             LiveDealerRebatePercentage = agent.LiveDealerRebatePercentage,
-                             LotteryRebatePercentage = agent.LotteryRebatePercentage,
-                             RegisteredOn = agent.RegisteredOn,
-                             SlotRebatePercentage = agent.SlotRebatePercentage,
-                             SportsRebatePercentage = agent.SportsRebatePercentage,
-                             Status = agent.Status,
-                             TeamNumber = 1 + agent.Players.Count(x => x.AgentId == agent.Id),
-                             Type = agent.Type,
-                             Username = agent.Username,
-                             VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
-                             AgentId = agent.Id
-                         };
-
-            if (query.Status != null)
-            {
-                agents = agents.Where(x => x.Status == query.Status);
-            }
-            if (!string.IsNullOrWhiteSpace(query.Username))
-            {
-                agents = agents.Where(x => x.Username == query.Username);
-            }
-
-            return agents.ToAsyncEnumerable();
-        }
+        return agents.ToAsyncEnumerable();
     }
 }

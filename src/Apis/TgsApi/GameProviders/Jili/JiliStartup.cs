@@ -12,68 +12,67 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.Jili
+namespace TGS.Apis.TgsApi.GameProviders.Jili;
+
+public class JiliStartup : BaseStartup
 {
-    public class JiliStartup : BaseStartup
+    protected override string LogPrefix => "jili";
+
+    public JiliStartup(IConfiguration configuration, IWebHostEnvironment env)
+        : base(configuration, env)
     {
-        protected override string LogPrefix => "jili";
+    }
 
-        public JiliStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
-        {
-        }
-
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(JiliErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.Jili => provider.GetRequiredService<JiliErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
-
-            services.AddSingleton<IJiliMerchantMapper, JiliMerchantMapper>();
-            services.AddSingleton<IJiliPlayerService, JiliPlayerService>();
-            services.AddSingleton<IJiliActionModelMapper, JiliActionModelMapper>();
-
-            services.AddScoped<IJiliService, JiliService>();
-
-            services.AddScoped<HandleJiliExceptionMiddleware>();
-            services.AddScoped<AuthorizeJiliMiddleware>();
-
-            services.AddTransient<IJiliDataStore>(sp
-                => ActivatorUtilities.CreateInstance<JiliRedisDataStore>(
-                    sp,
-                    sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(JiliGameInitializer)
+                typeof(JiliErrorMapper)
             },
-                (provider, _)
-                    => provider.GetRequiredService<JiliGameInitializer>());
+            (provider, key) => key switch
+            {
+                GameProvider.Jili => provider.GetRequiredService<JiliErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-            services.AddScopedWithResolver<IGameHistory>(new[]
-                {
-                    typeof(JiliGameHistory)
-                },
-                (provider, _) => provider.GetRequiredService<JiliGameHistory>());
-        }
+        services.AddSingleton<IJiliMerchantMapper, JiliMerchantMapper>();
+        services.AddSingleton<IJiliPlayerService, JiliPlayerService>();
+        services.AddSingleton<IJiliActionModelMapper, JiliActionModelMapper>();
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<IJiliService, JiliService>();
+
+        services.AddScoped<HandleJiliExceptionMiddleware>();
+        services.AddScoped<AuthorizeJiliMiddleware>();
+
+        services.AddTransient<IJiliDataStore>(sp
+            => ActivatorUtilities.CreateInstance<JiliRedisDataStore>(
+                sp,
+                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/api/jili";
+            typeof(JiliGameInitializer)
+        },
+            (provider, _)
+                => provider.GetRequiredService<JiliGameInitializer>());
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleJiliExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeJiliMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(JiliGameHistory)
+            },
+            (provider, _) => provider.GetRequiredService<JiliGameHistory>());
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/jili";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleJiliExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeJiliMiddleware>();
+            });
     }
 }

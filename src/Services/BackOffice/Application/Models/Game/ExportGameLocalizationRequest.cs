@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.Game
+﻿namespace TGS.Services.BackOffice.Application.Models.Game;
+
+public class ExportGameLocalizationRequest
 {
-    public class ExportGameLocalizationRequest
-    {
-        public string GameProviderCode { get; set; }
-    }
+    public string GameProviderCode { get; set; }
 }

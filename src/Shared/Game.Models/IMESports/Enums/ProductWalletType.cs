@@ -1,9 +1,8 @@
 ﻿// ReSharper disable IdentifierTypo
 
-namespace TGS.Shared.Game.Models.IMESports.Enums
+namespace TGS.Shared.Game.Models.IMESports.Enums;
+
+public enum ProductWalletType
 {
-    public enum ProductWalletType
-    {
-        IMESports = 401
-    }
+    IMESports = 401
 }

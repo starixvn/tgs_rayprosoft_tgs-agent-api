@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Models
+﻿namespace TGS.Services.BackOffice.Application.Models;
+
+public class BaseRequest
 {
-    public class BaseRequest
-    {
-        public string EditorUsername { get; set; }
-    }
+    public string EditorUsername { get; set; }
 }

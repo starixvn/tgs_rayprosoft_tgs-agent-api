@@ -1,8 +1,7 @@
-﻿namespace TGS.Apis.BackendOffice.Filters
+﻿namespace TGS.Apis.BackendOffice.Filters;
+
+public class ErrorModel
 {
-    public class ErrorModel
-    {
-        public string FieldName { get; set; }
-        public string Message { get; set; }
-    }
+    public string FieldName { get; set; }
+    public string Message { get; set; }
 }

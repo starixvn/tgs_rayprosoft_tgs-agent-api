@@ -13,106 +13,105 @@ using TGS.Services.Operations;
 using TGS.Shared.Game.Models.TF.Incoming;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares
-{
-    public sealed class AuthorizeTFMiddleware : IMiddleware
-    {
-        private static readonly string _Route = "/tf/api";
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ILogger<AuthorizeTFMiddleware> _logger;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
+namespace TGS.Apis.TgsApi.GameProviders.TF.Middlewares;
 
-        public AuthorizeTFMiddleware(
-            ISettingOperations settingOperations,
-            IGameProviderOperations gameProviderOperations,
-            IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
-            ILogger<AuthorizeTFMiddleware> logger)
+public sealed class AuthorizeTFMiddleware : IMiddleware
+{
+    private static readonly string _Route = "/tf/api";
+    private readonly IBrandOperations _brandOperations;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly ILogger<AuthorizeTFMiddleware> _logger;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly ISettingOperations _settingOperations;
+
+    public AuthorizeTFMiddleware(
+        ISettingOperations settingOperations,
+        IGameProviderOperations gameProviderOperations,
+        IPlayerOperations playerOperations,
+        IBrandOperations brandOperations,
+        ILogger<AuthorizeTFMiddleware> logger)
+    {
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
+    {
+        var method = context.Request.Method;
+        var path = context.Request.Path;
+
+        if (HttpMethods.IsPost(method)
+            && path.StartsWithSegments($"{_Route}/token/validate"))
         {
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            await next(context);
+            return;
         }
 
-        async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
+        var authorization = context.Request.Headers["Authorization"];
+
+        var configuration = await _settingOperations
+            .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
+            .ConfigureAwait(false);
+
+        var brandMerchant = configuration.BrandMerchants.FirstOrDefault(bm => bm.PrivateToken == authorization);
+
+        if (brandMerchant == null)
         {
-            var method = context.Request.Method;
-            var path = context.Request.Path;
+            throw new InvalidCredentialsException("");
+        }
 
-            if (HttpMethods.IsPost(method)
-                && path.StartsWithSegments($"{_Route}/token/validate"))
+        var playerCode = string.Empty;
+        var internalCurrencyCode = string.Empty;
+        if (HttpMethods.IsGet(method) && path.StartsWithSegments($"{_Route}/wallet"))
+        {
+            playerCode = context.Request.Query["loginName"];
+        }
+        else if (HttpMethods.IsPost(method)
+            && (path.StartsWithSegments($"{_Route}/transfer")
+                || path.StartsWithSegments($"{_Route}/rollback")))
+        {
+            var value = await context.Request.ReadAsStringAsync();
+
+            _logger.LogInformation($"request: {value}");
+
+            var transferRequest = JsonSerializer.Deserialize<TransferRequest>(value);
+            var ticketDetail = transferRequest.TicketDetail;
+
+            playerCode = transferRequest.LoginName;
+
+            var platformType = ticketDetail.RequestSource switch
             {
-                await next(context);
-                return;
-            }
+                "desktop-browser" => PlatformType.Desktop,
+                "mobile-browser" => PlatformType.Mobile,
+                "mobile-app" => PlatformType.Mobile,
+                "unknown" => PlatformType.Desktop,
+                _ => PlatformType.Desktop
+            };
+            context.Items.Add(ContextItems.PlatformType, platformType);
 
-            var authorization = context.Request.Headers["Authorization"];
-
-            var configuration = await _settingOperations
-                .GetValueFromJsonByKeyAsync<TFConfiguration>(SettingConsts.GameProviderConfigurations.TFGaming)
+            var gameProviderId = await _gameProviderOperations
+                .GetGameProviderIdByCodeAsync(GameProvider.TFGaming)
                 .ConfigureAwait(false);
 
-            var brandMerchant = configuration.BrandMerchants.FirstOrDefault(bm => bm.PrivateToken == authorization);
+            context.Items.Add(ContextItems.GameProviderId, gameProviderId);
 
-            if (brandMerchant == null)
-            {
-                throw new InvalidCredentialsException("");
-            }
+            playerCode = transferRequest.LoginName;
 
-            var playerCode = string.Empty;
-            var internalCurrencyCode = string.Empty;
-            if (HttpMethods.IsGet(method) && path.StartsWithSegments($"{_Route}/wallet"))
-            {
-                playerCode = context.Request.Query["loginName"];
-            }
-            else if (HttpMethods.IsPost(method)
-                && (path.StartsWithSegments($"{_Route}/transfer")
-                    || path.StartsWithSegments($"{_Route}/rollback")))
-            {
-                var value = await context.Request.ReadAsStringAsync();
+            var brandId = await _playerOperations
+                .GetBrandIdByPlayerCodeAsync(playerCode)
+                .ConfigureAwait(false);
 
-                _logger.LogInformation($"request: {value}");
+            var bgpc = await _brandOperations
+                .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
+                .ConfigureAwait(false);
 
-                var transferRequest = JsonSerializer.Deserialize<TransferRequest>(value);
-                var ticketDetail = transferRequest.TicketDetail;
-
-                playerCode = transferRequest.LoginName;
-
-                var platformType = ticketDetail.RequestSource switch
-                {
-                    "desktop-browser" => PlatformType.Desktop,
-                    "mobile-browser" => PlatformType.Mobile,
-                    "mobile-app" => PlatformType.Mobile,
-                    "unknown" => PlatformType.Desktop,
-                    _ => PlatformType.Desktop
-                };
-                context.Items.Add(ContextItems.PlatformType, platformType);
-
-                var gameProviderId = await _gameProviderOperations
-                    .GetGameProviderIdByCodeAsync(GameProvider.TFGaming)
-                    .ConfigureAwait(false);
-
-                context.Items.Add(ContextItems.GameProviderId, gameProviderId);
-
-                playerCode = transferRequest.LoginName;
-
-                var brandId = await _playerOperations
-                    .GetBrandIdByPlayerCodeAsync(playerCode)
-                    .ConfigureAwait(false);
-
-                var bgpc = await _brandOperations
-                    .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
-                    .ConfigureAwait(false);
-
-                context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-                context.Items.Add(ContextItems.PlayerCode, playerCode);
-            }
-
-            await next(context);
+            context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+            context.Items.Add(ContextItems.PlayerCode, playerCode);
         }
+
+        await next(context);
     }
 }

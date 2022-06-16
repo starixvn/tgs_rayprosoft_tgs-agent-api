@@ -1,9 +1,8 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum BrandPaymentOperation
 {
-    public enum BrandPaymentOperation
-    {
-        Create = 0,
-        Update = 1,
-        Delete = 2
-    }
+    Create = 0,
+    Update = 1,
+    Delete = 2
 }

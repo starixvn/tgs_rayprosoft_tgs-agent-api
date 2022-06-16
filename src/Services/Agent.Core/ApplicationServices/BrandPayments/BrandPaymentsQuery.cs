@@ -1,7 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.ApplicationServices.BrandPayments
-{
-    public record BrandPaymentsQuery(
-        Guid BrandId);
-}
+namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
+
+public record BrandPaymentsQuery(
+    Guid BrandId);

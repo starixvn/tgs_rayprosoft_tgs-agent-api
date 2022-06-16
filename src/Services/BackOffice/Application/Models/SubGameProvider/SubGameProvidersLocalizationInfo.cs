@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Services.BackOffice.Application.Models.SubGameProvider
-{
-    public class SubGameProvidersLocalizationInfo
-    {
-        public IEnumerable<string> Languages { get; set; }
+namespace TGS.Services.BackOffice.Application.Models.SubGameProvider;
 
-        public IEnumerable<SubGameProviderData> GameProviders { get; set; }
-    }
+public class SubGameProvidersLocalizationInfo
+{
+    public IEnumerable<string> Languages { get; set; }
+
+    public IEnumerable<SubGameProviderData> GameProviders { get; set; }
 }

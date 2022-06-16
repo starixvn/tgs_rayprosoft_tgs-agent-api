@@ -1,17 +1,16 @@
 ﻿using System;
 
-namespace TGS.Services.BackOffice.Application.Models.PlayerBucket
+namespace TGS.Services.BackOffice.Application.Models.PlayerBucket;
+
+public record PlayerBucketHistoryModel
 {
-    public record PlayerBucketHistoryModel
-    {
-        public Guid PlayerBucketId { get; set; }
+    public Guid PlayerBucketId { get; set; }
 
-        public string PlayerCode { get; set; }
+    public string PlayerCode { get; set; }
 
-        public decimal Turnover { get; set; }
+    public decimal Turnover { get; set; }
 
-        public string Data { get; set; }
+    public string Data { get; set; }
 
-        public DateTimeOffset CreatedOn { get; set; }
-    }
+    public DateTimeOffset CreatedOn { get; set; }
 }

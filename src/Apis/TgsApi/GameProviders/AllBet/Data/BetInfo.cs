@@ -1,6 +1,5 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.AllBet.Data
+﻿namespace TGS.Apis.TgsApi.GameProviders.AllBet.Data;
+
+public record BetInfo(string BetNumber, bool IsSettled)
 {
-    public record BetInfo(string BetNumber, bool IsSettled)
-    {
-    }
 }

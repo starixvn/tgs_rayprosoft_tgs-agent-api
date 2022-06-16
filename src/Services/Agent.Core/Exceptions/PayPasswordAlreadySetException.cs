@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.Exceptions
+namespace TGS.Services.Agent.Exceptions;
+
+internal class PayPasswordAlreadySetException : Exception
 {
-    internal class PayPasswordAlreadySetException : Exception
-    {
-    }
 }

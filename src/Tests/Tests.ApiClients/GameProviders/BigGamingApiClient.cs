@@ -4,29 +4,28 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 
-namespace TGS.Tests.ApiClients.GameProviders
+namespace TGS.Tests.ApiClients.GameProviders;
+
+public interface IBigGamingApiClient
 {
-    public interface IBigGamingApiClient
+  
+    ValueTask<BigGamingResponse> EntranceAsyncstAsync(BigGamingRequest request);
+}
+
+public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
+{
+    private static readonly string RoutePrefix = "api/bg";
+    private readonly HttpClient _client;
+
+    public BigGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
+        base(client, logger, json)
     {
-      
-        ValueTask<BigGamingResponse> EntranceAsyncstAsync(BigGamingRequest request);
+        _client = client;
     }
 
-    public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
-    {
-        private static readonly string RoutePrefix = "api/bg";
-        private readonly HttpClient _client;
+    
 
-        public BigGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
-            base(client, logger, json)
-        {
-            _client = client;
-        }
-
-        
-
-        public ValueTask<BigGamingResponse> EntranceAsyncstAsync(BigGamingRequest request) =>
-            ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post,
-                $"{RoutePrefix}/entrance", request);
-    }
+    public ValueTask<BigGamingResponse> EntranceAsyncstAsync(BigGamingRequest request) =>
+        ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post,
+            $"{RoutePrefix}/entrance", request);
 }

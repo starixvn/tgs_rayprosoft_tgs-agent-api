@@ -5,33 +5,32 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandCommunication
+namespace TGS.Services.BackOffice.Application.Commands.BrandCommunication;
+
+internal class CreateBrandCommunicationCommandService : ICommandService<CreateBrandCommunicationCommand>
 {
-    internal class CreateBrandCommunicationCommandService : ICommandService<CreateBrandCommunicationCommand>
+    private readonly ITgsCommands<CoreModels.BrandCommunication> _commands;
+
+    public CreateBrandCommunicationCommandService(
+        ITgsCommands<CoreModels.BrandCommunication> commands)
     {
-        private readonly ITgsCommands<CoreModels.BrandCommunication> _commands;
+        _commands = commands;
+    }
 
-        public CreateBrandCommunicationCommandService(
-            ITgsCommands<CoreModels.BrandCommunication> commands)
+    public async ValueTask ExecuteAsync(
+        CreateBrandCommunicationCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var brandCommunication = new CoreModels.BrandCommunication()
         {
-            _commands = commands;
-        }
+            Id = GuidExtensions.NewSequentialGuid(),
+            BrandId = command.BrandId,
+            Type = command.CommunicationType,
+            Phone = command.Phone,
+            AppId = command.AppId,
+            QRCodeUrl = command.QRCodeUrl
+        };
 
-        public async ValueTask ExecuteAsync(
-            CreateBrandCommunicationCommand command,
-            CancellationToken cancellationToken = default)
-        {
-            var brandCommunication = new CoreModels.BrandCommunication()
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                BrandId = command.BrandId,
-                Type = command.CommunicationType,
-                Phone = command.Phone,
-                AppId = command.AppId,
-                QRCodeUrl = command.QRCodeUrl
-            };
-
-            await _commands.CreateAsync(brandCommunication);
-        }
+        await _commands.CreateAsync(brandCommunication);
     }
 }

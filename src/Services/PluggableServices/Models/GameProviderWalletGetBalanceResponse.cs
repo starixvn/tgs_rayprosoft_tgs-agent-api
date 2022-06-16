@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record GameProviderWalletGetBalanceResponse : TgsResponse
 {
-    public record GameProviderWalletGetBalanceResponse : TgsResponse
-    {
-        [JsonPropertyName("success")]
-        public bool Success { get; init; }
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
-    }
+    [JsonPropertyName("success")]
+    public bool Success { get; init; }
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; init; }
 }

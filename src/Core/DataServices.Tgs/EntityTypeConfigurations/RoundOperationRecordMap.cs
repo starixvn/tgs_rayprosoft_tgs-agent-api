@@ -4,38 +4,37 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
+namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations;
+
+internal class RoundOperationRecordMap : IEntityTypeConfiguration<RoundOperationRecord>
 {
-    internal class RoundOperationRecordMap : IEntityTypeConfiguration<RoundOperationRecord>
+    void IEntityTypeConfiguration<RoundOperationRecord>.Configure(EntityTypeBuilder<RoundOperationRecord> builder)
     {
-        void IEntityTypeConfiguration<RoundOperationRecord>.Configure(EntityTypeBuilder<RoundOperationRecord> builder)
-        {
-            builder.ToTable("round_operation_records", Consts.BetSchema);
+        builder.ToTable("round_operation_records", Consts.BetSchema);
 
-            builder.HasKey(c => c.Id)
-                .HasName("pk_round_operation_records");
+        builder.HasKey(c => c.Id)
+            .HasName("pk_round_operation_records");
 
-            builder.Property(c => c.RoundId)
-                .IsRequired();
+        builder.Property(c => c.RoundId)
+            .IsRequired();
 
-            builder.Property(c => c.OperatorId)
-                .IsRequired();
+        builder.Property(c => c.OperatorId)
+            .IsRequired();
 
-            builder.Property(c => c.OldData)
-                .HasColumnType(ColumnTypes.Jsonb)
-                .IsRequired();
+        builder.Property(c => c.OldData)
+            .HasColumnType(ColumnTypes.Jsonb)
+            .IsRequired();
 
-            builder.Property(c => c.NewData)
-                .HasColumnType(ColumnTypes.Jsonb)
-                .IsRequired();
+        builder.Property(c => c.NewData)
+            .HasColumnType(ColumnTypes.Jsonb)
+            .IsRequired();
 
-            builder.Property(c => c.CreatedOn)
-                .IsRequired();
-            builder.Property(c => c.Remark)
-               .HasMaxLength(256);
+        builder.Property(c => c.CreatedOn)
+            .IsRequired();
+        builder.Property(c => c.Remark)
+           .HasMaxLength(256);
 
-            builder.HasIndex(c => new { c.RoundId })
-                    .HasDatabaseName("ix_round_operation_records_round_id");
-        }
+        builder.HasIndex(c => new { c.RoundId })
+                .HasDatabaseName("ix_round_operation_records_round_id");
     }
 }

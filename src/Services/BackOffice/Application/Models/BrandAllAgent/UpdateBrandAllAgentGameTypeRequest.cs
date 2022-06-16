@@ -3,8 +3,7 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
-{
-    public record UpdateBrandAllAgentGameTypeRequest(Guid BrandId, bool Switch, bool HasValidBet, bool HasWinLoss,
-        AllAgentGameType AllAgentGameType) : IRequest<MessageResponse>;
-}
+namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent;
+
+public record UpdateBrandAllAgentGameTypeRequest(Guid BrandId, bool Switch, bool HasValidBet, bool HasWinLoss,
+    AllAgentGameType AllAgentGameType) : IRequest<MessageResponse>;

@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket
+﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket;
+
+public enum AdditionalExpensesType
 {
-    public enum AdditionalExpensesType
-    {
-        AllAgent = 1000
-    }
+    AllAgent = 1000
 }

@@ -1,6 +1,5 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record ManualDepositBankFormResponse : ManualDepositFormResponse
 {
-    public record ManualDepositBankFormResponse : ManualDepositFormResponse
-    {
-    }
 }

@@ -12,130 +12,129 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Setting = TGS.Core.DataServices.Tgs.Models.Setting;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class SettingController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SettingController : BaseContextController
+    private readonly IRedisCacheManager _cacheManager;
+    private readonly ITgsCommands<Setting> _commands;
+    private readonly ITgsQueries<Setting> _queries;
+
+    public SettingController(
+        ITgsQueries<Setting> queries,
+        ITgsCommands<Setting> commands,
+        IRedisCacheManager cacheManager)
     {
-        private readonly IRedisCacheManager _cacheManager;
-        private readonly ITgsCommands<Setting> _commands;
-        private readonly ITgsQueries<Setting> _queries;
+        _queries = queries;
+        _commands = commands;
+        _cacheManager = cacheManager;
+    }
 
-        public SettingController(
-            ITgsQueries<Setting> queries,
-            ITgsCommands<Setting> commands,
-            IRedisCacheManager cacheManager)
+    [Route("")]
+    [HttpGet]
+    [Description("Get setting list")]
+    public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request) =>
+        _queries.GetQueries()
+            .Where(request.Key, p => p.Key.Contains(request.Key))
+            .Select(setting => new SettingModel
+            {
+                Key = setting.Key,
+                Value = setting.Value,
+                Description = setting.Description,
+                CreatedByUsername = setting.CreatedByUsername,
+                UpdatedByUsername = setting.UpdatedByUsername,
+                CreatedOn = setting.CreatedOn,
+                UpdatedOn = setting.UpdatedOn
+            }).CreatePagedResponseAsync(request);
+
+    [Route("{key}")]
+    [HttpGet]
+    [Description("Get setting by key")]
+    public async Task<GetSettingResponse> GetSingleAsync(string key)
+    {
+        var setting = await _queries.GetSingleAsync(p => p.Key == key);
+        if (setting == null)
         {
-            _queries = queries;
-            _commands = commands;
-            _cacheManager = cacheManager;
+            return CreateInvalidResponse<GetSettingResponse>(Common.NotFound);
         }
 
-        [Route("")]
-        [HttpGet]
-        [Description("Get setting list")]
-        public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request) =>
-            _queries.GetQueries()
-                .Where(request.Key, p => p.Key.Contains(request.Key))
-                .Select(setting => new SettingModel
-                {
-                    Key = setting.Key,
-                    Value = setting.Value,
-                    Description = setting.Description,
-                    CreatedByUsername = setting.CreatedByUsername,
-                    UpdatedByUsername = setting.UpdatedByUsername,
-                    CreatedOn = setting.CreatedOn,
-                    UpdatedOn = setting.UpdatedOn
-                }).CreatePagedResponseAsync(request);
-
-        [Route("{key}")]
-        [HttpGet]
-        [Description("Get setting by key")]
-        public async Task<GetSettingResponse> GetSingleAsync(string key)
+        return new()
         {
-            var setting = await _queries.GetSingleAsync(p => p.Key == key);
-            if (setting == null)
+            Valid = true,
+            Setting = new()
             {
-                return CreateInvalidResponse<GetSettingResponse>(Common.NotFound);
+                Key = setting.Key,
+                Value = setting.Value,
+                Description = setting.Description,
+                CreatedByUsername = setting.CreatedByUsername,
+                UpdatedByUsername = setting.UpdatedByUsername,
+                CreatedOn = setting.CreatedOn,
+                UpdatedOn = setting.UpdatedOn
             }
+        };
+    }
 
-            return new()
-            {
-                Valid = true,
-                Setting = new()
-                {
-                    Key = setting.Key,
-                    Value = setting.Value,
-                    Description = setting.Description,
-                    CreatedByUsername = setting.CreatedByUsername,
-                    UpdatedByUsername = setting.UpdatedByUsername,
-                    CreatedOn = setting.CreatedOn,
-                    UpdatedOn = setting.UpdatedOn
-                }
-            };
-        }
-
-        [HttpPost("")]
-        [Description("Create a setting")]
-        public async Task<MessageResponse> CreateAsync([FromBody] CreateSettingRequest request)
+    [HttpPost("")]
+    [Description("Create a setting")]
+    public async Task<MessageResponse> CreateAsync([FromBody] CreateSettingRequest request)
+    {
+        var settingExisted = await _queries.GetSingleAsync(p => p.Key == request.Key);
+        if (settingExisted != null)
         {
-            var settingExisted = await _queries.GetSingleAsync(p => p.Key == request.Key);
-            if (settingExisted != null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Setting.KeyExists);
-            }
-
-            var setting = new Setting
-            {
-                Key = request.Key,
-                Value = request.Value,
-                Description = request.Description,
-                CreatedOn = DateTimeOffset.Now,
-                CreatedByUsername = Username,
-                UpdatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = Username
-            };
-
-            await _commands.CreateAsync(setting);
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Resources.Setting.KeyExists);
         }
 
-        [HttpPut("{key}")]
-        [Description("Update setting by key")]
-        public async Task<MessageResponse> UpdateAsync(string key, [FromBody] UpdateSettingRequest request)
+        var setting = new Setting
         {
-            var setting = await _queries.GetSingleAsync(p => p.Key == key);
-            if (setting == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Common.NotFound);
-            }
+            Key = request.Key,
+            Value = request.Value,
+            Description = request.Description,
+            CreatedOn = DateTimeOffset.Now,
+            CreatedByUsername = Username,
+            UpdatedOn = DateTimeOffset.Now,
+            UpdatedByUsername = Username
+        };
 
-            setting.Value = request.Value;
-            setting.Description = request.Description;
-            setting.UpdatedOn = DateTimeOffset.Now;
-            setting.UpdatedByUsername = Username;
+        await _commands.CreateAsync(setting);
+        return CreateValidResponse<MessageResponse>();
+    }
 
-            await _commands.UpdateAsync(setting);
-
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Setting, setting.Key);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [Route("{key}")]
-        [HttpDelete]
-        [Description("Delete setting by key")]
-        public async Task<MessageResponse> DeleteAsync(string key)
+    [HttpPut("{key}")]
+    [Description("Update setting by key")]
+    public async Task<MessageResponse> UpdateAsync(string key, [FromBody] UpdateSettingRequest request)
+    {
+        var setting = await _queries.GetSingleAsync(p => p.Key == key);
+        if (setting == null)
         {
-            var setting = await _queries.GetSingleAsync(p => p.Key == key);
-            if (setting == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Common.NotFound);
-            }
-
-            await _commands.DeleteAsync(setting);
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Common.NotFound);
         }
+
+        setting.Value = request.Value;
+        setting.Description = request.Description;
+        setting.UpdatedOn = DateTimeOffset.Now;
+        setting.UpdatedByUsername = Username;
+
+        await _commands.UpdateAsync(setting);
+
+        await _cacheManager.ClearCacheAsync(RedisCacheType.Setting, setting.Key);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [Route("{key}")]
+    [HttpDelete]
+    [Description("Delete setting by key")]
+    public async Task<MessageResponse> DeleteAsync(string key)
+    {
+        var setting = await _queries.GetSingleAsync(p => p.Key == key);
+        if (setting == null)
+        {
+            return CreateInvalidResponse<MessageResponse>(Common.NotFound);
+        }
+
+        await _commands.DeleteAsync(setting);
+        return CreateValidResponse<MessageResponse>();
     }
 }

@@ -6,39 +6,38 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
 
-namespace TGS.Apis.OperatorApi.Middlewares
+namespace TGS.Apis.OperatorApi.Middlewares;
+
+public sealed class MaintenanceMiddleware
 {
-    public sealed class MaintenanceMiddleware
+    private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(MaintenanceMiddleware)}");
+    private readonly RequestDelegate _next;
+
+    public MaintenanceMiddleware(RequestDelegate next)
     {
-        private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.OperatorApi.Middlewares.{nameof(MaintenanceMiddleware)}");
-        private readonly RequestDelegate _next;
+        _next = next;
+    }
 
-        public MaintenanceMiddleware(RequestDelegate next)
+    public async Task InvokeAsync(HttpContext context,
+       IMaintenanceRedisRepository maintenanceRedisService)
+    {
+        using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(MaintenanceMiddleware));
+
+        var brandId = context.Items.GetBrandId();
+
+        if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
         {
-            _next = next;
-        }
-
-        public async Task InvokeAsync(HttpContext context,
-           IMaintenanceRedisRepository maintenanceRedisService)
-        {
-            using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(MaintenanceMiddleware));
-
-            var brandId = context.Items.GetBrandId();
-
-            if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
+            await context.Response.WriteAsJsonAsync(new TgsResponse
             {
-                await context.Response.WriteAsJsonAsync(new TgsResponse
-                {
-                    Error = 403,
-                    ErrorMessage = "UnderMaintenance",
-                    ErrorMessageKey = "UnderMaintenance"
-                }).ConfigureAwait(false);
+                Error = 403,
+                ErrorMessage = "UnderMaintenance",
+                ErrorMessageKey = "UnderMaintenance"
+            }).ConfigureAwait(false);
 
-                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
 
-                return;
-            }
-            await _next(context);
+            return;
         }
+        await _next(context);
     }
 }

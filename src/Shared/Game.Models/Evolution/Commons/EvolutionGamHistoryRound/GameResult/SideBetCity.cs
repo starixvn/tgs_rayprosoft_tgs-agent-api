@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.Commons.SideBetCity;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.GameResult;
+
+public record SideBetCity
 {
-    public record SideBetCity
-    {
-        [JsonPropertyName("cardsDealt")]
-        public string[] CardsDealt { get; set; }
-        [JsonPropertyName("outcome")]
-        public SideBetCityOutcome Outcome { get; set; }
-    }
+    [JsonPropertyName("cardsDealt")]
+    public string[] CardsDealt { get; set; }
+    [JsonPropertyName("outcome")]
+    public SideBetCityOutcome Outcome { get; set; }
 }

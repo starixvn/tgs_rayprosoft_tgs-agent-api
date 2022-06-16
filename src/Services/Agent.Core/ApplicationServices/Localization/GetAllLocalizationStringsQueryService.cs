@@ -5,30 +5,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.Localization
+namespace TGS.Services.Agent.ApplicationServices.Localization;
+
+internal class GetAllLocalizationStringsQueryService
+    : IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>>
 {
-    internal class GetAllLocalizationStringsQueryService
-        : IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>>
+    private readonly IAgentRepository _agentRepository;
+
+    public GetAllLocalizationStringsQueryService(IAgentRepository agentRepository)
     {
-        private readonly IAgentRepository _agentRepository;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    }
 
-        public GetAllLocalizationStringsQueryService(IAgentRepository agentRepository)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        }
+    public async ValueTask<IDictionary<string, string>> GetAsync(
+        GetAllLocalizationStringsQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var allI18N = _agentRepository.QueryAllLocalizationStringsAsync(query.CultureCode);
 
-        public async ValueTask<IDictionary<string, string>> GetAsync(
-            GetAllLocalizationStringsQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var allI18N = _agentRepository.QueryAllLocalizationStringsAsync(query.CultureCode);
-
-            return await allI18N
-                .ToDictionaryAsync(
-                    p => p.Key,
-                    p => p.Value,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-        }
+        return await allI18N
+            .ToDictionaryAsync(
+                p => p.Key,
+                p => p.Value,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }
