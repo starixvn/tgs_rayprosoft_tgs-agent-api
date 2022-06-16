@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Mime;
@@ -64,6 +65,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Description("Get player's promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [Obsolete("預計淘汰")]
         public async ValueTask<PagingResponse<PromotionResponse>> GetPlayerPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
         {

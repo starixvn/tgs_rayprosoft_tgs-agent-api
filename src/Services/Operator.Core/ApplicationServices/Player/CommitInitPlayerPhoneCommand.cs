@@ -2,10 +2,10 @@
 
 namespace TGS.Services.Operator.ApplicationServices.Player
 {
-    public record CommitPlayerInitPhoneCommand(
+    public record CommitInitPlayerPhoneCommand(
         string SecurityKey,
         string ValidateCode,
         string IpAddress,
-        string? HostName,
+        string HostName,
         Guid BrandId);
 }

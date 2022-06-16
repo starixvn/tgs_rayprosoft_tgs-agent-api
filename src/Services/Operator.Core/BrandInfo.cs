@@ -17,5 +17,7 @@ namespace TGS.Services.Operator
         bool SmsEnabled,
         bool SmsRegisterFlowEnabled,
         bool PlayerIdentityEnabled,
+        bool EmailRegisterFlowEnabled,
+        bool BankInfoRegisterFlowEnabled,
         JsonDocument? PlayerRegisterFlowSettings);
 }

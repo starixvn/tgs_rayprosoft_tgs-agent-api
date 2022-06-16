@@ -13,13 +13,13 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -114,6 +114,37 @@ namespace TGS.Apis.OperatorApi.Controllers
             var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CheckUsernameResponse { Exists = isExist };
+        }
+
+        /// <summary>
+        /// Create default withdraw bankinfo of register flow.
+        /// </summary>
+        /// <param name="createService"></param>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
+        [HttpPost("init-bankinfo", Name = "CreatePlayerBankInfoOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
+        public async Task CreateBankInfoAsync(
+            [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
+            CreateInitBankInfoViewModel viewModel)
+        {
+            var brandId = HttpContext.GetBrandId();
+            var playerData = HttpContext.Items.GetPlayerTokenData();
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            var hostName = Request.Host.Host;
+
+            var command = new CreateInitBankInfoCommand(
+                brandId!.Value,
+                playerData.PlayerCode,
+                viewModel.PaymentChannelId,
+                viewModel.BankType,
+                viewModel.Detail,
+                ipAddress,
+                hostName);
+
+            await createService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
         [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
@@ -262,6 +293,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpPost("login", Name = "Login")]
         [Consumes(MediaTypeNames.Application.Json)]
+        [IgnoreUserBlacklistCheck]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
@@ -638,20 +670,73 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new StartSetPlayerEmailCommand(
                 playerTokenData.PlayerCode,
                 request.Email,
-                CultureInfo.CurrentUICulture);
+                CultureInfo.CurrentUICulture,
+                false);
 
             return setPlayerEmailService.GetAsync(command);
         }
 
         /// <summary>
+        /// Starts the change email of register flow.
+        /// </summary>
+        /// <param name="getBrandInfoService">The get brand info service.</param>
+        /// <param name="getPlayerInfoService">The get player info service.</param>
+        /// <param name="checkService">The check player email service.</param>
+        /// <param name="setPlayerEmailService">The set player email service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
+        public async ValueTask<string> StartChangeEmailAsync(
+            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+            [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
+            [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+            [FromBody] StartInitEmailRequest request)
+        {
+            var brandId = HttpContext.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
+            if (!brandInfo.EmailRegisterFlowEnabled)
+                throw new InvalidOperationException();
+
+            var playerInfo = await getPlayerInfoService
+                .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
+                .ConfigureAwait(false);
+
+            var isBrandHasSameEmail = await checkService
+                .GetAsync(new CheckBrandEmailQuery(
+                    brandId!.Value,
+                    request.Email,
+                    playerInfo.PlayerCode))
+                .ConfigureAwait(false);
+
+            if (isBrandHasSameEmail)
+                throw new BrandEmailDuplicateException();
+
+            var command = new StartSetPlayerEmailCommand(
+                playerTokenData.PlayerCode,
+                request.Email,
+                CultureInfo.CurrentUICulture,
+                true);
+
+            return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Starts the change phone.
         /// </summary>
+        /// <param name="getBrandInfoService">The brand info query service.</param>
         /// <param name="checkService">The check player phone service.</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
         [HttpPost("phone", Name = "StartChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<string> StartChangePhoneAsync(
+            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
             [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
@@ -660,11 +745,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 || string.IsNullOrWhiteSpace(request.AreaCode))
                 throw new PlayerPhoneRequiredException();
 
-            var brandId = HttpContext.Items.GetBrandId();
+            var brandId = HttpContext.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
             var checkQuery = new CheckBrandPhoneQuery(
-                brandId,
+                brand.BrandId,
                 playerTokenData.PlayerCode,
                 request.AreaCode.Trim(),
                 request.Phone.Trim());
@@ -680,7 +767,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 request.AreaCode.Trim(),
                 request.Phone.Trim(),
-                CultureInfo.CurrentUICulture);
+                CultureInfo.CurrentUICulture,
+                brand.SmsEnabled);
 
             return await startSetPlayerPhoneService
                 .GetAsync(command)
@@ -688,20 +776,22 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Starts to set phone with username and password
+        /// Starts to set phone with player token
         /// </summary>
+        /// <param name="getBrandInfoService">The brand info query service.</param>
         /// <param name="getPlayerInfoService">The get player information service.</param>
-        /// <param name="validatePlayerService">The validate init phone service</param>
-        /// /// <param name="checkService">The check player phone service.</param>
+        /// <param name="checkService">The check player phone service.</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
         /// <returns>
         /// security code
         /// </returns>
         [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
         public async ValueTask<string> StartChangePhoneAsync(
-            [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
-            [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
+            [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+            [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartInitPhoneRequest request)
@@ -710,28 +800,23 @@ namespace TGS.Apis.OperatorApi.Controllers
                 || string.IsNullOrWhiteSpace(request.AreaCode))
                 throw new PlayerPhoneRequiredException();
 
-            var brandId = HttpContext.Items.GetBrandId();
+            var brandId = HttpContext.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
+            if (!brand.SmsRegisterFlowEnabled)
+                throw new InvalidOperationException();
 
             var playerInfo = await getPlayerInfoService
-                .GetAsync(new GetPlayerInfoByUserNameQuery(brandId, request.UserName))
+                .GetAsync(new GetPlayerQuery(brand.BrandId, playerTokenData.PlayerCode))
                 .ConfigureAwait(false);
 
             if (playerInfo == null)
                 throw new CoreExceptions.PlayerNotFoundException("Player not found.");
 
-            var playerPasswordValidateCommand = new PlayerPasswordValidateCommand(
-                playerInfo.PlayerCode,
-                request.Password);
-
-            var isValid = await validatePlayerService
-                .GetAsync(playerPasswordValidateCommand)
-                .ConfigureAwait(false);
-
-            if (!isValid)
-                throw new CoreExceptions.InvalidCredentialsException("Login fail.");
-
             var checkQuery = new CheckBrandPhoneQuery(
-                brandId,
+                brand.BrandId,
                 playerInfo.PlayerCode,
                 request.AreaCode.Trim(),
                 request.Phone.Trim());
@@ -747,10 +832,35 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerInfo.PlayerCode,
                 request.AreaCode.Trim(),
                 request.Phone.Trim(),
-                CultureInfo.CurrentUICulture);
+                CultureInfo.CurrentUICulture,
+                brand.SmsEnabled);
 
             return await startSetPlayerPhoneService
                 .GetAsync(startSetPlayerPhoneCommand)
+                .ConfigureAwait(false);
+        }
+
+        [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
+        public async ValueTask SubmitChangeEmailAsync(
+            [FromServices] ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+            [FromBody] SubmitInitEmailRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            var hostName = Request.Host.Host;
+
+            var command = new CommitInitPlayerEmailCommand(
+                request.SecurityKey,
+                request.ValidateCode,
+                ipAddress,
+                hostName,
+                brandId);
+
+            await commitPlayerEmailService
+                .ExecuteAsync(command)
                 .ConfigureAwait(false);
         }
 
@@ -781,14 +891,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Submits the change phone.
         /// </summary>
-        /// /// <param name="checkService">The check player phone service.</param>
         /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("phone", Name = "SubmitChangePhone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitChangePhoneAsync(
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)
         {
@@ -810,24 +918,24 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Submits the change phone.
         /// </summary>
         /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
-        /// <param name="requestAnalyzer">The request analyzer.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
-        public async ValueTask SubmitInitPhoneAsync(
-            [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
-            [FromServices] IRequestAnalyzer requestAnalyzer,
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
+        public async ValueTask SubmitChangePhoneAsync(
+            [FromServices] ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
             [FromBody] SubmitInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var ipAddress = HttpContext.Connection.RemoteIpAddress;
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
             var hostName = Request.Host.Host;
 
-            var command = new CommitPlayerInitPhoneCommand(
+            var command = new CommitInitPlayerPhoneCommand(
                 request.SecurityKey,
                 request.ValidateCode,
-                ipAddress.ToString(),
+                ipAddress,
                 hostName,
                 brandId);
 

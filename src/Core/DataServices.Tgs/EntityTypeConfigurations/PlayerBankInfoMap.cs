@@ -30,6 +30,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Detail)
                 .HasColumnType(ColumnTypes.Jsonb);
 
+            builder.Property(c => c.Default)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(c => c.CreatedByUsername)
                 .HasMaxLength(32)
                 .IsRequired();

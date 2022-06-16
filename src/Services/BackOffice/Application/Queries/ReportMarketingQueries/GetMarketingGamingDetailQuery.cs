@@ -27,11 +27,13 @@ public class
         {
             BrandId = request.BrandId,
             AgentUsername = request.AgentUsername,
+            PlayerUsername = request.PlayerUsername,
             Date = request.Date,
             Page = request.Page,
             Rows = request.Rows,
             OrderBy = request.OrderBy,
-            SortBy = request.SortBy
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
         };
 
         var response = await _reportClient.GetMarketingGamingDetailsAsync(reportRequest);

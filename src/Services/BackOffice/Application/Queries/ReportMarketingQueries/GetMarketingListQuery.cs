@@ -35,7 +35,8 @@ namespace TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
             };
 
             var response = await _reportClient.GetMarketingListAsync(reportRequest);

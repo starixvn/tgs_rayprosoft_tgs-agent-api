@@ -46,13 +46,15 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public bool EnableAgentSms { get; set; }
 
+        public bool EnableBankInfoRegisterFlow { get; set; }
+
+        public bool EnableEmailRegisterFlow { get; set; }
+
         public bool EnablePlayerIdentity { get; set; }
 
         public bool EnableSms { get; set; }
 
         public bool EnableSmsRegisterFlow { get; set; }
-
-        public string PlayerRegisterFlowSettings { get; set; }
 
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
@@ -75,6 +77,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal PlatformCharge { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+
+        public string PlayerRegisterFlowSettings { get; set; }
 
         public virtual ICollection<Player> Players { get; set; }
 

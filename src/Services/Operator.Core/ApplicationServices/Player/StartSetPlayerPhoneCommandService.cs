@@ -50,7 +50,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             Func<string> generateCode = () => _codeGenerator.GenerateCode();
 
-            if (brand!.SmsEnabled is false)
+            if (!command.SmsEnabled)
                 generateCode = () => "123456";
 
             var saveResult = await Policy
@@ -77,7 +77,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            if (brand.SmsEnabled)
+            if (command.SmsEnabled)
             {
                 var shortMessage = string.Format(
                     Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,

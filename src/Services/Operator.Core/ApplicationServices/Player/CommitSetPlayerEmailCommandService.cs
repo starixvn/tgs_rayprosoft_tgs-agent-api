@@ -38,7 +38,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 .GetAsync(new CheckBrandEmailQuery(
                     command.BrandId,
                     result.Email,
-                    command.PlayerCode))
+                    command.PlayerCode),
+                    cancellationToken)
                 .ConfigureAwait(false);
 
             if (isBrandHasSameEmail)

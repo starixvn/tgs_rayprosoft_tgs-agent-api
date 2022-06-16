@@ -47,6 +47,8 @@ namespace TGS.Services.Operator.ApplicationServices.Brand
                 brandInfo.SmsEnabled,
                 brandInfo.SmsRegisterFlowEnabled,
                 brandInfo.PlayerIdentityEnabled,
+                brandInfo.EmailRegisterFlowEnabled,
+                brandInfo.BankInfoRegisterFlowEnabled,
                 frontendInfo.PlayerRegisterFlowSettings);
         }
     }

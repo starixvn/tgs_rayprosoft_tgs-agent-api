@@ -16,6 +16,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public BankModel[] Banks { get; init; } = Array.Empty<BankModel>();
 
+        public string? Birthdate { get; init; }
+
         public string? Email { get; init; }
 
         public string? FacebookMessenger { get; init; }
@@ -66,8 +68,6 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 
         public string? WhatsApp { get; init; }
 
-        public string? Birthdate { get; init; }
-
         public class BankModel
         {
             public string BankType { get; init; } = default!;
@@ -75,6 +75,8 @@ namespace TGS.Services.BackOffice.Application.Models.Player
             public JsonDocument Detail { get; init; } = default!;
 
             public Guid Id { get; init; } = default!;
+
+            public bool IsDefault { get; init; }
 
             public Guid PaymentChannelId { get; init; } = default!;
         }

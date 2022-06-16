@@ -101,7 +101,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     ExistsAsync(predicate);
 
         Task<Player> IPlayerService.GetPlayerAsync(
-                    Expression<Func<Player, bool>> predicate,
+            Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 

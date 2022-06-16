@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw
 {
@@ -23,11 +21,15 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
             {
                 BankType = command.BankType,
                 PaymentChannelId = command.PaymentChannelId,
-                Detail = JsonDocument.Parse(command.Detail)
+                Detail = command.Detail
             };
 
-            await _paymentServiceClient
-                .CreatePlayerBankInfoAsync(command.BrandId, command.PlayerCode, bankInfo)
+           _ = await _paymentServiceClient
+                .CreatePlayerBankInfoAsync(
+                    command.BrandId,
+                    command.PlayerCode, 
+                    bankInfo,
+                    cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
     }
