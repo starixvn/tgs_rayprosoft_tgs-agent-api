@@ -7,6 +7,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Apis.OperatorApi.Attributes;
@@ -103,7 +104,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet(Name = "ListPromotions")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public IAsyncEnumerable<PromotionViewModel> ListPromotionsAsync(
-            [FromServices] IPromotionServiceClient promotionServiceClient)
+            [FromServices] IPromotionServiceClient promotionServiceClient,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -127,7 +129,11 @@ namespace TGS.Apis.OperatorApi.Controllers
                         SubSubject = promotion.SubSubject,
                         Terms = promotion.Convention,
                         VipLevels = promotion.VipLevels,
-                        CampaignDetail = promotion.CampaignDetail
+                        CampaignDetail = promotion.PromotionType == "Roulette"
+                            ? JsonSerializer.SerializeToDocument(
+                                promotion.CampaignDetail.Deserialize<RouletteItemViewModel>(jsonOptionsAccessor.Value.JsonSerializerOptions)!,
+                                jsonOptionsAccessor.Value.JsonSerializerOptions)
+                            : promotion.CampaignDetail
                     });
         }
     }
