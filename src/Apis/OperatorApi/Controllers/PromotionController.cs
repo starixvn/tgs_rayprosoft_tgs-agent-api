@@ -131,7 +131,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         VipLevels = promotion.VipLevels,
                         CampaignDetail = promotion.PromotionType == "Roulette"
                             ? JsonSerializer.SerializeToDocument(
-                                promotion.CampaignDetail.Deserialize<RouletteItemViewModel>(jsonOptionsAccessor.Value.JsonSerializerOptions)!,
+                                promotion.CampaignDetail.Deserialize<RouletteSettingsViewModel>(jsonOptionsAccessor.Value.JsonSerializerOptions)!,
                                 jsonOptionsAccessor.Value.JsonSerializerOptions)
                             : promotion.CampaignDetail
                     });
