@@ -18,14 +18,17 @@ internal class RegisterFlow : IRegisterFlowStep
             _flowSteps.Enqueue(step);
     }
 
-    public async ValueTask<bool> ConfirmCompletedAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
     {
         if (_flowSteps.Count == 0)
             return true;
 
         while (_flowSteps.Count > 0)
         {
-            var isCompleted = await _flowSteps.Peek().ConfirmCompletedAsync().ConfigureAwait(false);
+            var isCompleted = await _flowSteps.Peek()
+                .ConfirmCompletedAsync(playerCode, cancellationToken)
+                .ConfigureAwait(false);
+
             if (isCompleted)
                 _flowSteps.Dequeue();
             else
@@ -51,7 +54,7 @@ internal class RegisterFlow : IRegisterFlowStep
         {
             _flowSteps.Dequeue();
 
-            var isCompleted = await ConfirmCompletedAsync().ConfigureAwait(false);
+            var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
 
             return new RegisterFlowProcessResult(
                 isCompleted,

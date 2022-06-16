@@ -9,7 +9,7 @@ public interface IRegisterFlowStep
 {
     string Type { get; }
 
-    ValueTask<bool> ConfirmCompletedAsync(CancellationToken cancellationToken = default);
+    ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
         Guid brandId,

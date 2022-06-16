@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Player;
 
@@ -16,22 +17,34 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
     private readonly IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> _createAgentInvitationPlayerService;
     private readonly IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> _createPlayerInvitationPlayerService;
     private readonly IGetService<CreatePlayerCommand, CreatePlayerInfo> _createPlayerService;
+    private readonly IPlayerServiceClient _playerServiceClient;
     public string Type => "CreatePlayer";
 
     public CreatePlayerRegisterFlowStep(
         IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
         IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
         IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
+        IPlayerServiceClient playerServiceClient,
         IBrandServiceClient brandServiceClient)
     {
         _createPlayerService = createPlayerService ?? throw new ArgumentNullException(nameof(createPlayerService));
         _createAgentInvitationPlayerService = createAgentInvitationPlayerService ?? throw new ArgumentNullException(nameof(createAgentInvitationPlayerService));
         _createPlayerInvitationPlayerService = createPlayerInvitationPlayerService ?? throw new ArgumentNullException(nameof(createPlayerInvitationPlayerService));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
     }
 
-    public ValueTask<bool> ConfirmCompletedAsync(CancellationToken cancellationToken = default)
-        => ValueTask.FromResult(false);
+    public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(playerCode))
+            return false;
+
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(playerCode, cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is not null;
+    }
 
     public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
         Guid brandId,
@@ -43,6 +56,10 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
         var brand = await _brandServiceClient
             .GetBrandInfoAsync(brandId, cancellationToken)
             .ConfigureAwait(false);
+
+        var agentInvitationCode = string.IsNullOrWhiteSpace(locationInfo.AgentInvitationCode)
+            ? request.AgentInvitationCode
+            : locationInfo.AgentInvitationCode;
 
         if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
         {
@@ -70,14 +87,14 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                         IsNew = info.IsNew
                     }));
         }
-        else if (!string.IsNullOrWhiteSpace(locationInfo.AgentInvitationCode))
+        else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
         {
             var command = new CreatePlayerWithAgentInvitationCodeCommand(
                 brandId,
                 request.UserName,
                 request.Password,
                 brand!.Currency,
-                locationInfo.AgentInvitationCode,
+                agentInvitationCode,
                 request.IsTestPlayer,
                 locationInfo.Ip,
                 locationInfo.HostName);
@@ -121,13 +138,10 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
         }
     }
 
-    private record CreatePlayerInputData
+    internal record CreatePlayerInputData
     {
         [JsonPropertyName("invitationcode")]
         public string? AgentInvitationCode { get; init; }
-
-        [JsonPropertyName("confirmpwd")]
-        public string? ConfirmPassword { get; init; }
 
         [JsonPropertyName("testplayer")]
         public bool IsTestPlayer { get; init; } = false;
@@ -143,7 +157,7 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
         public string UserName { get; init; } = default!;
     }
 
-    private record CreatePlayerResponse
+    internal record CreatePlayerResponse
     {
         [JsonPropertyName("uid")]
         public string PlayerCode { get; init; } = default!;

@@ -5,9 +5,13 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NSubstitute;
 using NUnit.Framework;
+using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
+using Tgs.ServiceUtility;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -32,8 +36,10 @@ public class RegisterFlowTests
     [Test]
     public async Task After_Call_ConfirmCompleted_Will_Remain_Undone_Steps()
     {
+        var playerCode = "player1";
+
         var step1 = new StubRegisterFlowStep();
-        step1.SetConfirmCompletedDelegate(() => true);
+        step1.SetConfirmCompletedDelegate(_ => true);
         var step2 = new StubRegisterFlowStep();
         var step3 = new StubRegisterFlowStep();
 
@@ -43,7 +49,7 @@ public class RegisterFlowTests
             step3
         });
 
-        var actual = await sut.ConfirmCompletedAsync();
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
 
         var privateStack = typeof(RegisterFlow)
             .GetField("_flowSteps", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -95,11 +101,266 @@ public class RegisterFlowTests
     }
 
     [Test]
+    public async Task CreatePlayerRegisterStep_If_Player_Exists_ConfirmCompleted_Should_Return_True()
+    {
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var sut = new CreatePlayerRegisterFlowStep(
+            fakeCreatePlayerService,
+            fakeCreateAgentInvitationPlayerService,
+            fakeCreatePlayerInvitationPlayerService,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var playerCode = "player1";
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo());
+
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
+
+        Assert.IsTrue(actual);
+    }
+
+    [Test]
+    public async Task CreatePlayerRegisterStep_ProcessInput_With_InvitationCode()
+    {
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var sut = new CreatePlayerRegisterFlowStep(
+            fakeCreatePlayerService,
+            fakeCreateAgentInvitationPlayerService,
+            fakeCreatePlayerInvitationPlayerService,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var brandId = Guid.NewGuid();
+
+        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        {
+            IsTestPlayer = false,
+            UserName = "abc",
+            Password = "1234",
+            AgentInvitationCode = "aabbcc"
+        };
+
+        var locationInfo = new PlayerLocationInfo(
+            null,
+            "127.0.0.1",
+            null,
+            null);
+
+        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "AAA",
+                Currency = "CNY"
+            });
+
+        fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
+            x => x.BrandId == brandId
+                && x.IsTestPlayer == input.IsTestPlayer
+                && x.IpAddress == locationInfo.Ip
+                && x.HostName == locationInfo.HostName
+                && x.UserName == input.UserName
+                && x.Password == input.Password
+                && x.AgentInvitationCode == input.AgentInvitationCode))
+            .Returns(new CreatePlayerInfo("test", true));
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(input),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task CreatePlayerRegisterStep_ProcessInput_With_InvitationCode_Header()
+    {
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var sut = new CreatePlayerRegisterFlowStep(
+            fakeCreatePlayerService,
+            fakeCreateAgentInvitationPlayerService,
+            fakeCreatePlayerInvitationPlayerService,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var brandId = Guid.NewGuid();
+
+        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        {
+            IsTestPlayer = false,
+            UserName = "abc",
+            Password = "1234"
+        };
+
+        var locationInfo = new PlayerLocationInfo(
+            null,
+            "127.0.0.1",
+            null,
+            "aabbcc");
+
+        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "AAA",
+                Currency = "CNY"
+            });
+
+        fakeCreateAgentInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithAgentInvitationCodeCommand>(
+            x => x.BrandId == brandId
+                && x.IsTestPlayer == input.IsTestPlayer
+                && x.IpAddress == locationInfo.Ip
+                && x.HostName == locationInfo.HostName
+                && x.UserName == input.UserName
+                && x.Password == input.Password
+                && x.AgentInvitationCode == locationInfo.AgentInvitationCode))
+            .Returns(new CreatePlayerInfo("test", true));
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(input),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task CreatePlayerRegisterStep_ProcessInput_With_UpperPlayer()
+    {
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var sut = new CreatePlayerRegisterFlowStep(
+            fakeCreatePlayerService,
+            fakeCreateAgentInvitationPlayerService,
+            fakeCreatePlayerInvitationPlayerService,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var brandId = Guid.NewGuid();
+
+        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        {
+            IsTestPlayer = false,
+            UserName = "abc",
+            Password = "1234",
+            UpperPlayerCode = "player2"
+        };
+
+        var locationInfo = new PlayerLocationInfo(
+            null,
+            "127.0.0.1",
+            null,
+            null);
+
+        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "AAA",
+                Currency = "CNY"
+            });
+
+        fakeCreatePlayerInvitationPlayerService.GetAsync(Arg.Is<CreatePlayerWithPlayerInvitationCommand>(
+            x => x.BrandId == brandId
+                && x.IsTestPlayer == input.IsTestPlayer
+                && x.IpAddress == locationInfo.Ip
+                && x.HostName == locationInfo.HostName
+                && x.UserName == input.UserName
+                && x.Password == input.Password
+                && x.UpperPlayerCode == input.UpperPlayerCode))
+            .Returns(new CreatePlayerInfo("test", true));
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(input),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task CreatePlayerRegisterStep_ProcessInput_Without_InvitationCode()
+    {
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var sut = new CreatePlayerRegisterFlowStep(
+            fakeCreatePlayerService,
+            fakeCreateAgentInvitationPlayerService,
+            fakeCreatePlayerInvitationPlayerService,
+            fakePlayerServiceClient,
+            fakeBrandServiceClient);
+
+        var brandId = Guid.NewGuid();
+
+        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        {
+            IsTestPlayer = false,
+            UserName = "abc",
+            Password = "1234"
+        };
+
+        var locationInfo = new PlayerLocationInfo(
+            null,
+            "127.0.0.1",
+            null,
+            null);
+
+        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Code = "AAA",
+                Currency = "CNY"
+            });
+
+        fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
+            x => x.BrandId == brandId
+                && x.IsTestPlayer == input.IsTestPlayer
+                && x.IpAddress == locationInfo.Ip
+                && x.HostName == locationInfo.HostName
+                && x.UserName == input.UserName
+                && x.Password == input.Password))
+            .Returns(new CreatePlayerInfo("test", true));
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(input),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
     public async Task If_Has_Any_Undone_Step_ConfirmCompleted_Should_Return_True()
     {
         var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>());
 
-        var actual = await sut.ConfirmCompletedAsync();
+        var actual = await sut.ConfirmCompletedAsync(null);
 
         Assert.IsTrue(actual);
     }
@@ -108,7 +369,7 @@ public class RegisterFlowTests
     public async Task Process_Input_If_Step_Undone_Will_Return_CurrentStepInfo()
     {
         var brandId = Guid.NewGuid();
-        var locationInfo = new PlayerLocationInfo("127.0.0.1", null, null);
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
         var step1 = new StubRegisterFlowStep()
         {
@@ -143,7 +404,7 @@ public class RegisterFlowTests
     public async Task Process_Input_Will_Return_NextStepInfo()
     {
         var brandId = Guid.NewGuid();
-        var locationInfo = new PlayerLocationInfo("127.0.0.1", null, null);
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
         var step1 = new StubRegisterFlowStep()
         {
@@ -175,11 +436,13 @@ public class RegisterFlowTests
     [Test]
     public async Task Undone_Flow_Call_ConfirmCompleted_Should_Return_False()
     {
+        var playerCode = "player1";
+
         var sut = new RegisterFlow(new[] {
             new StubRegisterFlowStep()
         });
 
-        var actual = await sut.ConfirmCompletedAsync();
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
 
         Assert.IsFalse(actual);
     }

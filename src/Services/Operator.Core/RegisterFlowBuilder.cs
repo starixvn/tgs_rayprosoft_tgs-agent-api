@@ -20,6 +20,8 @@ internal class RegisterFlowBuilder
     {
         var definition = new RegisterFlowDefinition();
 
+        definition.AddStep(ActivatorUtilities.CreateInstance<CreatePlayerRegisterFlowStep>(_serviceProvider));
+
         foreach (var element in settingsJson.RootElement.EnumerateArray())
         {
             var type = element.GetProperty("type").GetString();

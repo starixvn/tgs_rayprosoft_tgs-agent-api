@@ -8,15 +8,15 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 
 public class StubRegisterFlowStep : IRegisterFlowStep
 {
-    private Func<bool> _confirmCompletedDelegate = () => false;
+    private Func<string, bool> _confirmCompletedDelegate = _ => false;
 
     private Func<Guid, JsonDocument, PlayerLocationInfo, Task<RegisterFlowProcessResult>> _ProcessInputDelegate =
         (_, _, _) => Task.FromResult(new RegisterFlowProcessResult(false, null, null));
 
     public string Type { get; set; }
 
-    public ValueTask<bool> ConfirmCompletedAsync(CancellationToken cancellationToken = default)
-        => new ValueTask<bool>(_confirmCompletedDelegate());
+    public ValueTask<bool> ConfirmCompletedAsync(string playerCode, CancellationToken cancellationToken = default)
+        => new ValueTask<bool>(_confirmCompletedDelegate(playerCode));
 
     public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
         Guid brandId,
@@ -25,7 +25,7 @@ public class StubRegisterFlowStep : IRegisterFlowStep
         CancellationToken cancellationToken = default)
         => await _ProcessInputDelegate(brandId, input, locationInfo).ConfigureAwait(false);
 
-    internal void SetConfirmCompletedDelegate(Func<bool> confirmCompletedDelegate)
+    internal void SetConfirmCompletedDelegate(Func<string, bool> confirmCompletedDelegate)
         => _confirmCompletedDelegate = confirmCompletedDelegate;
 
     internal void SetProcessInputDelegate(Func<Guid, JsonDocument, PlayerLocationInfo, Task<RegisterFlowProcessResult>> processInputDelegate)

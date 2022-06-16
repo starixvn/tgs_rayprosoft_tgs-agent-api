@@ -472,8 +472,55 @@ public class PlayerController : ControllerBase
     }
 
     [HttpPost("register", Name = "RegisterPlayerFlow")]
-    public void RegisterPlayer()
+    [IgnoreUserBlacklistCheck]
+    public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
+        [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+        [FromBody] PlayerRegisterFlowViewModel model)
     {
+        var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+
+        var brand = await getBrandService
+            .GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (brand == null)
+            throw new InvalidStatusException("Brand doesn't exist");
+
+        if (brand.Status == BrandStatus.Maintenance)
+            throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+
+        if (brand.Status != BrandStatus.Active)
+            throw new InvalidStatusException("Brand is not active");
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            invitationCode);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            model.Type,
+            model.Input,
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new PlayerRegisterFlowResponseViewModel
+        {
+            IsCompleted = result.IsCompleted,
+            StepResponse = result.StepResponse,
+            NextStepType = result.NextStepType
+        };
     }
 
     /// <summary>
