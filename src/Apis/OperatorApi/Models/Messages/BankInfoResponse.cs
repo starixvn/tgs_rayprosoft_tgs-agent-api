@@ -15,6 +15,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("id")]
         public Guid Id { get; init; }
 
+        [JsonPropertyName("default")]
+        public bool IsDefault { get; init; }
+
         [JsonPropertyName("paymentchannelid")]
         public Guid PaymentChannelId { get; init; }
     }
