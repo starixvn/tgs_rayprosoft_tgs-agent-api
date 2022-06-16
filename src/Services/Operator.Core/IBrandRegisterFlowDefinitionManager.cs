@@ -5,5 +5,5 @@ using System.Threading.Tasks;
 namespace TGS.Services.Operator;
 internal interface IBrandRegisterFlowDefinitionManager
 {
-    Task<RegisterFlowDefinition?> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default);
+    Task<RegisterFlowDefinition> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default);
 }

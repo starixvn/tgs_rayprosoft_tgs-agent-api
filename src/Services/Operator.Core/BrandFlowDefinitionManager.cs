@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -24,27 +25,21 @@ internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager
         _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
     }
 
-    public Task<RegisterFlowDefinition?> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default)
+    public async Task<RegisterFlowDefinition> GetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         var key = $"Flow:{brandId}";
 
-        return _memoryCache.GetOrCreateAsync(key, entry =>
-        {
-            entry.AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30D);
+        var settings = await _memoryCache.GetOrCreateAsync(
+            key,
+            async entry =>
+            {
+                var brandFrontendInfo = await _brandServiceClient
+                    .GetBrandFrontendInfoAsync(brandId)
+                    .ConfigureAwait(false);
 
-            return InternalGetRegisterFlowDefinitionAsync(brandId, cancellationToken);
-        });
-    }
+                return brandFrontendInfo?.PlayerRegisterFlowSettings;
+            }).ConfigureAwait(false);
 
-    private async Task<RegisterFlowDefinition?> InternalGetRegisterFlowDefinitionAsync(Guid brandId, CancellationToken cancellationToken = default)
-    {
-        var brandFrontendInfo = await _brandServiceClient
-            .GetBrandFrontendInfoAsync(brandId)
-            .ConfigureAwait(false);
-
-        if (brandFrontendInfo.PlayerRegisterFlowSettings is null)
-            return null;
-
-        return _registerFlowBuilder.LoadSettings(brandFrontendInfo.PlayerRegisterFlowSettings);
+        return _registerFlowBuilder.LoadSettings(settings ?? JsonDocument.Parse("[]"));
     }
 }

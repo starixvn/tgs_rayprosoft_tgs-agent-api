@@ -451,4 +451,38 @@ public class RegisterFlowTests
 
         Assert.IsFalse(actual);
     }
+
+    [Test]
+    public async Task ExecutePlayerRegisterFlow()
+    {
+        var fakeBrandRegisterFlowDefinitionManager = Substitute.For<IBrandRegisterFlowDefinitionManager>();
+
+        var sut = new ExecutePlayerRegisterFlowCommandService(fakeBrandRegisterFlowDefinitionManager);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            Guid.NewGuid(),
+            "CreatePlayer",
+            JsonDocument.Parse("{}"),
+            new PlayerLocationInfo(null, "127.0.0.1", null, null));
+
+        var flowDefinition = new RegisterFlowDefinition();
+
+        var fakeCreatePlayerStep = new StubRegisterFlowStep()
+        {
+            Type = "CreatePlayer"
+        };
+
+        fakeCreatePlayerStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
+            new RegisterFlowProcessResult(true, null, null)));
+
+        flowDefinition.AddStep(fakeCreatePlayerStep);
+
+        fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(command.BrandId))
+            .Returns(flowDefinition);
+
+
+        var actual = await sut.GetAsync(command);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
 }
