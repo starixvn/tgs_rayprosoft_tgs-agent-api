@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.SubGameProvider
+﻿namespace TGS.Services.BackOffice.Application.Models.SubGameProvider;
+
+public class UpdateSubGameProvidersLocationInfo
 {
-    public class UpdateSubGameProvidersLocationInfo
-    {
-        public string[] DiffGameProviderCodes { get; set; }
-    }
+    public string[] DiffGameProviderCodes { get; set; }
 }

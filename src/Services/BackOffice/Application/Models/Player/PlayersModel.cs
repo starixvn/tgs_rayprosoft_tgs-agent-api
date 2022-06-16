@@ -3,28 +3,27 @@ using TGS.Core.Models.Enums;
 
 #nullable enable
 
-namespace TGS.Services.BackOffice.Application.Models.Player
+namespace TGS.Services.BackOffice.Application.Models.Player;
+
+public class PlayersModel
 {
-    public class PlayersModel
-    {
-        public string? AgentName { get; init; }
+    public string? AgentName { get; init; }
 
-        public decimal Balance { get; set; }
+    public decimal Balance { get; set; }
 
-        public Guid? IdentityFormId { get; init; }
+    public Guid? IdentityFormId { get; init; }
 
-        public string ParentUsername { get; init; } = default!;
+    public string ParentUsername { get; init; } = default!;
 
-        public string PlayerCode { get; init; } = default!;
+    public string PlayerCode { get; init; } = default!;
 
-        public DateTimeOffset? RegisteredTime { get; init; }
+    public DateTimeOffset? RegisteredTime { get; init; }
 
-        public string? RegisterHost { get; init; }
+    public string? RegisterHost { get; init; }
 
-        public PlayerStatus Status { get; init; }
+    public PlayerStatus Status { get; init; }
 
-        public string Username { get; init; } = default!;
+    public string Username { get; init; } = default!;
 
-        public int? VipLevel { get; init; }
-    }
+    public int? VipLevel { get; init; }
 }

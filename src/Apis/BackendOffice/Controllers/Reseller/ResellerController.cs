@@ -9,143 +9,142 @@ using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Reseller
+namespace TGS.Apis.BackendOffice.Controllers.Reseller;
+
+[Route("api/[controller]")]
+[ApiController]
+public partial class ResellerController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public partial class ResellerController : BaseContextController
+    private readonly IResellerService _service;
+
+    public ResellerController(IResellerService service)
     {
-        private readonly IResellerService _service;
+        _service = service;
+    }
 
-        public ResellerController(IResellerService service)
+    [HttpGet]
+    [Description("Get resellers: 總公司列表")]
+    public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
+    {
+        return _service.GetResellers(request)
+            .Where(ResellerId, x => x.Id == ResellerId)
+            .Select(x => new ResellerModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Code = x.Code,
+                BusinessType = x.BusinessType,
+                Status = x.Status,
+                Description = x.Description,
+                OperationalEmail = x.OperationalEmail,
+                CreatedOn = x.CreatedOn,
+                UpdatedOn = x.UpdatedOn
+            }).CreatePagedResponseAsync(request);
+    }
+
+    [HttpGet("{id}")]
+    [Description("Get a Reseller")]
+    public async Task<GetResellerResponse> GetResellerAsync(Guid id)
+    {
+        var reseller = await _service.GetResellerAsync(x => x.Id == id,
+            x => x.Include(i => i.Currencies)
+                .Include(i => i.Languages)
+                .Include(i => i.GameProviders)
+                .Where(ResellerId != null, r => r.Id == ResellerId));
+
+        if (reseller == null)
         {
-            _service = service;
+            return CreateInvalidResponse<GetResellerResponse>(Resources.Reseller.NotFound);
         }
 
-        [HttpGet]
-        [Description("Get resellers: 總公司列表")]
-        public Task<PagedResponse<ResellerModel>> GetResellersAsync([FromQuery] GetResellersRequest request)
+        return new GetResellerResponse
         {
-            return _service.GetResellers(request)
-                .Where(ResellerId, x => x.Id == ResellerId)
-                .Select(x => new ResellerModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Code = x.Code,
-                    BusinessType = x.BusinessType,
-                    Status = x.Status,
-                    Description = x.Description,
-                    OperationalEmail = x.OperationalEmail,
-                    CreatedOn = x.CreatedOn,
-                    UpdatedOn = x.UpdatedOn
-                }).CreatePagedResponseAsync(request);
+            Valid = true,
+            Reseller = new ResellerModel
+            {
+                Id = reseller.Id,
+                Code = reseller.Code,
+                Name = reseller.Name,
+                BusinessType = reseller.BusinessType,
+                Status = reseller.Status,
+                Currencies = reseller.Currencies
+                    .Select(x => new ResellerCurrencyModel
+                    {
+                        Code = x.CurrencyCode,
+                        Name = x.Currency.Name
+                    }).ToArray(),
+                Languages = reseller.Languages
+                    .Select(x => new ResellerLanguageModel
+                    {
+                        CultureCode = x.CultureCode,
+                        Name = x.Language.Name
+                    }).ToArray(),
+                GameProviders = reseller.GameProviders
+                    .Select(x => new ResellerGameProviderModel
+                    {
+                        GameProviderId = x.GameProviderId,
+                        Name = x.GameProvider.Name
+                    }).ToArray(),
+                BetLimits = reseller.BetLimits
+                    .Select(x => new ResellerBetLimitModel
+                    {
+                        Id = x.BetLimitId,
+                        CurrencyCode = x.BetLimit.CurrencyCode,
+                        MinBet = x.BetLimit.MinBet,
+                        MaxBet = x.BetLimit.MaxBet,
+                        MaxBetPerMatch = x.BetLimit.MaxBetPerMatch
+                    }).ToArray(),
+
+                Description = reseller.Description,
+                OperationalEmail = reseller.OperationalEmail,
+                CreatedOn = reseller.CreatedOn,
+                UpdatedOn = reseller.UpdatedOn
+            }
+        };
+    }
+
+    [HttpPost]
+    [Description("Create a Reseller")]
+    public async Task<MessageResponse> CreateResellerAsync(CreateResellerRequest request)
+    {
+        if (await _service.ExistsAsync(x => x.Name == request.Name))
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
         }
 
-        [HttpGet("{id}")]
-        [Description("Get a Reseller")]
-        public async Task<GetResellerResponse> GetResellerAsync(Guid id)
+        if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
         {
-            var reseller = await _service.GetResellerAsync(x => x.Id == id,
-                x => x.Include(i => i.Currencies)
-                    .Include(i => i.Languages)
-                    .Include(i => i.GameProviders)
-                    .Where(ResellerId != null, r => r.Id == ResellerId));
-
-            if (reseller == null)
-            {
-                return CreateInvalidResponse<GetResellerResponse>(Resources.Reseller.NotFound);
-            }
-
-            return new GetResellerResponse
-            {
-                Valid = true,
-                Reseller = new ResellerModel
-                {
-                    Id = reseller.Id,
-                    Code = reseller.Code,
-                    Name = reseller.Name,
-                    BusinessType = reseller.BusinessType,
-                    Status = reseller.Status,
-                    Currencies = reseller.Currencies
-                        .Select(x => new ResellerCurrencyModel
-                        {
-                            Code = x.CurrencyCode,
-                            Name = x.Currency.Name
-                        }).ToArray(),
-                    Languages = reseller.Languages
-                        .Select(x => new ResellerLanguageModel
-                        {
-                            CultureCode = x.CultureCode,
-                            Name = x.Language.Name
-                        }).ToArray(),
-                    GameProviders = reseller.GameProviders
-                        .Select(x => new ResellerGameProviderModel
-                        {
-                            GameProviderId = x.GameProviderId,
-                            Name = x.GameProvider.Name
-                        }).ToArray(),
-                    BetLimits = reseller.BetLimits
-                        .Select(x => new ResellerBetLimitModel
-                        {
-                            Id = x.BetLimitId,
-                            CurrencyCode = x.BetLimit.CurrencyCode,
-                            MinBet = x.BetLimit.MinBet,
-                            MaxBet = x.BetLimit.MaxBet,
-                            MaxBetPerMatch = x.BetLimit.MaxBetPerMatch
-                        }).ToArray(),
-
-                    Description = reseller.Description,
-                    OperationalEmail = reseller.OperationalEmail,
-                    CreatedOn = reseller.CreatedOn,
-                    UpdatedOn = reseller.UpdatedOn
-                }
-            };
+            return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
         }
 
-        [HttpPost]
-        [Description("Create a Reseller")]
-        public async Task<MessageResponse> CreateResellerAsync(CreateResellerRequest request)
+        await _service.CreateResellerAsync(request, Username);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPut("{id}")]
+    [Description("Update a Reseller")]
+    public async Task<MessageResponse> UpdateResellerAsync(Guid id, UpdateResellerRequest request)
+    {
+        var reseller = await _service.GetResellerAsync(q => q.Id == id);
+
+        if (reseller == null)
         {
-            if (await _service.ExistsAsync(x => x.Name == request.Name))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
-            }
-
-            if (await _service.ExistsAsync(x => x.Code.ToLower() == request.Code.ToLower()))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
-            }
-
-            await _service.CreateResellerAsync(request, Username);
-
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
         }
 
-        [HttpPut("{id}")]
-        [Description("Update a Reseller")]
-        public async Task<MessageResponse> UpdateResellerAsync(Guid id, UpdateResellerRequest request)
+        if (await _service.ExistsAsync(x => x.Id != id && x.Name == request.Name))
         {
-            var reseller = await _service.GetResellerAsync(q => q.Id == id);
-
-            if (reseller == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NotFound);
-            }
-
-            if (await _service.ExistsAsync(x => x.Id != id && x.Name == request.Name))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
-            }
-
-            if (await _service.ExistsAsync(x => x.Id != id && x.Code == request.Code))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
-            }
-
-            await _service.UpdateResellerAsync(reseller, request, Username);
-
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Resources.Reseller.NameExists);
         }
+
+        if (await _service.ExistsAsync(x => x.Id != id && x.Code == request.Code))
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.Reseller.CodeExists);
+        }
+
+        await _service.UpdateResellerAsync(reseller, request, Username);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

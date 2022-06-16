@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.Exceptions
+namespace TGS.Services.Agent.Exceptions;
+
+public class DividendConditionException : Exception
 {
-    public class DividendConditionException : Exception
+    public DividendConditionException(string? message = null)
+        : base(message)
     {
-        public DividendConditionException(string? message = null)
-            : base(message)
-        {
-        }
     }
 }

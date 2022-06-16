@@ -5,35 +5,34 @@ using Microsoft.Extensions.Logging;
 using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.GameBalance
+namespace TGS.Services.Operator.ApplicationServices.GameBalance;
+
+internal class FundInGameBalanceCommandService : ICommandService<FundInGameBalanceCommand>
 {
-    internal class FundInGameBalanceCommandService : ICommandService<FundInGameBalanceCommand>
+    private readonly IGameProvidersOperatorPluggableClient _gameProvidersOperatorPluggableClient;
+    private readonly ILogger<FundInGameBalanceCommandService> _logger;
+
+    public FundInGameBalanceCommandService(
+        IGameProvidersOperatorPluggableClient gameProvidersOperatorPluggableClient,
+        ILogger<FundInGameBalanceCommandService> logger)
     {
-        private readonly IGameProvidersOperatorPluggableClient _gameProvidersOperatorPluggableClient;
-        private readonly ILogger<FundInGameBalanceCommandService> _logger;
+        _gameProvidersOperatorPluggableClient = gameProvidersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersOperatorPluggableClient));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public FundInGameBalanceCommandService(
-            IGameProvidersOperatorPluggableClient gameProvidersOperatorPluggableClient,
-            ILogger<FundInGameBalanceCommandService> logger)
+    public async ValueTask ExecuteAsync(FundInGameBalanceCommand command, CancellationToken cancellationToken = default)
+    {
+        var response = await _gameProvidersOperatorPluggableClient.GameProviderFundInAsync(
+            command.PlayerCode,
+            command.GameProviderCode,
+            command.Amount).ConfigureAwait(false);
+
+        if (response == null)
         {
-            _gameProvidersOperatorPluggableClient = gameProvidersOperatorPluggableClient ?? throw new ArgumentNullException(nameof(gameProvidersOperatorPluggableClient));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger.LogInformation("Failed to transfer the game wallet to the main wallet.");
+            throw new GameBalanceFundInFailedException("Failed to transfer the game wallet to the main wallet.");
         }
 
-        public async ValueTask ExecuteAsync(FundInGameBalanceCommand command, CancellationToken cancellationToken = default)
-        {
-            var response = await _gameProvidersOperatorPluggableClient.GameProviderFundInAsync(
-                command.PlayerCode,
-                command.GameProviderCode,
-                command.Amount).ConfigureAwait(false);
-
-            if (response == null)
-            {
-                _logger.LogInformation("Failed to transfer the game wallet to the main wallet.");
-                throw new GameBalanceFundInFailedException("Failed to transfer the game wallet to the main wallet.");
-            }
-
-            _logger.LogInformation("The game wallet was successfully transferred to the main wallet.");
-        }
+        _logger.LogInformation("The game wallet was successfully transferred to the main wallet.");
     }
 }

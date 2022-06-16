@@ -10,95 +10,94 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerQueries;
+
+public class
+    GetPlayerContributionsQuery : IGetService<GetPlayerContributionsReportRequest,
+        GetPlayerContributionsReportResponse>
 {
-    public class
-        GetPlayerContributionsQuery : IGetService<GetPlayerContributionsReportRequest,
-            GetPlayerContributionsReportResponse>
+    private readonly IReportClient _reportClient;
+
+    public GetPlayerContributionsQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<GetPlayerContributionsReportResponse> GetAsync(
+        GetPlayerContributionsReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetPlayerContributionsQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<GetPlayerContributionsReportResponse> GetAsync(
-            GetPlayerContributionsReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetPlayerContributionsRequest
         {
-            var reportRequest = new GetPlayerContributionsRequest
-            {
-                BrandId = request.BrandId,
-                Username = request.Username,
-                Level = request.Level,
-                HasUpperAgent = request.HasUpperAgent,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = true
-            };
+            BrandId = request.BrandId,
+            Username = request.Username,
+            Level = request.Level,
+            HasUpperAgent = request.HasUpperAgent,
+            From = request.From,
+            To = request.To,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = (short)request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = true
+        };
 
-            var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
+        var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
 
-            if (!response.Valid)
-            {
-                return new GetPlayerContributionsReportResponse
-                {
-                    Valid = response.Valid,
-                    Message = response.Message,
-                    TotalCount = response.TotalCount,
-                    Items = Array.Empty<PlayerContributionReportModel>(),
-                    Total = new PlayerContributionReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                };
-            }
-
-            var pageArray = response.Items?.Select(x => new PlayerContributionReportModel
-            {
-                Username = x.Username,
-                PlayerCode = x.PlayerCode,
-                Type = (AccountType)x.Type,
-                Level = x.Level,
-                DepositAmount = x.DepositAmount,
-                WithdrawalAmount = x.WithdrawalAmount,
-                CompanyAdjustAmount = x.CompanyAdjustAmount,
-                BonusAdjustAmount = x.BonusAdjustAmount,
-                AgentAdjustAmount = x.AgentAdjustAmount,
-                BonusAmount = x.BonusAmount,
-                BetAmount = x.BetAmount,
-                ValidBetAmount = x.ValidBetAmount,
-                Turnover = x.Turnover,
-                WinLossAmount = x.WinLossAmount,
-                NetProfit = x.NetProfit
-            }).AsQueryable().CreatePagedResponse(new PageableRequest
-            {
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.OrderBy,
-                SortBy = request.SortBy
-            });
-
-            var total = new PlayerContributionReportTotalModel(
-                response.Items.Sum(x => x.DepositAmount),
-                response.Items.Sum(x => x.WithdrawalAmount),
-                response.Items.Sum(x => x.CompanyAdjustAmount),
-                response.Items.Sum(x => x.BonusAdjustAmount),
-                response.Items.Sum(x => x.AgentAdjustAmount),
-                response.Items.Sum(x => x.BonusAmount),
-                response.Items.Sum(x => x.BetAmount),
-                response.Items.Sum(x => x.ValidBetAmount),
-                response.Items.Sum(x => x.Turnover),
-                response.Items.Sum(x => x.WinLossAmount),
-                response.Items.Sum(x => x.NetProfit)
-            );
-
+        if (!response.Valid)
+        {
             return new GetPlayerContributionsReportResponse
             {
+                Valid = response.Valid,
+                Message = response.Message,
                 TotalCount = response.TotalCount,
-                Items = pageArray.Items,
-                Total = total
+                Items = Array.Empty<PlayerContributionReportModel>(),
+                Total = new PlayerContributionReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             };
         }
+
+        var pageArray = response.Items?.Select(x => new PlayerContributionReportModel
+        {
+            Username = x.Username,
+            PlayerCode = x.PlayerCode,
+            Type = (AccountType)x.Type,
+            Level = x.Level,
+            DepositAmount = x.DepositAmount,
+            WithdrawalAmount = x.WithdrawalAmount,
+            CompanyAdjustAmount = x.CompanyAdjustAmount,
+            BonusAdjustAmount = x.BonusAdjustAmount,
+            AgentAdjustAmount = x.AgentAdjustAmount,
+            BonusAmount = x.BonusAmount,
+            BetAmount = x.BetAmount,
+            ValidBetAmount = x.ValidBetAmount,
+            Turnover = x.Turnover,
+            WinLossAmount = x.WinLossAmount,
+            NetProfit = x.NetProfit
+        }).AsQueryable().CreatePagedResponse(new PageableRequest
+        {
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.OrderBy,
+            SortBy = request.SortBy
+        });
+
+        var total = new PlayerContributionReportTotalModel(
+            response.Items.Sum(x => x.DepositAmount),
+            response.Items.Sum(x => x.WithdrawalAmount),
+            response.Items.Sum(x => x.CompanyAdjustAmount),
+            response.Items.Sum(x => x.BonusAdjustAmount),
+            response.Items.Sum(x => x.AgentAdjustAmount),
+            response.Items.Sum(x => x.BonusAmount),
+            response.Items.Sum(x => x.BetAmount),
+            response.Items.Sum(x => x.ValidBetAmount),
+            response.Items.Sum(x => x.Turnover),
+            response.Items.Sum(x => x.WinLossAmount),
+            response.Items.Sum(x => x.NetProfit)
+        );
+
+        return new GetPlayerContributionsReportResponse
+        {
+            TotalCount = response.TotalCount,
+            Items = pageArray.Items,
+            Total = total
+        };
     }
 }

@@ -16,183 +16,182 @@ using TGS.Services.Operator.ApplicationServices.BrandPayments;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.BrandPayment;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class WithdrawController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WithdrawController : ControllerBase
+    [HttpPost]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<Guid> CreateWithdrawRequestAsync(
+        [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
+        [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
+        CreateWithdrawRequest request)
     {
-        [HttpPost]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlockedCheck]
-        public async Task<Guid> CreateWithdrawRequestAsync(
-            [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
-            [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
-            CreateWithdrawRequest request)
-        {
-            try
-            {
-                var brandId = HttpContext.Items.GetBrandId();
-                var playerData = HttpContext.Items.GetPlayerTokenData();
-
-                var checkCommand = new CheckPlayerIdentityCommand(brandId, playerData.PlayerCode);
-
-                var playerCanWithdraw = await checkService.GetAsync(checkCommand).ConfigureAwait(false);
-
-                if (playerCanWithdraw is false)
-                    throw new PlayerCanNotWithdrawException();
-
-                var command = new CreateWithdrawFormCommand(
-                    playerData.PlayerCode,
-                    brandId,
-                    request.BankInfoId,
-                    request.Amount,
-                    request.Note);
-
-                await createFormService.ExecuteAsync(command).ConfigureAwait(false);
-
-                return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-            }
-            catch (InsufficientFundsException)
-            {
-                throw new PlayerHasInsufficientFundsException();
-            }
-        }
-
-        [HttpGet]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
-            [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-            [FromServices]
-            IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
-            [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var paymentMethods = await getAllPaymentMethodService
-                .GetAsync(new())
-                .ConfigureAwait(false);
-
-            var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
-
-            var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
-                .ToArrayAsync()
-                .ConfigureAwait(false);
-
-            foreach (var bp in brandPayments)
-            {
-                if (bp.TransferType != TransferType.Withdraw)
-                    continue;
-
-                var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
-
-                var paymentInfo = await getPaymentService
-                    .GetAsync(getPaymentQuery)
-                    .ConfigureAwait(false);
-
-                var paymentMethod = paymentMethods[bp.MethodId];
-
-                yield return new()
-                {
-                    Id = bp.Id,
-                    ChannelId = bp.ChannelId,
-                    ChannelName = bp.ChannelName,
-                    ChannelCode = bp.ChannelCode,
-                    TransferLimit = new()
-                    {
-                        From = bp.TransferLimit.From,
-                        To = bp.TransferLimit.To
-                    },
-                    ExtendedData = JsonDocument.Parse("{}"),
-                    PaymentId = bp.PaymentId,
-                    PaymentCode = paymentInfo.Code,
-                    MethodId = bp.MethodId,
-                    MethodCode = paymentMethod.Name,
-                    BankType = paymentMethod.BankType
-                };
-            }
-        }
-
-        /// <summary>
-        /// Get the player withdraw info list.
-        /// </summary>
-        /// <param name="getWithdrawFormsQueryService"></param>
-        /// <param name="request"></param>
-        /// <param name="paging"></param>
-        /// <returns></returns>
-        [HttpGet("player/list")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
-            [FromServices] IGetService<WithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
-            [FromQuery] GetWithdrawFormsRequest request,
-            [FromQuery] PageableRequest paging)
+        try
         {
             var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var playerData = HttpContext.Items.GetPlayerTokenData();
 
-            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var checkCommand = new CheckPlayerIdentityCommand(brandId, playerData.PlayerCode);
 
-            if (request.BeginCreateOn != null && request.EndCreateOn != null)
-                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+            var playerCanWithdraw = await checkService.GetAsync(checkCommand).ConfigureAwait(false);
 
-            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
-                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+            if (playerCanWithdraw is false)
+                throw new PlayerCanNotWithdrawException();
 
-            var query = new WithdrawFormsQuery(
+            var command = new CreateWithdrawFormCommand(
+                playerData.PlayerCode,
                 brandId,
-                playerTokenData.PlayerCode,
-                request.Status.ToPaymentFlowState(),
-                createOnRange,
-                updateOnRange,
-                paging);
+                request.BankInfoId,
+                request.Amount,
+                request.Note);
 
-            var result = await getWithdrawFormsQueryService.GetAsync(query).ConfigureAwait(false);
+            await createFormService.ExecuteAsync(command).ConfigureAwait(false);
 
-            var response = new PagedResponse<WithdrawFormViewModel>
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        }
+        catch (InsufficientFundsException)
+        {
+            throw new PlayerHasInsufficientFundsException();
+        }
+    }
+
+    [HttpGet]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
+        [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+        [FromServices]
+        IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+        [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var paymentMethods = await getAllPaymentMethodService
+            .GetAsync(new())
+            .ConfigureAwait(false);
+
+        var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
+
+        var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
+
+        foreach (var bp in brandPayments)
+        {
+            if (bp.TransferType != TransferType.Withdraw)
+                continue;
+
+            var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
+
+            var paymentInfo = await getPaymentService
+                .GetAsync(getPaymentQuery)
+                .ConfigureAwait(false);
+
+            var paymentMethod = paymentMethods[bp.MethodId];
+
+            yield return new()
             {
-                Valid = true,
-                TotalCount = result.TotalCount,
-                Items = result.Items
-                    .Select(form => new WithdrawFormViewModel
-                    {
-                        Id = form.Id,
-                        Status = form.Status.ToWithdrawFlowState(),
-                        Amount = form.ActualAmount ?? form.Amount,
-                        BrandPaymentId = form.BrandPaymentId,
-                        CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn,
-                        OrderNo = form.OrderNo
-                    })
-                    .ToArray()
+                Id = bp.Id,
+                ChannelId = bp.ChannelId,
+                ChannelName = bp.ChannelName,
+                ChannelCode = bp.ChannelCode,
+                TransferLimit = new()
+                {
+                    From = bp.TransferLimit.From,
+                    To = bp.TransferLimit.To
+                },
+                ExtendedData = JsonDocument.Parse("{}"),
+                PaymentId = bp.PaymentId,
+                PaymentCode = paymentInfo.Code,
+                MethodId = bp.MethodId,
+                MethodCode = paymentMethod.Name,
+                BankType = paymentMethod.BankType
             };
-
-            return response;
         }
+    }
 
-        [HttpGet("status")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
+    /// <summary>
+    /// Get the player withdraw info list.
+    /// </summary>
+    /// <param name="getWithdrawFormsQueryService"></param>
+    /// <param name="request"></param>
+    /// <param name="paging"></param>
+    /// <returns></returns>
+    [HttpGet("player/list")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
+        [FromServices] IGetService<WithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
+        [FromQuery] GetWithdrawFormsRequest request,
+        [FromQuery] PageableRequest paging)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+        var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+        if (request.BeginCreateOn != null && request.EndCreateOn != null)
+            createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+        if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+            updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+        var query = new WithdrawFormsQuery(
+            brandId,
+            playerTokenData.PlayerCode,
+            request.Status.ToPaymentFlowState(),
+            createOnRange,
+            updateOnRange,
+            paging);
+
+        var result = await getWithdrawFormsQueryService.GetAsync(query).ConfigureAwait(false);
+
+        var response = new PagedResponse<WithdrawFormViewModel>
         {
-            var dict = Enum.GetValues(typeof(FlowState))
-               .Cast<FlowState>()
-               .Where(x => x is not (FlowState.Unknown or FlowState.Approved))
-               .ToDictionary(t => (int)t, t => t.ToString());
-            return Task.FromResult(dict);
-        }
+            Valid = true,
+            TotalCount = result.TotalCount,
+            Items = result.Items
+                .Select(form => new WithdrawFormViewModel
+                {
+                    Id = form.Id,
+                    Status = form.Status.ToWithdrawFlowState(),
+                    Amount = form.ActualAmount ?? form.Amount,
+                    BrandPaymentId = form.BrandPaymentId,
+                    CreatedOn = form.CreatedOn,
+                    UpdatedOn = form.UpdatedOn,
+                    OrderNo = form.OrderNo
+                })
+                .ToArray()
+        };
 
-        [HttpGet("player/amount")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<decimal> GetWithdrawRequireAmountAsync(
-            [FromServices] IGetService<GetRequireAmountQuery, decimal> getService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        return response;
+    }
 
-            var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
-            var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+    [HttpGet("status")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+    public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
+    {
+        var dict = Enum.GetValues(typeof(FlowState))
+           .Cast<FlowState>()
+           .Where(x => x is not (FlowState.Unknown or FlowState.Approved))
+           .ToDictionary(t => (int)t, t => t.ToString());
+        return Task.FromResult(dict);
+    }
 
-            return WageringRequirement;
-        }
+    [HttpGet("player/amount")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<decimal> GetWithdrawRequireAmountAsync(
+        [FromServices] IGetService<GetRequireAmountQuery, decimal> getService)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
+        var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+
+        return WageringRequirement;
     }
 }

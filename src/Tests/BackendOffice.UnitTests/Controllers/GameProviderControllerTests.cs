@@ -13,137 +13,136 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Resources;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
+
+[TestFixture]
+[Parallelizable]
+public class GameProviderControllerTests : BaseTests
 {
-    [TestFixture]
-    [Parallelizable]
-    public class GameProviderControllerTests : BaseTests
+    [SetUp]
+    public override void Setup()
     {
-        [SetUp]
-        public override void Setup()
+        base.Setup();
+        _controller = new(
+            _mediatorMock.Object,
+            _uploadMock.Object);
+    }
+
+    private GameProviderController _controller=default!;
+    private readonly Mock<IMediator> _mediatorMock = new();
+    private readonly Mock<IUploadService> _uploadMock = new();
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Can_Get_GameProviders(bool showAll)
+    {
+        var list = CreateGameProviderModelFixture()
+            .CreateMany<GameProviderModel>(99)
+            .ToArray();
+
+        var request = new GetGameProvidersRequest
         {
-            base.Setup();
-            _controller = new(
-                _mediatorMock.Object,
-                _uploadMock.Object);
-        }
+            Code = "Code",
+            Name = "Name",
+            Page = 1,
+            Rows = 10,
+            SortBy = "updatedOn",
+            OrderBy = SortOrder.Descending,
+            ShowAll = showAll
+        };
+        var (skip, take) = GetPage(request);
+        var games = list.OrderByDescending(p => p.UpdatedOn)
+            .Select(g => (GameProviderBaseModel)g);
 
-        private GameProviderController _controller=default!;
-        private readonly Mock<IMediator> _mediatorMock = new();
-        private readonly Mock<IUploadService> _uploadMock = new();
+        var expectedGames = showAll ? games.ToArray() : games.Skip(skip).Take(take).ToArray();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_GameProviders(bool showAll)
-        {
-            var list = CreateGameProviderModelFixture()
-                .CreateMany<GameProviderModel>(99)
-                .ToArray();
-
-            var request = new GetGameProvidersRequest
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<GameProviderBaseModel>
             {
-                Code = "Code",
-                Name = "Name",
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
-            var (skip, take) = GetPage(request);
-            var games = list.OrderByDescending(p => p.UpdatedOn)
-                .Select(g => (GameProviderBaseModel)g);
+                Valid = true,
+                Items = expectedGames
+            });
 
-            var expectedGames = showAll ? games.ToArray() : games.Skip(skip).Take(take).ToArray();
+        var response = await _controller.GetGameProvidersAsync(request);
+        response.Valid.Should().BeTrue();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<GameProviderBaseModel>
-                {
-                    Valid = true,
-                    Items = expectedGames
-                });
+        for (var i = 0; i < response.Items.Length; i++)
+        {
+            response.Items[i].Id.Should().Be(expectedGames[i].Id);
+            response.Items[i].Name.Should().Be(expectedGames[i].Name);
+        }
 
-            var response = await _controller.GetGameProvidersAsync(request);
-            response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            for (var i = 0; i < response.Items.Length; i++)
+    [Test]
+    public async Task Cannot_Create_GameProvider_With_Name_Exists()
+    {
+        var list = CreateGameProviderModelFixture()
+            .CreateMany<GameProviderModel>(99)
+            .ToArray();
+
+        var request = new Fixture().Create<CreateGameProviderRequest>();
+        request.Name = list.FirstOrDefault()?.Name;
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse
             {
-                response.Items[i].Id.Should().Be(expectedGames[i].Id);
-                response.Items[i].Name.Should().Be(expectedGames[i].Name);
-            }
+                Valid = false,
+                Message = GameProvider.CodeExisted
+            });
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.CreateGameProviderAsync(request);
+        response.Valid.Should().BeFalse();
+        response.Message.Should().Be(GameProvider.CodeExisted);
 
-        [Test]
-        public async Task Cannot_Create_GameProvider_With_Name_Exists()
-        {
-            var list = CreateGameProviderModelFixture()
-                .CreateMany<GameProviderModel>(99)
-                .ToArray();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            var request = new Fixture().Create<CreateGameProviderRequest>();
-            request.Name = list.FirstOrDefault()?.Name;
+    [Test]
+    public async Task Can_Create_GameProvider()
+    {
+        var request = new Fixture().Create<CreateGameProviderRequest>();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse
-                {
-                    Valid = false,
-                    Message = GameProvider.CodeExisted
-                });
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse {Valid = true});
 
-            var response = await _controller.CreateGameProviderAsync(request);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(GameProvider.CodeExisted);
+        var response = await _controller.CreateGameProviderAsync(request);
+        response.Valid.Should().BeTrue();
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()));
-        }
+        _mediatorMock.Verify(x => x.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-        [Test]
-        public async Task Can_Create_GameProvider()
-        {
-            var request = new Fixture().Create<CreateGameProviderRequest>();
+    [Test]
+    public async Task Can_Update_GameProvider()
+    {
+        var brand = CreateGameProviderModelFixture().Create<GameProviderModel>();
+        var request = new Fixture().Create<UpdateGameProviderRequest>();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse {Valid = true});
 
-            var response = await _controller.CreateGameProviderAsync(request);
-            response.Valid.Should().BeTrue();
+        var response = await _controller.UpdateGameProviderAsync(brand.Id, request);
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()));
-        }
+        response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-        [Test]
-        public async Task Can_Update_GameProvider()
-        {
-            var brand = CreateGameProviderModelFixture().Create<GameProviderModel>();
-            var request = new Fixture().Create<UpdateGameProviderRequest>();
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = true});
-
-            var response = await _controller.UpdateGameProviderAsync(brand.Id, request);
-
-            response.Valid.Should().BeTrue();
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        private Fixture CreateGameProviderModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Customize<GameProviderModel>(u => u
-                .With(s => s.Languages, new GameProviderLanguageModel[]
-                {
-                })
-                .With(s => s.Currencies, new GameProviderCurrencyModel[]
-                {
-                }));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            return fixture;
-        }
+    private Fixture CreateGameProviderModelFixture()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<GameProviderModel>(u => u
+            .With(s => s.Languages, new GameProviderLanguageModel[]
+            {
+            })
+            .With(s => s.Currencies, new GameProviderCurrencyModel[]
+            {
+            }));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        return fixture;
     }
 }

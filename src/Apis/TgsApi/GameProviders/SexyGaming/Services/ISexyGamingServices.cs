@@ -7,22 +7,21 @@ using TGS.Core.Models.Services.Games;
 using TGS.GameProviders.Repositories.Models;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
+
+public interface ISexyGamingServices
 {
-    public interface ISexyGamingServices
-    {
-        ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token);
+    ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token);
 
-        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
+    ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
 
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
+    ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
 
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+    ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
 
-        ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+    ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
 
-        ValueTask<Guid> GetGameProviderIdAsync();
+    ValueTask<Guid> GetGameProviderIdAsync();
 
-        ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request);
-    }
+    ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request);
 }

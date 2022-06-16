@@ -1,8 +1,7 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record PlayerKickResponse : TgsResponse
 {
-    public record PlayerKickResponse : TgsResponse
-    {
-    }
 }

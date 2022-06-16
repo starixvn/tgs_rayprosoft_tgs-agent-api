@@ -19,285 +19,284 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
 using CoreModesl = TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests;
+
+[TestFixture]
+public class GameBalanceTests
 {
-    [TestFixture]
-    public class GameBalanceTests
+    [Test]
+    public async Task Player_Can_Fund_In()
     {
-        [Test]
-        public async Task Player_Can_Fund_In()
+        // arrange
+        var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+        var fakeLogger = new NullLogger<FundInGameBalanceCommandService>();
+
+        var gameProviderCode = "KY";
+        var playerCode = "playerCode";
+        int amount = 10000;
+
+        var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
+            Guid.NewGuid(),
+            Guid.NewGuid().ToString("N"));
+
+        fakeGameProvidersOperatorPluggableClient
+            .GameProviderFundInAsync(
+            playerCode,
+            gameProviderCode,
+            amount)
+            .Returns(gameProviderFundResultViewModel);
+
+        var sut = new FundInGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
+
+        // act
+        var command = new FundInGameBalanceCommand(gameProviderCode, playerCode, amount);
+        await sut.ExecuteAsync(command, default);
+    }
+
+    [Test]
+    public async Task Player_Can_Fund_Out()
+    {
+        // arrange
+        var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+        var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
+
+        var gameProviderCode = "KY";
+        var playerCode = "playerCode";
+        int amount = 10000;
+
+        var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
+            Guid.NewGuid(),
+            Guid.NewGuid().ToString("N"));
+        fakeGameProvidersOperatorPluggableClient
+            .GameProviderFundOutAsync(
+            playerCode,
+            gameProviderCode,
+            amount)
+            .Returns(gameProviderFundResultViewModel);
+
+        var sut = new FundOutGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
+
+        // act
+        var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
+        await sut.ExecuteAsync(command, default);
+    }
+
+    [Test]
+    public async Task Player_Can_Get_Game_Balance_Infos()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+        var brandId = Guid.NewGuid();
+
+        repository.Brands.Add(new CoreModesl.Brand()
         {
-            // arrange
-            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
-            var fakeLogger = new NullLogger<FundInGameBalanceCommandService>();
+            Id = brandId,
+            Name = "brandName",
+            ApiKey = string.Empty,
+            ClientId = string.Empty,
+            Code = "Test",
+            CreatedByUsername = "System",
+            UpdatedByUsername = "System",
+            SecretKey = string.Empty
+        });
+        await repository.SaveChangesAsync();
 
-            var gameProviderCode = "KY";
-            var playerCode = "playerCode";
-            int amount = 10000;
+        var sut = new GetGameBalanceInfosQueryService(repository);
 
-            var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
-                Guid.NewGuid(),
-                Guid.NewGuid().ToString("N"));
+        var query = new GetGameBalanceInfosQuery(
+            BrandId: brandId,
+            PlayerCode: "playerCode",
+            RecordOnRange: null);
 
-            fakeGameProvidersOperatorPluggableClient
-                .GameProviderFundInAsync(
-                playerCode,
-                gameProviderCode,
-                amount)
-                .Returns(gameProviderFundResultViewModel);
+        var info = await sut.QueryAsync(query).ToArrayAsync();
 
-            var sut = new FundInGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
+        Assert.IsTrue(info.Length >= 0);
+    }
 
-            // act
-            var command = new FundInGameBalanceCommand(gameProviderCode, playerCode, amount);
-            await sut.ExecuteAsync(command, default);
-        }
+    [Test]
+    public async Task Player_Can_Get_Transfer_Wallet_Balance()
+    {
+        // arrange
+        var playerCode = "playerCode";
+        var gameProviderCode = "KY";
+        var fakeUri = new Uri("https://www.fake.com");
 
-        [Test]
-        public async Task Player_Can_Fund_Out()
+        var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+
+        fakeGameProvidersOperatorPluggableClient
+            .GetBalanceAsync(playerCode, gameProviderCode)
+            .Returns(1000m);
+
+        var sut = new GetGameBalanceQueryService(fakeGameProvidersOperatorPluggableClient);
+
+        // act
+        var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
+        await sut.GetAsync(query, default);
+
+        // assert
+        _ = fakeGameProvidersOperatorPluggableClient
+            .Received(1)
+            .GetBalanceAsync(Arg.Is(playerCode), Arg.Is(gameProviderCode));
+    }
+
+    [Test]
+    public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_Brand_GameProvider_Status_Is_Inactive()
+    {
+        // arrange
+        var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
+        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var playerCode = "playerCode";
+        var brandId = Guid.NewGuid();
+        var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
+        var gameProviderId = Guid.NewGuid();
+        var gameProviderStatus = Status.Active;
+
+        fakeGameProviderOperations
+            .GetGameProviderIdByCodeAsync(Arg.Any<string>())
+            .Returns(gameProviderId);
+        fakeGameProviderOperations
+            .GetGameProviderStatusAsync(Arg.Any<Guid>())
+            .Returns(gameProviderStatus);
+
+        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
+        fakePlayerOperations
+            .GetCachedPlayerAsync(playerCode)
+            .Returns(cachedPlayer);
+
+        var playerTokenData = new PlayerTokenData
         {
-            // arrange
-            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
-            var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
+            PlayerCode = playerCode
+        };
 
-            var gameProviderCode = "KY";
-            var playerCode = "playerCode";
-            int amount = 10000;
+        fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
+        var brandGameProviderStatus = Status.Inactive;
 
-            var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
-                Guid.NewGuid(),
-                Guid.NewGuid().ToString("N"));
-            fakeGameProvidersOperatorPluggableClient
-                .GameProviderFundOutAsync(
-                playerCode,
-                gameProviderCode,
-                amount)
-                .Returns(gameProviderFundResultViewModel);
+        fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
 
-            var sut = new FundOutGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
 
-            // act
-            var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
-            await sut.ExecuteAsync(command, default);
-        }
+        // assert
+        Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+    }
 
-        [Test]
-        public async Task Player_Can_Get_Game_Balance_Infos()
+    [Test]
+    public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_Brand_GameProvider_Status_Is_Maintenance()
+    {
+        // arrange
+        var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
+        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var playerCode = "playerCode";
+        var brandId = Guid.NewGuid();
+        var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
+        var gameProviderId = Guid.NewGuid();
+        var gameProviderStatus = Status.Active;
+
+        fakeGameProviderOperations
+            .GetGameProviderIdByCodeAsync(Arg.Any<string>())
+            .Returns(gameProviderId);
+        fakeGameProviderOperations
+            .GetGameProviderStatusAsync(Arg.Any<Guid>())
+            .Returns(gameProviderStatus);
+
+        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
+        fakePlayerOperations
+            .GetCachedPlayerAsync(playerCode)
+            .Returns(cachedPlayer);
+
+        var playerTokenData = new PlayerTokenData
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-            var brandId = Guid.NewGuid();
+            PlayerCode = playerCode
+        };
 
-            repository.Brands.Add(new CoreModesl.Brand()
-            {
-                Id = brandId,
-                Name = "brandName",
-                ApiKey = string.Empty,
-                ClientId = string.Empty,
-                Code = "Test",
-                CreatedByUsername = "System",
-                UpdatedByUsername = "System",
-                SecretKey = string.Empty
-            });
-            await repository.SaveChangesAsync();
+        fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
+        var brandGameProviderStatus = Status.Maintenance;
 
-            var sut = new GetGameBalanceInfosQueryService(repository);
+        fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
 
-            var query = new GetGameBalanceInfosQuery(
-                BrandId: brandId,
-                PlayerCode: "playerCode",
-                RecordOnRange: null);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
 
-            var info = await sut.QueryAsync(query).ToArrayAsync();
+        // assert
+        Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+    }
 
-            Assert.IsTrue(info.Length >= 0);
-        }
+    [Test]
+    public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_GameProvider_Status_Is_Inactive()
+    {
+        // arrange
+        var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
+        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var playerCode = "playerCode";
+        var brandId = Guid.NewGuid();
+        var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
+        var gameProviderId = Guid.NewGuid();
+        var gameProviderStatus = Status.Inactive;
 
-        [Test]
-        public async Task Player_Can_Get_Transfer_Wallet_Balance()
+        fakeGameProviderOperations
+            .GetGameProviderIdByCodeAsync(Arg.Any<string>())
+            .Returns(gameProviderId);
+        fakeGameProviderOperations
+            .GetGameProviderStatusAsync(Arg.Any<Guid>())
+            .Returns(gameProviderStatus);
+
+        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
+        fakePlayerOperations
+            .GetCachedPlayerAsync(playerCode)
+            .Returns(cachedPlayer);
+
+        var playerTokenData = new PlayerTokenData
         {
-            // arrange
-            var playerCode = "playerCode";
-            var gameProviderCode = "KY";
-            var fakeUri = new Uri("https://www.fake.com");
+            PlayerCode = playerCode
+        };
 
-            var fakeGameProvidersOperatorPluggableClient = Substitute.For<IGameProvidersOperatorPluggableClient>();
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
 
-            fakeGameProvidersOperatorPluggableClient
-                .GetBalanceAsync(playerCode, gameProviderCode)
-                .Returns(1000m);
+        // assert
+        Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+    }
 
-            var sut = new GetGameBalanceQueryService(fakeGameProvidersOperatorPluggableClient);
+    [Test]
+    public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_GameProvider_Status_Is_Maintenance()
+    {
+        // arrange
+        var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
+        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+        var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+        var fakeBrandOperations = Substitute.For<IBrandOperations>();
+        var playerCode = "playerCode";
+        var brandId = Guid.NewGuid();
+        var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
+        var gameProviderId = Guid.NewGuid();
+        var gameProviderStatus = Status.Maintenance;
 
-            // act
-            var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
-            await sut.GetAsync(query, default);
+        fakeGameProviderOperations
+            .GetGameProviderIdByCodeAsync(Arg.Any<string>())
+            .Returns(gameProviderId);
+        fakeGameProviderOperations
+            .GetGameProviderStatusAsync(Arg.Any<Guid>())
+            .Returns(gameProviderStatus);
 
-            // assert
-            _ = fakeGameProvidersOperatorPluggableClient
-                .Received(1)
-                .GetBalanceAsync(Arg.Is(playerCode), Arg.Is(gameProviderCode));
-        }
+        var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
+        fakePlayerOperations
+            .GetCachedPlayerAsync(playerCode)
+            .Returns(cachedPlayer);
 
-        [Test]
-        public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_Brand_GameProvider_Status_Is_Inactive()
+        var playerTokenData = new PlayerTokenData
         {
-            // arrange
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var playerCode = "playerCode";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
-            var gameProviderId = Guid.NewGuid();
-            var gameProviderStatus = Status.Active;
+            PlayerCode = playerCode
+        };
 
-            fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(Arg.Any<string>())
-                .Returns(gameProviderId);
-            fakeGameProviderOperations
-                .GetGameProviderStatusAsync(Arg.Any<Guid>())
-                .Returns(gameProviderStatus);
+        var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
 
-            var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-            fakePlayerOperations
-                .GetCachedPlayerAsync(playerCode)
-                .Returns(cachedPlayer);
-
-            var playerTokenData = new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            };
-
-            fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
-            var brandGameProviderStatus = Status.Inactive;
-
-            fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
-
-            var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
-
-            // assert
-            Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
-        }
-
-        [Test]
-        public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_Brand_GameProvider_Status_Is_Maintenance()
-        {
-            // arrange
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var playerCode = "playerCode";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
-            var gameProviderId = Guid.NewGuid();
-            var gameProviderStatus = Status.Active;
-
-            fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(Arg.Any<string>())
-                .Returns(gameProviderId);
-            fakeGameProviderOperations
-                .GetGameProviderStatusAsync(Arg.Any<Guid>())
-                .Returns(gameProviderStatus);
-
-            var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-            fakePlayerOperations
-                .GetCachedPlayerAsync(playerCode)
-                .Returns(cachedPlayer);
-
-            var playerTokenData = new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            };
-
-            fakeValidStatus.GetStatus(cachedPlayer.Type).Returns(new Status[] { Status.Active });
-            var brandGameProviderStatus = Status.Maintenance;
-
-            fakeBrandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId).Returns(brandGameProviderStatus);
-
-            var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
-
-            // assert
-            Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
-        }
-
-        [Test]
-        public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_GameProvider_Status_Is_Inactive()
-        {
-            // arrange
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var playerCode = "playerCode";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
-            var gameProviderId = Guid.NewGuid();
-            var gameProviderStatus = Status.Inactive;
-
-            fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(Arg.Any<string>())
-                .Returns(gameProviderId);
-            fakeGameProviderOperations
-                .GetGameProviderStatusAsync(Arg.Any<Guid>())
-                .Returns(gameProviderStatus);
-
-            var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-            fakePlayerOperations
-                .GetCachedPlayerAsync(playerCode)
-                .Returns(cachedPlayer);
-
-            var playerTokenData = new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            };
-
-            var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
-
-            // assert
-            Assert.ThrowsAsync<InvalidStatusException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
-        }
-
-        [Test]
-        public void Player_Can_Not_Use_Transfer_Wallet_Balance_Query_FundIn_FundOut_When_GameProvider_Status_Is_Maintenance()
-        {
-            // arrange
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var playerCode = "playerCode";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "ae5533bd-35d5-5478-19d6-233ed44f7c9d";
-            var gameProviderId = Guid.NewGuid();
-            var gameProviderStatus = Status.Maintenance;
-
-            fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(Arg.Any<string>())
-                .Returns(gameProviderId);
-            fakeGameProviderOperations
-                .GetGameProviderStatusAsync(Arg.Any<Guid>())
-                .Returns(gameProviderStatus);
-
-            var cachedPlayer = new CachedPlayer() { Type = PlayerType.RealPlayer };
-            fakePlayerOperations
-                .GetCachedPlayerAsync(playerCode)
-                .Returns(cachedPlayer);
-
-            var playerTokenData = new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            };
-
-            var sut = new GameProviderStatusValidator(fakeGameProviderOperations, fakePlayerOperations, fakeValidStatus, fakeBrandOperations);
-
-            // assert
-            Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
-        }
+        // assert
+        Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Core.Models.Exceptions
+namespace TGS.Core.Models.Exceptions;
+
+public sealed class InvalidCaptchaException : Exception
 {
-    public sealed class InvalidCaptchaException : Exception
+    public InvalidCaptchaException(string message) : base(message)
     {
-        public InvalidCaptchaException(string message) : base(message)
-        {
-                
-        }
+            
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum PaymentTransferType
 {
-    public enum PaymentTransferType
-    {
-        Deposit = 0,
-        Withdrawal = 1
-    }
+    Deposit = 0,
+    Withdrawal = 1
 }

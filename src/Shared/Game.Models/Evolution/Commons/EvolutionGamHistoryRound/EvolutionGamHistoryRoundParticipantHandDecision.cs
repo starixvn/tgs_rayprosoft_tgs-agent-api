@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound;
+
+public record EvolutionGamHistoryRoundParticipantHandDecision
 {
-    public record EvolutionGamHistoryRoundParticipantHandDecision
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-    }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 }

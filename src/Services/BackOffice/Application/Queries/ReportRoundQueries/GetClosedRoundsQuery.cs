@@ -9,71 +9,70 @@ using Tgs.Report.Client.Models.Round;
 using TGS.Services.BackOffice.Application.Models.ReportRound;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportRoundQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportRoundQueries;
+
+public class
+    GetClosedRoundsQuery : IGetService<GetClosedRoundsReportRequest,
+        PagedResponse<ClosedRoundReportModel>>
 {
-    public class
-        GetClosedRoundsQuery : IGetService<GetClosedRoundsReportRequest,
-            PagedResponse<ClosedRoundReportModel>>
+    private readonly IReportClient _reportClient;
+
+    public GetClosedRoundsQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<PagedResponse<ClosedRoundReportModel>> GetAsync(
+        GetClosedRoundsReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetClosedRoundsQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<PagedResponse<ClosedRoundReportModel>> GetAsync(
-            GetClosedRoundsReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetClosedRoundsRequest
         {
-            var reportRequest = new GetClosedRoundsRequest
-            {
-                ExternalRoundId = request.ExternalRoundId,
-                GameProviderId = request.GameProviderId,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+            ExternalRoundId = request.ExternalRoundId,
+            GameProviderId = request.GameProviderId,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = (short)request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
 
-            var response = await _reportClient.GetClosedRoundsAsync(reportRequest);
+        var response = await _reportClient.GetClosedRoundsAsync(reportRequest);
 
-            return new()
+        return new()
+        {
+            Valid = response.Valid,
+            Message = response.Message,
+            TotalCount = response.TotalCount,
+            Items = response.Items?.Select(x => new ClosedRoundReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new ClosedRoundReportModel
-                {
-                    AdditionalData = x.AdditionalData,
-                    BetAmount = x.BetAmount,
-                    BrandCode = x.BrandCode,
-                    BrandName = x.BrandName,
-                    ClosedOn = x.ClosedOn,
-                    Commission = x.Commission,
-                    CreatedOn = x.CreatedOn,
-                    CurrencyCode = x.CurrencyCode,
-                    ExternalClosedOn = x.ExternalClosedOn,
-                    ExternalCreatedOn = x.ExternalCreatedOn,
-                    ExternalPlayerCode = x.ExternalPlayerCode,
-                    ExternalRoundId = x.ExternalRoundId,
-                    GameId = x.GameId,
-                    GameName = x.GameName,
-                    GameProviderCode = x.GameProviderCode,
-                    GameProviderId = x.GameProviderId,
-                    Id = x.Id,
-                    PlatformType = (PlatformType)x.PlatformType,
-                    PlayerCode = x.PlayerCode,
-                    PlayerName = x.PlayerName,
-                    PlayerType = (PlayerType)x.PlayerType,
-                    SettleAmount = x.SettleAmount,
-                    Status = (ClientRoundStatus)x.Status,
-                    SubGameProviderName = x.SubGameProviderName,
-                    TieBetAdjustment = x.TieBetAdjustment,
-                    UpdatedOn = x.UpdatedOn,
-                    ValidBetAmount = x.ValidBetAmount,
-                    WinLoss = x.WinLoss
-                }).ToArray()
-            };
-        }
+                AdditionalData = x.AdditionalData,
+                BetAmount = x.BetAmount,
+                BrandCode = x.BrandCode,
+                BrandName = x.BrandName,
+                ClosedOn = x.ClosedOn,
+                Commission = x.Commission,
+                CreatedOn = x.CreatedOn,
+                CurrencyCode = x.CurrencyCode,
+                ExternalClosedOn = x.ExternalClosedOn,
+                ExternalCreatedOn = x.ExternalCreatedOn,
+                ExternalPlayerCode = x.ExternalPlayerCode,
+                ExternalRoundId = x.ExternalRoundId,
+                GameId = x.GameId,
+                GameName = x.GameName,
+                GameProviderCode = x.GameProviderCode,
+                GameProviderId = x.GameProviderId,
+                Id = x.Id,
+                PlatformType = (PlatformType)x.PlatformType,
+                PlayerCode = x.PlayerCode,
+                PlayerName = x.PlayerName,
+                PlayerType = (PlayerType)x.PlayerType,
+                SettleAmount = x.SettleAmount,
+                Status = (ClientRoundStatus)x.Status,
+                SubGameProviderName = x.SubGameProviderName,
+                TieBetAdjustment = x.TieBetAdjustment,
+                UpdatedOn = x.UpdatedOn,
+                ValidBetAmount = x.ValidBetAmount,
+                WinLoss = x.WinLoss
+            }).ToArray()
+        };
     }
 }

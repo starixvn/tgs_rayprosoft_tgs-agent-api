@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.SBOBET.Outgoing
+namespace TGS.Shared.Game.Models.SBOBET.Outgoing;
+
+public record LoginResponse : BaseResponse
 {
-    public record LoginResponse : BaseResponse
-    {
-        [JsonPropertyName("url")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("url")]
+    public string Url { get; init; }
 }

@@ -1,7 +1,6 @@
-﻿namespace TGS.IdentityVerifiers
+﻿namespace TGS.IdentityVerifiers;
+
+public interface IIdentityVerifier
 {
-    public interface IIdentityVerifier
-    {
-        bool Verify(string id);
-    }
+    bool Verify(string id);
 }

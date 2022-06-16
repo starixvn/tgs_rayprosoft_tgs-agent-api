@@ -1,12 +1,11 @@
-﻿namespace TGS.Shared.Game.Models.Habanero.Enums
+﻿namespace TGS.Shared.Game.Models.Habanero.Enums;
+
+public enum GameApiError
 {
-    public enum GameApiError
-    {
-        Success,
-        Uncategorized,
-        AuthorizationFailed,
-        InsufficientFunds,
-        DuplicateTransaction,
-        TransactionNotExist
-    }
+    Success,
+    Uncategorized,
+    AuthorizationFailed,
+    InsufficientFunds,
+    DuplicateTransaction,
+    TransactionNotExist
 }

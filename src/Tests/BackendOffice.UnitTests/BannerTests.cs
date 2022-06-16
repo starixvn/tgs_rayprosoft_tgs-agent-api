@@ -7,349 +7,348 @@ using TGS.Paging;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class BannerTests
 {
-    [TestFixture]
-    public class BannerTests
+    [Test]
+    public async Task User_Can_Change_Banner_DisplayOrder()
     {
-        [Test]
-        public async Task User_Can_Change_Banner_DisplayOrder()
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new ChangeBannerOrderCommandService(moqBackOfficeRepository.Object);
+
+        var command = new ChangeBannerOrderCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            100,
+            "User1");
+
+        await sut.ExecuteAsync(command);
+
+        moqBackOfficeRepository.Verify(
+            fake => fake.ChangeBannerOrderAsync(
+                It.Is<Guid>(x => x == command.BannerId),
+                It.Is<int>(x => x == command.OrderNumber),
+                It.Is<string>(x => x == command.Modifier)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Count_Banners_Query()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+
+        var paging = new Paging<BannerInfo>
         {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            var sut = new ChangeBannerOrderCommandService(moqBackOfficeRepository.Object);
+        paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
 
-            var command = new ChangeBannerOrderCommand(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                100,
-                "User1");
+        var query = new GetBannersQuery(
+            Guid.NewGuid(),
+            BannerStatus.Rejected,
+            paging);
 
-            await sut.ExecuteAsync(command);
-
-            moqBackOfficeRepository.Verify(
-                fake => fake.ChangeBannerOrderAsync(
-                    It.Is<Guid>(x => x == command.BannerId),
-                    It.Is<int>(x => x == command.OrderNumber),
-                    It.Is<string>(x => x == command.Modifier)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task User_Can_Count_Banners_Query()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-            var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
-
-            var paging = new Paging<BannerInfo>
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
+            .Returns(new[]
             {
-                RowCount = 10,
-                Page = 0
-            };
+                new BannerInfo(
+                    Guid.NewGuid(),
+                    query.BrandId,
+                    "Title1",
+                    DateTimeOffset.UtcNow,
+                    null,
+                    "{}",
+                    BannerFlowStatus.Rejected,
+                    true,
+                    1,
+                    "User1",
+                    DateTimeOffset.UtcNow),
+                new BannerInfo(
+                    Guid.NewGuid(),
+                    query.BrandId,
+                    "Title2",
+                    DateTimeOffset.UtcNow,
+                    null,
+                    "{}",
+                    BannerFlowStatus.Rejected,
+                    true,
+                    1,
+                    "User1",
+                    DateTimeOffset.UtcNow)
+            }.ToAsyncEnumerable());
 
-            paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
+        var actual = await sut.GetAsync(query);
 
-            var query = new GetBannersQuery(
-                Guid.NewGuid(),
-                BannerStatus.Rejected,
-                paging);
+        Assert.AreEqual(2, actual);
+    }
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(new[]
-                {
-                    new BannerInfo(
-                        Guid.NewGuid(),
-                        query.BrandId,
-                        "Title1",
-                        DateTimeOffset.UtcNow,
-                        null,
-                        "{}",
-                        BannerFlowStatus.Rejected,
-                        true,
-                        1,
-                        "User1",
-                        DateTimeOffset.UtcNow),
-                    new BannerInfo(
-                        Guid.NewGuid(),
-                        query.BrandId,
-                        "Title2",
-                        DateTimeOffset.UtcNow,
-                        null,
-                        "{}",
-                        BannerFlowStatus.Rejected,
-                        true,
-                        1,
-                        "User1",
-                        DateTimeOffset.UtcNow)
-                }.ToAsyncEnumerable());
+    [Test]
+    public async Task User_Can_Create_Banner_Data()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            var actual = await sut.GetAsync(query);
+        var sut = new CreateBannerCommandService(moqBackOfficeRepository.Object);
 
-            Assert.AreEqual(2, actual);
-        }
+        var command = new CreateBannerCommand(
+            Guid.NewGuid(),
+            "TestTitle",
+            DateTimeOffset.Now,
+            null,
+            null,
+            "User1");
 
-        [Test]
-        public async Task User_Can_Create_Banner_Data()
+        await sut.ExecuteAsync(command);
+
+        moqBackOfficeRepository.Verify(
+            fake => fake.CreateBannerAsync(
+                It.IsAny<BannerModifyInfo>(),
+                It.Is<string>(x => x == command.Modifier)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Get_Banner_Detail()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBannerDetailQueryService(moqBackOfficeRepository.Object);
+
+        var query = new GetBannerDetailQuery(
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        await sut.GetAsync(query);
+
+        moqBackOfficeRepository.Verify(
+            fake => fake.GetBannerByIdAsync(It.Is<Guid>(x => x == query.BannerId)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Query_Expired_Banners()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+
+        var paging = new Paging<BannerInfo>
         {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            var sut = new CreateBannerCommandService(moqBackOfficeRepository.Object);
+        paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
 
-            var command = new CreateBannerCommand(
-                Guid.NewGuid(),
-                "TestTitle",
-                DateTimeOffset.Now,
-                null,
-                null,
-                "User1");
+        var query = new GetBannersQuery(
+            Guid.NewGuid(),
+            BannerStatus.Expired,
+            paging);
 
-            await sut.ExecuteAsync(command);
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryExpiredBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
+            .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.CreateBannerAsync(
-                    It.IsAny<BannerModifyInfo>(),
-                    It.Is<string>(x => x == command.Modifier)),
-                Times.Exactly(1));
-        }
+        await sut.QueryAsync(query).ToArrayAsync();
 
-        [Test]
-        public async Task User_Can_Get_Banner_Detail()
+        moqBackOfficeRepository.Verify(
+            fake => fake.QueryExpiredBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Query_Rejected_Banners()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+
+        var paging = new Paging<BannerInfo>
         {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            var sut = new GetBannerDetailQueryService(moqBackOfficeRepository.Object);
+        paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
 
-            var query = new GetBannerDetailQuery(
-                Guid.NewGuid(),
-                Guid.NewGuid());
+        var query = new GetBannersQuery(
+            Guid.NewGuid(),
+            BannerStatus.Rejected,
+            paging);
 
-            await sut.GetAsync(query);
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
+            .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.GetBannerByIdAsync(It.Is<Guid>(x => x == query.BannerId)),
-                Times.Exactly(1));
-        }
+        await sut.QueryAsync(query).ToArrayAsync();
 
-        [Test]
-        public async Task User_Can_Query_Expired_Banners()
+        moqBackOfficeRepository.Verify(
+            fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Query_Reviewing_Banners()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+
+        var paging = new Paging<BannerInfo>
         {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+        paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
 
-            var paging = new Paging<BannerInfo>
-            {
-                RowCount = 10,
-                Page = 0
-            };
+        var query = new GetBannersQuery(
+            Guid.NewGuid(),
+            BannerStatus.Reviewing,
+            paging);
 
-            paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryReviewingBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
+            .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
 
-            var query = new GetBannersQuery(
-                Guid.NewGuid(),
-                BannerStatus.Expired,
-                paging);
+        await sut.QueryAsync(query).ToArrayAsync();
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryExpiredBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
+        moqBackOfficeRepository.Verify(
+            fake => fake.QueryReviewingBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
+            Times.Exactly(1));
+    }
 
-            await sut.QueryAsync(query).ToArrayAsync();
+    [Test]
+    public async Task User_Can_Query_Valid_Banners()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.QueryExpiredBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
-                Times.Exactly(1));
-        }
+        var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-        [Test]
-        public async Task User_Can_Query_Rejected_Banners()
+        var paging = new Paging<BannerInfo>
         {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+        paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
 
-            var paging = new Paging<BannerInfo>
-            {
-                RowCount = 10,
-                Page = 0
-            };
+        var query = new GetBannersQuery(
+            Guid.NewGuid(),
+            BannerStatus.Valid,
+            paging);
 
-            paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryValidBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
+            .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
 
-            var query = new GetBannersQuery(
-                Guid.NewGuid(),
-                BannerStatus.Rejected,
-                paging);
+        await sut.QueryAsync(query).ToArrayAsync();
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
+        moqBackOfficeRepository.Verify(
+            fake => fake.QueryValidBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
+            Times.Exactly(1));
+    }
 
-            await sut.QueryAsync(query).ToArrayAsync();
+    [Test]
+    public async Task User_Can_Review_Banner()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
-                Times.Exactly(1));
-        }
+        var sut = new ReviewBannerCommandService(moqBackOfficeRepository.Object);
 
-        [Test]
-        public async Task User_Can_Query_Reviewing_Banners()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+        var command = new ReviewBannerCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            BannerReviewState.Approve,
+            null,
+            "User1");
 
-            var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+        await sut.ExecuteAsync(command);
 
-            var paging = new Paging<BannerInfo>
-            {
-                RowCount = 10,
-                Page = 0
-            };
+        moqBackOfficeRepository.Verify(
+            fake => fake.ReviewBannerAsync(
+                It.Is<Guid>(x => x == command.BannerId),
+                It.Is<BannerReviewState>(x => x == command.ReviewState),
+                It.Is<string>(x => x == command.Remark),
+                It.Is<string>(x => x == command.Reviewer)),
+            Times.Exactly(1));
+    }
 
-            paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
+    [Test]
+    public async Task User_Can_Set_Enable_Banner()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            var query = new GetBannersQuery(
-                Guid.NewGuid(),
-                BannerStatus.Reviewing,
-                paging);
+        var sut = new SetIsEanbleBannerCommandService(moqBackOfficeRepository.Object);
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryReviewingBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
+        var command = new SetIsEanbleBannerCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            true,
+            "User1");
 
-            await sut.QueryAsync(query).ToArrayAsync();
+        await sut.ExecuteAsync(command);
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.QueryReviewingBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
-                Times.Exactly(1));
-        }
+        moqBackOfficeRepository.Verify(
+            fake => fake.SetIsEnableBannerAsync(
+                It.Is<Guid>(x => x == command.BannerId),
+                It.Is<bool>(x => x == command.IsEnable),
+                It.Is<string>(x => x == command.Modifier)),
+            Times.Exactly(1));
+    }
 
-        [Test]
-        public async Task User_Can_Query_Valid_Banners()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+    [Test]
+    public async Task User_Can_Update_Banner_Data()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
+        var sut = new UpdateBannerCommandService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging<BannerInfo>
-            {
-                RowCount = 10,
-                Page = 0
-            };
+        var command = new UpdateBannerCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "TestTitle",
+            DateTimeOffset.Now,
+            null,
+            null,
+            "User1");
 
-            paging.SortByPropertyName(nameof(BannerInfo.DisplayOrder), false);
+        await sut.ExecuteAsync(command);
 
-            var query = new GetBannersQuery(
-                Guid.NewGuid(),
-                BannerStatus.Valid,
-                paging);
+        moqBackOfficeRepository.Verify(
+            fake => fake.UpdateBannerAsync(
+                It.Is<Guid>(x => x == command.BannerId),
+                It.IsAny<BannerModifyInfo>(),
+                It.Is<string>(x => x == command.Modifier)),
+            Times.Exactly(1));
+    }
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryValidBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(Array.Empty<BannerInfo>().ToAsyncEnumerable());
+    [Test]
+    public async Task Can_Archive_banner()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            await sut.QueryAsync(query).ToArrayAsync();
+        var sut = new ChangeBannerStatusCommandService(moqBackOfficeRepository.Object);
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.QueryValidBannersAsync(It.Is<Guid>(x => x == query.BrandId)),
-                Times.Exactly(1));
-        }
+        var command = new ChangeBannerStatusCommand(
+            Guid.NewGuid(),
+            4000,
+            "User1");
 
-        [Test]
-        public async Task User_Can_Review_Banner()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+        await sut.ExecuteAsync(command);
 
-            var sut = new ReviewBannerCommandService(moqBackOfficeRepository.Object);
-
-            var command = new ReviewBannerCommand(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                BannerReviewState.Approve,
-                null,
-                "User1");
-
-            await sut.ExecuteAsync(command);
-
-            moqBackOfficeRepository.Verify(
-                fake => fake.ReviewBannerAsync(
-                    It.Is<Guid>(x => x == command.BannerId),
-                    It.Is<BannerReviewState>(x => x == command.ReviewState),
-                    It.Is<string>(x => x == command.Remark),
-                    It.Is<string>(x => x == command.Reviewer)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task User_Can_Set_Enable_Banner()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-            var sut = new SetIsEanbleBannerCommandService(moqBackOfficeRepository.Object);
-
-            var command = new SetIsEanbleBannerCommand(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                true,
-                "User1");
-
-            await sut.ExecuteAsync(command);
-
-            moqBackOfficeRepository.Verify(
-                fake => fake.SetIsEnableBannerAsync(
-                    It.Is<Guid>(x => x == command.BannerId),
-                    It.Is<bool>(x => x == command.IsEnable),
-                    It.Is<string>(x => x == command.Modifier)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task User_Can_Update_Banner_Data()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-            var sut = new UpdateBannerCommandService(moqBackOfficeRepository.Object);
-
-            var command = new UpdateBannerCommand(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestTitle",
-                DateTimeOffset.Now,
-                null,
-                null,
-                "User1");
-
-            await sut.ExecuteAsync(command);
-
-            moqBackOfficeRepository.Verify(
-                fake => fake.UpdateBannerAsync(
-                    It.Is<Guid>(x => x == command.BannerId),
-                    It.IsAny<BannerModifyInfo>(),
-                    It.Is<string>(x => x == command.Modifier)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Can_Archive_banner()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-            var sut = new ChangeBannerStatusCommandService(moqBackOfficeRepository.Object);
-
-            var command = new ChangeBannerStatusCommand(
-                Guid.NewGuid(),
-                4000,
-                "User1");
-
-            await sut.ExecuteAsync(command);
-
-            moqBackOfficeRepository.Verify(
-                fake => fake.ChangeStatusAsync(
-                    It.Is<Guid>(x => x == command.BannerId),
-                    It.IsAny<int>(),
-                    It.Is<string>(x => x == command.Modifier)),
-                Times.Exactly(1));
-        }
+        moqBackOfficeRepository.Verify(
+            fake => fake.ChangeStatusAsync(
+                It.Is<Guid>(x => x == command.BannerId),
+                It.IsAny<int>(),
+                It.Is<string>(x => x == command.Modifier)),
+            Times.Exactly(1));
     }
 }

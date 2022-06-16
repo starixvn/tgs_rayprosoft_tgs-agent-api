@@ -1,6 +1,5 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
+
+public class CreateResellerRequest : ResellerRequest
 {
-    public class CreateResellerRequest : ResellerRequest
-    {
-    }
 }

@@ -4,18 +4,17 @@ using System.Threading;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Services
+namespace TGS.Services.BackOffice.Application.Services;
+
+internal class AgentDomainsQueryService : IQueryService<AgentDomainsQuery, string>
 {
-    internal class AgentDomainsQueryService : IQueryService<AgentDomainsQuery, string>
+    private readonly IAgentRepository _agentRepository;
+
+    public AgentDomainsQueryService(IAgentRepository agentRepository)
     {
-        private readonly IAgentRepository _agentRepository;
-
-        public AgentDomainsQueryService(IAgentRepository agentRepository)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        }
-
-        public IAsyncEnumerable<string> QueryAsync(AgentDomainsQuery query, CancellationToken cancellationToken = default)
-            => _agentRepository.QueryDomainsFromAgentAsync(query.AgentId);
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
     }
+
+    public IAsyncEnumerable<string> QueryAsync(AgentDomainsQuery query, CancellationToken cancellationToken = default)
+        => _agentRepository.QueryDomainsFromAgentAsync(query.AgentId);
 }

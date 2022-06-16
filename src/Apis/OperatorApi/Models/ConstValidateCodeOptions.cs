@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.OperatorApi.Models
+﻿namespace TGS.Apis.OperatorApi.Models;
+
+public class ConstValidateCodeOptions
 {
-    public class ConstValidateCodeOptions
-    {
-        public bool ValidateCodeTestEnabled { get; set; } = false;
-    }
+    public bool ValidateCodeTestEnabled { get; set; } = false;
 }

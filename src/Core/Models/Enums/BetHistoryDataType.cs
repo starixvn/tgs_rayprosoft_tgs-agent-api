@@ -1,11 +1,10 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum BetHistoryDataType
 {
-    public enum BetHistoryDataType
-    {
-        Url = 1,
-        Table = 2,
-        Text = 3,
-        Json = 4,
-        Xml = 5
-    }
+    Url = 1,
+    Table = 2,
+    Text = 3,
+    Json = 4,
+    Xml = 5
 }

@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.Operator
+﻿namespace TGS.Services.Operator;
+
+public class LogoutInfo
 {
-    public class LogoutInfo
-    {
-        public long UpdateTime { get; set; }
-    }
+    public long UpdateTime { get; set; }
 }

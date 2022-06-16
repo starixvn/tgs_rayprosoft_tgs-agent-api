@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace TGS.Apis.AgentApi.Models
+namespace TGS.Apis.AgentApi.Models;
+
+public record GetDividendsRequest : PagingRequest
 {
-    public record GetDividendsRequest : PagingRequest
-    {
-        public DateTimeOffset From { get; init; }
-        public DateTimeOffset To { get; init; }
-    }
+    public DateTimeOffset From { get; init; }
+    public DateTimeOffset To { get; init; }
 }

@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Licensee
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Licensee;
+
+public class CreateLicenseeRequestValidator : AbstractValidator<CreateLicenseeRequest>
 {
-    public class CreateLicenseeRequestValidator : AbstractValidator<CreateLicenseeRequest>
+    public CreateLicenseeRequestValidator()
     {
-        public CreateLicenseeRequestValidator()
-        {
-            Include(new LicenseeRequestValidator());
-        }
+        Include(new LicenseeRequestValidator());
     }
 }

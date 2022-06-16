@@ -2,23 +2,22 @@
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 
-namespace TGS.Shared.Game.Models.BigGaming.Incoming
+namespace TGS.Shared.Game.Models.BigGaming.Incoming;
+
+public record BigGamingSettleRequest : BigGamingParamsSignLoginIdRequest
 {
-    public record BigGamingSettleRequest : BigGamingParamsSignLoginIdRequest
-    {
-        [JsonPropertyName("userId")]
-        public int UserId { get; set; }
-        [JsonPropertyName("amount")]
-        public string Amount { get; set; }
-        [JsonPropertyName("moduleId")]
-        public BigGamingModuleId ModuleId { get; set; }
-        [JsonPropertyName("tranId")]
-        public string TranId { get; set; }
-        [JsonPropertyName("gameResult")]
-        public string GameResult { get; set; }
-        [JsonPropertyName("recalc")]
-        public string Recalc { get; set; }
-        [JsonPropertyName("orders")]
-        public BigGamingSettleOrderRequest[] Orders { get; set; }
-    }
+    [JsonPropertyName("userId")]
+    public int UserId { get; set; }
+    [JsonPropertyName("amount")]
+    public string Amount { get; set; }
+    [JsonPropertyName("moduleId")]
+    public BigGamingModuleId ModuleId { get; set; }
+    [JsonPropertyName("tranId")]
+    public string TranId { get; set; }
+    [JsonPropertyName("gameResult")]
+    public string GameResult { get; set; }
+    [JsonPropertyName("recalc")]
+    public string Recalc { get; set; }
+    [JsonPropertyName("orders")]
+    public BigGamingSettleOrderRequest[] Orders { get; set; }
 }

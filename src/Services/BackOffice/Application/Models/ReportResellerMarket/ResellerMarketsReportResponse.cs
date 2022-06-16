@@ -1,11 +1,10 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.ReportResellerMarket
-{
-    public record ResellerMarketsReportResponse
-    {
-        public PagedResponse<ResellerMarketDataReportModel> Datas { get; init; }
+namespace TGS.Services.BackOffice.Application.Models.ReportResellerMarket;
 
-        public ResellerMarketTotalReportModel[] Totals { get; init; }
-    }
+public record ResellerMarketsReportResponse
+{
+    public PagedResponse<ResellerMarketDataReportModel> Datas { get; init; }
+
+    public ResellerMarketTotalReportModel[] Totals { get; init; }
 }

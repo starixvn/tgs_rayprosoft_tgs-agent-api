@@ -6,50 +6,49 @@ using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers
+namespace TGS.Services.BackOffice.Application.Queries.BrandGameHandlers;
+
+public class GetGameQueryHandler : Handler<GetBrandGameRequest,
+    GetBrandGameResponse>
 {
-    public class GetGameQueryHandler : Handler<GetBrandGameRequest,
-        GetBrandGameResponse>
+    private readonly IBrandGameService _service;
+
+    public GetGameQueryHandler(IBrandGameService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IBrandGameService _service;
+        _service = service;
+    }
 
-        public GetGameQueryHandler(IBrandGameService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<GetBrandGameResponse> Handle(
+        GetBrandGameRequest request,
+        CancellationToken cancellationToken)
+    {
+        var brandGame = await _service.GetBrandGameAsync(x => x.Id == request.Id, x => x
+            .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
+            .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
+            .Where(BrandId != null, b => b.BrandId == BrandId)
+        );
+        if (brandGame == null)
         {
-            _service = service;
+            return CreateInvalidResponse<GetBrandGameResponse>(BrandGame.NotFound);
         }
 
-        public override async Task<GetBrandGameResponse> Handle(
-            GetBrandGameRequest request,
-            CancellationToken cancellationToken)
+        return new GetBrandGameResponse
         {
-            var brandGame = await _service.GetBrandGameAsync(x => x.Id == request.Id, x => x
-                .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId != null, b => b.BrandId == BrandId)
-            );
-            if (brandGame == null)
+            Valid = true,
+            BrandGame = new BrandGameResponseModel
             {
-                return CreateInvalidResponse<GetBrandGameResponse>(BrandGame.NotFound);
+                Id = brandGame.Id,
+                GameId = brandGame.GameId,
+                GameName = brandGame.Game.Name,
+                Status = brandGame.Status,
+                GameType = brandGame.Game.Type,
+                GameProviderName = brandGame.Game.GameProvider.Name,
+                Platform = brandGame.Game.PlatformType,
+                SupportHtml5 = brandGame.Game.Html5,
+                EffectiveBettingPercentage = brandGame.EffectiveBettingPercentage,
+                Rebate = brandGame.Rebate
             }
-
-            return new GetBrandGameResponse
-            {
-                Valid = true,
-                BrandGame = new BrandGameResponseModel
-                {
-                    Id = brandGame.Id,
-                    GameId = brandGame.GameId,
-                    GameName = brandGame.Game.Name,
-                    Status = brandGame.Status,
-                    GameType = brandGame.Game.Type,
-                    GameProviderName = brandGame.Game.GameProvider.Name,
-                    Platform = brandGame.Game.PlatformType,
-                    SupportHtml5 = brandGame.Game.Html5,
-                    EffectiveBettingPercentage = brandGame.EffectiveBettingPercentage,
-                    Rebate = brandGame.Rebate
-                }
-            };
-        }
+        };
     }
 }

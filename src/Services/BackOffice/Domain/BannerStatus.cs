@@ -1,11 +1,10 @@
-﻿namespace TGS.Services.BackOffice.Domain
+﻿namespace TGS.Services.BackOffice.Domain;
+
+public enum BannerStatus
 {
-    public enum BannerStatus
-    {
-        Other,
-        Reviewing,
-        Valid,
-        Rejected,
-        Expired
-    }
+    Other,
+    Reviewing,
+    Valid,
+    Rejected,
+    Expired
 }

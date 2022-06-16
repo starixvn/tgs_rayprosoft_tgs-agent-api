@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class PlayerPhoneNotSetException : Exception
 {
-    public class PlayerPhoneNotSetException : Exception
+    public PlayerPhoneNotSetException()
     {
-        public PlayerPhoneNotSetException()
-        {
-        }
     }
 }

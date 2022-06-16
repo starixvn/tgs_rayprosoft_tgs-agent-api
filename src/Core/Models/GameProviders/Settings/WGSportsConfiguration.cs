@@ -1,28 +1,27 @@
 ﻿using System;
 
-namespace TGS.Core.Models.GameProviders.Settings
+namespace TGS.Core.Models.GameProviders.Settings;
+
+/// <summary>
+///     WG Sports 設定檔案
+/// </summary>
+public record WGSportsConfiguration : PluggableConfigurationBase
 {
     /// <summary>
-    ///     WG Sports 設定檔案
+    ///     The amount maximum
     /// </summary>
-    public record WGSportsConfiguration : PluggableConfigurationBase
-    {
-        /// <summary>
-        ///     The amount maximum
-        /// </summary>
-        public decimal AmountMaximum { get; init; }
+    public decimal AmountMaximum { get; init; }
 
-        /// <summary>
-        ///     The amount format
-        /// </summary>
-        public string AmountFormat { get; init; }
+    /// <summary>
+    ///     The amount format
+    /// </summary>
+    public string AmountFormat { get; init; }
 
-        public Uri ApiUrl { get; init; }
+    public Uri ApiUrl { get; init; }
 
-        public string PartnerCode { get; init; }
+    public string PartnerCode { get; init; }
 
-        public string PartnerKey { get; init; }
+    public string PartnerKey { get; init; }
 
-        public string IV { get; init; }
-    }
+    public string IV { get; init; }
 }

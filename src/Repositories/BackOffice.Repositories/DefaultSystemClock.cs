@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace TGS.BackOffice.Repositories
+namespace TGS.BackOffice.Repositories;
+
+internal class DefaultSystemClock : ISystemClock
 {
-    internal class DefaultSystemClock : ISystemClock
-    {
-        public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
-    }
+    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 }

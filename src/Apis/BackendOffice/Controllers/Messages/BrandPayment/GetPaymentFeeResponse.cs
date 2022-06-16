@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
+namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
+
+public class GetPaymentFeeResponse : MessageResponse
 {
-    public class GetPaymentFeeResponse : MessageResponse
-    {
-        public PaymentFeeModel PaymentFee { get; set; }
-    }
+    public PaymentFeeModel PaymentFee { get; set; }
 }

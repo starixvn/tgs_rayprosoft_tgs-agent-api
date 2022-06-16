@@ -6,19 +6,18 @@ using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Commands.ReportExportPlayerContribution
+namespace TGS.Services.BackOffice.Application.Commands.ReportExportPlayerContribution;
+
+public class
+    ExportPlayerContributionsQuery : IGetService<ExportPlayerContributionsRequest,
+        Stream>
 {
-    public class
-        ExportPlayerContributionsQuery : IGetService<ExportPlayerContributionsRequest,
-            Stream>
-    {
-        private readonly IReportClient _reportClient;
+    private readonly IReportClient _reportClient;
 
-        public ExportPlayerContributionsQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+    public ExportPlayerContributionsQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
-        public async ValueTask<Stream> GetAsync(ExportPlayerContributionsRequest request,
-            CancellationToken cancellationToken = default)
-            => await _reportClient.ExportPlayerContributionsAsync(request).ConfigureAwait(false);
-    }
+    public async ValueTask<Stream> GetAsync(ExportPlayerContributionsRequest request,
+        CancellationToken cancellationToken = default)
+        => await _reportClient.ExportPlayerContributionsAsync(request).ConfigureAwait(false);
 }

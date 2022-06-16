@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions
+namespace TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions;
+
+public class InvalidTokenException : Exception
 {
-    public class InvalidTokenException : Exception
+    public InvalidTokenException(string message = "Invalid Token") : base(message)
     {
-        public InvalidTokenException(string message = "Invalid Token") : base(message)
-        {
-        }
     }
 }

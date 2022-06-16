@@ -6,30 +6,29 @@ using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandHandlers;
+
+public class UpdateBrandStatusHandler : Handler<UpdateBrandStatusRequest, MessageResponse>
 {
-    public class UpdateBrandStatusHandler : Handler<UpdateBrandStatusRequest, MessageResponse>
+    private readonly IBrandService _service;
+
+    public UpdateBrandStatusHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IBrandService _service;
+        _service = service;
+    }
 
-        public UpdateBrandStatusHandler(IBrandService service, IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateBrandStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var brand = await _service.GetBrandAsync(q => q.Id == request.BrandId);
+
+        if (brand == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateBrandStatusRequest request,
-            CancellationToken cancellationToken)
-        {
-            var brand = await _service.GetBrandAsync(q => q.Id == request.BrandId);
+        await _service.ChangeStatusAsync(brand, request);
 
-            if (brand == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
-            }
-
-            await _service.ChangeStatusAsync(brand, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

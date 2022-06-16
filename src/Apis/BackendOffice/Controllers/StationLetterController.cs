@@ -22,251 +22,250 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class StationLetterController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class StationLetterController : BaseContextController
+    private readonly ITgsCommands<StationLetter> _commands;
+    private readonly ITgsQueries<Player> _playerQueries;
+    private readonly ITgsQueries<StationLetter> _queries;
+    private readonly IStationLetterService _stationLetterService;
+
+    private readonly Dictionary<string, StationLetterStatus> _typeDictionary =
+        new()
+        {
+            { "pass", StationLetterStatus.Published },
+            { "reject", StationLetterStatus.Rejected }
+        };
+
+    private readonly IUploadService _uploadService;
+
+    public StationLetterController(
+        ITgsQueries<StationLetter> queries,
+        ITgsQueries<Player> playerQueries,
+        ITgsCommands<StationLetter> commands,
+        IUploadService uploadService,
+        IStationLetterService stationLetterService)
     {
-        private readonly ITgsCommands<StationLetter> _commands;
-        private readonly ITgsQueries<Player> _playerQueries;
-        private readonly ITgsQueries<StationLetter> _queries;
-        private readonly IStationLetterService _stationLetterService;
+        _queries = queries;
+        _playerQueries = playerQueries;
+        _commands = commands;
+        _uploadService = uploadService;
+        _stationLetterService = stationLetterService;
+    }
 
-        private readonly Dictionary<string, StationLetterStatus> _typeDictionary =
-            new()
-            {
-                { "pass", StationLetterStatus.Published },
-                { "reject", StationLetterStatus.Rejected }
-            };
+    [HttpPost]
+    [Description("Create a station letter")]
+    public async Task<MessageResponse> CreateAsync(
+        [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+        [FromBody] StationLetterRequest request)
+    {
+        var jsonOptions = jsonOptionsAccessor.Value;
 
-        private readonly IUploadService _uploadService;
-
-        public StationLetterController(
-            ITgsQueries<StationLetter> queries,
-            ITgsQueries<Player> playerQueries,
-            ITgsCommands<StationLetter> commands,
-            IUploadService uploadService,
-            IStationLetterService stationLetterService)
+        var stationLetter = new StationLetter
         {
-            _queries = queries;
-            _playerQueries = playerQueries;
-            _commands = commands;
-            _uploadService = uploadService;
-            _stationLetterService = stationLetterService;
-        }
-
-        [HttpPost]
-        [Description("Create a station letter")]
-        public async Task<MessageResponse> CreateAsync(
-            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
-            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            [FromBody] StationLetterRequest request)
-        {
-            var jsonOptions = jsonOptionsAccessor.Value;
-
-            var stationLetter = new StationLetter
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                BrandId = request.BrandId,
-                Subject = request.Subject,
-                Content = request.Content,
-                Localization = request.Localization == null
-                    ? "{}"
-                    : jsonSerializationProvider.SerializeToString(
-                        request.Localization,
-                        jsonOptions.JsonSerializerOptions),
-                AssignedAllPlayers = request.AssignedAllPlayers,
-                Status = StationLetterStatus.InVerify,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            var allPlayers = await _playerQueries.GetQueries()
-                .Where(p => p.Status == PlayerStatus.Enabled
-                    && p.BrandId == request.BrandId)
-                .ToArrayAsync();
-
-            if (!request.AssignedAllPlayers)
-            {
-                allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
-            }
-
-            var players = allPlayers.Select(p => new StationLetterPlayer
-            {
-                PlayerCode = p.PlayerCode,
-                StationLetterId = stationLetter.Id
-            }).ToArray();
-
-            await _stationLetterService.CreateStationLetterAsync(stationLetter, players);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPost("export")]
-        [Description("Export player file for example")]
-        public async Task<HttpResponseMessage> ExportAsync()
-        {
-            var wb = await Task.Run(() =>
-            {
-                var workbook = new XLWorkbook();
-                var ws = workbook.AddWorksheet("Player");
-                ws.Cell("A1").Value = "Player1";
-                ws.Cell("A2").Value = "Player2";
-
-                return workbook;
-            });
-
-            return wb.Deliver("Player.xlsx");
-        }
-
-        [HttpGet]
-        [Description("Get station letters")]
-        public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
-        {
-            var jsonDocumentOptions = default(JsonDocumentOptions);
-
-            return _queries.GetQueries()
-                .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId, l => l.BrandId == BrandId)
-                .Where(p => p.Status == request.Status)
-                .Where(x => x.Status != StationLetterStatus.Archived)
-                .Select(a => new StationLetterModel
-                {
-                    Id = a.Id,
-                    BrandId = a.BrandId,
-                    Subject = a.Subject,
-                    Content = a.Content,
-                    Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
-                    Remarks = a.Remarks,
-                    AssignedAllPlayers = a.AssignedAllPlayers,
-                    PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
-                    CreatedByUsername = a.CreatedByUsername,
-                    VerifiedByUsername = a.VerifiedByUsername,
-                    Status = a.Status.ToString(),
-                    CreatedOn = a.CreatedOn
-                })
-                .CreatePagedResponseAsync(request);
-        }
-
-        [HttpPut("{id}")]
-        [Description("Update a station letter")]
-        public async Task<MessageResponse> UpdateAsync(
-            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
-            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            Guid id,
-            [FromBody] StationLetterRequest request)
-        {
-            var jsonOptions = jsonOptionsAccessor.Value;
-
-            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
-
-            stationLetter.Subject = request.Subject;
-            stationLetter.Content = request.Content;
-
-            stationLetter.Localization = request.Localization == null
+            Id = GuidExtensions.NewSequentialGuid(),
+            BrandId = request.BrandId,
+            Subject = request.Subject,
+            Content = request.Content,
+            Localization = request.Localization == null
                 ? "{}"
                 : jsonSerializationProvider.SerializeToString(
                     request.Localization,
-                    jsonOptions.JsonSerializerOptions);
-            stationLetter.UpdatedByUsername = Username;
-            stationLetter.UpdatedOn = DateTimeOffset.Now;
+                    jsonOptions.JsonSerializerOptions),
+            AssignedAllPlayers = request.AssignedAllPlayers,
+            Status = StationLetterStatus.InVerify,
+            CreatedByUsername = Username,
+            UpdatedByUsername = Username,
+            CreatedOn = DateTimeOffset.Now,
+            UpdatedOn = DateTimeOffset.Now
+        };
 
-            await _commands.UpdateAsync(stationLetter);
+        var allPlayers = await _playerQueries.GetQueries()
+            .Where(p => p.Status == PlayerStatus.Enabled
+                && p.BrandId == request.BrandId)
+            .ToArrayAsync();
 
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPost("upload")]
-        [Description("Upload player file")]
-        public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
+        if (!request.AssignedAllPlayers)
         {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
-            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
-
-            var allPlayers = await _playerQueries.GetQueries()
-                .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
-                .ToArrayAsync();
-
-            var players = from u in users
-                          join p in allPlayers on u equals p.Username
-                              into tmpU
-                          from p in tmpU.DefaultIfEmpty()
-                          select new GetPlayerFromFileResponse.PlayerModel
-                          {
-                              Username = u,
-                              Exists = p != null
-                          };
-
-            return new GetPlayerFromFileResponse
-            {
-                Valid = true,
-                Players = players.ToArray()
-            };
+            allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
         }
 
-        [HttpPut("{id}/{type}")]
-        [Description("Verify a station letter")]
-        public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
+        var players = allPlayers.Select(p => new StationLetterPlayer
         {
-            if (!_typeDictionary.ContainsKey(type))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
-            }
+            PlayerCode = p.PlayerCode,
+            StationLetterId = stationLetter.Id
+        }).ToArray();
 
-            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+        await _stationLetterService.CreateStationLetterAsync(stationLetter, players);
 
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
+        return CreateValidResponse<MessageResponse>();
+    }
 
-            if (stationLetter.Status != StationLetterStatus.InVerify)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
-            }
-
-            var targetStatus = _typeDictionary
-                .FirstOrDefault(t => t.Key == type);
-
-            stationLetter.Status = targetStatus.Value;
-            stationLetter.VerifiedByUsername = Username;
-            stationLetter.Remarks = request.Remarks;
-            stationLetter.UpdatedByUsername = Username;
-            stationLetter.UpdatedOn = DateTimeOffset.Now;
-
-            await _commands.UpdateAsync(stationLetter);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPut("{id}/status/{status}")]
-        [Description("Change an station letter status")]
-        public async Task<MessageResponse> ChangeStatusAsync(Guid id, StationLetterStatus status)
+    [HttpPost("export")]
+    [Description("Export player file for example")]
+    public async Task<HttpResponseMessage> ExportAsync()
+    {
+        var wb = await Task.Run(() =>
         {
-            var announcement = await _queries.GetSingleAsync(q => q.Id == id);
+            var workbook = new XLWorkbook();
+            var ws = workbook.AddWorksheet("Player");
+            ws.Cell("A1").Value = "Player1";
+            ws.Cell("A2").Value = "Player2";
 
-            if (announcement == null)
+            return workbook;
+        });
+
+        return wb.Deliver("Player.xlsx");
+    }
+
+    [HttpGet]
+    [Description("Get station letters")]
+    public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
+    {
+        var jsonDocumentOptions = default(JsonDocumentOptions);
+
+        return _queries.GetQueries()
+            .Where(request.BrandId, x => x.BrandId == request.BrandId)
+            .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
+            .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
+            .Where(BrandId, l => l.BrandId == BrandId)
+            .Where(p => p.Status == request.Status)
+            .Where(x => x.Status != StationLetterStatus.Archived)
+            .Select(a => new StationLetterModel
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
+                Id = a.Id,
+                BrandId = a.BrandId,
+                Subject = a.Subject,
+                Content = a.Content,
+                Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
+                Remarks = a.Remarks,
+                AssignedAllPlayers = a.AssignedAllPlayers,
+                PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
+                CreatedByUsername = a.CreatedByUsername,
+                VerifiedByUsername = a.VerifiedByUsername,
+                Status = a.Status.ToString(),
+                CreatedOn = a.CreatedOn
+            })
+            .CreatePagedResponseAsync(request);
+    }
 
-            announcement.Status = status;
-            announcement.UpdatedOn = DateTimeOffset.Now;
-            announcement.UpdatedByUsername = Username;
+    [HttpPut("{id}")]
+    [Description("Update a station letter")]
+    public async Task<MessageResponse> UpdateAsync(
+        [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+        Guid id,
+        [FromBody] StationLetterRequest request)
+    {
+        var jsonOptions = jsonOptionsAccessor.Value;
 
-            await _commands.UpdateAsync(announcement);
+        var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
 
-            return CreateValidResponse<MessageResponse>();
+        if (stationLetter == null)
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
         }
+
+        stationLetter.Subject = request.Subject;
+        stationLetter.Content = request.Content;
+
+        stationLetter.Localization = request.Localization == null
+            ? "{}"
+            : jsonSerializationProvider.SerializeToString(
+                request.Localization,
+                jsonOptions.JsonSerializerOptions);
+        stationLetter.UpdatedByUsername = Username;
+        stationLetter.UpdatedOn = DateTimeOffset.Now;
+
+        await _commands.UpdateAsync(stationLetter);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPost("upload")]
+    [Description("Upload player file")]
+    public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
+    {
+        var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
+        var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
+
+        var allPlayers = await _playerQueries.GetQueries()
+            .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
+            .ToArrayAsync();
+
+        var players = from u in users
+                      join p in allPlayers on u equals p.Username
+                          into tmpU
+                      from p in tmpU.DefaultIfEmpty()
+                      select new GetPlayerFromFileResponse.PlayerModel
+                      {
+                          Username = u,
+                          Exists = p != null
+                      };
+
+        return new GetPlayerFromFileResponse
+        {
+            Valid = true,
+            Players = players.ToArray()
+        };
+    }
+
+    [HttpPut("{id}/{type}")]
+    [Description("Verify a station letter")]
+    public async Task<MessageResponse> VerifyAsync(Guid id, string type, [FromBody] VerifyRequest request)
+    {
+        if (!_typeDictionary.ContainsKey(type))
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidUrl);
+        }
+
+        var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+
+        if (stationLetter == null)
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+        }
+
+        if (stationLetter.Status != StationLetterStatus.InVerify)
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.InvalidStatus);
+        }
+
+        var targetStatus = _typeDictionary
+            .FirstOrDefault(t => t.Key == type);
+
+        stationLetter.Status = targetStatus.Value;
+        stationLetter.VerifiedByUsername = Username;
+        stationLetter.Remarks = request.Remarks;
+        stationLetter.UpdatedByUsername = Username;
+        stationLetter.UpdatedOn = DateTimeOffset.Now;
+
+        await _commands.UpdateAsync(stationLetter);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPut("{id}/status/{status}")]
+    [Description("Change an station letter status")]
+    public async Task<MessageResponse> ChangeStatusAsync(Guid id, StationLetterStatus status)
+    {
+        var announcement = await _queries.GetSingleAsync(q => q.Id == id);
+
+        if (announcement == null)
+        {
+            return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+        }
+
+        announcement.Status = status;
+        announcement.UpdatedOn = DateTimeOffset.Now;
+        announcement.UpdatedByUsername = Username;
+
+        await _commands.UpdateAsync(announcement);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

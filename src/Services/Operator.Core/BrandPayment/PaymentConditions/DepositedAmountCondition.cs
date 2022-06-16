@@ -1,19 +1,18 @@
 ﻿using Tgs.Payment;
 using Tgs.Payment.Clients;
 
-namespace TGS.Services.Operator.BrandPayment.PaymentConditions
+namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
+
+internal class DepositedAmountCondition : IBrandPaymentCondition
 {
-    internal class DepositedAmountCondition : IBrandPaymentCondition
+    private ValueRange<decimal> _depositedAmountLimit;
+
+    public DepositedAmountCondition(ValueRange<decimal> depositedAmountLimit)
     {
-        private ValueRange<decimal> _depositedAmountLimit;
-
-        public DepositedAmountCondition(ValueRange<decimal> depositedAmountLimit)
-        {
-            _depositedAmountLimit = depositedAmountLimit;
-        }
-
-        public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-            => player.DepositedAmount >= _depositedAmountLimit.From
-                && player.DepositedAmount < _depositedAmountLimit.To;
+        _depositedAmountLimit = depositedAmountLimit;
     }
+
+    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+        => player.DepositedAmount >= _depositedAmountLimit.From
+            && player.DepositedAmount < _depositedAmountLimit.To;
 }

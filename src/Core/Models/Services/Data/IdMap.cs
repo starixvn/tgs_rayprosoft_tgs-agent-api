@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Services.Data
+﻿namespace TGS.Core.Models.Services.Data;
+
+public record IdMap<TId> where TId : struct
 {
-    public record IdMap<TId> where TId : struct
-    {
-        public TId Id { get; init; }
-        public string ExternalId { get; init; }
-    }
+    public TId Id { get; init; }
+    public string ExternalId { get; init; }
 }

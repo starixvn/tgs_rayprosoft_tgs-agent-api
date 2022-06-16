@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.PragmaticPlay.Enums;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
-{
-    public record ErrorResponse
-    {
-        [JsonPropertyName("error")]
-        public GameApiError Error { get; init; } = GameApiError.Success;
+namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 
-        [JsonPropertyName("description")]
-        public string Description { get; init; } = GameApiError.Success.ToString();
-    }
+public record ErrorResponse
+{
+    [JsonPropertyName("error")]
+    public GameApiError Error { get; init; } = GameApiError.Success;
+
+    [JsonPropertyName("description")]
+    public string Description { get; init; } = GameApiError.Success.ToString();
 }

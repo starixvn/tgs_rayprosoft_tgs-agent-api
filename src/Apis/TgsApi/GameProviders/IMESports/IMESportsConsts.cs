@@ -1,10 +1,9 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.IMESports
+﻿namespace TGS.Apis.TgsApi.GameProviders.IMESports;
+
+public static class IMESportsConsts
 {
-    public static class IMESportsConsts
+    public static class RedisKey
     {
-        public static class RedisKey
-        {
-            public static readonly string SessionToken = "IMSessionToken";
-        }
+        public static readonly string SessionToken = "IMSessionToken";
     }
 }

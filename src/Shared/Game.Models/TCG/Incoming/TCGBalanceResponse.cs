@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.TCG.Common;
 
-namespace TGS.Shared.Game.Models.TCG.Incoming
+namespace TGS.Shared.Game.Models.TCG.Incoming;
+
+public record TCGBalanceResponse : TCGSingleWalletResponse
 {
-    public record TCGBalanceResponse : TCGSingleWalletResponse
-    {
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
-    }
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; init; }
 }

@@ -3,18 +3,17 @@ using System.Threading.Tasks;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.Avia;
 
-namespace TGS.Apis.TgsApi.GameProviders.Avia
+namespace TGS.Apis.TgsApi.GameProviders.Avia;
+
+public interface IAviaService
 {
-    public interface IAviaService
-    {
-        ValueTask<AviaBrandMerchant> GetBrandMerchantAsync(string brandCode);
+    ValueTask<AviaBrandMerchant> GetBrandMerchantAsync(string brandCode);
 
-        ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
+    ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
 
-        ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
+    ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
 
-        Task<Guid> GetGameProviderIdAsync();
+    Task<Guid> GetGameProviderIdAsync();
 
-        Task<AviaConfiguration> GetSettingConfigurationAsync();
-    }
+    Task<AviaConfiguration> GetSettingConfigurationAsync();
 }

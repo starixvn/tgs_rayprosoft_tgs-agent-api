@@ -1,16 +1,15 @@
 ﻿using NUnit.Framework;
 
-namespace TGS.Tests.TestsCommon
-{
-    [TestFixture]
-    public abstract class NUnitTestsBase
-    {
-        [SetUp]
-        public virtual void RunBeforeEachTest()
-        {
-            InitializeBeforeEachTest();
-        }
+namespace TGS.Tests.TestsCommon;
 
-        protected abstract void InitializeBeforeEachTest();
+[TestFixture]
+public abstract class NUnitTestsBase
+{
+    [SetUp]
+    public virtual void RunBeforeEachTest()
+    {
+        InitializeBeforeEachTest();
     }
+
+    protected abstract void InitializeBeforeEachTest();
 }

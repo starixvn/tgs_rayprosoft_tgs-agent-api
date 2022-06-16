@@ -2,27 +2,26 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using TGS.Core.DataServices.Base.Extensions;
 
-namespace TGS.Core.DataServices.Tgs.Migrations
+namespace TGS.Core.DataServices.Tgs.Migrations;
+
+public partial class AlterPlayerEmailIndex : Migration
 {
-    public partial class AlterPlayerEmailIndex : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
 
-            migrationBuilder.Sql(@"
+        migrationBuilder.Sql(@"
                 drop index if exists dbo.ux_players_email;
             ");
 
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.IndexSqlFormat, "players_brand_id_email"));
-        }
+        migrationBuilder.SqlResource(assembly,
+            string.Format(Consts.IndexSqlFormat, "players_brand_id_email"));
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(@"
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.Sql(@"
                 drop index if exists dbo.ux_players_email;
             ");
-        }
     }
 }

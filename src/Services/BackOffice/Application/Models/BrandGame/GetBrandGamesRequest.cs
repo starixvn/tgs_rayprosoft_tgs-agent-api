@@ -3,13 +3,12 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.BrandGame
+namespace TGS.Services.BackOffice.Application.Models.BrandGame;
+
+public class GetBrandGamesRequest : PageableRequest, IRequest<PagedResponse<BrandGameModel>>
 {
-    public class GetBrandGamesRequest : PageableRequest, IRequest<PagedResponse<BrandGameModel>>
-    {
-        public Guid? BrandId { get; set; }
-        public Guid? GameProviderId { get; set; }
-        public GameType? GameType { get; set; }
-        public string Keyword { get; set; }
-    }
+    public Guid? BrandId { get; set; }
+    public Guid? GameProviderId { get; set; }
+    public GameType? GameType { get; set; }
+    public string Keyword { get; set; }
 }

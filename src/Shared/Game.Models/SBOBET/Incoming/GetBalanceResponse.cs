@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.SBOBET.Incoming
+﻿namespace TGS.Shared.Game.Models.SBOBET.Incoming;
+
+public record GetBalanceResponse : BaseResponse
 {
-    public record GetBalanceResponse : BaseResponse
-    {
-    }
 }

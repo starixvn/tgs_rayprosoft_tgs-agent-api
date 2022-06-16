@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class PlayerNotFoundException : Exception
 {
-    public class PlayerNotFoundException : Exception
+    public PlayerNotFoundException(string message)
+        : base(message)
     {
-        public PlayerNotFoundException(string message)
-            : base(message)
-        {
-        }
     }
 }

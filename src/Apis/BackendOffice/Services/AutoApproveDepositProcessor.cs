@@ -8,44 +8,43 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 
-namespace TGS.Apis.BackendOffice.Services
+namespace TGS.Apis.BackendOffice.Services;
+
+public class AutoApproveDepositProcessor : IMessageHandler
 {
-    public class AutoApproveDepositProcessor : IMessageHandler
+    private readonly ILogger<AutoApproveDepositProcessor> _logger;
+    private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
+
+    public AutoApproveDepositProcessor(
+        ICommandService<ReviewDepositFormCommand> reviewCommandService,
+        ILogger<AutoApproveDepositProcessor> logger)
     {
-        private readonly ILogger<AutoApproveDepositProcessor> _logger;
-        private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
+        _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public AutoApproveDepositProcessor(
-            ICommandService<ReviewDepositFormCommand> reviewCommandService,
-            ILogger<AutoApproveDepositProcessor> logger)
-        {
-            _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+    public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Receive AutoApproveDeposit request.");
 
-        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Receive AutoApproveDeposit request.");
+        var request = ApproveDepositRequest.Parser.ParseFrom(data.Span);
 
-            var request = ApproveDepositRequest.Parser.ParseFrom(data.Span);
+        var formId = Guid.Parse(request.FormId);
+        var brandId = Guid.Parse(request.BrandId);
 
-            var formId = Guid.Parse(request.FormId);
-            var brandId = Guid.Parse(request.BrandId);
+        var command = new ReviewDepositFormCommand(
+            brandId,
+            formId,
+            ReviewState.Approve,
+            request.ActualAmount?.ToDecimal(),
+            null,
+            null,
+            null);
 
-            var command = new ReviewDepositFormCommand(
-                brandId,
-                formId,
-                ReviewState.Approve,
-                request.ActualAmount?.ToDecimal(),
-                null,
-                null,
-                null);
+        await _reviewCommandService
+            .ExecuteAsync(command, cancellationToken)
+            .ConfigureAwait(false);
 
-            await _reviewCommandService
-                .ExecuteAsync(command, cancellationToken)
-                .ConfigureAwait(false);
-
-            _logger.LogInformation("AutoApproveDeposit processing completed.");
-        }
+        _logger.LogInformation("AutoApproveDeposit processing completed.");
     }
 }

@@ -6,23 +6,22 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
+namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers;
+
+public class GetAgentsQueryHandler : Handler<GetAgentsRequest, PagedResponse<AgentModel>>
 {
-    public class GetAgentsQueryHandler : Handler<GetAgentsRequest, PagedResponse<AgentModel>>
+    private readonly IAgentService _service;
+
+    public GetAgentsQueryHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IAgentService _service;
+        _service = service;
+    }
 
-        public GetAgentsQueryHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+    public override async Task<PagedResponse<AgentModel>> Handle(GetAgentsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var (agents, totalCount) = await _service.GetAgentsAsync(request);
 
-        public override async Task<PagedResponse<AgentModel>> Handle(GetAgentsRequest request,
-            CancellationToken cancellationToken)
-        {
-            var (agents, totalCount) = await _service.GetAgentsAsync(request);
-
-            return await agents.CreatePagedResponseAsync(totalCount);
-        }
+        return await agents.CreatePagedResponseAsync(totalCount);
     }
 }

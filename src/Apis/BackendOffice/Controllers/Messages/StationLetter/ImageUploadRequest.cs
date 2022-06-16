@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
+namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
+
+public class ImageUploadRequest
 {
-    public class ImageUploadRequest
-    {
-        public IFormFile FormFile { get; set; }
-    }
+    public IFormFile FormFile { get; set; }
 }

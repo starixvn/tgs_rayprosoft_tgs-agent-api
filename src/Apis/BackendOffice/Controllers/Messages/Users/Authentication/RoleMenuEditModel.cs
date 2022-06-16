@@ -1,24 +1,23 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
+
+public class RoleMenuEditModel : BaseRoleMenuEditModel
 {
-    public class RoleMenuEditModel : BaseRoleMenuEditModel
-    {
-        public RoleSubMenuEditModel[] SubMenus { get; set; }
-    }
+    public RoleSubMenuEditModel[] SubMenus { get; set; }
+}
 
-    public class RoleSubMenuEditModel : BaseRoleMenuEditModel
-    {
-        //Called SubMenus not Permissions is limited from angular tree framework
-        public PermissionEditModel[] SubMenus { get; set; }
-    }
+public class RoleSubMenuEditModel : BaseRoleMenuEditModel
+{
+    //Called SubMenus not Permissions is limited from angular tree framework
+    public PermissionEditModel[] SubMenus { get; set; }
+}
 
-    public class PermissionEditModel
-    {
-        public Guid PermissionId { get; set; }
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public bool IsDisplay { get; set; }
-        public int DisplayOrder { get; set; }
-    }
+public class PermissionEditModel
+{
+    public Guid PermissionId { get; set; }
+    public string Code { get; set; }
+    public string Name { get; set; }
+    public bool IsDisplay { get; set; }
+    public int DisplayOrder { get; set; }
 }

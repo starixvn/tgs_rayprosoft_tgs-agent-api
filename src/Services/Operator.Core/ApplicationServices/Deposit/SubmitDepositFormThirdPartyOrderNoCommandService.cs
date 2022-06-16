@@ -5,32 +5,31 @@ using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
-namespace TGS.Services.Operator.ApplicationServices.Deposit
+namespace TGS.Services.Operator.ApplicationServices.Deposit;
+
+internal class SubmitDepositFormThirdPartyOrderNoCommandService : ICommandService<SubmitDepositFormThirdPartyOrderNoCommand>
 {
-    internal class SubmitDepositFormThirdPartyOrderNoCommandService : ICommandService<SubmitDepositFormThirdPartyOrderNoCommand>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+
+    public SubmitDepositFormThirdPartyOrderNoCommandService(IPaymentServiceClient paymentServiceClient)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    }
 
-        public SubmitDepositFormThirdPartyOrderNoCommandService(IPaymentServiceClient paymentServiceClient)
-        {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        }
+    public async ValueTask ExecuteAsync(SubmitDepositFormThirdPartyOrderNoCommand command, CancellationToken cancellationToken = default)
+    {
+        var formData = await _paymentServiceClient
+            .GetDepositFormAsync(command.FormId)
+            .ConfigureAwait(false);
 
-        public async ValueTask ExecuteAsync(SubmitDepositFormThirdPartyOrderNoCommand command, CancellationToken cancellationToken = default)
-        {
-            var formData = await _paymentServiceClient
-                .GetDepositFormAsync(command.FormId)
-                .ConfigureAwait(false);
+        if (formData == null)
+            return;
 
-            if (formData == null)
-                return;
-
-            await _paymentServiceClient
-                .SubmitDepositFormStatusAsync(
-                    command.FormId,
-                    formData.Status,
-                    thirdPartyOrderNo: command.ThirdPartyOrderNo)
-                .ConfigureAwait(false);
-        }
+        await _paymentServiceClient
+            .SubmitDepositFormStatusAsync(
+                command.FormId,
+                formData.Status,
+                thirdPartyOrderNo: command.ThirdPartyOrderNo)
+            .ConfigureAwait(false);
     }
 }

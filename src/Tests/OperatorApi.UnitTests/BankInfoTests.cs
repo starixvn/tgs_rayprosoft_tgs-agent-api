@@ -10,331 +10,330 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using Tgs.BrandCertificate.Clients;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests;
+
+[TestFixture]
+public class BankInfoTests
 {
-    [TestFixture]
-    public class BankInfoTests
+    [Test]
+    public async Task Player_Can_Create_BankInfo()
     {
-        [Test]
-        public async Task Player_Can_Create_BankInfo()
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new CreateBankInfoCommandService(fakePaymentServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var playerCode = "ThisIsPlayerCode";
+        var paymentChannelId = Guid.NewGuid();
+        var bankType = "Transfer";
+        var detail = new
         {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            bankAccount = "0987654321"
+        };
 
-            var sut = new CreateBankInfoCommandService(fakePaymentServiceClient);
+        var command = new CreateBankInfoCommand(
+            brandId,
+            playerCode,
+            paymentChannelId,
+            bankType,
+            JsonSerializer.SerializeToDocument(detail));
 
-            var brandId = Guid.NewGuid();
-            var playerCode = "ThisIsPlayerCode";
-            var paymentChannelId = Guid.NewGuid();
-            var bankType = "Transfer";
-            var detail = new
-            {
-                bankAccount = "0987654321"
-            };
+        await sut.ExecuteAsync(command);
 
-            var command = new CreateBankInfoCommand(
-                brandId,
-                playerCode,
-                paymentChannelId,
-                bankType,
-                JsonSerializer.SerializeToDocument(detail));
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .CreatePlayerBankInfoAsync(
+                Arg.Is(brandId),
+                Arg.Is(playerCode),
+                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
+    }
 
-            await sut.ExecuteAsync(command);
+    [Test]
+    public async Task Player_Can_Delete_BankInfo()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .CreatePlayerBankInfoAsync(
-                    Arg.Is(brandId),
-                    Arg.Is(playerCode),
-                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
-        }
+        var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
 
-        [Test]
-        public async Task Player_Can_Delete_BankInfo()
+        var playerCode = "ThisIsPlayerCode";
+        var bankInfoId = Guid.NewGuid();
+        var command = new DeleteBankInfoCommand(playerCode, bankInfoId);
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .DeletePlayerBankInfoAsync(Arg.Is(playerCode), Arg.Is(bankInfoId));
+    }
+
+    [Test]
+    public void Player_Can_List_Self_BankInfos()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new GetPlayerBankInfosQueryService(fakePaymentServiceClient);
+
+        var playerCode = "ThisIsPlayerCode";
+
+        sut.QueryAsync(new GetPlayerBankInfosQuery(playerCode));
+
+        _ = fakePaymentServiceClient.Received(1)
+            .GetPlayerBankInfosAsync(Arg.Is(playerCode));
+    }
+
+    [Test]
+    public async Task Player_Init_BankInfo_If_Brand_Not_Use_BankInfoRegisterFlow_Should_Not_Process()
+    {
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+
+        var sut = new CreateInitBankInfoCommandService(
+            fakeBrandServiceClient,
+            fakePlayerRepository,
+            fakePaymentServiceClient,
+            fakeRedisCacheManager);
+
+        var playerCode = "ThisIsPlayerCode";
+        var paymentChannelId = Guid.NewGuid();
+        var bankType = "Transfer";
+        var detail = new
         {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            bankAccount = "0987654321"
+        };
 
-            var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
+        var bankInfoId = Guid.NewGuid();
 
-            var playerCode = "ThisIsPlayerCode";
-            var bankInfoId = Guid.NewGuid();
-            var command = new DeleteBankInfoCommand(playerCode, bankInfoId);
-
-            await sut.ExecuteAsync(command);
-
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .DeletePlayerBankInfoAsync(Arg.Is(playerCode), Arg.Is(bankInfoId));
-        }
-
-        [Test]
-        public void Player_Can_List_Self_BankInfos()
+        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
         {
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            Id = Guid.NewGuid(),
+            Code = "code",
+            Currency = "CNY"
+        };
 
-            var sut = new GetPlayerBankInfosQueryService(fakePaymentServiceClient);
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
+            .Returns(brandInfo);
 
-            var playerCode = "ThisIsPlayerCode";
+        _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+            Arg.Is(brandInfo.Id),
+            Arg.Is(playerCode),
+            Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
+            .Returns(bankInfoId);
 
-            sut.QueryAsync(new GetPlayerBankInfosQuery(playerCode));
+        var command = new CreateInitBankInfoCommand(
+            brandInfo.Id,
+            playerCode,
+            paymentChannelId,
+            bankType,
+            JsonSerializer.SerializeToDocument(detail),
+            "127.0.0.1",
+            "localhost");
 
-            _ = fakePaymentServiceClient.Received(1)
-                .GetPlayerBankInfosAsync(Arg.Is(playerCode));
-        }
+        await sut.ExecuteAsync(command);
 
-        [Test]
-        public async Task Player_Init_BankInfo_If_Brand_Not_Use_BankInfoRegisterFlow_Should_Not_Process()
-        {
-            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
-
-            var sut = new CreateInitBankInfoCommandService(
-                fakeBrandServiceClient,
-                fakePlayerRepository,
-                fakePaymentServiceClient,
-                fakeRedisCacheManager);
-
-            var playerCode = "ThisIsPlayerCode";
-            var paymentChannelId = Guid.NewGuid();
-            var bankType = "Transfer";
-            var detail = new
-            {
-                bankAccount = "0987654321"
-            };
-
-            var bankInfoId = Guid.NewGuid();
-
-            var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = Guid.NewGuid(),
-                Code = "code",
-                Currency = "CNY"
-            };
-
-            _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
-                .Returns(brandInfo);
-
-            _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+        _ = fakePaymentServiceClient
+            .DidNotReceive()
+            .CreatePlayerBankInfoAsync(
                 Arg.Is(brandInfo.Id),
                 Arg.Is(playerCode),
-                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
-                .Returns(bankInfoId);
+                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
 
-            var command = new CreateInitBankInfoCommand(
-                brandInfo.Id,
-                playerCode,
-                paymentChannelId,
-                bankType,
-                JsonSerializer.SerializeToDocument(detail),
-                "127.0.0.1",
-                "localhost");
+        _ = fakePaymentServiceClient
+            .DidNotReceive()
+            .SetDefaultPlayerBankInfoAsync(
+                Arg.Is(playerCode),
+                Arg.Is(bankInfoId),
+                Arg.Is(playerCode));
 
-            await sut.ExecuteAsync(command);
+        _ = fakePlayerRepository
+            .DidNotReceive()
+            .UpdatePlayerStatusAsync(
+                Arg.Is(playerCode),
+                Arg.Is(PlayerStatus.Enabled));
 
-            _ = fakePaymentServiceClient
-                .DidNotReceive()
-                .CreatePlayerBankInfoAsync(
-                    Arg.Is(brandInfo.Id),
-                    Arg.Is(playerCode),
-                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
+        _ = fakeRedisCacheManager
+            .DidNotReceive()
+            .ClearCacheAsync(
+                Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
+                Arg.Is<string>(x => x == playerCode),
+                Arg.Any<bool>());
 
-            _ = fakePaymentServiceClient
-                .DidNotReceive()
-                .SetDefaultPlayerBankInfoAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(bankInfoId),
-                    Arg.Is(playerCode));
+        _ = fakePlayerRepository
+            .DidNotReceive()
+            .PlayerRegisterIpAsync(
+                Arg.Is(playerCode),
+                Arg.Is(command.IpAddress),
+                Arg.Is(command.HostName),
+                Arg.Any<DateTimeOffset>());
 
-            _ = fakePlayerRepository
-                .DidNotReceive()
-                .UpdatePlayerStatusAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(PlayerStatus.Enabled));
+        _ = fakePlayerRepository
+            .DidNotReceive()
+            .PlayerLoginIpAsync(
+                Arg.Is(playerCode),
+                Arg.Is(command.IpAddress),
+                Arg.Is(command.HostName));
+    }
 
-            _ = fakeRedisCacheManager
-                .DidNotReceive()
-                .ClearCacheAsync(
-                    Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
-                    Arg.Is<string>(x => x == playerCode),
-                    Arg.Any<bool>());
+    [Test]
+    public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Record_Ip()
+    {
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
 
-            _ = fakePlayerRepository
-                .DidNotReceive()
-                .PlayerRegisterIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName),
-                    Arg.Any<DateTimeOffset>());
+        var sut = new CreateInitBankInfoCommandService(
+            fakeBrandServiceClient,
+            fakePlayerRepository,
+            fakePaymentServiceClient,
+            fakeRedisCacheManager);
 
-            _ = fakePlayerRepository
-                .DidNotReceive()
-                .PlayerLoginIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName));
-        }
-
-        [Test]
-        public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Record_Ip()
+        var playerCode = "ThisIsPlayerCode";
+        var paymentChannelId = Guid.NewGuid();
+        var bankType = "Transfer";
+        var detail = new
         {
-            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            bankAccount = "0987654321"
+        };
 
-            var sut = new CreateInitBankInfoCommandService(
-                fakeBrandServiceClient,
-                fakePlayerRepository,
-                fakePaymentServiceClient,
-                fakeRedisCacheManager);
+        var bankInfoId = Guid.NewGuid();
 
-            var playerCode = "ThisIsPlayerCode";
-            var paymentChannelId = Guid.NewGuid();
-            var bankType = "Transfer";
-            var detail = new
-            {
-                bankAccount = "0987654321"
-            };
+        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+        {
+            Id = Guid.NewGuid(),
+            Code = "code",
+            Currency = "CNY",
+            BankInfoRegisterFlowEnabled = true
+        };
 
-            var bankInfoId = Guid.NewGuid();
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
+            .Returns(brandInfo);
 
-            var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = Guid.NewGuid(),
-                Code = "code",
-                Currency = "CNY",
-                BankInfoRegisterFlowEnabled = true
-            };
+        _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+            Arg.Is(brandInfo.Id),
+            Arg.Is(playerCode),
+            Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
+            .Returns(bankInfoId);
 
-            _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
-                .Returns(brandInfo);
+        var command = new CreateInitBankInfoCommand(
+            brandInfo.Id,
+            playerCode,
+            paymentChannelId,
+            bankType,
+            JsonSerializer.SerializeToDocument(detail),
+            "127.0.0.1",
+            "localhost");
 
-            _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+        await sut.ExecuteAsync(command);
+
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .CreatePlayerBankInfoAsync(
                 Arg.Is(brandInfo.Id),
                 Arg.Is(playerCode),
-                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
-                .Returns(bankInfoId);
+                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
 
-            var command = new CreateInitBankInfoCommand(
-                brandInfo.Id,
-                playerCode,
-                paymentChannelId,
-                bankType,
-                JsonSerializer.SerializeToDocument(detail),
-                "127.0.0.1",
-                "localhost");
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .SetDefaultPlayerBankInfoAsync(
+                Arg.Is(playerCode),
+                Arg.Is(bankInfoId),
+                Arg.Is(playerCode));
 
-            await sut.ExecuteAsync(command);
+        _ = fakePlayerRepository
+            .Received(1)
+            .PlayerRegisterIpAsync(
+                Arg.Is(playerCode),
+                Arg.Is(command.IpAddress),
+                Arg.Is(command.HostName),
+                Arg.Any<DateTimeOffset>());
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .CreatePlayerBankInfoAsync(
-                    Arg.Is(brandInfo.Id),
-                    Arg.Is(playerCode),
-                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
+        _ = fakePlayerRepository
+            .Received(1)
+            .PlayerLoginIpAsync(
+                Arg.Is(playerCode),
+                Arg.Is(command.IpAddress),
+                Arg.Is(command.HostName));
+    }
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .SetDefaultPlayerBankInfoAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(bankInfoId),
-                    Arg.Is(playerCode));
+    [Test]
+    public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Success()
+    {
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
 
-            _ = fakePlayerRepository
-                .Received(1)
-                .PlayerRegisterIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName),
-                    Arg.Any<DateTimeOffset>());
+        var sut = new CreateInitBankInfoCommandService(
+            fakeBrandServiceClient,
+            fakePlayerRepository,
+            fakePaymentServiceClient,
+            fakeRedisCacheManager);
 
-            _ = fakePlayerRepository
-                .Received(1)
-                .PlayerLoginIpAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(command.IpAddress),
-                    Arg.Is(command.HostName));
-        }
-
-        [Test]
-        public async Task Player_Init_BankInfo_If_Brand_Use_BankInfoRegisterFlow_Should_Success()
+        var playerCode = "ThisIsPlayerCode";
+        var paymentChannelId = Guid.NewGuid();
+        var bankType = "Transfer";
+        var detail = new
         {
-            var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            bankAccount = "0987654321"
+        };
 
-            var sut = new CreateInitBankInfoCommandService(
-                fakeBrandServiceClient,
-                fakePlayerRepository,
-                fakePaymentServiceClient,
-                fakeRedisCacheManager);
+        var bankInfoId = Guid.NewGuid();
 
-            var playerCode = "ThisIsPlayerCode";
-            var paymentChannelId = Guid.NewGuid();
-            var bankType = "Transfer";
-            var detail = new
-            {
-                bankAccount = "0987654321"
-            };
+        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
+        {
+            Id = Guid.NewGuid(),
+            Code = "code",
+            Currency = "CNY",
+            BankInfoRegisterFlowEnabled = true
+        };
 
-            var bankInfoId = Guid.NewGuid();
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
+            .Returns(brandInfo);
 
-            var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = Guid.NewGuid(),
-                Code = "code",
-                Currency = "CNY",
-                BankInfoRegisterFlowEnabled = true
-            };
+        _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+            Arg.Is(brandInfo.Id),
+            Arg.Is(playerCode),
+            Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
+            .Returns(bankInfoId);
 
-            _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandInfo.Id))
-                .Returns(brandInfo);
+        var command = new CreateInitBankInfoCommand(
+            brandInfo.Id,
+            playerCode,
+            paymentChannelId,
+            bankType,
+            JsonSerializer.SerializeToDocument(detail),
+            "127.0.0.1",
+            "localhost");
 
-            _ = fakePaymentServiceClient.CreatePlayerBankInfoAsync(
+        await sut.ExecuteAsync(command);
+
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .CreatePlayerBankInfoAsync(
                 Arg.Is(brandInfo.Id),
                 Arg.Is(playerCode),
-                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId))
-                .Returns(bankInfoId);
+                Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
 
-            var command = new CreateInitBankInfoCommand(
-                brandInfo.Id,
-                playerCode,
-                paymentChannelId,
-                bankType,
-                JsonSerializer.SerializeToDocument(detail),
-                "127.0.0.1",
-                "localhost");
+        _ = fakePaymentServiceClient
+            .Received(1)
+            .SetDefaultPlayerBankInfoAsync(
+                Arg.Is(playerCode),
+                Arg.Is(bankInfoId),
+                Arg.Is(playerCode));
 
-            await sut.ExecuteAsync(command);
+        _ = fakePlayerRepository
+            .Received(1)
+            .UpdatePlayerStatusAsync(
+                Arg.Is(playerCode),
+                Arg.Is(PlayerStatus.Enabled));
 
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .CreatePlayerBankInfoAsync(
-                    Arg.Is(brandInfo.Id),
-                    Arg.Is(playerCode),
-                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
-
-            _ = fakePaymentServiceClient
-                .Received(1)
-                .SetDefaultPlayerBankInfoAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(bankInfoId),
-                    Arg.Is(playerCode));
-
-            _ = fakePlayerRepository
-                .Received(1)
-                .UpdatePlayerStatusAsync(
-                    Arg.Is(playerCode),
-                    Arg.Is(PlayerStatus.Enabled));
-
-            _ = fakeRedisCacheManager
-                .Received(1)
-                .ClearCacheAsync(
-                    Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
-                    Arg.Is<string>(x => x == playerCode),
-                    Arg.Any<bool>());
-        }
+        _ = fakeRedisCacheManager
+            .Received(1)
+            .ClearCacheAsync(
+                Arg.Is<object>(x => x.ToString() == nameof(RedisCacheType.Player)),
+                Arg.Is<string>(x => x == playerCode),
+                Arg.Any<bool>());
     }
 }

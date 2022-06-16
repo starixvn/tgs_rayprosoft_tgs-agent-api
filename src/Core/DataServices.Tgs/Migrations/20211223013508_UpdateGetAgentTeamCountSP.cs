@@ -2,21 +2,20 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using TGS.Core.DataServices.Base.Extensions;
 
-namespace TGS.Core.DataServices.Tgs.Migrations
+namespace TGS.Core.DataServices.Tgs.Migrations;
+
+public partial class UpdateGetAgentTeamCountSP : Migration
 {
-    public partial class UpdateGetAgentTeamCountSP : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
 
-            migrationBuilder.SqlResource(assembly,
-                string.Format(Consts.FunctionSqlFormat, "agent_get_agents_with_team_counts"));
-        }
+        migrationBuilder.SqlResource(assembly,
+            string.Format(Consts.FunctionSqlFormat, "agent_get_agents_with_team_counts"));
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
 
-        }
     }
 }

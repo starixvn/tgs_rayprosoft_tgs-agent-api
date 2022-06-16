@@ -9,35 +9,34 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 
-namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Services;
+
+public sealed class TCGGameHistory : BaseBetHistory
 {
-    public sealed class TCGGameHistory : BaseBetHistory
+    private readonly IJsonSerializationProvider _jsonSerializationProvider;
+
+    public TCGGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        IJsonSerializationProvider jsonSerializationProvider
+    ) : base(roundQueries, gameProviderOperations)
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+    }
 
-        public TCGGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            IJsonSerializationProvider jsonSerializationProvider
-        ) : base(roundQueries, gameProviderOperations)
+    protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        return new ValueTask<RoundResult>(new RoundResult
         {
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-        }
-
-        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
-        {
-            return new ValueTask<RoundResult>(new RoundResult
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new JsonData {Value = round.RoundDetail.AdditionalData }
-                }
-            });
-        }
+                new JsonData {Value = round.RoundDetail.AdditionalData }
+            }
+        });
     }
 }

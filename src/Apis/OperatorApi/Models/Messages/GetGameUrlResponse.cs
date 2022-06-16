@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record GetGameUrlResponse : TgsResponse
 {
-    public record GetGameUrlResponse : TgsResponse
-    {
-        [JsonPropertyName("url")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("url")]
+    public string Url { get; init; }
 }

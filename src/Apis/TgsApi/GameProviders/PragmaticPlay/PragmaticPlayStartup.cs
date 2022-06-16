@@ -11,62 +11,61 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
+namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
+
+public sealed class PragmaticPlayStartup : BaseStartup
 {
-    public sealed class PragmaticPlayStartup : BaseStartup
+    public PragmaticPlayStartup(IConfiguration configuration, IWebHostEnvironment env)
+        : base(configuration, env)
     {
-        public PragmaticPlayStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
-        {
-        }
+    }
 
-        protected override string LogPrefix => "pragmaticplay";
+    protected override string LogPrefix => "pragmaticplay";
 
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(PragmaticPlayErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.PragmaticPlay => provider.GetRequiredService<PragmaticPlayErrorMapper>(),
-                    _                          => provider.GetRequiredService<TgsErrorMapper>()
-                }
-            );
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
+            {
+                typeof(PragmaticPlayErrorMapper)
+            },
+            (provider, key) => key switch
+            {
+                GameProvider.PragmaticPlay => provider.GetRequiredService<PragmaticPlayErrorMapper>(),
+                _                          => provider.GetRequiredService<TgsErrorMapper>()
+            }
+        );
 
-            services.AddScoped<AuthorizePragmaticPlayMiddleware>();
-            services.AddScoped<HandlePragmaticPlayExceptionMiddleware>();
+        services.AddScoped<AuthorizePragmaticPlayMiddleware>();
+        services.AddScoped<HandlePragmaticPlayExceptionMiddleware>();
 
-            services.AddScoped<IPragmaticPlayServices, PragmaticPlayServices>();
+        services.AddScoped<IPragmaticPlayServices, PragmaticPlayServices>();
 
-            services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
-            services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
+        services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
+        services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[]
-                {
-                    typeof(PragmaticPlayGameInitializer)
-                },
-                (provider, _) => provider.GetRequiredService<PragmaticPlayGameInitializer>());
+        services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(PragmaticPlayGameInitializer)
+            },
+            (provider, _) => provider.GetRequiredService<PragmaticPlayGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[]
-                {
-                    typeof(PragmaticPlayGameHistory)
-                },
-                (provider, _) => provider.GetRequiredService<PragmaticPlayGameHistory>());
-        }
+        services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(PragmaticPlayGameHistory)
+            },
+            (provider, _) => provider.GetRequiredService<PragmaticPlayGameHistory>());
+    }
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
-        {
-            const string Route = "/api/pp";
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/pp";
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandlePragmaticPlayExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizePragmaticPlayMiddleware>();
-                });
-        }
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandlePragmaticPlayExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizePragmaticPlayMiddleware>();
+            });
     }
 }

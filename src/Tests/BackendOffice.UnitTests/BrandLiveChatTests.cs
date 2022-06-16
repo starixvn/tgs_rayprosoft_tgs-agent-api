@@ -9,93 +9,92 @@ using TGS.Services.BackOffice.Application.Commands.BrandLiveChat;
 using TGS.Services.BackOffice.Application.Queries.BrandLiveChat;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class BrandLiveChatTests
 {
-    [TestFixture]
-    public class BrandLiveChatTests
+    [Test]
+    public async Task Get_Brand_Live_Chat_Should_Success()
     {
-        [Test]
-        public async Task Get_Brand_Live_Chat_Should_Success()
+        var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
+
+        var sut = new GetBrandLiveChatQueryService(fakeTgsQueries);
+
+        var brandId = Guid.NewGuid();
+        var query = new BrandLiveChatQuery(
+            BrandId: brandId);
+
+        var brandLiveChat = new CoreModels.BrandLiveChat()
         {
-            var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
+            BrandId = brandId,
+            ChatName = "LiveChat",
+            ChatSetting = "{\"url\": \"https://www.google.com/\" }"
+        };
 
-            var sut = new GetBrandLiveChatQueryService(fakeTgsQueries);
+        fakeTgsQueries
+            .GetSingleAsync(Arg.Any<Expression<Func<CoreModels.BrandLiveChat, bool>>>())
+            .Returns(brandLiveChat);
 
-            var brandId = Guid.NewGuid();
-            var query = new BrandLiveChatQuery(
-                BrandId: brandId);
+        var info = await sut.GetAsync(query);
 
-            var brandLiveChat = new CoreModels.BrandLiveChat()
-            {
-                BrandId = brandId,
-                ChatName = "LiveChat",
-                ChatSetting = "{\"url\": \"https://www.google.com/\" }"
-            };
+        Assert.IsTrue(info.ChatSetting != null);
+    }
 
-            fakeTgsQueries
-                .GetSingleAsync(Arg.Any<Expression<Func<CoreModels.BrandLiveChat, bool>>>())
-                .Returns(brandLiveChat);
+    [Test]
+    public async Task Create_Brand_Live_Chat_Should_Success()
+    {
+        var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
 
-            var info = await sut.GetAsync(query);
+        var sut = new CreateBrandLiveChatCommandService(fakeTgsCommand);
 
-            Assert.IsTrue(info.ChatSetting != null);
-        }
+        var command = new CreateBrandLiveChatCommand();
+        await sut.ExecuteAsync(command);
 
-        [Test]
-        public async Task Create_Brand_Live_Chat_Should_Success()
+        _ = fakeTgsCommand
+            .Received(1)
+            .CreateAsync(Arg.Any<CoreModels.BrandLiveChat>());
+    }
+
+    [Test]
+    public async Task Update_Brand_Live_Chat_Should_Success()
+    {
+        var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
+        var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
+
+        fakeTgsQueries
+            .GetSingleAsync(Arg.Any<Expression<Func<CoreModels.BrandLiveChat, bool>>>())
+            .Returns(new CoreModels.BrandLiveChat());
+
+        var sut = new UpdateBrandLiveChatCommandService(fakeTgsQueries, fakeTgsCommand);
+
+        var command = new UpdateBrandLiveChatCommand()
         {
-            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
+            BrandId = Guid.NewGuid(),
+            Name = "LiveChat",
+            Setting = JsonDocument.Parse("{}")
+        };
 
-            var sut = new CreateBrandLiveChatCommandService(fakeTgsCommand);
+        await sut.ExecuteAsync(command);
 
-            var command = new CreateBrandLiveChatCommand();
-            await sut.ExecuteAsync(command);
+        _ = fakeTgsCommand
+            .Received(1)
+            .UpdateAsync(Arg.Any<CoreModels.BrandLiveChat>());
+    }
 
-            _ = fakeTgsCommand
-                .Received(1)
-                .CreateAsync(Arg.Any<CoreModels.BrandLiveChat>());
-        }
+    [Test]
+    public async Task Delete_Brand_Live_Chat_Should_Success()
+    {
+        var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
+        var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
 
-        [Test]
-        public async Task Update_Brand_Live_Chat_Should_Success()
-        {
-            var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
-            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
+        var sut = new DeleteBrandLiveChatCommandService(fakeTgsQueries, fakeTgsCommand);
 
-            fakeTgsQueries
-                .GetSingleAsync(Arg.Any<Expression<Func<CoreModels.BrandLiveChat, bool>>>())
-                .Returns(new CoreModels.BrandLiveChat());
+        var command = new DeleteBrandLiveChatCommand(Guid.NewGuid());
+        await sut.ExecuteAsync(command);
 
-            var sut = new UpdateBrandLiveChatCommandService(fakeTgsQueries, fakeTgsCommand);
-
-            var command = new UpdateBrandLiveChatCommand()
-            {
-                BrandId = Guid.NewGuid(),
-                Name = "LiveChat",
-                Setting = JsonDocument.Parse("{}")
-            };
-
-            await sut.ExecuteAsync(command);
-
-            _ = fakeTgsCommand
-                .Received(1)
-                .UpdateAsync(Arg.Any<CoreModels.BrandLiveChat>());
-        }
-
-        [Test]
-        public async Task Delete_Brand_Live_Chat_Should_Success()
-        {
-            var fakeTgsQueries = Substitute.For<ITgsQueries<CoreModels.BrandLiveChat>>();
-            var fakeTgsCommand = Substitute.For<ITgsCommands<CoreModels.BrandLiveChat>>();
-
-            var sut = new DeleteBrandLiveChatCommandService(fakeTgsQueries, fakeTgsCommand);
-
-            var command = new DeleteBrandLiveChatCommand(Guid.NewGuid());
-            await sut.ExecuteAsync(command);
-
-            _ = fakeTgsCommand
-                .Received(1)
-                .DeleteAsync(Arg.Any<CoreModels.BrandLiveChat>());
-        }
+        _ = fakeTgsCommand
+            .Received(1)
+            .DeleteAsync(Arg.Any<CoreModels.BrandLiveChat>());
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record ManualDepositThirdPartyFormResponse : ManualDepositFormResponse
 {
-    public record ManualDepositThirdPartyFormResponse : ManualDepositFormResponse
-    {
-        [JsonPropertyName("qrcode")]
-        public string QrCode { get; init; }
-    }
+    [JsonPropertyName("qrcode")]
+    public string QrCode { get; init; }
 }

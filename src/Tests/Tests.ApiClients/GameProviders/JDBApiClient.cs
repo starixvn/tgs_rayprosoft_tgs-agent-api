@@ -18,71 +18,70 @@ using TGS.Services.Operations;
 using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
-namespace TGS.Tests.ApiClients.GameProviders
+namespace TGS.Tests.ApiClients.GameProviders;
+
+public interface IJDBApiClient
 {
-    public interface IJDBApiClient
+    ValueTask<BaseActionResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
+    ValueTask<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request);
+    ValueTask<BaseActionResponse> CancelTransactionsAsync(CancelTransactionRequest request);
+}
+
+public sealed class JDBApiClient : BaseApiClient, IJDBApiClient
+{
+    private readonly ISymmetricCryptoProvider _cryptoProvider;
+    private readonly ISettingOperations _settingOperations;
+
+    public JDBApiClient(
+        HttpClient client,
+        IApiClientLogger logger,
+        IJsonSerializationProvider json,
+        ISymmetricCryptoProviderFactory cryptoProviderFactory,
+        ISettingOperations settingOperations)
+        : base(client, logger, json)
     {
-        ValueTask<BaseActionResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
-        ValueTask<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request);
-        ValueTask<BaseActionResponse> CancelTransactionsAsync(CancelTransactionRequest request);
+        _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
+        _settingOperations = settingOperations;
     }
 
-    public sealed class JDBApiClient : BaseApiClient, IJDBApiClient
+    ValueTask<BaseActionResponse> IJDBApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
+        SendRequestAsync(Json.SerializeToString(request));
+
+    ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request) =>
+        SendRequestAsync(Json.SerializeToString(request));
+
+    ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(CancelTransactionRequest request) =>
+        SendRequestAsync(Json.SerializeToString(request));
+
+    private async ValueTask<BaseActionResponse> SendRequestAsync(string jsonString)
     {
-        private readonly ISymmetricCryptoProvider _cryptoProvider;
-        private readonly ISettingOperations _settingOperations;
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
+                .GameProviderConfigurations.JDB);
 
-        public JDBApiClient(
-            HttpClient client,
-            IApiClientLogger logger,
-            IJsonSerializationProvider json,
-            ISymmetricCryptoProviderFactory cryptoProviderFactory,
-            ISettingOperations settingOperations)
-            : base(client, logger, json)
-        {
-            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
-            _settingOperations = settingOperations;
-        }
+        var encryptedString = await _cryptoProvider.EncryptStringAsync(
+            jsonString,
+            configuration.AESIv,
+            configuration.AESKey,
+            padding: PaddingMode.Zeros,
+            encoding: Encoding.UTF8);
 
-        ValueTask<BaseActionResponse> IJDBApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
+        const string path = "api/jdb/entrance";
 
-        ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
-
-        ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(CancelTransactionRequest request) =>
-            SendRequestAsync(Json.SerializeToString(request));
-
-        private async ValueTask<BaseActionResponse> SendRequestAsync(string jsonString)
-        {
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
-
-            var encryptedString = await _cryptoProvider.EncryptStringAsync(
-                jsonString,
-                configuration.AESIv,
-                configuration.AESKey,
-                padding: PaddingMode.Zeros,
-                encoding: Encoding.UTF8);
-
-            const string path = "api/jdb/entrance";
-
-            return await ExecuteFormRequestAsync<BaseActionResponse>(
-                path,
-                new Dictionary<string, string>
+        return await ExecuteFormRequestAsync<BaseActionResponse>(
+            path,
+            new Dictionary<string, string>
+            {
                 {
-                    {
-                        "x", ToUrlSafeAesEncryptedString(encryptedString)
-                    }
-                });
-        }
+                    "x", ToUrlSafeAesEncryptedString(encryptedString)
+                }
+            });
+    }
 
-        private static string ToUrlSafeAesEncryptedString(string encryptedString)
-        {
-            var base64 = Convert.FromBase64String(encryptedString);
+    private static string ToUrlSafeAesEncryptedString(string encryptedString)
+    {
+        var base64 = Convert.FromBase64String(encryptedString);
 
-            return WebEncoders.Base64UrlEncode(base64);
-        }
+        return WebEncoders.Base64UrlEncode(base64);
     }
 }

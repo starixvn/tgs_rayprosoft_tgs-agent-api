@@ -1,9 +1,8 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
-{
-    public class LicenseeLanguageModel
-    {
-        public string CultureCode { get; set; }
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
 
-        public string Name { get; set; }
-    }
+public class LicenseeLanguageModel
+{
+    public string CultureCode { get; set; }
+
+    public string Name { get; set; }
 }

@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class UserBannedException : Exception
 {
-    public class UserBannedException : Exception
-    {
-    }
 }

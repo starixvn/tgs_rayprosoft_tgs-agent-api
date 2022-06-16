@@ -9,32 +9,31 @@ using TGS.Services.Operations.Validators;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Auth;
 
-namespace TGS.Services.Operator.ApplicationServices.Auth
+namespace TGS.Services.Operator.ApplicationServices.Auth;
+
+internal class GetAuthQueryService : IGetService<GetAuthQuery, ClaimsIdentity>
 {
-    internal class GetAuthQueryService : IGetService<GetAuthQuery, ClaimsIdentity>
+    private readonly IBrandOperations _brandOperations;
+
+    public GetAuthQueryService(
+        IBrandOperations brandOperations)
     {
-        private readonly IBrandOperations _brandOperations;
+        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+    }
 
-        public GetAuthQueryService(
-            IBrandOperations brandOperations)
+    public async ValueTask<ClaimsIdentity> GetAsync(
+        GetAuthQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(query.ApiKey);
+
+        var identity = new ClaimsIdentity(new[]
         {
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-        }
+            new Claim(JwtRegisteredClaimNames.Sub, $"{brandId}"),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("curr", query.Currency)
+        });
 
-        public async ValueTask<ClaimsIdentity> GetAsync(
-            GetAuthQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(query.ApiKey);
-
-            var identity = new ClaimsIdentity(new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, $"{brandId}"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("curr", query.Currency)
-            });
-
-            return identity;
-        }
+        return identity;
     }
 }

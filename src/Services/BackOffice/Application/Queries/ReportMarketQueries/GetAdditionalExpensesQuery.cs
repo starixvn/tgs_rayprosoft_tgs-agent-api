@@ -7,37 +7,36 @@ using Tgs.Report.Client.Models.Market;
 using TGS.Services.BackOffice.Application.Models.ReportMarket;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportMarketQueries;
+
+public class
+    GetAdditionalExpensesQuery : IGetService<GetAdditionalExpensesReportRequest,
+        GetAdditionalExpensesReportResponse>
 {
-    public class
-        GetAdditionalExpensesQuery : IGetService<GetAdditionalExpensesReportRequest,
-            GetAdditionalExpensesReportResponse>
+    private readonly IReportClient _reportClient;
+
+    public GetAdditionalExpensesQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<GetAdditionalExpensesReportResponse> GetAsync(
+        GetAdditionalExpensesReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetAdditionalExpensesQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<GetAdditionalExpensesReportResponse> GetAsync(
-            GetAdditionalExpensesReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetAdditionalExpensesRequest
         {
-            var reportRequest = new GetAdditionalExpensesRequest
-            {
-                BrandId = request.BrandId,
-                ReportDate = request.ReportDate
-            };
+            BrandId = request.BrandId,
+            ReportDate = request.ReportDate
+        };
 
-            var response = await _reportClient.GetAdditionalExpensesAsync(reportRequest);
+        var response = await _reportClient.GetAdditionalExpensesAsync(reportRequest);
 
-            return new GetAdditionalExpensesReportResponse
+        return new GetAdditionalExpensesReportResponse
+        {
+            AdditionalExpenses = response.AdditionalExpenses.Select(x => new AdditionalExpensesReportModel
             {
-                AdditionalExpenses = response.AdditionalExpenses.Select(x => new AdditionalExpensesReportModel
-                {
-                    AdditionalExpensesType = (AdditionalExpensesType)x.AdditionalExpensesType,
-                    Amount = x.Amount
-                }).ToArray()
-            };
-        }
+                AdditionalExpensesType = (AdditionalExpensesType)x.AdditionalExpensesType,
+                Amount = x.Amount
+            }).ToArray()
+        };
     }
 }

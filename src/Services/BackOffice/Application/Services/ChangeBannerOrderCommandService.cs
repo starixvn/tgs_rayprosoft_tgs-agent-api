@@ -4,21 +4,20 @@ using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Services
+namespace TGS.Services.BackOffice.Application.Services;
+
+internal class ChangeBannerOrderCommandService : ICommandService<ChangeBannerOrderCommand>
 {
-    internal class ChangeBannerOrderCommandService : ICommandService<ChangeBannerOrderCommand>
+    private readonly IBackOfficeRepository _backOfficeRepository;
+
+    public ChangeBannerOrderCommandService(IBackOfficeRepository backOfficeRepository)
     {
-        private readonly IBackOfficeRepository _backOfficeRepository;
-
-        public ChangeBannerOrderCommandService(IBackOfficeRepository backOfficeRepository)
-        {
-            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
-        }
-
-        public ValueTask ExecuteAsync(ChangeBannerOrderCommand command, CancellationToken cancellationToken = default)
-            => _backOfficeRepository.ChangeBannerOrderAsync(
-                command.BannerId,
-                command.OrderNumber,
-                command.Modifier);
+        _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
     }
+
+    public ValueTask ExecuteAsync(ChangeBannerOrderCommand command, CancellationToken cancellationToken = default)
+        => _backOfficeRepository.ChangeBannerOrderAsync(
+            command.BannerId,
+            command.OrderNumber,
+            command.Modifier);
 }

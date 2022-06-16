@@ -1,33 +1,32 @@
 ﻿using System.Threading.Tasks;
 
-namespace TGS.Core.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis;
+
+public interface IRedisList<T>
 {
-    public interface IRedisList<T>
-    {
-        Task<T[]> GetRangeAsync(long start, long count);
+    Task<T[]> GetRangeAsync(long start, long count);
 
-        Task<T[]> TakeAsync(long count, long skip = 0);
+    Task<T[]> TakeAsync(long count, long skip = 0);
 
-        Task AddToStartAsync(T item);
+    Task AddToStartAsync(T item);
 
-        Task AddToStartAsync(T[] items);
+    Task AddToStartAsync(T[] items);
 
-        Task AddToEndAsync(T item);
+    Task AddToEndAsync(T item);
 
-        Task AddToEndAsync(T[] items);
+    Task AddToEndAsync(T[] items);
 
-        Task<T> PopFromStartAsync();
+    Task<T> PopFromStartAsync();
 
-        Task<T> PopFromEndAsync();
+    Task<T> PopFromEndAsync();
 
-        Task ShrinkAsync(long maxSize);
+    Task ShrinkAsync(long maxSize);
 
-        Task<long> CountAsync();
+    Task<long> CountAsync();
 
-        Task ClearAsync();
+    Task ClearAsync();
 
-        void SetKeyPrefix(string keyPrefix);
+    void SetKeyPrefix(string keyPrefix);
 
-        string GetKey();
-    }
+    string GetKey();
 }

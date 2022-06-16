@@ -1,29 +1,28 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum RedisCacheType
 {
-    public enum RedisCacheType
-    {
-        Player,
-        Brand,
-        Currencies,
-        Languages,
-        GameProvider,
-        GameProviderIdByCode,
-        BrandGameProviderConfiguration,
-        GameProviderConfiguration,
-        GameProviderLanguages,
-        GameProviderCurrencies,
-        GameProviderBetLimitCode,
-        BrandGameProviders,
-        BrandGames,
-        Games,
-        SubGames,
-        UsernameToPlayerCode,
-        InvitationCodeToPlayerCode,
-        Setting,
-        Localization,
-        BrandDefaultBetLimit,
-        BrandApiKeys,
-        Announcements,
-        GameProviderIdAndConfigurationIdByCredentials
-    }
+    Player,
+    Brand,
+    Currencies,
+    Languages,
+    GameProvider,
+    GameProviderIdByCode,
+    BrandGameProviderConfiguration,
+    GameProviderConfiguration,
+    GameProviderLanguages,
+    GameProviderCurrencies,
+    GameProviderBetLimitCode,
+    BrandGameProviders,
+    BrandGames,
+    Games,
+    SubGames,
+    UsernameToPlayerCode,
+    InvitationCodeToPlayerCode,
+    Setting,
+    Localization,
+    BrandDefaultBetLimit,
+    BrandApiKeys,
+    Announcements,
+    GameProviderIdAndConfigurationIdByCredentials
 }

@@ -7,37 +7,36 @@ using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 
-namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
+namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers;
+
+public class ClearPlayerBucketsHandler : Handler<ClearPlayerBucketsRequest, ClearPlayerBucketsResponse>
 {
-    public class ClearPlayerBucketsHandler : Handler<ClearPlayerBucketsRequest, ClearPlayerBucketsResponse>
+    private readonly IPlayerBucketRepository _playerBucketRepository;
+    private readonly IPlayerService _service;
+
+    public ClearPlayerBucketsHandler(IPlayerBucketRepository playerBucketRepository, IPlayerService service,
+        IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IPlayerBucketRepository _playerBucketRepository;
-        private readonly IPlayerService _service;
+        _service = service;
+        _playerBucketRepository = playerBucketRepository;
+    }
 
-        public ClearPlayerBucketsHandler(IPlayerBucketRepository playerBucketRepository, IPlayerService service,
-            IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<ClearPlayerBucketsResponse> Handle(ClearPlayerBucketsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var player = await _service.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode).ConfigureAwait(false);
+
+        if (player is null)
         {
-            _service = service;
-            _playerBucketRepository = playerBucketRepository;
+            return CreateInvalidResponse<ClearPlayerBucketsResponse>(Player.NotFound);
         }
 
-        public override async Task<ClearPlayerBucketsResponse> Handle(ClearPlayerBucketsRequest request,
-            CancellationToken cancellationToken)
-        {
-            var player = await _service.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode).ConfigureAwait(false);
+        var wageringRequirement = await _playerBucketRepository.ClearPlayerBucketsAsync(request.PlayerCode);
 
-            if (player is null)
-            {
-                return CreateInvalidResponse<ClearPlayerBucketsResponse>(Player.NotFound);
-            }
-
-            var wageringRequirement = await _playerBucketRepository.ClearPlayerBucketsAsync(request.PlayerCode);
-
-            return new ClearPlayerBucketsResponse { 
-                Valid = true,
-                wageringRequirement = wageringRequirement
-            };
-        }
+        return new ClearPlayerBucketsResponse { 
+            Valid = true,
+            wageringRequirement = wageringRequirement
+        };
     }
 }

@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Wallet
-{
-    public record GetBalanceQuery(string PlayerCode);
-}
+﻿namespace TGS.Services.Operator.ApplicationServices.Wallet;
+
+public record GetBalanceQuery(string PlayerCode);

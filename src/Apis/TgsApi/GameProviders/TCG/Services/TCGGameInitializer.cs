@@ -10,123 +10,122 @@ using TGS.Shared.Game.ApiClients.TCG;
 using TGS.Shared.Game.Models.TCG.Enums;
 using TGS.Shared.Game.Models.TCG.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Services;
+
+public sealed class TCGGameInitializer : IGameInitializer
 {
-    public sealed class TCGGameInitializer : IGameInitializer
+    private readonly ITCGApiClient _client;
+    private readonly IReadOnlyDictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>> _methodMapper;
+    private readonly ITCGService _service;
+
+    public TCGGameInitializer(
+        ITCGApiClient client,
+        ITCGService service
+        )
     {
-        private readonly ITCGApiClient _client;
-        private readonly IReadOnlyDictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>> _methodMapper;
-        private readonly ITCGService _service;
-
-        public TCGGameInitializer(
-            ITCGApiClient client,
-            ITCGService service
-            )
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _methodMapper = new Dictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>>
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _methodMapper = new Dictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>>
-            {
-                { "384",SEAAsync },
-                { "2",ELOTTOAsync },
-                { "420",LOTTOVNAsync }
-            };
+            { "384",SEAAsync },
+            { "2",ELOTTOAsync },
+            { "420",LOTTOVNAsync }
+        };
+    }
+
+    async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+    {
+        var player = await _service.GetCachedPlayerAsync(request.Token.PlayerCode).ConfigureAwait(false);
+        var gameProviderId = await _service.GetGameProviderIdAsync();
+        var configuration = await _service.GetConfigurationAsync();
+        var cultureCode = await _service.GetGameProviderCultureCodeAsync(gameProviderId, player.BrandId, request.Language);
+        var merchant = await _service.GetMerchantAsync(player.DefaultWalletCurrencyCode);
+        var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.GameId);
+
+        if (!_methodMapper.TryGetValue(cachedGame.ExternalId.ToUpper(), out var execute))
+        {
+            throw new GameProviderApiErrorException($"GameId{request.GameId} could not find the corresponding lottery entry (GameId{request.GameId}找不到對應彩票入口)");
         }
-
-        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        var data = new TCGLaunchGameRequest()
         {
-            var player = await _service.GetCachedPlayerAsync(request.Token.PlayerCode).ConfigureAwait(false);
-            var gameProviderId = await _service.GetGameProviderIdAsync();
-            var configuration = await _service.GetConfigurationAsync();
-            var cultureCode = await _service.GetGameProviderCultureCodeAsync(gameProviderId, player.BrandId, request.Language);
-            var merchant = await _service.GetMerchantAsync(player.DefaultWalletCurrencyCode);
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.GameId);
+            UserName = request.Token.PlayerCode,
+            Language = cultureCode
+        };
 
-            if (!_methodMapper.TryGetValue(cachedGame.ExternalId.ToUpper(), out var execute))
-            {
-                throw new GameProviderApiErrorException($"GameId{request.GameId} could not find the corresponding lottery entry (GameId{request.GameId}找不到對應彩票入口)");
-            }
-            var data = new TCGLaunchGameRequest()
+        var response = await execute(configuration.ApiUrl, merchant, data, request.Token.PlatformType == PlatformType.Mobile).ConfigureAwait(false);
+
+        if (response.Status == 15)
+        {
+            var playerResponse = await _client.RegisterPlayerAsync(configuration.ApiUrl, merchant, new TCGRegisterPlayerRequest()
             {
                 UserName = request.Token.PlayerCode,
-                Language = cultureCode
-            };
-
-            var response = await execute(configuration.ApiUrl, merchant, data, request.Token.PlatformType == PlatformType.Mobile).ConfigureAwait(false);
-
-            if (response.Status == 15)
+                Password = merchant.PlayerPassword
+            }).ConfigureAwait(false);
+            if (playerResponse.Status != 0)
             {
-                var playerResponse = await _client.RegisterPlayerAsync(configuration.ApiUrl, merchant, new TCGRegisterPlayerRequest()
-                {
-                    UserName = request.Token.PlayerCode,
-                    Password = merchant.PlayerPassword
-                }).ConfigureAwait(false);
-                if (playerResponse.Status != 0)
-                {
-                    throw new GameProviderApiErrorException(response.ErrorDesc);
-                }
-                response = await execute(configuration.ApiUrl, merchant, data, request.Token.PlatformType == PlatformType.Mobile).ConfigureAwait(false);
+                throw new GameProviderApiErrorException(response.ErrorDesc);
             }
-            else
+            response = await execute(configuration.ApiUrl, merchant, data, request.Token.PlatformType == PlatformType.Mobile).ConfigureAwait(false);
+        }
+        else
+        {
+            if (response.Status != 0)
             {
-                if (response.Status != 0)
-                {
-                    throw new GameProviderApiErrorException(response.ErrorDesc);
-                }
+                throw new GameProviderApiErrorException(response.ErrorDesc);
             }
-            return new() { Url = $"{ merchant.GameUrl}{response.GameUrl}" };
         }
+        return new() { Url = $"{ merchant.GameUrl}{response.GameUrl}" };
+    }
 
-        private ValueTask<TCGLaunchGameResponse> ELOTTOAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+    private ValueTask<TCGLaunchGameResponse> ELOTTOAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+    {
+        var data = new TCGLaunchGameByELOTTORequest()
         {
-            var data = new TCGLaunchGameByELOTTORequest()
-            {
-                UserName = source.UserName,
-                Platform = "html5",
-                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
-                GameCode = "Lobby",
-                Language = source.Language,
-                LotteryBetMode = "Elott_Traditional",
-                View = "Lobby"
-            };
-            if (IsMobile)
-            {
-                data.GameCode = "game_list";
-                data.LotteryBetMode = "Elott_Traditional_Mobile_V2";
-                data.View = "game_list";
-            }
-            return _client.LaunchGameAsync(apiUrl, merchant, data);
-        }
-
-        private ValueTask<TCGLaunchGameResponse> LOTTOVNAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+            UserName = source.UserName,
+            Platform = "html5",
+            GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
+            GameCode = "Lobby",
+            Language = source.Language,
+            LotteryBetMode = "Elott_Traditional",
+            View = "Lobby"
+        };
+        if (IsMobile)
         {
-            var data = new TCGLaunchGameByLOTTOVNRequest()
-            {
-                UserName = source.UserName,
-                Platform = IsMobile ? "MOBILE" : "WEB",
-                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
-                GameCode = "lobby",
-                Language = source.Language,
-                LotteryBetMode = "Elott",
-                View = "lobby"
-            };
-
-            return _client.LaunchGameAsync(apiUrl, merchant, data);
+            data.GameCode = "game_list";
+            data.LotteryBetMode = "Elott_Traditional_Mobile_V2";
+            data.View = "game_list";
         }
+        return _client.LaunchGameAsync(apiUrl, merchant, data);
+    }
 
-        private ValueTask<TCGLaunchGameResponse> SEAAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+    private ValueTask<TCGLaunchGameResponse> LOTTOVNAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+    {
+        var data = new TCGLaunchGameByLOTTOVNRequest()
         {
-            var data = new TCGLaunchGameBySEARequest()
-            {
-                UserName = source.UserName,
-                Platform = "html5",
-                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
-                GameCode = "lobby",
-                Language = source.Language,
-                LotteryBetMode = "SEA_Tradition",
-                View = "lobby"
-            };
-            return _client.LaunchGameAsync(apiUrl, merchant, data);
-        }
+            UserName = source.UserName,
+            Platform = IsMobile ? "MOBILE" : "WEB",
+            GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
+            GameCode = "lobby",
+            Language = source.Language,
+            LotteryBetMode = "Elott",
+            View = "lobby"
+        };
+
+        return _client.LaunchGameAsync(apiUrl, merchant, data);
+    }
+
+    private ValueTask<TCGLaunchGameResponse> SEAAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
+    {
+        var data = new TCGLaunchGameBySEARequest()
+        {
+            UserName = source.UserName,
+            Platform = "html5",
+            GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
+            GameCode = "lobby",
+            Language = source.Language,
+            LotteryBetMode = "SEA_Tradition",
+            View = "lobby"
+        };
+        return _client.LaunchGameAsync(apiUrl, merchant, data);
     }
 }

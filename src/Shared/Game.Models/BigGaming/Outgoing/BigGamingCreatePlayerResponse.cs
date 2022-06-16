@@ -5,17 +5,16 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.BigGaming.Outgoing
+namespace TGS.Shared.Game.Models.BigGaming.Outgoing;
+
+public record BigGamingCreatePlayerResponse
 {
-    public record BigGamingCreatePlayerResponse
-    {
-        [JsonPropertyName("success")]
-        public bool Success { get; init; }
-        [JsonPropertyName("userId")]
-        public long UserId { get; init; }
-        [JsonPropertyName("nickname")]
-        public string Nickname { get; init; }
-        [JsonPropertyName("regType")]
-        public string RegType { get; init; }
-    }
+    [JsonPropertyName("success")]
+    public bool Success { get; init; }
+    [JsonPropertyName("userId")]
+    public long UserId { get; init; }
+    [JsonPropertyName("nickname")]
+    public string Nickname { get; init; }
+    [JsonPropertyName("regType")]
+    public string RegType { get; init; }
 }

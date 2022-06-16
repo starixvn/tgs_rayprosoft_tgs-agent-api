@@ -1,11 +1,10 @@
-﻿namespace TGS.Core.DataServices.Tgs.Models
+﻿namespace TGS.Core.DataServices.Tgs.Models;
+
+public class PlayerGameSetting
 {
-    public class PlayerGameSetting
-    {
-        public bool IsAutoTransferToGame { get; set; }
+    public bool IsAutoTransferToGame { get; set; }
 
-        public string PlayerCode { get; set; }
+    public string PlayerCode { get; set; }
 
-        public virtual Player Player { get; set; }
-    }
+    public virtual Player Player { get; set; }
 }

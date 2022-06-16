@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.TCG.Common
+namespace TGS.Shared.Game.Models.TCG.Common;
+
+public record TCGSingleWalletTradeResponse : TCGSingleWalletResponse
 {
-    public record TCGSingleWalletTradeResponse : TCGSingleWalletResponse
-    {
-        [JsonPropertyName("balance_info")]
-        public BalanceInfo[] BalanceInfos { get; init; }
-    }
+    [JsonPropertyName("balance_info")]
+    public BalanceInfo[] BalanceInfos { get; init; }
 }

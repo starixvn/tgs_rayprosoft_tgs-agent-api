@@ -1,15 +1,14 @@
 using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class ResellerLanguage
 {
-    public class ResellerLanguage
-    {
-        public Guid ResellerId { get; set; }
+    public Guid ResellerId { get; set; }
 
-        public virtual Reseller Reseller { get; set; }
+    public virtual Reseller Reseller { get; set; }
 
-        public string CultureCode { get; set; }
+    public string CultureCode { get; set; }
 
-        public virtual Language Language { get; set; }
-    }
+    public virtual Language Language { get; set; }
 }

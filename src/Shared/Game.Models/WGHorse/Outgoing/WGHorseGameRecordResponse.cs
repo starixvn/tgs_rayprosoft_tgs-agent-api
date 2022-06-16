@@ -6,21 +6,20 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.WGHorse.Commons;
 
-namespace TGS.Shared.Game.Models.WGHorse.Outgoing
+namespace TGS.Shared.Game.Models.WGHorse.Outgoing;
+
+public record WGHorseGameRecordResponse: WGHorseResponse
 {
-    public record WGHorseGameRecordResponse: WGHorseResponse
-    {
-        [JsonPropertyName("Page")]
-        public string Page { get; set; }
-        [JsonPropertyName("PageTotal")]
-        public string PageTotal { get; set; }
-        [JsonPropertyName("PageSize")]
-        public string PageSize { get; set; }
-        [JsonPropertyName("RaceDateFrom")]
-        public string RaceDateFrom { get; set; }
-        [JsonPropertyName("RaceDateTo")]
-        public string RaceDateTo { get; set; }
-        [JsonPropertyName("ArrayInvoice")]
-        public WGHorseGameRecord[] ArrayInvoice { get; set; }
-    }
+    [JsonPropertyName("Page")]
+    public string Page { get; set; }
+    [JsonPropertyName("PageTotal")]
+    public string PageTotal { get; set; }
+    [JsonPropertyName("PageSize")]
+    public string PageSize { get; set; }
+    [JsonPropertyName("RaceDateFrom")]
+    public string RaceDateFrom { get; set; }
+    [JsonPropertyName("RaceDateTo")]
+    public string RaceDateTo { get; set; }
+    [JsonPropertyName("ArrayInvoice")]
+    public WGHorseGameRecord[] ArrayInvoice { get; set; }
 }

@@ -1,9 +1,8 @@
-﻿namespace TGS.Shared.Game.Models.SBOBET.Enums
+﻿namespace TGS.Shared.Game.Models.SBOBET.Enums;
+
+public enum ResultType
 {
-    public enum ResultType
-    {
-        Win = 0,
-        Loss = 1,
-        Tie = 2
-    }
+    Win = 0,
+    Loss = 1,
+    Tie = 2
 }

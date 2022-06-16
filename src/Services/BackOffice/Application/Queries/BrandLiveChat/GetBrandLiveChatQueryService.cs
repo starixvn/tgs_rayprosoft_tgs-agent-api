@@ -6,31 +6,30 @@ using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Interfaces;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Services.BackOffice.Application.Queries.BrandLiveChat
+namespace TGS.Services.BackOffice.Application.Queries.BrandLiveChat;
+
+internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo>
 {
-    internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo>
+    private readonly ITgsQueries<CoreModels.BrandLiveChat> _tgsQueries;
+
+    public GetBrandLiveChatQueryService(ITgsQueries<CoreModels.BrandLiveChat> tgsQueries)
     {
-        private readonly ITgsQueries<CoreModels.BrandLiveChat> _tgsQueries;
+        _tgsQueries = tgsQueries ?? throw new ArgumentNullException(nameof(tgsQueries));
+    }
 
-        public GetBrandLiveChatQueryService(ITgsQueries<CoreModels.BrandLiveChat> tgsQueries)
+    public async ValueTask<BrandLiveChatInfo> GetAsync(
+        BrandLiveChatQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _tgsQueries.GetSingleAsync(x => x.BrandId == query.BrandId);
+
+        if (result == null)
+            return null;
+
+        return new BrandLiveChatInfo()
         {
-            _tgsQueries = tgsQueries ?? throw new ArgumentNullException(nameof(tgsQueries));
-        }
-
-        public async ValueTask<BrandLiveChatInfo> GetAsync(
-            BrandLiveChatQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var result = await _tgsQueries.GetSingleAsync(x => x.BrandId == query.BrandId);
-
-            if (result == null)
-                return null;
-
-            return new BrandLiveChatInfo()
-            {
-                ChatName = result.ChatName,
-                ChatSetting = JsonDocument.Parse(result.ChatSetting)
-            };
-        }
+            ChatName = result.ChatName,
+            ChatSetting = JsonDocument.Parse(result.ChatSetting)
+        };
     }
 }

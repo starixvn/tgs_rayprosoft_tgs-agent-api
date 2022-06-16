@@ -2,29 +2,28 @@
 using Microsoft.AspNetCore.Builder;
 using TGS.Workers.Schedulers.Hangfire.Services;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ApplicationBuilderExtensions
 {
-    public static class ApplicationBuilderExtensions
+    public static IApplicationBuilder UseHangfireScheduler(this IApplicationBuilder app)
     {
-        public static IApplicationBuilder UseHangfireScheduler(this IApplicationBuilder app)
+        var jobProvider = app.ApplicationServices.GetRequiredService<IJobProvider>();
+        var manager = app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+
+        foreach (var job in jobProvider.GetJobDescriptions())
         {
-            var jobProvider = app.ApplicationServices.GetRequiredService<IJobProvider>();
-            var manager = app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
+            var jobId = job.Id.ToString();
+            var method = job.Worker.GetMethod("ExecuteWorkerAsync");
 
-            foreach (var job in jobProvider.GetJobDescriptions())
-            {
-                var jobId = job.Id.ToString();
-                var method = job.Worker.GetMethod("ExecuteWorkerAsync");
-
-                manager.RemoveIfExists(jobId);
-                manager.AddOrUpdate(
-                    job.Id.ToString(),
-                    new(job.Worker, method, job.Name, job.Context),
-                    job.CronExpression,
-                    job.TimeZone);
-            }
-
-            return app;
+            manager.RemoveIfExists(jobId);
+            manager.AddOrUpdate(
+                job.Id.ToString(),
+                new(job.Worker, method, job.Name, job.Context),
+                job.CronExpression,
+                job.TimeZone);
         }
+
+        return app;
     }
 }

@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.BetConstruct.Incoming
+﻿namespace TGS.Shared.Game.Models.BetConstruct.Incoming;
+
+public record RollbackResponse : ErrorResponse
 {
-    public record RollbackResponse : ErrorResponse
-    {
-    }
 }

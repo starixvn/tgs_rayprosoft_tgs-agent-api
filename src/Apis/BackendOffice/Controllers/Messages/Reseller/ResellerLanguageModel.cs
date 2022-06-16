@@ -1,9 +1,8 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller
-{
-    public class ResellerLanguageModel
-    {
-        public string CultureCode { get; set; }
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 
-        public string Name { get; set; }
-    }
+public class ResellerLanguageModel
+{
+    public string CultureCode { get; set; }
+
+    public string Name { get; set; }
 }

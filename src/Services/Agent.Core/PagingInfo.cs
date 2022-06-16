@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Agent
-{
-    public record PagingInfo(int Page, int RowCount, string? SortBy, bool IsDesc);
-}
+﻿namespace TGS.Services.Agent;
+
+public record PagingInfo(int Page, int RowCount, string? SortBy, bool IsDesc);

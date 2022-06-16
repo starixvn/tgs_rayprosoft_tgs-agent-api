@@ -3,23 +3,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.Vip
+namespace TGS.Services.Operator.ApplicationServices.Vip;
+
+internal class CountVipLevelsQueryService : IGetService<GetVipLevelListQuery, int>
 {
-    internal class CountVipLevelsQueryService : IGetService<GetVipLevelListQuery, int>
+    private readonly IVipLevelRepository _vipLevelRepository;
+
+    public CountVipLevelsQueryService(IVipLevelRepository vipLevelRepository)
     {
-        private readonly IVipLevelRepository _vipLevelRepository;
-
-        public CountVipLevelsQueryService(IVipLevelRepository vipLevelRepository)
-        {
-            _vipLevelRepository = vipLevelRepository ??
-                throw new ArgumentNullException(nameof(vipLevelRepository));
-        }
-
-        public async ValueTask<int> GetAsync(
-            GetVipLevelListQuery query,
-            CancellationToken cancellationToken = default)
-            => await _vipLevelRepository
-                .QueryVipLevelsTotalCountAsync(query.BrandId)
-                .ConfigureAwait(false);
+        _vipLevelRepository = vipLevelRepository ??
+            throw new ArgumentNullException(nameof(vipLevelRepository));
     }
+
+    public async ValueTask<int> GetAsync(
+        GetVipLevelListQuery query,
+        CancellationToken cancellationToken = default)
+        => await _vipLevelRepository
+            .QueryVipLevelsTotalCountAsync(query.BrandId)
+            .ConfigureAwait(false);
 }

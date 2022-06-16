@@ -1,14 +1,13 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum CommunicationType : short
 {
-    public enum CommunicationType : short
-    {
-        WeChat,
-        WhatsApp,
-        Telegram,
-        KakaoTalk,
-        Line,
-        Skype,
-        Viber,
-        Zalo
-    }
+    WeChat,
+    WhatsApp,
+    Telegram,
+    KakaoTalk,
+    Line,
+    Skype,
+    Viber,
+    Zalo
 }

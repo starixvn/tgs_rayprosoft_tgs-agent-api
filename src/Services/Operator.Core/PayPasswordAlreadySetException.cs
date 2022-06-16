@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+internal class PayPasswordAlreadySetException : Exception
 {
-    internal class PayPasswordAlreadySetException : Exception
+    public PayPasswordAlreadySetException()
     {
-        public PayPasswordAlreadySetException()
-        {
-        }
     }
 }

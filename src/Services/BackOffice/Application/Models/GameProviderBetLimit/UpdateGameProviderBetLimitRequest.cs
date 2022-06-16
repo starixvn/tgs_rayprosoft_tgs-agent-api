@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProviderBetLimit
+namespace TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
+
+public class UpdateGameProviderBetLimitRequest : GameProviderBetLimitRequest, IRequest<MessageResponse>
 {
-    public class UpdateGameProviderBetLimitRequest : GameProviderBetLimitRequest, IRequest<MessageResponse>
-    {
-    }
 }

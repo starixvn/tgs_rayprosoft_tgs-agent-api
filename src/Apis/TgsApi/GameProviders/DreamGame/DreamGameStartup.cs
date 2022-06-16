@@ -27,181 +27,180 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.TgsApi.GameProviders.DreamGame
+namespace TGS.Apis.TgsApi.GameProviders.DreamGame;
+
+public class DreamGameStartup
 {
-    public class DreamGameStartup
+    private readonly IConfiguration _configuration;
+
+    public DreamGameStartup(
+        IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public DreamGameStartup(
-            IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseGlobalExceptionHandler();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseGlobalExceptionHandler();
+        app.UseGameApiLogger(
+            "dreamgame",
+            new[] { "/health", "/favicon.ico", "/metrics" });
 
-            app.UseGameApiLogger(
-                "dreamgame",
-                new[] { "/health", "/favicon.ico", "/metrics" });
+        app.UseRouting();
 
-            app.UseRouting();
+        app.UseHttpMetrics();
 
-            app.UseHttpMetrics();
-
-            app.UseWhen(
-                context =>
-                {
-                    if (context.Request.ContentType != MediaTypeNames.Application.Json)
-                    {
-                        return false;
-                    }
-
-                    var route = "/api/dg";
-
-                    return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase);
-                },
-                builder =>
-                {
-                    builder.UseMiddleware<HandleDreamGameExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeDreamGameMiddleware>();
-                });
-
-            app.UseEndpoints(endpoints =>
+        app.UseWhen(
+            context =>
             {
-                endpoints.MapControllers();
+                if (context.Request.ContentType != MediaTypeNames.Application.Json)
+                {
+                    return false;
+                }
 
-                endpoints.MapHealthChecks("/health");
+                var route = "/api/dg";
 
-                endpoints.MapMetrics();
-                endpoints.MapProfileViewer();
+                return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase);
+            },
+            builder =>
+            {
+                builder.UseMiddleware<HandleDreamGameExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeDreamGameMiddleware>();
             });
-        }
 
-        public void ConfigureServices(IServiceCollection services)
+        app.UseEndpoints(endpoints =>
         {
-            _ = services.AddTgsRepository(_configuration, "Tgs");
+            endpoints.MapControllers();
 
-            _ = services
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddSystemJsonSerializer()
-                .AddTransactions()
-                .AddOperations()
-                .AddGameOperations(sp
-                    => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
-                .AddGameProvidersoRepository();
+            endpoints.MapHealthChecks("/health");
 
-            _ = services
-                .AddRedis((options, sp) =>
+            endpoints.MapMetrics();
+            endpoints.MapProfileViewer();
+        });
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        _ = services.AddTgsRepository(_configuration, "Tgs");
+
+        _ = services
+            .AddWebApiServices()
+            .AddTgsLog()
+            .AddSystemJsonSerializer()
+            .AddTransactions()
+            .AddOperations()
+            .AddGameOperations(sp
+                => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+            .AddGameProvidersoRepository();
+
+        _ = services
+            .AddRedis((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            });
+
+        _ = services.AddHttpContextAccessor();
+
+        _ = services.AddFeatureManagement();
+
+        _ = services.AddControllers(options =>
+          {
+              options.Filters.Add<ValidateModelFilter>();
+          });
+
+        _ = services.AddHealthChecks()
+            .ForwardToPrometheus();
+
+        _ = services
+            .AddMessageQueue()
+            .AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                .ConfigQueueOptions((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+                    options.Url = config.GetValue<string>("NatsSetting:Urls");
                 });
+            })
+            .AddNatsGlobPatternExchange("*");
 
-            _ = services.AddHttpContextAccessor();
+        _ = services
+            .AddOptions<OtlpExporterOptions>()
+            .Configure<IConfiguration>((options, config) =>
+            {
+                var nodeIp = config.GetValue<string>("NODE_IP");
 
-            _ = services.AddFeatureManagement();
-
-            _ = services.AddControllers(options =>
-              {
-                  options.Filters.Add<ValidateModelFilter>();
-              });
-
-            _ = services.AddHealthChecks()
-                .ForwardToPrometheus();
-
-            _ = services
-                .AddMessageQueue()
-                .AddNatsMessageQueue(natsConfig =>
+                if (!string.IsNullOrWhiteSpace(nodeIp))
                 {
-                    natsConfig
-                    .ConfigQueueOptions((options, sp) =>
+                    options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                }
+
+                config.GetSection("OpenTelemetry:Tracing").Bind(options);
+            });
+
+        _ = services
+            .AddOpenTelemetryTracing(builder
+                => builder
+                    .SetResourceBuilder(
+                        ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+                    .AddSource("TGS.*")
+                    .AddSource("Tgs.*")
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
                     {
-                        var config = sp.GetRequiredService<IConfiguration>();
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    });
-                })
-                .AddNatsGlobPatternExchange("*");
-
-            _ = services
-                .AddOptions<OtlpExporterOptions>()
-                .Configure<IConfiguration>((options, config) =>
-                {
-                    var nodeIp = config.GetValue<string>("NODE_IP");
-
-                    if (!string.IsNullOrWhiteSpace(nodeIp))
+                        options.SetDbStatementForText = true;
+                    })
+                    .AddOtlpExporter()
+                    .AddProfileViewExporter())
+            .Configure<AspNetCoreInstrumentationOptions>(options =>
+            {
+                options.Filter = httpContext
+                    => !httpContext.Request.Path.HasValue
+                    || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                    && !httpContext.Request.Path.StartsWithSegments("/health")
+                    && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                    && !httpContext.Request.Path.StartsWithSegments("/metrics")
+                    && !new[]
                     {
-                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
-                    }
+                        "html",
+                        "ico",
+                        "png",
+                        "jpg"
+                    }.Any(
+                        ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+            })
+            .AddProfileViewer();
 
-                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
-                });
+        _ = services
+            .AddInterceptionService()
+            .ConfigureDynamicProxy(config =>
+            {
+                config.Interceptors.AddTyped<DiagnosticsInterceptor>(
+                        Predicates.ForNameSpace("Tgs.*"),
+                        Predicates.ForNameSpace("TGS.*"));
+            });
 
-            _ = services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .SetResourceBuilder(
-                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddOtlpExporter()
-                        .AddProfileViewExporter())
-                .Configure<AspNetCoreInstrumentationOptions>(options =>
-                {
-                    options.Filter = httpContext
-                        => !httpContext.Request.Path.HasValue
-                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                        && !httpContext.Request.Path.StartsWithSegments("/health")
-                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
-                        && !new[]
-                        {
-                            "html",
-                            "ico",
-                            "png",
-                            "jpg"
-                        }.Any(
-                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
-                })
-                .AddProfileViewer();
+        _ = services.AddErrorMappers(new[]
+            {
+                typeof(DreamGameErrorMapper)
+            },
+            (provider, key) => key switch
+            {
+                Consts.GameProvider.DreamGame => provider.GetRequiredService<DreamGameErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-            _ = services
-                .AddInterceptionService()
-                .ConfigureDynamicProxy(config =>
-                {
-                    config.Interceptors.AddTyped<DiagnosticsInterceptor>(
-                            Predicates.ForNameSpace("Tgs.*"),
-                            Predicates.ForNameSpace("TGS.*"));
-                });
+        _ = services.AddScoped<AuthorizeDreamGameMiddleware>();
 
-            _ = services.AddErrorMappers(new[]
-                {
-                    typeof(DreamGameErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    Consts.GameProvider.DreamGame => provider.GetRequiredService<DreamGameErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
+        _ = services.AddScoped<HandleDreamGameExceptionMiddleware>();
 
-            _ = services.AddScoped<AuthorizeDreamGameMiddleware>();
+        _ = services.AddScoped<IDreamGameService, DreamGameService>();
 
-            _ = services.AddScoped<HandleDreamGameExceptionMiddleware>();
-
-            _ = services.AddScoped<IDreamGameService, DreamGameService>();
-
-            _ = services.AddScoped<IDreamGamegModelActionMapper, DreamGamegModelActionMapper>();
-        }
+        _ = services.AddScoped<IDreamGamegModelActionMapper, DreamGamegModelActionMapper>();
     }
 }

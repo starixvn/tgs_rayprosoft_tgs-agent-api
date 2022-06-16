@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Outgoing
+namespace TGS.Shared.Game.Models.SexyGaming.Outgoing;
+
+public record SexyGamingCreateMemberResponse: SexyGamingBaseResponse
 {
-    public record SexyGamingCreateMemberResponse: SexyGamingBaseResponse
-    {
-    }
 }

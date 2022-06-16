@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Reseller
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Reseller;
+
+public class UpdateResellerRequestValidator : AbstractValidator<UpdateResellerRequest>
 {
-    public class UpdateResellerRequestValidator : AbstractValidator<UpdateResellerRequest>
+    public UpdateResellerRequestValidator()
     {
-        public UpdateResellerRequestValidator()
-        {
-            Include(new ResellerRequestValidator());
-        }
+        Include(new ResellerRequestValidator());
     }
 }

@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
+
+public class GetResellersRequest : PageableRequest
 {
-    public class GetResellersRequest : PageableRequest
-    {
-        public string Keyword { get; set; }
-    }
+    public string Keyword { get; set; }
 }

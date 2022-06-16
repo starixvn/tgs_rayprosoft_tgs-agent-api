@@ -7,24 +7,23 @@ using Microsoft.Extensions.FileProviders;
 using Tgs.ServiceUtility;
 using TGS.Services.Agent.ApplicationServices.Localization;
 
-namespace TGS.Apis.AgentApi.Controllers
+namespace TGS.Apis.AgentApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class LocalizationController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LocalizationController : ControllerBase
+    private static readonly PhysicalFileProvider _FileProvider =
+        new PhysicalFileProvider(Environment.CurrentDirectory);
+
+    [HttpGet]
+    public ValueTask<IDictionary<string, string>> GetLocalizeDictionaryAsync(
+        [FromServices] IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>> getService)
     {
-        private static readonly PhysicalFileProvider _FileProvider =
-            new PhysicalFileProvider(Environment.CurrentDirectory);
+        var currentCultureName = CultureInfo.CurrentUICulture.Name;
 
-        [HttpGet]
-        public ValueTask<IDictionary<string, string>> GetLocalizeDictionaryAsync(
-            [FromServices] IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>> getService)
-        {
-            var currentCultureName = CultureInfo.CurrentUICulture.Name;
+        var query = new GetAllLocalizationStringsQuery(currentCultureName);
 
-            var query = new GetAllLocalizationStringsQuery(currentCultureName);
-
-            return getService.GetAsync(query);
-        }
+        return getService.GetAsync(query);
     }
 }

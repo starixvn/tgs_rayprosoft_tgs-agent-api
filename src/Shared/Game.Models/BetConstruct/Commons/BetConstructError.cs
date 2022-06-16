@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.BetConstruct.Commons
+namespace TGS.Shared.Game.Models.BetConstruct.Commons;
+
+public record BetConstructError
 {
-    public record BetConstructError
-    {
-        [JsonPropertyName("code")]
-        public string Code { get; set; }
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
-    }
+    [JsonPropertyName("code")]
+    public string Code { get; set; }
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Apis.OperatorApi.Models
+namespace TGS.Apis.OperatorApi.Models;
+
+public class LeePayApiException : Exception
 {
-    public class LeePayApiException : Exception
+    public LeePayApiException()
+        : base($"LeePay api has error.")
     {
-        public LeePayApiException()
-            : base($"LeePay api has error.")
-        {
-        }
     }
 }

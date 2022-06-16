@@ -6,32 +6,31 @@ using TGS.Services.BackOffice.Application.Models.GameProviderConfiguration;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.GameProviderConfigurationHandlers
+namespace TGS.Services.BackOffice.Application.Commands.GameProviderConfigurationHandlers;
+
+public class
+    UpdateGameProviderConfigurationHandler : Handler<UpdateGameProviderConfigurationRequest, MessageResponse>
 {
-    public class
-        UpdateGameProviderConfigurationHandler : Handler<UpdateGameProviderConfigurationRequest, MessageResponse>
+    private readonly IGameProviderConfigurationService _service;
+
+    public UpdateGameProviderConfigurationHandler(IGameProviderConfigurationService service,
+        IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IGameProviderConfigurationService _service;
+        _service = service;
+    }
 
-        public UpdateGameProviderConfigurationHandler(IGameProviderConfigurationService service,
-            IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateGameProviderConfigurationRequest request,
+        CancellationToken cancellationToken)
+    {
+        var configuration = await _service.GetGameProviderConfigurationAsync(x => x.Id == request.Id);
+
+        if (configuration == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(GameProviderConfiguration.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateGameProviderConfigurationRequest request,
-            CancellationToken cancellationToken)
-        {
-            var configuration = await _service.GetGameProviderConfigurationAsync(x => x.Id == request.Id);
+        await _service.UpdateGameProviderConfigurationAsync(configuration, request);
 
-            if (configuration == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(GameProviderConfiguration.NotFound);
-            }
-
-            await _service.UpdateGameProviderConfigurationAsync(configuration, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

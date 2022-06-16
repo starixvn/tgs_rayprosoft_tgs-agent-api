@@ -1,4 +1,3 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
-{
-    public record GetPlayerRequest();
-}
+﻿namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record GetPlayerRequest();

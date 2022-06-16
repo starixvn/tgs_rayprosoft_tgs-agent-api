@@ -8,56 +8,55 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.ApplicationServices.Agent;
 
-namespace TGS.Apis.AgentApi.Controllers
+namespace TGS.Apis.AgentApi.Controllers;
+
+[Route("api/agent/email")]
+[ApiController]
+public class AgentEmailController : ControllerBase
 {
-    [Route("api/agent/email")]
-    [ApiController]
-    public class AgentEmailController : ControllerBase
+    /// <summary>
+    /// Starts the change email.
+    /// </summary>
+    /// <param name="setEmailService">The set email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPost]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public ValueTask<string> StartChangeEmailAsync(
+        [FromServices] IGetService<StartSetAgentEmailCommand, string> setEmailService,
+        [FromBody] StartSetEmailRequest request)
     {
-        /// <summary>
-        /// Starts the change email.
-        /// </summary>
-        /// <param name="setEmailService">The set email service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPost]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask<string> StartChangeEmailAsync(
-            [FromServices] IGetService<StartSetAgentEmailCommand, string> setEmailService,
-            [FromBody] StartSetEmailRequest request)
-        {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var command = new StartSetAgentEmailCommand(
-                agentTokenData.AgentId,
-                request.Email,
-                CultureInfo.CurrentUICulture);
+        var command = new StartSetAgentEmailCommand(
+            agentTokenData.AgentId,
+            request.Email,
+            CultureInfo.CurrentUICulture);
 
-            return setEmailService.GetAsync(command);
-        }
+        return setEmailService.GetAsync(command);
+    }
 
-        /// <summary>
-        /// Submits the change email.
-        /// </summary>
-        /// <param name="commitEmailService">The commit email service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPut]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask SubmitChangeEmailAsync(
-            [FromServices] ICommandService<CommitSetAgentEmailCommand> commitEmailService,
-            [FromBody] SubmitChangeEmailRequest request)
-        {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+    /// <summary>
+    /// Submits the change email.
+    /// </summary>
+    /// <param name="commitEmailService">The commit email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPut]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public ValueTask SubmitChangeEmailAsync(
+        [FromServices] ICommandService<CommitSetAgentEmailCommand> commitEmailService,
+        [FromBody] SubmitChangeEmailRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var command = new CommitSetAgentEmailCommand(
-                agentTokenData.AgentId,
-                request.SecurityKey,
-                request.ValidateCode);
+        var command = new CommitSetAgentEmailCommand(
+            agentTokenData.AgentId,
+            request.SecurityKey,
+            request.ValidateCode);
 
-            return commitEmailService.ExecuteAsync(command);
-        }
+        return commitEmailService.ExecuteAsync(command);
     }
 }

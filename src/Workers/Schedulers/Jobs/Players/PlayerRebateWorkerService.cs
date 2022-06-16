@@ -2,32 +2,31 @@
 using TGS.Core.Models.Messages;
 using Tgs.ProfitRebate.Client;
 
-namespace TGS.Workers.Schedulers.Jobs.Players
+namespace TGS.Workers.Schedulers.Jobs.Players;
+
+public interface IPlayerRebateWorkerService
 {
-    public interface IPlayerRebateWorkerService
+    Task<TgsResponse> ExecutionAsync();
+    Task<TgsResponse> ManualExecutionAsync(string date = null);
+}
+
+public class PlayerRebateWorkerService : IPlayerRebateWorkerService
+{
+    private readonly IProfitRebateClient _client;
+
+    public PlayerRebateWorkerService(
+        IProfitRebateClient client)
+        => _client = client;
+
+    async Task<TgsResponse> IPlayerRebateWorkerService.ExecutionAsync()
     {
-        Task<TgsResponse> ExecutionAsync();
-        Task<TgsResponse> ManualExecutionAsync(string date = null);
+        var response = await _client.CreatePlayerRebateAsync(new());
+        return new() { ErrorMessage = response.Message };
     }
 
-    public class PlayerRebateWorkerService : IPlayerRebateWorkerService
+    async Task<TgsResponse> IPlayerRebateWorkerService.ManualExecutionAsync(string date)
     {
-        private readonly IProfitRebateClient _client;
-
-        public PlayerRebateWorkerService(
-            IProfitRebateClient client)
-            => _client = client;
-
-        async Task<TgsResponse> IPlayerRebateWorkerService.ExecutionAsync()
-        {
-            var response = await _client.CreatePlayerRebateAsync(new());
-            return new() { ErrorMessage = response.Message };
-        }
-
-        async Task<TgsResponse> IPlayerRebateWorkerService.ManualExecutionAsync(string date)
-        {
-            var response = await _client.CreatePlayerRebateAsync(new(date));
-            return new() { ErrorMessage = response.Message };
-        }
+        var response = await _client.CreatePlayerRebateAsync(new(date));
+        return new() { ErrorMessage = response.Message };
     }
 }

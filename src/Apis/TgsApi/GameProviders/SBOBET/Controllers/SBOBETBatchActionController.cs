@@ -15,78 +15,77 @@ using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
+namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers;
+
+[Route("api/sbo/batch")]
+[ApiController]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
+[AllowAnonymous]
+[FeatureGate(Consts.GameProvider.SBOBET)]
+public sealed class SBOBETBatchActionController : ControllerBase
 {
-    [Route("api/sbo/batch")]
-    [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [Produces(MediaTypeNames.Application.Json)]
-    [AllowAnonymous]
-    [FeatureGate(Consts.GameProvider.SBOBET)]
-    public sealed class SBOBETBatchActionController : ControllerBase
+    private static readonly string GameProviderCode = Consts.GameProvider.SBOBET;
+    private readonly IGamePlayActions _action;
+    private readonly IBrandOperations _brandOperations;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly ISBOBETActionModelMapper _map;
+    private readonly IPlayerOperations _playerOperations;
+
+    public SBOBETBatchActionController(
+        IPlayerOperations playerOperations,
+        IBrandOperations brandOperations, IGameProviderOperations gameProviderOperations,
+        IGamePlayActions action,
+        ISBOBETActionModelMapper map)
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.SBOBET;
-        private readonly IGamePlayActions _action;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ISBOBETActionModelMapper _map;
-        private readonly IPlayerOperations _playerOperations;
+        _playerOperations = playerOperations;
+        _brandOperations = brandOperations;
+        _gameProviderOperations = gameProviderOperations;
+        _action = action;
+        _map = map;
+    }
 
-        public SBOBETBatchActionController(
-            IPlayerOperations playerOperations,
-            IBrandOperations brandOperations, IGameProviderOperations gameProviderOperations,
-            IGamePlayActions action,
-            ISBOBETActionModelMapper map)
+    [HttpPost]
+    [Route("transactions/cancel")]
+    public async ValueTask<BatchResponse> CancelTransactionsAsync(BatchRequest request)
+    {
+        var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode)
+            .ConfigureAwait(false);
+
+        var autoCloseRound =
+            await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
+
+        var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions)
+            .ConfigureAwait(false);
+
+        var r = await _action.CancelBatchAsync(_map.Request(gameProviderId, data, autoCloseRound, request))
+            .ConfigureAwait(false);
+
+        return _map.Response(r);
+    }
+
+    private async Task<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(Guid gameProviderId,
+        BatchRequestTransaction[] transactions)
+    {
+        var map = new Dictionary<string, Guid>();
+
+        foreach (var playerCode in transactions.GroupBy(t => t.PlayerCode).Select(g => g.Key))
         {
-            _playerOperations = playerOperations;
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _action = action;
-            _map = map;
-        }
-
-        [HttpPost]
-        [Route("transactions/cancel")]
-        public async ValueTask<BatchResponse> CancelTransactionsAsync(BatchRequest request)
-        {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode)
-                .ConfigureAwait(false);
-
-            var autoCloseRound =
-                await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
-
-            var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions)
-                .ConfigureAwait(false);
-
-            var r = await _action.CancelBatchAsync(_map.Request(gameProviderId, data, autoCloseRound, request))
-                .ConfigureAwait(false);
-
-            return _map.Response(r);
-        }
-
-        private async Task<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(Guid gameProviderId,
-            BatchRequestTransaction[] transactions)
-        {
-            var map = new Dictionary<string, Guid>();
-
-            foreach (var playerCode in transactions.GroupBy(t => t.PlayerCode).Select(g => g.Key))
+            if (map.ContainsKey(playerCode))
             {
-                if (map.ContainsKey(playerCode))
-                {
-                    continue;
-                }
-
-                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
-                    .ConfigureAwait(false);
-
-                var gameProviderConfigurationId =
-                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
-                        .ConfigureAwait(false);
-
-                map.Add(playerCode, gameProviderConfigurationId);
+                continue;
             }
 
-            return map;
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
+                .ConfigureAwait(false);
+
+            var gameProviderConfigurationId =
+                await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
+                    .ConfigureAwait(false);
+
+            map.Add(playerCode, gameProviderConfigurationId);
         }
+
+        return map;
     }
 }

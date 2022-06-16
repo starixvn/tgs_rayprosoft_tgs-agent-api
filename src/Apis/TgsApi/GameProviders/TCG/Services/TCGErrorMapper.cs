@@ -8,64 +8,63 @@ using TGS.Shared.Game.Models.TCG.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.TCG.Enums.GameApiError;
 
-namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Services;
+
+public sealed class TCGErrorMapper : IErrorMapper
 {
-    public sealed class TCGErrorMapper : IErrorMapper
-    {
-        private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
-            new Dictionary<Type, GameApiError>
+    private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
+        new Dictionary<Type, GameApiError>
+        {
+            {typeof(InvalidCredentialsException), InvalidSignature},
+            {typeof(MissingTokenException), InvalidParametersFailedToDecryptTheParameters},
+            {typeof(PlayerLoginExpiredException), UserDoesNotExists},
+            {typeof(PlayerNotFoundException), UserDoesNotExists},
+            {typeof(PlayerDisabledException), UserDoesNotExists},
+            {typeof(PlayerHasInsufficientFundsException), InsufficientMerchantCreditToFundIn},
+            {typeof(InvalidGameActionException), MethodNotFound},
+            {typeof(InvalidAmountException), InsufficientMerchantCreditToFundIn},
+            {typeof(ArgumentException), InvalidParametersFailedToDecryptTheParameters},
+            {typeof(ModelBindingException), MissingRequiredParameter},
+            {typeof(InvalidStatusException), UnknownSystemErrorPleaseContactTCGCustomerSupport},
+            {typeof(InvalidOperationException), MethodNotFound}
+        };
+
+    private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
+        ApiErrorByInvalidGameActionErrorCode =
+            new Dictionary<InvalidGameActionErrorCode, GameApiError>
             {
-                {typeof(InvalidCredentialsException), InvalidSignature},
-                {typeof(MissingTokenException), InvalidParametersFailedToDecryptTheParameters},
-                {typeof(PlayerLoginExpiredException), UserDoesNotExists},
-                {typeof(PlayerNotFoundException), UserDoesNotExists},
-                {typeof(PlayerDisabledException), UserDoesNotExists},
-                {typeof(PlayerHasInsufficientFundsException), InsufficientMerchantCreditToFundIn},
-                {typeof(InvalidGameActionException), MethodNotFound},
-                {typeof(InvalidAmountException), InsufficientMerchantCreditToFundIn},
-                {typeof(ArgumentException), InvalidParametersFailedToDecryptTheParameters},
-                {typeof(ModelBindingException), MissingRequiredParameter},
-                {typeof(InvalidStatusException), UnknownSystemErrorPleaseContactTCGCustomerSupport},
-                {typeof(InvalidOperationException), MethodNotFound}
+                {None, MethodNotFound},
+                { Duplicate, GameApiError.TransactionNotFound},
+                { Cancelled, GameApiError.TransactionNotFound},
+                { Settled, GameApiError.TransactionNotFound},
+                { InvalidGameActionErrorCode.TransactionNotFound,GameApiError. TransactionNotFound},
+                { TransactionBeingCancelledNotFound, GameApiError.TransactionNotFound},
+                { TransactionBeingReferencedNotFound, GameApiError.TransactionNotFound},
+                { RoundNotFound ,GameApiError.TransactionNotFound},
+                { GameNotFound, GameApiError.TransactionNotFound},
+                { ActionProhibited, GameApiError.TransactionNotFound}
             };
 
-        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
-            ApiErrorByInvalidGameActionErrorCode =
-                new Dictionary<InvalidGameActionErrorCode, GameApiError>
-                {
-                    {None, MethodNotFound},
-                    { Duplicate, GameApiError.TransactionNotFound},
-                    { Cancelled, GameApiError.TransactionNotFound},
-                    { Settled, GameApiError.TransactionNotFound},
-                    { InvalidGameActionErrorCode.TransactionNotFound,GameApiError. TransactionNotFound},
-                    { TransactionBeingCancelledNotFound, GameApiError.TransactionNotFound},
-                    { TransactionBeingReferencedNotFound, GameApiError.TransactionNotFound},
-                    { RoundNotFound ,GameApiError.TransactionNotFound},
-                    { GameNotFound, GameApiError.TransactionNotFound},
-                    { ActionProhibited, GameApiError.TransactionNotFound}
-                };
-
-        int IErrorMapper.GetApiErrorByException(Exception exception)
+    int IErrorMapper.GetApiErrorByException(Exception exception)
+    {
+        if (exception == null)
         {
-            if (exception == null)
-            {
-                return (int)0;
-            }
-
-            if (exception is InvalidGameActionException e &&
-                ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
-            {
-                return (int)error;
-            }
-
-            var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)UnknownSystemErrorPleaseContactTCGCustomerSupport;
+            return (int)0;
         }
 
-        int IErrorMapper.GetHttpStatusByException(Exception exception) =>
-            StatusCodes.Status200OK;
+        if (exception is InvalidGameActionException e &&
+            ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+        {
+            return (int)error;
+        }
 
-        string IErrorMapper.GetMessageByException(Exception exception) =>
-            exception.Message;
+        var type = exception.GetType();
+        return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)UnknownSystemErrorPleaseContactTCGCustomerSupport;
     }
+
+    int IErrorMapper.GetHttpStatusByException(Exception exception) =>
+        StatusCodes.Status200OK;
+
+    string IErrorMapper.GetMessageByException(Exception exception) =>
+        exception.Message;
 }

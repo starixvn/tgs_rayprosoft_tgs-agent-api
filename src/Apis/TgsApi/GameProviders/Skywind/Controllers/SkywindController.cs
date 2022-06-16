@@ -15,207 +15,206 @@ using TGS.Shared.Game.Models.Skywind.Common;
 using TGS.Shared.Game.Models.Skywind.Enums;
 using TGS.Shared.Game.Models.Skywind.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
+namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers;
+
+[Route("sw/api")]
+[ApiController]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
+[AllowAnonymous]
+[FeatureGate(Consts.GameProvider.Skywind)]
+public sealed class SkywindController : ControllerBase
 {
-    [Route("sw/api")]
-    [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [Produces(MediaTypeNames.Application.Json)]
-    [AllowAnonymous]
-    [FeatureGate(Consts.GameProvider.Skywind)]
-    public sealed class SkywindController : ControllerBase
+    private readonly IGamePlayActions _actions;
+    private readonly IGamePlayActions _gamePlayActions;
+    private readonly ISkywindActionModelMapper _map;
+    private readonly ISkywindService _service;
+
+    public SkywindController(
+        IGamePlayActions actions,
+        ISkywindActionModelMapper map,
+        ISkywindService service,
+        IGamePlayActions gamePlayActions)
     {
-        private readonly IGamePlayActions _actions;
-        private readonly IGamePlayActions _gamePlayActions;
-        private readonly ISkywindActionModelMapper _map;
-        private readonly ISkywindService _service;
+        _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+        _map = map ?? throw new ArgumentNullException(nameof(map));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _gamePlayActions = gamePlayActions ?? throw new ArgumentNullException(nameof(gamePlayActions));
+    }
 
-        public SkywindController(
-            IGamePlayActions actions,
-            ISkywindActionModelMapper map,
-            ISkywindService service,
-            IGamePlayActions gamePlayActions)
+    [HttpPost("debit")]
+    public async Task<SkywindSingleWalletResponse> BetAsync(SkywindBetRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+        if (request.EventType.ToLower().IgnoreCaseEquals("free-bet") && request.Amount > 0)
         {
-            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _map = map ?? throw new ArgumentNullException(nameof(map));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _gamePlayActions = gamePlayActions ?? throw new ArgumentNullException(nameof(gamePlayActions));
-        }
-
-        [HttpPost("debit")]
-        public async Task<SkywindSingleWalletResponse> BetAsync(SkywindBetRequest request)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            if (request.EventType.ToLower().IgnoreCaseEquals("free-bet") && request.Amount > 0)
-            {
-                return new SkywindSingleWalletResponse()
-                {
-                    ErrorCode = (int)GameApiError.InsufficientFreeBetsBalance,
-                    ErrorMsg = GameApiError.InsufficientFreeBetsBalance.Description(),
-                    TrxId = request.TrxId
-                };
-            }
-
-            var betData = await _map.BetAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
-            if (betData == null)
-            {
-                return new SkywindSingleWalletResponse()
-                {
-                    ErrorCode = (int)GameApiError.DuplicateTransaction,
-                    ErrorMsg = GameApiError.DuplicateTransaction.Description(),
-                    TrxId = request.TrxId
-                };
-            }
-
-            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-
             return new SkywindSingleWalletResponse()
             {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                Balance = betResult.Balance,
-                CurrencyCode = betResult.GameProviderCurrencyCode,
+                ErrorCode = (int)GameApiError.InsufficientFreeBetsBalance,
+                ErrorMsg = GameApiError.InsufficientFreeBetsBalance.Description(),
                 TrxId = request.TrxId
             };
         }
 
-        [HttpPost("get_balance")]
-        public async Task<SkywindSingleWalletResponse> GetBalanceAsync(SkywindBalanceRequest request)
+        var betData = await _map.BetAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
+        if (betData == null)
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Skywind, playerCode).ConfigureAwait(false);
-
             return new SkywindSingleWalletResponse()
             {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                Balance = getBalance.Balance,
-                CurrencyCode = getBalance.GameProviderCurrencyCode
-            };
-        }
-
-        [HttpPost("rollback")]
-        public async Task<SkywindSingleWalletResponse> RollbackBetAsync(SkywindRollbackBetRequest request)
-        {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var betData = await _map.RollbackBetAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
-
-            if (betData == null)
-            {
-                return new SkywindSingleWalletResponse()
-                {
-                    ErrorCode = (int)GameApiError.TransactionNotFound,
-                    ErrorMsg = GameApiError.TransactionNotFound.Description(),
-                    TrxId = request.TrxId
-                };
-            }
-
-            var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
-
-            return new SkywindSingleWalletResponse()
-            {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                Balance = betResult.Balance,
-                CurrencyCode = betResult.GameProviderCurrencyCode,
+                ErrorCode = (int)GameApiError.DuplicateTransaction,
+                ErrorMsg = GameApiError.DuplicateTransaction.Description(),
                 TrxId = request.TrxId
             };
         }
 
-        [HttpPost("credit")]
-        public async Task<SkywindSingleWalletResponse> SettleAsync(SkywindSettleRequest request)
+        var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+        return new SkywindSingleWalletResponse()
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            Balance = betResult.Balance,
+            CurrencyCode = betResult.GameProviderCurrencyCode,
+            TrxId = request.TrxId
+        };
+    }
 
-            var betData = await _map.SettleAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
+    [HttpPost("get_balance")]
+    public async Task<SkywindSingleWalletResponse> GetBalanceAsync(SkywindBalanceRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Skywind, playerCode).ConfigureAwait(false);
 
-            if (betData == null)
-            {
-                return new SkywindSingleWalletResponse()
-                {
-                    ErrorCode = (int)GameApiError.DuplicateTransaction,
-                    ErrorMsg = GameApiError.DuplicateTransaction.Description(),
-                    TrxId = request.TrxId
-                };
-            }
+        return new SkywindSingleWalletResponse()
+        {
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            Balance = getBalance.Balance,
+            CurrencyCode = getBalance.GameProviderCurrencyCode
+        };
+    }
 
-            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+    [HttpPost("rollback")]
+    public async Task<SkywindSingleWalletResponse> RollbackBetAsync(SkywindRollbackBetRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
+        var betData = await _map.RollbackBetAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
+
+        if (betData == null)
+        {
             return new SkywindSingleWalletResponse()
             {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                Balance = betResult.Balance,
-                CurrencyCode = betResult.GameProviderCurrencyCode,
+                ErrorCode = (int)GameApiError.TransactionNotFound,
+                ErrorMsg = GameApiError.TransactionNotFound.Description(),
                 TrxId = request.TrxId
             };
         }
 
-        [HttpPost("validate_terminal_ticket")]
-        public async Task<SkywindValidateTicketResponse> ValidateTerminalTicketAsync(SkywindValidateTicketRequest request)
+        var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+
+        return new SkywindSingleWalletResponse()
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            Balance = betResult.Balance,
+            CurrencyCode = betResult.GameProviderCurrencyCode,
+            TrxId = request.TrxId
+        };
+    }
 
-            var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
-            {
-                PlayerCode = playerCode,
-                GameProviderCode = Consts.GameProvider.Skywind,
-                PlatformType = platformType
-            }).ConfigureAwait(false);
+    [HttpPost("credit")]
+    public async Task<SkywindSingleWalletResponse> SettleAsync(SkywindSettleRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            return new SkywindValidateTicketResponse()
+        var betData = await _map.SettleAsync(gameProviderId, gameProviderConfigurationId, platformType, playerCode, request).ConfigureAwait(false);
+
+        if (betData == null)
+        {
+            return new SkywindSingleWalletResponse()
             {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                CustId = playerCode,
-                CustSessionId = request.Ticket,
-                CurrencyCode = validationResult.GameProviderCurrencyCode,
-                Country = "CN",
-                TestCust = _service.IsTest(playerCode)
+                ErrorCode = (int)GameApiError.DuplicateTransaction,
+                ErrorMsg = GameApiError.DuplicateTransaction.Description(),
+                TrxId = request.TrxId
             };
         }
 
-        [HttpPost("validate_ticket")]
-        public async Task<SkywindValidateTicketResponse> ValidateTicketAsync(SkywindValidateTicketRequest request)
+        var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+        return new SkywindSingleWalletResponse()
         {
-            var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            Balance = betResult.Balance,
+            CurrencyCode = betResult.GameProviderCurrencyCode,
+            TrxId = request.TrxId
+        };
+    }
 
-            var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
-            {
-                PlayerCode = playerCode,
-                GameProviderCode = Consts.GameProvider.Skywind,
-                PlatformType = platformType
-            }).ConfigureAwait(false);
+    [HttpPost("validate_terminal_ticket")]
+    public async Task<SkywindValidateTicketResponse> ValidateTerminalTicketAsync(SkywindValidateTicketRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            return new SkywindValidateTicketResponse()
-            {
-                ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                CustId = playerCode,
-                CustSessionId = request.Ticket,
-                CurrencyCode = validationResult.GameProviderCurrencyCode,
-                Country = "CN",
-                TestCust = _service.IsTest(playerCode)
-            };
-        }
+        var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
+        {
+            PlayerCode = playerCode,
+            GameProviderCode = Consts.GameProvider.Skywind,
+            PlatformType = platformType
+        }).ConfigureAwait(false);
+
+        return new SkywindValidateTicketResponse()
+        {
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            CustId = playerCode,
+            CustSessionId = request.Ticket,
+            CurrencyCode = validationResult.GameProviderCurrencyCode,
+            Country = "CN",
+            TestCust = _service.IsTest(playerCode)
+        };
+    }
+
+    [HttpPost("validate_ticket")]
+    public async Task<SkywindValidateTicketResponse> ValidateTicketAsync(SkywindValidateTicketRequest request)
+    {
+        var items = HttpContext.Items;
+        var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+        var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
+        {
+            PlayerCode = playerCode,
+            GameProviderCode = Consts.GameProvider.Skywind,
+            PlatformType = platformType
+        }).ConfigureAwait(false);
+
+        return new SkywindValidateTicketResponse()
+        {
+            ErrorCode = (int)GameApiError.Success,
+            ErrorMsg = GameApiError.Success.Description(),
+            CustId = playerCode,
+            CustSessionId = request.Ticket,
+            CurrencyCode = validationResult.GameProviderCurrencyCode,
+            Country = "CN",
+            TestCust = _service.IsTest(playerCode)
+        };
     }
 }

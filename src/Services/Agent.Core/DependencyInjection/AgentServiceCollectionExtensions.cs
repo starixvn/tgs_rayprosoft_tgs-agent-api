@@ -5,38 +5,37 @@ using TGS.Services.Agent;
 using TGS.Services.Agent.Configuration;
 using TGS.Services.Agent.ValidateCode;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class AgentServiceCollectionExtensions
 {
-    public static class AgentServiceCollectionExtensions
+    public static AgentConfiguration AddAgentApiCore(this IServiceCollection services)
     {
-        public static AgentConfiguration AddAgentApiCore(this IServiceCollection services)
-        {
-            services.RegisterAllServiceUtilityTypes(
-                Assembly.GetExecutingAssembly(),
-                ServiceLifetime.Transient);
+        services.RegisterAllServiceUtilityTypes(
+            Assembly.GetExecutingAssembly(),
+            ServiceLifetime.Transient);
 
-            services
-                .AddOptions<AgentOptions>()
-                .Services
-                .AddValidateCodeClient((options, sp) =>
-                {
-                    var agentOptions = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
+        services
+            .AddOptions<AgentOptions>()
+            .Services
+            .AddValidateCodeClient((options, sp) =>
+            {
+                var agentOptions = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
 
-                    options.ValidateCodeBaseUrl = agentOptions.ValidateCodeBaseUrl;
-                })
-                .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-                .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
-                .AddMail()
-                .AddSmsClient((sp, httpClient) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
+                options.ValidateCodeBaseUrl = agentOptions.ValidateCodeBaseUrl;
+            })
+            .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
+            .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
+            .AddMail()
+            .AddSmsClient((sp, httpClient) =>
+            {
+                var options = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
 
-                    httpClient.BaseAddress = options.SmsBaseUrl;
-                });
+                httpClient.BaseAddress = options.SmsBaseUrl;
+            });
 
-            var agentConfiguration = new AgentConfiguration(services);
+        var agentConfiguration = new AgentConfiguration(services);
 
-            return agentConfiguration;
-        }
+        return agentConfiguration;
     }
 }

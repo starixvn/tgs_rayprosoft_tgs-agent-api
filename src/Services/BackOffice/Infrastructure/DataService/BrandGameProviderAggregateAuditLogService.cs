@@ -5,34 +5,33 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 
-namespace TGS.Services.BackOffice.Infrastructure.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService;
+
+public interface IBrandGameProviderAggregateAuditLogService
 {
-    public interface IBrandGameProviderAggregateAuditLogService
+    ValueTask<int> CreateBrandGameProviderAggregateAuditLogAsync(
+        CreateBrandGameProviderAggregateAuditLogRequest request);
+}
+
+public class BrandGameProviderAggregateAuditLogService : BaseRepositoryOperations<ITgsRepository>,
+    IBrandGameProviderAggregateAuditLogService
+{
+    public BrandGameProviderAggregateAuditLogService(ITgsRepository repository) : base(repository)
     {
-        ValueTask<int> CreateBrandGameProviderAggregateAuditLogAsync(
-            CreateBrandGameProviderAggregateAuditLogRequest request);
     }
 
-    public class BrandGameProviderAggregateAuditLogService : BaseRepositoryOperations<ITgsRepository>,
-        IBrandGameProviderAggregateAuditLogService
+    async ValueTask<int> IBrandGameProviderAggregateAuditLogService.CreateBrandGameProviderAggregateAuditLogAsync(
+        CreateBrandGameProviderAggregateAuditLogRequest request)
     {
-        public BrandGameProviderAggregateAuditLogService(ITgsRepository repository) : base(repository)
+        var log = new BrandGameProviderAggregateAuditLog
         {
-        }
+            BrandId = request.BrandId,
+            CreatedByUserId = request.UserId,
+            CreatedOn = DateTimeOffset.UtcNow
+        };
 
-        async ValueTask<int> IBrandGameProviderAggregateAuditLogService.CreateBrandGameProviderAggregateAuditLogAsync(
-            CreateBrandGameProviderAggregateAuditLogRequest request)
-        {
-            var log = new BrandGameProviderAggregateAuditLog
-            {
-                BrandId = request.BrandId,
-                CreatedByUserId = request.UserId,
-                CreatedOn = DateTimeOffset.UtcNow
-            };
+        await CreateEntityAsync(log);
 
-            await CreateEntityAsync(log);
-
-            return log.Id;
-        }
+        return log.Id;
     }
 }

@@ -8,51 +8,50 @@ using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.ReportAgent;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries;
+
+public class
+    GetAgentPlayerWinLossQuery : IGetService<GetAgentPlayerWinLossReportRequest,
+        PagedResponse<AgentPlayerWinLossReportModel>>
 {
-    public class
-        GetAgentPlayerWinLossQuery : IGetService<GetAgentPlayerWinLossReportRequest,
-            PagedResponse<AgentPlayerWinLossReportModel>>
+    private readonly IReportClient _reportClient;
+
+    public GetAgentPlayerWinLossQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<PagedResponse<AgentPlayerWinLossReportModel>> GetAsync(
+        GetAgentPlayerWinLossReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetAgentPlayerWinLossQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<PagedResponse<AgentPlayerWinLossReportModel>> GetAsync(
-            GetAgentPlayerWinLossReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetAgentPlayerWinLossRequest
         {
-            var reportRequest = new GetAgentPlayerWinLossRequest
-            {
-                AgentId = request.AgentId,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+            AgentId = request.AgentId,
+            From = request.From,
+            To = request.To,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = (short)request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
 
-            var response = await _reportClient.GetAgentPlayerWinLossAsync(reportRequest);
+        var response = await _reportClient.GetAgentPlayerWinLossAsync(reportRequest);
 
-            return new()
+        return new()
+        {
+            Valid = response.Valid,
+            Message = response.Message,
+            TotalCount = response.TotalCount,
+            Items = response.Items?.Select(x => new AgentPlayerWinLossReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new AgentPlayerWinLossReportModel
-                {
-                    Username = x.Username,
-                    LiveDealerWinLossAmount = x.LiveDealerWinLossAmount,
-                    SlotWinLossAmount = x.SlotWinLossAmount,
-                    LotteryWinLossAmount = x.LotteryWinLossAmount,
-                    CardGameWinLossAmount = x.CardGameWinLossAmount,
-                    SportsWinLossAmount = x.SportsWinLossAmount,
-                    VirtualSportsWinLossAmount = x.VirtualSportsWinLossAmount
-                }).ToArray()
-            };
-        }
+                Username = x.Username,
+                LiveDealerWinLossAmount = x.LiveDealerWinLossAmount,
+                SlotWinLossAmount = x.SlotWinLossAmount,
+                LotteryWinLossAmount = x.LotteryWinLossAmount,
+                CardGameWinLossAmount = x.CardGameWinLossAmount,
+                SportsWinLossAmount = x.SportsWinLossAmount,
+                VirtualSportsWinLossAmount = x.VirtualSportsWinLossAmount
+            }).ToArray()
+        };
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages;
+
+public enum ReviewResponseState
 {
-    public enum ReviewResponseState
-    {
-        WaitingPayment,
-        Approve,
-        Reject,
-        Paid
-    }
+    WaitingPayment,
+    Approve,
+    Reject,
+    Paid
 }

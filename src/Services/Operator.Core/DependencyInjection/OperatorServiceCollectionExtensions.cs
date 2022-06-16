@@ -10,56 +10,55 @@ using System.Collections.Generic;
 using System;
 using System.Collections.Immutable;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class OperatorServiceCollectionExtensions
 {
-    public static class OperatorServiceCollectionExtensions
+    private static readonly Dictionary<string, Type> _FlowTypes = new();
+
+    public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
     {
-        private static readonly Dictionary<string, Type> _FlowTypes = new();
+        _ = services.RegisterAllServiceUtilityTypes(
+            typeof(OperatorServiceCollectionExtensions).Assembly,
+            ServiceLifetime.Transient);
 
-        public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
-        {
-            _ = services.RegisterAllServiceUtilityTypes(
-                typeof(OperatorServiceCollectionExtensions).Assembly,
-                ServiceLifetime.Transient);
+        _ = services
+            .AddOptions<OperatorOptions>()
+            .Services
+            .AddValidateCodeClient((options, sp) =>
+            {
+                var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-            _ = services
-                .AddOptions<OperatorOptions>()
-                .Services
-                .AddValidateCodeClient((options, sp) =>
-                {
-                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+                options.ValidateCodeBaseUrl = operatorOptions.ValidateCodeBaseUrl;
+            })
+            .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
+            .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
+            .AddTransient<IRequestAnalyzer, RequestAnalyzer>()
+            .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
+            .AddMail()
+            .AddSmsClient((sp, httpClient) =>
+            {
+                var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                    options.ValidateCodeBaseUrl = operatorOptions.ValidateCodeBaseUrl;
-                })
-                .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
-                .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-                .AddTransient<IRequestAnalyzer, RequestAnalyzer>()
-                .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
-                .AddMail()
-                .AddSmsClient((sp, httpClient) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+                httpClient.BaseAddress = options.SmsBaseUrl;
+            })
+            .AddFileServiceClient((sp, httpClient) =>
+            {
+                var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                    httpClient.BaseAddress = options.SmsBaseUrl;
-                })
-                .AddFileServiceClient((sp, httpClient) =>
-                {
-                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+                httpClient.BaseAddress = options.FileServiceBaseUrl;
+            })
+            .AddPaymentClient()
+            .AddRouletteSignInClient();
 
-                    httpClient.BaseAddress = options.FileServiceBaseUrl;
-                })
-                .AddPaymentClient()
-                .AddRouletteSignInClient();
+        services
+            .AddScoped(sp => new RegisterFlowBuilder(
+                sp,
+                _FlowTypes.ToImmutableDictionary()))
+            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>();
 
-            services
-                .AddScoped(sp => new RegisterFlowBuilder(
-                    sp,
-                    _FlowTypes.ToImmutableDictionary()))
-                .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>();
+        var opConfiguration = new OperatorConfiguration(services);
 
-            var opConfiguration = new OperatorConfiguration(services);
-
-            return opConfiguration;
-        }
+        return opConfiguration;
     }
 }

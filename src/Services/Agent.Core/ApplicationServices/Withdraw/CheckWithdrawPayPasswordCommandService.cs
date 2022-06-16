@@ -4,34 +4,33 @@ using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.Withdraw
+namespace TGS.Services.Agent.ApplicationServices.Withdraw;
+
+internal class CheckWithdrawPayPasswordCommandService : ICommandService<CheckWithdrawPayPasswordCommand>
 {
-    internal class CheckWithdrawPayPasswordCommandService : ICommandService<CheckWithdrawPayPasswordCommand>
+    private readonly IAgentRepository _agentRepository;
+    private readonly IPasswordHandler _passwordHandler;
+
+    public CheckWithdrawPayPasswordCommandService(
+        IAgentRepository agentRepository,
+        IPasswordHandler passwordHandler)
     {
-        private readonly IAgentRepository _agentRepository;
-        private readonly IPasswordHandler _passwordHandler;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    }
 
-        public CheckWithdrawPayPasswordCommandService(
-            IAgentRepository agentRepository,
-            IPasswordHandler passwordHandler)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-            _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-        }
+    public async ValueTask ExecuteAsync(
+        CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
+    {
+        var agentData = await _agentRepository
+            .GetAgentByIdAsync(command.AgentId)
+            .ConfigureAwait(false);
 
-        public async ValueTask ExecuteAsync(
-            CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
-        {
-            var agentData = await _agentRepository
-                .GetAgentByIdAsync(command.AgentId)
-                .ConfigureAwait(false);
+        var isVaild = _passwordHandler.Verify(
+            agentData!.PayPassword,
+            agentData.PaySalt,
+            command.PayPassword);
 
-            var isVaild = _passwordHandler.Verify(
-                agentData!.PayPassword,
-                agentData.PaySalt,
-                command.PayPassword);
-
-            command.ReturnSource.SetResult(isVaild);
-        }
+        command.ReturnSource.SetResult(isVaild);
     }
 }

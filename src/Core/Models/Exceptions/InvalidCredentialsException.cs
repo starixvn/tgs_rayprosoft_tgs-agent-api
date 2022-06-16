@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Core.Models.Exceptions
+namespace TGS.Core.Models.Exceptions;
+
+public sealed class InvalidCredentialsException : Exception
 {
-    public sealed class InvalidCredentialsException : Exception
+    public InvalidCredentialsException(string message) : base(message)
     {
-        public InvalidCredentialsException(string message) : base(message)
-        {
-        }
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Apis.OperatorApi.Models
+namespace TGS.Apis.OperatorApi.Models;
+
+public class FavoriteCountFullException : Exception
 {
-    public class FavoriteCountFullException : Exception
-    {
-    }
 }

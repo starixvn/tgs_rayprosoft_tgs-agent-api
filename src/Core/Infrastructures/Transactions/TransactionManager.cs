@@ -7,107 +7,106 @@ using Tgs.Logging;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 
-namespace TGS.Core.Infrastructures.Transactions
+namespace TGS.Core.Infrastructures.Transactions;
+
+public interface ITransactionManager
 {
-    public interface ITransactionManager
+    Task<TResult> ExecuteTransactionAsync<TContext, TResult>(
+        Func<TContext> contextFactory,
+        IsolationLevel level,
+        string externalTransactionId,
+        Func<TContext, Task<TResult>> execute,
+        Func<TContext, TResult, Task> onPostCommit = null,
+        Func<TContext, TResult, Exception, Task> onPostRollback = null,
+        bool autoDetectChangesEnabled = true)
+        where TContext : IBaseRepository;
+}
+
+public sealed class TransactionManager : ITransactionManager
+{
+    private readonly ITgsLog _log;
+
+    public TransactionManager(ITgsLog log)
     {
-        Task<TResult> ExecuteTransactionAsync<TContext, TResult>(
-            Func<TContext> contextFactory,
-            IsolationLevel level,
-            string externalTransactionId,
-            Func<TContext, Task<TResult>> execute,
-            Func<TContext, TResult, Task> onPostCommit = null,
-            Func<TContext, TResult, Exception, Task> onPostRollback = null,
-            bool autoDetectChangesEnabled = true)
-            where TContext : IBaseRepository;
+        _log = log.SetLogger("Transaction Manager");
     }
 
-    public sealed class TransactionManager : ITransactionManager
+    async Task<TResult> ITransactionManager.ExecuteTransactionAsync<TContext, TResult>(
+        Func<TContext> contextFactory,
+        IsolationLevel level,
+        string externalTransactionId,
+        Func<TContext, Task<TResult>> execute,
+        Func<TContext, TResult, Task> onPostCommit,
+        Func<TContext, TResult, Exception, Task> onPostRollback,
+        bool autoDetectChangesEnabled)
     {
-        private readonly ITgsLog _log;
+        await using var context = contextFactory();
+        await using var transaction = await context.BeginTransactionAsync(level);
+        ExceptionDispatchInfo errorInfo;
+        TResult result = default;
 
-        public TransactionManager(ITgsLog log)
+        if (!autoDetectChangesEnabled)
         {
-            _log = log.SetLogger("Transaction Manager");
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
         }
 
-        async Task<TResult> ITransactionManager.ExecuteTransactionAsync<TContext, TResult>(
-            Func<TContext> contextFactory,
-            IsolationLevel level,
-            string externalTransactionId,
-            Func<TContext, Task<TResult>> execute,
-            Func<TContext, TResult, Task> onPostCommit,
-            Func<TContext, TResult, Exception, Task> onPostRollback,
-            bool autoDetectChangesEnabled)
+        try
         {
-            await using var context = contextFactory();
-            await using var transaction = await context.BeginTransactionAsync(level);
-            ExceptionDispatchInfo errorInfo;
-            TResult result = default;
+            result = await execute(context);
 
-            if (!autoDetectChangesEnabled)
-            {
-                context.ChangeTracker.AutoDetectChangesEnabled = false;
-            }
+            await transaction.CommitAsync();
 
             try
             {
-                result = await execute(context);
-
-                await transaction.CommitAsync();
-
-                try
+                // commit succeeded, log any post error. otherwise, transaction rollback will fail.
+                if (onPostCommit != null)
                 {
-                    // commit succeeded, log any post error. otherwise, transaction rollback will fail.
-                    if (onPostCommit != null)
-                    {
-                        await onPostCommit(context, result);
-                    }
+                    await onPostCommit(context, result);
                 }
-                catch (Exception ex)
-                {
-                    _log.LogError("Error during post transaction committed.", ex);
-                }
-
-                return result;
             }
             catch (Exception ex)
             {
-                errorInfo = ExceptionDispatchInfo.Capture(ex);
+                _log.LogError("Error during post transaction committed.", ex);
             }
 
-            // log the error in saving the commit
-            _log.LogWarning(
-                $"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
-                errorInfo.SourceException);
-
-            try
-            {
-                if (transaction.GetDbTransaction().Connection != null)
-                {
-                    await transaction.RollbackAsync();
-                }
-            }
-            catch (Exception ex2)
-            {
-                _log.LogWarning(
-                    $"Error during rolling back transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
-                    ex2);
-            }
-
-            if (onPostRollback != null)
-            {
-                await onPostRollback(context, result, errorInfo.SourceException);
-            }
-
-            if (!autoDetectChangesEnabled)
-            {
-                context.ChangeTracker.AutoDetectChangesEnabled = true;
-            }
-
-            errorInfo.Throw();
-
-            throw new InvalidOperationException("This part of the code should never be reached");
+            return result;
         }
+        catch (Exception ex)
+        {
+            errorInfo = ExceptionDispatchInfo.Capture(ex);
+        }
+
+        // log the error in saving the commit
+        _log.LogWarning(
+            $"Error during transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
+            errorInfo.SourceException);
+
+        try
+        {
+            if (transaction.GetDbTransaction().Connection != null)
+            {
+                await transaction.RollbackAsync();
+            }
+        }
+        catch (Exception ex2)
+        {
+            _log.LogWarning(
+                $"Error during rolling back transaction with External Id:'{externalTransactionId}' {errorInfo.SourceException.GetMessageChain()}",
+                ex2);
+        }
+
+        if (onPostRollback != null)
+        {
+            await onPostRollback(context, result, errorInfo.SourceException);
+        }
+
+        if (!autoDetectChangesEnabled)
+        {
+            context.ChangeTracker.AutoDetectChangesEnabled = true;
+        }
+
+        errorInfo.Throw();
+
+        throw new InvalidOperationException("This part of the code should never be reached");
     }
 }

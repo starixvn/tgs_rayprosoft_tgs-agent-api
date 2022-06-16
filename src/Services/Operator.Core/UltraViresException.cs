@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class UltraViresException : Exception
 {
-    public class UltraViresException : Exception
+    public UltraViresException()
     {
-        public UltraViresException()
-        {
-        }
     }
 }

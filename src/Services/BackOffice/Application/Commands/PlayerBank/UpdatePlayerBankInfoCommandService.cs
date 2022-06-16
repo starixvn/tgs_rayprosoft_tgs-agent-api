@@ -4,42 +4,41 @@ using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Commands.PlayerBank
+namespace TGS.Services.BackOffice.Application.Commands.PlayerBank;
+
+internal class UpdatePlayerBankInfoCommandService : ICommandService<UpdatePlayerBankInfoCommand>
 {
-    internal class UpdatePlayerBankInfoCommandService : ICommandService<UpdatePlayerBankInfoCommand>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+
+    public UpdatePlayerBankInfoCommandService(
+        IPaymentServiceClient paymentServiceClient)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    }
 
-        public UpdatePlayerBankInfoCommandService(
-            IPaymentServiceClient paymentServiceClient)
+    public async ValueTask ExecuteAsync(
+        UpdatePlayerBankInfoCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        await _paymentServiceClient
+            .DeletePlayerBankInfoAsync(command.PlayerCode, command.BankInfoId, cancellationToken)
+            .ConfigureAwait(false);
+
+        var createInfo = new BankCreateInfo
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        }
+            BankType = command.BankType,
+            PaymentChannelId = command.PaymentChannelId,
+            Detail = command.Detail,
+            IsDefault = false
+        };
 
-        public async ValueTask ExecuteAsync(
-            UpdatePlayerBankInfoCommand command,
-            CancellationToken cancellationToken = default)
-        {
-            await _paymentServiceClient
-                .DeletePlayerBankInfoAsync(command.PlayerCode, command.BankInfoId, cancellationToken)
-                .ConfigureAwait(false);
-
-            var createInfo = new BankCreateInfo
-            {
-                BankType = command.BankType,
-                PaymentChannelId = command.PaymentChannelId,
-                Detail = command.Detail,
-                IsDefault = false
-            };
-
-            _ = await _paymentServiceClient
-                .CreatePlayerBankInfoAsync(
-                    command.BrandId,
-                    command.PlayerCode,
-                    createInfo,
-                    command.ModifyUser,
-                    cancellationToken)
-                .ConfigureAwait(false);
-        }
+        _ = await _paymentServiceClient
+            .CreatePlayerBankInfoAsync(
+                command.BrandId,
+                command.PlayerCode,
+                createInfo,
+                command.ModifyUser,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 }

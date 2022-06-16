@@ -1,20 +1,19 @@
 ﻿using FluentValidation;
 using TGS.Apis.BackendOffice.Controllers.Messages.Roles;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Role
-{
-    public class CreateRoleRequestValidator : AbstractValidator<CreateRoleRequest>
-    {
-        public CreateRoleRequestValidator()
-        {
-            RuleFor(x => x.Name)
-                .NotNull()
-                .NotEmpty()
-                .WithMessage(Resources.Role.NameRequired);
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.Role;
 
-            RuleFor(x => x.Name)
-                .Must(p => p == null || p.Length < 50)
-                .WithMessage(Resources.Role.NameLengthLimit);
-        }
+public class CreateRoleRequestValidator : AbstractValidator<CreateRoleRequest>
+{
+    public CreateRoleRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotNull()
+            .NotEmpty()
+            .WithMessage(Resources.Role.NameRequired);
+
+        RuleFor(x => x.Name)
+            .Must(p => p == null || p.Length < 50)
+            .WithMessage(Resources.Role.NameLengthLimit);
     }
 }

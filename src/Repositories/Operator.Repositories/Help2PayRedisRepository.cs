@@ -3,34 +3,33 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Services.Operator;
 
-namespace TGS.Operator.Repositories
+namespace TGS.Operator.Repositories;
+
+internal class Help2PayRedisRepository : IHelp2PayRepository
 {
-    internal class Help2PayRedisRepository : IHelp2PayRepository
+    private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
+    private static readonly string _KeyPrefix = "Help2Pay:DepositHtml";
+
+    private readonly IDatabase _database;
+
+    public Help2PayRedisRepository(IDatabase database)
     {
-        private static readonly TimeSpan _Expire = TimeSpan.FromHours(1);
-        private static readonly string _KeyPrefix = "Help2Pay:DepositHtml";
+        _database = database ?? throw new ArgumentNullException(nameof(database));
+    }
 
-        private readonly IDatabase _database;
+    public async ValueTask<string?> GetDepositHtmlAsync(Guid identityId)
+    {
+        var dataKey = $"{_KeyPrefix}:{identityId}";
 
-        public Help2PayRedisRepository(IDatabase database)
-        {
-            _database = database ?? throw new ArgumentNullException(nameof(database));
-        }
+        return await _database.StringGetAsync(dataKey)
+            .ConfigureAwait(false);
+    }
 
-        public async ValueTask<string?> GetDepositHtmlAsync(Guid identityId)
-        {
-            var dataKey = $"{_KeyPrefix}:{identityId}";
+    public async ValueTask<bool> StoreDepositHtmlAsync(Guid identityId, string html)
+    {
+        var dataKey = $"{_KeyPrefix}:{identityId}";
 
-            return await _database.StringGetAsync(dataKey)
-                .ConfigureAwait(false);
-        }
-
-        public async ValueTask<bool> StoreDepositHtmlAsync(Guid identityId, string html)
-        {
-            var dataKey = $"{_KeyPrefix}:{identityId}";
-
-            return await _database.StringSetAsync(dataKey, html, _Expire, when: When.NotExists)
-                .ConfigureAwait(false);
-        }
+        return await _database.StringSetAsync(dataKey, html, _Expire, when: When.NotExists)
+            .ConfigureAwait(false);
     }
 }

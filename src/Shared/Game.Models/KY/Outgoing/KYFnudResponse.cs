@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.KY.Commons;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
+namespace TGS.Shared.Game.Models.KY.Outgoing;
+
+public record KYFnudResponse : KYBaseDataResponse
 {
-    public record KYFnudResponse : KYBaseDataResponse
-    {
-        [JsonPropertyName("money")]
-        public string Balance { get; init; }
-    }
+    [JsonPropertyName("money")]
+    public string Balance { get; init; }
 }

@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.AgentApi.Models.Messages
+﻿namespace TGS.Apis.AgentApi.Models.Messages;
+
+public record ForgotPasswordRequest
 {
-    public record ForgotPasswordRequest
-    {
-        public string Email { get; set; }
-    }
+    public string Email { get; set; }
 }

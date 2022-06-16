@@ -11,60 +11,59 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.Habanero
+namespace TGS.Apis.TgsApi.GameProviders.Habanero;
+
+public sealed class HabaneroStartup : BaseStartup
 {
-    public sealed class HabaneroStartup : BaseStartup
+    public HabaneroStartup(IConfiguration configuration, IWebHostEnvironment env)
+        : base(configuration, env)
     {
-        public HabaneroStartup(IConfiguration configuration, IWebHostEnvironment env)
-            : base(configuration, env)
-        {
-        }
+    }
 
-        protected override string LogPrefix => "habanero";
+    protected override string LogPrefix => "habanero";
 
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(HabaneroErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.Habanero => provider.GetRequiredService<HabaneroErrorMapper>(),
-                    _                     => provider.GetRequiredService<TgsErrorMapper>()
-                }
-            );
-
-            services.AddScoped<AuthorizeHabaneroMiddleware>();
-            services.AddScoped<HandleHabaneroExceptionMiddleware>();
-
-            services.AddScoped<IHabaneroServices, HabaneroServices>();
-            services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(HabaneroGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<HabaneroGameInitializer>());
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
+                typeof(HabaneroErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(HabaneroGameHistory)
-            }, (provider, _) =>
-                provider.GetRequiredService<HabaneroGameHistory>());
-        }
+                GameProvider.Habanero => provider.GetRequiredService<HabaneroErrorMapper>(),
+                _                     => provider.GetRequiredService<TgsErrorMapper>()
+            }
+        );
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<AuthorizeHabaneroMiddleware>();
+        services.AddScoped<HandleHabaneroExceptionMiddleware>();
+
+        services.AddScoped<IHabaneroServices, HabaneroServices>();
+        services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
+
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/api/haba";
+            typeof(HabaneroGameInitializer)
+        }, (provider, _) =>
+            provider.GetRequiredService<HabaneroGameInitializer>());
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleHabaneroExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeHabaneroMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IGameHistory>(new[]
+        {
+            typeof(HabaneroGameHistory)
+        }, (provider, _) =>
+            provider.GetRequiredService<HabaneroGameHistory>());
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/haba";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleHabaneroExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeHabaneroMiddleware>();
+            });
     }
 }

@@ -7,65 +7,64 @@ using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 
-namespace TGS.Services.Agent.ApplicationServices.Agent
+namespace TGS.Services.Agent.ApplicationServices.Agent;
+
+internal class ForgotPasswordByEmailCommandService : IGetService<ForgotPasswordByEmailCommand, string>
 {
-    internal class ForgotPasswordByEmailCommandService : IGetService<ForgotPasswordByEmailCommand, string>
+    private readonly IAgentRepository _agentRepository;
+    private readonly IValidateCodeGenerator _codeGenerator;
+    private readonly IValidateCodeOperator _validateCodeOperator;
+
+    public ForgotPasswordByEmailCommandService(
+        IAgentRepository agentRepository,
+        IValidateCodeGenerator codeGenerator,
+        IValidateCodeOperator validateCodeOperator)
     {
-        private readonly IAgentRepository _agentRepository;
-        private readonly IValidateCodeGenerator _codeGenerator;
-        private readonly IValidateCodeOperator _validateCodeOperator;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+        _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+    }
 
-        public ForgotPasswordByEmailCommandService(
-            IAgentRepository agentRepository,
-            IValidateCodeGenerator codeGenerator,
-            IValidateCodeOperator validateCodeOperator)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-            _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-        }
+    public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command, CancellationToken cancellationToken = default)
+    {
+        var foundAgents = await _agentRepository
+            .GetAgentsByEmailAsync(command.BrandId, command.Email)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
 
-        public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command, CancellationToken cancellationToken = default)
-        {
-            var foundAgents = await _agentRepository
-                .GetAgentsByEmailAsync(command.BrandId, command.Email)
-                .ToArrayAsync()
-                .ConfigureAwait(false);
+        if (foundAgents.Length != 1)
+            throw new AgentNotFoundException(command.Email);
 
-            if (foundAgents.Length != 1)
-                throw new AgentNotFoundException(command.Email);
+        var agent = foundAgents[0];
 
-            var agent = foundAgents[0];
+        var saveResult = await Policy
+            .HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
+            .RetryAsync(5)
+            .ExecuteAsync(async () =>
+            {
+                var validateCode = _codeGenerator.GenerateCode();
+                var token = _codeGenerator.GenerateSecurityKey();
 
-            var saveResult = await Policy
-                .HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
-                .RetryAsync(5)
-                .ExecuteAsync(async () =>
-                {
-                    var validateCode = _codeGenerator.GenerateCode();
-                    var token = _codeGenerator.GenerateSecurityKey();
+                var data = new ValidateCodeData(agent.Id.ToString(), token);
 
-                    var data = new ValidateCodeData(agent.Id.ToString(), token);
+                var result = await _validateCodeOperator
+                    .SaveValidateDataAsync(validateCode, token, data)
+                    .ConfigureAwait(false);
 
-                    var result = await _validateCodeOperator
-                        .SaveValidateDataAsync(validateCode, token, data)
-                        .ConfigureAwait(false);
+                return (result, validateCode, token);
+            })
+            .ConfigureAwait(false);
 
-                    return (result, validateCode, token);
-                })
-                .ConfigureAwait(false);
+        if (!saveResult.Result)
+            throw new GenerateValidateCodeFailException();
 
-            if (!saveResult.Result)
-                throw new GenerateValidateCodeFailException();
+        await _validateCodeOperator
+            .SendEmailAsync(
+                command.CultureInfo,
+                command.Email,
+                saveResult.ValidateCode)
+            .ConfigureAwait(false);
 
-            await _validateCodeOperator
-                .SendEmailAsync(
-                    command.CultureInfo,
-                    command.Email,
-                    saveResult.ValidateCode)
-                .ConfigureAwait(false);
-
-            return saveResult.Token;
-        }
+        return saveResult.Token;
     }
 }

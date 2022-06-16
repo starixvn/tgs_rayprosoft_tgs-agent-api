@@ -13,365 +13,364 @@ using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class PlayerIdentityTests
 {
-    [TestFixture]
-    public class PlayerIdentityTests
+    [Test]
+    public async Task Approve_Player_Identity_Form_Should_Success()
     {
-        [Test]
-        public async Task Approve_Player_Identity_Form_Should_Success()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
+        var fakePlayerService = Substitute.For<IPlayerService>();
 
-            var formId = Guid.NewGuid();
-            fakePlayerService
-                .GetPlayerIdentityFormByIdAsync(formId)
-                .Returns(new PlayerIdentityFormInfo
-                {
-                    FormId = formId,
-                    Status = PlayerIdentityReviewState.WaitingVerify
-                });
+        var formId = Guid.NewGuid();
+        fakePlayerService
+            .GetPlayerIdentityFormByIdAsync(formId)
+            .Returns(new PlayerIdentityFormInfo
+            {
+                FormId = formId,
+                Status = PlayerIdentityReviewState.WaitingVerify
+            });
 
-            var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
+        var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
 
-            var brandId = Guid.NewGuid();
+        var brandId = Guid.NewGuid();
 
-            var command = new ReviewPlayerIdentityFormCommand(
+        var command = new ReviewPlayerIdentityFormCommand(
+            brandId,
+            formId,
+            PlayerIdentityReviewState.Approve,
+            "remark",
+            "reviewUserId",
+            "reviewUserName",
+            "realName",
+            "idNumber");
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerService
+            .Received(1)
+            .SignOffPlayerIdentityFormAsync(
                 brandId,
                 formId,
                 PlayerIdentityReviewState.Approve,
-                "remark",
                 "reviewUserId",
                 "reviewUserName",
+                "remark",
                 "realName",
                 "idNumber");
+    }
 
-            await sut.ExecuteAsync(command);
+    [Test]
+    public async Task Approve_Player_Identity_Form_Status_Is_Reject_Should_Failed()
+    {
+        var fakePlayerService = Substitute.For<IPlayerService>();
 
-            _ = fakePlayerService
-                .Received(1)
-                .SignOffPlayerIdentityFormAsync(
-                    brandId,
-                    formId,
-                    PlayerIdentityReviewState.Approve,
-                    "reviewUserId",
-                    "reviewUserName",
-                    "remark",
-                    "realName",
-                    "idNumber");
-        }
+        var formId = Guid.NewGuid();
+        fakePlayerService
+            .GetPlayerIdentityFormByIdAsync(formId)
+            .Returns(new PlayerIdentityFormInfo
+            {
+                FormId = formId,
+                Status = PlayerIdentityReviewState.Reject
+            });
 
-        [Test]
-        public async Task Approve_Player_Identity_Form_Status_Is_Reject_Should_Failed()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
+        var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
 
-            var formId = Guid.NewGuid();
-            fakePlayerService
-                .GetPlayerIdentityFormByIdAsync(formId)
-                .Returns(new PlayerIdentityFormInfo
-                {
-                    FormId = formId,
-                    Status = PlayerIdentityReviewState.Reject
-                });
+        var brandId = Guid.NewGuid();
 
-            var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
+        var command = new ReviewPlayerIdentityFormCommand(
+            brandId,
+            formId,
+            PlayerIdentityReviewState.Approve,
+            "remark",
+            "reviewUserId",
+            "reviewUserName",
+            "realName",
+            "idNumber");
 
-            var brandId = Guid.NewGuid();
+        await sut.ExecuteAsync(command);
 
-            var command = new ReviewPlayerIdentityFormCommand(
+        _ = fakePlayerService
+            .Received(0)
+            .SignOffPlayerIdentityFormAsync(
                 brandId,
                 formId,
                 PlayerIdentityReviewState.Approve,
-                "remark",
                 "reviewUserId",
                 "reviewUserName",
+                "remark",
                 "realName",
                 "idNumber");
+    }
 
-            await sut.ExecuteAsync(command);
+    [Test]
+    public async Task Can_Count_Player_Identity_Forms_Query()
+    {
+        var fakeBackOfficeRepository = Substitute.For<IBackOfficeRepository>();
 
-            _ = fakePlayerService
-                .Received(0)
-                .SignOffPlayerIdentityFormAsync(
-                    brandId,
-                    formId,
+        var sut = new GetPlayerIdentityAuthenticationListQueryService(fakeBackOfficeRepository);
+
+        var paging = new Paging<PlayerIdentityAuthenticationInfo>
+        {
+            RowCount = 10,
+            Page = 0
+        };
+
+        paging.SortByPropertyName(nameof(PlayerIdentityAuthenticationInfo.CreatedOn), false);
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+
+        var query = new GetPlayerIdentityAuthenticationFormsQuery(
+            brandId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            paging);
+
+        fakeBackOfficeRepository.QueryPlayerIdentityAuthenticationsAsync(
+            Arg.Is(brandId),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null)
+            .Returns(new[]
+            {
+                new PlayerIdentityAuthenticationInfo(
+                    "",
+                    "IdNumber",
+                    "RealName",
+                    "Remark",
+                    PlayerIdentityReviewState.WaitingVerify,
+                    "Username",
+                    DateTimeOffset.UtcNow,
+                    Guid.NewGuid(),
+                    "PlayerCode"),
+                new PlayerIdentityAuthenticationInfo(
+                    "",
+                    "IdNumber1",
+                    "RealName1",
+                    "Remark1",
                     PlayerIdentityReviewState.Approve,
-                    "reviewUserId",
-                    "reviewUserName",
-                    "remark",
-                    "realName",
-                    "idNumber");
-        }
+                    "Username1",
+                    DateTimeOffset.UtcNow,
+                    Guid.NewGuid(),
+                    "PlayerCode1")
+            }.ToAsyncEnumerable());
 
-        [Test]
-        public async Task Can_Count_Player_Identity_Forms_Query()
-        {
-            var fakeBackOfficeRepository = Substitute.For<IBackOfficeRepository>();
+        var actual = await sut.GetAsync(query);
 
-            var sut = new GetPlayerIdentityAuthenticationListQueryService(fakeBackOfficeRepository);
+        Assert.AreEqual(2, actual);
+    }
 
-            var paging = new Paging<PlayerIdentityAuthenticationInfo>
+    [Test]
+    public async Task Can_Create_Player_Identity_Auth_Form()
+    {
+        var fakeBrandService = Substitute.For<IBrandService>();
+        var fakePlayerService = Substitute.For<IPlayerService>();
+
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var playerCode = "playerCode";
+
+        fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
+            .Returns(new Brand()
             {
-                RowCount = 10,
-                Page = 0
-            };
+                Id = brandId,
+                EnablePlayerIdentity = true,
+                Status = BrandStatus.Active
+            });
 
-            paging.SortByPropertyName(nameof(PlayerIdentityAuthenticationInfo.CreatedOn), false);
+        var sut = new CreateIdentityAuthenticationFormCommandService(
+            fakeBrandService,
+            fakePlayerService);
 
-            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var command = new CreateIdentityAuthenticationFormCommand(
+            playerCode,
+            brandId,
+            "620dff81110125f95bb9ccbb");
 
-            var query = new GetPlayerIdentityAuthenticationFormsQuery(
-                brandId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                paging);
+        var actual = await sut.GetAsync(command);
 
-            fakeBackOfficeRepository.QueryPlayerIdentityAuthenticationsAsync(
-                Arg.Is(brandId),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null)
-                .Returns(new[]
-                {
-                    new PlayerIdentityAuthenticationInfo(
-                        "",
-                        "IdNumber",
-                        "RealName",
-                        "Remark",
-                        PlayerIdentityReviewState.WaitingVerify,
-                        "Username",
-                        DateTimeOffset.UtcNow,
-                        Guid.NewGuid(),
-                        "PlayerCode"),
-                    new PlayerIdentityAuthenticationInfo(
-                        "",
-                        "IdNumber1",
-                        "RealName1",
-                        "Remark1",
-                        PlayerIdentityReviewState.Approve,
-                        "Username1",
-                        DateTimeOffset.UtcNow,
-                        Guid.NewGuid(),
-                        "PlayerCode1")
-                }.ToAsyncEnumerable());
+        _ = fakePlayerService
+            .Received(1)
+            .CreatePlayerAuthenticationFormAsync(
+                Arg.Any<Guid>(),
+                Arg.Any<string>(),
+                Arg.Any<string>());
 
-            var actual = await sut.GetAsync(query);
+        _ = fakePlayerService
+            .Received(1)
+            .UpdatePlayerIdentityAsync(Arg.Any<string>(), Arg.Any<Guid>());
 
-            Assert.AreEqual(2, actual);
-        }
+        Assert.IsTrue(actual.Valid);
+    }
 
-        [Test]
-        public async Task Can_Create_Player_Identity_Auth_Form()
-        {
-            var fakeBrandService = Substitute.For<IBrandService>();
-            var fakePlayerService = Substitute.For<IPlayerService>();
+    [Test]
+    public async Task Can_Not_Create_Player_Identity_Auth_Form_When_Brand_EnablePlayerIdentity_Is_False()
+    {
+        var fakeBrandService = Substitute.For<IBrandService>();
+        var fakePlayerService = Substitute.For<IPlayerService>();
 
-            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
-            var playerCode = "playerCode";
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
 
-            fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
-                .Returns(new Brand()
-                {
-                    Id = brandId,
-                    EnablePlayerIdentity = true,
-                    Status = BrandStatus.Active
-                });
-
-            var sut = new CreateIdentityAuthenticationFormCommandService(
-                fakeBrandService,
-                fakePlayerService);
-
-            var command = new CreateIdentityAuthenticationFormCommand(
-                playerCode,
-                brandId,
-                "620dff81110125f95bb9ccbb");
-
-            var actual = await sut.GetAsync(command);
-
-            _ = fakePlayerService
-                .Received(1)
-                .CreatePlayerAuthenticationFormAsync(
-                    Arg.Any<Guid>(),
-                    Arg.Any<string>(),
-                    Arg.Any<string>());
-
-            _ = fakePlayerService
-                .Received(1)
-                .UpdatePlayerIdentityAsync(Arg.Any<string>(), Arg.Any<Guid>());
-
-            Assert.IsTrue(actual.Valid);
-        }
-
-        [Test]
-        public async Task Can_Not_Create_Player_Identity_Auth_Form_When_Brand_EnablePlayerIdentity_Is_False()
-        {
-            var fakeBrandService = Substitute.For<IBrandService>();
-            var fakePlayerService = Substitute.For<IPlayerService>();
-
-            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
-
-            fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
-                .Returns(new Brand()
-                {
-                    Id = brandId,
-                    EnablePlayerIdentity = false,
-                    Status = BrandStatus.Active
-                });
-
-            var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandService, fakePlayerService);
-
-            var command = new CreateIdentityAuthenticationFormCommand(
-                "playerCode",
-                brandId,
-                "620dff81110125f95bb9ccbb");
-
-            var actual = await sut.GetAsync(command);
-
-            Assert.IsFalse(actual.Valid);
-        }
-
-        [Test]
-        public async Task Can_Query_Player_Identity_Forms()
-        {
-            var fakeBackOfficeRepository = Substitute.For<IBackOfficeRepository>();
-
-            var sut = new GetPlayerIdentityAuthenticationListQueryService(fakeBackOfficeRepository);
-
-            var paging = new Paging<PlayerIdentityAuthenticationInfo>
+        fakeBrandService.GetBrandAsync(Arg.Any<Expression<Func<Brand, bool>>>())
+            .Returns(new Brand()
             {
-                RowCount = 10,
-                Page = 0
-            };
+                Id = brandId,
+                EnablePlayerIdentity = false,
+                Status = BrandStatus.Active
+            });
 
-            paging.SortByPropertyName(nameof(PlayerIdentityAuthenticationInfo.CreatedOn), false);
+        var sut = new CreateIdentityAuthenticationFormCommandService(fakeBrandService, fakePlayerService);
 
-            var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var command = new CreateIdentityAuthenticationFormCommand(
+            "playerCode",
+            brandId,
+            "620dff81110125f95bb9ccbb");
 
-            var query = new GetPlayerIdentityAuthenticationFormsQuery(
-                brandId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                paging);
+        var actual = await sut.GetAsync(command);
 
-            fakeBackOfficeRepository.QueryPlayerIdentityAuthenticationsAsync(
-                Arg.Is(brandId),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null)
-                .Returns(new[]
-                {
-                    new PlayerIdentityAuthenticationInfo(
-                        "{}",
-                        "IdNumber",
-                        "RealName",
-                        "Remark",
-                        PlayerIdentityReviewState.WaitingVerify,
-                        "Username",
-                        DateTimeOffset.UtcNow,
-                        Guid.NewGuid(),
-                        "PlayerCode"),
-                    new PlayerIdentityAuthenticationInfo(
-                        "{}",
-                        "IdNumber1",
-                        "RealName1",
-                        "Remark1",
-                        PlayerIdentityReviewState.Approve,
-                        "Username1",
-                        DateTimeOffset.UtcNow,
-                        Guid.NewGuid(),
-                        "PlayerCode1")
-                }.ToAsyncEnumerable());
+        Assert.IsFalse(actual.Valid);
+    }
 
-            await sut.QueryAsync(query).ToArrayAsync();
+    [Test]
+    public async Task Can_Query_Player_Identity_Forms()
+    {
+        var fakeBackOfficeRepository = Substitute.For<IBackOfficeRepository>();
 
-            _ = fakeBackOfficeRepository
-                .Received(1)
-                .QueryPlayerIdentityAuthenticationsAsync(
-                    Arg.Any<Guid>(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
-        }
+        var sut = new GetPlayerIdentityAuthenticationListQueryService(fakeBackOfficeRepository);
 
-        [Test]
-        public async Task Get_Player_Identity_Form_Should_Success()
+        var paging = new Paging<PlayerIdentityAuthenticationInfo>
         {
-            var fakePlayerService = Substitute.For<IPlayerService>();
+            RowCount = 10,
+            Page = 0
+        };
 
-            fakePlayerService
-                .GetPlayerIdentityFormAsync("playerCode")
-                .Returns(new PlayerIdentityFormModel
-                {
-                    Id = Guid.NewGuid(),
-                    Data = "{}"
-                });
+        paging.SortByPropertyName(nameof(PlayerIdentityAuthenticationInfo.CreatedOn), false);
 
-            var sut = new GetPlayerIdentityFormQueryService(fakePlayerService);
+        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
 
-            _ = await sut.GetAsync(new GetPlayerIdentityFormQuery("playerCode"));
+        var query = new GetPlayerIdentityAuthenticationFormsQuery(
+            brandId,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            paging);
 
-            _ = fakePlayerService.Received(1).GetPlayerIdentityFormAsync("playerCode");
-        }
+        fakeBackOfficeRepository.QueryPlayerIdentityAuthenticationsAsync(
+            Arg.Is(brandId),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null)
+            .Returns(new[]
+            {
+                new PlayerIdentityAuthenticationInfo(
+                    "{}",
+                    "IdNumber",
+                    "RealName",
+                    "Remark",
+                    PlayerIdentityReviewState.WaitingVerify,
+                    "Username",
+                    DateTimeOffset.UtcNow,
+                    Guid.NewGuid(),
+                    "PlayerCode"),
+                new PlayerIdentityAuthenticationInfo(
+                    "{}",
+                    "IdNumber1",
+                    "RealName1",
+                    "Remark1",
+                    PlayerIdentityReviewState.Approve,
+                    "Username1",
+                    DateTimeOffset.UtcNow,
+                    Guid.NewGuid(),
+                    "PlayerCode1")
+            }.ToAsyncEnumerable());
 
-        [Test]
-        public async Task Reject_Player_Identity_Form_Should_Success()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
+        await sut.QueryAsync(query).ToArrayAsync();
 
-            var formId = Guid.NewGuid();
-            fakePlayerService
-                .GetPlayerIdentityFormByIdAsync(formId)
-                .Returns(new PlayerIdentityFormInfo
-                {
-                    FormId = formId,
-                    Status = PlayerIdentityReviewState.WaitingVerify
-                });
+        _ = fakeBackOfficeRepository
+            .Received(1)
+            .QueryPlayerIdentityAuthenticationsAsync(
+                Arg.Any<Guid>(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+    }
 
-            var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
+    [Test]
+    public async Task Get_Player_Identity_Form_Should_Success()
+    {
+        var fakePlayerService = Substitute.For<IPlayerService>();
 
-            var brandId = Guid.NewGuid();
+        fakePlayerService
+            .GetPlayerIdentityFormAsync("playerCode")
+            .Returns(new PlayerIdentityFormModel
+            {
+                Id = Guid.NewGuid(),
+                Data = "{}"
+            });
 
-            var command = new ReviewPlayerIdentityFormCommand(
+        var sut = new GetPlayerIdentityFormQueryService(fakePlayerService);
+
+        _ = await sut.GetAsync(new GetPlayerIdentityFormQuery("playerCode"));
+
+        _ = fakePlayerService.Received(1).GetPlayerIdentityFormAsync("playerCode");
+    }
+
+    [Test]
+    public async Task Reject_Player_Identity_Form_Should_Success()
+    {
+        var fakePlayerService = Substitute.For<IPlayerService>();
+
+        var formId = Guid.NewGuid();
+        fakePlayerService
+            .GetPlayerIdentityFormByIdAsync(formId)
+            .Returns(new PlayerIdentityFormInfo
+            {
+                FormId = formId,
+                Status = PlayerIdentityReviewState.WaitingVerify
+            });
+
+        var sut = new ReviewPlayerIdentityFormCommandService(fakePlayerService);
+
+        var brandId = Guid.NewGuid();
+
+        var command = new ReviewPlayerIdentityFormCommand(
+            brandId,
+            formId,
+            PlayerIdentityReviewState.Reject,
+            "remark",
+            "reviewUserId",
+            "reviewUserName",
+            "realName",
+            "idNumber");
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakePlayerService
+            .Received(1)
+            .SignOffPlayerIdentityFormAsync(
                 brandId,
                 formId,
                 PlayerIdentityReviewState.Reject,
-                "remark",
                 "reviewUserId",
                 "reviewUserName",
+                "remark",
                 "realName",
                 "idNumber");
-
-            await sut.ExecuteAsync(command);
-
-            _ = fakePlayerService
-                .Received(1)
-                .SignOffPlayerIdentityFormAsync(
-                    brandId,
-                    formId,
-                    PlayerIdentityReviewState.Reject,
-                    "reviewUserId",
-                    "reviewUserName",
-                    "remark",
-                    "realName",
-                    "idNumber");
-        }
     }
 }

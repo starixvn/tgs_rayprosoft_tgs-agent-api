@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record SetQqIdRequest
 {
-    public record SetQqIdRequest
-    {
-        [JsonPropertyName("qq")]
-        public string QqId { get; init; }
-    }
+    [JsonPropertyName("qq")]
+    public string QqId { get; init; }
 }

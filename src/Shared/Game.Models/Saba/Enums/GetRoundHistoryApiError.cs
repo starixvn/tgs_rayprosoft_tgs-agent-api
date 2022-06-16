@@ -1,10 +1,9 @@
-﻿namespace TGS.Shared.Game.Models.Saba.Enums
+﻿namespace TGS.Shared.Game.Models.Saba.Enums;
+
+public enum GetRoundHistoryApiError
 {
-    public enum GetRoundHistoryApiError
-    {
-        Ok = 0,
-        Fail = 1,
-        InvalidVendorId = 9,
-        SystemUnderMaintenance = 10
-    }
+    Ok = 0,
+    Fail = 1,
+    InvalidVendorId = 9,
+    SystemUnderMaintenance = 10
 }

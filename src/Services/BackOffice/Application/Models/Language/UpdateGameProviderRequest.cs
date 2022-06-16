@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.Language
+namespace TGS.Services.BackOffice.Application.Models.Language;
+
+public class UpdateLanguageRequest : LanguageRequest, IRequest<MessageResponse>
 {
-    public class UpdateLanguageRequest : LanguageRequest, IRequest<MessageResponse>
-    {
-    }
 }

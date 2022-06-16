@@ -1,7 +1,6 @@
-﻿namespace TGS.IdentityVerifiers
+﻿namespace TGS.IdentityVerifiers;
+
+public interface IIdentityVerifierSelector<TCondition>
 {
-    public interface IIdentityVerifierSelector<TCondition>
-    {
-        IIdentityVerifier GetIdentityVerifier(TCondition condition);
-    }
+    IIdentityVerifier GetIdentityVerifier(TCondition condition);
 }

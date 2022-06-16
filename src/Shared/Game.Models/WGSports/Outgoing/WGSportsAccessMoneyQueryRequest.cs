@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.WGSports.Outgoing
+namespace TGS.Shared.Game.Models.WGSports.Outgoing;
+
+public record WGSportsAccessMoneyQueryRequest
 {
-    public record WGSportsAccessMoneyQueryRequest
-    {
-        public string OrderId { get; init; }
-    }
+    public string OrderId { get; init; }
 }

@@ -1,23 +1,22 @@
 ﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.BetLimit;
 
-namespace TGS.Services.BackOffice.Validation.BetLimit
+namespace TGS.Services.BackOffice.Validation.BetLimit;
+
+public class BetLimitRequestValidator : AbstractValidator<BetLimitRequest>
 {
-    public class BetLimitRequestValidator : AbstractValidator<BetLimitRequest>
+    public BetLimitRequestValidator()
     {
-        public BetLimitRequestValidator()
-        {
-            RuleFor(x => x.CurrencyCode)
-                .NotEmpty()
-                .WithMessage(Application.Resources.BetLimit.CodeRequired);
+        RuleFor(x => x.CurrencyCode)
+            .NotEmpty()
+            .WithMessage(Application.Resources.BetLimit.CodeRequired);
 
-            RuleFor(x => x.MinBet)
-                .GreaterThanOrEqualTo(0)
-                .WithMessage(Application.Resources.BetLimit.MinbetGreaterThanZero);
+        RuleFor(x => x.MinBet)
+            .GreaterThanOrEqualTo(0)
+            .WithMessage(Application.Resources.BetLimit.MinbetGreaterThanZero);
 
-            RuleFor(x => x.MaxBet)
-                .GreaterThan(x => x.MinBet)
-                .WithMessage(Application.Resources.BetLimit.MaxbetGreaterThanMinbet);
-        }
+        RuleFor(x => x.MaxBet)
+            .GreaterThan(x => x.MinBet)
+            .WithMessage(Application.Resources.BetLimit.MaxbetGreaterThanMinbet);
     }
 }

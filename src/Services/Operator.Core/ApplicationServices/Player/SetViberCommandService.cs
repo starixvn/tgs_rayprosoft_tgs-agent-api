@@ -5,25 +5,24 @@ using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.Player
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+internal class SetViberCommandService : ICommandService<SetViberCommand>
 {
-    internal class SetViberCommandService : ICommandService<SetViberCommand>
+    private readonly IPlayerServiceClient _client;
+
+    public SetViberCommandService(IPlayerServiceClient client)
     {
-        private readonly IPlayerServiceClient _client;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+    }
 
-        public SetViberCommandService(IPlayerServiceClient client)
+    public ValueTask ExecuteAsync(SetViberCommand command, CancellationToken cancellationToken = default)
+    {
+        var properties = new Dictionary<PlayerPropertyName, string?>
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-        }
+            [PlayerPropertyName.Viber] = command.ViberId
+        };
 
-        public ValueTask ExecuteAsync(SetViberCommand command, CancellationToken cancellationToken = default)
-        {
-            var properties = new Dictionary<PlayerPropertyName, string?>
-            {
-                [PlayerPropertyName.Viber] = command.ViberId
-            };
-
-            return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
-        }
+        return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
     }
 }

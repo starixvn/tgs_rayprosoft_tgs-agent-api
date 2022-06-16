@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons
+namespace TGS.Shared.Game.Models.Evolution.Commons;
+
+public record EvolutionBaseResponse
 {
-    public record EvolutionBaseResponse
-    {
-        [JsonPropertyName("status")]
-        public string Status { get; set; }
-        [JsonPropertyName("uuid")]
-        public string Uuid { get; set; }
-    }
+    [JsonPropertyName("status")]
+    public string Status { get; set; }
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; }
 }

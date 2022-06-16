@@ -5,28 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using TGS.Workers.Schedulers.Hangfire.Services;
 
-namespace TGS.Workers.Schedulers.Hangfire.Services
+namespace TGS.Workers.Schedulers.Hangfire.Services;
+
+internal interface IJobProvider
 {
-    internal interface IJobProvider
-    {
-        IEnumerable<JobDescription> GetJobDescriptions();
+    IEnumerable<JobDescription> GetJobDescriptions();
 
-        bool TryGetJobDescriptionById(Guid id, out JobDescription job);
+    bool TryGetJobDescriptionById(Guid id, out JobDescription job);
+}
+
+public abstract class BaseJobProvider : IJobProvider
+{
+    private readonly IReadOnlyDictionary<Guid, JobDescription> _jobs;
+
+    protected BaseJobProvider(params JobDescription[] jobs)
+    {
+        _jobs = jobs.ToDictionary(j => j.Id);
     }
 
-    public abstract class BaseJobProvider : IJobProvider
-    {
-        private readonly IReadOnlyDictionary<Guid, JobDescription> _jobs;
+    IEnumerable<JobDescription> IJobProvider.GetJobDescriptions() => 
+        _jobs.Values;
 
-        protected BaseJobProvider(params JobDescription[] jobs)
-        {
-            _jobs = jobs.ToDictionary(j => j.Id);
-        }
-
-        IEnumerable<JobDescription> IJobProvider.GetJobDescriptions() => 
-            _jobs.Values;
-
-        bool IJobProvider.TryGetJobDescriptionById(Guid id, out JobDescription job) =>
-            _jobs.TryGetValue(id, out job);
-    }
+    bool IJobProvider.TryGetJobDescriptionById(Guid id, out JobDescription job) =>
+        _jobs.TryGetValue(id, out job);
 }

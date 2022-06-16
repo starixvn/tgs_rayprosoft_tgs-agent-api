@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 
-namespace TGS.Services.BackOffice.Validation.GameProviderBetLimit
+namespace TGS.Services.BackOffice.Validation.GameProviderBetLimit;
+
+public class CreateGameProviderBetLimitRequestValidator : AbstractValidator<CreateGameProviderBetLimitRequest>
 {
-    public class CreateGameProviderBetLimitRequestValidator : AbstractValidator<CreateGameProviderBetLimitRequest>
+    public CreateGameProviderBetLimitRequestValidator()
     {
-        public CreateGameProviderBetLimitRequestValidator()
-        {
-            Include(new GameProviderBetLimitRequestValidator());
-        }
+        Include(new GameProviderBetLimitRequestValidator());
     }
 }

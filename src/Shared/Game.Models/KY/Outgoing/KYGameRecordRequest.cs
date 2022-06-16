@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.KY.Commons;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
+namespace TGS.Shared.Game.Models.KY.Outgoing;
+
+public record KYGameRecordRequest : KYBaseRequest
 {
-    public record KYGameRecordRequest : KYBaseRequest
-    {
-        [JsonPropertyName("startTime")]
-        public long StartTime { get; init; }
-        [JsonPropertyName("endTime")]
-        public long EndTime { get; init; }
-    }
+    [JsonPropertyName("startTime")]
+    public long StartTime { get; init; }
+    [JsonPropertyName("endTime")]
+    public long EndTime { get; init; }
 }

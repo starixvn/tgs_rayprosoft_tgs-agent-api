@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.LY.Commons;
 
-namespace TGS.Shared.Game.Models.LY.Outgoing
+namespace TGS.Shared.Game.Models.LY.Outgoing;
+
+public record LYGetBalanceRequest : LYBaseRequest
 {
-    public record LYGetBalanceRequest : LYBaseRequest
-    {
-        [JsonPropertyName("account")]
-        public string PlayerCode { get; init; }
-    }
+    [JsonPropertyName("account")]
+    public string PlayerCode { get; init; }
 }

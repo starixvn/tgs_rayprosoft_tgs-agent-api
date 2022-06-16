@@ -6,34 +6,33 @@ using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Application.Models.ReportBrandGameProviderRound;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.BackendOffice.Controllers.Report
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandGameProviderReportController : BaseContextController
-    {
-        [HttpGet]
-        [Description("Get brand game provider round aggregate")]
-        public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
-            [FromServices]
-            IGetService<GetBrandGameProviderRoundsReportRequest, GetBrandGameProviderRoundsReportResponse>
-                brandGameProviderRoundsService,
-            [FromQuery] GetBrandGameProviderRoundsReportRequest request)
-            => await brandGameProviderRoundsService
-                .GetAsync(request)
-                .ConfigureAwait(false);
+namespace TGS.Apis.BackendOffice.Controllers.Report;
 
-        [HttpPost("generate")]
-        [Description("Generate brand game provider round aggregate")]
-        public async Task<MessageResponse> GenerateGameProviderAggregateAsync(
-            [FromServices] IGetService<GenerateBrandGameProviderAggregateRequest, MessageResponse>
-                generateBrandGameProviderAggregateService,
-            [FromBody] GenerateBrandGameProviderAggregateRequest request)
-        {
-            request.UserId = UserId;
-            return await generateBrandGameProviderAggregateService
-                .GetAsync(request)
-                .ConfigureAwait(false);
-        }
+[Route("api/[controller]")]
+[ApiController]
+public class BrandGameProviderReportController : BaseContextController
+{
+    [HttpGet]
+    [Description("Get brand game provider round aggregate")]
+    public async Task<GetBrandGameProviderRoundsReportResponse> GetGameProviderRoundsAsync(
+        [FromServices]
+        IGetService<GetBrandGameProviderRoundsReportRequest, GetBrandGameProviderRoundsReportResponse>
+            brandGameProviderRoundsService,
+        [FromQuery] GetBrandGameProviderRoundsReportRequest request)
+        => await brandGameProviderRoundsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
+    [HttpPost("generate")]
+    [Description("Generate brand game provider round aggregate")]
+    public async Task<MessageResponse> GenerateGameProviderAggregateAsync(
+        [FromServices] IGetService<GenerateBrandGameProviderAggregateRequest, MessageResponse>
+            generateBrandGameProviderAggregateService,
+        [FromBody] GenerateBrandGameProviderAggregateRequest request)
+    {
+        request.UserId = UserId;
+        return await generateBrandGameProviderAggregateService
+            .GetAsync(request)
+            .ConfigureAwait(false);
     }
 }

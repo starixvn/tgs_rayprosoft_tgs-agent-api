@@ -10,35 +10,34 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.PlayerIp;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.PlayerIpHandlers
+namespace TGS.Services.BackOffice.Application.Queries.PlayerIpHandlers;
+
+public class GetPlayerIpByIpOperationQueryHandler : Handler<GetPlayerIpsByIpRequest, PagedResponse<PlayerIpByIpModel>>
 {
-    public class GetPlayerIpByIpOperationQueryHandler : Handler<GetPlayerIpsByIpRequest, PagedResponse<PlayerIpByIpModel>>
+    private readonly IPlayerIpService _service;
+
+    public GetPlayerIpByIpOperationQueryHandler(IPlayerIpService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly IPlayerIpService _service;
+        _service = service ?? throw new System.ArgumentNullException(nameof(service));
+    }
 
-        public GetPlayerIpByIpOperationQueryHandler(IPlayerIpService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override Task<PagedResponse<PlayerIpByIpModel>> Handle(GetPlayerIpsByIpRequest request, CancellationToken cancellationToken)
+    {
+        var endDateTimeOffset = DateTimeOffset.UtcNow;
+        var startDateTimeOffset = endDateTimeOffset.AddDays(-14);
+
+        if (request.IpType == IpType.RegisterIp)
         {
-            _service = service ?? throw new System.ArgumentNullException(nameof(service));
+            return _service
+                .GetPlayerIpRecordsByRegisterQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
+                .CreatePagedResponseAsync(request);
         }
-
-        public override Task<PagedResponse<PlayerIpByIpModel>> Handle(GetPlayerIpsByIpRequest request, CancellationToken cancellationToken)
+        else
         {
-            var endDateTimeOffset = DateTimeOffset.UtcNow;
-            var startDateTimeOffset = endDateTimeOffset.AddDays(-14);
-
-            if (request.IpType == IpType.RegisterIp)
-            {
-                return _service
-                    .GetPlayerIpRecordsByRegisterQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
-                    .CreatePagedResponseAsync(request);
-            }
-            else
-            {
-                return _service
-                    .GetPlayerIpOperationByIpQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
-                    .CreatePagedResponseAsync(request);
-            }
+            return _service
+                .GetPlayerIpOperationByIpQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
+                .CreatePagedResponseAsync(request);
         }
     }
 }

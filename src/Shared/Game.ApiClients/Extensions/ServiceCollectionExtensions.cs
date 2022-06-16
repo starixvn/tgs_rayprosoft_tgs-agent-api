@@ -19,54 +19,53 @@ using TGS.Shared.Game.ApiClients.TCG;
 using TGS.Shared.Game.ApiClients.TF;
 using TGS.Shared.Game.ApiClients.WMCasino;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Dependency Injection of Game.ApiClients, need to add following dependencies beforehand:
+    /// 1. AddApiClient() in Infrastructures.ApiClient ( if BaseApiClient is used )
+    /// </summary>
+    public static IServiceCollection AddGameApiClients(this IServiceCollection services)
     {
-        /// <summary>
-        /// Dependency Injection of Game.ApiClients, need to add following dependencies beforehand:
-        /// 1. AddApiClient() in Infrastructures.ApiClient ( if BaseApiClient is used )
-        /// </summary>
-        public static IServiceCollection AddGameApiClients(this IServiceCollection services)
-        {
-            services.AddHttpClient<ISBOApiClient, SBOApiClient>();
+        services.AddHttpClient<ISBOApiClient, SBOApiClient>();
 
-            services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
+        services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
 
-            services.AddHttpClient<IJDBApiClient, JDBApiClient>();
+        services.AddHttpClient<IJDBApiClient, JDBApiClient>();
 
-            services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
+        services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
 
-            services.AddHttpClient<ISabaApiClient, SabaApiClient>();
+        services.AddHttpClient<ISabaApiClient, SabaApiClient>();
 
-            services.AddHttpClient<IIMESportsApiClient, IMESportsApiClient>();
+        services.AddHttpClient<IIMESportsApiClient, IMESportsApiClient>();
 
-            services.AddHttpClient<IBigGamingApiClient, BigGamingApiClient>();
+        services.AddHttpClient<IBigGamingApiClient, BigGamingApiClient>();
 
-            services.AddHttpClient<ISexyGamingApiClient, SexyGamingApiClient>();
+        services.AddHttpClient<ISexyGamingApiClient, SexyGamingApiClient>();
 
-            services.AddHttpClient<ISkywindApiClient, SkywindApiClient>();
+        services.AddHttpClient<ISkywindApiClient, SkywindApiClient>();
 
-            services.AddHttpClient<IAllBetApiClient, AllBetApiClient>();
+        services.AddHttpClient<IAllBetApiClient, AllBetApiClient>();
 
-            services.AddHttpClient<IEvolutionApiClient, EvolutionApiClient>();
+        services.AddHttpClient<IEvolutionApiClient, EvolutionApiClient>();
 
-            services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
+        services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
 
-            services.AddHttpClient<ITCGApiClient, TCGApiClient>();
-            services.AddScoped<ITCGUtility, TCGUtility>();
+        services.AddHttpClient<ITCGApiClient, TCGApiClient>();
+        services.AddScoped<ITCGUtility, TCGUtility>();
 
-            services.AddHttpClient<ICard365ApiClient, Card365ApiClient>();
+        services.AddHttpClient<ICard365ApiClient, Card365ApiClient>();
 
-            services.AddHttpClient<IBetConstructApiClient, BetConstructApiClient>();
-            services.AddScoped<IBetConstructUtility, BetConstructUtility>();
-            services.AddScoped<IAviaApiClient, AviaApiClient>();
+        services.AddHttpClient<IBetConstructApiClient, BetConstructApiClient>();
+        services.AddScoped<IBetConstructUtility, BetConstructUtility>();
+        services.AddScoped<IAviaApiClient, AviaApiClient>();
 
-            services.AddHttpClient<IJiliApiClient, JiliApiClient>();
+        services.AddHttpClient<IJiliApiClient, JiliApiClient>();
 
-            services.AddHttpClient<ITFApiClient, TFApiClient>();
+        services.AddHttpClient<ITFApiClient, TFApiClient>();
 
-            return services;
-        }
+        return services;
     }
 }

@@ -12,123 +12,122 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Language;
 using TGS.Services.BackOffice.Application.Resources;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
+
+[TestFixture]
+[Parallelizable]
+public class LanguageControllerTests : BaseTests
 {
-    [TestFixture]
-    [Parallelizable]
-    public class LanguageControllerTests : BaseTests
+    [SetUp]
+    public override void Setup()
     {
-        [SetUp]
-        public override void Setup()
+        base.Setup();
+        _controller = new LanguageController(
+            _mediatorMock.Object);
+    }
+
+    private LanguageController _controller = default!;
+    private readonly Mock<IMediator> _mediatorMock = new();
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Can_Get_Languages(bool showAll)
+    {
+        var list = CreateLanguageModelFixture()
+            .CreateMany<LanguageModel>(99)
+            .ToArray();
+
+        var request = new GetLanguagesRequest
         {
-            base.Setup();
-            _controller = new LanguageController(
-                _mediatorMock.Object);
-        }
+            CultureCode = "CultureCode",
+            LanguageCode = "LanguageCode",
+            Page = 1,
+            Rows = 10,
+            SortBy = "updatedOn",
+            OrderBy = SortOrder.Descending,
+            ShowAll = showAll
+        };
+        var (skip, take) = GetPage(request);
+        var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
 
-        private LanguageController _controller = default!;
-        private readonly Mock<IMediator> _mediatorMock = new();
+        var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Languages(bool showAll)
-        {
-            var list = CreateLanguageModelFixture()
-                .CreateMany<LanguageModel>(99)
-                .ToArray();
-
-            var request = new GetLanguagesRequest
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetLanguagesRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<LanguageModel>
             {
-                CultureCode = "CultureCode",
-                LanguageCode = "LanguageCode",
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
-            var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+                Valid = true,
+                Items = expectedRoles
+            });
 
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
+        var response = await _controller.GetLanguagesAsync(request);
+        response.Valid.Should().BeTrue();
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetLanguagesRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<LanguageModel>
-                {
-                    Valid = true,
-                    Items = expectedRoles
-                });
-
-            var response = await _controller.GetLanguagesAsync(request);
-            response.Valid.Should().BeTrue();
-
-            for (var i = 0; i < response.Items.Length; i++)
-            {
-                response.Items[i].CultureCode.Should().Be(expectedRoles[i].CultureCode);
-                response.Items[i].LanguageCode.Should().Be(expectedRoles[i].LanguageCode);
-                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
-            }
-
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetLanguagesRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        [Test]
-        public async Task Cannot_Create_Language_With_Culture_Code_Exists()
+        for (var i = 0; i < response.Items.Length; i++)
         {
-            var list = CreateLanguageModelFixture()
-                .CreateMany<LanguageModel>(99)
-                .ToArray();
-
-            var request = new Fixture().Create<CreateLanguageRequest>();
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse { Valid = false, Message = Language.CultureCodeExisted });
-
-            var response = await _controller.CreateLanguageAsync(request);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Language.CultureCodeExisted);
-
-            _mediatorMock.Verify(x => x.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()));
+            response.Items[i].CultureCode.Should().Be(expectedRoles[i].CultureCode);
+            response.Items[i].LanguageCode.Should().Be(expectedRoles[i].LanguageCode);
+            response.Items[i].Name.Should().Be(expectedRoles[i].Name);
         }
 
-        [Test]
-        public async Task Can_Create_Language()
-        {
-            var request = new Fixture().Create<CreateLanguageRequest>();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetLanguagesRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse { Valid = true });
+    [Test]
+    public async Task Cannot_Create_Language_With_Culture_Code_Exists()
+    {
+        var list = CreateLanguageModelFixture()
+            .CreateMany<LanguageModel>(99)
+            .ToArray();
 
-            var response = await _controller.CreateLanguageAsync(request);
-            response.Valid.Should().BeTrue();
+        var request = new Fixture().Create<CreateLanguageRequest>();
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()));
-        }
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse { Valid = false, Message = Language.CultureCodeExisted });
 
-        [Test]
-        public async Task Can_Update_Language()
-        {
-            var language = CreateLanguageModelFixture().Create<LanguageModel>();
-            var request = new Fixture().Create<UpdateLanguageRequest>();
+        var response = await _controller.CreateLanguageAsync(request);
+        response.Valid.Should().BeFalse();
+        response.Message.Should().Be(Language.CultureCodeExisted);
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdateLanguageRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse { Valid = true });
+        _mediatorMock.Verify(x => x.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            var response = await _controller.UpdateLanguageAsync(language.CultureCode, request);
+    [Test]
+    public async Task Can_Create_Language()
+    {
+        var request = new Fixture().Create<CreateLanguageRequest>();
 
-            response.Valid.Should().BeTrue();
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateLanguageRequest>(), It.IsAny<CancellationToken>()));
-        }
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse { Valid = true });
 
-        private Fixture CreateLanguageModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Create<LanguageModel>();
-            return fixture;
-        }
+        var response = await _controller.CreateLanguageAsync(request);
+        response.Valid.Should().BeTrue();
+
+        _mediatorMock.Verify(x => x.Send(It.IsAny<CreateLanguageRequest>(), It.IsAny<CancellationToken>()));
+    }
+
+    [Test]
+    public async Task Can_Update_Language()
+    {
+        var language = CreateLanguageModelFixture().Create<LanguageModel>();
+        var request = new Fixture().Create<UpdateLanguageRequest>();
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdateLanguageRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse { Valid = true });
+
+        var response = await _controller.UpdateLanguageAsync(language.CultureCode, request);
+
+        response.Valid.Should().BeTrue();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<UpdateLanguageRequest>(), It.IsAny<CancellationToken>()));
+    }
+
+    private Fixture CreateLanguageModelFixture()
+    {
+        var fixture = new Fixture();
+        fixture.Create<LanguageModel>();
+        return fixture;
     }
 }

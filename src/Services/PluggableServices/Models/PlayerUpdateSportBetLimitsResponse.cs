@@ -1,8 +1,7 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record PlayerUpdateSportBetLimitsResponse : TgsResponse
 {
-    public record PlayerUpdateSportBetLimitsResponse : TgsResponse
-    {
-    }
 }

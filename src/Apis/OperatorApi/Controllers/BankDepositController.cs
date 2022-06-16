@@ -24,353 +24,278 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 using TGS.Services.Operator.ApplicationServices.Player;
 
-namespace TGS.Apis.OperatorApi.Controllers
-{
-    [Route("api/deposit/bank")]
-    [ApiController]
-    public class BankDepositController : ControllerBase
-    {
-        private static readonly Random _Random = new Random();
-        private readonly ILogger<BankDepositController> _loger;
+namespace TGS.Apis.OperatorApi.Controllers;
 
-        public BankDepositController(ILogger<BankDepositController> loger)
+[Route("api/deposit/bank")]
+[ApiController]
+public class BankDepositController : ControllerBase
+{
+    private static readonly Random _Random = new Random();
+    private readonly ILogger<BankDepositController> _loger;
+
+    public BankDepositController(ILogger<BankDepositController> loger)
+    {
+        _loger = loger ?? throw new ArgumentNullException(nameof(loger));
+    }
+
+    [HttpGet("help2pay/pay/{identityId}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public async ValueTask<ContentResult> GetHelp2PayDepositHtmlAsync(
+        [FromServices] IHelp2PayRepository redisRepository,
+        [FromRoute] Guid identityId)
+    {
+        var html = await redisRepository.GetDepositHtmlAsync(identityId)
+            .ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(html))
         {
-            _loger = loger ?? throw new ArgumentNullException(nameof(loger));
+            throw new PaymentFailException($"Can not find help2pay deposit html of identity id:{identityId}");
         }
 
-        [HttpGet("help2pay/pay/{identityId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public async ValueTask<ContentResult> GetHelp2PayDepositHtmlAsync(
-            [FromServices] IHelp2PayRepository redisRepository,
-            [FromRoute] Guid identityId)
+        return new ContentResult
         {
-            var html = await redisRepository.GetDepositHtmlAsync(identityId)
+            StatusCode = StatusCodes.Status200OK,
+            ContentType = "text/html",
+            Content = html
+        };
+    }
+
+    [HttpPost("help2pay")]
+    [EnableUserBlockedCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<DepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        [FromServices] IHelp2PayRepository redisRepository,
+        [FromServices] Help2PaySerializer serializer,
+        [FromBody] SubmitDepositRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
+
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            "tgs.payment.help2pay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new Help2PayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("securityCode").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
+                    formId,
+                    "https://google.com",
+                    clientIp,
+                    brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<Help2PayDepositApplyInfo>(formData.ApplyInfo!);
+
+        if (!string.IsNullOrWhiteSpace(applyInfo.Response.PaymentDepositId))
+        {
+            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                createdFormId,
+                applyInfo.Response.PaymentDepositId);
+
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
                 .ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(html))
-            {
-                throw new PaymentFailException($"Can not find help2pay deposit html of identity id:{identityId}");
-            }
+            var identityId = Guid.NewGuid();
 
-            return new ContentResult
+            await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
+                .ConfigureAwait(false);
+
+            return new DepositFormCreatedResponse
             {
-                StatusCode = StatusCodes.Status200OK,
-                ContentType = "text/html",
-                Content = html
+                FormId = createdFormId,
+                PaymentUrl = $"/api/deposit/bank/help2pay/pay/{identityId}"
             };
         }
 
-        [HttpPost("help2pay")]
-        [EnableUserBlockedCheck]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<DepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] IHelp2PayRepository redisRepository,
-            [FromServices] Help2PaySerializer serializer,
-            [FromBody] SubmitDepositRequest request)
+        throw new PaymentFailException("Something went wrong to deposit via help2pay");
+    }
+
+    [HttpPost("maticpay")]
+    [EnableUserBlockedCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
+       [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+       [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+       [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+       [FromServices] MaticPaySerializer serializer,
+       [FromBody] SubmitDepositRequest request
+       )
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+        var player = await getPlayerInfoService.GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode));
+
+        if (!player.IdentityAuthentication)
+            throw new MaticPayDepositNeedRealNameException();
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            "tgs.payment.maticpay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new MaticPayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                    formId,
+                    request.Amount,
+                    player.RealName)));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<MaticPayDepositApplyInfo>(formData.ApplyInfo!);
+
+        if (applyInfo.Response.Code == "0")
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            var paymentUrl = applyInfo.Response.Detail.PayURL.ToString();
 
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
-
-            var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.help2pay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new Help2PayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("securityCode").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("bankCode").GetString(),
-                        formId,
-                        "https://google.com",
-                        clientIp,
-                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<Help2PayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (!string.IsNullOrWhiteSpace(applyInfo.Response.PaymentDepositId))
-            {
-                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    applyInfo.Response.PaymentDepositId);
-
-                await updateDepositFormService
-                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                    .ConfigureAwait(false);
-
-                var identityId = Guid.NewGuid();
-
-                await redisRepository.StoreDepositHtmlAsync(identityId, applyInfo.Response.Html)
-                    .ConfigureAwait(false);
-
-                return new DepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = $"/api/deposit/bank/help2pay/pay/{identityId}"
-                };
-            }
-
-            throw new PaymentFailException("Something went wrong to deposit via help2pay");
-        }
-
-        [HttpPost("maticpay")]
-        [EnableUserBlockedCheck]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
-           [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-           [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-           [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-           [FromServices] MaticPaySerializer serializer,
-           [FromBody] SubmitDepositRequest request
-           )
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var player = await getPlayerInfoService.GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode));
-
-            if (!player.IdentityAuthentication)
-                throw new MaticPayDepositNeedRealNameException();
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.maticpay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new MaticPayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
-                        formId,
-                        request.Amount,
-                        player.RealName)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<MaticPayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (applyInfo.Response.Code == "0")
-            {
-                var paymentUrl = applyInfo.Response.Detail.PayURL.ToString();
-
-                var payUri = new Uri(paymentUrl);
-                var thirdPartyOrderNo = HttpUtility.ParseQueryString(payUri.Query).Get("oid");
-
-                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    thirdPartyOrderNo);
-
-                await updateDepositFormService
-                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                    .ConfigureAwait(false);
-
-                if (applyInfo.Response.Detail.PayURL.ToString() == string.Empty)
-                {
-                    paymentUrl = applyInfo.Response.Detail.PayHtml.ToString();
-                }
-
-                return new MaticPayDepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = paymentUrl,
-                    ErrorMessage = string.Empty
-                };
-            }
-            else
-            {
-                throw new PaymentFailException(applyInfo.Response.Msg);
-            }
-        }
-
-        [HttpPost("primepay")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlockedCheck]
-        public async Task<DepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] PrimePaySerializer serializer,
-            [FromBody] SubmitDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.primepay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new PrimePayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("key").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
-                        formId,
-                        "https://google.com",
-                        brandPaymentInfo.RootElement.TryGetProperty("paymentMethod", out var prop)
-                            ? prop.GetString()
-                            : null)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (applyInfo.Response is PrimePayDepositSuccessResponse response)
-            {
-                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceId);
-
-                await updateDepositFormService
-                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                    .ConfigureAwait(false);
-
-                return new DepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
-                };
-            }
-            else
-            {
-                var failResponse = (PrimePayDepositFailResponse)applyInfo.Response;
-
-                throw new PaymentFailException(failResponse.Errors);
-            }
-        }
-
-        [HttpPost("skypay-{fragment}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [EnableUserBlockedCheck]
-        public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] SkyPaySerializer serializer,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            string fragment,
-            [FromBody] SubmitDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.GetBrandId().Value;
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new SkyPayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
-                        formId)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
+            var payUri = new Uri(paymentUrl);
+            var thirdPartyOrderNo = HttpUtility.ParseQueryString(payUri.Query).Get("oid");
 
             var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    applyInfo.Response.TradeNo);
+                createdFormId,
+                thirdPartyOrderNo);
+
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ConfigureAwait(false);
+
+            if (applyInfo.Response.Detail.PayURL.ToString() == string.Empty)
+            {
+                paymentUrl = applyInfo.Response.Detail.PayHtml.ToString();
+            }
+
+            return new MaticPayDepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = paymentUrl,
+                ErrorMessage = string.Empty
+            };
+        }
+        else
+        {
+            throw new PaymentFailException(applyInfo.Response.Msg);
+        }
+    }
+
+    [HttpPost("primepay")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<DepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        [FromServices] PrimePaySerializer serializer,
+        [FromBody] SubmitDepositRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            "tgs.payment.primepay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new PrimePayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("key").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+                    formId,
+                    "https://google.com",
+                    brandPaymentInfo.RootElement.TryGetProperty("paymentMethod", out var prop)
+                        ? prop.GetString()
+                        : null)));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
+
+        if (applyInfo.Response is PrimePayDepositSuccessResponse response)
+        {
+            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                createdFormId,
+                ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceId);
 
             await updateDepositFormService
                 .ExecuteAsync(updateThirdPartyOrderNoCommand)
@@ -379,61 +304,219 @@ namespace TGS.Apis.OperatorApi.Controllers
             return new DepositFormCreatedResponse
             {
                 FormId = createdFormId,
-                PaymentUrl = applyInfo.Response.TradeUrl
+                PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
             };
         }
-
-        [HttpPost("tupay", Name = "SubmitTuPayDepositRequest")]
-        [EnableUserBlockedCheck]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] TuPaySerializer serializer,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromBody] SubmitDepositRequest request)
+        else
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            var failResponse = (PrimePayDepositFailResponse)applyInfo.Response;
 
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
+            throw new PaymentFailException(failResponse.Errors);
+        }
+    }
 
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+    [HttpPost("skypay-{fragment}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] SkyPaySerializer serializer,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        string fragment,
+        [FromBody] SubmitDepositRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.GetBrandId().Value;
 
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.tupay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new TuPayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
-                        formId)));
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
 
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new SkyPayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
+                    formId)));
 
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
+
+        var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                 createdFormId,
-                brandId);
+                applyInfo.Response.TradeNo);
 
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
+        await updateDepositFormService
+            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ConfigureAwait(false);
 
-            var applyInfo = serializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
+        return new DepositFormCreatedResponse
+        {
+            FormId = createdFormId,
+            PaymentUrl = applyInfo.Response.TradeUrl
+        };
+    }
 
+    [HttpPost("tupay", Name = "SubmitTuPayDepositRequest")]
+    [EnableUserBlockedCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] TuPaySerializer serializer,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        [FromBody] SubmitDepositRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            "tgs.payment.tupay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new TuPayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("merchant").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("secret").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
+                    formId)));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<TuPayDepositApplyInfo>(formData.ApplyInfo!);
+
+        var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+            createdFormId,
+            applyInfo.Response.TradeNo);
+
+        await updateDepositFormService
+            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ConfigureAwait(false);
+
+        return new DepositFormCreatedResponse
+        {
+            FormId = createdFormId,
+            PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+        };
+    }
+
+    [HttpPost("umpay")]
+    [EnableUserBlockedCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        [FromServices] UmPaySerializer serializer,
+        [FromBody] SubmitDepositRequest request
+        )
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+        //需要隨機兩位小數的通道類型:PAY01支轉支 PAY03轉數快 PAY04網銀
+        var randomPointTradeTypes = new string[] { "PAY01", "PAY03", "PAY04" };
+
+        var tradeType = brandPaymentInfo.RootElement.GetProperty("tradeType").GetString();
+        var amount = request.Amount;
+        if (randomPointTradeTypes.Contains(tradeType))
+        {
+            amount += _Random.Next(1, 100) / 100M;
+        }
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            amount,
+            "tgs.payment.umpay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new UmPayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
+                    tradeType,
+                    "1",
+                    formId,
+                    amount,
+                    1m,
+                    formId.ToString())));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
+
+        if (applyInfo.Response.Code == "1")
+        {
             var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                 createdFormId,
                 applyInfo.Response.TradeNo);
@@ -442,185 +525,101 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExecuteAsync(updateThirdPartyOrderNoCommand)
                 .ConfigureAwait(false);
 
+            return new UmPayDepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = applyInfo.Response.JumpUrl.ToString(),
+                ErrorMessage = string.Empty
+            };
+        }
+        else
+        {
+            throw new PaymentFailException(applyInfo.Response.Msg);
+        }
+    }
+
+    [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
+    [HttpPost("~/api/deposit/thirdparty/zeronineninepay", Name = "SubmitZeroNineNinePayThirdPartyDepositRequest")]
+    [EnableUserBlockedCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        [FromServices] ZeroNineNinePaySerializer serializer,
+        [FromBody] SubmitDepositRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var clientIp = HttpContext.Connection.RemoteIpAddress;
+
+        if (clientIp != null && clientIp.IsIPv4MappedToIPv6)
+            clientIp = clientIp.MapToIPv4();
+
+        _loger.LogTrace("zeronineninepay clientIp:{clientIp}", clientIp);
+
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
+
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            "tgs.payment.zeronineninepay.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new ZeroNineNinePayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
+                    brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
+                    formId,
+                    clientIp?.ToString(),
+                    null)));
+
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
+
+        var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
+
+        if (applyInfo.Response.Code == 200)
+        {
+            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                createdFormId,
+                applyInfo.Response.Data.TradeNo);
+
+            await updateDepositFormService
+                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ConfigureAwait(false);
+
             return new DepositFormCreatedResponse
             {
                 FormId = createdFormId,
-                PaymentUrl = applyInfo.Response.RedirectUrl.ToString()
+                PaymentUrl = applyInfo.Response.Data.PayUrl
             };
         }
-
-        [HttpPost("umpay")]
-        [EnableUserBlockedCheck]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] UmPaySerializer serializer,
-            [FromBody] SubmitDepositRequest request
-            )
+        else
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            //需要隨機兩位小數的通道類型:PAY01支轉支 PAY03轉數快 PAY04網銀
-            var randomPointTradeTypes = new string[] { "PAY01", "PAY03", "PAY04" };
-
-            var tradeType = brandPaymentInfo.RootElement.GetProperty("tradeType").GetString();
-            var amount = request.Amount;
-            if (randomPointTradeTypes.Contains(tradeType))
-            {
-                amount += _Random.Next(1, 100) / 100M;
-            }
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                amount,
-                "tgs.payment.umpay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new UmPayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
-                        tradeType,
-                        "1",
-                        formId,
-                        amount,
-                        1m,
-                        formId.ToString())));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (applyInfo.Response.Code == "1")
-            {
-                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    applyInfo.Response.TradeNo);
-
-                await updateDepositFormService
-                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                    .ConfigureAwait(false);
-
-                return new UmPayDepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = applyInfo.Response.JumpUrl.ToString(),
-                    ErrorMessage = string.Empty
-                };
-            }
-            else
-            {
-                throw new PaymentFailException(applyInfo.Response.Msg);
-            }
-        }
-
-        [HttpPost("zeronineninepay", Name = "SubmitZeroNineNinePayDepositRequest")]
-        [HttpPost("~/api/deposit/thirdparty/zeronineninepay", Name = "SubmitZeroNineNinePayThirdPartyDepositRequest")]
-        [EnableUserBlockedCheck]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            [FromServices] ZeroNineNinePaySerializer serializer,
-            [FromBody] SubmitDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var clientIp = HttpContext.Connection.RemoteIpAddress;
-
-            if (clientIp != null && clientIp.IsIPv4MappedToIPv6)
-                clientIp = clientIp.MapToIPv4();
-
-            _loger.LogTrace("zeronineninepay clientIp:{clientIp}", clientIp);
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.zeronineninepay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new ZeroNineNinePayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("merchantId").GetInt32(),
-                        brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
-                        formId,
-                        clientIp?.ToString(),
-                        null)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
-                createdFormId,
-                brandId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
-
-            var applyInfo = serializer.Deserialize<ZeroNineNinePayDepositApplyInfo>(formData.ApplyInfo!);
-
-            if (applyInfo.Response.Code == 200)
-            {
-                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    applyInfo.Response.Data.TradeNo);
-
-                await updateDepositFormService
-                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                    .ConfigureAwait(false);
-
-                return new DepositFormCreatedResponse
-                {
-                    FormId = createdFormId,
-                    PaymentUrl = applyInfo.Response.Data.PayUrl
-                };
-            }
-            else
-            {
-                throw new PaymentFailException(applyInfo.Response.Message);
-            }
+            throw new PaymentFailException(applyInfo.Response.Message);
         }
     }
 }

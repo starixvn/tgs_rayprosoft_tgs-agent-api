@@ -3,33 +3,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 
-namespace TGS.Services.BackOffice.Domain
+namespace TGS.Services.BackOffice.Domain;
+
+internal interface IWalletExchangeService
 {
-    internal interface IWalletExchangeService
-    {
-        ValueTask CancelWithdrawAsync(
-            Guid brandId,
-            UserType userType,
-            string userId,
-            decimal amount,
-            string reviewUserId,
-            CancellationToken cancellationToken = default);
+    ValueTask CancelWithdrawAsync(
+        Guid brandId,
+        UserType userType,
+        string userId,
+        decimal amount,
+        string reviewUserId,
+        CancellationToken cancellationToken = default);
 
-        ValueTask CommitWithdrawAsync(
-            Guid brandId,
-            UserType userType,
-            string userId,
-            decimal amount,
-            decimal actualAmount,
-            string reviewUserId,
-            CancellationToken cancellationToken = default);
+    ValueTask CommitWithdrawAsync(
+        Guid brandId,
+        UserType userType,
+        string userId,
+        decimal amount,
+        decimal actualAmount,
+        string reviewUserId,
+        CancellationToken cancellationToken = default);
 
-        ValueTask RollbackWithdrawAsync(
-            Guid brandId,
-            UserType userType,
-            string userId,
-            decimal amount,
-            string reviewUserId,
-            CancellationToken cancellationToken = default);
-    }
+    ValueTask RollbackWithdrawAsync(
+        Guid brandId,
+        UserType userType,
+        string userId,
+        decimal amount,
+        string reviewUserId,
+        CancellationToken cancellationToken = default);
 }

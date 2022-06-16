@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.JDB.Incoming
+namespace TGS.Shared.Game.Models.JDB.Incoming;
+
+public record CancelTransactionRequest : BaseActionRequest
 {
-    public record CancelTransactionRequest : BaseActionRequest
-    {
-        [JsonPropertyName("transferId")]
-        public long TransferId { get; init; }
-    }
+    [JsonPropertyName("transferId")]
+    public long TransferId { get; init; }
 }

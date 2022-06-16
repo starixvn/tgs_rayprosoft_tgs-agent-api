@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons
+namespace TGS.Shared.Game.Models.Evolution.Commons;
+
+public record EvolutionChannel
 {
-    public record EvolutionChannel
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-    }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 }

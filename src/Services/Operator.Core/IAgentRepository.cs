@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public interface IAgentRepository
 {
-    public interface IAgentRepository
-    {
-        ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(string invitationCode);
-    }
+    ValueTask<AgentInfo?> GetAgentInfoByInvitationCodeAsync(string invitationCode);
 }
