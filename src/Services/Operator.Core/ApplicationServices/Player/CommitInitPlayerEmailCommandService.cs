@@ -10,17 +10,20 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitPlayerEmailCommand>
 {
+    private readonly IBrandRepository _brandRepository;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandEmailQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public CommitInitPlayerEmailCommandService(
+       IBrandRepository brandRepository,
        IPlayerRepository playerRepository,
        IGetService<CheckBrandEmailQuery, bool> checkService,
        IValidateCodeOperator validateCodeOperator,
        IRedisCacheManager cacheManager)
     {
+        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
         _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
@@ -31,6 +34,13 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         CommitInitPlayerEmailCommand command,
         CancellationToken cancellationToken = default)
     {
+        var brand = await _brandRepository
+            .GetBrandInfoAsync(command.BrandId)
+            .ConfigureAwait(false);
+
+        if (brand!.EmailRegisterFlowEnabled is false)
+            return;
+
         var result = await _validateCodeOperator
             .GetValidateCodeDataAsync<EmailValidateData>(
                 command.ValidateCode,
@@ -45,7 +55,7 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         var checkQuery = new CheckBrandEmailQuery(command.BrandId, result.Email, playerCode);
 
         var isBrandHasSameEmail = await _checkService
-            .GetAsync(checkQuery)
+            .GetAsync(checkQuery, cancellationToken)
             .ConfigureAwait(false);
 
         if (isBrandHasSameEmail)
@@ -54,6 +64,9 @@ internal class CommitInitPlayerEmailCommandService : ICommandService<CommitInitP
         await _playerRepository
             .SetPlayerEmailAsync(playerCode, result.Email)
             .ConfigureAwait(false);
+
+        if (brand.BankInfoRegisterFlowEnabled)
+            return;
 
         await _playerRepository
             .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)

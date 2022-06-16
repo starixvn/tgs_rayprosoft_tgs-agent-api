@@ -33,6 +33,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 false,
                 PlayerIdentityEnabled: false,
+                false,
                 false);
 
             fakeBrandRepository.GetBrandInfoAsync(Arg.Is(brandId)).Returns(brandInfo);
@@ -117,6 +118,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 false,
                 PlayerIdentityEnabled: true,
+                false,
                 false);
 
             _ = fakeBrandRepository

@@ -258,6 +258,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     false,
                     false,
                     false,
+                    false,
                     false));
 
             var actualSecurityKey = await sut.GetAsync(command);

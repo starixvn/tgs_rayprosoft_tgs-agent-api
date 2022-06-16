@@ -48,7 +48,8 @@ namespace TGS.Operator.Repositories
                     brand.EnableSms,
                     brand.EnableSmsRegisterFlow,
                     brand.EnablePlayerIdentity,
-                    brand.EnableEmailRegisterFlow);
+                    brand.EnableEmailRegisterFlow,
+                    brand.EnableBankInfoRegisterFlow);
             }
 
             var logo = JsonSerializer.Deserialize<BrandSmsVendorSettings>(brand.LogoInfo)!;
@@ -64,7 +65,8 @@ namespace TGS.Operator.Repositories
                 brand.EnableSms,
                 brand.EnableSmsRegisterFlow,
                 brand.EnablePlayerIdentity,
-                brand.EnableEmailRegisterFlow);
+                brand.EnableEmailRegisterFlow,
+                brand.EnableBankInfoRegisterFlow);
         }
 
         public IAsyncEnumerable<AnnouncementInfo> QueryAnnouncementInfosAsync(Guid brandId, DateTimeOffset searchDate)

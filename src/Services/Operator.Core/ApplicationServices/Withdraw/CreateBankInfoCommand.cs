@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw
 {
@@ -7,5 +8,5 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw
         string PlayerCode,
         Guid PaymentChannelId,
         string BankType,
-        string Detail);
+        JsonDocument Detail);
 }

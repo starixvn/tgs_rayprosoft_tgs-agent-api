@@ -56,7 +56,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player
                 .GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
                 .ConfigureAwait(false);
 
-            var playerStatus = brand.SmsRegisterFlowEnabled || brand.EmailRegisterFlowEnabled
+            var playerStatus = brand.SmsRegisterFlowEnabled || brand.EmailRegisterFlowEnabled || brand.BankInfoRegisterFlowEnabled
                 ? PlayerStatus.InBlacklist
                 : PlayerStatus.Enabled;
 
@@ -70,7 +70,8 @@ namespace TGS.Services.Operator.ApplicationServices.Player
 
             if (!string.IsNullOrEmpty(resultPlayerCode)
                 && !brand.SmsRegisterFlowEnabled
-                && !brand.EmailRegisterFlowEnabled)
+                && !brand.EmailRegisterFlowEnabled
+                && !brand.BankInfoRegisterFlowEnabled)
             {
                 await _playerRepository
                     .PlayerRegisterIpAsync(

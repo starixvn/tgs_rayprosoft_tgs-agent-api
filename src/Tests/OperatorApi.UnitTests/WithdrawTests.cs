@@ -331,6 +331,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     false,
                     false,
                     PlayerIdentityEnabled: true,
+                    false,
                     false));
 
             _ = fakePlayerRepository
@@ -382,6 +383,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     false,
                     false,
                     PlayerIdentityEnabled: false,
+                    false,
                     false));
 
             var sut = new CheckPlayerIdentityCommandService(fakeBrandRepository, fakePlayerRepository);
@@ -417,6 +419,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     false,
                     false,
                     PlayerIdentityEnabled: true,
+                    false,
                     false));
 
             _ = fakePlayerRepository
@@ -447,7 +450,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Player_Withdraw_But_Balance_Not_Enough_Will_Throw_Excpetion()
+        public void Player_Withdraw_But_Balance_Not_Enough_Will_Throw_Exception()
         {
             var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeCashServiceClient = Substitute.For<ICashServiceClient>();

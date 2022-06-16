@@ -29,6 +29,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     false,
                     false,
                     false,
+                    false,
                     false));
 
             var sut = new GetBrandQueryService(fakeBrandRepository);

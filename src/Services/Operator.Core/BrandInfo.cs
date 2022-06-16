@@ -14,4 +14,5 @@ public record BrandInfo(
     bool SmsEnabled,
     bool SmsRegisterFlowEnabled,
     bool PlayerIdentityEnabled,
-    bool EmailRegisterFlowEnabled);
+    bool EmailRegisterFlowEnabled,
+    bool BankInfoRegisterFlowEnabled);

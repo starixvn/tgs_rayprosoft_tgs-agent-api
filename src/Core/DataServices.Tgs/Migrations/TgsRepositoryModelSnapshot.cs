@@ -1515,6 +1515,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("enable_agent_sms");
 
+                    b.Property<bool>("EnableBankInfoRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_bank_info_register_flow");
+
                     b.Property<bool>("EnableEmailRegisterFlow")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")

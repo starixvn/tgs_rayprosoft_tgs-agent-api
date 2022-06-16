@@ -55,6 +55,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(false)
                 .IsRequired();
 
+            builder.Property(b => b.EnableBankInfoRegisterFlow)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(b => b.EnablePlayerIdentity)
                 .HasDefaultValue(false)
                 .IsRequired();
