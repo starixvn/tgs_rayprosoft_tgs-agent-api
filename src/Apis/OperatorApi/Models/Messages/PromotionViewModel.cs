@@ -8,6 +8,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 
 public class PromotionViewModel
 {
+    public JsonDocument CampaignDetail { get; init; } = default!;
+
     public string? Content { get; init; }
 
     public string? DesktopBanner { get; init; }
