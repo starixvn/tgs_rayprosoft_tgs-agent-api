@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
+
+public class VerifyRequest
 {
-    public class VerifyRequest
-    {
-        public string Remarks { get; set; }
-    }
+    public string Remarks { get; set; }
 }

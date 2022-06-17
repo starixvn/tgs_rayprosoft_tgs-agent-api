@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.VipLevel
+namespace TGS.Apis.BackendOffice.Controllers.Messages.VipLevel;
+
+public class VipLevelsResponse : MessageResponse
 {
-    public class VipLevelsResponse : MessageResponse
-    {
-        public VipLevelModel[] VipLevels { get; set; }
-    }
+    public VipLevelModel[] VipLevels { get; set; }
 }

@@ -17,95 +17,94 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.AsiaGaming.Common;
 
-namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
+namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services;
+
+public sealed class AsiaGamingGameHistory : BaseBetHistory
 {
-    public sealed class AsiaGamingGameHistory : BaseBetHistory
+    private readonly IJsonSerializationProvider _json;
+    private readonly ISettingOperations _settingOperations;
+
+    public AsiaGamingGameHistory(
+        IRoundQueries roundQueries,
+        ISettingOperations settingOperations,
+        IGameProviderOperations gameProviderOperations,
+        IJsonSerializationProvider json)
+        : base(roundQueries, gameProviderOperations)
     {
-        private readonly IJsonSerializationProvider _json;
-        private readonly ISettingOperations _settingOperations;
+        _settingOperations = settingOperations;
+        _json = json;
+    }
 
-        public AsiaGamingGameHistory(
-            IRoundQueries roundQueries,
-            ISettingOperations settingOperations,
-            IGameProviderOperations gameProviderOperations,
-            IJsonSerializationProvider json)
-            : base(roundQueries, gameProviderOperations)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(SettingConsts
+                .GameProviderConfigurations.AsiaGaming);
+
+        var gameType = cachedGame.ExternalId.SplitByUnderscore()[2];
+        var gameHistoryType =
+            configuration.GameHistoryTypes?.FirstOrDefault(h => h.GameTypes.IgnoreCaseContains(gameType));
+        var history = gameHistoryType == null
+            ? round.RoundDetail.AdditionalData
+            : GetGameHistory(gameHistoryType, round.RoundDetail.AdditionalData);
+
+        return new RoundResult
         {
-            _settingOperations = settingOperations;
-            _json = json;
-        }
-
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
-        {
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(SettingConsts
-                    .GameProviderConfigurations.AsiaGaming);
-
-            var gameType = cachedGame.ExternalId.SplitByUnderscore()[2];
-            var gameHistoryType =
-                configuration.GameHistoryTypes?.FirstOrDefault(h => h.GameTypes.IgnoreCaseContains(gameType));
-            var history = gameHistoryType == null
-                ? round.RoundDetail.AdditionalData
-                : GetGameHistory(gameHistoryType, round.RoundDetail.AdditionalData);
-
-            return new RoundResult
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            Data = new BaseData[]
             {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                Data = new BaseData[]
-                {
-                    new JsonData {Value = history}
-                }
-            };
-        }
-
-        private string GetGameHistory(AsiaGamingGameHistoryType gameHistoryType, string roundDetail)
-        {
-            var gameHistory = _json.DeserializeFromString<GameHistory>(roundDetail);
-            var datas = gameHistory.RoundResult.SplitByColon();
-
-            var historyData = new Dictionary<string, string>();
-            foreach (var data in datas)
-            {
-                var dataSplitBySemicolon = data.SplitBySemicolon();
-                var type = dataSplitBySemicolon[0];
-                var cards = GetCards(dataSplitBySemicolon.Skip(1).ToArray());
-                historyData.Add(gameHistoryType.Descriptions[type], cards);
+                new JsonData {Value = history}
             }
+        };
+    }
 
-            return _json.SerializeToString(historyData);
-        }
+    private string GetGameHistory(AsiaGamingGameHistoryType gameHistoryType, string roundDetail)
+    {
+        var gameHistory = _json.DeserializeFromString<GameHistory>(roundDetail);
+        var datas = gameHistory.RoundResult.SplitByColon();
 
-        private string GetCards(string[] details)
+        var historyData = new Dictionary<string, string>();
+        foreach (var data in datas)
         {
-            for (var i = 0; i < details.Length; i++)
-            {
-                var detail = details[i];
-                details[i] = GetCard(detail);
-            }
-
-            return details.JoinAsStringBySemicolon();
+            var dataSplitBySemicolon = data.SplitBySemicolon();
+            var type = dataSplitBySemicolon[0];
+            var cards = GetCards(dataSplitBySemicolon.Skip(1).ToArray());
+            historyData.Add(gameHistoryType.Descriptions[type], cards);
         }
 
-        private string GetCard(string cardCode)
+        return _json.SerializeToString(historyData);
+    }
+
+    private string GetCards(string[] details)
+    {
+        for (var i = 0; i < details.Length; i++)
         {
-            if (cardCode.Length < 2)
-            {
-                return cardCode;
-            }
-
-            var agCode = cardCode[0].ToString();
-            var code = agCode switch
-            {
-                "C" => "♣",
-                "D" => "♦",
-                "H" => "♥",
-                _   => "♠"
-            };
-
-            return cardCode.Replace(agCode, code);
+            var detail = details[i];
+            details[i] = GetCard(detail);
         }
+
+        return details.JoinAsStringBySemicolon();
+    }
+
+    private string GetCard(string cardCode)
+    {
+        if (cardCode.Length < 2)
+        {
+            return cardCode;
+        }
+
+        var agCode = cardCode[0].ToString();
+        var code = agCode switch
+        {
+            "C" => "♣",
+            "D" => "♦",
+            "H" => "♥",
+            _   => "♠"
+        };
+
+        return cardCode.Replace(agCode, code);
     }
 }

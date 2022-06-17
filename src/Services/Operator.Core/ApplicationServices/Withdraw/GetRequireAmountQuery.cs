@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Withdraw
-{
-    public record GetRequireAmountQuery(string PlayerCode);
-}
+﻿namespace TGS.Services.Operator.ApplicationServices.Withdraw;
+
+public record GetRequireAmountQuery(string PlayerCode);

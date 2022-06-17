@@ -12,93 +12,92 @@ using Tgs.Logging;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Workers.Schedulers.Jobs;
 
-namespace TGS.Tests.Schedulers.UnitTests
+namespace TGS.Tests.Schedulers.UnitTests;
+
+[TestFixture]
+[Parallelizable]
+public class BrandGameProviderScheduleWorkerTests
 {
-    [TestFixture]
-    [Parallelizable]
-    public class BrandGameProviderScheduleWorkerTests
+    [SetUp]
+    public void Setup() =>
+        _service = new(
+            _redisCacheManager.Object,
+            _serviceMock.Object,
+            _logMock.Object);
+
+    private BrandGameProviderScheduleWorker _service;
+    private readonly Mock<IBrandGameProviderService> _serviceMock = new();
+    private readonly Mock<ITgsLog> _logMock = new();
+    private readonly Mock<IRedisCacheManager> _redisCacheManager = new();
+
+    [TestCase(Status.Active, Status.Maintenance, -1, 10)]
+    [TestCase(Status.Maintenance, Status.Active, 1, 10)]
+    public async Task Can_Change_Status(
+        Status sourceStatus, Status targetStatus, int addFromMinutes,
+        int addToMinutes)
     {
-        [SetUp]
-        public void Setup() =>
-            _service = new(
-                _redisCacheManager.Object,
-                _serviceMock.Object,
-                _logMock.Object);
+        var brandGameProviders = CreateBrandGameProviderFixture()
+            .CreateMany<BrandGameProvider>(2)
+            .AsQueryable()
+            .BuildMock();
 
-        private BrandGameProviderScheduleWorker _service;
-        private readonly Mock<IBrandGameProviderService> _serviceMock = new();
-        private readonly Mock<ITgsLog> _logMock = new();
-        private readonly Mock<IRedisCacheManager> _redisCacheManager = new();
+        var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
 
-        [TestCase(Status.Active, Status.Maintenance, -1, 10)]
-        [TestCase(Status.Maintenance, Status.Active, 1, 10)]
-        public async Task Can_Change_Status(
-            Status sourceStatus, Status targetStatus, int addFromMinutes,
-            int addToMinutes)
+        foreach (var brandGameProvider in brandGameProviders)
         {
-            var brandGameProviders = CreateBrandGameProviderFixture()
-                .CreateMany<BrandGameProvider>(2)
-                .AsQueryable()
-                .BuildMock();
+            brandGameProvider.Status = sourceStatus;
+            brandGameProvider.IsManualChangeStatus = false;
 
-            var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-
-            foreach (var brandGameProvider in brandGameProviders)
+            brandGameProvider.Schedules = new[]
             {
-                brandGameProvider.Status = sourceStatus;
-                brandGameProvider.IsManualChangeStatus = false;
-
-                brandGameProvider.Schedules = new[]
+                new BrandGameProviderSchedule
                 {
-                    new BrandGameProviderSchedule
-                    {
-                        Id = Guid.NewGuid(),
-                        BrandGameProviderId = brandGameProvider.Id,
-                        BrandGameProvider = brandGameProvider,
-                        From = now.AddMinutes(addFromMinutes),
-                        To = now.AddMinutes(addToMinutes),
-                        DayOfWeek = now.DayOfWeek,
-                        IsDefault = true,
-                        Status = SwitchStatus.Enabled
-                    }
-                };
-            }
-
-            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, false))
-                .Returns(brandGameProviders);
-
-            await _service.ExecuteAsync(It.IsAny<object>());
-
-            if (targetStatus == Status.Maintenance)
-            {
-                _serviceMock.Verify(p =>
-                    p.UpdateBrandGameProvidersAsync(
-                        It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id))),
-                        ""));
-            }
-            else
-            {
-                _serviceMock.Verify(p =>
-                    p.UpdateBrandGameProvidersAsync("",
-                        It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id)))));
-            }
+                    Id = Guid.NewGuid(),
+                    BrandGameProviderId = brandGameProvider.Id,
+                    BrandGameProvider = brandGameProvider,
+                    From = now.AddMinutes(addFromMinutes),
+                    To = now.AddMinutes(addToMinutes),
+                    DayOfWeek = now.DayOfWeek,
+                    IsDefault = true,
+                    Status = SwitchStatus.Enabled
+                }
+            };
         }
 
-        private Fixture CreateBrandGameProviderFixture()
+        _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, false))
+            .Returns(brandGameProviders);
+
+        await _service.ExecuteAsync(It.IsAny<object>());
+
+        if (targetStatus == Status.Maintenance)
         {
-            var fixture = new Fixture();
-
-            fixture.Customize<BrandGameProvider>(u => u
-                .With(s => s.Brand, new Brand())
-                .With(s => s.GameProvider, new GameProvider())
-                .With(s => s.GameProviderConfiguration, new GameProviderConfiguration())
-                .With(s => s.DefaultLanguage, new Language())
-                .With(s => s.Schedules,
-                    new BrandGameProviderSchedule[]
-                    {
-                    }));
-
-            return fixture;
+            _serviceMock.Verify(p =>
+                p.UpdateBrandGameProvidersAsync(
+                    It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id))),
+                    ""));
         }
+        else
+        {
+            _serviceMock.Verify(p =>
+                p.UpdateBrandGameProvidersAsync("",
+                    It.Is<string>(x => x == string.Join(",", brandGameProviders.Select(b => b.Id)))));
+        }
+    }
+
+    private Fixture CreateBrandGameProviderFixture()
+    {
+        var fixture = new Fixture();
+
+        fixture.Customize<BrandGameProvider>(u => u
+            .With(s => s.Brand, new Brand())
+            .With(s => s.GameProvider, new GameProvider())
+            .With(s => s.GameProviderConfiguration, new GameProviderConfiguration())
+            .With(s => s.DefaultLanguage, new Language())
+            .With(s => s.Schedules,
+                new BrandGameProviderSchedule[]
+                {
+                }));
+
+        return fixture;
     }
 }

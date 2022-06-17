@@ -7,41 +7,40 @@ using TGS.Services.BackOffice.Application.Commands.Localization;
 using TGS.Services.BackOffice.Application.Queries.Localization;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class LocalizationController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class LocalizationController : ControllerBase
+    [HttpGet("export/{systemCode}")]
+    public async Task<FileContentResult> ExportLocalizationFileAsync(
+        [FromServices] IGetService<ExportLocalizationFileCommand, Stream> exportService,
+        string systemCode)
     {
-        [HttpGet("export/{systemCode}")]
-        public async Task<FileContentResult> ExportLocalizationFileAsync(
-            [FromServices] IGetService<ExportLocalizationFileCommand, Stream> exportService,
-            string systemCode)
-        {
-            await using var fs = await exportService
-                .GetAsync(new ExportLocalizationFileCommand(systemCode))
-                .ConfigureAwait(false);
+        await using var fs = await exportService
+            .GetAsync(new ExportLocalizationFileCommand(systemCode))
+            .ConfigureAwait(false);
 
-            var content = new byte[fs.Length];
+        var content = new byte[fs.Length];
 
-            await fs.ReadAsync(new Memory<byte>(content)).ConfigureAwait(false);
+        await fs.ReadAsync(new Memory<byte>(content)).ConfigureAwait(false);
 
-            return File(
-                content,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        }
+        return File(
+            content,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
 
-        [HttpPost("import/{systemCode}")]
-        public async Task ImportLocalizationFileAsync(
-            [FromServices] ICommandService<ImportLocalizationFileCommand> importService,
-            string systemCode,
-            [FromForm(Name = "file")] IFormFile file)
-        {
-            await using var fs = file.OpenReadStream();
+    [HttpPost("import/{systemCode}")]
+    public async Task ImportLocalizationFileAsync(
+        [FromServices] ICommandService<ImportLocalizationFileCommand> importService,
+        string systemCode,
+        [FromForm(Name = "file")] IFormFile file)
+    {
+        await using var fs = file.OpenReadStream();
 
-            var command = new ImportLocalizationFileCommand(systemCode, fs);
+        var command = new ImportLocalizationFileCommand(systemCode, fs);
 
-            await importService.ExecuteAsync(command).ConfigureAwait(false);
-        }
+        await importService.ExecuteAsync(command).ConfigureAwait(false);
     }
 }

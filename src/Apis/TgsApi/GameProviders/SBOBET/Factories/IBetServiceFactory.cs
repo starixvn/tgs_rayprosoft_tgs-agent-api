@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
+﻿namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories;
+
+public interface IBetServiceFactory
 {
-    public interface IBetServiceFactory
-    {
-        IBetService Get(int productType);
-    }
+    IBetService Get(int productType);
 }

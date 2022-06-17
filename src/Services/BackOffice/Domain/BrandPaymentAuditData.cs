@@ -1,7 +1,7 @@
 ﻿using TGS.Core.Models.Enums;
 
-namespace TGS.Services.BackOffice.Domain
-{
+namespace TGS.Services.BackOffice.Domain;
+
 	public record BrandPaymentAuditData(
 		string ChannelName,
 		SwitchStatus PaymentStatus,
@@ -14,4 +14,3 @@ namespace TGS.Services.BackOffice.Domain
 		decimal DepositedAmountMin,
 		decimal DepositedAmountMax,
 		bool DepositedAmountUnlimited);
-}

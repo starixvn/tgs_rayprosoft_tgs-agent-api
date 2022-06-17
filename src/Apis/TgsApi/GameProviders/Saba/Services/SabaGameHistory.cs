@@ -16,72 +16,71 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.Saba;
 using TGS.Shared.Game.Models.Saba.Enums;
 
-namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
+namespace TGS.Apis.TgsApi.GameProviders.Saba.Services;
+
+public sealed class SabaGameHistory : BaseBetHistory
 {
-    public sealed class SabaGameHistory : BaseBetHistory
+    private readonly ISabaApiClient _client;
+    private readonly IJsonSerializationProvider _json;
+    private readonly ISettingOperations _settingOperations;
+
+    public SabaGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        ISettingOperations settingOperations,
+        IJsonSerializationProvider json,
+        ISabaApiClient client)
+        : base(roundQueries, gameProviderOperations)
     {
-        private readonly ISabaApiClient _client;
-        private readonly IJsonSerializationProvider _json;
-        private readonly ISettingOperations _settingOperations;
+        _settingOperations = settingOperations;
+        _json = json;
+        _client = client;
+    }
 
-        public SabaGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ISettingOperations settingOperations,
-            IJsonSerializationProvider json,
-            ISabaApiClient client)
-            : base(roundQueries, gameProviderOperations)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var placeBetAction = round.GameActions.FirstOrDefault(ga => ga.Type == GameActionType.PlaceBet);
+
+        if (placeBetAction == null)
         {
-            _settingOperations = settingOperations;
-            _json = json;
-            _client = client;
+            throw new InvalidGameActionException($"Data in the round with id {round.ExternalRoundId} is not found.",
+                InvalidGameActionErrorCode.TransactionNotFound);
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<SabaConfiguration>(SettingConsts
+                .GameProviderConfigurations.Saba);
+
+        var response = await _client.GetBetDetailByTransIdAsync(configuration.ApiUrl,
+            new()
+            {
+                VendorId = configuration.VendorId,
+                ExternalTransactionId = placeBetAction.ExternalTransactionId
+            });
+
+        if (response.ErrorCode != GetRoundHistoryApiError.Ok)
         {
-            var placeBetAction = round.GameActions.FirstOrDefault(ga => ga.Type == GameActionType.PlaceBet);
-
-            if (placeBetAction == null)
-            {
-                throw new InvalidGameActionException($"Data in the round with id {round.ExternalRoundId} is not found.",
-                    InvalidGameActionErrorCode.TransactionNotFound);
-            }
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SabaConfiguration>(SettingConsts
-                    .GameProviderConfigurations.Saba);
-
-            var response = await _client.GetBetDetailByTransIdAsync(configuration.ApiUrl,
-                new()
-                {
-                    VendorId = configuration.VendorId,
-                    ExternalTransactionId = placeBetAction.ExternalTransactionId
-                });
-
-            if (response.ErrorCode != GetRoundHistoryApiError.Ok)
-            {
-                throw new GameProviderApiErrorException($"Get sbo bet history fail: {response.ErrorMessage}");
-            }
-
-            var gameResults = response.Data?.Results;
-
-            if (gameResults == null || gameResults.Length == 0)
-            {
-                return new();
-            }
-
-            return new()
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Winloss = (round.WinLoss ?? 0).Negate(),
-                Turnover = round.Turnover ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new JsonData {Value = _json.SerializeToString(gameResults, new() {WriteIndented = false})}
-                }
-            };
+            throw new GameProviderApiErrorException($"Get sbo bet history fail: {response.ErrorMessage}");
         }
+
+        var gameResults = response.Data?.Results;
+
+        if (gameResults == null || gameResults.Length == 0)
+        {
+            return new();
+        }
+
+        return new()
+        {
+            BetAmount = round.BetAmount ?? 0,
+            Winloss = (round.WinLoss ?? 0).Negate(),
+            Turnover = round.Turnover ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
+            {
+                new JsonData {Value = _json.SerializeToString(gameResults, new() {WriteIndented = false})}
+            }
+        };
     }
 }

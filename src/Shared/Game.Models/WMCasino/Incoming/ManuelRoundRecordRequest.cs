@@ -1,9 +1,8 @@
-﻿namespace TGS.Shared.Game.Models.WMCasino.Incoming
+﻿namespace TGS.Shared.Game.Models.WMCasino.Incoming;
+
+public record ManuelRoundRecordRequest
 {
-    public record ManuelRoundRecordRequest
-    {
-        public string PlayerCode { get; init; }
-        public string ExternalGameId { get; init; }
-        public string ExternalRoundId { get; init; }
-    }
+    public string PlayerCode { get; init; }
+    public string ExternalGameId { get; init; }
+    public string ExternalRoundId { get; init; }
 }

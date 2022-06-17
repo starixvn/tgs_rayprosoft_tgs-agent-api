@@ -8,44 +8,43 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 
-namespace TGS.Apis.BackendOffice.Services
+namespace TGS.Apis.BackendOffice.Services;
+
+public class AutoRejectDepositProcessor : IMessageHandler
 {
-    public class AutoRejectDepositProcessor : IMessageHandler
+    private readonly ILogger<AutoRejectDepositProcessor> _logger;
+    private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
+
+    public AutoRejectDepositProcessor(
+        ICommandService<ReviewDepositFormCommand> reviewCommandService,
+        ILogger<AutoRejectDepositProcessor> logger)
     {
-        private readonly ILogger<AutoRejectDepositProcessor> _logger;
-        private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
+        _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public AutoRejectDepositProcessor(
-            ICommandService<ReviewDepositFormCommand> reviewCommandService,
-            ILogger<AutoRejectDepositProcessor> logger)
-        {
-            _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+    public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Receive AutoRejectDeposit request.");
 
-        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Receive AutoRejectDeposit request.");
+        var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
 
-            var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
+        var formId = request.FormId.ToGuid();
+        var brandId = request.BrandId.ToGuid();
 
-            var formId = request.FormId.ToGuid();
-            var brandId = request.BrandId.ToGuid();
+        var command = new ReviewDepositFormCommand(
+            brandId,
+            formId,
+            ReviewState.Reject,
+            null,
+            null,
+            null,
+            null);
 
-            var command = new ReviewDepositFormCommand(
-                brandId,
-                formId,
-                ReviewState.Reject,
-                null,
-                null,
-                null,
-                null);
+        await _reviewCommandService
+            .ExecuteAsync(command, cancellationToken)
+            .ConfigureAwait(false);
 
-            await _reviewCommandService
-                .ExecuteAsync(command, cancellationToken)
-                .ConfigureAwait(false);
-
-            _logger.LogInformation("AutoRejectDeposit processing completed.");
-        }
+        _logger.LogInformation("AutoRejectDeposit processing completed.");
     }
 }

@@ -724,6 +724,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DepositHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_handling_fee");
+
                     b.Property<decimal>("ESportsWinLoss")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -829,6 +834,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("win_loss_amount");
+
+                    b.Property<decimal>("WithdrawHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("withdraw_handling_fee");
 
                     b.Property<decimal>("WithdrawalAmount")
                         .HasPrecision(18, 6)
@@ -1505,6 +1515,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("enable_agent_sms");
 
+                    b.Property<bool>("EnableBankInfoRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_bank_info_register_flow");
+
+                    b.Property<bool>("EnableEmailRegisterFlow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_email_register_flow");
+
                     b.Property<bool>("EnablePlayerIdentity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -1554,6 +1576,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)")
                         .HasColumnName("platform_charge");
+
+                    b.Property<string>("PlayerRegisterFlowSettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("player_register_flow_settings");
 
                     b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
@@ -4553,6 +4579,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DepositHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_handling_fee");
+
                     b.Property<decimal>("DividendAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4633,6 +4664,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("win_loss_amount");
+
+                    b.Property<decimal>("WithdrawHandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("withdraw_handling_fee");
 
                     b.Property<decimal>("WithdrawalAmount")
                         .HasPrecision(18, 6)
@@ -4857,6 +4893,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<bool>("Default")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("default");
 
                     b.Property<string>("Detail")
                         .HasColumnType("jsonb")

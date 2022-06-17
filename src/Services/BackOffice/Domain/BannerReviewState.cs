@@ -1,8 +1,7 @@
-﻿namespace TGS.Services.BackOffice.Domain
+﻿namespace TGS.Services.BackOffice.Domain;
+
+public enum BannerReviewState
 {
-    public enum BannerReviewState
-    {
-        Reject,
-        Approve
-    }
+    Reject,
+    Approve
 }

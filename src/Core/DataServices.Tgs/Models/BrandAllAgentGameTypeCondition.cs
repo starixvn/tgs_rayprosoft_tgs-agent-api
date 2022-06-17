@@ -1,22 +1,21 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class BrandAllAgentGameTypeCondition
 {
-    public class BrandAllAgentGameTypeCondition
-    {
-        public AllAgentGameType AllAgentGameType { get; set; }
+    public AllAgentGameType AllAgentGameType { get; set; }
 
-        public AllAgentRebateType AllAgentRebateType { get; set; }
+    public AllAgentRebateType AllAgentRebateType { get; set; }
 
-        public int Rank { get; set; }
+    public int Rank { get; set; }
 
-        public Guid BrandId { get; set; }
+    public Guid BrandId { get; set; }
 
-        public decimal NetProfit { get; set; }
+    public decimal NetProfit { get; set; }
 
-        public int ActiveNumber { get; set; }
+    public int ActiveNumber { get; set; }
 
-        public decimal RebatePercentage { get; set; }
-    }
+    public decimal RebatePercentage { get; set; }
 }

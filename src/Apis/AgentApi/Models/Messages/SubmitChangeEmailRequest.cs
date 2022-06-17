@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.AgentApi.Models.Messages
-{
-    public record SubmitChangeEmailRequest
-    {
-        [JsonPropertyName("securitykey")]
-        public string SecurityKey { get; init; }
+namespace TGS.Apis.AgentApi.Models.Messages;
 
-        [JsonPropertyName("validatecode")]
-        public string ValidateCode { get; init; }
-    }
+public record SubmitChangeEmailRequest
+{
+    [JsonPropertyName("securitykey")]
+    public string SecurityKey { get; init; }
+
+    [JsonPropertyName("validatecode")]
+    public string ValidateCode { get; init; }
 }

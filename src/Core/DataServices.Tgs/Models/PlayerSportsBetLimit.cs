@@ -1,21 +1,20 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class PlayerSportsBetLimit
 {
-    public class PlayerSportsBetLimit
-    {
-        public string PlayerCode { get; set; }
+    public string PlayerCode { get; set; }
 
-        public virtual Player Player { get; set; }
+    public virtual Player Player { get; set; }
 
-        public Guid SportMarketTypeId { get; set; }
+    public Guid SportMarketTypeId { get; set; }
 
-        public virtual SportMarketType SportMarketType { get; set; }
+    public virtual SportMarketType SportMarketType { get; set; }
 
-        public int MinBet { get; set; }
+    public int MinBet { get; set; }
 
-        public int MaxBet { get; set; }
+    public int MaxBet { get; set; }
 
-        public int MaxBetPerMatch { get; set; }
-    }
+    public int MaxBetPerMatch { get; set; }
 }

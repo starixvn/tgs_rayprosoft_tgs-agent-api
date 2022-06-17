@@ -2,18 +2,17 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
+namespace TGS.Services.BackOffice.Application.Models.ReportPlayer;
+
+public class GetPlayerAccountChangesReportRequest : PageableRequest
 {
-    public class GetPlayerAccountChangesReportRequest : PageableRequest
-    {
-        public Guid BrandId { get; init; }
+    public Guid BrandId { get; init; }
 
-        public string PlayerCode { get; init; } = default!;
+    public string PlayerCode { get; init; } = default!;
 
-        public AccountChangeType? AccountChangeType { get; init; }
+    public AccountChangeType? AccountChangeType { get; init; }
 
-        public DateTimeOffset From { get; init; }
+    public DateTimeOffset From { get; init; }
 
-        public DateTimeOffset To { get; init; }
-    }
+    public DateTimeOffset To { get; init; }
 }

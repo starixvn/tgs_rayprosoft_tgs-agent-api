@@ -1,34 +1,35 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Withdraw;
 
-namespace TGS.Services.Operator.ApplicationServices.Withdraw
+namespace TGS.Services.Operator.ApplicationServices.Withdraw;
+
+internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoCommand>
 {
-    internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoCommand>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+
+    public CreateBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    }
 
-        public CreateBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
+    public async ValueTask ExecuteAsync(CreateBankInfoCommand command, CancellationToken cancellationToken = default)
+    {
+        var bankInfo = new BankCreateInfo
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        }
+            BankType = command.BankType,
+            PaymentChannelId = command.PaymentChannelId,
+            Detail = command.Detail
+        };
 
-        public async ValueTask ExecuteAsync(CreateBankInfoCommand command, CancellationToken cancellationToken = default)
-        {
-            var bankInfo = new BankCreateInfo
-            {
-                BankType = command.BankType,
-                PaymentChannelId = command.PaymentChannelId,
-                Detail = JsonDocument.Parse(command.Detail)
-            };
-
-            await _paymentServiceClient
-                .CreatePlayerBankInfoAsync(command.BrandId, command.PlayerCode, bankInfo)
-                .ConfigureAwait(false);
-        }
+       _ = await _paymentServiceClient
+            .CreatePlayerBankInfoAsync(
+                command.BrandId,
+                command.PlayerCode, 
+                bankInfo,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

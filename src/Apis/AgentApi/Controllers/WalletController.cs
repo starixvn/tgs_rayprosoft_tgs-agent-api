@@ -8,34 +8,33 @@ using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Wallet;
 
-namespace TGS.Apis.AgentApi.Controllers
+namespace TGS.Apis.AgentApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class WalletController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class WalletController : ControllerBase
+    /// <summary>
+    /// Gets the balance information.
+    /// </summary>
+    /// <param name="getBalanceService">The get balance service.</param>
+    /// <returns></returns>
+    [HttpGet]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public async Task<BalanceInfoResponse> GetBalanceAsync(
+        [FromServices] IGetService<GetBalanceQuery, BalanceInfo> getBalanceService)
     {
-        /// <summary>
-        /// Gets the balance information.
-        /// </summary>
-        /// <param name="getBalanceService">The get balance service.</param>
-        /// <returns></returns>
-        [HttpGet]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async Task<BalanceInfoResponse> GetBalanceAsync(
-            [FromServices] IGetService<GetBalanceQuery, BalanceInfo> getBalanceService)
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var query = new GetBalanceQuery(agentTokenData.AgentId);
+
+        var info = await getBalanceService
+            .GetAsync(query)
+            .ConfigureAwait(false);
+
+        return new BalanceInfoResponse()
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-            var query = new GetBalanceQuery(agentTokenData.AgentId);
-
-            var info = await getBalanceService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            return new BalanceInfoResponse()
-            {
-                Main = info.Main
-            };
-        }
+            Main = info.Main
+        };
     }
 }

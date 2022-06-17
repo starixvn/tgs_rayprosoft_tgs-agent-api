@@ -14,87 +14,86 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.PragmaticPlay;
 using TGS.Shared.Game.Models.PragmaticPlay.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
+namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
+
+public sealed class PragmaticPlayGameHistory : BaseBetHistory
 {
-    public sealed class PragmaticPlayGameHistory : BaseBetHistory
+    private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+    private readonly IPragmaticPlayApiClient _client;
+    private readonly IPragmaticPlayHashProvider _hashProvider;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly ISettingOperations _settingOperations;
+
+    public PragmaticPlayGameHistory(
+        IRoundQueries roundQueries,
+        IPlayerOperations playerOperations,
+        IGameProviderOperations gameProviderOperations,
+        IBrandGameProviderOperations brandGameProviderOperations,
+        ISettingOperations settingOperations,
+        IPragmaticPlayHashProvider hashProvider,
+        IPragmaticPlayApiClient client)
+        : base(roundQueries, gameProviderOperations)
     {
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IPragmaticPlayApiClient _client;
-        private readonly IPragmaticPlayHashProvider _hashProvider;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
+        _settingOperations = settingOperations;
+        _playerOperations = playerOperations;
+        _brandGameProviderOperations = brandGameProviderOperations;
+        _hashProvider = hashProvider;
+        _client = client;
+    }
 
-        public PragmaticPlayGameHistory(
-            IRoundQueries roundQueries,
-            IPlayerOperations playerOperations,
-            IGameProviderOperations gameProviderOperations,
-            IBrandGameProviderOperations brandGameProviderOperations,
-            ISettingOperations settingOperations,
-            IPragmaticPlayHashProvider hashProvider,
-            IPragmaticPlayApiClient client)
-            : base(roundQueries, gameProviderOperations)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+        string playerCode, Round round,
+        CachedGameProvider cachedGameProvider,
+        CachedGame cachedGame, string language)
+    {
+        var configuration =
+            await _settingOperations
+                .GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts.GameProviderConfigurations
+                    .PragmaticPlay)
+                .ConfigureAwait(false);
+
+        var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
+            .ConfigureAwait(false);
+
+        var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
+            .ConfigureAwait(false);
+
+        var model = new OpenHistoryExtendedRequest
         {
-            _settingOperations = settingOperations;
-            _playerOperations = playerOperations;
-            _brandGameProviderOperations = brandGameProviderOperations;
-            _hashProvider = hashProvider;
-            _client = client;
+            SecureLogin = configuration.SecureLogin,
+            PlayerCode = playerCode,
+            RoundId = round.GameActions.First().ExternalGameActionGroupId,
+            Language = culture
+        };
+
+        var hash = _hashProvider.ComputeHash(model, configuration.SecretKey);
+
+        var request = model with
+        {
+            Hash = hash
+        };
+
+        var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, request)
+            .ConfigureAwait(false);
+
+        if (response.Error.IgnoreCaseNotEquals("0"))
+        {
+            throw new GameProviderApiErrorException($"Get pragmatic play bet history fail: {response.Description}");
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
-            string playerCode, Round round,
-            CachedGameProvider cachedGameProvider,
-            CachedGame cachedGame, string language)
+        return new()
         {
-            var configuration =
-                await _settingOperations
-                    .GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts.GameProviderConfigurations
-                        .PragmaticPlay)
-                    .ConfigureAwait(false);
-
-            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
-                .ConfigureAwait(false);
-
-            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
-                .ConfigureAwait(false);
-
-            var model = new OpenHistoryExtendedRequest
+            BetAmount = round.BetAmount ?? 0,
+            Winloss = (round.WinLoss ?? 0).Negate(),
+            Turnover = round.Turnover ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                SecureLogin = configuration.SecureLogin,
-                PlayerCode = playerCode,
-                RoundId = round.GameActions.First().ExternalGameActionGroupId,
-                Language = culture
-            };
-
-            var hash = _hashProvider.ComputeHash(model, configuration.SecretKey);
-
-            var request = model with
-            {
-                Hash = hash
-            };
-
-            var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, request)
-                .ConfigureAwait(false);
-
-            if (response.Error.IgnoreCaseNotEquals("0"))
-            {
-                throw new GameProviderApiErrorException($"Get pragmatic play bet history fail: {response.Description}");
-            }
-
-            return new()
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Winloss = (round.WinLoss ?? 0).Negate(),
-                Turnover = round.Turnover ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
+                new UrlData
                 {
-                    new UrlData
-                    {
-                        Url = response.Url
-                    }
+                    Url = response.Url
                 }
-            };
-        }
+            }
+        };
     }
 }

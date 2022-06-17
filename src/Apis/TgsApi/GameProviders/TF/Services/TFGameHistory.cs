@@ -9,47 +9,46 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.TF.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.TF.Services
+namespace TGS.Apis.TgsApi.GameProviders.TF.Services;
+
+public class TFGameHistory : BaseBetHistory
 {
-    public class TFGameHistory : BaseBetHistory
+    public TFGameHistory(
+       IRoundQueries roundQueries,
+       IGameProviderOperations gameProviderOperations)
+       : base(roundQueries, gameProviderOperations)
     {
-        public TFGameHistory(
-           IRoundQueries roundQueries,
-           IGameProviderOperations gameProviderOperations)
-           : base(roundQueries, gameProviderOperations)
+    }
+
+    protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+        string playerCode,
+        Round round,
+        CachedGameProvider cachedGameProvider,
+        CachedGame cachedGame,
+        string language)
+    {
+        var gameRecord = round.RoundDetail == null || string.IsNullOrEmpty(round.RoundDetail.AdditionalData)
+            ? null
+            : JsonSerializer.Deserialize<TFGameRecord>(round.RoundDetail.AdditionalData);
+
+        if (gameRecord == null)
         {
+            return ValueTask.FromResult<RoundResult>(null);
         }
 
-        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
-            string playerCode,
-            Round round,
-            CachedGameProvider cachedGameProvider,
-            CachedGame cachedGame,
-            string language)
+        return ValueTask.FromResult(new RoundResult
         {
-            var gameRecord = round.RoundDetail == null || string.IsNullOrEmpty(round.RoundDetail.AdditionalData)
-                ? null
-                : JsonSerializer.Deserialize<TFGameRecord>(round.RoundDetail.AdditionalData);
-
-            if (gameRecord == null)
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                return ValueTask.FromResult<RoundResult>(null);
-            }
-
-            return ValueTask.FromResult(new RoundResult
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
+                new JsonData
                 {
-                    new JsonData
-                    {
-                        Value = JsonSerializer.Serialize(gameRecord)
-                    }
+                    Value = JsonSerializer.Serialize(gameRecord)
                 }
-            });
-        }
+            }
+        });
     }
 }

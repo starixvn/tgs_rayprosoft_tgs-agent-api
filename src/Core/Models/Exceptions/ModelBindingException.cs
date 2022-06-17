@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Core.Models.Exceptions
+namespace TGS.Core.Models.Exceptions;
+
+public sealed class ModelBindingException : Exception
 {
-    public sealed class ModelBindingException : Exception
+    public ModelBindingException(string message) : base(message)
     {
-        public ModelBindingException(string message) : base(message)
-        {
-        }
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum BucketType
 {
-    public enum BucketType
-    {
-        Deposit = 1,
-        Promotion = 2,
-        Adjustment = 3,
-        Vip = 4
-    }
+    Deposit = 1,
+    Promotion = 2,
+    Adjustment = 3,
+    Vip = 4
 }

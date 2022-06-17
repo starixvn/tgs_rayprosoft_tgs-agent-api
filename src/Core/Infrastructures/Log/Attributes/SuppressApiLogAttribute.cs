@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace TGS.Core.Infrastructures.Log.Attributes
+namespace TGS.Core.Infrastructures.Log.Attributes;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class SuppressApiLogAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class SuppressApiLogAttribute : Attribute
-    {
-    }
 }

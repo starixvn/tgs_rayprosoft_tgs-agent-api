@@ -1,10 +1,9 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.Jili
+﻿namespace TGS.Apis.TgsApi.GameProviders.Jili;
+
+public static class JiliConsts
 {
-    public static class JiliConsts
+    public static class ContextItems
     {
-        public static class ContextItems
-        {
-            public const string JiliPlayerId = "JiliPlayerId";
-        }
+        public const string JiliPlayerId = "JiliPlayerId";
     }
 }

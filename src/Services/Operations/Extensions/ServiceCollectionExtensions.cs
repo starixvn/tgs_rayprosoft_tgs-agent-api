@@ -7,79 +7,78 @@ using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 
-namespace TGS.Services.Operations.Extensions
+namespace TGS.Services.Operations.Extensions;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
+    ///     1. AddRepository of Tgs database
+    ///     2. AddRedis() in Infrastructures.Redis
+    /// </summary>
+    public static IServiceCollection AddOperations(this IServiceCollection services)
     {
-        /// <summary>
-        ///     Dependency Injection of Operations, need to add the following dependencies beforehand:
-        ///     1. AddRepository of Tgs database
-        ///     2. AddRedis() in Infrastructures.Redis
-        /// </summary>
-        public static IServiceCollection AddOperations(this IServiceCollection services)
-        {
-            #region Code Mappers
+        #region Code Mappers
 
-            services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
-            services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
-            services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
-            services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
+        services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
+        services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
+        services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
+        services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
 
-            #endregion Code Mappers
+        #endregion Code Mappers
 
-            #region Queries
+        #region Queries
 
-            services.AddFactory<IBrandQueries, BrandQueries>();
-            services.AddFactory<IGameProviderQueries, GameProviderQueries>();
-            services.AddFactory<IAgentQueries, AgentQueries>();
-            services.AddFactory<IPlayerQueries, PlayerQueries>();
-            services.AddFactory<IWalletQueries, WalletQueries>();
-            services.AddFactory<ISettingQueries, SettingQueries>();
-            services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
-            services.AddFactory<IGameQueries, GameQueries>();
+        services.AddFactory<IBrandQueries, BrandQueries>();
+        services.AddFactory<IGameProviderQueries, GameProviderQueries>();
+        services.AddFactory<IAgentQueries, AgentQueries>();
+        services.AddFactory<IPlayerQueries, PlayerQueries>();
+        services.AddFactory<IWalletQueries, WalletQueries>();
+        services.AddFactory<ISettingQueries, SettingQueries>();
+        services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
+        services.AddFactory<IGameQueries, GameQueries>();
 
-            services.AddFactory<IGameActionQueries, GameActionQueries>();
-            services.AddFactory<IRoundQueries, RoundQueries>();
+        services.AddFactory<IGameActionQueries, GameActionQueries>();
+        services.AddFactory<IRoundQueries, RoundQueries>();
 
-            services.AddFactory<IBetLimitQueries, BetLimitQueries>();
+        services.AddFactory<IBetLimitQueries, BetLimitQueries>();
 
-            #endregion Queries
+        #endregion Queries
 
-            #region Commands
+        #region Commands
 
-            services.AddFactory<IPlayerCommands, PlayerCommands>();
-            services.AddFactory<IAgentCommands, AgentCommands>();
+        services.AddFactory<IPlayerCommands, PlayerCommands>();
+        services.AddFactory<IAgentCommands, AgentCommands>();
 
-            #endregion Commands
+        #endregion Commands
 
-            #region Operations
+        #region Operations
 
-            services.AddScoped<IBrandOperations, BrandOperations>();
-            services.AddScoped<IGameProviderOperations, GameProviderOperations>();
-            services.AddScoped<IPlayerOperations, PlayerOperations>();
-            services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
-            services.AddScoped<ISettingOperations, SettingOperations>();
-            services.AddScoped<ILocalizationOperations, LocalizationOperations>();
-            services.AddScoped<IAgentOperations, AgentOperations>();
+        services.AddScoped<IBrandOperations, BrandOperations>();
+        services.AddScoped<IGameProviderOperations, GameProviderOperations>();
+        services.AddScoped<IPlayerOperations, PlayerOperations>();
+        services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
+        services.AddScoped<ISettingOperations, SettingOperations>();
+        services.AddScoped<ILocalizationOperations, LocalizationOperations>();
+        services.AddScoped<IAgentOperations, AgentOperations>();
 
-            #endregion Operations
+        #endregion Operations
 
-            services.AddSingleton<IValidStatus<Status>, ValidStatus>();
-            services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
+        services.AddSingleton<IValidStatus<Status>, ValidStatus>();
+        services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
 
-            services.AddSingleton<IAmountValidator, AmountValidator>();
+        services.AddSingleton<IAmountValidator, AmountValidator>();
 
-            services.AddScoped<IStatusValidator, StatusValidator>();
+        services.AddScoped<IStatusValidator, StatusValidator>();
 
-            return services;
-        }
+        return services;
+    }
 
-        private static void AddFactory<TInterface, TServices>(this IServiceCollection services)
-            where TInterface : class
-            where TServices : class, TInterface
-        {
-            services.AddScoped<TInterface, TServices>();
-            services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
-        }
+    private static void AddFactory<TInterface, TServices>(this IServiceCollection services)
+        where TInterface : class
+        where TServices : class, TInterface
+    {
+        services.AddScoped<TInterface, TServices>();
+        services.AddTransient<Func<TInterface>>(c => c.GetRequiredService<TInterface>);
     }
 }

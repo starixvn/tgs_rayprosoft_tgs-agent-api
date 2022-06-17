@@ -1,22 +1,21 @@
 ﻿using System;
 using TGS.Core.Models.GameProviders.Settings.JDB;
 
-namespace TGS.Core.Models.GameProviders.Settings
+namespace TGS.Core.Models.GameProviders.Settings;
+
+public record JDBConfiguration : PluggableConfigurationBase
 {
-    public record JDBConfiguration : PluggableConfigurationBase
-    {
-        public Uri ApiUrl { get; init; }
+    public Uri ApiUrl { get; init; }
 
-        public bool MoreGame { get; init; }
+    public bool MoreGame { get; init; }
 
-        public string AESIv { get; init; }
+    public string AESIv { get; init; }
 
-        public string AESKey { get; init; }
+    public string AESKey { get; init; }
 
-        public string ClientDomain { get; init; }
+    public string ClientDomain { get; init; }
 
-        public int TimezoneHour { get; init; }
+    public int TimezoneHour { get; init; }
 
-        public JDBAgent[] Agents { get; init; }
-    }
+    public JDBAgent[] Agents { get; init; }
 }

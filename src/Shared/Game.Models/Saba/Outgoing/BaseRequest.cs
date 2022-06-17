@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Saba.Outgoing
+namespace TGS.Shared.Game.Models.Saba.Outgoing;
+
+public record BaseRequest
 {
-    public record BaseRequest
-    {
-        [JsonPropertyName("vendor_id")]
-        public string VendorId { get; init; }
-    }
+    [JsonPropertyName("vendor_id")]
+    public string VendorId { get; init; }
 }

@@ -9,28 +9,27 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandLanguage;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BrandLanguageController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandLanguageController : ControllerBase
+    [HttpGet]
+    [Description("Get a brand's languages")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public IAsyncEnumerable<BrandLanguageModel> GetBrandLanguagesAsync(
+       [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
     {
-        [HttpGet]
-        [Description("Get a brand's languages")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public IAsyncEnumerable<BrandLanguageModel> GetBrandLanguagesAsync(
-           [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            var query = new BrandLanguageQuery(brandId);
-            var info = queryService.QueryAsync(query);
+        var query = new BrandLanguageQuery(brandId);
+        var info = queryService.QueryAsync(query);
 
-            return info.Select(x =>
-                new BrandLanguageModel()
-                {
-                    CultureCode = x.CultureCode
-                });
-        }
+        return info.Select(x =>
+            new BrandLanguageModel()
+            {
+                CultureCode = x.CultureCode
+            });
     }
 }

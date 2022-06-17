@@ -4,49 +4,48 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Services.Operations.CodeMappers;
 
-namespace TGS.Services.Operations
+namespace TGS.Services.Operations;
+
+public interface IBrandGameProviderOperations
 {
-    public interface IBrandGameProviderOperations
+    Task<string> MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode);
+}
+
+public sealed class BrandGameProviderOperations : IBrandGameProviderOperations
+{
+    private readonly IBrandOperations _brandOperations;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly IGameProviderLanguageCodeMapper _languageCodeMapper;
+
+    public BrandGameProviderOperations(
+        IBrandOperations brandOperations,
+        IGameProviderOperations gameProviderOperations,
+        IGameProviderLanguageCodeMapper languageCodeMapper)
     {
-        Task<string> MapCultureAsync(Guid gameProviderId, Guid brandId, string cultureCode);
+        _brandOperations = brandOperations;
+        _gameProviderOperations = gameProviderOperations;
+        _languageCodeMapper = languageCodeMapper;
     }
 
-    public sealed class BrandGameProviderOperations : IBrandGameProviderOperations
+    async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId,
+        string cultureCode)
     {
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IGameProviderLanguageCodeMapper _languageCodeMapper;
+        var gameProviderLanguages = await _gameProviderOperations.GetGameProviderLanguagesAsync(gameProviderId);
 
-        public BrandGameProviderOperations(
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations,
-            IGameProviderLanguageCodeMapper languageCodeMapper)
-        {
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _languageCodeMapper = languageCodeMapper;
-        }
+        var internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, cultureCode,
+            () => _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId, gameProviderId));
 
-        async Task<string> IBrandGameProviderOperations.MapCultureAsync(Guid gameProviderId, Guid brandId,
-            string cultureCode)
-        {
-            var gameProviderLanguages = await _gameProviderOperations.GetGameProviderLanguagesAsync(gameProviderId);
+        internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, internalCode,
+            () => Task.FromResult(Consts.DefaultCultureCode));
 
-            var internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, cultureCode,
-                () => _brandOperations.GetBrandGameProviderConfigurationDefaultLanguageAsync(brandId, gameProviderId));
+        return await _languageCodeMapper.InternalToExternalAsync(internalCode, gameProviderId);
+    }
 
-            internalCode = await GetSupportedLanguageAsync(gameProviderLanguages, internalCode,
-                () => Task.FromResult(Consts.DefaultCultureCode));
-
-            return await _languageCodeMapper.InternalToExternalAsync(internalCode, gameProviderId);
-        }
-
-        private static async Task<string> GetSupportedLanguageAsync(string[] gameProviderLanguages,
-            string language, Func<Task<string>> getDefaultLanguage)
-        {
-            return language.IsNotNullOrEmpty() && gameProviderLanguages.IgnoreCaseContains(language)
-                ? language
-                : await getDefaultLanguage();
-        }
+    private static async Task<string> GetSupportedLanguageAsync(string[] gameProviderLanguages,
+        string language, Func<Task<string>> getDefaultLanguage)
+    {
+        return language.IsNotNullOrEmpty() && gameProviderLanguages.IgnoreCaseContains(language)
+            ? language
+            : await getDefaultLanguage();
     }
 }

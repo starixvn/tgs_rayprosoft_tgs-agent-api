@@ -9,47 +9,46 @@ using Tgs.Report.Client.Models.GameAction;
 using TGS.Services.BackOffice.Application.Models.ReportGameAction;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportGameActionQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportGameActionQueries;
+
+public class
+    GetGameActionsQuery : IGetService<GetGameActionsReportRequest,
+        PagedResponse<GameActionReportModel>>
 {
-    public class
-        GetGameActionsQuery : IGetService<GetGameActionsReportRequest,
-            PagedResponse<GameActionReportModel>>
+    private readonly IReportClient _reportClient;
+
+    public GetGameActionsQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<PagedResponse<GameActionReportModel>> GetAsync(GetGameActionsReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetGameActionsQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<PagedResponse<GameActionReportModel>> GetAsync(GetGameActionsReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetGameActionsRequest
         {
-            var reportRequest = new GetGameActionsRequest
-            {
-                RoundId = request.RoundId,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+            RoundId = request.RoundId,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = (short)request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
 
-            var response = await _reportClient.GetGameActionsAsync(reportRequest);
+        var response = await _reportClient.GetGameActionsAsync(reportRequest);
 
-            return new()
+        return new()
+        {
+            Valid = response.Valid,
+            Message = response.Message,
+            TotalCount = response.TotalCount,
+            Items = response.Items?.Select(x => new GameActionReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new GameActionReportModel
-                {
-                    RecordedOn = x.RecordedOn,
-                    ExternalTransactionId = x.ExternalTransactionId,
-                    GameActionType = (GameActionType)x.GameActionType,
-                    Amount = x.Amount,
-                    BeforeBalance = x.BeforeBalance,
-                    AfterBalance = x.AfterBalance
-                }).ToArray()
-            };
-        }
+                RecordedOn = x.RecordedOn,
+                ExternalTransactionId = x.ExternalTransactionId,
+                GameActionType = (GameActionType)x.GameActionType,
+                Amount = x.Amount,
+                BeforeBalance = x.BeforeBalance,
+                AfterBalance = x.AfterBalance
+            }).ToArray()
+        };
     }
 }

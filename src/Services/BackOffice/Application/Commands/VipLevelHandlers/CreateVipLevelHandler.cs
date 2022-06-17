@@ -8,38 +8,37 @@ using TGS.Services.BackOffice.Application.Models.VipLevel;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.VipLevelHandlers
+namespace TGS.Services.BackOffice.Application.Commands.VipLevelHandlers;
+
+public class CreateVipLevelHandler : Handler<CreateVipLevelRequest, MessageResponse>
 {
-    public class CreateVipLevelHandler : Handler<CreateVipLevelRequest, MessageResponse>
+    private readonly IVipLevelService _service;
+
+    public CreateVipLevelHandler(IVipLevelService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IVipLevelService _service;
+        _service = service;
+    }
 
-        public CreateVipLevelHandler(IVipLevelService service, IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(CreateVipLevelRequest request,
+        CancellationToken cancellationToken)
+    {
+        var vipLevels = await _service.GetVipLevelQueries(q => q.Where(v => v.BrandId == request.BrandId))
+            .ToArrayAsync(cancellationToken);
+        var max = vipLevels.Any() ? vipLevels.Max(x => x.Level) : 0;
+        var lastVip = await _service.GetVipLevelAsync(x => x.BrandId == request.BrandId && x.Level == max);
+
+        if (lastVip != null && (lastVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
+            lastVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit))
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(string.Format(
+                VipLevel.LevelUpAccumulateLessThanPreviousLevel,
+                lastVip.LevelUpAccumulateBetAmount, lastVip.LevelUpAccumulateDeposit));
         }
 
-        public override async Task<MessageResponse> Handle(CreateVipLevelRequest request,
-            CancellationToken cancellationToken)
-        {
-            var vipLevels = await _service.GetVipLevelQueries(q => q.Where(v => v.BrandId == request.BrandId))
-                .ToArrayAsync(cancellationToken);
-            var max = vipLevels.Any() ? vipLevels.Max(x => x.Level) : 0;
-            var lastVip = await _service.GetVipLevelAsync(x => x.BrandId == request.BrandId && x.Level == max);
+        request.Level = (lastVip?.Level ?? 0) + 1;
 
-            if (lastVip != null && (lastVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount ||
-                lastVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit))
-            {
-                return CreateInvalidResponse<MessageResponse>(string.Format(
-                    VipLevel.LevelUpAccumulateLessThanPreviousLevel,
-                    lastVip.LevelUpAccumulateBetAmount, lastVip.LevelUpAccumulateDeposit));
-            }
+        await _service.CreateVipLevelAsync(request);
 
-            request.Level = (lastVip?.Level ?? 0) + 1;
-
-            await _service.CreateVipLevelAsync(request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.VR.Outgoing
+namespace TGS.Shared.Game.Models.VR.Outgoing;
+
+public record VRCreatePlayerRequest
 {
-    public record VRCreatePlayerRequest
-    {
-        [JsonPropertyName("playerName")]
-        public string PlayerCode { get; init; }
-    }
+    [JsonPropertyName("playerName")]
+    public string PlayerCode { get; init; }
 }

@@ -4,24 +4,23 @@ using NUnit.Framework;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Agent;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests;
+
+[TestFixture]
+public class AgentTests
 {
-    [TestFixture]
-    public class AgentTests
+    [Test]
+    public async Task Can_Get_AgentInfo_By_InvitationCode()
     {
-        [Test]
-        public async Task Can_Get_AgentInfo_By_InvitationCode()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-            var sut = new GetAgentInfoByInvitationCodeQueryService(fakeAgentRepository);
+        var sut = new GetAgentInfoByInvitationCodeQueryService(fakeAgentRepository);
 
-            var query = new GetAgentInfoByInvitationCodeQuery("test");
+        var query = new GetAgentInfoByInvitationCodeQuery("test");
 
-            await sut.GetAsync(query);
+        await sut.GetAsync(query);
 
-            _ = fakeAgentRepository.Received(1)
-                .GetAgentInfoByInvitationCodeAsync(Arg.Is(query.InvitationCode));
-        }
+        _ = fakeAgentRepository.Received(1)
+            .GetAgentInfoByInvitationCodeAsync(Arg.Is(query.InvitationCode));
     }
 }

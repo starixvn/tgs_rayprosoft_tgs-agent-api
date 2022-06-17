@@ -6,20 +6,19 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.KY.Commons
+namespace TGS.Shared.Game.Models.KY.Commons;
+
+/// <summary>
+/// 基地 - 請求
+/// </summary>
+public record KYBaseRequest
 {
     /// <summary>
-    /// 基地 - 請求
+    /// Gets or sets the action.
     /// </summary>
-    public record KYBaseRequest
-    {
-        /// <summary>
-        /// Gets or sets the action.
-        /// </summary>
-        /// <value>
-        /// The action.
-        /// </value>
-        [JsonPropertyName("s")]
-        public int Action { get; set; }
-    }
+    /// <value>
+    /// The action.
+    /// </value>
+    [JsonPropertyName("s")]
+    public int Action { get; set; }
 }

@@ -1,27 +1,26 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class Wallet
 {
-    public class Wallet
-    {
-        public decimal Balance { get; set; }
+    public decimal Balance { get; set; }
 
-        public DateTimeOffset CreatedOn { get; set; }
+    public DateTimeOffset CreatedOn { get; set; }
 
-        public virtual Currency Currency { get; set; }
+    public virtual Currency Currency { get; set; }
 
-        public string CurrencyCode { get; set; }
+    public string CurrencyCode { get; set; }
 
-        public string ExternalCurrencyCode { get; set; } = string.Empty;
+    public string ExternalCurrencyCode { get; set; } = string.Empty;
 
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        public decimal LockedBalance { get; set; }
+    public decimal LockedBalance { get; set; }
 
-        public virtual Player Player { get; set; }
+    public virtual Player Player { get; set; }
 
-        public string PlayerCode { get; set; }
+    public string PlayerCode { get; set; }
 
-        public DateTimeOffset UpdatedOn { get; set; }
-    }
+    public DateTimeOffset UpdatedOn { get; set; }
 }

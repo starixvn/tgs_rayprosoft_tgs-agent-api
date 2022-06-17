@@ -1,7 +1,6 @@
-﻿namespace TGS.GameProviders.Repositories.Options
+﻿namespace TGS.GameProviders.Repositories.Options;
+
+public class GameProvidersOption
 {
-    public class GameProvidersOption
-    {
-        public string MongoConnectionString { get; set; }
-    }
+    public string MongoConnectionString { get; set; }
 }

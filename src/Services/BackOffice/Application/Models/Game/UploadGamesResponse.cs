@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.Game
+namespace TGS.Services.BackOffice.Application.Models.Game;
+
+public class UploadGamesResponse : MessageResponse
 {
-    public class UploadGamesResponse : MessageResponse
-    {
-        public UploadGameModel[] Games { get; set; }
-    }
+    public UploadGameModel[] Games { get; set; }
 }

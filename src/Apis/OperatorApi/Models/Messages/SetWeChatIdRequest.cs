@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public class SetWeChatIdRequest
 {
-    public class SetWeChatIdRequest
-    {
-        [JsonPropertyName("wechat")]
-        public string WebChatId { get; init; }
-    }
+    [JsonPropertyName("wechat")]
+    public string WebChatId { get; init; }
 }

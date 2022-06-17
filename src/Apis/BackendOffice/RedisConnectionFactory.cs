@@ -3,49 +3,48 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using TGS.Core.Infrastructures.Redis;
 
-namespace TGS.Apis.BackendOffice
+namespace TGS.Apis.BackendOffice;
+
+internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
 {
-    internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
+    private readonly ConnectionMultiplexer _connectionMultiplexer;
+    private bool _disposedValue;
+
+    public RedisConnectionFactory(
+        IOptions<RedisOptions> optionsAccessor)
     {
-        private readonly ConnectionMultiplexer _connectionMultiplexer;
-        private bool _disposedValue;
+        if (optionsAccessor is null)
+            throw new ArgumentNullException(nameof(optionsAccessor));
 
-        public RedisConnectionFactory(
-            IOptions<RedisOptions> optionsAccessor)
+        var options = optionsAccessor.Value;
+
+        var connectionOptions = ConfigurationOptions.Parse(options.ConnectionString);
+
+        _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionOptions);
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    public IConnectionMultiplexer GetConnection()
+        => _connectionMultiplexer;
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
         {
-            if (optionsAccessor is null)
-                throw new ArgumentNullException(nameof(optionsAccessor));
-
-            var options = optionsAccessor.Value;
-
-            var connectionOptions = ConfigurationOptions.Parse(options.ConnectionString);
-
-            _connectionMultiplexer = ConnectionMultiplexer.Connect(connectionOptions);
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        public IConnectionMultiplexer GetConnection()
-            => _connectionMultiplexer;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _connectionMultiplexer?.Dispose();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                _disposedValue = true;
+                _connectionMultiplexer?.Dispose();
             }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
         }
     }
 }

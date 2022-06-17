@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
-{
-    public abstract record BalanceResponse : ErrorResponse
-    {
-        [JsonPropertyName("cash")]
-        public decimal Balance { get; init; }
+namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 
-        [JsonPropertyName("bonus")]
-        public decimal Bonus { get; init; }
-    }
+public abstract record BalanceResponse : ErrorResponse
+{
+    [JsonPropertyName("cash")]
+    public decimal Balance { get; init; }
+
+    [JsonPropertyName("bonus")]
+    public decimal Bonus { get; init; }
 }

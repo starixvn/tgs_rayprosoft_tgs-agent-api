@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons
+namespace TGS.Shared.Game.Models.Evolution.Commons;
+
+public record EvolutionGameDetail
 {
-    public record EvolutionGameDetail
-    {
-        [JsonPropertyName("table")]
-        public EvolutionGameTable GameTable { get; set; }
-    }
+    [JsonPropertyName("table")]
+    public EvolutionGameTable GameTable { get; set; }
 }

@@ -20,220 +20,219 @@ using TGS.Services.BackOffice.Application.Queries.Game;
 using TGS.Services.BackOffice.Domain;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.BackendOffice.Controllers.GameProvider
+namespace TGS.Apis.BackendOffice.Controllers.GameProvider;
+
+[Route("api/[controller]")]
+[ApiController]
+public class GameController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class GameController : BaseContextController
+    private readonly IMediator _mediator;
+    private readonly IUploadService _uploadService;
+
+    public GameController(IMediator mediator, IUploadService uploadService)
     {
-        private readonly IMediator _mediator;
-        private readonly IUploadService _uploadService;
+        _mediator = mediator;
+        _uploadService = uploadService;
+    }
 
-        public GameController(IMediator mediator, IUploadService uploadService)
+    [HttpGet]
+    [Description("Get games")]
+    public Task<PagedResponse<GameModel>>
+        GetGameProvidersAsync([FromQuery] GetGamesRequest request) => _mediator.Send(request);
+
+    [HttpPost]
+    [Description("Create games")]
+    public Task<MessageResponse> CreateGamesAsync(CreateGamesRequest request) =>
+        _mediator.Send(request);
+
+    [HttpPut("{id}")]
+    [Description("Update a game")]
+    public Task<MessageResponse> UpdateGameAsync(int id, UpdateGameRequest request)
+    {
+        request.Id = id;
+        return _mediator.Send(request);
+    }
+
+    [HttpPost("upload")]
+    [Description("Upload games")]
+    public async Task<IActionResult> UploadGamesAsync([FromForm] UploadGamesRequest request)
+    {
+        var response = await _mediator.Send(request).ConfigureAwait(false);
+
+        if (response.Valid)
+            return Ok(response);
+        return StatusCode(400, response);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("export/{gameProviderId}")]
+    [Description("Export games")]
+    public async Task<IActionResult> ExportGamesAsync(Guid gameProviderId)
+    {
+        var fileStream = await _mediator.Send(new ExportGamesRequest(gameProviderId)).ConfigureAwait(false);
+
+        return File(
+            fileStream,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Games.xlsx");
+    }
+
+    [HttpGet("localization/export")]
+    [Description("Export game localization for example")]
+    public async Task<FileStreamResult> ExportGamesLocalizationAsync(
+        [FromServices] IGetService<GetGameLocalizationQuery, GameLocalizationInfo> getLocalizationQueryService,
+        [FromQuery] ExportGameLocalizationRequest request
+    )
+    {
+        var query = new GetGameLocalizationQuery(request.GameProviderCode);
+        var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
+
+        var memoryStream = new MemoryStream();
+
+        using (var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook))
         {
-            _mediator = mediator;
-            _uploadService = uploadService;
-        }
+            var workbookPart = document.AddWorkbookPart();
+            workbookPart.Workbook = new Workbook();
 
-        [HttpGet]
-        [Description("Get games")]
-        public Task<PagedResponse<GameModel>>
-            GetGameProvidersAsync([FromQuery] GetGamesRequest request) => _mediator.Send(request);
+            var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+            worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-        [HttpPost]
-        [Description("Create games")]
-        public Task<MessageResponse> CreateGamesAsync(CreateGamesRequest request) =>
-            _mediator.Send(request);
+            var sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-        [HttpPut("{id}")]
-        [Description("Update a game")]
-        public Task<MessageResponse> UpdateGameAsync(int id, UpdateGameRequest request)
-        {
-            request.Id = id;
-            return _mediator.Send(request);
-        }
-
-        [HttpPost("upload")]
-        [Description("Upload games")]
-        public async Task<IActionResult> UploadGamesAsync([FromForm] UploadGamesRequest request)
-        {
-            var response = await _mediator.Send(request).ConfigureAwait(false);
-
-            if (response.Valid)
-                return Ok(response);
-            return StatusCode(400, response);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("export/{gameProviderId}")]
-        [Description("Export games")]
-        public async Task<IActionResult> ExportGamesAsync(Guid gameProviderId)
-        {
-            var fileStream = await _mediator.Send(new ExportGamesRequest(gameProviderId)).ConfigureAwait(false);
-
-            return File(
-                fileStream,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "Games.xlsx");
-        }
-
-        [HttpGet("localization/export")]
-        [Description("Export game localization for example")]
-        public async Task<FileStreamResult> ExportGamesLocalizationAsync(
-            [FromServices] IGetService<GetGameLocalizationQuery, GameLocalizationInfo> getLocalizationQueryService,
-            [FromQuery] ExportGameLocalizationRequest request
-        )
-        {
-            var query = new GetGameLocalizationQuery(request.GameProviderCode);
-            var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
-
-            var memoryStream = new MemoryStream();
-
-            using (var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook))
+            sheets.Append(new Sheet
             {
-                var workbookPart = document.AddWorkbookPart();
-                workbookPart.Workbook = new Workbook();
+                Id = workbookPart.GetIdOfPart(worksheetPart),
+                SheetId = 1,
+                Name = request.GameProviderCode
+            });
 
-                var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-                worksheetPart.Worksheet = new Worksheet(new SheetData());
+            var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-                var sheets = workbookPart.Workbook.AppendChild(new Sheets());
-
-                sheets.Append(new Sheet
+            var row = new Row();
+            row.Append(
+                new Cell
                 {
-                    Id = workbookPart.GetIdOfPart(worksheetPart),
-                    SheetId = 1,
-                    Name = request.GameProviderCode
-                });
+                    CellValue = new CellValue("Id"),
+                    DataType = CellValues.String
+                },
+                new Cell
+                {
+                    CellValue = new CellValue("Code"),
+                    DataType = CellValues.String
+                }
+            );
 
-                var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
-
-                var row = new Row();
+            foreach (var item in info.Languages)
+            {
                 row.Append(
                     new Cell
                     {
-                        CellValue = new CellValue("Id"),
+                        CellValue = new CellValue(item.Replace("-", "")),
+                        DataType = CellValues.String
+                    }
+                );
+            }
+
+            sheetData.AppendChild(row);
+
+            foreach (var game in info.Games)
+            {
+                row = new Row();
+                row.Append(
+                    new Cell
+                    {
+                        CellValue = new CellValue(game.GameId),
                         DataType = CellValues.String
                     },
                     new Cell
                     {
-                        CellValue = new CellValue("Code"),
+                        CellValue = new CellValue(game.GameCode),
                         DataType = CellValues.String
                     }
                 );
-
-                foreach (var item in info.Languages)
+                if (game.Localization != null)
                 {
-                    row.Append(
-                        new Cell
+                    foreach (var item in info.Languages)
+                    {
+                        var localization = JsonDocument.Parse(game.Localization);
+                        JsonElement lang;
+                        var isExist = localization.RootElement.TryGetProperty(item, out lang);
+                        if (isExist)
                         {
-                            CellValue = new CellValue(item.Replace("-", "")),
-                            DataType = CellValues.String
+                            row.Append(
+                                new Cell
+                                {
+                                    CellValue = new CellValue(lang.GetProperty("name").ToString()),
+                                    DataType = CellValues.String
+                                }
+                            );
                         }
-                    );
+                    }
                 }
 
                 sheetData.AppendChild(row);
-
-                foreach (var game in info.Games)
-                {
-                    row = new Row();
-                    row.Append(
-                        new Cell
-                        {
-                            CellValue = new CellValue(game.GameId),
-                            DataType = CellValues.String
-                        },
-                        new Cell
-                        {
-                            CellValue = new CellValue(game.GameCode),
-                            DataType = CellValues.String
-                        }
-                    );
-                    if (game.Localization != null)
-                    {
-                        foreach (var item in info.Languages)
-                        {
-                            var localization = JsonDocument.Parse(game.Localization);
-                            JsonElement lang;
-                            var isExist = localization.RootElement.TryGetProperty(item, out lang);
-                            if (isExist)
-                            {
-                                row.Append(
-                                    new Cell
-                                    {
-                                        CellValue = new CellValue(lang.GetProperty("name").ToString()),
-                                        DataType = CellValues.String
-                                    }
-                                );
-                            }
-                        }
-                    }
-
-                    sheetData.AppendChild(row);
-                }
             }
-
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            return new FileStreamResult(
-                memoryStream,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
 
-        [HttpPost("localization/upload")]
-        [Description("Upload game localization file")]
-        public async Task<MessageResponse> UploadGamesLocalizationAsync(
-            IFormFile file,
-            [FromServices]
-            IGetService<UpdateGameLocalizationQuery, UpdateGameLocationInfo> updateGameLocalizationQueryService)
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        return new FileStreamResult(
+            memoryStream,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    [HttpPost("localization/upload")]
+    [Description("Upload game localization file")]
+    public async Task<MessageResponse> UploadGamesLocalizationAsync(
+        IFormFile file,
+        [FromServices]
+        IGetService<UpdateGameLocalizationQuery, UpdateGameLocationInfo> updateGameLocalizationQueryService)
+    {
+        var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadGameLocalizationModel>(file);
+
+        var games = uploadedResult
+            .Where(p => !string.IsNullOrEmpty(p.Id))
+            .Select(x => new GameLocalizationModel
+            {
+                Id = int.Parse(x.Id),
+                Code = x.Code,
+                Localization = new Dictionary<string, JsonDocument>
+                {
+                    { "en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }") },
+                    { "zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }") },
+                    { "zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }") },
+                    { "id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }") },
+                    { "th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }") },
+                    { "vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }") },
+                    { "ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }") },
+                    { "ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }") }
+                }
+            })
+            .ToList();
+
+        var query = new UpdateGameLocalizationQuery
         {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadGameLocalizationModel>(file);
+            Games = games,
+            EditorUsername = Username
+        };
 
-            var games = uploadedResult
-                .Where(p => !string.IsNullOrEmpty(p.Id))
-                .Select(x => new GameLocalizationModel
-                {
-                    Id = int.Parse(x.Id),
-                    Code = x.Code,
-                    Localization = new Dictionary<string, JsonDocument>
-                    {
-                        { "en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }") },
-                        { "zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }") },
-                        { "zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }") },
-                        { "id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }") },
-                        { "th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }") },
-                        { "vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }") },
-                        { "ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }") },
-                        { "ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }") }
-                    }
-                })
-                .ToList();
+        var info = await updateGameLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
-            var query = new UpdateGameLocalizationQuery
-            {
-                Games = games,
-                EditorUsername = Username
-            };
+        var diffGames = info.DiffGameIds;
 
-            var info = await updateGameLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
-
-            var diffGames = info.DiffGameIds;
-
-            if (diffGames.Any())
-            {
-                return new MessageResponse
-                {
-                    Valid = false,
-                    Message = "Games Not Found",
-                    Errors = diffGames.Select(x => x.ToString()).ToArray()
-                };
-            }
-
+        if (diffGames.Any())
+        {
             return new MessageResponse
             {
-                Valid = true,
-                Message = "Update Games Localization Success"
+                Valid = false,
+                Message = "Games Not Found",
+                Errors = diffGames.Select(x => x.ToString()).ToArray()
             };
         }
+
+        return new MessageResponse
+        {
+            Valid = true,
+            Message = "Update Games Localization Success"
+        };
     }
 }

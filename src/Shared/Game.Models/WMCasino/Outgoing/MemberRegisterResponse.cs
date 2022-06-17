@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.WMCasino.Outgoing
+namespace TGS.Shared.Game.Models.WMCasino.Outgoing;
+
+public record MemberRegisterResponse : ErrorResponse
 {
-    public record MemberRegisterResponse : ErrorResponse
-    {
-        [JsonPropertyName("result")]
-        public string Result { get; init; }
-    }
+    [JsonPropertyName("result")]
+    public string Result { get; init; }
 }

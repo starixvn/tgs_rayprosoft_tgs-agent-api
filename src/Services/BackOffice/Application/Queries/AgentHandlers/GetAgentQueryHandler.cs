@@ -8,89 +8,88 @@ using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
+namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers;
+
+public class GetAgentQueryHandler : Handler<GetAgentRequest, GetAgentResponse>
 {
-    public class GetAgentQueryHandler : Handler<GetAgentRequest, GetAgentResponse>
+    private readonly IAgentDividendService _agentDividendService;
+    private readonly ITgsRepository _tgsRepository;
+    private readonly IAgentService _service;
+
+
+    public GetAgentQueryHandler(
+        IAgentService service,
+        IAgentDividendService agentDividendService,
+        ITgsRepository tgsRepository,
+        IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IAgentDividendService _agentDividendService;
-        private readonly ITgsRepository _tgsRepository;
-        private readonly IAgentService _service;
+        _service = service;
+        _agentDividendService = agentDividendService;
+        _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
+    }
 
+    public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
+        CancellationToken cancellationToken)
+    {
+        var agent = await _service.GetAgentAsync(x => x.Id == request.Id).ConfigureAwait(false);
 
-        public GetAgentQueryHandler(
-            IAgentService service,
-            IAgentDividendService agentDividendService,
-            ITgsRepository tgsRepository,
-            IHttpContextAccessor accessor) : base(accessor)
+        var dividend = await _agentDividendService.GetAgentDividends()
+            .Where(x => x.AgentId == request.Id && x.SentOn == null)
+            .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
+
+        var playerNumber = (await _tgsRepository.Players.AsQueryable().Where(x => x.AgentId == request.Id).ToArrayAsync().ConfigureAwait(false)).Length;
+        if (agent == null)
         {
-            _service = service;
-            _agentDividendService = agentDividendService;
-            _tgsRepository = tgsRepository ?? throw new System.ArgumentNullException(nameof(tgsRepository));
+            return CreateInvalidResponse<GetAgentResponse>(Agent.NotFound);
         }
 
-        public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
-            CancellationToken cancellationToken)
+        return new()
         {
-            var agent = await _service.GetAgentAsync(x => x.Id == request.Id).ConfigureAwait(false);
-
-            var dividend = await _agentDividendService.GetAgentDividends()
-                .Where(x => x.AgentId == request.Id && x.SentOn == null)
-                .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
-
-            var playerNumber = (await _tgsRepository.Players.AsQueryable().Where(x => x.AgentId == request.Id).ToArrayAsync().ConfigureAwait(false)).Length;
-            if (agent == null)
+            Valid = true,
+            Agent = new()
             {
-                return CreateInvalidResponse<GetAgentResponse>(Agent.NotFound);
-            }
-
-            return new()
-            {
-                Valid = true,
-                Agent = new()
+                Id = agent.Id,
+                BrandId = agent.BrandId,
+                Username = agent.Username,
+                RealName = agent.RealName,
+                Status = agent.Status,
+                Type = agent.Type,
+                LevelType = agent.LevelType,
+                InvitationCode = agent.InvitationCode,
+                ParentUsername = agent.ParentAgent?.Username,
+                RegisteredOn = agent.RegisteredOn,
+                Balance = agent.Wallets.FirstOrDefault()?.Balance ?? 0,
+                CommissionPercentage = agent.CommissionPercentage,
+                DividendPercentage = agent.DividendPercentage,
+                LiveDealerRebatePercentage = agent.LiveDealerRebatePercentage,
+                SlotRebatePercentage = agent.SlotRebatePercentage,
+                LotteryRebatePercentage = agent.LotteryRebatePercentage,
+                CardGameRebatePercentage = agent.CardGameRebatePercentage,
+                SportsRebatePercentage = agent.SportsRebatePercentage,
+                VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
+                Email = agent.Email,
+                Phone = agent.Phone,
+                QQ = agent.QQ,
+                Wechat = agent.Wechat,
+                Remarks = agent.Remarks,
+                Banks = agent.Banks.Select(b => new AgentBankModel
                 {
-                    Id = agent.Id,
-                    BrandId = agent.BrandId,
-                    Username = agent.Username,
-                    RealName = agent.RealName,
-                    Status = agent.Status,
-                    Type = agent.Type,
-                    LevelType = agent.LevelType,
-                    InvitationCode = agent.InvitationCode,
-                    ParentUsername = agent.ParentAgent?.Username,
-                    RegisteredOn = agent.RegisteredOn,
-                    Balance = agent.Wallets.FirstOrDefault()?.Balance ?? 0,
-                    CommissionPercentage = agent.CommissionPercentage,
-                    DividendPercentage = agent.DividendPercentage,
-                    LiveDealerRebatePercentage = agent.LiveDealerRebatePercentage,
-                    SlotRebatePercentage = agent.SlotRebatePercentage,
-                    LotteryRebatePercentage = agent.LotteryRebatePercentage,
-                    CardGameRebatePercentage = agent.CardGameRebatePercentage,
-                    SportsRebatePercentage = agent.SportsRebatePercentage,
-                    VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
-                    Email = agent.Email,
-                    Phone = agent.Phone,
-                    QQ = agent.QQ,
-                    Wechat = agent.Wechat,
-                    Remarks = agent.Remarks,
-                    Banks = agent.Banks.Select(b => new AgentBankModel
-                    {
-                        Id = b.Id,
-                        RealName = b.RealName,
-                        BankName = b.BankName,
-                        BankAccount = b.BankAccount
-                    }).ToArray(),
-                    AccumulatedProfitSharing = dividend,
-                    PlayerNumber = playerNumber,
-                    AgentDividendConditions = agent.AgentDividendConditions.Select(x => new AgentDividendConditionModel
-                    {
-                        Rank = x.Rank,
-                        NetProfit = x.NetProfit,
-                        ActiveNumber = x.ActiveNumber,
-                        DividendPercentage = x.DividendPercentage
-                    }).OrderBy(x => x.Rank).ToArray(),
-                    Path = agent.Path
-                }
-            };
-        }
+                    Id = b.Id,
+                    RealName = b.RealName,
+                    BankName = b.BankName,
+                    BankAccount = b.BankAccount
+                }).ToArray(),
+                AccumulatedProfitSharing = dividend,
+                PlayerNumber = playerNumber,
+                AgentDividendConditions = agent.AgentDividendConditions.Select(x => new AgentDividendConditionModel
+                {
+                    Rank = x.Rank,
+                    NetProfit = x.NetProfit,
+                    ActiveNumber = x.ActiveNumber,
+                    DividendPercentage = x.DividendPercentage
+                }).OrderBy(x => x.Rank).ToArray(),
+                Path = agent.Path
+            }
+        };
     }
 }

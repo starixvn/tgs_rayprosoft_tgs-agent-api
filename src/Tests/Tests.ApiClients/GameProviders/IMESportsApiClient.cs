@@ -7,34 +7,33 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Shared.Game.Models.IMESports.Incoming;
 
-namespace TGS.Tests.ApiClients.GameProviders
+namespace TGS.Tests.ApiClients.GameProviders;
+
+public interface IIMESportsApiClient
 {
-    public interface IIMESportsApiClient
+    ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
+    ValueTask<BetResponse> PlaceBetAsync(BetRequest request);
+    ValueTask<BetResponse> SettleAndCancelBetAsync(BetRequest request);
+}
+
+public sealed class IMESportsApiClient : BaseApiClient, IIMESportsApiClient
+{
+    private static readonly string RoutePrefix = "api/imesports";
+
+    public IMESportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+        : base(client, logger, json)
     {
-        ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
-        ValueTask<BetResponse> PlaceBetAsync(BetRequest request);
-        ValueTask<BetResponse> SettleAndCancelBetAsync(BetRequest request);
     }
 
-    public sealed class IMESportsApiClient : BaseApiClient, IIMESportsApiClient
-    {
-        private static readonly string RoutePrefix = "api/imesports";
+    ValueTask<GetBalanceResponse> IIMESportsApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
+        ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/getbalance",
+            request);
 
-        public IMESportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
-            : base(client, logger, json)
-        {
-        }
+    ValueTask<BetResponse> IIMESportsApiClient.PlaceBetAsync(BetRequest request) =>
+        ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/placebet",
+            request);
 
-        ValueTask<GetBalanceResponse> IIMESportsApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
-            ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/getbalance",
-                request);
-
-        ValueTask<BetResponse> IIMESportsApiClient.PlaceBetAsync(BetRequest request) =>
-            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/placebet",
-                request);
-
-        ValueTask<BetResponse> IIMESportsApiClient.SettleAndCancelBetAsync(BetRequest request) =>
-            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/settle",
-                request);
-    }
+    ValueTask<BetResponse> IIMESportsApiClient.SettleAndCancelBetAsync(BetRequest request) =>
+        ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/settle",
+            request);
 }

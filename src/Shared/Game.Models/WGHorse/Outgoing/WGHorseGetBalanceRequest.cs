@@ -1,7 +1,6 @@
-﻿namespace TGS.Shared.Game.Models.WGHorse.Outgoing
+﻿namespace TGS.Shared.Game.Models.WGHorse.Outgoing;
+
+public record WGHorseGetBalanceRequest
 {
-    public record WGHorseGetBalanceRequest
-    {
-        public string PlayerCode { get; init; }
-    }
+    public string PlayerCode { get; init; }
 }

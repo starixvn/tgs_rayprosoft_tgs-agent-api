@@ -1,11 +1,10 @@
 ﻿using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Services.BetHistories
+namespace TGS.Core.Models.Services.BetHistories;
+
+public sealed record XmlData : ValueData
 {
-    public sealed record XmlData : ValueData
+    public XmlData() : base(BetHistoryDataType.Xml)
     {
-        public XmlData() : base(BetHistoryDataType.Xml)
-        {
-        }
     }
 }

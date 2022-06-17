@@ -13,281 +13,280 @@ using TGS.Services.Agent;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Agent.ApplicationServices.Agent;
 
-namespace Agent.UnitTests
+namespace Agent.UnitTests;
+
+[TestFixture]
+public class AgentTests
 {
-    [TestFixture]
-    public class AgentTests
+    [Test]
+    public async Task Agent_Can_Set_Password()
     {
-        [Test]
-        public async Task Agent_Can_Set_Password()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-            var sut = new SetAgentPasswordCommandService(
-                fakePasswordHandler,
-                fakeAgentRepository);
+        var sut = new SetAgentPasswordCommandService(
+            fakePasswordHandler,
+            fakeAgentRepository);
 
-            var command = new SetAgentPasswordCommand(
+        var command = new SetAgentPasswordCommand(
+            Guid.NewGuid(),
+            "NewPassword");
+
+        await sut.ExecuteAsync(command);
+
+        _ = fakeAgentRepository.Received(1)
+            .SetPasswordAsync(
+                Arg.Is(command.AgentId),
+                Arg.Any<byte[]>(),
+                Arg.Any<byte[]>(),
+                Arg.Any<DateTimeOffset>());
+    }
+
+    [Test]
+    public async Task Agent_Can_Valid_Password()
+    {
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+        var sut = new ValidateAgentPasswordCommandService(fakeAgentRepository, fakePasswordHandler);
+
+        var command = new ValidateAgentPasswordCommand(
+            Guid.NewGuid(),
+            "Password");
+
+        fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>())
+            .Returns(new AgentInfo(
+                command.AgentId,
+                "AgentName",
+                "AgentName",
+                null,
                 Guid.NewGuid(),
-                "NewPassword");
+                null,
+                null,
+                null,
+                "Invitation",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                null,
+                DateTimeOffset.Now,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                0,
+                0));
 
-            await sut.ExecuteAsync(command);
+        await sut.GetAsync(command);
 
-            _ = fakeAgentRepository.Received(1)
-                .SetPasswordAsync(
-                    Arg.Is(command.AgentId),
-                    Arg.Any<byte[]>(),
-                    Arg.Any<byte[]>(),
-                    Arg.Any<DateTimeOffset>());
-        }
+        fakePasswordHandler.Received(1)
+            .Verify(
+                Arg.Any<byte[]>(),
+                Arg.Any<byte[]>(),
+                Arg.Is(command.Password));
+    }
 
-        [Test]
-        public async Task Agent_Can_Valid_Password()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+    [Test]
+    public async Task Agent_Validate_Password_If_Not_Found_Agent_Will_Return_False()
+    {
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
-            var sut = new ValidateAgentPasswordCommandService(fakeAgentRepository, fakePasswordHandler);
+        var sut = new ValidateAgentPasswordCommandService(fakeAgentRepository, fakePasswordHandler);
 
-            var command = new ValidateAgentPasswordCommand(
+        var command = new ValidateAgentPasswordCommand(
+            Guid.NewGuid(),
+            "Password");
+
+        fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>())
+            .Returns(new AgentInfo(
+                command.AgentId,
+                "AgentName",
+                "AgentName",
+                null,
                 Guid.NewGuid(),
-                "Password");
+                null,
+                null,
+                null,
+                "Invitation",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                null,
+                DateTimeOffset.Now,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                0M,
+                0));
 
-            fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>())
-                .Returns(new AgentInfo(
-                    command.AgentId,
-                    "AgentName",
-                    "AgentName",
-                    null,
-                    Guid.NewGuid(),
-                    null,
-                    null,
-                    null,
-                    "Invitation",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0,
-                    0));
+        var actual = await sut.GetAsync(command);
 
-            await sut.GetAsync(command);
+        Assert.IsFalse(actual);
+    }
 
-            fakePasswordHandler.Received(1)
-                .Verify(
-                    Arg.Any<byte[]>(),
-                    Arg.Any<byte[]>(),
-                    Arg.Is(command.Password));
-        }
+    [Test]
+    public async Task Create_Agent_Should_Success()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
-        [Test]
-        public async Task Agent_Validate_Password_If_Not_Found_Agent_Will_Return_False()
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        var brandId = Guid.NewGuid();
+
+        var brand = new CoreModels.Brand
         {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-
-            var sut = new ValidateAgentPasswordCommandService(fakeAgentRepository, fakePasswordHandler);
-
-            var command = new ValidateAgentPasswordCommand(
-                Guid.NewGuid(),
-                "Password");
-
-            fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>())
-                .Returns(new AgentInfo(
-                    command.AgentId,
-                    "AgentName",
-                    "AgentName",
-                    null,
-                    Guid.NewGuid(),
-                    null,
-                    null,
-                    null,
-                    "Invitation",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0M,
-                    0));
-
-            var actual = await sut.GetAsync(command);
-
-            Assert.IsFalse(actual);
-        }
-
-        [Test]
-        public async Task Create_Agent_Should_Success()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            var brandId = Guid.NewGuid();
-
-            var brand = new CoreModels.Brand
+            Id = brandId,
+            Currencies = new List<CoreModels.BrandCurrency>
             {
-                Id = brandId,
-                Currencies = new List<CoreModels.BrandCurrency>
+                new CoreModels.BrandCurrency
                 {
-                    new CoreModels.BrandCurrency
-                    {
-                        BrandId = brandId,
-                        CurrencyCode = "CNY",
-                        BrandCurrencyCode = "CNY"
-                    }
-                },
-                ApiKey = string.Empty,
-                ClientId = string.Empty,
-                Code = "Test",
-                CreatedByUsername = "System",
-                Name = "Test",
-                UpdatedByUsername = "System",
-                SecretKey = string.Empty
-            };
+                    BrandId = brandId,
+                    CurrencyCode = "CNY",
+                    BrandCurrencyCode = "CNY"
+                }
+            },
+            ApiKey = string.Empty,
+            ClientId = string.Empty,
+            Code = "Test",
+            CreatedByUsername = "System",
+            Name = "Test",
+            UpdatedByUsername = "System",
+            SecretKey = string.Empty
+        };
 
-            await repository.Brands.AddAsync(brand);
-            var parentAgentId = Guid.NewGuid();
+        await repository.Brands.AddAsync(brand);
+        var parentAgentId = Guid.NewGuid();
 
-            var parentAgent = new CoreModels.Agent
+        var parentAgent = new CoreModels.Agent
+        {
+            Id = parentAgentId,
+            AgentDividendConditions = new[]
             {
-                Id = parentAgentId,
-                AgentDividendConditions = new[]
+                new CoreModels.AgentDividendCondition
                 {
-                    new CoreModels.AgentDividendCondition
-                    {
-                        Rank = 1,
-                        NetProfit = 1,
-                        ActiveNumber = 1,
-                        DividendPercentage = 50
-                    }
-                },
-                InvitationCode = "Test",
+                    Rank = 1,
+                    NetProfit = 1,
+                    ActiveNumber = 1,
+                    DividendPercentage = 50
+                }
+            },
+            InvitationCode = "Test",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "agent",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        };
+        await repository.Agents.AddAsync(parentAgent);
+        await repository.SaveChangesAsync();
+
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+        fakePasswordHandler.GenerateCredential(Arg.Any<string>())
+            .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
+
+        var sut = new CreateAgentCommandService(repository, fakePasswordHandler);
+
+        var query = new CreateAgentCommand
+        {
+            ParentAgentId = parentAgentId,
+            BrandId = brandId,
+            Username = "UserName",
+            Password = "Password",
+            Remarks = "Remarks"
+        };
+
+        var info = await sut.GetAsync(query);
+
+        Assert.IsTrue(info.IsNew);
+    }
+
+    [Test]
+    public async Task Get_Agent_Info_By_Agent_Id()
+    {
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+
+        var sut = new GetAgentInfoQueryService(fakeAgentRepository);
+
+        var agentId = Guid.NewGuid();
+
+        await sut.GetAsync(new GetAgentInfoQuery(agentId));
+
+        _ = fakeAgentRepository.Received(1)
+            .GetAgentByIdAsync(Arg.Is(agentId));
+    }
+
+    [Test]
+    public async Task Get_Agent_List_Should_Success()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        var brandId = Guid.NewGuid();
+        var parentAgentId = Guid.NewGuid();
+
+        repository.Agents.AddRange(
+            new CoreModels.Agent
+            {
+                BrandId = brandId,
+                ParentAgentId = parentAgentId,
+                Id = Guid.NewGuid(),
+                InvitationCode = "Test1",
                 Password = Array.Empty<byte>(),
                 Salt = Array.Empty<byte>(),
-                Username = "agent",
+                Username = "agent1",
                 WithdrawPassword = Array.Empty<byte>(),
                 WithdrawSalt = Array.Empty<byte>()
-            };
-            await repository.Agents.AddAsync(parentAgent);
-            await repository.SaveChangesAsync();
-
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-
-            fakePasswordHandler.GenerateCredential(Arg.Any<string>())
-                .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
-
-            var sut = new CreateAgentCommandService(repository, fakePasswordHandler);
-
-            var query = new CreateAgentCommand
+            },
+            new CoreModels.Agent
             {
-                ParentAgentId = parentAgentId,
                 BrandId = brandId,
-                Username = "UserName",
-                Password = "Password",
-                Remarks = "Remarks"
-            };
+                ParentAgentId = parentAgentId,
+                Id = Guid.NewGuid(),
+                InvitationCode = "Test2",
+                Password = Array.Empty<byte>(),
+                Salt = Array.Empty<byte>(),
+                Username = "agent2",
+                WithdrawPassword = Array.Empty<byte>(),
+                WithdrawSalt = Array.Empty<byte>()
+            });
 
-            var info = await sut.GetAsync(query);
+        await repository.SaveChangesAsync();
 
-            Assert.IsTrue(info.IsNew);
-        }
+        var sut = new GetAgentInfosQueryService(repository);
 
-        [Test]
-        public async Task Get_Agent_Info_By_Agent_Id()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var query = new GetAgentInfosQuery(
+            brandId,
+            parentAgentId,
+            null,
+            null);
 
-            var sut = new GetAgentInfoQueryService(fakeAgentRepository);
+        var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-            var agentId = Guid.NewGuid();
+        Assert.AreEqual(2, actual.Length);
+    }
 
-            await sut.GetAsync(new GetAgentInfoQuery(agentId));
+    [Test]
+    public async Task Get_Agent_Domains_By_Agent_Id()
+    {
+        var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-            _ = fakeAgentRepository.Received(1)
-                .GetAgentByIdAsync(Arg.Is(agentId));
-        }
+        var sut = new GetAgentDomainsQueryService(fakeAgentRepository);
 
-        [Test]
-        public async Task Get_Agent_List_Should_Success()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        var query = new GetAgentDomainsQuery(Guid.NewGuid());
 
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+        await sut.QueryAsync(query).ToArrayAsync();
 
-            var brandId = Guid.NewGuid();
-            var parentAgentId = Guid.NewGuid();
-
-            repository.Agents.AddRange(
-                new CoreModels.Agent
-                {
-                    BrandId = brandId,
-                    ParentAgentId = parentAgentId,
-                    Id = Guid.NewGuid(),
-                    InvitationCode = "Test1",
-                    Password = Array.Empty<byte>(),
-                    Salt = Array.Empty<byte>(),
-                    Username = "agent1",
-                    WithdrawPassword = Array.Empty<byte>(),
-                    WithdrawSalt = Array.Empty<byte>()
-                },
-                new CoreModels.Agent
-                {
-                    BrandId = brandId,
-                    ParentAgentId = parentAgentId,
-                    Id = Guid.NewGuid(),
-                    InvitationCode = "Test2",
-                    Password = Array.Empty<byte>(),
-                    Salt = Array.Empty<byte>(),
-                    Username = "agent2",
-                    WithdrawPassword = Array.Empty<byte>(),
-                    WithdrawSalt = Array.Empty<byte>()
-                });
-
-            await repository.SaveChangesAsync();
-
-            var sut = new GetAgentInfosQueryService(repository);
-
-            var query = new GetAgentInfosQuery(
-                brandId,
-                parentAgentId,
-                null,
-                null);
-
-            var actual = await sut.QueryAsync(query).ToArrayAsync();
-
-            Assert.AreEqual(2, actual.Length);
-        }
-
-        [Test]
-        public async Task Get_Agent_Domains_By_Agent_Id()
-        {
-            var fakeAgentRepository = Substitute.For<IAgentRepository>();
-
-            var sut = new GetAgentDomainsQueryService(fakeAgentRepository);
-
-            var query = new GetAgentDomainsQuery(Guid.NewGuid());
-
-            await sut.QueryAsync(query).ToArrayAsync();
-
-            _ = fakeAgentRepository.Received(1)
-                .GetAgentDomainsByIdAsync(Arg.Is(query.AgentId));
-        }
+        _ = fakeAgentRepository.Received(1)
+            .GetAgentDomainsByIdAsync(Arg.Is(query.AgentId));
     }
 }

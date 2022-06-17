@@ -16,92 +16,91 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Extensions;
 using TGS.Services.Operations.Extensions;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddBackendOfficeServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        public static IServiceCollection AddBackendOfficeServices(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            services.AddTgsRepository(configuration, "Tgs");
+        services.AddTgsRepository(configuration, "Tgs");
 
-            services.AddScoped<IUploadService, UploadService>();
-            services.AddScoped<ExceptionMiddleware>();
+        services.AddScoped<IUploadService, UploadService>();
+        services.AddScoped<ExceptionMiddleware>();
 
-            services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
-            services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
-            services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
-            services.AddTransient<IResellerService, ResellerService>();
-            services.AddTransient<ILicenseeService, LicenseeService>();
-            services.AddTransient<IBrandPaymentService, BrandPaymentService>();
-            services.AddTransient<IStationLetterService, StationLetterService>();
+        services.AddTransient(typeof(ITgsCommands<>), typeof(TgsCommands<>));
+        services.AddTransient(typeof(ITgsQueries<>), typeof(TgsQueries<>));
+        services.AddTransient(typeof(ILogQueries), typeof(LogQueries));
+        services.AddTransient<IResellerService, ResellerService>();
+        services.AddTransient<ILicenseeService, LicenseeService>();
+        services.AddTransient<IBrandPaymentService, BrandPaymentService>();
+        services.AddTransient<IStationLetterService, StationLetterService>();
 
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
+        services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+        services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
-            services
-                .AddSystemJsonSerializer()
-                .AddSecurity()
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddOperations()
-                .AddApiClient()
-                .AddTransactions()
-                .AddBackOfficeApplicationServices()
-                .AddReportClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+        services
+            .AddSystemJsonSerializer()
+            .AddSecurity()
+            .AddWebApiServices()
+            .AddTgsLog()
+            .AddOperations()
+            .AddApiClient()
+            .AddTransactions()
+            .AddBackOfficeApplicationServices()
+            .AddReportClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.BaseUrl = config.GetValue<Uri>("Report:Url");
-                })
-                .AddReportAggregateClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+                options.BaseUrl = config.GetValue<Uri>("Report:Url");
+            })
+            .AddReportAggregateClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.BaseUrl = config.GetValue<Uri>("BackOffice:ReportAggregateUrl");
-                })
-                .AddPromotionClientServices((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+                options.BaseUrl = config.GetValue<Uri>("BackOffice:ReportAggregateUrl");
+            })
+            .AddPromotionClientServices((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                    config.GetSection("Promotion").Bind(options);
-                })
-                .AddPlayerBucketRepositoriesServices()
-                .AddCashServiceClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+                config.GetSection("Promotion").Bind(options);
+            })
+            .AddPlayerBucketRepositoriesServices()
+            .AddCashServiceClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.BaseUrl = config.GetValue<Uri>("BackOffice:CashBaseUrl");
-                })
-                .AddBrandCertificateClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
+                options.BaseUrl = config.GetValue<Uri>("BackOffice:CashBaseUrl");
+            })
+            .AddBrandCertificateClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
-                });
+                options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
+            });
 
-            services.AddWallet()
-                .AddTgsAgentWalletRepositories();
+        services.AddWallet()
+            .AddTgsAgentWalletRepositories();
 
-            services
-                .AddPaymentClient();
+        services
+            .AddPaymentClient();
 
-            return services;
-        }
+        return services;
+    }
 
-        public static IServiceCollection AddRedis(
-            this IServiceCollection services,
-            Action<RedisOptions, IServiceProvider> configure)
-        {
-            services
-                .AddOptions<RedisOptions>()
-                .Configure(configure)
-                .Services
-                .AddRedisServices()
-                .RegisterRedisConnectionFactory<RedisConnectionFactory>();
+    public static IServiceCollection AddRedis(
+        this IServiceCollection services,
+        Action<RedisOptions, IServiceProvider> configure)
+    {
+        services
+            .AddOptions<RedisOptions>()
+            .Configure(configure)
+            .Services
+            .AddRedisServices()
+            .RegisterRedisConnectionFactory<RedisConnectionFactory>();
 
-            return services;
-        }
+        return services;
     }
 }

@@ -1,10 +1,9 @@
 ﻿using TGS.Services.Operator;
-namespace TGS.Services.Operator.ValidateCode
-{
-    public interface IValidateCodeGenerator
-    {
-        string GenerateCode();
+namespace TGS.Services.Operator.ValidateCode;
 
-        string GenerateSecurityKey();
-    }
+public interface IValidateCodeGenerator
+{
+    string GenerateCode();
+
+    string GenerateSecurityKey();
 }

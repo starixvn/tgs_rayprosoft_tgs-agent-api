@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Outgoing
+namespace TGS.Shared.Game.Models.SexyGaming.Outgoing;
+
+public record SexyGamingGameUrlResponse : SexyGamingBaseResponse
 {
-    public record SexyGamingGameUrlResponse : SexyGamingBaseResponse
-    {
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
-    }
+    [JsonPropertyName("url")]
+    public string Url { get; set; }
 }

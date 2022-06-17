@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Models.GameProviders.Settings.SexyGaming
+namespace TGS.Core.Models.GameProviders.Settings.SexyGaming;
+
+public record SexyGamingBetLimitVenus
 {
-    public record SexyGamingBetLimitVenus
-    {
-        [JsonPropertyName("LIVE")]
-        public SexyGamingBetLimitVenusLive Live { get; set; }
-    }
+    [JsonPropertyName("LIVE")]
+    public SexyGamingBetLimitVenusLive Live { get; set; }
 }

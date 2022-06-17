@@ -11,58 +11,57 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Agent.ApplicationServices.Agent;
 
-namespace TGS.Apis.AgentApi.Filters
-{
-    public class CheckAgentEnabledFilter : IAsyncAuthorizationFilter
-    {
-        private readonly IGetService<GetAgentStatusQuery, AgentStatus> _getService;
+namespace TGS.Apis.AgentApi.Filters;
 
-        public CheckAgentEnabledFilter(IGetService<GetAgentStatusQuery, AgentStatus> getService)
+public class CheckAgentEnabledFilter : IAsyncAuthorizationFilter
+{
+    private readonly IGetService<GetAgentStatusQuery, AgentStatus> _getService;
+
+    public CheckAgentEnabledFilter(IGetService<GetAgentStatusQuery, AgentStatus> getService)
+    {
+        _getService = getService ?? throw new ArgumentNullException(nameof(getService));
+    }
+
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+    {
+        var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizeAgentTokenAttribute>()
+            .LastOrDefault();
+
+        if (authAttr == null || authAttr.AllowNullOrEmpty)
         {
-            _getService = getService ?? throw new ArgumentNullException(nameof(getService));
+            return;
         }
 
-        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        var agentCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<CheckAgentEnabledAttribute>()
+            .LastOrDefault();
+
+        var agentTokenData = context.HttpContext.Items.GetAgentTokenData();
+
+        var agentId = agentTokenData.AgentId;
+
+        var status = await _getService.GetAsync(new GetAgentStatusQuery(agentId));
+
+        if (status == AgentStatus.Disabled && agentCheckEnabledAttr != null)
         {
-            var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizeAgentTokenAttribute>()
-                .LastOrDefault();
-
-            if (authAttr == null || authAttr.AllowNullOrEmpty)
-            {
-                return;
-            }
-
-            var agentCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<CheckAgentEnabledAttribute>()
-                .LastOrDefault();
-
-            var agentTokenData = context.HttpContext.Items.GetAgentTokenData();
-
-            var agentId = agentTokenData.AgentId;
-
-            var status = await _getService.GetAsync(new GetAgentStatusQuery(agentId));
-
-            if (status == AgentStatus.Disabled && agentCheckEnabledAttr != null)
-            {
-                context.Result = new ObjectResult(
-                    new TgsResponse
-                    {
-                        Error = (int)TgsApiError.UserBlocked,
-                        ErrorMessage = string.Empty,
-                        ErrorMessageKey = "UserBlocked"
-                    })
-                { StatusCode = StatusCodes.Status403Forbidden };
-            }
-            else if (status == AgentStatus.InBlacklist)
-            {
-                context.Result = new ObjectResult(
-                    new TgsResponse
-                    {
-                        Error = (int)TgsApiError.UserBanned,
-                        ErrorMessage = string.Empty,
-                        ErrorMessageKey = "AccessDenied"
-                    })
-                { StatusCode = StatusCodes.Status403Forbidden };
-            }
+            context.Result = new ObjectResult(
+                new TgsResponse
+                {
+                    Error = (int)TgsApiError.UserBlocked,
+                    ErrorMessage = string.Empty,
+                    ErrorMessageKey = "UserBlocked"
+                })
+            { StatusCode = StatusCodes.Status403Forbidden };
+        }
+        else if (status == AgentStatus.InBlacklist)
+        {
+            context.Result = new ObjectResult(
+                new TgsResponse
+                {
+                    Error = (int)TgsApiError.UserBanned,
+                    ErrorMessage = string.Empty,
+                    ErrorMessageKey = "AccessDenied"
+                })
+            { StatusCode = StatusCodes.Status403Forbidden };
         }
     }
 }

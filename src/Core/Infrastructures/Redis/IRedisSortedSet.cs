@@ -1,30 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis;
+
+public interface IRedisSortedSet<T>
 {
-    public interface IRedisSortedSet<T>
-    {
-        void SetKeyPrefix(string keyPrefix);
+    void SetKeyPrefix(string keyPrefix);
 
-        string GetKey();
+    string GetKey();
 
-        Task<T> GetWithMinScoreAsync();
+    Task<T> GetWithMinScoreAsync();
 
-        Task<T> GetWithMaxScoreAsync();
+    Task<T> GetWithMaxScoreAsync();
 
-        Task TrimLowerAsync(int targetLength);
+    Task TrimLowerAsync(int targetLength);
 
-        Task TrimUpperAsync(int targetLength);
+    Task TrimUpperAsync(int targetLength);
 
-        Task<int> CountAsync();
+    Task<int> CountAsync();
 
-        Task AddAsync(double score, T item);
+    Task AddAsync(double score, T item);
 
-        Task AddRangeAsync(IEnumerable<ScoredItem<T>> items);
+    Task AddRangeAsync(IEnumerable<ScoredItem<T>> items);
 
-        Task<T[]> TakeAsync(int count);
+    Task<T[]> TakeAsync(int count);
 
-        Task<T[]> TakeDescendingAsync(int count);
-    }
+    Task<T[]> TakeDescendingAsync(int count);
 }

@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.JDB.Incoming
+namespace TGS.Shared.Game.Models.JDB.Incoming;
+
+public record GetBalanceRequest : BaseActionRequest
 {
-    public record GetBalanceRequest : BaseActionRequest
-    {
-        [JsonPropertyName("currency")]
-        public string Currency { get; init; }
-    }
+    [JsonPropertyName("currency")]
+    public string Currency { get; init; }
 }

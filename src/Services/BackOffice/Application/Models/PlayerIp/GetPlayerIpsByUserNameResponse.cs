@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.PlayerIp
+namespace TGS.Services.BackOffice.Application.Models.PlayerIp;
+
+public class GetPlayerIpsByUserNameResponse : MessageResponse
 {
-    public class GetPlayerIpsByUserNameResponse : MessageResponse
-    {
-        public PlayerIpByUserNameModel[] datas { get; init; }
-    }
+    public PlayerIpByUserNameModel[] datas { get; init; }
 }

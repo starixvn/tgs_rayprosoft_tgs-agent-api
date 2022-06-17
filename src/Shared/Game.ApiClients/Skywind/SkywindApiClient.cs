@@ -11,83 +11,82 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Shared.Game.Models.Skywind.Outgoing;
 
-namespace TGS.Shared.Game.ApiClients.Skywind
+namespace TGS.Shared.Game.ApiClients.Skywind;
+
+public interface ISkywindApiClient
 {
-    public interface ISkywindApiClient
+    ValueTask<SkywindGameUrlResponse> GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request);
+    ValueTask<SkywindGamHistoryRoundDetailsResponse> GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request);
+}
+
+public sealed class SkywindApiClient : BaseApiClient, ISkywindApiClient
+{
+    private readonly string _accessTokenCacheType = "AccessToken";
+    private readonly string _gameProvider = Consts.GameProvider.Skywind;
+    private readonly IRedisCacheManager _redisCacheManager;
+    public SkywindApiClient(
+        HttpClient client,
+        IApiClientLogger logger,
+        IJsonSerializationProvider json,
+        IRedisCacheManager redisCacheManager
+        ) : base(client, logger, json)
     {
-        ValueTask<SkywindGameUrlResponse> GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request);
-        ValueTask<SkywindGamHistoryRoundDetailsResponse> GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request);
+        _redisCacheManager = redisCacheManager ?? throw new ArgumentNullException(nameof(redisCacheManager));
     }
 
-    public sealed class SkywindApiClient : BaseApiClient, ISkywindApiClient
+    async ValueTask<SkywindGameUrlResponse> ISkywindApiClient.GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request)
     {
-        private readonly string _accessTokenCacheType = "AccessToken";
-        private readonly string _gameProvider = Consts.GameProvider.Skywind;
-        private readonly IRedisCacheManager _redisCacheManager;
-        public SkywindApiClient(
-            HttpClient client,
-            IApiClientLogger logger,
-            IJsonSerializationProvider json,
-            IRedisCacheManager redisCacheManager
-            ) : base(client, logger, json)
+        var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}&language={request.Language}";
+        var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
+
+        var heard = new Dictionary<string, string> {
+         { "X-ACCESS-TOKEN", getaccessToken }
+        };
+
+
+        return await ExecuteJsonRequestAsync<SkywindGameUrl, SkywindGameUrlResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
+    }
+
+    async ValueTask<SkywindGamHistoryRoundDetailsResponse> ISkywindApiClient.GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request)
+    {
+        var path = $"/history/game/{request.RoundId}/image?language={request.Language}";
+        var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
+
+        var heard = new Dictionary<string, string> {
+         { "X-ACCESS-TOKEN", getaccessToken }
+        };
+
+
+        return await ExecuteJsonRequestAsync<SkywindGamHistoryRoundDetailsRequest, SkywindGamHistoryRoundDetailsResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.GamHistoryRoundDetails").ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the user login asynchronous.
+    /// AccessToken 有效時間:一個小时了
+    /// </summary>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns></returns>
+    private async ValueTask<string> GetAccessTokenAsync(SkywindConfiguration configuration)
+    {
+        var accessToken = default(string);
+
+        accessToken = await _redisCacheManager.SafeGetAsync(_gameProvider, _accessTokenCacheType, () => Task.FromResult(default(string))).ConfigureAwait(false);
+
+        if (string.IsNullOrEmpty(accessToken))
         {
-            _redisCacheManager = redisCacheManager ?? throw new ArgumentNullException(nameof(redisCacheManager));
-        }
-
-        async ValueTask<SkywindGameUrlResponse> ISkywindApiClient.GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request)
-        {
-            var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}&language={request.Language}";
-            var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
-
-            var heard = new Dictionary<string, string> {
-             { "X-ACCESS-TOKEN", getaccessToken }
-            };
-
-
-            return await ExecuteJsonRequestAsync<SkywindGameUrl, SkywindGameUrlResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
-        }
-
-        async ValueTask<SkywindGamHistoryRoundDetailsResponse> ISkywindApiClient.GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request)
-        {
-            var path = $"/history/game/{request.RoundId}/image?language={request.Language}";
-            var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
-
-            var heard = new Dictionary<string, string> {
-             { "X-ACCESS-TOKEN", getaccessToken }
-            };
-
-
-            return await ExecuteJsonRequestAsync<SkywindGamHistoryRoundDetailsRequest, SkywindGamHistoryRoundDetailsResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.GamHistoryRoundDetails").ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Gets the user login asynchronous.
-        /// AccessToken 有效時間:一個小时了
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns></returns>
-        private async ValueTask<string> GetAccessTokenAsync(SkywindConfiguration configuration)
-        {
-            var accessToken = default(string);
-
-            accessToken = await _redisCacheManager.SafeGetAsync(_gameProvider, _accessTokenCacheType, () => Task.FromResult(default(string))).ConfigureAwait(false);
-
-            if (string.IsNullOrEmpty(accessToken))
+            var source = new SkywindUserLoginRequest()
             {
-                var source = new SkywindUserLoginRequest()
-                {
-                    SecretKey = configuration.SecretKey,
-                    Username = configuration.Username,
-                    Password = configuration.Password
-                };
-                var response = await ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " /login", source, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
-                if (!string.IsNullOrEmpty(response.AccessToken))
-                {
-                    await _redisCacheManager.SafeCacheAsync(_gameProvider, _accessTokenCacheType, TimeSpan.FromMinutes(45), response.AccessToken).ConfigureAwait(false);
-                    accessToken = response.AccessToken;
-                }
+                SecretKey = configuration.SecretKey,
+                Username = configuration.Username,
+                Password = configuration.Password
+            };
+            var response = await ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " /login", source, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(response.AccessToken))
+            {
+                await _redisCacheManager.SafeCacheAsync(_gameProvider, _accessTokenCacheType, TimeSpan.FromMinutes(45), response.AccessToken).ConfigureAwait(false);
+                accessToken = response.AccessToken;
             }
-            return accessToken;
         }
+        return accessToken;
     }
 }

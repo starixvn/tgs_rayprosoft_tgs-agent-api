@@ -6,21 +6,20 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.KY.Commons;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
-{
-    public record KYFundCheckingResponse : KYBaseDataResponse
-    {
-        /// <summary>
-        /// Gets or sets the status.
-        /// 状态码（-1:不存在、0:成功、2:失败、3:处理中）
-        /// </summary>
-        /// <value>
-        /// The status.
-        /// </value>
-        [JsonPropertyName("status")]
-        public int Status { get; init; }
+namespace TGS.Shared.Game.Models.KY.Outgoing;
 
-        [JsonPropertyName("money")]
-        public decimal? Amount { get; init; }
-    }
+public record KYFundCheckingResponse : KYBaseDataResponse
+{
+    /// <summary>
+    /// Gets or sets the status.
+    /// 状态码（-1:不存在、0:成功、2:失败、3:处理中）
+    /// </summary>
+    /// <value>
+    /// The status.
+    /// </value>
+    [JsonPropertyName("status")]
+    public int Status { get; init; }
+
+    [JsonPropertyName("money")]
+    public decimal? Amount { get; init; }
 }

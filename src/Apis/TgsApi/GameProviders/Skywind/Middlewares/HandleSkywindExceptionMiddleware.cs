@@ -10,40 +10,39 @@ using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.Skywind.Common;
 using TGS.Shared.Game.Models.Skywind.Enums;
 
-namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
+namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares;
+
+public sealed class HandleSkywindExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
 {
-    public sealed class HandleSkywindExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
+    private readonly IGamePlayActions _action;
+
+    public HandleSkywindExceptionMiddleware(
+        Func<string, IErrorMapper> mapper,
+        ITgsLog log,
+        IGamePlayActions action)
+        : base(mapper, Consts.GameProvider.Skywind, log, "skywind")
     {
-        private readonly IGamePlayActions _action;
+        _action = action;
+    }
 
-        public HandleSkywindExceptionMiddleware(
-            Func<string, IErrorMapper> mapper,
-            ITgsLog log,
-            IGamePlayActions action)
-            : base(mapper, Consts.GameProvider.Skywind, log, "skywind")
+    protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
+        Exception exception)
+    {
+        var error = (GameApiError)errorCode;
+        var message = ErrorMapper.GetMessageByException(exception);
+        if (errorCode == 101 || errorCode == 900)
         {
-            _action = action;
+            error = GameApiError.GameTokenExpired;
+            message = GameApiError.GameTokenExpired.Description();
         }
 
-        protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
-            Exception exception)
+        var response = new SkywindSingleWalletResponse()
         {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
-            if (errorCode == 101 || errorCode == 900)
-            {
-                error = GameApiError.GameTokenExpired;
-                message = GameApiError.GameTokenExpired.Description();
-            }
+            ErrorCode = ((int)error),
+            ErrorMsg = (!string.IsNullOrEmpty(error.Description())) ? error.Description() : message
+        };
 
-            var response = new SkywindSingleWalletResponse()
-            {
-                ErrorCode = ((int)error),
-                ErrorMsg = (!string.IsNullOrEmpty(error.Description())) ? error.Description() : message
-            };
-
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(response, response.GetType());
-        }
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(response, response.GetType());
     }
 }

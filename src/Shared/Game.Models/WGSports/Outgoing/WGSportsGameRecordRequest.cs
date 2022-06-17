@@ -6,23 +6,22 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.WGSports.Enums;
 
-namespace TGS.Shared.Game.Models.WGSports.Outgoing
+namespace TGS.Shared.Game.Models.WGSports.Outgoing;
+
+public record WGSportsGameRecordRequest
 {
-    public record WGSportsGameRecordRequest
-    {
-        /// <summary>
-        /// The game record time
-        /// </summary>
-        public GameRecordTime GameRecordTime { get; init; }
+    /// <summary>
+    /// The game record time
+    /// </summary>
+    public GameRecordTime GameRecordTime { get; init; }
 
-        /// <summary>
-        /// The start time
-        /// </summary>
-        public string StartTime { get; init; }
+    /// <summary>
+    /// The start time
+    /// </summary>
+    public string StartTime { get; init; }
 
-        /// <summary>
-        /// The end time
-        /// </summary>
-        public string EndTime { get; init; }
-    }
+    /// <summary>
+    /// The end time
+    /// </summary>
+    public string EndTime { get; init; }
 }

@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons
+namespace TGS.Shared.Game.Models.Evolution.Commons;
+
+public record EvolutionGame
 {
-    public record EvolutionGame
-    {
-        [JsonPropertyName("id")]
-        public string ExternalRoundId { get; set; }
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        [JsonPropertyName("details")]
-        public EvolutionGameDetail GameDetail { get; set; }
-    }
+    [JsonPropertyName("id")]
+    public string ExternalRoundId { get; set; }
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+    [JsonPropertyName("details")]
+    public EvolutionGameDetail GameDetail { get; set; }
 }

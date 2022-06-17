@@ -2,31 +2,30 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
+namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations;
+
+internal class TransactionPromotionMap : IEntityTypeConfiguration<TransactionPromotion>
 {
-    internal class TransactionPromotionMap : IEntityTypeConfiguration<TransactionPromotion>
+    void IEntityTypeConfiguration<TransactionPromotion>.Configure(EntityTypeBuilder<TransactionPromotion> builder)
     {
-        void IEntityTypeConfiguration<TransactionPromotion>.Configure(EntityTypeBuilder<TransactionPromotion> builder)
-        {
-            builder.ToTable("transaction_promotions");
+        builder.ToTable("transaction_promotions");
 
-            builder.HasKey(e => new
-                {
-                    e.TransactionId,
-                    e.PromotionId
-                })
-                .HasName("pk_transaction_promotions");
+        builder.HasKey(e => new
+            {
+                e.TransactionId,
+                e.PromotionId
+            })
+            .HasName("pk_transaction_promotions");
 
-            builder.HasIndex(e => e.TransactionId)
-                .HasDatabaseName("ix_transactions_transaction_id");
+        builder.HasIndex(e => e.TransactionId)
+            .HasDatabaseName("ix_transactions_transaction_id");
 
-            builder
-                .HasOne(e => e.Promotion)
-                .WithMany()
-                .HasConstraintName("fk_transaction_promotion_promotion_id");
+        builder
+            .HasOne(e => e.Promotion)
+            .WithMany()
+            .HasConstraintName("fk_transaction_promotion_promotion_id");
 
-            builder.HasIndex(e => e.PromotionId)
-                .HasDatabaseName("ix_transaction_Promotion_id");
-        }
+        builder.HasIndex(e => e.PromotionId)
+            .HasDatabaseName("ix_transaction_Promotion_id");
     }
 }

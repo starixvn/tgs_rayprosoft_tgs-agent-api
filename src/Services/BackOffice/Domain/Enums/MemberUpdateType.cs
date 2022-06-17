@@ -1,9 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Domain.Enums
+﻿namespace TGS.Services.BackOffice.Domain.Enums;
+
+public enum MemberUpdateType
 {
-    public enum MemberUpdateType
-    {
-        Info = 1,
-        Contact = 2,
-        Password = 3
-    }
+    Info = 1,
+    Contact = 2,
+    Password = 3
 }

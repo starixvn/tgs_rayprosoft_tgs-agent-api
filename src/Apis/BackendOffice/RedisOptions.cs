@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.BackendOffice
+﻿namespace TGS.Apis.BackendOffice;
+
+public class RedisOptions
 {
-    public class RedisOptions
-    {
-        public string ConnectionString { get; set; } = "localhost";
-    }
+    public string ConnectionString { get; set; } = "localhost";
 }

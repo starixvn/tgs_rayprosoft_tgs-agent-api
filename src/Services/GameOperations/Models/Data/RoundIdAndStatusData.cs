@@ -1,12 +1,11 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.GameOperations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data;
+
+internal record RoundIdAndStatusData
 {
-    internal record RoundIdAndStatusData
-    {
-        internal Guid RoundId { get; init; }
-        internal string ExternalRoundId { get; init; }
-        internal RoundStatus Status { get; init; }
-    }
+    internal Guid RoundId { get; init; }
+    internal string ExternalRoundId { get; init; }
+    internal RoundStatus Status { get; init; }
 }

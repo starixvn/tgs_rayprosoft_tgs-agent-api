@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.BrandPayments
-{
-    public record AllPaymentChannelsQuery();
-}
+﻿namespace TGS.Services.Operator.ApplicationServices.BrandPayments;
+
+public record AllPaymentChannelsQuery();

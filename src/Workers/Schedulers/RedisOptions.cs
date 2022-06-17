@@ -1,7 +1,6 @@
-﻿namespace TGS.Workers.Schedulers
+﻿namespace TGS.Workers.Schedulers;
+
+public class RedisOptions
 {
-    public class RedisOptions
-    {
-        public string ConnectionString { get; set; } = "localhost";
-    }
+    public string ConnectionString { get; set; } = "localhost";
 }

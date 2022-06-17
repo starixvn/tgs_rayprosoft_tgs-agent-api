@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.Settings
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Settings;
+
+public class GetSettingResponse : MessageResponse
 {
-    public class GetSettingResponse : MessageResponse
-    {
-        public SettingModel Setting { get; set; }
-    }
+    public SettingModel Setting { get; set; }
 }

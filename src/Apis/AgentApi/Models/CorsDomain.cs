@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.AgentApi.Models
+﻿namespace TGS.Apis.AgentApi.Models;
+
+public class CorsDomain
 {
-    public class CorsDomain
-    {
-        public string[] Urls { get; set; }
-    }
+    public string[] Urls { get; set; }
 }

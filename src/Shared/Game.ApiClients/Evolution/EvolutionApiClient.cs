@@ -9,55 +9,54 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Shared.Game.Models.Evolution.Outgoing;
 
-namespace TGS.Shared.Game.ApiClients.Evolution
+namespace TGS.Shared.Game.ApiClients.Evolution;
+
+public interface IEvolutionApiClient
 {
-    public interface IEvolutionApiClient
-    {
-        ValueTask<EvolutionGameUrlResponse> GetGameUrlAsync(
-            EvolutionConfiguration configuration, EvolutionGameUrlRequest request);
+    ValueTask<EvolutionGameUrlResponse> GetGameUrlAsync(
+        EvolutionConfiguration configuration, EvolutionGameUrlRequest request);
 
-        ValueTask<EvolutionGamHistoryRoundResponse> GetGamHistoryRoundAsync(
-            EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request);
+    ValueTask<EvolutionGamHistoryRoundResponse> GetGamHistoryRoundAsync(
+        EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request);
+}
+
+public sealed class EvolutionApiClient : BaseApiClient, IEvolutionApiClient
+{
+    private readonly string _gameProvider = Consts.GameProvider.Evolution;
+
+    public EvolutionApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+        : base(client, logger, json)
+    {
     }
 
-    public sealed class EvolutionApiClient : BaseApiClient, IEvolutionApiClient
+    async ValueTask<EvolutionGameUrlResponse> IEvolutionApiClient.GetGameUrlAsync(
+        EvolutionConfiguration configuration, EvolutionGameUrlRequest request)
+        => await ExecuteJsonRequestAsync<EvolutionGameUrlRequest, EvolutionGameUrlResponse>(HttpMethod.Post,
+            configuration.Ua2AuthenticationUrl,
+            string.Empty,
+            request,
+            logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
+
+    async ValueTask<EvolutionGamHistoryRoundResponse> IEvolutionApiClient.GetGamHistoryRoundAsync(
+        EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request)
     {
-        private readonly string _gameProvider = Consts.GameProvider.Evolution;
+        var url = $"{configuration.ApiUrl}api/gamehistory/v1/players/{request.PlayerCode}/games/{request.RoundId}";
+        var headers = GettHeaders(configuration.CasinoID, configuration.GameHistoryApiToken);
 
-        public EvolutionApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
-            : base(client, logger, json)
+        return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(
+            HttpMethod.Get,
+            url,
+            null,
+            headers,
+            logPrefix: $"{_gameProvider}.GetGamHistoryRound").ConfigureAwait(false);
+    }
+
+    private Dictionary<string, string> GettHeaders(string casinoKey, string apiToken)
+        => new Dictionary<string, string>
         {
-        }
-
-        async ValueTask<EvolutionGameUrlResponse> IEvolutionApiClient.GetGameUrlAsync(
-            EvolutionConfiguration configuration, EvolutionGameUrlRequest request)
-            => await ExecuteJsonRequestAsync<EvolutionGameUrlRequest, EvolutionGameUrlResponse>(HttpMethod.Post,
-                configuration.Ua2AuthenticationUrl,
-                string.Empty,
-                request,
-                logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
-
-        async ValueTask<EvolutionGamHistoryRoundResponse> IEvolutionApiClient.GetGamHistoryRoundAsync(
-            EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request)
-        {
-            var url = $"{configuration.ApiUrl}api/gamehistory/v1/players/{request.PlayerCode}/games/{request.RoundId}";
-            var headers = GettHeaders(configuration.CasinoID, configuration.GameHistoryApiToken);
-
-            return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(
-                HttpMethod.Get,
-                url,
-                null,
-                headers,
-                logPrefix: $"{_gameProvider}.GetGamHistoryRound").ConfigureAwait(false);
-        }
-
-        private Dictionary<string, string> GettHeaders(string casinoKey, string apiToken)
-            => new Dictionary<string, string>
             {
-                {
-                    "Authorization",
-                    $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{casinoKey}:{apiToken}"))}"
-                }
-            };
-    }
+                "Authorization",
+                $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{casinoKey}:{apiToken}"))}"
+            }
+        };
 }

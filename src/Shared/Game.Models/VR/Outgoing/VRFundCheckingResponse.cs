@@ -5,17 +5,16 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.VR.Outgoing
+namespace TGS.Shared.Game.Models.VR.Outgoing;
+
+public record VRFundCheckingResponse
 {
-    public record VRFundCheckingResponse
-    {
-        [JsonPropertyName("totalRecords")]
-        public int TotalRecords { get; set; }
-        [JsonPropertyName("recordPage")]
-        public int RecordPage { get; set; }
-        [JsonPropertyName("recordCountPerPage")]
-        public int RecordCountPerPage { get; set; }
-        [JsonPropertyName("records")]
-        public VRFundCheckingRecordResponse[] Records { get; set; }
-    }
+    [JsonPropertyName("totalRecords")]
+    public int TotalRecords { get; set; }
+    [JsonPropertyName("recordPage")]
+    public int RecordPage { get; set; }
+    [JsonPropertyName("recordCountPerPage")]
+    public int RecordCountPerPage { get; set; }
+    [JsonPropertyName("records")]
+    public VRFundCheckingRecordResponse[] Records { get; set; }
 }

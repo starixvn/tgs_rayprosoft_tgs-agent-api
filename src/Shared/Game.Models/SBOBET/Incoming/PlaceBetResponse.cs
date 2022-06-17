@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.SBOBET.Incoming
+namespace TGS.Shared.Game.Models.SBOBET.Incoming;
+
+public record PlaceBetResponse : BaseResponse
 {
-    public record PlaceBetResponse : BaseResponse
-    {
-        [JsonPropertyName("betAmount")]
-        public decimal BetAmount { get; init; }
-    }
+    [JsonPropertyName("betAmount")]
+    public decimal BetAmount { get; init; }
 }

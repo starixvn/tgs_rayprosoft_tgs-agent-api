@@ -1,7 +1,6 @@
-﻿namespace TGS.IdentityVerifiers
+﻿namespace TGS.IdentityVerifiers;
+
+public class AlwaysFailVerifier : IIdentityVerifier
 {
-    public class AlwaysFailVerifier : IIdentityVerifier
-    {
-        public bool Verify(string id) => false;
-    }
+    public bool Verify(string id) => false;
 }

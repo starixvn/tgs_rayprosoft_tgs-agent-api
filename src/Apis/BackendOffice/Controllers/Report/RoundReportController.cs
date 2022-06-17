@@ -9,63 +9,62 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportRound;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.BackendOffice.Controllers.Report
+namespace TGS.Apis.BackendOffice.Controllers.Report;
+
+[Route("api/[controller]")]
+[ApiController]
+public class RoundReportController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RoundReportController : BaseContextController
+    [HttpGet("closedRounds")]
+    [Description("Get closed rounds")]
+    public async Task<PagedResponse<ClosedRoundReportModel>> GetClosedRoundsAsync(
+        [FromServices] IGetService<GetClosedRoundsReportRequest, PagedResponse<ClosedRoundReportModel>>
+            closedRoundsService,
+        [FromQuery] GetClosedRoundsReportRequest request)
+        => await closedRoundsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
+    [HttpGet("openRounds")]
+    [Description("Get open rounds")]
+    public async Task<PagedResponse<OpenRoundReportModel>> GetOpenRoundsAsync(
+        [FromServices] IGetService<GetOpenRoundsReportRequest, PagedResponse<OpenRoundReportModel>>
+            openRoundsService,
+        [FromQuery] GetOpenRoundsReportRequest request)
+        => await openRoundsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
+    [HttpGet("{roundId}")]
+    [Description("Get a round")]
+    public async Task<JsonDocument?> GetRoundHistoryAsync(Guid roundId,
+        [FromServices] IGetService<GetRoundHistoryReportRequest, JsonDocument?>
+            roundHistoryService,
+        [FromQuery] GetRoundHistoryReportRequest request)
     {
-        [HttpGet("closedRounds")]
-        [Description("Get closed rounds")]
-        public async Task<PagedResponse<ClosedRoundReportModel>> GetClosedRoundsAsync(
-            [FromServices] IGetService<GetClosedRoundsReportRequest, PagedResponse<ClosedRoundReportModel>>
-                closedRoundsService,
-            [FromQuery] GetClosedRoundsReportRequest request)
-            => await closedRoundsService
-                .GetAsync(request)
-                .ConfigureAwait(false);
-
-        [HttpGet("openRounds")]
-        [Description("Get open rounds")]
-        public async Task<PagedResponse<OpenRoundReportModel>> GetOpenRoundsAsync(
-            [FromServices] IGetService<GetOpenRoundsReportRequest, PagedResponse<OpenRoundReportModel>>
-                openRoundsService,
-            [FromQuery] GetOpenRoundsReportRequest request)
-            => await openRoundsService
-                .GetAsync(request)
-                .ConfigureAwait(false);
-
-        [HttpGet("{roundId}")]
-        [Description("Get a round")]
-        public async Task<JsonDocument?> GetRoundHistoryAsync(Guid roundId,
-            [FromServices] IGetService<GetRoundHistoryReportRequest, JsonDocument?>
-                roundHistoryService,
-            [FromQuery] GetRoundHistoryReportRequest request)
-        {
-            request.RoundId = roundId;
-            return await roundHistoryService
-                .GetAsync(request)
-                .ConfigureAwait(false);
-        }
-
-        [HttpGet]
-        [Description("Get rounds")]
-        public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
-            [FromServices] IGetService<GetRoundsReportRequest, PagedResponse<RoundView>>
-                roundsService,
-            [FromQuery] GetRoundsReportRequest request)
-            => await roundsService
-                .GetAsync(request)
-                .ConfigureAwait(false);
-
-        [HttpGet("betRecords")]
-        [Description("Get bet records")]
-        public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
-            [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
-                betRecordsService,
-            [FromQuery] GetBetRecordsReportRequest request)
-            => await betRecordsService
-                .GetAsync(request)
-                .ConfigureAwait(false);
+        request.RoundId = roundId;
+        return await roundHistoryService
+            .GetAsync(request)
+            .ConfigureAwait(false);
     }
+
+    [HttpGet]
+    [Description("Get rounds")]
+    public async ValueTask<PagedResponse<RoundView>> GetRoundsAsync(
+        [FromServices] IGetService<GetRoundsReportRequest, PagedResponse<RoundView>>
+            roundsService,
+        [FromQuery] GetRoundsReportRequest request)
+        => await roundsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
+    [HttpGet("betRecords")]
+    [Description("Get bet records")]
+    public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
+        [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
+            betRecordsService,
+        [FromQuery] GetBetRecordsReportRequest request)
+        => await betRecordsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
 }

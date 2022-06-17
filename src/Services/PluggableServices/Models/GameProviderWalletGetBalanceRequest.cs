@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Models.Tokens;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record GameProviderWalletGetBalanceRequest
 {
-    public record GameProviderWalletGetBalanceRequest
-    {
-        [JsonPropertyName("gpcode")]
-        public string GameProviderCode { get; init; }
-        [JsonPropertyName("playercode")]
-        public string PlayerCode { get; init; }
-    }
+    [JsonPropertyName("gpcode")]
+    public string GameProviderCode { get; init; }
+    [JsonPropertyName("playercode")]
+    public string PlayerCode { get; init; }
 }

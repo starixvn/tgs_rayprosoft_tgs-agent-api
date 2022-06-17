@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.BetConstruct.Incoming
-{
-    public class ResultedSelection
-    {
-        [JsonPropertyName("SelectionId")]
-        public long SelectionId { get; set; }
+namespace TGS.Shared.Game.Models.BetConstruct.Incoming;
 
-        [JsonPropertyName("State")]
-        public int State { get; set; }
-    }
+public class ResultedSelection
+{
+    [JsonPropertyName("SelectionId")]
+    public long SelectionId { get; set; }
+
+    [JsonPropertyName("State")]
+    public int State { get; set; }
 }

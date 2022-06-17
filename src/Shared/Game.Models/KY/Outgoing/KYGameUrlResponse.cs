@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
+namespace TGS.Shared.Game.Models.KY.Outgoing;
+
+public record KYGameUrlResponse : KYBaseDataResponse
 {
-    public record KYGameUrlResponse : KYBaseDataResponse
-    {
-        [JsonPropertyName("url")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("url")]
+    public string Url { get; init; }
 }

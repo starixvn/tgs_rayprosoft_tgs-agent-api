@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.BigGaming.Incoming
+namespace TGS.Shared.Game.Models.BigGaming.Incoming;
+
+public record BigGamingOrderStatusResponse
 {
-    public record BigGamingOrderStatusResponse
-    {
-        [JsonPropertyName("result")]
-        public BigGamingOrderStatusResultResponse[] Result { get; set; }
-    }
+    [JsonPropertyName("result")]
+    public BigGamingOrderStatusResultResponse[] Result { get; set; }
 }

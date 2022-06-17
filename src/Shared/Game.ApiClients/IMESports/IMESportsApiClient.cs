@@ -12,53 +12,52 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Shared.Game.Models.IMESports.Outgoing;
 
-namespace TGS.Shared.Game.ApiClients.IMESports
+namespace TGS.Shared.Game.ApiClients.IMESports;
+
+public interface IIMESportsApiClient
 {
-    public interface IIMESportsApiClient
+    ValueTask<NewLaunchGameResponse> NewLaunchGameAsync(Uri apiUrl, PlatformType platformType, NewLaunchGameRequest request);
+
+    ValueTask<BaseResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
+
+    ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
+}
+
+public sealed class IMESportsApiClient : BaseApiClient, IIMESportsApiClient
+{
+    public IMESportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+        : base(client, logger, json)
     {
-        ValueTask<NewLaunchGameResponse> NewLaunchGameAsync(Uri apiUrl, PlatformType platformType, NewLaunchGameRequest request);
-
-        ValueTask<BaseResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
-
-        ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
     }
 
-    public sealed class IMESportsApiClient : BaseApiClient, IIMESportsApiClient
+    ValueTask<NewLaunchGameResponse> IIMESportsApiClient.NewLaunchGameAsync(Uri apiUrl, PlatformType platformType, NewLaunchGameRequest request)
     {
-        public IMESportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
-            : base(client, logger, json)
-        {
-        }
+        var prefix = $"{Consts.GameProvider.IMESports}.NewLaunchGame";
+        var path = platformType == PlatformType.Desktop ? "NewLaunchGame" : "NewLaunchMobileGame";
+        return ExecuteJsonRequestAsync<NewLaunchGameRequest, NewLaunchGameResponse>(HttpMethod.Post, apiUrl,
+            $"/Game/{path}", request, logPrefix: prefix);
+    }
 
-        ValueTask<NewLaunchGameResponse> IIMESportsApiClient.NewLaunchGameAsync(Uri apiUrl, PlatformType platformType, NewLaunchGameRequest request)
-        {
-            var prefix = $"{Consts.GameProvider.IMESports}.NewLaunchGame";
-            var path = platformType == PlatformType.Desktop ? "NewLaunchGame" : "NewLaunchMobileGame";
-            return ExecuteJsonRequestAsync<NewLaunchGameRequest, NewLaunchGameResponse>(HttpMethod.Post, apiUrl,
-                $"/Game/{path}", request, logPrefix: prefix);
-        }
+    ValueTask<BaseResponse> IIMESportsApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
+    {
+        var prefix = $"{Consts.GameProvider.IMESports}.RegisterPlayer";
+        return ExecuteJsonRequestAsync<RegisterPlayerRequest, BaseResponse>(
+            HttpMethod.Post, apiUrl,
+            "/Player/Register",
+            request, logPrefix: prefix);
+    }
 
-        ValueTask<BaseResponse> IIMESportsApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
+    ValueTask<GetRoundHistoryResponse> IIMESportsApiClient.GetRoundHistoryAsync(Uri apiUrl,
+        GetRoundHistoryRequest request)
+    {
+        var options = new JsonSerializerOptions
         {
-            var prefix = $"{Consts.GameProvider.IMESports}.RegisterPlayer";
-            return ExecuteJsonRequestAsync<RegisterPlayerRequest, BaseResponse>(
-                HttpMethod.Post, apiUrl,
-                "/Player/Register",
-                request, logPrefix: prefix);
-        }
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
 
-        ValueTask<GetRoundHistoryResponse> IIMESportsApiClient.GetRoundHistoryAsync(Uri apiUrl,
-            GetRoundHistoryRequest request)
-        {
-            var options = new JsonSerializerOptions
-            {
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
-            };
-
-            var prefix = $"{Consts.GameProvider.IMESports}.RoundHistory";
-            return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(
-                HttpMethod.Post, apiUrl, "/Report/GetBetLog",
-                request, logPrefix: prefix, options: options);
-        }
+        var prefix = $"{Consts.GameProvider.IMESports}.RoundHistory";
+        return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(
+            HttpMethod.Post, apiUrl, "/Report/GetBetLog",
+            request, logPrefix: prefix, options: options);
     }
 }

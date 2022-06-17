@@ -8,23 +8,22 @@ using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions
+namespace TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
+
+public record SexyGamingCancelBet
 {
-    public record SexyGamingCancelBet
-    {
-        [JsonPropertyName("platformTxId")]
-        public string PlatformTxId { get; set; }
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-        [JsonPropertyName("platform")]
-        public string Platform { get; set; }
-        [JsonPropertyName("gameType")]
-        public string GameType { get; set; }
-        [JsonPropertyName("gameCode")]
-        public string GameCode { get; set; }
-        [JsonPropertyName("roundId")]
-        public string RoundId { get; set; }
-        [JsonPropertyName("gameInfo")]
-        public JsonDocument GameInfo { get; set; }
-    }
+    [JsonPropertyName("platformTxId")]
+    public string PlatformTxId { get; set; }
+    [JsonPropertyName("userId")]
+    public string UserId { get; set; }
+    [JsonPropertyName("platform")]
+    public string Platform { get; set; }
+    [JsonPropertyName("gameType")]
+    public string GameType { get; set; }
+    [JsonPropertyName("gameCode")]
+    public string GameCode { get; set; }
+    [JsonPropertyName("roundId")]
+    public string RoundId { get; set; }
+    [JsonPropertyName("gameInfo")]
+    public JsonDocument GameInfo { get; set; }
 }

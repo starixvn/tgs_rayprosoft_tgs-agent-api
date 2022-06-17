@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum PlayerListCondition
 {
-    public enum PlayerListCondition
-    {
-        MatchAll = 0,
-        MatchOne = 1
-    }
+    MatchAll = 0,
+    MatchOne = 1
 }

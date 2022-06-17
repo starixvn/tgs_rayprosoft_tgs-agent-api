@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent;
+
+public interface IGameProviderRepository
 {
-    public interface IGameProviderRepository
-    {
-        IAsyncEnumerable<GameProviderInfo> GetGameProvidersAsync(Guid brandId);
-    }
+    IAsyncEnumerable<GameProviderInfo> GetGameProvidersAsync(Guid brandId);
 }

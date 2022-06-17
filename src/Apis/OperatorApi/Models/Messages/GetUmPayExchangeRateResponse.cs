@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public class GetUmPayExchangeRateResponse
 {
-    public class GetUmPayExchangeRateResponse
-    {
-        public JsonDocument Rate { get; set; }
-    }
+    public JsonDocument Rate { get; set; }
 }

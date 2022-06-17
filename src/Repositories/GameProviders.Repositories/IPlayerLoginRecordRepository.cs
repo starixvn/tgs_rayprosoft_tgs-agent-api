@@ -2,12 +2,11 @@
 using System.Threading.Tasks;
 using TGS.GameProviders.Repositories.Models;
 
-namespace TGS.GameProviders.Repositories
-{
-    public interface IPlayerLoginRecordRepository
-    {
-        Task<PlayerLoginRecordModel> GetAsync(Guid loginRecordId);
+namespace TGS.GameProviders.Repositories;
 
-        Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode);
-    }
+public interface IPlayerLoginRecordRepository
+{
+    Task<PlayerLoginRecordModel> GetAsync(Guid loginRecordId);
+
+    Task<PlayerLoginRecordModel[]> QueryEnabledAsync(string playerCode);
 }

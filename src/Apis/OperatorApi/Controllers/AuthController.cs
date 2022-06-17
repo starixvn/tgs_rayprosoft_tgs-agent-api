@@ -11,57 +11,56 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Auth;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [Produces(MediaTypeNames.Application.Json)]
-    public class AuthController : ControllerBase
+    [HttpPost("jwt")]
+    [AllowAnonymous]
+    public async Task<AuthResponse> AuthenticateAsync(
+        [FromServices] IGetService<GetAuthQuery, ClaimsIdentity> getAuthQueryService,
+        [FromServices] IMaintenanceRedisRepository maintenanceRedisService,
+        [FromServices] IGetService<MakeBrandAuthTokenCommand, AuthInfo> makeTokenService,
+        [FromBody] AuthRequest request)
     {
-        [HttpPost("jwt")]
-        [AllowAnonymous]
-        public async Task<AuthResponse> AuthenticateAsync(
-            [FromServices] IGetService<GetAuthQuery, ClaimsIdentity> getAuthQueryService,
-            [FromServices] IMaintenanceRedisRepository maintenanceRedisService,
-            [FromServices] IGetService<MakeBrandAuthTokenCommand, AuthInfo> makeTokenService,
-            [FromBody] AuthRequest request)
-        {
-            var query = new GetAuthQuery(
-                request.ApiKey,
-                request.Currency);
+        var query = new GetAuthQuery(
+            request.ApiKey,
+            request.Currency);
 
-            var id = await getAuthQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
+        var id = await getAuthQueryService
+            .GetAsync(query)
+            .ConfigureAwait(false);
 
-            var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+        var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
 
-            var isMaintenance = !string.IsNullOrEmpty(
-                await maintenanceRedisService
-                    .GetBrandMaintenanceAsync(brandId)
-                    .ConfigureAwait(false));
+        var isMaintenance = !string.IsNullOrEmpty(
+            await maintenanceRedisService
+                .GetBrandMaintenanceAsync(brandId)
+                .ConfigureAwait(false));
 
-            var tokenInfo = await makeTokenService.GetAsync(
-                new MakeBrandAuthTokenCommand(
-                    brandId,
-                    id,
-                    Consts.Site)).ConfigureAwait(false);
+        var tokenInfo = await makeTokenService.GetAsync(
+            new MakeBrandAuthTokenCommand(
+                brandId,
+                id,
+                Consts.Site)).ConfigureAwait(false);
 
-            if (isMaintenance)
-                return this.Fail<AuthResponse, AuthResponse>(
-                    StatusCodes.Status503ServiceUnavailable,
-                    new AuthResponse()
-                    {
-                        Token = tokenInfo.Token,
-                        ExpiredOn = tokenInfo.ExpiredOn
-                    });
-            else
-                return new AuthResponse()
+        if (isMaintenance)
+            return this.Fail<AuthResponse, AuthResponse>(
+                StatusCodes.Status503ServiceUnavailable,
+                new AuthResponse()
                 {
                     Token = tokenInfo.Token,
                     ExpiredOn = tokenInfo.ExpiredOn
-                };
-        }
+                });
+        else
+            return new AuthResponse()
+            {
+                Token = tokenInfo.Token,
+                ExpiredOn = tokenInfo.ExpiredOn
+            };
     }
 }

@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
-{
+namespace TGS.Apis.BackendOffice.Controllers.BrandPayment;
+
 	public partial class BrandPaymentController
 	{
 		[HttpGet("{paymentId:guid}/auditLogs")]
@@ -57,4 +57,3 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 			};
 		}
 	}
-}

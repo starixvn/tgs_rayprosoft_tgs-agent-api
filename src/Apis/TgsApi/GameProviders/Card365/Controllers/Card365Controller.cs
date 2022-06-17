@@ -8,68 +8,67 @@ using TGS.Apis.TgsApi.GameProviders.Card365.Services;
 using TGS.Core.Models;
 using TGS.Shared.Game.Models.Card365.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
+namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers;
+
+[Route("api/365")]
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+[AllowAnonymous]
+[FeatureGate(Consts.GameProvider.Card365)]
+public class Card365Controller : ControllerBase
 {
-    [Route("api/365")]
-    [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
-    [AllowAnonymous]
-    [FeatureGate(Consts.GameProvider.Card365)]
-    public class Card365Controller : ControllerBase
+    [Consumes("application/x-www-form-urlencoded")]
+    [HttpPost("entrance")]
+    public ValueTask<ErrorResponse> EntranceAsync([FromForm] EntranceRequest request)
+        => ValueTask.FromResult(new ErrorResponse());
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("balance")]
+    public ValueTask<BalanceResponse> GetBalanceAsync(
+        [FromServices] ICard365BetActionServices services,
+        GetBalanceRequest request)
     {
-        [Consumes("application/x-www-form-urlencoded")]
-        [HttpPost("entrance")]
-        public ValueTask<ErrorResponse> EntranceAsync([FromForm] EntranceRequest request)
-            => ValueTask.FromResult(new ErrorResponse());
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        return services.GetBalanceAsync(playerCode);
+    }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("balance")]
-        public ValueTask<BalanceResponse> GetBalanceAsync(
-            [FromServices] ICard365BetActionServices services,
-            GetBalanceRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            return services.GetBalanceAsync(playerCode);
-        }
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("bet")]
+    public ValueTask<BalanceResponse> LockAmountAsync(
+        [FromServices] ICard365BetActionServices services,
+        BetRequest request)
+    {
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        return services.LockAmountAsync(playerCode, request);
+    }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("bet")]
-        public ValueTask<BalanceResponse> LockAmountAsync(
-            [FromServices] ICard365BetActionServices services,
-            BetRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            return services.LockAmountAsync(playerCode, request);
-        }
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("cancelbet")]
+    public ValueTask<BalanceResponse> CancelLockAmountAsync(
+        [FromServices] ICard365BetActionServices services,
+        CancelBetRequest request)
+    {
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        return services.CancelLockAmountAsync(playerCode, request);
+    }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("cancelbet")]
-        public ValueTask<BalanceResponse> CancelLockAmountAsync(
-            [FromServices] ICard365BetActionServices services,
-            CancelBetRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            return services.CancelLockAmountAsync(playerCode, request);
-        }
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("settle")]
+    public ValueTask<BalanceResponse> PlaceBetAndSettleAsync(
+        [FromServices] ICard365BetActionServices services,
+        SettleBetRequest request)
+    {
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        return services.PlaceBetAndSettleAsync(playerCode, request);
+    }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("settle")]
-        public ValueTask<BalanceResponse> PlaceBetAndSettleAsync(
-            [FromServices] ICard365BetActionServices services,
-            SettleBetRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            return services.PlaceBetAndSettleAsync(playerCode, request);
-        }
-
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("voidgame")]
-        public ValueTask<BalanceResponse> VoidRoundAsync(
-            [FromServices] ICard365BetActionServices services,
-            VoidGameRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            return services.VoidRoundAsync(playerCode, request);
-        }
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("voidgame")]
+    public ValueTask<BalanceResponse> VoidRoundAsync(
+        [FromServices] ICard365BetActionServices services,
+        VoidGameRequest request)
+    {
+        var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+        return services.VoidRoundAsync(playerCode, request);
     }
 }

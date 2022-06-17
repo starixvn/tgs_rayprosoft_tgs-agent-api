@@ -1,19 +1,18 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Saba.Incoming
+namespace TGS.Shared.Game.Models.Saba.Incoming;
+
+public record GetBalanceRequest : BaseRequest
 {
-    public record GetBalanceRequest : BaseRequest
+    [JsonPropertyName("message")]
+    public Data Body { get; init; }
+
+    public record Data
     {
-        [JsonPropertyName("message")]
-        public Data Body { get; init; }
+        [JsonPropertyName("action")]
+        public string Action { get; init; }
 
-        public record Data
-        {
-            [JsonPropertyName("action")]
-            public string Action { get; init; }
-
-            [JsonPropertyName("userId")]
-            public string UserId { get; init; }
-        }
+        [JsonPropertyName("userId")]
+        public string UserId { get; init; }
     }
 }

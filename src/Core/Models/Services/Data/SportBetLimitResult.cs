@@ -1,15 +1,14 @@
-﻿namespace TGS.Core.Models.Services.Data
+﻿namespace TGS.Core.Models.Services.Data;
+
+public record SportBetLimitResult
 {
-    public record SportBetLimitResult
-    {
-        public string SportTypeExternalId { get; init; }
+    public string SportTypeExternalId { get; init; }
 
-        public string MarketTypeExternalId { get; init; }
+    public string MarketTypeExternalId { get; init; }
 
-        public int MinBet { get; init; }
+    public int MinBet { get; init; }
 
-        public int MaxBet { get; init; }
+    public int MaxBet { get; init; }
 
-        public int MaxBetPerMatch { get; init; }
-    }
+    public int MaxBetPerMatch { get; init; }
 }

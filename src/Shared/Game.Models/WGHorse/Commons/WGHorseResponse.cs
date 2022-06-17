@@ -5,12 +5,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.WGHorse.Commons
+namespace TGS.Shared.Game.Models.WGHorse.Commons;
+
+public record WGHorseResponse
 {
-    public record WGHorseResponse
-    {
-        [JsonPropertyName("ReturnCode")]
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-        public int ReturnCode { get; init; }
-    }
+    [JsonPropertyName("ReturnCode")]
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public int ReturnCode { get; init; }
 }

@@ -4,24 +4,23 @@ using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Services
+namespace TGS.Services.BackOffice.Application.Services;
+
+internal class ModifyBrandLogoInfoCommandService : ICommandService<ModifyBrandLogoInfoCommand>
 {
-    internal class ModifyBrandLogoInfoCommandService : ICommandService<ModifyBrandLogoInfoCommand>
+    private readonly IBackOfficeRepository _backOfficeRepository;
+
+    public ModifyBrandLogoInfoCommandService(IBackOfficeRepository backOfficeRepository)
     {
-        private readonly IBackOfficeRepository _backOfficeRepository;
-
-        public ModifyBrandLogoInfoCommandService(IBackOfficeRepository backOfficeRepository)
-        {
-            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
-        }
-
-        public ValueTask ExecuteAsync(ModifyBrandLogoInfoCommand command, CancellationToken cancellationToken = default)
-            => _backOfficeRepository.UpdateBrandLogoInfoAsync(
-                new BrandLogoInfo(
-                    command.BrandId,
-                    command.DesktopLogoUrl,
-                    command.MobileLogoUrl,
-                    command.LoadingIconUrl),
-                command.Modifier);
+        _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
     }
+
+    public ValueTask ExecuteAsync(ModifyBrandLogoInfoCommand command, CancellationToken cancellationToken = default)
+        => _backOfficeRepository.UpdateBrandLogoInfoAsync(
+            new BrandLogoInfo(
+                command.BrandId,
+                command.DesktopLogoUrl,
+                command.MobileLogoUrl,
+                command.LoadingIconUrl),
+            command.Modifier);
 }

@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.AgentApi.Models.Messages
+namespace TGS.Apis.AgentApi.Models.Messages;
+
+public record StartSetEmailRequest
 {
-    public record StartSetEmailRequest
-    {
-        [JsonPropertyName("email")]
-        public string Email { get; init; }
-    }
+    [JsonPropertyName("email")]
+    public string Email { get; init; }
 }

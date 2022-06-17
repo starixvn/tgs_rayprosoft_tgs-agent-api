@@ -2,102 +2,107 @@
 using System.Collections.Generic;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class Brand : BaseEntity<Guid>
 {
-    public class Brand : BaseEntity<Guid>
-    {
-        public AgentDividendType AgentDividendType { get; set; }
+    public AgentDividendType AgentDividendType { get; set; }
 
-        public virtual ICollection<Announcement> Announcements { get; set; }
+    public virtual ICollection<Announcement> Announcements { get; set; }
 
-        public string ApiKey { get; set; }
+    public string ApiKey { get; set; }
 
-        public bool AutoClearWageringRequirement { get; set; }
+    public bool AutoClearWageringRequirement { get; set; }
 
-        public decimal AutoClearWageringRequirementBalance { get; set; }
+    public decimal AutoClearWageringRequirementBalance { get; set; }
 
-        public bool AutoSentAgentBonus { get; set; }
+    public bool AutoSentAgentBonus { get; set; }
 
-        public bool AutoSentPlayerBonus { get; set; }
+    public bool AutoSentPlayerBonus { get; set; }
 
-        public virtual ICollection<BrandBetLimit> BetLimits { get; set; }
+    public virtual ICollection<BrandBetLimit> BetLimits { get; set; }
 
-        public virtual ICollection<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
+    public virtual ICollection<BrandAgentDividendCondition> BrandAgentDividendConditions { get; set; }
 
-        public virtual ICollection<BrandGroup> BrandGroups { get; set; }
+    public virtual ICollection<BrandGroup> BrandGroups { get; set; }
 
-        public bool CheckDividendActiveCount { get; set; }
+    public bool CheckDividendActiveCount { get; set; }
 
-        public string ClientId { get; set; }
+    public string ClientId { get; set; }
 
-        public virtual ICollection<BrandCurrency> Currencies { get; set; }
+    public virtual ICollection<BrandCurrency> Currencies { get; set; }
 
-        public DateTimeOffset CurrentSettlementFrom { get; set; }
+    public DateTimeOffset CurrentSettlementFrom { get; set; }
 
-        public DateTimeOffset CurrentSettlementTo { get; set; }
+    public DateTimeOffset CurrentSettlementTo { get; set; }
 
-        public virtual ICollection<Department> Departments { get; set; }
+    public virtual ICollection<Department> Departments { get; set; }
 
-        public decimal DepositHandlingFeeRateTenPercentile { get; set; }
+    public decimal DepositHandlingFeeRateTenPercentile { get; set; }
 
-        public string Description { get; set; }
+    public string Description { get; set; }
 
-        public virtual ICollection<BrandDomain> Domains { get; set; }
+    public virtual ICollection<BrandDomain> Domains { get; set; }
 
-        public bool EnableAgentSms { get; set; }
+    public bool EnableAgentSms { get; set; }
 
-        public bool EnablePlayerIdentity { get; set; }
+    public bool EnableBankInfoRegisterFlow { get; set; }
 
-        public bool EnableSms { get; set; }
+    public bool EnableEmailRegisterFlow { get; set; }
 
-        public bool EnableSmsRegisterFlow { get; set; }
+    public bool EnablePlayerIdentity { get; set; }
 
-        public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
+    public bool EnableSms { get; set; }
 
-        public virtual ICollection<BrandGame> Games { get; set; }
+    public bool EnableSmsRegisterFlow { get; set; }
 
-        public virtual ICollection<BrandLanguage> Languages { get; set; }
+    public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
-        public virtual Licensee Licensee { get; set; }
+    public virtual ICollection<BrandGame> Games { get; set; }
 
-        public Guid LicenseeId { get; set; }
+    public virtual ICollection<BrandLanguage> Languages { get; set; }
 
-        public string LogoInfo { get; set; }
+    public virtual Licensee Licensee { get; set; }
 
-        public DateTimeOffset NextSettlementFrom { get; set; }
+    public Guid LicenseeId { get; set; }
 
-        public DateTimeOffset NextSettlementTo { get; set; }
+    public string LogoInfo { get; set; }
 
-        public string OperationalEmail { get; set; }
+    public DateTimeOffset NextSettlementFrom { get; set; }
 
-        public decimal PlatformCharge { get; set; }
+    public DateTimeOffset NextSettlementTo { get; set; }
 
-        public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
+    public string OperationalEmail { get; set; }
 
-        public virtual ICollection<Player> Players { get; set; }
+    public decimal PlatformCharge { get; set; }
 
-        public DateTimeOffset PreviousSettlementFrom { get; set; }
+    public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        public DateTimeOffset PreviousSettlementTo { get; set; }
+    public string PlayerRegisterFlowSettings { get; set; }
 
-        public string SecretKey { get; set; }
+    public virtual ICollection<Player> Players { get; set; }
 
-        public int? SettlementDay { get; set; }
+    public DateTimeOffset PreviousSettlementFrom { get; set; }
 
-        public SettlementIntervalType SettlementIntervalType { get; set; }
+    public DateTimeOffset PreviousSettlementTo { get; set; }
 
-        public string SmsVendorCode { get; set; }
+    public string SecretKey { get; set; }
 
-        public string SmsVendorSettings { get; set; }
+    public int? SettlementDay { get; set; }
 
-        public virtual ICollection<StationLetter> StationLetters { get; set; }
+    public SettlementIntervalType SettlementIntervalType { get; set; }
 
-        public BrandStatus Status { get; set; }
+    public string SmsVendorCode { get; set; }
 
-        public string TimeZoneId { get; set; }
+    public string SmsVendorSettings { get; set; }
 
-        public virtual ICollection<VipLevel> VipLevels { get; set; }
+    public virtual ICollection<StationLetter> StationLetters { get; set; }
 
-        public decimal WithdrawHandlingFeeRateTenPercentile { get; set; }
-    }
+    public BrandStatus Status { get; set; }
+
+    public string TimeZoneId { get; set; }
+
+    public virtual ICollection<VipLevel> VipLevels { get; set; }
+
+    public decimal WithdrawHandlingFeeRateTenPercentile { get; set; }
 }

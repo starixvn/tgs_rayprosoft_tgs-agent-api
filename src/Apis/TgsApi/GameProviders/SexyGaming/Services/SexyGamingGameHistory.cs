@@ -11,47 +11,46 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
+
+public sealed class SexyGamingGameHistory : BaseBetHistory
 {
-    public sealed class SexyGamingGameHistory : BaseBetHistory
+    private readonly ISexyGamingGameHistoryService _gameHistoryService;
+    private readonly IGameProviderOperations _gameProviderOperations;
+
+    public SexyGamingGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        ISexyGamingGameHistoryService gameHistoryService
+    ) : base(roundQueries, gameProviderOperations)
     {
-        private readonly ISexyGamingGameHistoryService _gameHistoryService;
-        private readonly IGameProviderOperations _gameProviderOperations;
+        _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+        _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
+    }
 
-        public SexyGamingGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ISexyGamingGameHistoryService gameHistoryService
-        ) : base(roundQueries, gameProviderOperations)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var gameRecord = JsonSerializer.Deserialize<SexyGamingGameRecord>(round.RoundDetail.AdditionalData);
+        var value = default(string);
+        if (gameRecord != null)
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
+            var games = await _gameProviderOperations.GetCachedGamesAsync(round.GameProviderId)
+                .ConfigureAwait(false);
+            var externalGameId = games.Where(x => x.Id == round.GameId).First().ExternalId;
+            value = _gameHistoryService.GetGameHistory(externalGameId, gameRecord);
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        return new RoundResult
         {
-            var gameRecord = JsonSerializer.Deserialize<SexyGamingGameRecord>(round.RoundDetail.AdditionalData);
-            var value = default(string);
-            if (gameRecord != null)
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                var games = await _gameProviderOperations.GetCachedGamesAsync(round.GameProviderId)
-                    .ConfigureAwait(false);
-                var externalGameId = games.Where(x => x.Id == round.GameId).First().ExternalId;
-                value = _gameHistoryService.GetGameHistory(externalGameId, gameRecord);
+                new JsonData {Value = value}
             }
-
-            return new RoundResult
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new JsonData {Value = value}
-                }
-            };
-        }
+        };
     }
 }

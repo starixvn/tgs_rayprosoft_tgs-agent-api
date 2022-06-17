@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class PromotionGameProvider
 {
-    public class PromotionGameProvider
-    {
-        public Guid PromotionId { get; set; }
-        public Guid GameProviderId { get; set; }
-        public virtual Promotion Promotion { get; set; }
-        public virtual GameProvider GameProvider { get; set; }
-    }
+    public Guid PromotionId { get; set; }
+    public Guid GameProviderId { get; set; }
+    public virtual Promotion Promotion { get; set; }
+    public virtual GameProvider GameProvider { get; set; }
 }

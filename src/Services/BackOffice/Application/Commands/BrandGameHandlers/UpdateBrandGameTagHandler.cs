@@ -9,40 +9,39 @@ using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers;
+
+public class UpdateBrandGameTagHandler : Handler<UpdateBrandGameTagRequest, MessageResponse>
 {
-    public class UpdateBrandGameTagHandler : Handler<UpdateBrandGameTagRequest, MessageResponse>
+    private readonly IRedisCacheManager _cacheManager;
+    private readonly IBrandGameService _service;
+
+    public UpdateBrandGameTagHandler(
+        IBrandGameService service,
+        IHttpContextAccessor accessor,
+        IRedisCacheManager cacheManager) : base(accessor)
     {
-        private readonly IRedisCacheManager _cacheManager;
-        private readonly IBrandGameService _service;
+        _service = service;
+        _cacheManager = cacheManager;
+    }
 
-        public UpdateBrandGameTagHandler(
-            IBrandGameService service,
-            IHttpContextAccessor accessor,
-            IRedisCacheManager cacheManager) : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateBrandGameTagRequest request,
+        CancellationToken cancellationToken)
+    {
+        var brandGame = await _service.GetBrandGameAsync(q => q.Id == request.Id);
+
+        if (brandGame == null)
         {
-            _service = service;
-            _cacheManager = cacheManager;
+            return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateBrandGameTagRequest request,
-            CancellationToken cancellationToken)
-        {
-            var brandGame = await _service.GetBrandGameAsync(q => q.Id == request.Id);
+        brandGame.Tag = request.Enabled
+            ? brandGame.Tag.AddTag(request.GameTag)
+            : brandGame.Tag.RemoveTag(request.GameTag);
 
-            if (brandGame == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
-            }
+        await _service.UpdateBrandGameAsync(brandGame);
+        await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brandGame.BrandId, true);
 
-            brandGame.Tag = request.Enabled
-                ? brandGame.Tag.AddTag(request.GameTag)
-                : brandGame.Tag.RemoveTag(request.GameTag);
-
-            await _service.UpdateBrandGameAsync(brandGame);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brandGame.BrandId, true);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

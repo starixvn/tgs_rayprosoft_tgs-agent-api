@@ -5,42 +5,41 @@ using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
+namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
+
+public class
+    GetGameProviderBetLimitQueryHandler : Handler<GetGameProviderBetLimitRequest, GetGameProviderBetLimitResponse>
 {
-    public class
-        GetGameProviderBetLimitQueryHandler : Handler<GetGameProviderBetLimitRequest, GetGameProviderBetLimitResponse>
+    private readonly IGameProviderBetLimitService _service;
+
+    public GetGameProviderBetLimitQueryHandler(IGameProviderBetLimitService service, IHttpContextAccessor accessor)
+        : base(accessor)
     {
-        private readonly IGameProviderBetLimitService _service;
+        _service = service;
+    }
 
-        public GetGameProviderBetLimitQueryHandler(IGameProviderBetLimitService service, IHttpContextAccessor accessor)
-            : base(accessor)
+    public override async Task<GetGameProviderBetLimitResponse> Handle(GetGameProviderBetLimitRequest request,
+        CancellationToken cancellationToken)
+    {
+        var gameProviderBetLimit = await _service.GetGameProviderBetLimitAsync(x => x.Id == request.Id);
+
+        if (gameProviderBetLimit == null)
         {
-            _service = service;
+            return CreateInvalidResponse<GetGameProviderBetLimitResponse>(GameProviderBetLimit.NotFound);
         }
 
-        public override async Task<GetGameProviderBetLimitResponse> Handle(GetGameProviderBetLimitRequest request,
-            CancellationToken cancellationToken)
+        return new()
         {
-            var gameProviderBetLimit = await _service.GetGameProviderBetLimitAsync(x => x.Id == request.Id);
-
-            if (gameProviderBetLimit == null)
+            Valid = true,
+            GameProviderBetLimit = new()
             {
-                return CreateInvalidResponse<GetGameProviderBetLimitResponse>(GameProviderBetLimit.NotFound);
+                Id = gameProviderBetLimit.Id,
+                CurrencyCode = gameProviderBetLimit.CurrencyCode,
+                MinBet = gameProviderBetLimit.MinBet,
+                MaxBet = gameProviderBetLimit.MaxBet,
+                MaxBetPerMatch = gameProviderBetLimit.MaxBetPerMatch,
+                ExternalSetting = gameProviderBetLimit.ExternalSetting
             }
-
-            return new()
-            {
-                Valid = true,
-                GameProviderBetLimit = new()
-                {
-                    Id = gameProviderBetLimit.Id,
-                    CurrencyCode = gameProviderBetLimit.CurrencyCode,
-                    MinBet = gameProviderBetLimit.MinBet,
-                    MaxBet = gameProviderBetLimit.MaxBet,
-                    MaxBetPerMatch = gameProviderBetLimit.MaxBetPerMatch,
-                    ExternalSetting = gameProviderBetLimit.ExternalSetting
-                }
-            };
-        }
+        };
     }
 }

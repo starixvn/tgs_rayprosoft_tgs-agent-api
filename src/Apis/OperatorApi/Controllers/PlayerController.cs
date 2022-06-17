@@ -1,234 +1,274 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Tgs.BrandCertificate;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
-using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
+using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+public class PlayerController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
-    public class PlayerController : ControllerBase
+    private readonly ILogger<PlayerController> _logger;
+
+    public PlayerController(ILogger<PlayerController> logger)
     {
-        private readonly ILogger<PlayerController> _logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public PlayerController(ILogger<PlayerController> logger)
+    /// <summary>
+    /// Player changes password, player login is needed when use this
+    /// </summary>
+    [HttpPut("password", Name = "ChangePassword")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    public async Task<ChangePasswordResponse> ChangePasswordAsync(
+        [FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
+        [FromBody] ChangePasswordRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var query = new ChangePasswordQuery(
+            brandId,
+            playerTokenData.PlayerCode,
+            request.OldPassword,
+            request.NewPassword);
+
+        ChangePasswordInfo info;
+        try
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
-        /// <summary>
-        /// Player changes password, player login is needed when use this
-        /// </summary>
-        [HttpPut("password", Name = "ChangePassword")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<ChangePasswordResponse> ChangePasswordAsync(
-            [FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
-            [FromBody] ChangePasswordRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new ChangePasswordQuery(
-                brandId,
-                playerTokenData.PlayerCode,
-                request.OldPassword,
-                request.NewPassword);
-
-            ChangePasswordInfo info;
-            try
-            {
-                info = await getChangePasswordQueryService
-                    .GetAsync(query)
-                    .ConfigureAwait(false);
-            }
-            catch (InvalidCredentialsException)
-            {
-                throw new InvalidCredentialsException(Player.PasswordMismatched);
-            }
-
-            return new ChangePasswordResponse
-            {
-                PlayerCode = info.PlayerCode,
-                UpdateTime = info.UpdateTime
-            };
-        }
-
-        /// <summary>
-        /// Checks the identity is valid.
-        /// </summary>
-        /// <param name="identityVerifierSelector">The identity verifier selector.</param>
-        /// <param name="playerOperations">The player operations.</param>
-        /// <param name="id">The identify number.</param>
-        /// <returns></returns>
-        [HttpGet("identity/check/{id}", Name = "CheckIdentityIsValid")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<bool> CheckIdentityIsValidAsync(
-            [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
-            [FromServices] IPlayerOperations playerOperations,
-            string id)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var player = await playerOperations
-                .GetPlayerByCodeAsync(playerTokenData.PlayerCode)
-                .ConfigureAwait(false);
-
-            var identityVerifier = identityVerifierSelector.GetIdentityVerifier(player.DefaultWalletCurrencyCode);
-
-            return identityVerifier.Verify(id);
-        }
-
-        /// <summary>
-        /// Check username exists
-        /// </summary>
-        [HttpGet("checkUsername", Name = "CheckUserNameExists")]
-        public async Task<CheckUsernameResponse> CheckUsernameAsync(
-            [FromServices] IGetService<GetUserNameQuery, bool> getUserNameQueryService,
-            [FromQuery] CheckUsernameRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new GetUserNameQuery(brandId, request.Username);
-            var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
-
-            return new CheckUsernameResponse { Exists = isExist };
-        }
-
-        [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask CreateIdentityAuthenticationFormAsync(
-            [FromServices] IGetService<UploadIdentityCommand, string> uploadIdentityCommandService,
-            [FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
-            [FromForm(Name = "file")] IFormFile identityFile)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var contentType = identityFile.ContentType;
-            await using var fileStream = identityFile.OpenReadStream();
-
-            var fileId = await uploadIdentityCommandService
-                .GetAsync(new UploadIdentityCommand(contentType, fileStream))
-                .ConfigureAwait(false);
-
-            var command = new CreateIdentityAuthenticationFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                fileId);
-
-            await commandService
-                .ExecuteAsync(command)
+            info = await getChangePasswordQueryService
+                .GetAsync(query)
                 .ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// Start forgot password flow.
-        /// </summary>
-        /// <param name="forgotPasswordService">The forgot password service.</param>
-        /// <param name="forgotPasswordBySmsService">The forgot password by SMS service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        /// <response code="200">Return the token, when reset password, must input to verify.</response>
-        [HttpPost("password/forgot", Name = "ForgotPassword")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        public ValueTask<string> ForgotPasswordAsync(
-            [FromServices] IGetService<ForgotPasswordByMailCommand, string> forgotPasswordService,
-            [FromServices] IGetService<ForgotPasswordBySmsCommand, string> forgotPasswordBySmsService,
-            [FromBody] ForgotPasswordRequest request)
+        catch (InvalidCredentialsException)
         {
-            var brandId = HttpContext.Items.GetBrandId();
+            throw new InvalidCredentialsException(Player.PasswordMismatched);
+        }
 
-            if (!string.IsNullOrWhiteSpace(request.Phone))
-            {
-                return forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
-                    brandId,
-                    CultureInfo.CurrentUICulture,
-                    request.AreaCode,
-                    request.Phone));
-            }
+        return new ChangePasswordResponse
+        {
+            PlayerCode = info.PlayerCode,
+            UpdateTime = info.UpdateTime
+        };
+    }
 
-            return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
+    /// <summary>
+    /// Checks the identity is valid.
+    /// </summary>
+    /// <param name="identityVerifierSelector">The identity verifier selector.</param>
+    /// <param name="playerOperations">The player operations.</param>
+    /// <param name="id">The identify number.</param>
+    /// <returns></returns>
+    [HttpGet("identity/check/{id}", Name = "CheckIdentityIsValid")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<bool> CheckIdentityIsValidAsync(
+        [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
+        [FromServices] IPlayerOperations playerOperations,
+        string id)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var player = await playerOperations
+            .GetPlayerByCodeAsync(playerTokenData.PlayerCode)
+            .ConfigureAwait(false);
+
+        var identityVerifier = identityVerifierSelector.GetIdentityVerifier(player.DefaultWalletCurrencyCode);
+
+        return identityVerifier.Verify(id);
+    }
+
+    /// <summary>
+    /// Check username exists
+    /// </summary>
+    [HttpGet("checkUsername", Name = "CheckUserNameExists")]
+    public async Task<CheckUsernameResponse> CheckUsernameAsync(
+        [FromServices] IGetService<GetUserNameQuery, bool> getUserNameQueryService,
+        [FromQuery] CheckUsernameRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new GetUserNameQuery(brandId, request.Username);
+        var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
+
+        return new CheckUsernameResponse { Exists = isExist };
+    }
+
+    /// <summary>
+    /// Create default withdraw bankinfo of register flow.
+    /// </summary>
+    /// <param name="createService"></param>
+    /// <param name="viewModel"></param>
+    /// <returns></returns>
+    [HttpPost("init-bankinfo", Name = "CreatePlayerBankInfoOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async Task CreateBankInfoAsync(
+        [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
+        CreateInitBankInfoViewModel viewModel)
+    {
+        var brandId = HttpContext.GetBrandId();
+        var playerData = HttpContext.Items.GetPlayerTokenData();
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var hostName = Request.Host.Host;
+
+        var command = new CreateInitBankInfoCommand(
+            brandId!.Value,
+            playerData.PlayerCode,
+            viewModel.PaymentChannelId,
+            viewModel.BankType,
+            viewModel.Detail,
+            ipAddress,
+            hostName);
+
+        await createService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask CreateIdentityAuthenticationFormAsync(
+        [FromServices] IGetService<UploadIdentityCommand, string> uploadIdentityCommandService,
+        [FromServices] ICommandService<CreateIdentityAuthenticationFormCommand> commandService,
+        [FromForm(Name = "file")] IFormFile identityFile)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var contentType = identityFile.ContentType;
+        await using var fileStream = identityFile.OpenReadStream();
+
+        var fileId = await uploadIdentityCommandService
+            .GetAsync(new UploadIdentityCommand(contentType, fileStream))
+            .ConfigureAwait(false);
+
+        var command = new CreateIdentityAuthenticationFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            fileId);
+
+        await commandService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Start forgot password flow.
+    /// </summary>
+    /// <param name="forgotPasswordService">The forgot password service.</param>
+    /// <param name="forgotPasswordBySmsService">The forgot password by SMS service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    /// <response code="200">Return the token, when reset password, must input to verify.</response>
+    [HttpPost("password/forgot", Name = "ForgotPassword")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    public ValueTask<string> ForgotPasswordAsync(
+        [FromServices] IGetService<ForgotPasswordByMailCommand, string> forgotPasswordService,
+        [FromServices] IGetService<ForgotPasswordBySmsCommand, string> forgotPasswordBySmsService,
+        [FromBody] ForgotPasswordRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+        {
+            return forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
                 brandId,
                 CultureInfo.CurrentUICulture,
-                request.Email));
+                request.AreaCode,
+                request.Phone));
         }
 
-        [HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
+            brandId,
+            CultureInfo.CurrentUICulture,
+            request.Email));
+    }
 
-            var query = new GetPlayerIsAutoTransferToGameQuery(playerTokenData.PlayerCode);
+    [HttpGet("game/auto-transfer", Name = "GetAutoTransferToGameFlag")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<bool> GetAutoTransferToGameFlagAsync(
+        [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            return getService.GetAsync(query);
-        }
+        var query = new GetPlayerIsAutoTransferToGameQuery(playerTokenData.PlayerCode);
+
+        return getService.GetAsync(query);
+    }
 
         /// <summary>
         /// Get player information
         /// </summary>
         [HttpGet("info", Name = "GetPlayerInfo")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [IgnoreUserBlacklistCheck]
         public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
             [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
             [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
             [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
             [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
-            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService)
+            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
+            [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var playerCode = playerTokenData.PlayerCode;
 
-            var player = await getPlayerMainDataQueryService
-                .GetAsync(new GetPlayerMainDataQuery(playerCode))
-                .ConfigureAwait(false);
+        var player = await getPlayerMainDataQueryService
+            .GetAsync(new GetPlayerMainDataQuery(playerCode))
+            .ConfigureAwait(false);
 
-            if (player == null)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
-            }
+        if (player == null)
+        {
+            throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
+        }
 
-            var vipLevel = await getPlayerVipLevelQueryService
-                .GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
-                .ConfigureAwait(false);
+        var vipLevel = await getPlayerVipLevelQueryService
+            .GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
+            .ConfigureAwait(false);
 
-            var playerProperties = await getPlayerPropertiesQueryService
-                .GetAsync(new GetPlayerPropertiesQuery(playerCode))
-                .ConfigureAwait(false);
+        var playerProperties = await getPlayerPropertiesQueryService
+            .GetAsync(new GetPlayerPropertiesQuery(playerCode))
+            .ConfigureAwait(false);
 
-            var isAutoTransferToGame = await getAutoTransFlagService
-                .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
-                .ConfigureAwait(false);
+        var isAutoTransferToGame = await getAutoTransFlagService
+            .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
+            .ConfigureAwait(false);
 
-            var identityFormInfo = await getIdentityFormStatusService
-                .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
-                .ConfigureAwait(false);
+        var identityFormInfo = await getIdentityFormStatusService
+            .GetAsync(new GetPlayerIdentityFormQuery(playerCode))
+            .ConfigureAwait(false);
 
-            var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
+        var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
+            var bankInfoAuthentication = await getBankInfoQueryService
+                .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
+                .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
+            
             var playerInfo = new PlayerInfoViewModel
             {
                 PlayerCode = player.PlayerCode,
@@ -250,607 +290,730 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Line = playerProperties.GetValueOrDefault("Line"),
                 Viber = playerProperties.GetValueOrDefault("Viber"),
                 Telegram = playerProperties.GetValueOrDefault("Telegram"),
-                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp")
+                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
+                BankInfoAuthentication = bankInfoAuthentication
             };
 
-            return playerInfo;
-        }
+        return playerInfo;
+    }
 
-        /// <summary>
-        /// Player login
-        /// </summary>
-        [HttpPost("login", Name = "Login")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<LoginResponse> LoginAsync(
-            [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
-            [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
-            [FromBody] LoginRequest request)
+    /// <summary>
+    /// Player login
+    /// </summary>
+    [HttpPost("login", Name = "Login")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [IgnoreUserBlacklistCheck]
+    public async Task<LoginResponse> LoginAsync(
+        [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
+        [FromBody] LoginRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        try
         {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var isBanned = await getService
-                .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
-                .ConfigureAwait(false);
-
-            if (isBanned)
-                throw new UserBannedException();
-
-            try
-            {
-                var ipAddress = HttpContext.Connection.RemoteIpAddress;
-                var hostName = Request.Host.Host;
-
-                var command = new LoginCommand(
-                    brandId,
-                    request.Username,
-                    request.Password,
-                    ipAddress.ToString(),
-                    hostName,
-                    request.PlatformType, Consts.Site);
-
-                var info = await loginService
-                    .GetAsync(command)
-                    .ConfigureAwait(false);
-
-                return new LoginResponse
-                {
-                    LoginTime = info.LoginTime,
-                    PlayerToken = info.PlayerToken
-                };
-            }
-            catch (Exception ex)
-            {
-                switch (ex)
-                {
-                    case CoreExceptions.PlayerNotFoundException playerNotFoundException:
-                        _logger.LogWarning(playerNotFoundException, $"{request.Username} not found.");
-                        break;
-
-                    case CoreExceptions.InvalidCredentialsException invalidCredException:
-                        _logger.LogWarning(invalidCredException, Player.PasswordMismatched);
-                        break;
-
-                    default:
-                        _logger.LogWarning(ex, "Login fail!");
-                        break;
-                }
-
-                throw new LoginFailException();
-            }
-        }
-
-        /// <summary>
-        /// Player logout, player login is needed when use this
-        /// </summary>
-        [HttpDelete("logout", Name = "Logout")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<LogoutResponse> LogoutAsync(
-            [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
-            LogoutInfo info;
-            try
-            {
-                info = await getLogoutQueryService
-                    .GetAsync(query)
-                    .ConfigureAwait(false);
-            }
-            catch (CoreExceptions.PlayerNotFoundException)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, Player.NotFound);
-            }
-
-            return new LogoutResponse { UpdateTime = info.UpdateTime };
-        }
-
-        /// <summary>
-        /// Create a player
-        /// </summary>
-        [HttpPost("create", Name = "RegisterPlayer")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<CreatePlayerResponse> RegisterPlayerAsync(
-            [FromServices] IBrandRepository brandRepository,
-            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
-            [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
-            [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
-            [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
-            [FromBody] CreatePlayerRequest request)
-        {
-            var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
-
-            var brand = await brandRepository.GetBrandInfoAsync(brandId).ConfigureAwait(false);
-
-            if (brand == null)
-                throw new InvalidStatusException("Brand doesn't exist");
-
-            if (brand.Status == BrandStatus.Maintenance)
-                throw new BrandUnderMaintenanceException("Brand is put into maintenance");
-
-            if (brand.Status != BrandStatus.Active)
-                throw new InvalidStatusException("Brand is not active");
-
             var ipAddress = HttpContext.Connection.RemoteIpAddress;
             var hostName = Request.Host.Host;
 
-            var agentInvitationCode = string.IsNullOrWhiteSpace(invitationCode)
-                ? request.AgentInvitationCode
-                : invitationCode;
-
-            if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
-            {
-                var command = new CreatePlayerWithPlayerInvitationCommand(
-                    brandId,
-                    request.UserName,
-                    request.Password,
-                    brand.Currency,
-                    request.UpperPlayerCode,
-                    request.IsTestPlayer,
-                    ipAddress.ToString(),
-                    hostName);
-
-                var info = await createPlayerInvitationPlayerService
-                    .GetAsync(command)
-                    .ConfigureAwait(false);
-
-                return new CreatePlayerResponse
-                {
-                    PlayerCode = info.PlayerCode,
-                    IsNew = info.IsNew
-                };
-            }
-            else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
-            {
-                var command = new CreatePlayerWithAgentInvitationCodeCommand(
-                    brandId,
-                    request.UserName,
-                    request.Password,
-                    brand.Currency,
-                    agentInvitationCode,
-                    request.IsTestPlayer,
-                    ipAddress.ToString(),
-                    hostName);
-
-                var info = await createAgentInvitationPlayerService
-                    .GetAsync(command)
-                    .ConfigureAwait(false);
-
-                return new CreatePlayerResponse
-                {
-                    PlayerCode = info.PlayerCode,
-                    IsNew = info.IsNew
-                };
-            }
-            else
-            {
-                var query = new CreatePlayerCommand(
-                    brandId,
-                    request.UserName,
-                    request.Password,
-                    brand.Currency,
-                    request.IsTestPlayer,
-                    ipAddress.ToString(),
-                    hostName);
-
-                var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
-
-                return new CreatePlayerResponse
-                {
-                    PlayerCode = info.PlayerCode,
-                    IsNew = info.IsNew
-                };
-            }
-        }
-
-        /// <summary>
-        /// Resets the password.
-        /// </summary>
-        /// <param name="resetService">The reset service.</param>
-        /// <param name="request">The request.</param>
-        /// <response code="406">Reset password not accept, maybe validate code not match.</response>
-        [HttpPost("password/reset", Name = "ResetPassword")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        public async ValueTask ResetPasswordAsync(
-            [FromServices] ICommandService<ResetPasswordCommand> resetService,
-            [FromBody] ResetPasswordRequest request)
-            => await resetService
-                .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
-                .ConfigureAwait(false);
-
-        /// <summary>
-        /// Sets the birthdate asynchronous.
-        /// </summary>
-        /// <param name="setBirthdateService">The set birthdate service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPatch("birthdate", Name = "SetBirthdate")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask SetBirthdateAsync(
-            [FromServices] ICommandService<SetBirthdateCommand> setBirthdateService,
-            [FromBody] SetBirthdateRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetBirthdateCommand(playerTokenData.PlayerCode, request.Birthdate);
-
-            return setBirthdateService.ExecuteAsync(command);
-        }
-
-        /// <summary>
-        /// Sets the Facebook Messenger id.
-        /// </summary>
-        /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("fb", Name = "SetFacebookMessengerId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetFacebookMessengerIdAsync(
-            [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
-            [FromBody] SetFacebookMessengerIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetFacebookMessengerCommand(playerTokenData.PlayerCode, request.FacebookMessenger);
-
-            await setFacebookMessengerService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the Line id.
-        /// </summary>
-        /// <param name="setLineService">The set line service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("line", Name = "SetLineId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetLineIdAsync(
-            [FromServices] ICommandService<SetLineCommand> setLineService,
-            [FromBody] SetLineIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
-
-            await setLineService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the player identity.
-        /// </summary>
-        /// <param name="setIdentityService">The set identity service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPatch("identity", Name = "SetPlayerIdentity")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask SetPlayerIdentityAsync(
-            [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
-            [FromBody] SetPlayerIdentityRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
-
-            return setIdentityService.ExecuteAsync(command);
-        }
-
-        /// <summary>
-        /// Sets the QQ number.
-        /// </summary>
-        /// <param name="setQqService">The set qq service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("qq", Name = "SetQqId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetQqIdAsync(
-            [FromServices] ICommandService<SetQqCommand> setQqService,
-            [FromBody] SetQqIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetQqCommand(playerTokenData.PlayerCode, request.QqId);
-
-            await setQqService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the Telegram number.
-        /// </summary>
-        /// <param name="setTelegramService">The set telegram service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("telegram", Name = "SetTelegramId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetTelegramIdAsync(
-            [FromServices] ICommandService<SetTelegramCommand> setTelegramService,
-            [FromBody] SetTelegramIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetTelegramCommand(playerTokenData.PlayerCode, request.TelegramId);
-
-            await setTelegramService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the Viber id.
-        /// </summary>
-        /// <param name="setViberService">The set viber service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("viber", Name = "SetViberId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetViberIdAsync(
-            [FromServices] ICommandService<SetViberCommand> setViberService,
-            [FromBody] SetViberIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetViberCommand(playerTokenData.PlayerCode, request.ViberId);
-
-            await setViberService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the WeChat id.
-        /// </summary>
-        /// <param name="setWeChatService">The set we chat service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("wechat", Name = "SetWeChatId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task SetWeChatIdAsync(
-            [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
-            [FromBody] SetWeChatIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
-
-            await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets the WhatsApp id.
-        /// </summary>
-        /// <param name="setWhatsAppService">The set line service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPatch("whatsapp", Name = "SetWhatsAppId")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SetWhatsAppIdAsync(
-            [FromServices] ICommandService<SetWhatsAppCommand> setWhatsAppService,
-            [FromBody] SetWhatsAppIdRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new SetWhatsAppCommand(playerTokenData.PlayerCode, request.WhatsAppId);
-
-            await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Starts the change email.
-        /// </summary>
-        /// <param name="setPlayerEmailService">The set player email service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPost("email", Name = "StartChangeEmail")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask<string> StartChangeEmailAsync(
-            [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
-            [FromBody] StartSetEmailRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new StartSetPlayerEmailCommand(
-                playerTokenData.PlayerCode,
-                request.Email,
-                CultureInfo.CurrentUICulture);
-
-            return setPlayerEmailService.GetAsync(command);
-        }
-
-        /// <summary>
-        /// Starts the change phone.
-        /// </summary>
-        /// <param name="checkService">The check player phone service.</param>
-        /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
-        /// <param name="request">The request.</param>
-        [HttpPost("phone", Name = "StartChangePhone")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<string> StartChangePhoneAsync(
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-            [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
-            [FromBody] StartSetPhoneRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.Phone)
-                || string.IsNullOrWhiteSpace(request.AreaCode))
-                throw new PlayerPhoneRequiredException();
-
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var checkQuery = new CheckBrandPhoneQuery(
+            var command = new LoginCommand(
                 brandId,
-                playerTokenData.PlayerCode,
-                request.AreaCode.Trim(),
-                request.Phone.Trim());
-
-            var isBrandHasSamePhone = await checkService
-                .GetAsync(checkQuery)
-                .ConfigureAwait(false);
-
-            if (isBrandHasSamePhone)
-                throw new BrandPhoneDuplicateException();
-
-            var command = new StartSetPlayerPhoneCommand(
-                playerTokenData.PlayerCode,
-                request.AreaCode.Trim(),
-                request.Phone.Trim(),
-                CultureInfo.CurrentUICulture);
-
-            return await startSetPlayerPhoneService
-                .GetAsync(command)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Starts to set phone with username and password
-        /// </summary>
-        /// <param name="getPlayerInfoService">The get player information service.</param>
-        /// <param name="validatePlayerService">The validate init phone service</param>
-        /// /// <param name="checkService">The check player phone service.</param>
-        /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        /// security code
-        /// </returns>
-        [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
-        public async ValueTask<string> StartChangePhoneAsync(
-            [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
-            [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-            [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
-            [FromBody] StartInitPhoneRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.Phone)
-                || string.IsNullOrWhiteSpace(request.AreaCode))
-                throw new PlayerPhoneRequiredException();
-
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var playerInfo = await getPlayerInfoService
-                .GetAsync(new GetPlayerInfoByUserNameQuery(brandId, request.UserName))
-                .ConfigureAwait(false);
-
-            if (playerInfo == null)
-                throw new CoreExceptions.PlayerNotFoundException("Player not found.");
-
-            var playerPasswordValidateCommand = new PlayerPasswordValidateCommand(
-                playerInfo.PlayerCode,
-                request.Password);
-
-            var isValid = await validatePlayerService
-                .GetAsync(playerPasswordValidateCommand)
-                .ConfigureAwait(false);
-
-            if (!isValid)
-                throw new CoreExceptions.InvalidCredentialsException("Login fail.");
-
-            var checkQuery = new CheckBrandPhoneQuery(
-                brandId,
-                playerInfo.PlayerCode,
-                request.AreaCode.Trim(),
-                request.Phone.Trim());
-
-            var isBrandHasSamePhone = await checkService
-                .GetAsync(checkQuery)
-                .ConfigureAwait(false);
-
-            if (isBrandHasSamePhone)
-                throw new BrandPhoneDuplicateException();
-
-            var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
-                playerInfo.PlayerCode,
-                request.AreaCode.Trim(),
-                request.Phone.Trim(),
-                CultureInfo.CurrentUICulture);
-
-            return await startSetPlayerPhoneService
-                .GetAsync(startSetPlayerPhoneCommand)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Submits the change email.
-        /// </summary>
-        /// <param name="commitPlayerEmailService">The commit player email service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPut("email", Name = "SubmitChangeEmail")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask SubmitChangeEmailAsync(
-            [FromServices] ICommandService<CommitSetPlayerEmailCommand> commitPlayerEmailService,
-            [FromBody] SubmitChangeEmailRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var command = new CommitSetPlayerEmailCommand(
-                playerTokenData.PlayerCode,
-                request.SecurityKey,
-                request.ValidateCode,
-                brandId);
-
-            return commitPlayerEmailService.ExecuteAsync(command);
-        }
-
-        /// <summary>
-        /// Submits the change phone.
-        /// </summary>
-        /// /// <param name="checkService">The check player phone service.</param>
-        /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPut("phone", Name = "SubmitChangePhone")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask SubmitChangePhoneAsync(
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-            [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
-            [FromBody] SubmitChangePhoneRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new CommitSetPlayerPhoneCommand(
-                brandId,
-                playerTokenData.PlayerCode,
-                request.SecurityKey,
-                request.ValidateCode);
-
-            await commitPlayerPhoneService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Submits the change phone.
-        /// </summary>
-        /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
-        /// <param name="requestAnalyzer">The request analyzer.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
-        public async ValueTask SubmitInitPhoneAsync(
-            [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
-            [FromServices] IRequestAnalyzer requestAnalyzer,
-            [FromBody] SubmitInitPhoneRequest request)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var ipAddress = HttpContext.Connection.RemoteIpAddress;
-            var hostName = Request.Host.Host;
-
-            var command = new CommitPlayerInitPhoneCommand(
-                request.SecurityKey,
-                request.ValidateCode,
+                request.Username,
+                request.Password,
                 ipAddress.ToString(),
                 hostName,
-                brandId);
+                request.PlatformType, Consts.Site);
 
-            await commitPlayerInitPhoneService
-                .ExecuteAsync(command)
+            var info = await loginService
+                .GetAsync(command)
+                .ConfigureAwait(false);
+
+            return new LoginResponse
+            {
+                LoginTime = info.LoginTime,
+                PlayerToken = info.PlayerToken
+            };
+        }
+        catch (Exception ex)
+        {
+            switch (ex)
+            {
+                case CoreExceptions.PlayerNotFoundException playerNotFoundException:
+                    _logger.LogWarning(playerNotFoundException, $"{request.Username} not found.");
+                    break;
+
+                case InvalidCredentialsException invalidCredException:
+                    _logger.LogWarning(invalidCredException, Player.PasswordMismatched);
+                    break;
+
+                default:
+                    _logger.LogWarning(ex, "Login fail!");
+                    break;
+            }
+
+            throw new LoginFailException();
+        }
+    }
+
+    /// <summary>
+    /// Player logout, player login is needed when use this
+    /// </summary>
+    [HttpDelete("logout", Name = "Logout")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<LogoutResponse> LogoutAsync(
+        [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var query = new GetLogoutQuery(brandId, playerTokenData.PlayerCode, playerTokenData.LoginRecordId);
+        LogoutInfo info;
+        try
+        {
+            info = await getLogoutQueryService
+                .GetAsync(query)
                 .ConfigureAwait(false);
         }
-
-        [HttpPost("game/auto-transfer", Name = "ToggleAutoTransferToGameFlag")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask ToggleAutoTransferToGameFlagAsync(
-            [FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
+        catch (CoreExceptions.PlayerNotFoundException)
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var command = new TogglePlayerIsAutoTransferToGameCommand(playerTokenData.PlayerCode);
-
-            return toggleService.ExecuteAsync(command);
+            throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, Player.NotFound);
         }
+
+        return new LogoutResponse { UpdateTime = info.UpdateTime };
+    }
+
+    /// <summary>
+    /// Create a player
+    /// </summary>
+    [HttpPost("create", Name = "RegisterPlayer")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    public async Task<CreatePlayerResponse> RegisterPlayerAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
+        [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
+        [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
+        [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
+        [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+        [FromBody] CreatePlayerRequest request)
+    {
+        var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+
+        var brand = await getBrandService
+            .GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (brand == null)
+            throw new InvalidStatusException("Brand doesn't exist");
+
+        if (brand.Status == BrandStatus.Maintenance)
+            throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+
+        if (brand.Status != BrandStatus.Active)
+            throw new InvalidStatusException("Brand is not active");
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var agentInvitationCode = string.IsNullOrWhiteSpace(invitationCode)
+            ? request.AgentInvitationCode
+            : invitationCode;
+
+        if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
+        {
+            var command = new CreatePlayerWithPlayerInvitationCommand(
+                brandId,
+                request.UserName,
+                request.Password,
+                brand.Currency,
+                request.UpperPlayerCode,
+                request.IsTestPlayer,
+                ipAddress.ToString(),
+                hostName);
+
+            var info = await createPlayerInvitationPlayerService
+                .GetAsync(command)
+                .ConfigureAwait(false);
+
+            return new CreatePlayerResponse
+            {
+                PlayerCode = info.PlayerCode,
+                IsNew = info.IsNew
+            };
+        }
+        else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
+        {
+            var command = new CreatePlayerWithAgentInvitationCodeCommand(
+                brandId,
+                request.UserName,
+                request.Password,
+                brand.Currency,
+                agentInvitationCode,
+                request.IsTestPlayer,
+                ipAddress.ToString(),
+                hostName);
+
+            var info = await createAgentInvitationPlayerService
+                .GetAsync(command)
+                .ConfigureAwait(false);
+
+            return new CreatePlayerResponse
+            {
+                PlayerCode = info.PlayerCode,
+                IsNew = info.IsNew
+            };
+        }
+        else
+        {
+            var query = new CreatePlayerCommand(
+                brandId,
+                request.UserName,
+                request.Password,
+                brand.Currency,
+                request.IsTestPlayer,
+                ipAddress.ToString(),
+                hostName);
+
+            var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
+
+            return new CreatePlayerResponse
+            {
+                PlayerCode = info.PlayerCode,
+                IsNew = info.IsNew
+            };
+        }
+    }
+
+    [HttpPost("register", Name = "RegisterPlayerFlow")]
+    [IgnoreUserBlacklistCheck]
+    public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
+        [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
+        [FromBody] PlayerRegisterFlowViewModel model)
+    {
+        var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+
+        var brand = await getBrandService
+            .GetAsync(new BrandQuery(brandId), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (brand == null)
+            throw new InvalidStatusException("Brand doesn't exist");
+
+        if (brand.Status == BrandStatus.Maintenance)
+            throw new BrandUnderMaintenanceException("Brand is put into maintenance");
+
+        if (brand.Status != BrandStatus.Active)
+            throw new InvalidStatusException("Brand is not active");
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            invitationCode);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            model.Type,
+            model.Input,
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new PlayerRegisterFlowResponseViewModel
+        {
+            IsCompleted = result.IsCompleted,
+            StepResponse = result.StepResponse,
+            NextStepType = result.NextStepType
+        };
+    }
+
+    /// <summary>
+    /// Resets the password.
+    /// </summary>
+    /// <param name="resetService">The reset service.</param>
+    /// <param name="request">The request.</param>
+    /// <response code="406">Reset password not accept, maybe validate code not match.</response>
+    [HttpPost("password/reset", Name = "ResetPassword")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+    public async ValueTask ResetPasswordAsync(
+        [FromServices] ICommandService<ResetPasswordCommand> resetService,
+        [FromBody] ResetPasswordRequest request)
+        => await resetService
+            .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
+            .ConfigureAwait(false);
+
+    /// <summary>
+    /// Sets the birthdate asynchronous.
+    /// </summary>
+    /// <param name="setBirthdateService">The set birthdate service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPatch("birthdate", Name = "SetBirthdate")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask SetBirthdateAsync(
+        [FromServices] ICommandService<SetBirthdateCommand> setBirthdateService,
+        [FromBody] SetBirthdateRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetBirthdateCommand(playerTokenData.PlayerCode, request.Birthdate);
+
+        return setBirthdateService.ExecuteAsync(command);
+    }
+
+    /// <summary>
+    /// Sets the Facebook Messenger id.
+    /// </summary>
+    /// <param name="setFacebookMessengerService">The set facebook messenger service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("fb", Name = "SetFacebookMessengerId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetFacebookMessengerIdAsync(
+        [FromServices] ICommandService<SetFacebookMessengerCommand> setFacebookMessengerService,
+        [FromBody] SetFacebookMessengerIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetFacebookMessengerCommand(playerTokenData.PlayerCode, request.FacebookMessenger);
+
+        await setFacebookMessengerService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the Line id.
+    /// </summary>
+    /// <param name="setLineService">The set line service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("line", Name = "SetLineId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetLineIdAsync(
+        [FromServices] ICommandService<SetLineCommand> setLineService,
+        [FromBody] SetLineIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetLineCommand(playerTokenData.PlayerCode, request.LineId);
+
+        await setLineService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the player identity.
+    /// </summary>
+    /// <param name="setIdentityService">The set identity service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPatch("identity", Name = "SetPlayerIdentity")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask SetPlayerIdentityAsync(
+        [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
+        [FromBody] SetPlayerIdentityRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetIdentityCommand(playerTokenData.PlayerCode, request.RealName, request.Identity, brandId);
+
+        return setIdentityService.ExecuteAsync(command);
+    }
+
+    /// <summary>
+    /// Sets the QQ number.
+    /// </summary>
+    /// <param name="setQqService">The set qq service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("qq", Name = "SetQqId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task SetQqIdAsync(
+        [FromServices] ICommandService<SetQqCommand> setQqService,
+        [FromBody] SetQqIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetQqCommand(playerTokenData.PlayerCode, request.QqId);
+
+        await setQqService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the Telegram number.
+    /// </summary>
+    /// <param name="setTelegramService">The set telegram service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("telegram", Name = "SetTelegramId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetTelegramIdAsync(
+        [FromServices] ICommandService<SetTelegramCommand> setTelegramService,
+        [FromBody] SetTelegramIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetTelegramCommand(playerTokenData.PlayerCode, request.TelegramId);
+
+        await setTelegramService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the Viber id.
+    /// </summary>
+    /// <param name="setViberService">The set viber service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("viber", Name = "SetViberId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetViberIdAsync(
+        [FromServices] ICommandService<SetViberCommand> setViberService,
+        [FromBody] SetViberIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetViberCommand(playerTokenData.PlayerCode, request.ViberId);
+
+        await setViberService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the WeChat id.
+    /// </summary>
+    /// <param name="setWeChatService">The set we chat service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("wechat", Name = "SetWeChatId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task SetWeChatIdAsync(
+        [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
+        [FromBody] SetWeChatIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetWeChatCommand(playerTokenData.PlayerCode, request.WebChatId);
+
+        await setWeChatService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the WhatsApp id.
+    /// </summary>
+    /// <param name="setWhatsAppService">The set line service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPatch("whatsapp", Name = "SetWhatsAppId")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetWhatsAppIdAsync(
+        [FromServices] ICommandService<SetWhatsAppCommand> setWhatsAppService,
+        [FromBody] SetWhatsAppIdRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new SetWhatsAppCommand(playerTokenData.PlayerCode, request.WhatsAppId);
+
+        await setWhatsAppService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Starts the change email.
+    /// </summary>
+    /// <param name="setPlayerEmailService">The set player email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPost("email", Name = "StartChangeEmail")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<string> StartChangeEmailAsync(
+        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+        [FromBody] StartSetEmailRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new StartSetPlayerEmailCommand(
+            playerTokenData.PlayerCode,
+            request.Email,
+            CultureInfo.CurrentUICulture,
+            false);
+
+        return setPlayerEmailService.GetAsync(command);
+    }
+
+    /// <summary>
+    /// Starts the change email of register flow.
+    /// </summary>
+    /// <param name="getBrandInfoService">The get brand info service.</param>
+    /// <param name="getPlayerInfoService">The get player info service.</param>
+    /// <param name="checkService">The check player email service.</param>
+    /// <param name="setPlayerEmailService">The set player email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask<string> StartChangeEmailAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+        [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
+        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+        [FromBody] StartInitEmailRequest request)
+    {
+        var brandId = HttpContext.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
+        if (!brandInfo.EmailRegisterFlowEnabled)
+            throw new InvalidOperationException();
+
+        var playerInfo = await getPlayerInfoService
+            .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
+            .ConfigureAwait(false);
+
+        var isBrandHasSameEmail = await checkService
+            .GetAsync(new CheckBrandEmailQuery(
+                brandId!.Value,
+                request.Email,
+                playerInfo.PlayerCode))
+            .ConfigureAwait(false);
+
+        if (isBrandHasSameEmail)
+            throw new BrandEmailDuplicateException();
+
+        var command = new StartSetPlayerEmailCommand(
+            playerTokenData.PlayerCode,
+            request.Email,
+            CultureInfo.CurrentUICulture,
+            true);
+
+        return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Starts the change phone.
+    /// </summary>
+    /// <param name="getBrandInfoService">The brand info query service.</param>
+    /// <param name="checkService">The check player phone service.</param>
+    /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
+    /// <param name="request">The request.</param>
+    [HttpPost("phone", Name = "StartChangePhone")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask<string> StartChangePhoneAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+        [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+        [FromBody] StartSetPhoneRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Phone)
+            || string.IsNullOrWhiteSpace(request.AreaCode))
+            throw new PlayerPhoneRequiredException();
+
+        var brandId = HttpContext.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
+        var checkQuery = new CheckBrandPhoneQuery(
+            brand.BrandId,
+            playerTokenData.PlayerCode,
+            request.AreaCode.Trim(),
+            request.Phone.Trim());
+
+        var isBrandHasSamePhone = await checkService
+            .GetAsync(checkQuery)
+            .ConfigureAwait(false);
+
+        if (isBrandHasSamePhone)
+            throw new BrandPhoneDuplicateException();
+
+        var command = new StartSetPlayerPhoneCommand(
+            playerTokenData.PlayerCode,
+            request.AreaCode.Trim(),
+            request.Phone.Trim(),
+            CultureInfo.CurrentUICulture,
+            brand.SmsEnabled);
+
+        return await startSetPlayerPhoneService
+            .GetAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Starts to set phone with player token
+    /// </summary>
+    /// <param name="getBrandInfoService">The brand info query service.</param>
+    /// <param name="getPlayerInfoService">The get player information service.</param>
+    /// <param name="checkService">The check player phone service.</param>
+    /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns>
+    /// security code
+    /// </returns>
+    [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask<string> StartChangePhoneAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+        [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+        [FromBody] StartInitPhoneRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Phone)
+            || string.IsNullOrWhiteSpace(request.AreaCode))
+            throw new PlayerPhoneRequiredException();
+
+        var brandId = HttpContext.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+
+        if (!brand.SmsRegisterFlowEnabled)
+            throw new InvalidOperationException();
+
+        var playerInfo = await getPlayerInfoService
+            .GetAsync(new GetPlayerQuery(brand.BrandId, playerTokenData.PlayerCode))
+            .ConfigureAwait(false);
+
+        if (playerInfo == null)
+            throw new CoreExceptions.PlayerNotFoundException("Player not found.");
+
+        var checkQuery = new CheckBrandPhoneQuery(
+            brand.BrandId,
+            playerInfo.PlayerCode,
+            request.AreaCode.Trim(),
+            request.Phone.Trim());
+
+        var isBrandHasSamePhone = await checkService
+            .GetAsync(checkQuery)
+            .ConfigureAwait(false);
+
+        if (isBrandHasSamePhone)
+            throw new BrandPhoneDuplicateException();
+
+        var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
+            playerInfo.PlayerCode,
+            request.AreaCode.Trim(),
+            request.Phone.Trim(),
+            CultureInfo.CurrentUICulture,
+            brand.SmsEnabled);
+
+        return await startSetPlayerPhoneService
+            .GetAsync(startSetPlayerPhoneCommand)
+            .ConfigureAwait(false);
+    }
+
+    [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask SubmitChangeEmailAsync(
+        [FromServices] ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+        [FromBody] SubmitInitEmailRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var hostName = Request.Host.Host;
+
+        var command = new CommitInitPlayerEmailCommand(
+            request.SecurityKey,
+            request.ValidateCode,
+            ipAddress,
+            hostName,
+            brandId);
+
+        await commitPlayerEmailService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Submits the change email.
+    /// </summary>
+    /// <param name="commitPlayerEmailService">The commit player email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPut("email", Name = "SubmitChangeEmail")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask SubmitChangeEmailAsync(
+        [FromServices] ICommandService<CommitSetPlayerEmailCommand> commitPlayerEmailService,
+        [FromBody] SubmitChangeEmailRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var command = new CommitSetPlayerEmailCommand(
+            playerTokenData.PlayerCode,
+            request.SecurityKey,
+            request.ValidateCode,
+            brandId);
+
+        return commitPlayerEmailService.ExecuteAsync(command);
+    }
+
+    /// <summary>
+    /// Submits the change phone.
+    /// </summary>
+    /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPut("phone", Name = "SubmitChangePhone")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SubmitChangePhoneAsync(
+        [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
+        [FromBody] SubmitChangePhoneRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new CommitSetPlayerPhoneCommand(
+            brandId,
+            playerTokenData.PlayerCode,
+            request.SecurityKey,
+            request.ValidateCode);
+
+        await commitPlayerPhoneService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Submits the change phone.
+    /// </summary>
+    /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask SubmitChangePhoneAsync(
+        [FromServices] ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
+        [FromBody] SubmitInitPhoneRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var hostName = Request.Host.Host;
+
+        var command = new CommitInitPlayerPhoneCommand(
+            request.SecurityKey,
+            request.ValidateCode,
+            ipAddress,
+            hostName,
+            brandId);
+
+        await commitPlayerInitPhoneService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
+    }
+
+    [HttpPost("game/auto-transfer", Name = "ToggleAutoTransferToGameFlag")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask ToggleAutoTransferToGameFlagAsync(
+        [FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var command = new TogglePlayerIsAutoTransferToGameCommand(playerTokenData.PlayerCode);
+
+        return toggleService.ExecuteAsync(command);
     }
 }

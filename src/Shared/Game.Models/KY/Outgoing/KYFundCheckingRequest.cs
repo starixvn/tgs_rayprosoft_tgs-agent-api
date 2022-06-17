@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.KY.Commons;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
+namespace TGS.Shared.Game.Models.KY.Outgoing;
+
+public record KYFundCheckingRequest : KYBaseRequest
 {
-    public record KYFundCheckingRequest : KYBaseRequest
-    {
-        [JsonPropertyName("orderid")]
-        public string OrderId { get; init; }
-    }
+    [JsonPropertyName("orderid")]
+    public string OrderId { get; init; }
 }

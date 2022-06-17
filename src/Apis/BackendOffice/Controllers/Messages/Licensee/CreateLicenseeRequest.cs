@@ -1,6 +1,5 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
+
+public class CreateLicenseeRequest : LicenseeRequest
 {
-    public class CreateLicenseeRequest : LicenseeRequest
-    {
-    }
 }

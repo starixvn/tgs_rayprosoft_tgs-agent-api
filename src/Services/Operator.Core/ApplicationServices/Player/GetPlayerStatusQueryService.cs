@@ -8,27 +8,26 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operator.ApplicationServices.Player;
 
-namespace TGS.Services.Operator.ApplicationServices.Player
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+internal class GetPlayerStatusQueryService : IGetService<GetPlayerStatusQuery, PlayerStatus>
 {
-    internal class GetPlayerStatusQueryService : IGetService<GetPlayerStatusQuery, PlayerStatus>
+    private readonly ITgsRepository _tgsRepository;
+
+    public GetPlayerStatusQueryService(ITgsRepository tgsRepository)
     {
-        private readonly ITgsRepository _tgsRepository;
+        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    }
 
-        public GetPlayerStatusQueryService(ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+    public async ValueTask<PlayerStatus> GetAsync(
+        GetPlayerStatusQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var player = await _tgsRepository.Players
+            .AsNoTracking()
+            .SingleAsync(x => x.PlayerCode == query.PlayerCode)
+            .ConfigureAwait(false);
 
-        public async ValueTask<PlayerStatus> GetAsync(
-            GetPlayerStatusQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var player = await _tgsRepository.Players
-                .AsNoTracking()
-                .SingleAsync(x => x.PlayerCode == query.PlayerCode)
-                .ConfigureAwait(false);
-
-            return player.Status;
-        }
+        return player.Status;
     }
 }

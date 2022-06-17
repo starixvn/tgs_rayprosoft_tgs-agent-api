@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Services.PluggableServices.Models
-{
-    public record PlayerKickRequest
-    {
-        [JsonPropertyName("gpcode")]
-        public string GameProviderCode { get; init; }
+namespace TGS.Services.PluggableServices.Models;
 
-        [JsonPropertyName("playercode")]
-        public string PlayerCode { get; init; }
-    }
+public record PlayerKickRequest
+{
+    [JsonPropertyName("gpcode")]
+    public string GameProviderCode { get; init; }
+
+    [JsonPropertyName("playercode")]
+    public string PlayerCode { get; init; }
 }

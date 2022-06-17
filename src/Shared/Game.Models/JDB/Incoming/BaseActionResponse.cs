@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.JDB.Incoming
+namespace TGS.Shared.Game.Models.JDB.Incoming;
+
+public record BaseActionResponse : BaseResponse
 {
-    public record BaseActionResponse : BaseResponse
-    {
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
-    }
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; init; }
 }

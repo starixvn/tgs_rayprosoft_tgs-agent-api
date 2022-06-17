@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public class SetLineIdRequest
 {
-    public class SetLineIdRequest
-    {
-        [JsonPropertyName("line")]
-        public string LineId { get; init; }
-    }
+    [JsonPropertyName("line")]
+    public string LineId { get; init; }
 }

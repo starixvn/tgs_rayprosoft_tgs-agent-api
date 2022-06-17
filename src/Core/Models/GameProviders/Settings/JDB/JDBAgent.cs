@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.GameProviders.Settings.JDB
+﻿namespace TGS.Core.Models.GameProviders.Settings.JDB;
+
+public record JDBAgent
 {
-    public record JDBAgent
-    {
-        public string Id { get; init; }
-        public string CurrencyCode { get; init; }
-    }
+    public string Id { get; init; }
+    public string CurrencyCode { get; init; }
 }

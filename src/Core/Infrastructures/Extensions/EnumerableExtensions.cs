@@ -3,91 +3,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions;
+
+public static class EnumerableExtensions
 {
-    public static class EnumerableExtensions
+    public static Task<T[]> WhenAll<T>(this IEnumerable<Task<T>> source) =>
+        Task.WhenAll(source);
+
+    public static ValueTask<T[]> WhenAll<T>(this IEnumerable<ValueTask<T>> tasks)
     {
-        public static Task<T[]> WhenAll<T>(this IEnumerable<Task<T>> source) =>
-            Task.WhenAll(source);
+        var list = tasks.ToList();
+        var length = list.Count;
+        var result = new T[length];
+        var i = 0;
 
-        public static ValueTask<T[]> WhenAll<T>(this IEnumerable<ValueTask<T>> tasks)
+        for (; i < length; i++)
         {
-            var list = tasks.ToList();
-            var length = list.Count;
-            var result = new T[length];
-            var i = 0;
+            if (list[i].IsCompletedSuccessfully)
+            {
+                result[i] = list[i].Result;
+            }
+            else
+            {
+                return WhenAllAsync();
+            }
+        }
 
+        return new ValueTask<T[]>(result);
+
+        async ValueTask<T[]> WhenAllAsync()
+        {
             for (; i < length; i++)
             {
-                if (list[i].IsCompletedSuccessfully)
+                try
                 {
-                    result[i] = list[i].Result;
+                    result[i] = await list[i];
                 }
-                else
+                catch
                 {
-                    return WhenAllAsync();
-                }
-            }
-
-            return new ValueTask<T[]>(result);
-
-            async ValueTask<T[]> WhenAllAsync()
-            {
-                for (; i < length; i++)
-                {
-                    try
+                    for (i++; i < length; i++)
                     {
-                        result[i] = await list[i];
-                    }
-                    catch
-                    {
-                        for (i++; i < length; i++)
+                        try
                         {
-                            try
-                            {
-                                await list[i];
-                            }
-                            catch
-                            {
-                                // ignored
-                            }
+                            await list[i];
                         }
-
-                        throw;
+                        catch
+                        {
+                            // ignored
+                        }
                     }
-                }
 
-                return result;
+                    throw;
+                }
             }
+
+            return result;
         }
-        public static IList<T[]> ToArraySegments<T>(this IEnumerable<T> source, int limit)
+    }
+    public static IList<T[]> ToArraySegments<T>(this IEnumerable<T> source, int limit)
+    {
+        if (limit < 1)
         {
-            if (limit < 1)
-            {
-                throw new ArgumentException($"limit for {nameof(ToArraySegments)} cannot be less than 1");
-            }
-
-            var arrays = new List<T[]>();
-            var current = new List<T>(limit);
-
-            foreach (var e in source)
-            {
-                current.Add(e);
-                if (current.Count != limit)
-                {
-                    continue;
-                }
-
-                arrays.Add(current.ToArray());
-                current = new(limit);
-            }
-
-            if (current.Count > 0)
-            {
-                arrays.Add(current.ToArray());
-            }
-
-            return arrays;
+            throw new ArgumentException($"limit for {nameof(ToArraySegments)} cannot be less than 1");
         }
+
+        var arrays = new List<T[]>();
+        var current = new List<T>(limit);
+
+        foreach (var e in source)
+        {
+            current.Add(e);
+            if (current.Count != limit)
+            {
+                continue;
+            }
+
+            arrays.Add(current.ToArray());
+            current = new(limit);
+        }
+
+        if (current.Count > 0)
+        {
+            arrays.Add(current.ToArray());
+        }
+
+        return arrays;
     }
 }

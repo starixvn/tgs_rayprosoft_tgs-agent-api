@@ -1,18 +1,17 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket
-{
-    public record MarketReportTotalModel(
-        int RegisteredCount,
-        int FirstFundInCount,
-        decimal DepositAmount,
-        decimal WithdrawalAmount,
-        decimal CompanyAdjustAmount,
-        decimal BonusAdjustAmount,
-        decimal BonusAmount,
-        decimal BetAmount,
-        decimal ValidBetAmount,
-        decimal Turnover,
-        decimal WinLossAmount,
-        decimal NetProfit,
-        decimal AdditionalExpenses
-    );
-}
+﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarket;
+
+public record MarketReportTotalModel(
+    int RegisteredCount,
+    int FirstFundInCount,
+    decimal DepositAmount,
+    decimal WithdrawalAmount,
+    decimal CompanyAdjustAmount,
+    decimal BonusAdjustAmount,
+    decimal BonusAmount,
+    decimal BetAmount,
+    decimal ValidBetAmount,
+    decimal Turnover,
+    decimal WinLossAmount,
+    decimal NetProfit,
+    decimal AdditionalExpenses
+);

@@ -2,11 +2,10 @@
 
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.IMESports.Outgoing
+namespace TGS.Shared.Game.Models.IMESports.Outgoing;
+
+public record BasePlayerRequest : BaseRequest
 {
-    public record BasePlayerRequest : BaseRequest
-    {
-        [JsonPropertyName("PlayerId")]
-        public string PlayerCode { get; init; }
-    }
+    [JsonPropertyName("PlayerId")]
+    public string PlayerCode { get; init; }
 }

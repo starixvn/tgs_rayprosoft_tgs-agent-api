@@ -1,11 +1,10 @@
 ﻿using System.Xml.Serialization;
 
-namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
+namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing;
+
+[XmlRoot]
+public record PlayerTicketResponse
 {
-    [XmlRoot]
-    public record PlayerTicketResponse
-    {
-        [XmlElement(ElementName = "ResponseCode")]
-        public string Error { get; init; }
-    }
+    [XmlElement(ElementName = "ResponseCode")]
+    public string Error { get; init; }
 }

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.WGSports.Outgoing
+namespace TGS.Shared.Game.Models.WGSports.Outgoing;
+
+public record WGSportsGetBalanceRequest
 {
-    public record WGSportsGetBalanceRequest
-    {
-        public string PlayerCode { get; init; }
-    }
+    public string PlayerCode { get; init; }
 }

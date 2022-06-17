@@ -17,401 +17,400 @@ using TGS.Shared.Game.Models.TCG.Common;
 using TGS.Shared.Game.Models.TCG.Enums;
 using TGS.Shared.Game.Models.TCG.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers;
+
+[Route("api/tcg")]
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+[AllowAnonymous]
+[FeatureGate(Consts.GameProvider.TCG)]
+public class TCGController : ControllerBase
 {
-    [Route("api/tcg")]
-    [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
-    [AllowAnonymous]
-    [FeatureGate(Consts.GameProvider.TCG)]
-    public class TCGController : ControllerBase
+    private readonly IGamePlayActions _actions;
+    private readonly ITCGCacheService _cacheService;
+    private readonly ILogger<TCGController> _logger;
+    private readonly ITCGActionModelMapper _mapper;
+    private readonly ITCGService _service;
+
+    public TCGController(
+        IGamePlayActions actions,
+        ITCGCacheService cacheService,
+        ITCGActionModelMapper mapper,
+        ITCGService service,
+        ILogger<TCGController> logger)
     {
-        private readonly IGamePlayActions _actions;
-        private readonly ITCGCacheService _cacheService;
-        private readonly ILogger<TCGController> _logger;
-        private readonly ITCGActionModelMapper _mapper;
-        private readonly ITCGService _service;
+        _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public TCGController(
-            IGamePlayActions actions,
-            ITCGCacheService cacheService,
-            ITCGActionModelMapper mapper,
-            ITCGService service,
-            ILogger<TCGController> logger)
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("bet")]
+    public async ValueTask<TCGSingleWalletTradeResponse> BetAsync(TCGDebitRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
+
+        foreach (var transactionData in request.Transactions)
         {
-            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            await _cacheService.AddAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
         }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("bet")]
-        public async ValueTask<TCGSingleWalletTradeResponse> BetAsync(TCGDebitRequest request)
+        var betDatas = await _mapper.BetAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
+        if (betDatas == null)
         {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
-
-            foreach (var transactionData in request.Transactions)
-            {
-                await _cacheService.AddAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
-            var betDatas = await _mapper.BetAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
-            if (betDatas == null)
-            {
-                return new TCGSingleWalletTradeResponse()
-                {
-                    Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
-                    ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
-                };
-            }
-
-            var balanceInfos = new List<BalanceInfo>();
-            foreach (var betData in betDatas)
-            {
-                var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-
-                balanceInfos.Add(new BalanceInfo()
-                {
-                    UserName = betData.PlayerCode,
-                    Balance = betResult.Balance
-                });
-            }
-
-            foreach (var transactionData in request.Transactions)
-            {
-                await _cacheService.RemoveAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
             return new TCGSingleWalletTradeResponse()
             {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = balanceInfos.ToArray()
+                Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
+                ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
             };
         }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("cancelreserve")]
-        public async ValueTask<TCGSingleWalletTradeResponse> CancelReserveAsync(TCGCancelReserveRequest request)
+        var balanceInfos = new List<BalanceInfo>();
+        foreach (var betData in betDatas)
         {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
-            foreach (var reservationDetail in request.ReservationDetails)
+            balanceInfos.Add(new BalanceInfo()
             {
-                await _cacheService.AddAsync(
-                    reservationDetail.UserName,
-                    reservationDetail.RefNo).ConfigureAwait(false);
-            }
-
-            var betData = await _mapper.CancelReserveAsync(gameProviderId, request).ConfigureAwait(false);
-
-            var betResult = await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
-
-            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
-                                select new BalanceInfo
-                                {
-                                    UserName = PlayerBalance.Key,
-                                    Balance = PlayerBalance.Value
-                                }).ToArray();
-
-            foreach (var reservationDetail1 in request.ReservationDetails)
-            {
-                await _cacheService.RemoveAsync(
-                    reservationDetail1.UserName,
-                    reservationDetail1.RefNo).ConfigureAwait(false);
-            }
-
-            return new TCGSingleWalletTradeResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = balanceInfos.ToArray()
-            };
-        }
-
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("checktransactionstatus")]
-        public async ValueTask<TCGCheckTransactionStatusResponse> CheckTransactionStatusAsync(TCGCheckTransactionStatusRequest request)
-        {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-
-            var results = new List<QueryResult>();
-
-            foreach (var transactionInfo in request.TransactionDetails)
-            {
-                if (await _cacheService.ExistAsync(transactionInfo.UserName, transactionInfo.RefNo).ConfigureAwait(false))
-                {
-                    results.Add(new QueryResult()
-                    {
-                        RefNo = transactionInfo.RefNo,
-                        TransStatus = TCGTransStatus.PENDING.ToString()
-                    });
-                }
-                else
-                {
-                    var queryResults = await _mapper.CheckTransactionStatusAsync(
-                        gameProviderId,
-                        transactionInfo.UserName,
-                        transactionInfo.RefNo).ConfigureAwait(false);
-                    results.Add(queryResults);
-                }
-            }
-
-            return new TCGCheckTransactionStatusResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                QueryResult = results.ToArray()
-            };
-        }
-
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("close")]
-        public async ValueTask<TCGSingleWalletResponse> CloseAsync([FromBody] TCGCloseRequest request)
-        {
-            var betData = await _mapper.CloseAsync(request).ConfigureAwait(false);
-
-            if (betData == null)
-            {
-                return new TCGSingleWalletResponse()
-                {
-                    Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
-                    ErrorDesc = "Please check if the order does not exist or the order has been closed.(請檢查訂單是否不存在或訂單已經關閉。)",
-                };
-            }
-            var result = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
-
-            return new TCGSingleWalletTradeResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = new BalanceInfo[] {
-                    new BalanceInfo()
-                    {
-                        UserName= request.UserName,
-                        Balance=result.Balance
-                    }
-                }
-            };
-        }
-
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("confirmreserve")]
-        public async ValueTask<TCGSingleWalletTradeResponse> ConfirmReserveAsync(TCGConfirmReserveRequest request)
-        {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-
-            var betData = await _mapper.ConfirmReserveAsync(gameProviderId, request).ConfigureAwait(false);
-
-            foreach (var transactionData in betData.Transactions)
-            {
-                await _cacheService.AddAsync(
-                       transactionData.PlayerCode,
-                       transactionData.ExternalTransactionId).ConfigureAwait(false);
-            }
-
-            //var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
-
-            var balanceInfos = new List<BalanceInfo>();
-            foreach (var playerCode in betData.Transactions.GroupBy(x => x.PlayerCode).Select(x => x.Key).ToArray())
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, playerCode).ConfigureAwait(false);
-                balanceInfos.Add(new BalanceInfo()
-                {
-                    UserName = playerCode,
-                    Balance = getBalance.Balance
-                });
-            }
-            /*
-            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
-                                select new BalanceInfo
-                                {
-                                    UserName = PlayerBalance.Key,
-                                    Balance = PlayerBalance.Value
-                                }).ToArray();
-            */
-            foreach (var transactionData in betData.Transactions)
-            {
-                await _cacheService.RemoveAsync(
-                       transactionData.PlayerCode,
-                       transactionData.ExternalTransactionId).ConfigureAwait(false);
-            }
-
-            return new TCGSingleWalletTradeResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = balanceInfos.ToArray()
-            };
-        }
-
-        [Consumes("application/x-www-form-urlencoded")]
-        [HttpPost("entrance")]
-        public ValueTask<TCGSingleWalletResponse> EntranceAsync([FromForm] TCGSingleWalletRequest request)
-            => ValueTask.FromResult(new TCGSingleWalletResponse
-            {
-                Status = (int)GameApiError.MethodNotFound,
-                ErrorDesc = GameApiError.MethodNotFound.Description()
+                UserName = betData.PlayerCode,
+                Balance = betResult.Balance
             });
+        }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("balance")]
-        public async ValueTask<TCGBalanceResponse> GetBalanceAsync(TCGBalanceRequest request)
+        foreach (var transactionData in request.Transactions)
         {
-            try
-            {
-                var player = await _service.GetCachedPlayerAsync(request.Username).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation(JsonSerializer.Serialize(new
-                {
-                    Data = JsonSerializer.Serialize(request),
-                    Message = $"玩家不存在{ex.Message}",
-                    Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                }));
-                return new TCGBalanceResponse()
-                {
-                    Status = (int)GameApiError.UserDoesNotExists,
-                    ErrorDesc = GameApiError.UserDoesNotExists.Description()
-                };
-            }
+            await _cacheService.RemoveAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
+        }
 
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, request.Username).ConfigureAwait(false);
+        return new TCGSingleWalletTradeResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = balanceInfos.ToArray()
+        };
+    }
 
-            return new TCGBalanceResponse()
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("cancelreserve")]
+    public async ValueTask<TCGSingleWalletTradeResponse> CancelReserveAsync(TCGCancelReserveRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
+        foreach (var reservationDetail in request.ReservationDetails)
+        {
+            await _cacheService.AddAsync(
+                reservationDetail.UserName,
+                reservationDetail.RefNo).ConfigureAwait(false);
+        }
+
+        var betData = await _mapper.CancelReserveAsync(gameProviderId, request).ConfigureAwait(false);
+
+        var betResult = await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
+
+        var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                            select new BalanceInfo
+                            {
+                                UserName = PlayerBalance.Key,
+                                Balance = PlayerBalance.Value
+                            }).ToArray();
+
+        foreach (var reservationDetail1 in request.ReservationDetails)
+        {
+            await _cacheService.RemoveAsync(
+                reservationDetail1.UserName,
+                reservationDetail1.RefNo).ConfigureAwait(false);
+        }
+
+        return new TCGSingleWalletTradeResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = balanceInfos.ToArray()
+        };
+    }
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("checktransactionstatus")]
+    public async ValueTask<TCGCheckTransactionStatusResponse> CheckTransactionStatusAsync(TCGCheckTransactionStatusRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
+        var results = new List<QueryResult>();
+
+        foreach (var transactionInfo in request.TransactionDetails)
+        {
+            if (await _cacheService.ExistAsync(transactionInfo.UserName, transactionInfo.RefNo).ConfigureAwait(false))
             {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
+                results.Add(new QueryResult()
+                {
+                    RefNo = transactionInfo.RefNo,
+                    TransStatus = TCGTransStatus.PENDING.ToString()
+                });
+            }
+            else
+            {
+                var queryResults = await _mapper.CheckTransactionStatusAsync(
+                    gameProviderId,
+                    transactionInfo.UserName,
+                    transactionInfo.RefNo).ConfigureAwait(false);
+                results.Add(queryResults);
+            }
+        }
+
+        return new TCGCheckTransactionStatusResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            QueryResult = results.ToArray()
+        };
+    }
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("close")]
+    public async ValueTask<TCGSingleWalletResponse> CloseAsync([FromBody] TCGCloseRequest request)
+    {
+        var betData = await _mapper.CloseAsync(request).ConfigureAwait(false);
+
+        if (betData == null)
+        {
+            return new TCGSingleWalletResponse()
+            {
+                Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
+                ErrorDesc = "Please check if the order does not exist or the order has been closed.(請檢查訂單是否不存在或訂單已經關閉。)",
+            };
+        }
+        var result = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+
+        return new TCGSingleWalletTradeResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = new BalanceInfo[] {
+                new BalanceInfo()
+                {
+                    UserName= request.UserName,
+                    Balance=result.Balance
+                }
+            }
+        };
+    }
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("confirmreserve")]
+    public async ValueTask<TCGSingleWalletTradeResponse> ConfirmReserveAsync(TCGConfirmReserveRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
+        var betData = await _mapper.ConfirmReserveAsync(gameProviderId, request).ConfigureAwait(false);
+
+        foreach (var transactionData in betData.Transactions)
+        {
+            await _cacheService.AddAsync(
+                   transactionData.PlayerCode,
+                   transactionData.ExternalTransactionId).ConfigureAwait(false);
+        }
+
+        //var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
+
+        var balanceInfos = new List<BalanceInfo>();
+        foreach (var playerCode in betData.Transactions.GroupBy(x => x.PlayerCode).Select(x => x.Key).ToArray())
+        {
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, playerCode).ConfigureAwait(false);
+            balanceInfos.Add(new BalanceInfo()
+            {
+                UserName = playerCode,
                 Balance = getBalance.Balance
-            };
-        }
-
-        [HttpPost("ping")]
-        public ValueTask<TCGSingleWalletResponse> PingAsync()
-        {
-            return ValueTask.FromResult(new TCGSingleWalletResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description()
             });
         }
-
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("reservemoney")]
-        public async ValueTask<TCGSingleWalletTradeResponse> ReserveMoneyAsync(TCGReserveMoneyRequest request)
+        /*
+        var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                            select new BalanceInfo
+                            {
+                                UserName = PlayerBalance.Key,
+                                Balance = PlayerBalance.Value
+                            }).ToArray();
+        */
+        foreach (var transactionData in betData.Transactions)
         {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
-
-            _logger.LogInformation(JsonSerializer.Serialize(new
-            {
-                Data = JsonSerializer.Serialize(request),
-                GameId = cachedGame.Id,
-                GameExternalId = cachedGame.ExternalId,
-            }));
-
-            foreach (var transactionData in request.Transactions)
-            {
-                await _cacheService.AddAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
-            var betDatas = await _mapper.ReserveMoneyAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
-            if (betDatas == null)
-            {
-                return new TCGSingleWalletTradeResponse()
-                {
-                    Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
-                    ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
-                };
-            }
-
-            var balanceInfos = new List<BalanceInfo>();
-            foreach (var betData in betDatas)
-            {
-                var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-                balanceInfos.Add(new BalanceInfo()
-                {
-                    UserName = betData.PlayerCode,
-                    Balance = betResult.Balance
-                });
-            }
-
-            foreach (var transactionData in request.Transactions)
-            {
-                await _cacheService.RemoveAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
-            return new TCGSingleWalletTradeResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = balanceInfos.ToArray()
-            };
+            await _cacheService.RemoveAsync(
+                   transactionData.PlayerCode,
+                   transactionData.ExternalTransactionId).ConfigureAwait(false);
         }
 
-        [Consumes(MediaTypeNames.Application.Json)]
-        [HttpPost("settle")]
-        public async ValueTask<TCGSingleWalletTradeResponse> SettleAsync(TCGCreditRequest request)
+        return new TCGSingleWalletTradeResponse()
         {
-            var items = HttpContext.Items;
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var cachedGames = await _service.GetCachedGamesAsync(request.ProductType.ToString());
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = balanceInfos.ToArray()
+        };
+    }
 
+    [Consumes("application/x-www-form-urlencoded")]
+    [HttpPost("entrance")]
+    public ValueTask<TCGSingleWalletResponse> EntranceAsync([FromForm] TCGSingleWalletRequest request)
+        => ValueTask.FromResult(new TCGSingleWalletResponse
+        {
+            Status = (int)GameApiError.MethodNotFound,
+            ErrorDesc = GameApiError.MethodNotFound.Description()
+        });
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("balance")]
+    public async ValueTask<TCGBalanceResponse> GetBalanceAsync(TCGBalanceRequest request)
+    {
+        try
+        {
+            var player = await _service.GetCachedPlayerAsync(request.Username).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
             _logger.LogInformation(JsonSerializer.Serialize(new
             {
                 Data = JsonSerializer.Serialize(request),
-                CachedGames = JsonSerializer.Serialize(cachedGames),
+                Message = $"玩家不存在{ex.Message}",
                 Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             }));
-
-            foreach (var transactionData in request.Transactions)
+            return new TCGBalanceResponse()
             {
-                await _cacheService.AddAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
-            var betData = await _mapper.SettleAsync(gameProviderId, cachedGames, request).ConfigureAwait(false);
-
-            var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
-
-            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
-                                select new BalanceInfo
-                                {
-                                    UserName = PlayerBalance.Key,
-                                    Balance = PlayerBalance.Value
-                                }).ToArray();
-
-            foreach (var transactionData in request.Transactions)
-            {
-                await _cacheService.RemoveAsync(
-                    transactionData.UserName,
-                    transactionData.RefNo).ConfigureAwait(false);
-            }
-
-            return new TCGSingleWalletTradeResponse()
-            {
-                Status = (int)GameApiError.Success,
-                ErrorDesc = GameApiError.Success.Description(),
-                BalanceInfos = balanceInfos
+                Status = (int)GameApiError.UserDoesNotExists,
+                ErrorDesc = GameApiError.UserDoesNotExists.Description()
             };
         }
+
+        var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.TCG, request.Username).ConfigureAwait(false);
+
+        return new TCGBalanceResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            Balance = getBalance.Balance
+        };
+    }
+
+    [HttpPost("ping")]
+    public ValueTask<TCGSingleWalletResponse> PingAsync()
+    {
+        return ValueTask.FromResult(new TCGSingleWalletResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description()
+        });
+    }
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("reservemoney")]
+    public async ValueTask<TCGSingleWalletTradeResponse> ReserveMoneyAsync(TCGReserveMoneyRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var cachedGame = await _service.GetCachedGameAsync($"tcg_{request.ProductType}");
+
+        _logger.LogInformation(JsonSerializer.Serialize(new
+        {
+            Data = JsonSerializer.Serialize(request),
+            GameId = cachedGame.Id,
+            GameExternalId = cachedGame.ExternalId,
+        }));
+
+        foreach (var transactionData in request.Transactions)
+        {
+            await _cacheService.AddAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
+        }
+
+        var betDatas = await _mapper.ReserveMoneyAsync(gameProviderId, cachedGame, request).ConfigureAwait(false);
+        if (betDatas == null)
+        {
+            return new TCGSingleWalletTradeResponse()
+            {
+                Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
+                ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
+            };
+        }
+
+        var balanceInfos = new List<BalanceInfo>();
+        foreach (var betData in betDatas)
+        {
+            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            balanceInfos.Add(new BalanceInfo()
+            {
+                UserName = betData.PlayerCode,
+                Balance = betResult.Balance
+            });
+        }
+
+        foreach (var transactionData in request.Transactions)
+        {
+            await _cacheService.RemoveAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
+        }
+
+        return new TCGSingleWalletTradeResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = balanceInfos.ToArray()
+        };
+    }
+
+    [Consumes(MediaTypeNames.Application.Json)]
+    [HttpPost("settle")]
+    public async ValueTask<TCGSingleWalletTradeResponse> SettleAsync(TCGCreditRequest request)
+    {
+        var items = HttpContext.Items;
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var cachedGames = await _service.GetCachedGamesAsync(request.ProductType.ToString());
+
+        _logger.LogInformation(JsonSerializer.Serialize(new
+        {
+            Data = JsonSerializer.Serialize(request),
+            CachedGames = JsonSerializer.Serialize(cachedGames),
+            Logon = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        }));
+
+        foreach (var transactionData in request.Transactions)
+        {
+            await _cacheService.AddAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
+        }
+
+        var betData = await _mapper.SettleAsync(gameProviderId, cachedGames, request).ConfigureAwait(false);
+
+        var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
+
+        var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                            select new BalanceInfo
+                            {
+                                UserName = PlayerBalance.Key,
+                                Balance = PlayerBalance.Value
+                            }).ToArray();
+
+        foreach (var transactionData in request.Transactions)
+        {
+            await _cacheService.RemoveAsync(
+                transactionData.UserName,
+                transactionData.RefNo).ConfigureAwait(false);
+        }
+
+        return new TCGSingleWalletTradeResponse()
+        {
+            Status = (int)GameApiError.Success,
+            ErrorDesc = GameApiError.Success.Description(),
+            BalanceInfos = balanceInfos
+        };
     }
 }

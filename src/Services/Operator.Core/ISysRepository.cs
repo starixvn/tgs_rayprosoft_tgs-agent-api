@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public interface ISysRepository
 {
-    public interface ISysRepository
-    {
-        IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
-    }
+    IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
 }

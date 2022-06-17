@@ -6,36 +6,35 @@ using TGS.Services.BackOffice.Application.Models.Language;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.LanguageHandlers
+namespace TGS.Services.BackOffice.Application.Commands.LanguageHandlers;
+
+public class UpdateLanguageHandler : Handler<UpdateLanguageRequest, MessageResponse>
 {
-    public class UpdateLanguageHandler : Handler<UpdateLanguageRequest, MessageResponse>
+    private readonly ILanguageService _service;
+
+    public UpdateLanguageHandler(ILanguageService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly ILanguageService _service;
+        _service = service;
+    }
 
-        public UpdateLanguageHandler(ILanguageService service, IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateLanguageRequest request,
+        CancellationToken cancellationToken)
+    {
+        var language = await _service.GetLanguageAsync(q => q.CultureCode == request.CultureCode);
+
+        if (language == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(Language.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateLanguageRequest request,
-            CancellationToken cancellationToken)
+        if (await _service.ExistsAsync(x =>
+            request.CultureCode != x.CultureCode && x.LanguageCode == request.LanguageCode))
         {
-            var language = await _service.GetLanguageAsync(q => q.CultureCode == request.CultureCode);
-
-            if (language == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Language.NotFound);
-            }
-
-            if (await _service.ExistsAsync(x =>
-                request.CultureCode != x.CultureCode && x.LanguageCode == request.LanguageCode))
-            {
-                return CreateInvalidResponse<MessageResponse>(Language.LanguageCodeExisted);
-            }
-
-            await _service.UpdateLanguageAsync(language, request);
-
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Language.LanguageCodeExisted);
         }
+
+        await _service.UpdateLanguageAsync(language, request);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

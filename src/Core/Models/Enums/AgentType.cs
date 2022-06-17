@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum AgentType
 {
-    public enum AgentType
-    {
-        Cash = 1,
-        Credit = 2
-    }
+    Cash = 1,
+    Credit = 2
 }

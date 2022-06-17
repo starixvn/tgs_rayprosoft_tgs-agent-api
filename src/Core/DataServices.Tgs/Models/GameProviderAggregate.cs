@@ -1,33 +1,32 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class GameProviderAggregate
 {
-    public class GameProviderAggregate
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public int AuditLogId { get; set; }
+    public int AuditLogId { get; set; }
 
-        public Guid? GameProviderId { get; set; }
+    public Guid? GameProviderId { get; set; }
 
-        public string CurrencyCode { get; set; }
+    public string CurrencyCode { get; set; }
 
-        public int TransactionCount { get; set; }
+    public int TransactionCount { get; set; }
 
-        public decimal BetAmount { get; set; }
+    public decimal BetAmount { get; set; }
 
-        public decimal ValidBetAmount { get; set; }
+    public decimal ValidBetAmount { get; set; }
 
-        public decimal Turnover { get; set; }
+    public decimal Turnover { get; set; }
 
-        public decimal WinLoss { get; set; }
+    public decimal WinLoss { get; set; }
 
-        public decimal SettleAmount { get; set; }
+    public decimal SettleAmount { get; set; }
 
-        public decimal Commission { get; set; }
+    public decimal Commission { get; set; }
 
-        public DateTimeOffset ReportDate { get; set; }
+    public DateTimeOffset ReportDate { get; set; }
 
-        public DateTimeOffset CreatedOn { get; set; }
-    }
+    public DateTimeOffset CreatedOn { get; set; }
 }

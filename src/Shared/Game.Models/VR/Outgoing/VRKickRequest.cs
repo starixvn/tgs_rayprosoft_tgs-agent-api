@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.VR.Outgoing
+namespace TGS.Shared.Game.Models.VR.Outgoing;
+
+public record VRKickRequest
 {
-    public record VRKickRequest
-    {
-        [JsonPropertyName("playerName")]
-        public string PlayerCode { get; init; }
-    }
+    [JsonPropertyName("playerName")]
+    public string PlayerCode { get; init; }
 }

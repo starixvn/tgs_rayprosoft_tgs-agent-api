@@ -5,27 +5,26 @@ using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
-namespace TGS.Services.Operator.ApplicationServices.Deposit
+namespace TGS.Services.Operator.ApplicationServices.Deposit;
+
+internal class GetDepositFormQueryService : IGetService<GetDepositFormQuery, DepositFormInfo?>
 {
-    internal class GetDepositFormQueryService : IGetService<GetDepositFormQuery, DepositFormInfo?>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+
+    public GetDepositFormQueryService(IPaymentServiceClient paymentServiceClient)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    }
 
-        public GetDepositFormQueryService(IPaymentServiceClient paymentServiceClient)
-        {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        }
+    public async ValueTask<DepositFormInfo?> GetAsync(GetDepositFormQuery query, CancellationToken cancellationToken = default)
+    {
+        var formData = await _paymentServiceClient
+            .GetDepositFormAsync(query.BrandId, query.FormId)
+            .ConfigureAwait(false);
 
-        public async ValueTask<DepositFormInfo?> GetAsync(GetDepositFormQuery query, CancellationToken cancellationToken = default)
-        {
-            var formData = await _paymentServiceClient
-                .GetDepositFormAsync(query.BrandId, query.FormId)
-                .ConfigureAwait(false);
-
-            if (formData != null && formData.PlayerCode == query.PlayerCode)
-                return formData;
-            else
-                return null;
-        }
+        if (formData != null && formData.PlayerCode == query.PlayerCode)
+            return formData;
+        else
+            return null;
     }
 }

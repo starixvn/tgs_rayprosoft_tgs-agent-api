@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.TF.Incoming
+﻿namespace TGS.Shared.Game.Models.TF.Incoming;
+
+public class UnSettleRequest : TransferRequest
 {
-    public class UnSettleRequest : TransferRequest
-    {
-    }
 }

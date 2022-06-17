@@ -2,34 +2,35 @@
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public interface IPlayerRepository
 {
-    public interface IPlayerRepository
-    {
-        ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
+    ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
 
-        ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
+    ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
 
-        ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+    ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
+    ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
 
-        ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
+    ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
 
-        ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName);
+    ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName);
 
-        ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
+    ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 
-        ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host);
+    ValueTask PlayerLoginIpAsync(string playerCode, string ip, string host);
 
-        ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn);
+    ValueTask PlayerRegisterIpAsync(string playerCode, string ip, string? host, DateTimeOffset registeredOn);
 
-        ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+    ValueTask SetPlayerEmailAsync(string playerCode, string email);
 
-        ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
+    ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
 
-        ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
+    ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
-    }
+    ValueTask UpdatePlayerIdentityAsync(string playerCode, Guid identityAuthenticationFormId);
+
+    ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
 }

@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.WGSports.Commons;
 
-namespace TGS.Shared.Game.Models.WGSports.Outgoing
+namespace TGS.Shared.Game.Models.WGSports.Outgoing;
+
+public record WGSportsGetBalanceResponse : WGSportsResponse
 {
-    public record WGSportsGetBalanceResponse : WGSportsResponse
-    {
-        [JsonPropertyName("Balance")]
-        public string Balance { get; init; }
-        [JsonPropertyName("Currency")]
-        public string Currency { get; init; }
-    }
+    [JsonPropertyName("Balance")]
+    public string Balance { get; init; }
+    [JsonPropertyName("Currency")]
+    public string Currency { get; init; }
 }

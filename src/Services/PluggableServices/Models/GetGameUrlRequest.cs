@@ -4,23 +4,22 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using TGS.Core.Models.Tokens;
 
-namespace TGS.Services.PluggableServices.Models
+namespace TGS.Services.PluggableServices.Models;
+
+public record GetGameUrlRequest
 {
-    public record GetGameUrlRequest
-    {
-        [JsonPropertyName("gpcode")]
-        public string GameProviderCode { get; init; }
+    [JsonPropertyName("gpcode")]
+    public string GameProviderCode { get; init; }
 
-        [JsonPropertyName("gid")]
-        public int GameId { get; init; }
+    [JsonPropertyName("gid")]
+    public int GameId { get; init; }
 
-        [JsonPropertyName("token")]
-        public PlayerTokenData Token { get; init; }
+    [JsonPropertyName("token")]
+    public PlayerTokenData Token { get; init; }
 
-        [JsonPropertyName("language")]
-        public string Language { get; init; }
+    [JsonPropertyName("language")]
+    public string Language { get; init; }
 
-        [JsonPropertyName("extends")]
-        public JsonDocument ExtendedData { get; set; }
-    }
+    [JsonPropertyName("extends")]
+    public JsonDocument ExtendedData { get; set; }
 }

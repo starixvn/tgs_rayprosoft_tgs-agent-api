@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.OperatorApi.Models.Messages
+namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public record BalanceInfoResponse
 {
-    public record BalanceInfoResponse
-    {
-        [JsonPropertyName("main")]
-        public decimal Main { get; init; }
-    }
+    [JsonPropertyName("main")]
+    public decimal Main { get; init; }
 }

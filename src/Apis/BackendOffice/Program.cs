@@ -5,43 +5,42 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace TGS.Apis.BackendOffice
+namespace TGS.Apis.BackendOffice;
+
+public class Program
 {
-    public class Program
-    {
-        public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration(builder =>
-            {
-                builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
-            })
-            .ConfigureLogging((ctx, logging) =>
-            {
-                logging
-                    .AddOpenTelemetry(options =>
-                    {
-                        options.IncludeFormattedMessage = true;
-                        options.ParseStateValues = true;
-                        _ = options.AddFluentdForwardExporter(fluentOptions =>
-                        {
-                            var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
-                            fluentOptions.Host = nodeIp;
-                            fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
-                            fluentOptions.UseMessagePack();
-                        });
-                    });
-            })
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
-
-        public static async Task Main(string[] args)
+    public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration(builder =>
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
+        })
+        .ConfigureLogging((ctx, logging) =>
+        {
+            logging
+                .AddOpenTelemetry(options =>
+                {
+                    options.IncludeFormattedMessage = true;
+                    options.ParseStateValues = true;
+                    _ = options.AddFluentdForwardExporter(fluentOptions =>
+                    {
+                        var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
+                        fluentOptions.Host = nodeIp;
+                        fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+                        fluentOptions.UseMessagePack();
+                    });
+                });
+        })
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
 
-            var host = CreateHostBuilder(args).Build();
+    public static async Task Main(string[] args)
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            await host.RunAsync();
-        }
+        var host = CreateHostBuilder(args).Build();
+
+        await host.RunAsync();
     }
 }

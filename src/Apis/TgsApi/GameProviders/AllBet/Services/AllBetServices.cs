@@ -9,64 +9,63 @@ using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 
-namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
+namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services;
+
+public interface IAllBetServices
 {
-    public interface IAllBetServices
+    ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
+        string playerCode, string externalGameActionGroupId);
+
+    ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+
+    ValueTask<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+        string playerCode, string externalRoundId, int gameId);
+}
+
+public class AllBetServices : IAllBetServices
+{
+    private readonly IGameActionQueries _gameActionQueries;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly HttpContext _httpContext;
+
+    public AllBetServices(
+        IHttpContextAccessor httpContextAccessor,
+        IGameProviderOperations gameProviderOperations,
+        IGameActionQueries gameActionQueries)
     {
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalGameActionGroupId);
-
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
-
-        ValueTask<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, int gameId);
+        _httpContext = httpContextAccessor.HttpContext;
+        _gameProviderOperations = gameProviderOperations;
+        _gameActionQueries = gameActionQueries;
     }
 
-    public class AllBetServices : IAllBetServices
+    async ValueTask<GameProviderConfigurationData> IAllBetServices.GetGameProviderConfigurationDataAsync()
     {
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
+        var items = _httpContext?.Items ??
+            throw new InvalidOperationException("Can not get http context items");
 
-        public AllBetServices(
-            IHttpContextAccessor httpContextAccessor,
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+        var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+            .ConfigureAwait(false);
+
+        return new()
         {
-            _httpContext = httpContextAccessor.HttpContext;
-            _gameProviderOperations = gameProviderOperations;
-            _gameActionQueries = gameActionQueries;
-        }
-
-        async ValueTask<GameProviderConfigurationData> IAllBetServices.GetGameProviderConfigurationDataAsync()
-        {
-            var items = _httpContext?.Items ??
-                throw new InvalidOperationException("Can not get http context items");
-
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                .ConfigureAwait(false);
-
-            return new()
-            {
-                GameProviderId = gameProviderId,
-                GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
-            };
-        }
-
-        ValueTask<GameActionExternalIds[]> IAllBetServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalGameActionGroupId)
-            => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
-                gameProviderId, playerCode, externalGameActionGroupId);
-
-        ValueTask<GameActionExternalIds[]> IAllBetServices.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, int gameId)
-            => _gameActionQueries.GetValidGameActionExternalIdsAsync(
-                gameProviderId, playerCode, externalRoundId, gameId, false);
+            GameProviderId = gameProviderId,
+            GameProviderConfigurationId = gameProviderConfigurationId,
+            AutoCloseRound = autoCloseRound,
+            PlatformType = platformType
+        };
     }
+
+    ValueTask<GameActionExternalIds[]> IAllBetServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
+        string playerCode, string externalGameActionGroupId)
+        => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+            gameProviderId, playerCode, externalGameActionGroupId);
+
+    ValueTask<GameActionExternalIds[]> IAllBetServices.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+        string playerCode, string externalRoundId, int gameId)
+        => _gameActionQueries.GetValidGameActionExternalIdsAsync(
+            gameProviderId, playerCode, externalRoundId, gameId, false);
 }

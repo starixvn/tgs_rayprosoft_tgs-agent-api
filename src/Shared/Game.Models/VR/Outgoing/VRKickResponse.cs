@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.VR.Outgoing
+namespace TGS.Shared.Game.Models.VR.Outgoing;
+
+public record VRKickResponse
 {
-    public record VRKickResponse
-    {
-        [JsonPropertyName("errorCode")]
-        public int ErrorCode { get; init; }
-    }
+    [JsonPropertyName("errorCode")]
+    public int ErrorCode { get; init; }
 }

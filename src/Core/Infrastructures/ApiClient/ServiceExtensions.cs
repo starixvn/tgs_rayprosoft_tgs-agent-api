@@ -1,18 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace TGS.Core.Infrastructures.ApiClient
+namespace TGS.Core.Infrastructures.ApiClient;
+
+public static class ServiceExtensions
 {
-    public static class ServiceExtensions
+    /// <summary>
+    /// Dependency Injection of Infrastructures.ApiClient, need to add following dependencies beforehand:
+    /// 1. AddJson() in Infrastructures.Json ( if BaseApiClient is used )
+    /// 2. AddTgsLog() in Infrastructures.Log
+    /// </summary>
+    public static IServiceCollection AddApiClient(this IServiceCollection services)
     {
-        /// <summary>
-        /// Dependency Injection of Infrastructures.ApiClient, need to add following dependencies beforehand:
-        /// 1. AddJson() in Infrastructures.Json ( if BaseApiClient is used )
-        /// 2. AddTgsLog() in Infrastructures.Log
-        /// </summary>
-        public static IServiceCollection AddApiClient(this IServiceCollection services)
-        {
-            services.AddScoped<IApiClientLogger, ApiClientLogger>();
-            return services;
-        }
+        services.AddScoped<IApiClientLogger, ApiClientLogger>();
+        return services;
     }
 }

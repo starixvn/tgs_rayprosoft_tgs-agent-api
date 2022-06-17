@@ -2,22 +2,21 @@
 using Microsoft.AspNetCore.Builder;
 using TGS.Apis.OperatorApi.Middlewares;
 
-namespace TGS.Apis.OperatorApi.Extensions
+namespace TGS.Apis.OperatorApi.Extensions;
+
+public static class ApplicationBuilderExtensions
 {
-    public static class ApplicationBuilderExtensions
+    public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
+        string[] bypassRouting)
     {
-        public static IApplicationBuilder UseVerifyJwtTokenMiddlewares(this IApplicationBuilder app,
-            string[] bypassRouting)
-        {
-            var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
+        var bypass = bypassRouting.Concat(new[] { "/api/auth" }).Distinct().ToArray();
 
-            app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
-                builder => builder
-                    .UseMiddleware<VerifyCredentialsMiddleware>()
-                    .UseMiddleware<MaintenanceMiddleware>()
-                    .UseMiddleware<VerifyPlayerTokenMiddleware>());
+        app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
+            builder => builder
+                .UseMiddleware<VerifyCredentialsMiddleware>()
+                .UseMiddleware<MaintenanceMiddleware>()
+                .UseMiddleware<VerifyPlayerTokenMiddleware>());
 
-            return app;
-        }
+        return app;
     }
 }

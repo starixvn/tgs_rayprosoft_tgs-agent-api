@@ -8,43 +8,42 @@ using Tgs.Report.Client.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.ReportAgent;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries
+namespace TGS.Services.BackOffice.Application.Queries.ReportAgentQueries;
+
+public class
+    GetAgentTeamInfoQuery : IGetService<GetAgentTeamInfoReportRequest, PagedResponse<TeamInfoReportModel>>
 {
-    public class
-        GetAgentTeamInfoQuery : IGetService<GetAgentTeamInfoReportRequest, PagedResponse<TeamInfoReportModel>>
+    private readonly IReportClient _reportClient;
+
+    public GetAgentTeamInfoQuery(IReportClient reportClient)
+        => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    public async ValueTask<PagedResponse<TeamInfoReportModel>> GetAsync(GetAgentTeamInfoReportRequest request,
+        CancellationToken cancellationToken = default)
     {
-        private readonly IReportClient _reportClient;
-
-        public GetAgentTeamInfoQuery(IReportClient reportClient)
-            => _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
-        public async ValueTask<PagedResponse<TeamInfoReportModel>> GetAsync(GetAgentTeamInfoReportRequest request,
-            CancellationToken cancellationToken = default)
+        var reportRequest = new GetAgentTeamInfoRequest
         {
-            var reportRequest = new GetAgentTeamInfoRequest
-            {
-                AgentId = request.AgentId,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = (short)request.OrderBy,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+            AgentId = request.AgentId,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = (short)request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
 
-            var response = await _reportClient.GetAgentTeamInfoAsync(reportRequest);
+        var response = await _reportClient.GetAgentTeamInfoAsync(reportRequest);
 
-            return new()
+        return new()
+        {
+            Valid = response.Valid,
+            Message = response.Message,
+            TotalCount = response.TotalCount,
+            Items = response.Items?.Select(x => new TeamInfoReportModel
             {
-                Valid = response.Valid,
-                Message = response.Message,
-                TotalCount = response.TotalCount,
-                Items = response.Items?.Select(x => new TeamInfoReportModel
-                {
-                    Username = x.Username,
-                    RegisteredOn = x.RegisteredOn,
-                    Contribution = x.Contribution
-                }).ToArray()
-            };
-        }
+                Username = x.Username,
+                RegisteredOn = x.RegisteredOn,
+                Contribution = x.Contribution
+            }).ToArray()
+        };
     }
 }

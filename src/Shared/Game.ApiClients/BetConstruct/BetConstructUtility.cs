@@ -6,51 +6,50 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace TGS.Shared.Game.ApiClients.BetConstruct
+namespace TGS.Shared.Game.ApiClients.BetConstruct;
+
+public interface IBetConstructUtility
 {
-    public interface IBetConstructUtility
+    string ComputeSignature(Dictionary<string, object> hashDict, string sharedKey);
+}
+
+internal class BetConstructUtility : IBetConstructUtility
+{
+    private readonly MD5 _md5;
+    private readonly ILogger<BetConstructUtility> _logger;
+
+    public BetConstructUtility(ILogger<BetConstructUtility> logger)
     {
-        string ComputeSignature(Dictionary<string, object> hashDict, string sharedKey);
+        _md5 = MD5.Create();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    internal class BetConstructUtility : IBetConstructUtility
+    string MD5Hash(string plainText)
     {
-        private readonly MD5 _md5;
-        private readonly ILogger<BetConstructUtility> _logger;
+        var data = Encoding.UTF8.GetBytes(plainText);
 
-        public BetConstructUtility(ILogger<BetConstructUtility> logger)
-        {
-            _md5 = MD5.Create();
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        var hash = _md5.ComputeHash(data);
 
-        string MD5Hash(string plainText)
-        {
-            var data = Encoding.UTF8.GetBytes(plainText);
+        return Convert.ToHexString(hash).ToLower();
+    }
 
-            var hash = _md5.ComputeHash(data);
+    string IBetConstructUtility.ComputeSignature(Dictionary<string, object> hashDict, string sharedKey)
+    {
+        _logger.LogInformation($"ComputeSignature hashDict:{JsonSerializer.Serialize(hashDict)}");
 
-            return Convert.ToHexString(hash).ToLower();
-        }
+        var content = string.Join(
+            "",
+            hashDict.Where(x => x.Value != null && x.Value.ToString() != "")
+                .Select(x =>
+                {
+                    return $"{x.Key}{x.Value}";
+                }));
 
-        string IBetConstructUtility.ComputeSignature(Dictionary<string, object> hashDict, string sharedKey)
-        {
-            _logger.LogInformation($"ComputeSignature hashDict:{JsonSerializer.Serialize(hashDict)}");
+        var plainText = $"{content}{sharedKey}";
+        _logger.LogInformation($"ComputeSignature plainText:{plainText}");
+        var hash = MD5Hash(plainText);            
+        _logger.LogInformation($"ComputeSignature hash:{hash}");
 
-            var content = string.Join(
-                "",
-                hashDict.Where(x => x.Value != null && x.Value.ToString() != "")
-                    .Select(x =>
-                    {
-                        return $"{x.Key}{x.Value}";
-                    }));
-
-            var plainText = $"{content}{sharedKey}";
-            _logger.LogInformation($"ComputeSignature plainText:{plainText}");
-            var hash = MD5Hash(plainText);            
-            _logger.LogInformation($"ComputeSignature hash:{hash}");
-
-            return hash;
-        }
+        return hash;
     }
 }

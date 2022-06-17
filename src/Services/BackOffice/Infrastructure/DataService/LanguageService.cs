@@ -7,67 +7,66 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Language;
 
-namespace TGS.Services.BackOffice.Infrastructure.DataService
+namespace TGS.Services.BackOffice.Infrastructure.DataService;
+
+public interface ILanguageService
 {
-    public interface ILanguageService
+    Task<Language> GetLanguageAsync(Expression<Func<Language, bool>> predicate,
+        Func<IQueryable<Language>, IQueryable<Language>> preQuery = null);
+
+    IQueryable<Language> GetLanguageQueries(
+        Func<IQueryable<Language>, IQueryable<Language>> preQuery = null,
+        bool tracking = false);
+
+    Task CreateLanguageAsync(CreateLanguageRequest request);
+    Task UpdateLanguageAsync(Language language, UpdateLanguageRequest request);
+    Task<bool> ExistsAsync(Expression<Func<Language, bool>> predicate);
+}
+
+public class LanguageService : BaseRepositoryOperations<ITgsRepository>, ILanguageService
+{
+    public LanguageService(ITgsRepository tgsRepository) : base(tgsRepository)
     {
-        Task<Language> GetLanguageAsync(Expression<Func<Language, bool>> predicate,
-            Func<IQueryable<Language>, IQueryable<Language>> preQuery = null);
-
-        IQueryable<Language> GetLanguageQueries(
-            Func<IQueryable<Language>, IQueryable<Language>> preQuery = null,
-            bool tracking = false);
-
-        Task CreateLanguageAsync(CreateLanguageRequest request);
-        Task UpdateLanguageAsync(Language language, UpdateLanguageRequest request);
-        Task<bool> ExistsAsync(Expression<Func<Language, bool>> predicate);
     }
 
-    public class LanguageService : BaseRepositoryOperations<ITgsRepository>, ILanguageService
+    Task<Language> ILanguageService.GetLanguageAsync(Expression<Func<Language, bool>> predicate,
+        Func<IQueryable<Language>, IQueryable<Language>> preQuery) =>
+        GetEntityFirstOrDefaultAsync(predicate, preQuery);
+
+    IQueryable<Language> ILanguageService.GetLanguageQueries(
+        Func<IQueryable<Language>, IQueryable<Language>> preQuery,
+        bool tracking) =>
+        GetQueriesAsync(preQuery, tracking);
+
+    async Task ILanguageService.UpdateLanguageAsync(
+        Language language, UpdateLanguageRequest request)
     {
-        public LanguageService(ITgsRepository tgsRepository) : base(tgsRepository)
-        {
-        }
+        language.Name = request.Name;
+        language.CultureCode = request.CultureCode;
+        language.LanguageCode = request.LanguageCode;
+        language.LocalizedName = request.LocalizedName;
+        language.UpdatedOn = DateTimeOffset.Now;
 
-        Task<Language> ILanguageService.GetLanguageAsync(Expression<Func<Language, bool>> predicate,
-            Func<IQueryable<Language>, IQueryable<Language>> preQuery) =>
-            GetEntityFirstOrDefaultAsync(predicate, preQuery);
-
-        IQueryable<Language> ILanguageService.GetLanguageQueries(
-            Func<IQueryable<Language>, IQueryable<Language>> preQuery,
-            bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
-
-        async Task ILanguageService.UpdateLanguageAsync(
-            Language language, UpdateLanguageRequest request)
-        {
-            language.Name = request.Name;
-            language.CultureCode = request.CultureCode;
-            language.LanguageCode = request.LanguageCode;
-            language.LocalizedName = request.LocalizedName;
-            language.UpdatedOn = DateTimeOffset.Now;
-
-            await UpdateEntityAsync(language);
-        }
-
-        async Task ILanguageService.CreateLanguageAsync(CreateLanguageRequest request)
-        {
-            var language = new Language
-            {
-                Name = request.Name,
-                CultureCode = request.CultureCode,
-                LanguageCode = request.LanguageCode,
-                LocalizedName = request.LocalizedName,
-                CreatedByUsername = request.EditorUsername,
-                UpdatedByUsername = request.EditorUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            await CreateEntityAsync(language);
-        }
-
-        Task<bool> ILanguageService.ExistsAsync(Expression<Func<Language, bool>> predicate) =>
-            ExistsAsync(predicate);
+        await UpdateEntityAsync(language);
     }
+
+    async Task ILanguageService.CreateLanguageAsync(CreateLanguageRequest request)
+    {
+        var language = new Language
+        {
+            Name = request.Name,
+            CultureCode = request.CultureCode,
+            LanguageCode = request.LanguageCode,
+            LocalizedName = request.LocalizedName,
+            CreatedByUsername = request.EditorUsername,
+            UpdatedByUsername = request.EditorUsername,
+            CreatedOn = DateTimeOffset.Now,
+            UpdatedOn = DateTimeOffset.Now
+        };
+
+        await CreateEntityAsync(language);
+    }
+
+    Task<bool> ILanguageService.ExistsAsync(Expression<Func<Language, bool>> predicate) =>
+        ExistsAsync(predicate);
 }

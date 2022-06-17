@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public interface IPlayerOnlineRepository
 {
-    public interface IPlayerOnlineRepository
-    {
-        Task SetAsync(Guid brandId, string playerCode);
-    }
+    Task SetAsync(Guid brandId, string playerCode);
 }

@@ -2,28 +2,27 @@
 
 using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class PromotionDistribute
 {
-    public class PromotionDistribute
-    {
-        public decimal BonusAmount { get; set; }
+    public decimal BonusAmount { get; set; }
 
-        public Guid BrandId { get; set; }
+    public Guid BrandId { get; set; }
 
-        public decimal Bucket { get; set; }
+    public decimal Bucket { get; set; }
 
-        public DateTimeOffset CreatedOn { get; set; }
+    public DateTimeOffset CreatedOn { get; set; }
 
-        public string? Distributor { get; set; }
+    public string? Distributor { get; set; }
 
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        public Guid? PlanId { get; set; }
+    public Guid? PlanId { get; set; }
 
-        public string PlayerCode { get; set; } = default!;
+    public string PlayerCode { get; set; } = default!;
 
-        public Guid PromotionId { get; set; }
+    public Guid PromotionId { get; set; }
 
-        public DateTimeOffset? SentOn { get; set; }
-    }
+    public DateTimeOffset? SentOn { get; set; }
 }

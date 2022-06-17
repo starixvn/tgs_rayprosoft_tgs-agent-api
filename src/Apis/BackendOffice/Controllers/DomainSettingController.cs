@@ -4,50 +4,49 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Services;
 
-namespace TGS.Apis.BackendOffice.Controllers
+namespace TGS.Apis.BackendOffice.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class DomainSettingController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DomainSettingController : BaseContextController
+    [HttpPut("ingress/{agentId}", Name = "ApplyAgentDomainIngress")]
+    public ValueTask ApplyAgentDomainIngressAsync(
+        [FromServices] ICommandService<ApplyAgentDomainIngressCommand> applyService,
+        Guid agentId)
     {
-        [HttpPut("ingress/{agentId}", Name = "ApplyAgentDomainIngress")]
-        public ValueTask ApplyAgentDomainIngressAsync(
-            [FromServices] ICommandService<ApplyAgentDomainIngressCommand> applyService,
-            Guid agentId)
-        {
-            var command = new ApplyAgentDomainIngressCommand(agentId);
+        var command = new ApplyAgentDomainIngressCommand(agentId);
 
-            return applyService.ExecuteAsync(command);
-        }
+        return applyService.ExecuteAsync(command);
+    }
 
-        [HttpPut("dns-zone/{agentId}", Name = "CreateZoneByAgentId")]
-        public ValueTask CreateDnsZoneAsync(
-            [FromServices] ICommandService<CreateAgentDnsZoneCommand> createService,
-            Guid agentId)
-        {
-            var command = new CreateAgentDnsZoneCommand(agentId);
+    [HttpPut("dns-zone/{agentId}", Name = "CreateZoneByAgentId")]
+    public ValueTask CreateDnsZoneAsync(
+        [FromServices] ICommandService<CreateAgentDnsZoneCommand> createService,
+        Guid agentId)
+    {
+        var command = new CreateAgentDnsZoneCommand(agentId);
 
-            return createService.ExecuteAsync(command);
-        }
+        return createService.ExecuteAsync(command);
+    }
 
-        [HttpDelete("ingress/{agentId}", Name = "DeleteAgentDomainIngress")]
-        public ValueTask DeleteAgentDomainIngressAsync(
-            [FromServices] ICommandService<DeleteAgentDomainIngressCommand> deleteService,
-            Guid agentId)
-        {
-            var command = new DeleteAgentDomainIngressCommand(agentId);
+    [HttpDelete("ingress/{agentId}", Name = "DeleteAgentDomainIngress")]
+    public ValueTask DeleteAgentDomainIngressAsync(
+        [FromServices] ICommandService<DeleteAgentDomainIngressCommand> deleteService,
+        Guid agentId)
+    {
+        var command = new DeleteAgentDomainIngressCommand(agentId);
 
-            return deleteService.ExecuteAsync(command);
-        }
+        return deleteService.ExecuteAsync(command);
+    }
 
-        [HttpDelete("dns-zone/{agentId}", Name = "DeleteZoneByAgentId")]
-        public ValueTask DeleteDnsZoneAsync(
-            [FromServices] ICommandService<DeleteAgentDnsZoneCommand> deleteService,
-            Guid agentId)
-        {
-            var command = new DeleteAgentDnsZoneCommand(agentId);
+    [HttpDelete("dns-zone/{agentId}", Name = "DeleteZoneByAgentId")]
+    public ValueTask DeleteDnsZoneAsync(
+        [FromServices] ICommandService<DeleteAgentDnsZoneCommand> deleteService,
+        Guid agentId)
+    {
+        var command = new DeleteAgentDnsZoneCommand(agentId);
 
-            return deleteService.ExecuteAsync(command);
-        }
+        return deleteService.ExecuteAsync(command);
     }
 }

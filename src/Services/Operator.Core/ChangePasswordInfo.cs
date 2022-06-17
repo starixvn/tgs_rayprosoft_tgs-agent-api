@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Operator;
+
+public class ChangePasswordInfo
 {
-    public class ChangePasswordInfo
-    {
-        public string PlayerCode { get; set; } = default!;
-        public DateTimeOffset UpdateTime { get; set; }
-    }
+    public string PlayerCode { get; set; } = default!;
+    public DateTimeOffset UpdateTime { get; set; }
 }

@@ -9,55 +9,54 @@ using TGS.Services.Agent;
 using TGS.Services.WalletService;
 using TGS.Services.Agent.ApplicationServices.Wallet;
 
-namespace Agent.UnitTests
+namespace Agent.UnitTests;
+
+[TestFixture]
+public class WalletTests
 {
-    [TestFixture]
-    public class WalletTests
+    [Test]
+    public async Task Agent_Can_Get_Balance_Info()
     {
-        [Test]
-        public async Task Agent_Can_Get_Balance_Info()
-        {
-            var moqAgentRepository = new Mock<IAgentRepository>();
-            var moqAgentWalletRepository = new Mock<IAgentWalletRepository>();
+        var moqAgentRepository = new Mock<IAgentRepository>();
+        var moqAgentWalletRepository = new Mock<IAgentWalletRepository>();
 
-            var sut = new GetBalanceQueryService(
-                moqAgentRepository.Object,
-                moqAgentWalletRepository.Object);
+        var sut = new GetBalanceQueryService(
+            moqAgentRepository.Object,
+            moqAgentWalletRepository.Object);
 
-            var agentId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
 
-            _ = moqAgentRepository.Setup(fake => fake.GetAgentByIdAsync(It.Is<Guid>(x => x == agentId)))
-                .Returns(ValueTask.FromResult(new AgentInfo(
-                    agentId,
-                    "TestAgent",
-                    null,
-                    null,
-                    Guid.NewGuid(),
-                    "agent@test.com",
-                    null,
-                    null,
-                    "aaabbb",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0M,
-                    0)));
+        _ = moqAgentRepository.Setup(fake => fake.GetAgentByIdAsync(It.Is<Guid>(x => x == agentId)))
+            .Returns(ValueTask.FromResult(new AgentInfo(
+                agentId,
+                "TestAgent",
+                null,
+                null,
+                Guid.NewGuid(),
+                "agent@test.com",
+                null,
+                null,
+                "aaabbb",
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                Array.Empty<byte>(),
+                null,
+                DateTimeOffset.Now,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                0M,
+                0)));
 
-            var expected = new BalanceInfo(10000M).ToExpectedObject();
+        var expected = new BalanceInfo(10000M).ToExpectedObject();
 
-            _ = moqAgentWalletRepository
-                .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.Is<Guid>(x => x == agentId)))
-                .Returns(ValueTask.FromResult(10000M));
+        _ = moqAgentWalletRepository
+            .Setup(fake => fake.GetBalanceAsync(It.IsAny<Guid>(), It.Is<Guid>(x => x == agentId)))
+            .Returns(ValueTask.FromResult(10000M));
 
-            var actual = await sut.GetAsync(new GetBalanceQuery(agentId));
+        var actual = await sut.GetAsync(new GetBalanceQuery(agentId));
 
-            expected.ShouldMatch(actual);
-        }
+        expected.ShouldMatch(actual);
     }
 }
