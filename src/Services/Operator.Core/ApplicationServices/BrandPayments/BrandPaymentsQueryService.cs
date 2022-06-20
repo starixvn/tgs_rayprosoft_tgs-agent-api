@@ -4,9 +4,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Tgs.Payment.Clients;
-using TGS.Services.Operator.BrandPayment.PaymentConditions;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.BrandPayments;
+using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandPayments;
 

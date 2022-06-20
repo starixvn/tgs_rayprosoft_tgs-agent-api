@@ -5,17 +5,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
-using TGS.Core.Infrastructures.Utility;
 using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
-using TGS.Services.Operator.ApplicationServices.Deposit;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
 internal class SubmitBankDepositFormCommandService : ICommandService<SubmitBankDepositFormCommand>
 {
-    private readonly IFileServiceClient _fileServiceClient;
     private readonly IQueryService<BrandPaymentsQuery, BrandPaymentInfo> _brandPaymentsQueryService;
+    private readonly IFileServiceClient _fileServiceClient;
     private readonly IGetService<GetPaymentQuery, PaymentInfo> _getPaymentService;
     private readonly IPaymentServiceClient _paymentServiceClient;
 

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using TGS.Core.DataServices.Tgs;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.BrandCommunication;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandCommunication;
 

@@ -12,6 +12,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 

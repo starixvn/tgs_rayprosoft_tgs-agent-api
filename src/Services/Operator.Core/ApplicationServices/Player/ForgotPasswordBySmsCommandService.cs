@@ -2,21 +2,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
+using Tgs.BrandCertificate.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.ApplicationServices.Player;
-using Tgs.BrandCertificate.Clients;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class ForgotPasswordBySmsCommandService : IGetService<ForgotPasswordBySmsCommand, string>
 {
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IValidateCodeGenerator _codeGenerator;
     private readonly IPlayerRepository _playerRepository;
     private readonly ISmsServiceClient _smsServiceClient;
-    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public ForgotPasswordBySmsCommandService(

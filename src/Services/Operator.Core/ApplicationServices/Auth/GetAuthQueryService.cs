@@ -3,11 +3,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Models;
-using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Auth;
+using TGS.Services.Operations;
 
 namespace TGS.Services.Operator.ApplicationServices.Auth;
 

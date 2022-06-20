@@ -9,7 +9,7 @@ using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Player;
 
-namespace TGS.Services.Operator;
+namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
 {

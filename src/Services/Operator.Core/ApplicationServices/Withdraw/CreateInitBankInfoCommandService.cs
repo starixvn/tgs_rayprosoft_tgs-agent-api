@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Models.Enums;
+using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
-using Tgs.BrandCertificate.Clients;
+using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 

@@ -102,8 +102,8 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
             .GetPlayerInfoAsync(command.UpperPlayerCode)
             .ConfigureAwait(false);
 
-        if (upperPlayer == null 
-            || upperPlayer.BrandId != command.BrandId 
+        if (upperPlayer == null
+            || upperPlayer.BrandId != command.BrandId
             || upperPlayer.Status != PlayerStatus.Enabled)
             throw new InvalidInvitationCodeException(
                 command.UpperPlayerCode,

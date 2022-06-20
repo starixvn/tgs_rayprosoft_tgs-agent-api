@@ -24,6 +24,7 @@ using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -221,22 +222,22 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query);
     }
 
-        /// <summary>
-        /// Get player information
-        /// </summary>
-        [HttpGet("info", Name = "GetPlayerInfo")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [IgnoreUserBlacklistCheck]
-        public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
-            [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
-            [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
-            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
-            [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
-            [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var playerCode = playerTokenData.PlayerCode;
+    /// <summary>
+    /// Get player information
+    /// </summary>
+    [HttpGet("info", Name = "GetPlayerInfo")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
+        [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
+        [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
+        [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
+        [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
+        [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var playerCode = playerTokenData.PlayerCode;
 
         var player = await getPlayerMainDataQueryService
             .GetAsync(new GetPlayerMainDataQuery(playerCode))
@@ -265,34 +266,34 @@ public class PlayerController : ControllerBase
 
         var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
-            var bankInfoAuthentication = await getBankInfoQueryService
-                .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
-                .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
-            
-            var playerInfo = new PlayerInfoViewModel
-            {
-                PlayerCode = player.PlayerCode,
-                IdentityAuthentication = player.IdentityAuthentication,
-                IdentityAuthenticationFormStatus = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status,
-                IdentityAuthenticationFormId = identityFormInfo.FormId,
-                IsAutoTransferToGame = isAutoTransferToGame,
-                IsSetPayPassword = player.IsSetPayPassword,
-                Username = player.UserName,
-                Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.Parse(birthdateValue),
-                VipLevel = vipLevel,
-                RealName = playerProperties.GetValueOrDefault("RealName"),
-                Email = playerProperties.GetValueOrDefault("Email"),
-                Phone = playerProperties.GetValueOrDefault("Phone"),
-                PhoneAreaCode = playerProperties.GetValueOrDefault("AreaCode"),
-                QQ = playerProperties.GetValueOrDefault("QQ"),
-                Wechat = playerProperties.GetValueOrDefault("Wechat"),
-                FacebookMessenger = playerProperties.GetValueOrDefault("FacebookMessenger"),
-                Line = playerProperties.GetValueOrDefault("Line"),
-                Viber = playerProperties.GetValueOrDefault("Viber"),
-                Telegram = playerProperties.GetValueOrDefault("Telegram"),
-                WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
-                BankInfoAuthentication = bankInfoAuthentication
-            };
+        var bankInfoAuthentication = await getBankInfoQueryService
+            .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
+            .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
+
+        var playerInfo = new PlayerInfoViewModel
+        {
+            PlayerCode = player.PlayerCode,
+            IdentityAuthentication = player.IdentityAuthentication,
+            IdentityAuthenticationFormStatus = player.IdentityAuthentication ? PlayerIdentityReviewState.Approve : identityFormInfo.Status,
+            IdentityAuthenticationFormId = identityFormInfo.FormId,
+            IsAutoTransferToGame = isAutoTransferToGame,
+            IsSetPayPassword = player.IsSetPayPassword,
+            Username = player.UserName,
+            Birthdate = string.IsNullOrWhiteSpace(birthdateValue) ? null : DateOnly.Parse(birthdateValue),
+            VipLevel = vipLevel,
+            RealName = playerProperties.GetValueOrDefault("RealName"),
+            Email = playerProperties.GetValueOrDefault("Email"),
+            Phone = playerProperties.GetValueOrDefault("Phone"),
+            PhoneAreaCode = playerProperties.GetValueOrDefault("AreaCode"),
+            QQ = playerProperties.GetValueOrDefault("QQ"),
+            Wechat = playerProperties.GetValueOrDefault("Wechat"),
+            FacebookMessenger = playerProperties.GetValueOrDefault("FacebookMessenger"),
+            Line = playerProperties.GetValueOrDefault("Line"),
+            Viber = playerProperties.GetValueOrDefault("Viber"),
+            Telegram = playerProperties.GetValueOrDefault("Telegram"),
+            WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
+            BankInfoAuthentication = bankInfoAuthentication
+        };
 
         return playerInfo;
     }
@@ -847,10 +848,10 @@ public class PlayerController : ControllerBase
     /// <returns>
     /// security code
     /// </returns>
-    [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
+    [HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangePhoneAsync(
+    public async ValueTask<string> StartSetPhoneAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
         [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
         [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,

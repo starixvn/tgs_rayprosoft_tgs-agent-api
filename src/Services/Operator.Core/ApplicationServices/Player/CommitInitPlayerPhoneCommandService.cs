@@ -11,11 +11,11 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPlayerPhoneCommand>
 {
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
-    private readonly IBrandServiceClient _brandServiceClient;
 
     public CommitInitPlayerPhoneCommandService(
         IValidateCodeOperator validateCodeOperator,
