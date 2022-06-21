@@ -14,7 +14,7 @@ internal class VipCondition : IBrandPaymentCondition
         _allowVips = allowVips.ToArray();
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
     {
         if (player.VipLevelId == null)
             return false;

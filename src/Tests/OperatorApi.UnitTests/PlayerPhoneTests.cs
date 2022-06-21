@@ -7,6 +7,7 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -85,7 +86,7 @@ public class PlayerPhoneTests
         moqPlayerRepository.Verify(
             fake => fake.UpdatePlayerStatusAsync(
                 It.Is<string>(x => x == playerCode),
-                It.Is<PlayerStatus>(x => x == PlayerStatus.Enabled)),
+                It.Is<Core.Models.Enums.PlayerStatus>(x => x == Core.Models.Enums.PlayerStatus.Enabled)),
             Times.Never);
 
         moqCacheManager.Verify(
@@ -172,7 +173,7 @@ public class PlayerPhoneTests
         moqPlayerRepository.Verify(
             fake => fake.UpdatePlayerStatusAsync(
                 It.Is<string>(x => x == playerCode),
-                It.Is<PlayerStatus>(x => x == PlayerStatus.Enabled)),
+                It.Is<Core.Models.Enums.PlayerStatus>(x => x == Core.Models.Enums.PlayerStatus.Enabled)),
             Times.Never);
 
         moqCacheManager.Verify(
@@ -260,7 +261,7 @@ public class PlayerPhoneTests
         moqPlayerRepository.Verify(
             fake => fake.UpdatePlayerStatusAsync(
                 It.Is<string>(x => x == playerCode),
-                It.Is<PlayerStatus>(x => x == PlayerStatus.Enabled)),
+                It.Is<Core.Models.Enums.PlayerStatus>(x => x == Core.Models.Enums.PlayerStatus.Enabled)),
             Times.Exactly(1));
 
         moqCacheManager.Verify(
@@ -526,14 +527,14 @@ public class PlayerPhoneTests
     [Test]
     public async Task Start_Set_Player_Phone_Should_Not_Send_Confirm_Message_When_Sms_Disabled()
     {
-        var moqPlayerRepository = new Mock<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var moqValidateCodeGenerator = new Mock<IValidateCodeGenerator>();
         var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
         var moqSmsServiceClient = new Mock<ISmsServiceClient>();
 
         var sut = new StartSetPlayerPhoneCommandService(
-            moqPlayerRepository.Object,
+            fakePlayerServiceClient,
             fakeBrandServiceClient,
             moqValidateCodeGenerator.Object,
             moqValidateCodeOperator.Object,
@@ -541,23 +542,12 @@ public class PlayerPhoneTests
 
         var areaCode = "886";
         var phone = "0988123456";
-        var player = new PlayerInfo(
-            "abcdef123456",
-            Guid.NewGuid(),
-            0M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "Tester",
-            "Tester",
-            null,
-            1,
-            null,
-            null,
-            false);
+        var player = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "abcdef123456",
+            BrandId = Guid.NewGuid(),
+            Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+        };
 
         var command = new StartSetPlayerPhoneCommand(
             player.PlayerCode,
@@ -569,9 +559,8 @@ public class PlayerPhoneTests
         var validateCode = "123456";
         var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-        moqPlayerRepository
-            .Setup(fake => fake.GetPlayerInfoAsync(It.Is<string>(x => x == player.PlayerCode)))
-            .Returns(ValueTask.FromResult(player));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(player.PlayerCode))
+            .Returns(player);
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(player.BrandId))
             .Returns(new Tgs.BrandCertificate.Clients.BrandInfo

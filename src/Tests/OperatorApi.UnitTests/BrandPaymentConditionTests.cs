@@ -80,7 +80,7 @@ public class BrandPaymentConditionTests
             fakeCondition2.Object,
             fakeCondition3.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -126,7 +126,8 @@ public class BrandPaymentConditionTests
         fakeCondition
             .Setup(fake => fake.IsValid(
                 It.IsAny<BrandPaymentInfo>(),
-                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>()))
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var sut = new BrandPaymentFilterCondition(
@@ -178,7 +179,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -221,7 +222,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -264,7 +265,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -307,7 +308,7 @@ public class BrandPaymentConditionTests
 
         var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -350,7 +351,7 @@ public class BrandPaymentConditionTests
 
         var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -442,7 +443,7 @@ public class BrandPaymentConditionTests
 
         var sut = new ShowOnAllPlayersCondition();
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -485,7 +486,7 @@ public class BrandPaymentConditionTests
 
         var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 50M);
 
         Assert.IsTrue(actual);
     }
@@ -528,7 +529,7 @@ public class BrandPaymentConditionTests
 
         var sut = new BlockListCondition(new[] { brandPayment.Id });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -571,7 +572,7 @@ public class BrandPaymentConditionTests
 
         var sut = new WhiteListCondition(new[] { brandPayment.Id });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -736,7 +737,7 @@ public class BrandPaymentConditionTests
 
         var sut = new VipCondition(Array.Empty<Guid>());
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -748,6 +749,7 @@ public class BrandPaymentConditionTests
         {
             PlayerCode = "ThisIsPlayerCode",
             BrandId = Guid.NewGuid(),
+            VipLevelId = Guid.NewGuid()
         };
 
         var brandPayment = new BrandPaymentInfo
@@ -779,7 +781,7 @@ public class BrandPaymentConditionTests
 
         var sut = new VipCondition(new[] { playerInfo.VipLevelId.Value });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }

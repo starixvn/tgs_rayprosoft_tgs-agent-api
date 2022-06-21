@@ -14,6 +14,6 @@ internal class WhiteListCondition : IBrandPaymentCondition
         _whiteList = playerAllowBrandPaymentIds.ToArray();
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => _whiteList.Contains(brandPayment.Id);
 }

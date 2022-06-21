@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
@@ -8,17 +9,17 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetPlayerPropertiesQueryService
-    : IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>>
+    : IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>>
 {
-    private readonly IPlayerServiceClient _client;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
     public GetPlayerPropertiesQueryService(
         IPlayerServiceClient client)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _playerServiceClient = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public ValueTask<IReadOnlyDictionary<string, string>> GetAsync(GetPlayerPropertiesQuery query,
+    public ValueTask<IImmutableDictionary<string, string>> GetAsync(GetPlayerPropertiesQuery query,
         CancellationToken cancellationToken = default)
-        => _client.GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken);
+        => _playerServiceClient.GetPlayerPropertiesAsync(query.PlayerCode, cancellationToken);
 }

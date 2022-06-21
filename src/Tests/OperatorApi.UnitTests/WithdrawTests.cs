@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
@@ -91,7 +92,7 @@ public class WithdrawTests
             .Returns(new Dictionary<string, string>
             {
                 ["DefaultWalletId"] = walletId.ToString()
-            });
+            }.ToImmutableDictionary());
 
         fakeCashServiceClient
             .GetBalanceAsync(Arg.Any<Guid>())
@@ -210,7 +211,7 @@ public class WithdrawTests
             .Returns(new Dictionary<string, string>
             {
                 ["DefaultWalletId"] = walletId.ToString()
-            });
+            }.ToImmutableDictionary());
 
         fakeCashServiceClient
             .GetBalanceAsync(Arg.Any<Guid>())
@@ -314,6 +315,7 @@ public class WithdrawTests
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         var brandId = Guid.NewGuid();
         var playerCode = "playerCode";
@@ -328,27 +330,18 @@ public class WithdrawTests
                 PlayerIdentityEnabled = true
             });
 
-        _ = fakePlayerRepository
-            .GetPlayerInfoAsync(playerCode)
-            .Returns(new Services.Operator.PlayerInfo(
-                playerCode,
-                brandId,
-                0m,
-                IdentityAuthentication: false,
-                false,
-                null,
-                null,
-                null,
-                Core.Models.Enums.PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        _ = fakePlayerServiceClient
+            .GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+            });
 
-        var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
+        var sut = new CheckPlayerIdentityCommandService(
+            fakeBrandServiceClient,
+            fakePlayerServiceClient);
 
         var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
@@ -359,7 +352,7 @@ public class WithdrawTests
     public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_False()
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         var brandId = Guid.NewGuid();
         var playerCode = "playerCode";
@@ -373,13 +366,12 @@ public class WithdrawTests
                 Currency = "CNY"
             });
 
-        var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
+        var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerServiceClient);
 
         var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
-        _ = fakePlayerRepository
-            .Received(0)
-            .GetPlayerInfoAsync(playerCode);
+        _ = fakePlayerServiceClient.Received(0)
+            .GetPlayerInfoAsync(Arg.Is(playerCode));
 
         Assert.IsTrue(actual);
     }
@@ -388,7 +380,7 @@ public class WithdrawTests
     public async Task Player_Can_Withdraw_When_Brand_Enable_Player_Identity_Is_True_And_Player_Identity_Authentication_Is_True()
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         var brandId = Guid.NewGuid();
         var playerCode = "playerCode";
@@ -403,27 +395,17 @@ public class WithdrawTests
                 PlayerIdentityEnabled = true
             });
 
-        _ = fakePlayerRepository
-            .GetPlayerInfoAsync(playerCode)
-            .Returns(new Services.Operator.PlayerInfo(
-                playerCode,
-                brandId,
-                0m,
-                IdentityAuthentication: true,
-                false,
-                null,
-                null,
-                null,
-                Core.Models.Enums.PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        _ = fakePlayerServiceClient
+            .GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = playerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                IdentityAuthentication = true
+            });
 
-        var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerRepository);
+        var sut = new CheckPlayerIdentityCommandService(fakeBrandServiceClient, fakePlayerServiceClient);
 
         var actual = await sut.GetAsync(new CheckPlayerIdentityCommand(brandId, playerCode));
 
@@ -472,7 +454,7 @@ public class WithdrawTests
             .Returns(new Dictionary<string, string>
             {
                 ["DefaultWalletId"] = walletId.ToString()
-            });
+            }.ToImmutableDictionary());
 
         fakeCashServiceClient
             .GetBalanceAsync(Arg.Any<Guid>())

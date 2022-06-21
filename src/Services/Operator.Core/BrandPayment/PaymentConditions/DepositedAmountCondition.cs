@@ -11,7 +11,7 @@ internal class DepositedAmountCondition : IBrandPaymentCondition
         _depositedAmountLimit = depositedAmountLimit;
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player)
-        => player.DepositedAmount >= _depositedAmountLimit.From
-            && player.DepositedAmount < _depositedAmountLimit.To;
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
+        => depositedAmount >= _depositedAmountLimit.From
+            && depositedAmount < _depositedAmountLimit.To;
 }

@@ -124,7 +124,8 @@ public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
                 [PlayerPropertyName.Birthdate] = request.Birthdate.ToString()
             };
 
-            await _playerServiceClient.SetPlayerPropertiesAsync(player.PlayerCode, properties)
+            await _playerServiceClient
+                .SetPlayerPropertiesAsync(player.PlayerCode, properties.ToImmutableDictionary())
                 .ConfigureAwait(false);
         }
 

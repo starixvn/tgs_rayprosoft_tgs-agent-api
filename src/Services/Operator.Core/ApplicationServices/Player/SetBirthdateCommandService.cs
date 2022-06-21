@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
@@ -21,7 +22,7 @@ internal class SetBirthdateCommandService : ICommandService<SetBirthdateCommand>
         var properties = new Dictionary<PlayerPropertyName, string?>
         {
             [PlayerPropertyName.Birthdate] = command.Birthdate?.ToString("yyyy/MM/dd")
-        };
+        }.ToImmutableDictionary();
 
         return _playerServiceClient.SetPlayerPropertiesAsync(command.PlayerCode, properties);
     }

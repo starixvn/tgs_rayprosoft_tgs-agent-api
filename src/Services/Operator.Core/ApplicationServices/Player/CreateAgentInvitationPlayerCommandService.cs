@@ -108,7 +108,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
             .GetAgentByInvitationCodeAsync(command.BrandId, command.AgentInvitationCode)
             .ConfigureAwait(false);
 
-        if (agent == null || agent.Status != AgentStatus.Enabled)
+        if (agent == null || agent.Status != Core.Models.Enums.AgentStatus.Enabled)
             throw new InvalidInvitationCodeException(
                 command.AgentInvitationCode,
                 "Can't find the agent info");
@@ -125,8 +125,10 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
                     BetLimitId = betLimitId,
                     AgentId = agent.Id,
                     AgentInvitationCode = command.AgentInvitationCode,
-                    Type = command.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
-                    PlayerStatus = status
+                    Type = command.IsTestPlayer
+                        ? Core.Models.Enums.PlayerType.TestPlayer
+                        : Core.Models.Enums.PlayerType.RealPlayer,
+                    PlayerStatus = (Core.Models.Enums.PlayerStatus)(short)status
                 })
             .ConfigureAwait(false);
 

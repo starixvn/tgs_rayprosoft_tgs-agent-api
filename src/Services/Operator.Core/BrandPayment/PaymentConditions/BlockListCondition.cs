@@ -14,6 +14,6 @@ internal class BlockListCondition : IBrandPaymentCondition
         _blockList = playerBlockedBrandPaymentIds.ToArray();
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => !_blockList.Contains(brandPayment.Id);
 }

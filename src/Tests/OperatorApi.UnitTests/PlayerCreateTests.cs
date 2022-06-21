@@ -31,6 +31,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -56,6 +57,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -95,6 +97,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -120,6 +123,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -138,7 +142,7 @@ public class PlayerCreateTests
         _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.Enabled));
     }
 
     [Test]
@@ -151,6 +155,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -176,6 +181,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -215,6 +221,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -240,6 +247,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -257,7 +265,7 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -270,6 +278,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -296,6 +305,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -335,6 +345,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -361,6 +372,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -378,7 +390,8 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(
+                x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -391,6 +404,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -418,6 +432,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -457,6 +472,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -482,6 +498,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerCommand(
@@ -499,7 +516,7 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -514,6 +531,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeAgentOperations
@@ -540,6 +558,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -571,6 +590,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -598,6 +618,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -640,6 +661,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -667,6 +689,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -686,7 +709,7 @@ public class PlayerCreateTests
         _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.Enabled));
     }
 
     [Test]
@@ -701,6 +724,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -729,6 +753,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -771,6 +796,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -799,6 +825,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -818,7 +845,7 @@ public class PlayerCreateTests
         _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -833,6 +860,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -861,6 +889,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -903,6 +932,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClent = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -931,6 +961,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClent,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -950,7 +981,7 @@ public class PlayerCreateTests
         _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -965,6 +996,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -993,6 +1025,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -1097,6 +1130,7 @@ public class PlayerCreateTests
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(ValueTask.FromResult(
@@ -1107,30 +1141,20 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1159,6 +1183,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1171,24 +1196,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1198,6 +1212,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1237,6 +1252,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1249,24 +1265,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1276,6 +1281,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1294,7 +1300,7 @@ public class PlayerCreateTests
         _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == TGS.Core.Models.Enums.PlayerStatus.Enabled));
     }
 
     [Test]
@@ -1307,6 +1313,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1320,24 +1327,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1347,6 +1343,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1386,6 +1383,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1399,24 +1397,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1426,6 +1413,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1443,7 +1431,7 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -1456,6 +1444,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1469,24 +1458,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1496,6 +1474,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1535,6 +1514,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1548,24 +1528,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1575,6 +1544,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1592,7 +1562,7 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -1605,6 +1575,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1618,24 +1589,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1645,6 +1605,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1684,6 +1645,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
@@ -1697,24 +1659,13 @@ public class PlayerCreateTests
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(brandInfo);
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId,
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
             .Returns("TestPlayerCode");
@@ -1724,6 +1675,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1742,7 +1694,7 @@ public class PlayerCreateTests
         _ = _ = fakePlayerOperations
             .Received(1)
             .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]
@@ -1756,6 +1708,7 @@ public class PlayerCreateTests
 
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1772,6 +1725,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var password = "password";
@@ -1802,6 +1756,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1819,6 +1774,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var password = "password";
@@ -1847,6 +1803,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1863,6 +1820,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1890,6 +1848,7 @@ public class PlayerCreateTests
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeAgentOperations
@@ -1913,6 +1872,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var query = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -1940,6 +1900,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1951,30 +1912,20 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                Guid.NewGuid(),
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = Guid.NewGuid(),
+                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var query = new CreatePlayerWithPlayerInvitationCommand(
