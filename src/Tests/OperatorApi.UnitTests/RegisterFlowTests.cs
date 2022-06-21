@@ -482,11 +482,13 @@ public class RegisterFlowTests
         var fakeCheckBrandPhoneService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();
         var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
         var sut = new SetPhoneRegisterFlowStep(
             fakeGetBrandInfoService,
             fakeCheckBrandPhoneService,
             fakeStartSetPhoneService,
+            fakeConfirmSetPhoneService,
             fakePlayerServiceClient);
 
         var playerCode = "player1";
@@ -504,24 +506,31 @@ public class RegisterFlowTests
     }
 
     [Test]
-    public async Task SetPhoneRegisterFlowStep_ProcessInputAsync()
+    public async Task SetPhoneRegisterFlowStep_ProcessInitPhone()
     {
         var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
         var fakeCheckBrandPhoneService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();
         var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
 
         var sut = new SetPhoneRegisterFlowStep(
             fakeGetBrandInfoService,
             fakeCheckBrandPhoneService,
             fakeStartSetPhoneService,
+            fakeConfirmSetPhoneService,
             fakePlayerServiceClient);
 
         var brandId = Guid.NewGuid();
-        var inputData = new InitPhoneInputData
+        var phoneData = new PhoneData
         {
             AreaCode = "123",
             Phone = "1345678"
+        };
+        var inputData = new InitPhoneStepInputData
+        {
+            InputType = "Init",
+            Data = JsonSerializer.SerializeToDocument(phoneData)
         };
         var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
 
@@ -551,6 +560,52 @@ public class RegisterFlowTests
             brandId,
             JsonSerializer.SerializeToDocument(inputData),
             locationInfo);
+
+        Assert.IsFalse(actual.IsCompleted);
+        Assert.NotNull(actual.StepResponse);
+    }
+
+    [Test]
+    public async Task SetPhoneRegisterFlowStep_ProcessValidPhone()
+    {
+        var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
+        var fakeCheckBrandPhoneService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();
+        var fakeStartSetPhoneService = Substitute.For<IGetService<StartSetPlayerPhoneCommand, string>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeConfirmSetPhoneService = Substitute.For<ICommandService<CommitInitPlayerPhoneCommand>>();
+
+        var sut = new SetPhoneRegisterFlowStep(
+            fakeGetBrandInfoService,
+            fakeCheckBrandPhoneService,
+            fakeStartSetPhoneService,
+            fakeConfirmSetPhoneService,
+            fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var confirmData = new ConfirmPhoneData
+        {
+            SecurityKey = Guid.NewGuid().ToString(),
+            ValidateCode = "123456"
+        };
+        var inputData = new InitPhoneStepInputData
+        {
+            InputType = "Valid",
+            Data = JsonSerializer.SerializeToDocument(confirmData)
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode
+            });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
     }
 
     [Test]
