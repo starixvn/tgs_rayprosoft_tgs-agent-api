@@ -359,6 +359,7 @@ public class PlayerController : ControllerBase
     /// </summary>
     [HttpDelete("logout", Name = "Logout")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
     public async Task<LogoutResponse> LogoutAsync(
         [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
     {
