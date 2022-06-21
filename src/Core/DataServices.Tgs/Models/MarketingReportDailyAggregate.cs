@@ -4,7 +4,7 @@ using System;
 
 namespace TGS.Core.DataServices.Tgs.Models;
 
-public class AgentDailyAggregate
+public class MarketingReportDailyAggregate
 {
     public Guid AgentId { get; set; } = default!;
 

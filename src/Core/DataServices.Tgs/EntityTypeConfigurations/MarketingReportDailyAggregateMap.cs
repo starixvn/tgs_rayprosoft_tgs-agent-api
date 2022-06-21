@@ -5,14 +5,14 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations;
 
-internal class AgentDailyAggregateMap : IEntityTypeConfiguration<AgentDailyAggregate>
+internal class MarketingReportDailyAggregateMap : IEntityTypeConfiguration<MarketingReportDailyAggregate>
 {
-    public void Configure(EntityTypeBuilder<AgentDailyAggregate> builder)
+    public void Configure(EntityTypeBuilder<MarketingReportDailyAggregate> builder)
     {
-        _ = builder.ToTable("agent_daily_aggregates", Consts.ReportSchema);
+        _ = builder.ToTable("marketing_report_daily_aggregates", Consts.ReportSchema);
 
         _ = builder.HasKey(c => new { c.ReportDate, c.AgentId })
-            .HasName("pk_agent_daily_aggregate_report_date_agent_id");
+            .HasName("pk_marketing_report_daily_aggregates_report_date_agent_id");
 
         _ = builder.Property(c => c.AgentId)
             .IsRequired();

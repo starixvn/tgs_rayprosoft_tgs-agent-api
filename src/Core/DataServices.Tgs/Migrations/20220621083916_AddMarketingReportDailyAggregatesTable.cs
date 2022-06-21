@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class AddAgentDailyAggregatesTable : Migration
+    public partial class AddMarketingReportDailyAggregatesTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "agent_daily_aggregates",
+                name: "marketing_report_daily_aggregates",
                 schema: "report",
                 columns: table => new
                 {
@@ -22,14 +22,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_agent_daily_aggregate_report_date_agent_id", x => new { x.report_date, x.agent_id });
+                    table.PrimaryKey("pk_marketing_report_daily_aggregates_report_date_agent_id", x => new { x.report_date, x.agent_id });
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "agent_daily_aggregates",
+                name: "marketing_report_daily_aggregates",
                 schema: "report");
         }
     }
