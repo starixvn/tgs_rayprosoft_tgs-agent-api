@@ -8,15 +8,9 @@ public interface IPlayerRepository
 {
     ValueTask<Guid> CreatePlayerAuthenticationFormAsync(Guid brandId, string playerCode, string data);
 
-    ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
-
     ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
     ValueTask<PlayerIdentityFormInfo> GetPlayerIdentityFormQueryAsync(string playerCode);
-
-    ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode);
-
-    ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName);
 
     ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 

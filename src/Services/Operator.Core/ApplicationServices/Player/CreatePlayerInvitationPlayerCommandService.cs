@@ -3,8 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
@@ -120,8 +120,10 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
                     CurrencyCode = currency,
                     BetLimitId = betLimitId,
                     UpperPlayerCode = upperPlayer.PlayerCode,
-                    Type = command.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
-                    PlayerStatus = status
+                    Type = command.IsTestPlayer
+                        ? Core.Models.Enums.PlayerType.TestPlayer
+                        : Core.Models.Enums.PlayerType.RealPlayer,
+                    PlayerStatus = (Core.Models.Enums.PlayerStatus)status
                 })
             .ConfigureAwait(false);
 

@@ -11,6 +11,7 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
 
@@ -485,5 +486,22 @@ public class RegisterFlowTests
         var actual = await sut.GetAsync(command);
 
         Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public void SetPhoneRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authticate_Phone_Should_Return_True()
+    {
+        var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
+
+        var sut = new SetPhoneRegisterFlowStep();
+
+        var playerCode = "player1";
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo());
+
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
+
+        Assert.IsTrue(actual);
     }
 }

@@ -747,10 +747,10 @@ public class PlayerController : ControllerBase
     /// <param name="setPlayerEmailService">The set player email service.</param>
     /// <param name="request">The request.</param>
     /// <returns></returns>
-    [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
+    [HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangeEmailAsync(
+    public async ValueTask<string> StartSetEmailAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
         [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
         [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,

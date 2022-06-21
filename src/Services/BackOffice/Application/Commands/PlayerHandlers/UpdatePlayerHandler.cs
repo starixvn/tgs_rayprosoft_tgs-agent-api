@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,7 +139,7 @@ public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
                 [PlayerPropertyName.WhatsApp] = request.WhatsApp
             };
 
-            await _playerServiceClient.SetPlayerPropertiesAsync(player.PlayerCode, properties)
+            await _playerServiceClient.SetPlayerPropertiesAsync(player.PlayerCode, properties.ToImmutableDictionary())
                 .ConfigureAwait(false);
         }
 

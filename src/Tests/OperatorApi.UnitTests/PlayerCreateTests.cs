@@ -5,6 +5,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.PlayerService.Client;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
@@ -1035,6 +1036,7 @@ public class PlayerCreateTests
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
         {
@@ -1062,6 +1064,7 @@ public class PlayerCreateTests
             fakeBrandOperations,
             fakeAgentOperations,
             fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -1080,7 +1083,7 @@ public class PlayerCreateTests
         // assert
         _ = fakePlayerOperations
             .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == Core.Models.Enums.PlayerStatus.InBlacklist));
     }
 
     [Test]

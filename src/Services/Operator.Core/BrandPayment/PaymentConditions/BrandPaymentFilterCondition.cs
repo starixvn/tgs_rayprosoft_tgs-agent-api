@@ -21,17 +21,17 @@ internal class BrandPaymentFilterCondition : IBrandPaymentCondition
         _brandPaymentCondition = brandPaymentCondition;
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
     {
-        if (!_blockListCondition.IsValid(brandPayment, player))
+        if (!_blockListCondition.IsValid(brandPayment, player, depositedAmount))
             return false;
 
-        if (_whiteListCondition.IsValid(brandPayment, player))
+        if (_whiteListCondition.IsValid(brandPayment, player, depositedAmount))
             return true;
 
-        if (!_showOnAllPlayersCondition.IsValid(brandPayment, player))
+        if (!_showOnAllPlayersCondition.IsValid(brandPayment, player, depositedAmount))
             return false;
 
-        return _brandPaymentCondition.IsValid(brandPayment, player);
+        return _brandPaymentCondition.IsValid(brandPayment, player, depositedAmount);
     }
 }

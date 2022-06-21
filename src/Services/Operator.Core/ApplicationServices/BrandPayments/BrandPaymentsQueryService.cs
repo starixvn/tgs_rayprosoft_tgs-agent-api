@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
@@ -12,14 +13,14 @@ namespace TGS.Services.Operator.ApplicationServices.BrandPayments;
 internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
 {
     private readonly IPaymentServiceClient _paymentServiceClient;
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
     public BrandPaymentsQueryService(
         IPaymentServiceClient paymentServiceClient,
-        IPlayerRepository playerRepository)
+        IPlayerServiceClient playerServiceClient)
     {
         _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
     public async IAsyncEnumerable<BrandPaymentInfo> QueryAsync(
@@ -53,9 +54,13 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
             .ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
             .ConfigureAwait(false);
 
-        var playerInfo = await _playerRepository
-            .GetPlayerInfoAsync(query.PlayerCode)
+        var playerInfo = await _playerServiceClient
+            .GetPlayerInfoAsync(query.PlayerCode, cancellationToken)
             .ConfigureAwait(false)!;
+
+        var depositedAmount = await _playerServiceClient
+            .GetPlayerDepositedAmountAsync(query.PlayerCode, cancellationToken)
+            .ConfigureAwait(false);
 
         var blockListCondition = new BlockListCondition(blockList);
         var whiteListCondition = new WhiteListCondition(whiteList);
@@ -89,7 +94,7 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
                         phoneCondition,
                         vipCondition));
 
-            if (filterCondition.IsValid(bp, playerInfo!))
+            if (filterCondition.IsValid(bp, playerInfo!, depositedAmount))
                 yield return bp;
         }
     }
