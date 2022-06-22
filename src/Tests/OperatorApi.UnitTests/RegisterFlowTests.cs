@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,14 +10,17 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate;
 using Tgs.BrandCertificate.Clients;
+using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetEmailRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
+using static TGS.Services.Operator.PlayerRegisterFlow.SetWithdrawBankInfoRegisterFlowStep;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -189,6 +193,38 @@ public class RegisterFlowTests
         var actual = await sut.ProcessInputAsync(
             brandId,
             JsonSerializer.SerializeToDocument(input),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetWithdrawBankInfoRegisterStep_ProcssInput()
+    {
+        var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
+        var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
+
+        var sut = new SetWithdrawBankInfoRegisterFlowStep(
+            fakeQueryPlayerBankInfoService,
+            fakeCreateBankInfoService);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new BankInfoData
+        {
+            BankType = "Bank",
+            Detail = JsonDocument.Parse("{}"),
+            PaymentChannelId = Guid.NewGuid()
+        };
+
+        var locationInfo = new PlayerLocationInfo(
+            "player1",
+            "127.0.0.1",
+            null,
+            null);
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
@@ -739,6 +775,37 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetWithdrawBankInfoRegisterStep_If_Has_Withdraw_BankInfo_ConfirmCompleted_Should_Return_True()
+    {
+        var fakeQueryPlayerBankInfoService = Substitute.For<IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo>>();
+        var fakeCreateBankInfoService = Substitute.For<ICommandService<CreateInitBankInfoCommand>>();
+
+        var sut = new SetWithdrawBankInfoRegisterFlowStep(
+            fakeQueryPlayerBankInfoService,
+            fakeCreateBankInfoService);
+
+        var playerCode = "player1";
+        var brandId = Guid.NewGuid();
+
+        fakeQueryPlayerBankInfoService.QueryAsync(Arg.Any<GetPlayerBankInfosQuery>())
+            .Returns(new[] {
+                new PlayerBankInfo
+                {
+                    BankType = "Bank",
+                    BrandId = brandId,
+                    Id = Guid.NewGuid(),
+                    PaymentChannelId = Guid.NewGuid(),
+                    PlayerCode = playerCode,
+                    IsDefault=true
+                }
+            }.ToAsyncEnumerable());
+
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
+
+        Assert.IsTrue(actual);
     }
 
     [Test]

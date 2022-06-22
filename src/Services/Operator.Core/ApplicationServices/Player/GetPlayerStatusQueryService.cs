@@ -1,32 +1,22 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.DataServices.Tgs;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class GetPlayerStatusQueryService : IGetService<GetPlayerStatusQuery, PlayerStatus>
 {
-    private readonly ITgsRepository _tgsRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public GetPlayerStatusQueryService(ITgsRepository tgsRepository)
+    public GetPlayerStatusQueryService(IPlayerServiceClient playerServiceClient)
     {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
-    public async ValueTask<PlayerStatus> GetAsync(
+    public ValueTask<PlayerStatus> GetAsync(
         GetPlayerStatusQuery query,
         CancellationToken cancellationToken = default)
-    {
-        var player = await _tgsRepository.Players
-            .AsNoTracking()
-            .SingleAsync(x => x.PlayerCode == query.PlayerCode)
-            .ConfigureAwait(false);
-
-        return player.Status;
-    }
+        => _playerServiceClient.GetPlayerStatusAsync(query.PlayerCode, cancellationToken);
 }

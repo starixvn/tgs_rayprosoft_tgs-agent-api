@@ -54,34 +54,16 @@ public class PlayerInfoTests
     [Test]
     public async Task Get_Player_Status_Should_Success()
     {
-        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-        dbContextOptionsBuilder
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-        ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
-        var brandId = Guid.NewGuid();
-        var playerCode = "playerCode";
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        repository.Players.Add(new Player
-        {
-            PlayerCode = playerCode,
-            Status = CoreEnums.PlayerStatus.Disabled,
-            DefaultWalletCurrencyCode = "CNY",
-            Password = Array.Empty<byte>(),
-            Salt = Array.Empty<byte>(),
-            WithdrawPassword = Array.Empty<byte>(),
-            WithdrawSalt = Array.Empty<byte>(),
-            Username = "tester"
-        });
+        var sut = new GetPlayerStatusQueryService(fakePlayerServiceClient);
 
-        await repository.SaveChangesAsync();
-        var sut = new GetPlayerStatusQueryService(repository);
+        var query = new GetPlayerStatusQuery("playerCode");
 
-        var query = new GetPlayerStatusQuery(playerCode);
-        var actual = await sut.GetAsync(query);
-        var expected = CoreEnums.PlayerStatus.Disabled;
+        _ = await sut.GetAsync(query);
 
-        Assert.AreEqual(expected, actual);
+        _ = fakePlayerServiceClient.Received(1)
+            .GetPlayerStatusAsync(Arg.Is(query.PlayerCode));
     }
 
     [Test]
