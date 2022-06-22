@@ -45,12 +45,12 @@
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.16-beta" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
-    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.20" />    
+    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.21" />    
     <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.6" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.0" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.15" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.7" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.17" />
     <PackageReference Include="Tgs.Report.Client" Version="0.0.32" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
     <PackageReference Include="Tgs.Report.Aggregate.Client" Version="0.0.8" />
