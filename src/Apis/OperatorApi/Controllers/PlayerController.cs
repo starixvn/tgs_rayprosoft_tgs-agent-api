@@ -266,9 +266,10 @@ public class PlayerController : ControllerBase
 
         var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
-        var bankInfoAuthentication = await getBankInfoQueryService
-            .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
-            .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
+        var bankInfoAuthentication = player.Status == Tgs.PlayerService.Client.PlayerStatus.Enabled
+              || await getBankInfoQueryService
+                  .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
+                  .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
 
         var playerInfo = new PlayerInfoViewModel
         {
@@ -359,6 +360,7 @@ public class PlayerController : ControllerBase
     /// </summary>
     [HttpDelete("logout", Name = "Logout")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
     public async Task<LogoutResponse> LogoutAsync(
         [FromServices] IGetService<GetLogoutQuery, LogoutInfo> getLogoutQueryService)
     {
