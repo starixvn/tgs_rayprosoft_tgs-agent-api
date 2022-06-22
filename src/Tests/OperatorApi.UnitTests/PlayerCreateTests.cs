@@ -1145,8 +1145,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
@@ -1200,8 +1199,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1269,8 +1267,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1331,8 +1328,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1401,8 +1397,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1462,8 +1457,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1532,8 +1526,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1593,8 +1586,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1663,8 +1655,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = brandId
             });
 
         fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
@@ -1916,8 +1907,7 @@ public class PlayerCreateTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = upperPlayerCode,
-                BrandId = Guid.NewGuid(),
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+                BrandId = Guid.NewGuid()
             });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(

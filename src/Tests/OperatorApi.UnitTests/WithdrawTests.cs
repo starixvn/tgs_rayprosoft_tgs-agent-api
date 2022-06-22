@@ -82,7 +82,6 @@ public class WithdrawTests
                 IdentityAuthentication = false,
                 IsSetPayPassword = false,
                 PhoneAuthentication = false,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
                 UserName = "Tester",
                 VipLevelId = null
             });
@@ -144,7 +143,6 @@ public class WithdrawTests
                 IdentityAuthentication = false,
                 IsSetPayPassword = false,
                 PhoneAuthentication = false,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
                 UserName = "Tester",
                 VipLevelId = null
             });
@@ -201,7 +199,6 @@ public class WithdrawTests
                 IdentityAuthentication = false,
                 IsSetPayPassword = false,
                 PhoneAuthentication = false,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
                 UserName = "ThisIsPlayerName",
                 VipLevelId = null
             });
@@ -335,8 +332,7 @@ public class WithdrawTests
             .Returns(new Tgs.PlayerService.Client.PlayerInfo
             {
                 PlayerCode = playerCode,
-                BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
+                BrandId = brandId
             });
 
         var sut = new CheckPlayerIdentityCommandService(
@@ -401,7 +397,6 @@ public class WithdrawTests
             {
                 PlayerCode = playerCode,
                 BrandId = brandId,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
                 IdentityAuthentication = true
             });
 
@@ -444,7 +439,6 @@ public class WithdrawTests
                 IdentityAuthentication = false,
                 IsSetPayPassword = false,
                 PhoneAuthentication = false,
-                Status = Tgs.PlayerService.Client.PlayerStatus.Enabled,
                 UserName = "Tester",
                 VipLevelId = null
             });

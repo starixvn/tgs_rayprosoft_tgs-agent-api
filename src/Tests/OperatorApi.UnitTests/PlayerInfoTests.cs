@@ -94,8 +94,7 @@ public class PlayerInfoTests
         var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
         {
             PlayerCode = "playerCode",
-            BrandId = Guid.NewGuid(),
-            Status = PlayerStatus.Enabled
+            BrandId = Guid.NewGuid()
         };
 
         fakePlayerServiceClient

@@ -49,6 +49,10 @@ internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
             .ToDictionaryAsync(info => info.Id, info => info.Level)
             .ConfigureAwait(false);
 
+        var playerStatus = await _playerServiceClient
+            .GetPlayerStatusAsync(query.PlayerCode, cancellationToken)
+            .ConfigureAwait(false);
+
         return new PlayerInfo(
             player.PlayerCode,
             player.BrandId,
@@ -58,7 +62,7 @@ internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
             playerProperties.GetValueOrDefault("Phone"),
             playerProperties.GetValueOrDefault("AreaCode"),
             player.VipLevelId,
-            player.Status,
+            playerStatus,
             player.UserName,
             playerProperties["RealName"],
             playerProperties["Email"],

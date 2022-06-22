@@ -545,8 +545,7 @@ public class PlayerPhoneTests
         var player = new Tgs.PlayerService.Client.PlayerInfo
         {
             PlayerCode = "abcdef123456",
-            BrandId = Guid.NewGuid(),
-            Status = Tgs.PlayerService.Client.PlayerStatus.Enabled
+            BrandId = Guid.NewGuid()
         };
 
         var command = new StartSetPlayerPhoneCommand(

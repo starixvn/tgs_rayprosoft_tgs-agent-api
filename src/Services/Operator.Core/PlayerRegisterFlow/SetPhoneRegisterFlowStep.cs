@@ -80,7 +80,7 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             throw new PlayerPhoneRequiredException();
 
         var brand = await _getBrandInfoService
-            .GetAsync(new BrandQuery(brandId))
+            .GetAsync(new BrandQuery(brandId), cancellationToken)
             .ConfigureAwait(false);
 
         if (!brand.SmsRegisterFlowEnabled)
@@ -90,7 +90,7 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             throw new PlayerNotFoundException("Player not found.");
 
         var playerInfo = await _playerServiceClient
-            .GetPlayerInfoAsync(locationInfo.PlayerCode, cancellationToken: cancellationToken)
+            .GetPlayerInfoAsync(locationInfo.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
         if (playerInfo is null)
@@ -103,7 +103,7 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             data.Phone.Trim());
 
         var isBrandHasSamePhone = await _checkBrandPhoneService
-            .GetAsync(checkQuery)
+            .GetAsync(checkQuery, cancellationToken)
             .ConfigureAwait(false);
 
         if (isBrandHasSamePhone)

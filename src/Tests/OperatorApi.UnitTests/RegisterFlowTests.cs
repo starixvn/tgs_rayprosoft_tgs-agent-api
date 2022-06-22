@@ -15,6 +15,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.PlayerRegisterFlow;
+using static TGS.Services.Operator.PlayerRegisterFlow.SetEmailRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -476,7 +477,139 @@ public class RegisterFlowTests
     }
 
     [Test]
-    public async Task SetPhoneRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authticate_Phone_Should_Return_True()
+    public async Task SetEmailRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authenticate_Email_Should_Return_True()
+    {
+        var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
+        var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+        var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
+        var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetEmailRegisterFlowStep(
+            fakeGetBrandInfoService,
+            fakeCheckBrandEmailService,
+            fakeStartSetMailService,
+            fakeCommitMailService,
+            fakePlayerServiceClient);
+
+        var playerCode = "player1";
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = "tester",
+                EmailAuthentication = true
+            });
+
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
+
+        Assert.IsTrue(actual);
+    }
+
+    [Test]
+    public async Task SetEmailRegisterFlowStep_ProcessInitEmail()
+    {
+        var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
+        var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+        var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
+        var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetEmailRegisterFlowStep(
+            fakeGetBrandInfoService,
+            fakeCheckBrandEmailService,
+            fakeStartSetMailService,
+            fakeCommitMailService,
+            fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var emailData = new EmailData
+        {
+            Email = "tester@test.com"
+        };
+        var inputData = new InitEmailStepInputData
+        {
+            InputType = "Init",
+            Data = JsonSerializer.SerializeToDocument(emailData)
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakeGetBrandInfoService.GetAsync(Arg.Is<BrandQuery>(query => query.BrandId == brandId))
+            .Returns(new Services.Operator.BrandInfo(
+                brandId,
+                "Test",
+                null,
+                null,
+                null,
+                BrandStatus.Active,
+                "CNY",
+                false,
+                false,
+                false,
+                true,
+                false,
+                null));
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode
+            });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsFalse(actual.IsCompleted);
+        Assert.NotNull(actual.StepResponse);
+    }
+
+    [Test]
+    public async Task SetEmailRegisterFlowStep_ProcessValidEmail()
+    {
+        var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
+        var fakeCheckBrandEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+        var fakeStartSetMailService = Substitute.For<IGetService<StartSetPlayerEmailCommand, string>>();
+        var fakeCommitMailService = Substitute.For<ICommandService<CommitInitPlayerEmailCommand>>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetEmailRegisterFlowStep(
+            fakeGetBrandInfoService,
+            fakeCheckBrandEmailService,
+            fakeStartSetMailService,
+            fakeCommitMailService,
+            fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var confirmData = new ConfirmEmailData
+        {
+            SecurityKey = Guid.NewGuid().ToString(),
+            ValidateCode = "123456"
+        };
+        var inputData = new InitEmailStepInputData
+        {
+            InputType = "Valid",
+            Data = JsonSerializer.SerializeToDocument(confirmData)
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode
+            });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetPhoneRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authenticate_Phone_Should_Return_True()
     {
         var fakeGetBrandInfoService = Substitute.For<IGetService<BrandQuery, Services.Operator.BrandInfo>>();
         var fakeCheckBrandPhoneService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();

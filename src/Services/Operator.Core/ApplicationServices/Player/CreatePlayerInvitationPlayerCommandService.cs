@@ -107,9 +107,13 @@ internal class CreatePlayerInvitationPlayerCommandService : IGetService<CreatePl
             .GetPlayerInfoAsync(command.UpperPlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
+        var upperPlayerStatus = await _playerServiceClient
+            .GetPlayerStatusAsync(command.UpperPlayerCode, cancellationToken)
+            .ConfigureAwait(false);
+
         if (upperPlayer == null
             || upperPlayer.BrandId != command.BrandId
-            || upperPlayer.Status != PlayerStatus.Enabled)
+            || upperPlayerStatus != PlayerStatus.Enabled)
             throw new InvalidInvitationCodeException(
                 command.UpperPlayerCode,
                 "Can't find the player info");

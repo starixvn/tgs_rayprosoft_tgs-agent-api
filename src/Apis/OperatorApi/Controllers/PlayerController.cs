@@ -760,7 +760,9 @@ public class PlayerController : ControllerBase
         var brandId = HttpContext.GetBrandId();
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+        var brandInfo = await getBrandInfoService
+            .GetAsync(new BrandQuery(brandId!.Value), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
         if (!brandInfo.EmailRegisterFlowEnabled)
             throw new InvalidOperationException();
