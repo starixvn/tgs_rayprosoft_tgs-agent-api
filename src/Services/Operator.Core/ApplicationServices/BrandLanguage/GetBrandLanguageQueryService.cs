@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using TGS.Core.DataServices.Tgs;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.BrandLanguage;
 using Microsoft.EntityFrameworkCore;
+using Tgs.ServiceUtility;
+using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandLanguage;
 

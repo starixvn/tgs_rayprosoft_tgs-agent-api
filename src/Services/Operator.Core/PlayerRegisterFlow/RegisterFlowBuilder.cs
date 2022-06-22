@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TGS.Services.Operator;
+namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlowBuilder
 {

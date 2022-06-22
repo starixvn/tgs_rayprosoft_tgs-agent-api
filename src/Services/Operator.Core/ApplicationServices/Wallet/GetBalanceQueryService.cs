@@ -4,15 +4,14 @@ using System.Threading.Tasks;
 using Tgs.CashService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operations;
-using TGS.Services.Operator.ApplicationServices.Wallet;
 
 namespace TGS.Services.Operator.ApplicationServices.Wallet;
 
 internal class GetBalanceQueryService : IGetService<GetBalanceQuery, BalanceInfo>
 {
     private readonly ICashServiceClient _cashServiceClient;
-    private readonly IPlayerOperations _playerOperations;
     private readonly IPlayerOnlineRepository _playerOnlineRepository;
+    private readonly IPlayerOperations _playerOperations;
 
     public GetBalanceQueryService(ICashServiceClient cashServiceClient,
         IPlayerOperations playerOperations,

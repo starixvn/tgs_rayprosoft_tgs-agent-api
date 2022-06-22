@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Tgs.BrandCertificate;
+using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -16,12 +17,12 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
-using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -229,6 +230,7 @@ public class PlayerController : ControllerBase
     [IgnoreUserBlacklistCheck]
     public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
         [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
+        [FromServices] IGetService<GetPlayerStatusQuery, Tgs.PlayerService.Client.PlayerStatus> getPlayerStatusQueryService,
         [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
         [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
         [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
@@ -243,9 +245,7 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
 
         if (player == null)
-        {
             throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
-        }
 
         var vipLevel = await getPlayerVipLevelQueryService
             .GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
@@ -265,7 +265,11 @@ public class PlayerController : ControllerBase
 
         var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
-        var bankInfoAuthentication = player.Status == Tgs.PlayerService.Client.PlayerStatus.Enabled
+        var playerStatus = await getPlayerStatusQueryService
+            .GetAsync(new GetPlayerStatusQuery(playerCode), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var bankInfoAuthentication = playerStatus == Tgs.PlayerService.Client.PlayerStatus.Enabled
               || await getBankInfoQueryService
                   .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
                   .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
@@ -740,56 +744,6 @@ public class PlayerController : ControllerBase
     }
 
     /// <summary>
-    /// Starts the change email of register flow.
-    /// </summary>
-    /// <param name="getBrandInfoService">The get brand info service.</param>
-    /// <param name="getPlayerInfoService">The get player info service.</param>
-    /// <param name="checkService">The check player email service.</param>
-    /// <param name="setPlayerEmailService">The set player email service.</param>
-    /// <param name="request">The request.</param>
-    /// <returns></returns>
-    [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangeEmailAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-        [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
-        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
-        [FromBody] StartInitEmailRequest request)
-    {
-        var brandId = HttpContext.GetBrandId();
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-        var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
-
-        if (!brandInfo.EmailRegisterFlowEnabled)
-            throw new InvalidOperationException();
-
-        var playerInfo = await getPlayerInfoService
-            .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
-            .ConfigureAwait(false);
-
-        var isBrandHasSameEmail = await checkService
-            .GetAsync(new CheckBrandEmailQuery(
-                brandId!.Value,
-                request.Email,
-                playerInfo.PlayerCode))
-            .ConfigureAwait(false);
-
-        if (isBrandHasSameEmail)
-            throw new BrandEmailDuplicateException();
-
-        var command = new StartSetPlayerEmailCommand(
-            playerTokenData.PlayerCode,
-            request.Email,
-            CultureInfo.CurrentUICulture,
-            true);
-
-        return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
-    }
-
-    /// <summary>
     /// Starts the change phone.
     /// </summary>
     /// <param name="getBrandInfoService">The brand info query service.</param>
@@ -839,6 +793,58 @@ public class PlayerController : ControllerBase
     }
 
     /// <summary>
+    /// Starts the change email of register flow.
+    /// </summary>
+    /// <param name="getBrandInfoService">The get brand info service.</param>
+    /// <param name="getPlayerInfoService">The get player info service.</param>
+    /// <param name="checkService">The check player email service.</param>
+    /// <param name="setPlayerEmailService">The set player email service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask<string> StartSetEmailAsync(
+        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
+        [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
+        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+        [FromBody] StartInitEmailRequest request)
+    {
+        var brandId = HttpContext.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var brandInfo = await getBrandInfoService
+            .GetAsync(new BrandQuery(brandId!.Value), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (!brandInfo.EmailRegisterFlowEnabled)
+            throw new InvalidOperationException();
+
+        var playerInfo = await getPlayerInfoService
+            .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
+            .ConfigureAwait(false);
+
+        var isBrandHasSameEmail = await checkService
+            .GetAsync(new CheckBrandEmailQuery(
+                brandId!.Value,
+                request.Email,
+                playerInfo.PlayerCode))
+            .ConfigureAwait(false);
+
+        if (isBrandHasSameEmail)
+            throw new BrandEmailDuplicateException();
+
+        var command = new StartSetPlayerEmailCommand(
+            playerTokenData.PlayerCode,
+            request.Email,
+            CultureInfo.CurrentUICulture,
+            true);
+
+        return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Starts to set phone with player token
     /// </summary>
     /// <param name="getBrandInfoService">The brand info query service.</param>
@@ -849,10 +855,10 @@ public class PlayerController : ControllerBase
     /// <returns>
     /// security code
     /// </returns>
-    [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
+    [HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangePhoneAsync(
+    public async ValueTask<string> StartSetPhoneAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
         [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
         [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,

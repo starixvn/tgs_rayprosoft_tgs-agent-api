@@ -7,7 +7,7 @@ using Tgs.BrandCertificate.Clients;
 
 #nullable enable
 
-namespace TGS.Services.Operator;
+namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager
 {

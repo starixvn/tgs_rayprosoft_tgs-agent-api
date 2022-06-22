@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Tgs.Payment.SkyPay;
 using Tgs.Payment.TuPay;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.ZeroNineNinePay;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -22,7 +24,6 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Deposit;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -147,11 +148,11 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
-       [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+       [FromServices] IPlayerServiceClient playerServiceClient,
        [FromServices] MaticPaySerializer serializer,
        [FromBody] SubmitDepositRequest request
        )
@@ -165,10 +166,18 @@ public class BankDepositController : ControllerBase
 
         var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-        var player = await getPlayerInfoService.GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode));
+        var player = await playerServiceClient
+            .GetPlayerInfoAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
-        if (!player.IdentityAuthentication)
+        if (player is null || !player.IdentityAuthentication)
             throw new MaticPayDepositNeedRealNameException();
+
+        var playerProperties = await playerServiceClient
+            .GetPlayerPropertiesAsync(playerTokenData.PlayerCode, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var realName = playerProperties.GetValueOrDefault("RealName");
 
         var command = new CreateDepositFormCommand(
             playerTokenData.PlayerCode,
@@ -183,7 +192,7 @@ public class BankDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
                     formId,
                     request.Amount,
-                    player.RealName)));
+                    realName)));
 
         await createDepositFormService
             .ExecuteAsync(command)

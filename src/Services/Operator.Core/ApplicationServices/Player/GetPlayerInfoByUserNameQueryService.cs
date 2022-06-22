@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-public class GetPlayerInfoByUserNameQueryService : IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo?>
+public class GetPlayerInfoByUserNameQueryService : IGetService<GetPlayerInfoByUserNameQuery, Tgs.PlayerService.Client.PlayerInfo?>
 {
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public GetPlayerInfoByUserNameQueryService(IPlayerRepository playerRepository)
+    public GetPlayerInfoByUserNameQueryService(
+        IPlayerServiceClient playerServiceClient)
     {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
-    public ValueTask<PlayerInfo?> GetAsync(
+    public ValueTask<Tgs.PlayerService.Client.PlayerInfo?> GetAsync(
         GetPlayerInfoByUserNameQuery query,
         CancellationToken cancellationToken = default)
-        => _playerRepository.GetPlayerInfoByUserNameAsync(query.BrandId, query.UserName);
+        => _playerServiceClient.GetPlayerInfoByUserNameAsync(
+            query.BrandId,
+            query.UserName,
+            cancellationToken);
 }

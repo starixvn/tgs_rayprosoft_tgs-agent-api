@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using TGS.Services.Operator.ValidateCode;
-using TGS.Services.Operator;
 
 namespace TGS.Services.Operator.ValidateCode;
 

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
-using TGS.Services.Operator.ApplicationServices.Withdraw;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 

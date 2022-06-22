@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TGS.Services.Operator;
+namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 public interface IRegisterFlowStep
 {

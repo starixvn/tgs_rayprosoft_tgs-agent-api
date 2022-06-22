@@ -5,7 +5,6 @@ using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 using TGS.Services.Operations;
 using TGS.Services.Operator.ValidateCode;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 

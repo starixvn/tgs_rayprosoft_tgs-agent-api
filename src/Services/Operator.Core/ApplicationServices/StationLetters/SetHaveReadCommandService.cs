@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.StationLetters;
-using TGS.Services.Operator.ApplicationServices.StationLetters;
 
 namespace TGS.Services.Operator.ApplicationServices.StationLetters;
 

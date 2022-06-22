@@ -7,6 +7,7 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 
@@ -103,9 +104,9 @@ public class PaymentTests
     public async Task User_Can_List_Available_BrandPayments()
     {
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-        var fakeWalletRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new BrandPaymentsQueryService(fakePaymentServiceClient, fakeWalletRepository);
+        var sut = new BrandPaymentsQueryService(fakePaymentServiceClient, fakePlayerServiceClient);
 
         var brandId = Guid.NewGuid();
         var playerCode = "ThisIsPlayerCode";

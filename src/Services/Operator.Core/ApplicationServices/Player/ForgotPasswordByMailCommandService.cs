@@ -6,7 +6,6 @@ using Polly;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ValidateCode;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 

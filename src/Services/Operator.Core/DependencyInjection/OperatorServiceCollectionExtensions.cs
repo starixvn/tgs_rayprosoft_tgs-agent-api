@@ -1,14 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
+using TGS.Services.Operator.PlayerRegisterFlow;
 using TGS.Services.Operator.ValidateCode;
-using Tgs.RouletteServices.Clients;
-using System.Collections.Generic;
-using System;
-using System.Collections.Immutable;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

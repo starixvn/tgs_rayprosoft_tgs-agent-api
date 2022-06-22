@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TGS.Services.Operator;
+namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlowDefinition
 {

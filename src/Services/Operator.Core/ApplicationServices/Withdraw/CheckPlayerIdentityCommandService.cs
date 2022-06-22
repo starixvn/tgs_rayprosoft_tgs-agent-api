@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -9,14 +10,14 @@ namespace TGS.Services.Operator.ApplicationServices.Withdraw;
 internal class CheckPlayerIdentityCommandService : IGetService<CheckPlayerIdentityCommand, bool>
 {
     private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
     public CheckPlayerIdentityCommandService(
         IBrandServiceClient brandServiceClient,
-        IPlayerRepository playerRepository)
+        IPlayerServiceClient playerServiceClient)
     {
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
     public async ValueTask<bool> GetAsync(CheckPlayerIdentityCommand command, CancellationToken cancellationToken = default)
@@ -28,8 +29,8 @@ internal class CheckPlayerIdentityCommandService : IGetService<CheckPlayerIdenti
         if (!brand!.PlayerIdentityEnabled)
             return true;
 
-        var player = await _playerRepository
-            .GetPlayerInfoAsync(command.PlayerCode)
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
         if (player == null)

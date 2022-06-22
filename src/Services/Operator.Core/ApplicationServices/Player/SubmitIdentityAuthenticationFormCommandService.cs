@@ -1,9 +1,9 @@
-﻿using System.Threading;
+﻿using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Utility;
 using Tgs.FileService.Clients;
 using Tgs.ServiceUtility;
-using System.Net.Http.Headers;
+using TGS.Core.Infrastructures.Utility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
