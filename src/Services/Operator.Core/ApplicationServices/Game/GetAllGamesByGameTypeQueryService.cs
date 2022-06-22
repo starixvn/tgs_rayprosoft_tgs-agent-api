@@ -4,12 +4,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
+using Tgs.ServiceUtility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator.GameProviders;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Game;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 

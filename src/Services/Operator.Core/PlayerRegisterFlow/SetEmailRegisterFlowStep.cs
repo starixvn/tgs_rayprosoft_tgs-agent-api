@@ -1,0 +1,166 @@
+﻿using System;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
+using Tgs.ServiceUtility;
+using TGS.Apis.OperatorApi.Models;
+using TGS.Services.Operator.ApplicationServices.Brand;
+using TGS.Services.Operator.ApplicationServices.Player;
+
+namespace TGS.Services.Operator.PlayerRegisterFlow;
+
+internal class SetEmailRegisterFlowStep : IRegisterFlowStep
+{
+    private readonly IGetService<CheckBrandEmailQuery, bool> _checkService;
+    private readonly ICommandService<CommitInitPlayerEmailCommand> _commitPlayerEmailService;
+    private readonly IGetService<BrandQuery, BrandInfo> _getBrandInfoService;
+    private readonly IPlayerServiceClient _playerServiceClient;
+    private readonly IGetService<StartSetPlayerEmailCommand, string> _setPlayerEmailService;
+    public string Type => "InitMail";
+
+    public SetEmailRegisterFlowStep(
+        IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        IGetService<CheckBrandEmailQuery, bool> checkService,
+        IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+        ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+        IPlayerServiceClient playerServiceClient)
+    {
+        _getBrandInfoService = getBrandInfoService ?? throw new ArgumentNullException(nameof(getBrandInfoService));
+        _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
+        _setPlayerEmailService = setPlayerEmailService ?? throw new ArgumentNullException(nameof(setPlayerEmailService));
+        _commitPlayerEmailService = commitPlayerEmailService ?? throw new ArgumentNullException(nameof(commitPlayerEmailService));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+    }
+
+    public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(playerCode))
+            return false;
+
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(playerCode, cancellationToken)
+            .ConfigureAwait(false);
+
+        return player is not null && player.EmailAuthentication;
+    }
+
+    public ValueTask<RegisterFlowProcessResult> ProcessInputAsync(Guid brandId, JsonDocument input, PlayerLocationInfo locationInfo, CancellationToken cancellationToken = default)
+    {
+        var request = input.Deserialize<InitEmailStepInputData>()!;
+
+        if (request.InputType == "Valid")
+            return ProcessValidEmailAsync(
+                brandId,
+                request.Data.Deserialize<ConfirmEmailData>()!,
+                locationInfo,
+                cancellationToken);
+        else
+            return ProcessSetEmailAsync(
+                brandId,
+                request.Data.Deserialize<EmailData>()!,
+                locationInfo,
+                cancellationToken);
+    }
+
+    private async ValueTask<RegisterFlowProcessResult> ProcessSetEmailAsync(
+        Guid brandId,
+        EmailData data,
+        PlayerLocationInfo locationInfo,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(data.Email))
+            throw new PlayerPhoneRequiredException();
+
+        var brand = await _getBrandInfoService
+            .GetAsync(new BrandQuery(brandId), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!brand.EmailRegisterFlowEnabled)
+            throw new InvalidOperationException();
+
+        if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
+            throw new PlayerNotFoundException("Player not found.");
+
+        var playerInfo = await _playerServiceClient
+            .GetPlayerInfoAsync(locationInfo.PlayerCode, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        if (playerInfo is null)
+            throw new PlayerNotFoundException("Player not found.");
+
+        var isBrandHasSameEmail = await _checkService
+            .GetAsync(new CheckBrandEmailQuery(
+                brandId,
+                data.Email,
+                playerInfo.PlayerCode))
+            .ConfigureAwait(false);
+
+        if (isBrandHasSameEmail)
+            throw new BrandEmailDuplicateException();
+
+        var command = new StartSetPlayerEmailCommand(
+            locationInfo.PlayerCode,
+            data.Email,
+            CultureInfo.CurrentUICulture,
+            true);
+
+        var result = await _setPlayerEmailService
+            .GetAsync(command, cancellationToken)
+            .ConfigureAwait(false);
+
+        return new RegisterFlowProcessResult(
+            false,
+            null,
+            JsonSerializer.SerializeToDocument(result));
+    }
+
+    private async ValueTask<RegisterFlowProcessResult> ProcessValidEmailAsync(
+        Guid brandId,
+        ConfirmEmailData data,
+        PlayerLocationInfo locationInfo,
+        CancellationToken cancellationToken = default)
+    {
+        var command = new CommitInitPlayerEmailCommand(
+            data.SecurityKey,
+            data.ValidateCode,
+            locationInfo.Ip,
+            locationInfo.HostName!,
+            brandId);
+
+        await _commitPlayerEmailService
+            .ExecuteAsync(command, cancellationToken)
+            .ConfigureAwait(false);
+
+        return new RegisterFlowProcessResult(
+            true,
+            null,
+            null);
+    }
+
+    internal record InitEmailStepInputData
+    {
+        [JsonPropertyName("input")]
+        public string InputType { get; init; } = "Init";
+
+        [JsonPropertyName("data")]
+        public JsonDocument Data { get; init; } = default!;
+    };
+
+    internal record EmailData
+    {
+        [JsonPropertyName("email")]
+        public string Email { get; init; } = default!;
+    }
+
+    internal record ConfirmEmailData
+    {
+        [JsonPropertyName("securitykey")]
+        public string SecurityKey { get; init; } = default!;
+
+        [JsonPropertyName("validatecode")]
+        public string ValidateCode { get; init; } = default!;
+    }
+}

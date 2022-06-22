@@ -20,6 +20,7 @@ using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
 using TGS.Services.Operator.ApplicationServices.Player;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -104,14 +105,14 @@ public class PlayerPasswordTests
     [Test]
     public async Task Forgot_Password_By_Sms_Will_Send_Message()
     {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
         var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
         var sut = new ForgotPasswordBySmsCommandService(
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeValidateCodeGenerator,
             fakeValidateCodeOperator,
             fakeBrandServiceClient,
@@ -123,28 +124,17 @@ public class PlayerPasswordTests
             "886",
             "0912345678");
 
-        fakePlayerRepository
-            .FindPlayerInfoByPhoneAsync(
+        fakePlayerServiceClient
+            .GetPlayerInfoByPhoneAsync(
                 Arg.Is(command.BrandId),
                 Arg.Is(command.AreaCode),
                 Arg.Is(command.Phone))
-            .Returns(new PlayerInfo(
-                "TestCode",
-                command.BrandId,
-                1000M,
-                false,
-                true,
-                command.Phone,
-                command.AreaCode,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = "TestCode",
+                BrandId = command.BrandId,
+                PhoneAuthentication = true
+            });
 
         var validateCode = "123456";
         var token = "abc123";
@@ -152,11 +142,14 @@ public class PlayerPasswordTests
         fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
         fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
 
-        fakeValidateCodeOperator
-            .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
+        fakeValidateCodeOperator.SaveValidateDataAsync(
+            Arg.Is(validateCode),
+            Arg.Is(token),
+            Arg.Any<ValidateCodeData>())
             .Returns(true);
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(command.BrandId))
+        fakeBrandServiceClient
+            .GetBrandInfoAsync(Arg.Is(command.BrandId))
             .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
             {
                 Id = command.BrandId,
@@ -180,14 +173,14 @@ public class PlayerPasswordTests
     [Test]
     public void Forgot_Password_Not_Found_Player_By_Phone_Will_Throw_Exception()
     {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
         var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
         var sut = new ForgotPasswordBySmsCommandService(
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeValidateCodeGenerator,
             fakeValidateCodeOperator,
             fakeBrandServiceClient,

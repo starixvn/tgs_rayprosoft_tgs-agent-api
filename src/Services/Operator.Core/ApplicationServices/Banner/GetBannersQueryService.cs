@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Banner;
 
 namespace TGS.Services.Operator.ApplicationServices.Banner;
 

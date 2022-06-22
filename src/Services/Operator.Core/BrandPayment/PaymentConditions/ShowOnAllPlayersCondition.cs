@@ -4,6 +4,6 @@ namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
 
 internal class ShowOnAllPlayersCondition : IBrandPaymentCondition
 {
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => brandPayment.IsAllPlayers;
 }

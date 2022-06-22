@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Localization;
 
 namespace TGS.Services.Operator.ApplicationServices.Localization;
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using TGS.Core.Models.Enums;
+using Tgs.PlayerService.Client;
 
 namespace TGS.Services.Operator;
 

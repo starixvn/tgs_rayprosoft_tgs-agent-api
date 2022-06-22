@@ -12,6 +12,9 @@ internal class MatchAllCondition : IBrandPaymentCondition
         _brandPaymentConditions = brandPaymentConditions;
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-        => _brandPaymentConditions.All(condition => condition.IsValid(brandPayment, player));
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
+        => _brandPaymentConditions.All(condition => condition.IsValid(
+            brandPayment,
+            player,
+            depositedAmount));
 }

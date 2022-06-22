@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
@@ -21,7 +22,7 @@ public class SetLineCommandService : ICommandService<SetLineCommand>
         var properties = new Dictionary<PlayerPropertyName, string?>
         {
             [PlayerPropertyName.Line] = command.LineId
-        };
+        }.ToImmutableDictionary();
 
         return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
     }
