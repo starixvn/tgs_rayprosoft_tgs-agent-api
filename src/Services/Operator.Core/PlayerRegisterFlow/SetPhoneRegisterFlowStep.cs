@@ -14,7 +14,6 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
 {
-    private readonly IGetService<CheckBrandPhoneQuery, bool> _checkBrandPhoneService;
     private readonly ICommandService<CommitInitPlayerPhoneCommand> _commitPlayerInitPhoneService;
     private readonly IGetService<BrandQuery, BrandInfo> _getBrandInfoService;
     private readonly IPlayerServiceClient _playerServiceClient;
@@ -23,13 +22,11 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
 
     public SetPhoneRegisterFlowStep(
         IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        IGetService<CheckBrandPhoneQuery, bool> checkBrandPhoneService,
         IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
         ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
         IPlayerServiceClient playerServiceClient)
     {
         _getBrandInfoService = getBrandInfoService ?? throw new ArgumentNullException(nameof(getBrandInfoService));
-        _checkBrandPhoneService = checkBrandPhoneService ?? throw new ArgumentNullException(nameof(checkBrandPhoneService));
         _startSetPlayerPhoneService = startSetPlayerPhoneService ?? throw new ArgumentNullException(nameof(startSetPlayerPhoneService));
         _commitPlayerInitPhoneService = commitPlayerInitPhoneService ?? throw new ArgumentNullException(nameof(commitPlayerInitPhoneService));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
@@ -80,31 +77,32 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             throw new PlayerPhoneRequiredException();
 
         var brand = await _getBrandInfoService
-            .GetAsync(new BrandQuery(brandId), cancellationToken)
-            .ConfigureAwait(false);
+           .GetAsync(new BrandQuery(brandId), cancellationToken)
+           .ConfigureAwait(false);
 
-        if (!brand.SmsRegisterFlowEnabled)
-            throw new InvalidOperationException();
+        if (brand is null)
+            return new RegisterFlowProcessResult(false, null, null);
 
         if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
-            throw new PlayerNotFoundException("Player not found.");
+            return new RegisterFlowProcessResult(false, null, null);
 
         var playerInfo = await _playerServiceClient
             .GetPlayerInfoAsync(locationInfo.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
         if (playerInfo is null)
-            throw new PlayerNotFoundException("Player not found.");
+            return new RegisterFlowProcessResult(false, null, null);
 
-        var checkQuery = new CheckBrandPhoneQuery(
-            brand.BrandId,
-            playerInfo.PlayerCode,
-            data.AreaCode.Trim(),
-            data.Phone.Trim());
-
-        var isBrandHasSamePhone = await _checkBrandPhoneService
-            .GetAsync(checkQuery, cancellationToken)
+        var findPlayer = await _playerServiceClient
+            .GetPlayerInfoByPhoneAsync(
+                brandId,
+                data.AreaCode.Trim(),
+                data.Phone.Trim(),
+                cancellationToken)
             .ConfigureAwait(false);
+
+        var isBrandHasSamePhone = findPlayer is not null
+            && findPlayer.PlayerCode != locationInfo.PlayerCode;
 
         if (isBrandHasSamePhone)
             throw new BrandPhoneDuplicateException();

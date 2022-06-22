@@ -7,6 +7,4 @@ public record CreatePlayerCommand(
     string UserName,
     string Password,
     string CurrencyCode,
-    bool IsTestPlayer,
-    string IpAddress,
-    string? HostName);
+    bool IsTestPlayer);

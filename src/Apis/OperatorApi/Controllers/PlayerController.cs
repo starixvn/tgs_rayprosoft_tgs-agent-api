@@ -429,9 +429,7 @@ public class PlayerController : ControllerBase
                 request.Password,
                 brand.Currency,
                 request.UpperPlayerCode,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+                request.IsTestPlayer);
 
             var info = await createPlayerInvitationPlayerService
                 .GetAsync(command)
@@ -451,9 +449,7 @@ public class PlayerController : ControllerBase
                 request.Password,
                 brand.Currency,
                 agentInvitationCode,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+                request.IsTestPlayer);
 
             var info = await createAgentInvitationPlayerService
                 .GetAsync(command)
@@ -472,9 +468,7 @@ public class PlayerController : ControllerBase
                 request.UserName,
                 request.Password,
                 brand.Currency,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+                request.IsTestPlayer);
 
             var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
 

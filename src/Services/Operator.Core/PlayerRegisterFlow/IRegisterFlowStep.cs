@@ -9,6 +9,8 @@ public interface IRegisterFlowStep
 {
     string Type { get; }
 
+    void SetupStep(JsonElement jsonElement) { }
+
     ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default);
 
     ValueTask<RegisterFlowProcessResult> ProcessInputAsync(

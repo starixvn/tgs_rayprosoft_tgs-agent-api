@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Apis.OperatorApi.Models;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
@@ -14,7 +13,6 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetEmailRegisterFlowStep : IRegisterFlowStep
 {
-    private readonly IGetService<CheckBrandEmailQuery, bool> _checkService;
     private readonly ICommandService<CommitInitPlayerEmailCommand> _commitPlayerEmailService;
     private readonly IGetService<BrandQuery, BrandInfo> _getBrandInfoService;
     private readonly IPlayerServiceClient _playerServiceClient;
@@ -23,13 +21,11 @@ internal class SetEmailRegisterFlowStep : IRegisterFlowStep
 
     public SetEmailRegisterFlowStep(
         IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        IGetService<CheckBrandEmailQuery, bool> checkService,
         IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
         ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
         IPlayerServiceClient playerServiceClient)
     {
         _getBrandInfoService = getBrandInfoService ?? throw new ArgumentNullException(nameof(getBrandInfoService));
-        _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
         _setPlayerEmailService = setPlayerEmailService ?? throw new ArgumentNullException(nameof(setPlayerEmailService));
         _commitPlayerEmailService = commitPlayerEmailService ?? throw new ArgumentNullException(nameof(commitPlayerEmailService));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
@@ -72,31 +68,31 @@ internal class SetEmailRegisterFlowStep : IRegisterFlowStep
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(data.Email))
-            throw new PlayerPhoneRequiredException();
+            return new RegisterFlowProcessResult(false, null, null);
 
         var brand = await _getBrandInfoService
             .GetAsync(new BrandQuery(brandId), cancellationToken)
             .ConfigureAwait(false);
 
-        if (!brand.EmailRegisterFlowEnabled)
-            throw new InvalidOperationException();
+        if (brand is null)
+            return new RegisterFlowProcessResult(false, null, null);
 
         if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
-            throw new PlayerNotFoundException("Player not found.");
+            return new RegisterFlowProcessResult(false, null, null);
 
         var playerInfo = await _playerServiceClient
             .GetPlayerInfoAsync(locationInfo.PlayerCode, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (playerInfo is null)
-            throw new PlayerNotFoundException("Player not found.");
+            return new RegisterFlowProcessResult(false, null, null);
 
-        var isBrandHasSameEmail = await _checkService
-            .GetAsync(new CheckBrandEmailQuery(
-                brandId,
-                data.Email,
-                playerInfo.PlayerCode))
+        var findPlayer = await _playerServiceClient
+            .GetPlayerInfoByEmailAsync(brandId, data.Email, cancellationToken)
             .ConfigureAwait(false);
+
+        var isBrandHasSameEmail = findPlayer is not null
+            && findPlayer.PlayerCode != locationInfo.PlayerCode;
 
         if (isBrandHasSameEmail)
             throw new BrandEmailDuplicateException();
