@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class BrandPaymentVipLevel
 {
-    public class BrandPaymentVipLevel
-    {
-        public Guid BrandPaymentId { get; set; }
-        public virtual BrandPayment BrandPayment { get; set; }
-        public Guid VipLevelId { get; set; }
-        public virtual VipLevel VipLevel { get; set; }
-    }
+    public Guid BrandPaymentId { get; set; }
+    public virtual BrandPayment BrandPayment { get; set; }
+    public Guid VipLevelId { get; set; }
+    public virtual VipLevel VipLevel { get; set; }
 }

@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.BetLimit
+namespace TGS.Services.BackOffice.Application.Models.BetLimit;
+
+public class GetBetLimitResponse : MessageResponse
 {
-    public class GetBetLimitResponse : MessageResponse
-    {
-        public BetLimitResponseModel BetLimit { get; set; }
-    }
+    public BetLimitResponseModel BetLimit { get; set; }
 }

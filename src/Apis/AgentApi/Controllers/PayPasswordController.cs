@@ -12,89 +12,88 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.ApplicationServices.PayPassowrd;
 
-namespace TGS.Apis.AgentApi.Controllers
+namespace TGS.Apis.AgentApi.Controllers;
+
+[Route("api/pay/password")]
+[ApiController]
+public class PayPasswordController : ControllerBase
 {
-    [Route("api/pay/password")]
-    [ApiController]
-    public class PayPasswordController : ControllerBase
+    private readonly ILogger<PayPasswordController> _logger;
+
+    public PayPasswordController(ILogger<PayPasswordController> logger)
     {
-        private readonly ILogger<PayPasswordController> _logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public PayPasswordController(ILogger<PayPasswordController> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
-        [HttpPatch(Name = "ChangePayPassword"), HK28CheckContraint]
-        [ApiExplorerSettings(GroupName = "HK28")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask ChangePayPasswordAsync(
-            [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
-            ChangePayPasswordRequest request)
-        {
-            try
-            {
-                var agentTokenData = HttpContext.Items.GetAgentTokenData();
-
-                var command = new ChangePayPasswordCommand(
-                    agentTokenData.AgentId,
-                    request.Password,
-                    request.NewPassword);
-
-                return changePayPasswordService.ExecuteAsync(command);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Change PayPassword occur error.");
-
-                throw new InvalidOperationException();
-            }
-        }
-
-        [HttpPatch(Order = 1)]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask ChangePayPasswordByValidateCodeAsync(
-            [FromServices] ICommandService<ChangePayPasswordByValidateCodeCommand> changePayPasswordService,
-            ChangePayPasswordByValidateCodeRequest request)
+    [HttpPatch(Name = "ChangePayPassword"), HK28CheckContraint]
+    [ApiExplorerSettings(GroupName = "HK28")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public ValueTask ChangePayPasswordAsync(
+        [FromServices] ICommandService<ChangePayPasswordCommand> changePayPasswordService,
+        ChangePayPasswordRequest request)
+    {
+        try
         {
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var command = new ChangePayPasswordByValidateCodeCommand(
+            var command = new ChangePayPasswordCommand(
                 agentTokenData.AgentId,
-                request.NewPassword,
-                request.ValidateCode,
-                request.SecurityKey);
+                request.Password,
+                request.NewPassword);
 
             return changePayPasswordService.ExecuteAsync(command);
         }
-
-        [HttpPost]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async Task SetPayPasswordAsync(
-            [FromServices] ICommandService<SetFirstPayPasswordCommand> setPayPasswordService,
-            [FromBody] SetPayPasswordRequest request)
+        catch (Exception ex)
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            _logger.LogError(ex, "Change PayPassword occur error.");
 
-            var command = new SetFirstPayPasswordCommand(agentTokenData.AgentId, request.Password);
-
-            await setPayPasswordService.ExecuteAsync(command).ConfigureAwait(false);
+            throw new InvalidOperationException();
         }
+    }
 
-        [HttpPost("validate-code")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public ValueTask<string> StartChangePayPasswordAsync(
-            [FromServices] IGetService<StartChangePayPasswordCommand, string> startChangePayPasswordService)
-        {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+    [HttpPatch(Order = 1)]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public ValueTask ChangePayPasswordByValidateCodeAsync(
+        [FromServices] ICommandService<ChangePayPasswordByValidateCodeCommand> changePayPasswordService,
+        ChangePayPasswordByValidateCodeRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var command = new StartChangePayPasswordCommand(agentTokenData.AgentId, CultureInfo.CurrentUICulture);
+        var command = new ChangePayPasswordByValidateCodeCommand(
+            agentTokenData.AgentId,
+            request.NewPassword,
+            request.ValidateCode,
+            request.SecurityKey);
 
-            return startChangePayPasswordService.GetAsync(command);
-        }
+        return changePayPasswordService.ExecuteAsync(command);
+    }
+
+    [HttpPost]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public async Task SetPayPasswordAsync(
+        [FromServices] ICommandService<SetFirstPayPasswordCommand> setPayPasswordService,
+        [FromBody] SetPayPasswordRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var command = new SetFirstPayPasswordCommand(agentTokenData.AgentId, request.Password);
+
+        await setPayPasswordService.ExecuteAsync(command).ConfigureAwait(false);
+    }
+
+    [HttpPost("validate-code")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [TgsResponseWrapper]
+    public ValueTask<string> StartChangePayPasswordAsync(
+        [FromServices] IGetService<StartChangePayPasswordCommand, string> startChangePayPasswordService)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var command = new StartChangePayPasswordCommand(agentTokenData.AgentId, CultureInfo.CurrentUICulture);
+
+        return startChangePayPasswordService.GetAsync(command);
     }
 }

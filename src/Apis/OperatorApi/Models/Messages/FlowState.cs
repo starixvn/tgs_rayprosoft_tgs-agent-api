@@ -1,13 +1,12 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿namespace TGS.Apis.OperatorApi.Models.Messages;
+
+public enum FlowState
 {
-    public enum FlowState
-    {
-        Unknown = 0,
-        WaitingPayment,
-        Review,
-        Approved,
-        Rejected,
-        WaitingPaid,
-        Paid
-    }
+    Unknown = 0,
+    WaitingPayment,
+    Review,
+    Approved,
+    Rejected,
+    WaitingPaid,
+    Paid
 }

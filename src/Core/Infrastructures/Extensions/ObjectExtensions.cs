@@ -2,28 +2,27 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace TGS.Core.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions;
+
+public static class ObjectExtensions
 {
-    public static class ObjectExtensions
+    public static string ToJson(this object obj, bool indented = false)
     {
-        public static string ToJson(this object obj, bool indented = false)
-        {
-            if (obj is null)
-                return null;
+        if (obj is null)
+            return null;
 
-            return JsonSerializer.Serialize(obj, obj.GetType(), new JsonSerializerOptions { WriteIndented = indented });
+        return JsonSerializer.Serialize(obj, obj.GetType(), new JsonSerializerOptions { WriteIndented = indented });
+    }
+
+    public static TAttribute GetPropertyAttribute<TObject, TAttribute>(this TObject obj, string propertyName)
+        where TObject : class
+        where TAttribute : Attribute
+    {
+        if (propertyName.IsNullOrEmpty())
+        {
+            throw new ArgumentException($"PropertyName({propertyName}) can't not be null or empty");
         }
 
-        public static TAttribute GetPropertyAttribute<TObject, TAttribute>(this TObject obj, string propertyName)
-            where TObject : class
-            where TAttribute : Attribute
-        {
-            if (propertyName.IsNullOrEmpty())
-            {
-                throw new ArgumentException($"PropertyName({propertyName}) can't not be null or empty");
-            }
-
-            return obj.GetType()?.GetProperty(propertyName)?.GetCustomAttribute<TAttribute>();
-        }
+        return obj.GetType()?.GetProperty(propertyName)?.GetCustomAttribute<TAttribute>();
     }
 }

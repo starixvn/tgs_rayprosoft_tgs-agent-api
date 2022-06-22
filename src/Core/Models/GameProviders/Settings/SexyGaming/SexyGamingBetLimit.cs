@@ -5,10 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Models.GameProviders.Settings.SexyGaming
+namespace TGS.Core.Models.GameProviders.Settings.SexyGaming;
+
+public record SexyGamingBetLimit
 {
-    public record SexyGamingBetLimit
-    {
-        public Dictionary<int, string> SexybcrtMapper { get; set; }
-    }
+    public Dictionary<int, string> SexybcrtMapper { get; set; }
 }

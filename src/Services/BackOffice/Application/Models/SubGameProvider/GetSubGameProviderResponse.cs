@@ -2,14 +2,13 @@
 using System.Text.Json;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.SubGameProvider
+namespace TGS.Services.BackOffice.Application.Models.SubGameProvider;
+
+public class GetSubGameProviderResponse : MessageResponse
 {
-    public class GetSubGameProviderResponse : MessageResponse
-    {
-        public string Code { get; init; }
-        public string Name { get; init; }
-        public string Description { get; init; }
-        public JsonDocument Localization { get; init; }
-        public Guid GameProviderId { get; init; }
-    }
+    public string Code { get; init; }
+    public string Name { get; init; }
+    public string Description { get; init; }
+    public JsonDocument Localization { get; init; }
+    public Guid GameProviderId { get; init; }
 }

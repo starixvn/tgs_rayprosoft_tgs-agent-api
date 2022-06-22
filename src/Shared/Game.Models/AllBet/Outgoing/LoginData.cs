@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.AllBet.Outgoing
+namespace TGS.Shared.Game.Models.AllBet.Outgoing;
+
+public record LoginData
 {
-    public record LoginData
-    {
-        [JsonPropertyName("gameLoginUrl")]
-        public string Url { get; init; }
-    }
+    [JsonPropertyName("gameLoginUrl")]
+    public string Url { get; init; }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Services.BackOffice.Application.Models.ReportMarket
-{
-    public record GetAdditionalExpensesReportRequest
-    {
-        public Guid BrandId { get; set; }
+namespace TGS.Services.BackOffice.Application.Models.ReportMarket;
 
-        public DateTimeOffset ReportDate { get; set; }
-    }
+public record GetAdditionalExpensesReportRequest
+{
+    public Guid BrandId { get; set; }
+
+    public DateTimeOffset ReportDate { get; set; }
 }

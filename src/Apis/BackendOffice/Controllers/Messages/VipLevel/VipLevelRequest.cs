@@ -1,8 +1,7 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.VipLevel
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.VipLevel;
+
+public class VipLevelRequest
 {
-    public class VipLevelRequest
-    {
-        public string Code { get; set; }
-        public string Name { get; set; }
-    }
+    public string Code { get; set; }
+    public string Name { get; set; }
 }

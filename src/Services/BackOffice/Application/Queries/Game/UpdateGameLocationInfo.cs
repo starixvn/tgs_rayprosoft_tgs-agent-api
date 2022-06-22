@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Queries.Game
+﻿namespace TGS.Services.BackOffice.Application.Queries.Game;
+
+public class UpdateGameLocationInfo
 {
-    public class UpdateGameLocationInfo
-    {
-        public int[] DiffGameIds { get; set; }
-    }
+    public int[] DiffGameIds { get; set; }
 }

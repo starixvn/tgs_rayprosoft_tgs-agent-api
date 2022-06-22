@@ -10,78 +10,77 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.ApplicationServices.Deposit;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/deposit/zalo")]
+[ApiController]
+public class ZaloDepositController : ControllerBase
 {
-    [Route("api/deposit/zalo")]
-    [ApiController]
-    public class ZaloDepositController : ControllerBase
+    [HttpPost("skypay-{fragment}")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [EnableUserBlockedCheck]
+    public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
+        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] SkyPaySerializer serializer,
+        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
+        string fragment,
+        [FromBody] SubmitDepositRequest request)
     {
-        [HttpPost("skypay-{fragment}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [PlayerCheckEnabled]
-        public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] SkyPaySerializer serializer,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
-            string fragment,
-            [FromBody] SubmitDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.GetBrandId().Value;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.GetBrandId().Value;
 
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
+        var brandPayment = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .ConfigureAwait(false);
 
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+        var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new SkyPayDepositSettings(
-                        brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
-                        formId)));
+        var command = new CreateDepositFormCommand(
+            playerTokenData.PlayerCode,
+            brandId,
+            request.BrandPaymentId,
+            request.Amount,
+            $"tgs.payment.skypay.{fragment.ToLower()}.deposit",
+            request.PromotionId,
+            formId => serializer.Serialize(
+                new SkyPayDepositSettings(
+                    brandPaymentInfo.RootElement.GetProperty("accessToken").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("gateway").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("transfer").GetString(),
+                    brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
+                    formId)));
 
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
+        await createDepositFormService
+            .ExecuteAsync(command)
+            .ConfigureAwait(false);
 
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
-            var getDepositFormQuery = new GetDepositFormQuery(
-                playerTokenData.PlayerCode,
+        var getDepositFormQuery = new GetDepositFormQuery(
+            playerTokenData.PlayerCode,
+            createdFormId,
+            brandId);
+
+        var formData = await getDepositFormService
+            .GetAsync(getDepositFormQuery)
+            .ConfigureAwait(false);
+
+        var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
+
+        var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                 createdFormId,
-                brandId);
+                applyInfo.Response.TradeNo);
 
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
+        await updateDepositFormService
+            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ConfigureAwait(false);
 
-            var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
-
-            var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
-                    createdFormId,
-                    applyInfo.Response.TradeNo);
-
-            await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
-                .ConfigureAwait(false);
-
-            return new DepositFormCreatedResponse
-            {
-                FormId = createdFormId,
-                PaymentUrl = applyInfo.Response.TradeUrl
-            };
-        }
+        return new DepositFormCreatedResponse
+        {
+            FormId = createdFormId,
+            PaymentUrl = applyInfo.Response.TradeUrl
+        };
     }
 }

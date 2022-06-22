@@ -13,141 +13,140 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Shared.Game.Models.Jili.Outgoing;
 
-namespace TGS.Shared.Game.ApiClients.Jili
-{
-    public interface IJiliApiClient
-    {
-        ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
-            Uri apiUrl,
-            string agentId,
-            string agentKey,
-            string language,
-            string externalRoundId);
+namespace TGS.Shared.Game.ApiClients.Jili;
 
-        ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
-                    Uri apiUrl,
-            string agentId,
-            string agentKey,
-            JiliLoginWithoutRedirectRequest request);
+public interface IJiliApiClient
+{
+    ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
+        Uri apiUrl,
+        string agentId,
+        string agentKey,
+        string language,
+        string externalRoundId);
+
+    ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
+                Uri apiUrl,
+        string agentId,
+        string agentKey,
+        JiliLoginWithoutRedirectRequest request);
+}
+
+internal class JiliApiClient : BaseApiClient, IJiliApiClient
+{
+    private const string AlphanumericCharacters = "123456789abcdefghijklmnopqrstuvwxyz";
+    private static readonly Random _Random = new Random();
+
+    public JiliApiClient(
+        HttpClient client,
+        IApiClientLogger logger,
+        IJsonSerializationProvider json)
+        : base(client, logger, json)
+    {
     }
 
-    internal class JiliApiClient : BaseApiClient, IJiliApiClient
+    public async ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
+        Uri apiUrl,
+        string agentId,
+        string agentKey,
+        string language,
+        string externalRoundId)
     {
-        private const string AlphanumericCharacters = "123456789abcdefghijklmnopqrstuvwxyz";
-        private static readonly Random _Random = new Random();
-
-        public JiliApiClient(
-            HttpClient client,
-            IApiClientLogger logger,
-            IJsonSerializationProvider json)
-            : base(client, logger, json)
+        var parameters = new Dictionary<string, string>
         {
-        }
+            ["WagersId"] = externalRoundId,
+            ["AgentId"] = agentId
+        };
 
-        public async ValueTask<JiliGetGameDetailUrlResponse> GetGameDetailUrlAsync(
-            Uri apiUrl,
-            string agentId,
-            string agentKey,
-            string language,
-            string externalRoundId)
+        var keyGen = GetKeyGen(agentId, agentKey);
+        var key = GetKey(keyGen, parameters);
+        parameters["Key"] = key;
+        parameters["Lang"] = language;
+
+        var prefix = $"{Consts.GameProvider.Jili}.GetGameDetailUrl";
+
+        var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
+        var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/api1/GetGameDetailUrl?{queryString}";
+
+        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriString)
         {
-            var parameters = new Dictionary<string, string>
-            {
-                ["WagersId"] = externalRoundId,
-                ["AgentId"] = agentId
-            };
+            Content = new FormUrlEncodedContent(parameters)
+        };
 
-            var keyGen = GetKeyGen(agentId, agentKey);
-            var key = GetKey(keyGen, parameters);
-            parameters["Key"] = key;
-            parameters["Lang"] = language;
+        var response = await SendAsync(httpRequestMessage, prefix).ConfigureAwait(false);
 
-            var prefix = $"{Consts.GameProvider.Jili}.GetGameDetailUrl";
+        var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/api1/GetGameDetailUrl?{queryString}";
+        return JsonSerializer.Deserialize<JiliGetGameDetailUrlResponse>(responseMessage);
+    }
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uriString)
-            {
-                Content = new FormUrlEncodedContent(parameters)
-            };
+    public async ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
+        Uri apiUrl,
+        string agentId,
+        string agentKey,
+        JiliLoginWithoutRedirectRequest request)
+    {
+        var value = JsonSerializer.Serialize(request);
+        var parameters = JsonSerializer.Deserialize<Dictionary<string, string>>(value)!;
+        parameters["AgentId"] = agentId;
 
-            var response = await SendAsync(httpRequestMessage, prefix).ConfigureAwait(false);
+        var keyGen = GetKeyGen(agentId, agentKey);
+        var key = GetKey(keyGen, parameters);
+        parameters["Key"] = key;
 
-            var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var prefix = $"{Consts.GameProvider.Jili}.LoginWithoutRedirect";
 
-            return JsonSerializer.Deserialize<JiliGetGameDetailUrlResponse>(responseMessage);
-        }
+        var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
+        var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/singleWallet/LoginWithoutRedirect?{queryString}";
 
-        public async ValueTask<JiliLoginWithoutRedirectResponse> LoginWithoutRedirectAsync(
-            Uri apiUrl,
-            string agentId,
-            string agentKey,
-            JiliLoginWithoutRedirectRequest request)
-        {
-            var value = JsonSerializer.Serialize(request);
-            var parameters = JsonSerializer.Deserialize<Dictionary<string, string>>(value)!;
-            parameters["AgentId"] = agentId;
+        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uriString);
 
-            var keyGen = GetKeyGen(agentId, agentKey);
-            var key = GetKey(keyGen, parameters);
-            parameters["Key"] = key;
+        var response = await SendAsync(httpRequestMessage, prefix).ConfigureAwait(false);
 
-            var prefix = $"{Consts.GameProvider.Jili}.LoginWithoutRedirect";
+        var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var uriString = $"{apiUrl.AbsoluteUri.TrimEndSlash()}/singleWallet/LoginWithoutRedirect?{queryString}";
+        return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
+    }
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uriString);
+    private string GenerateString(int length)
+    {
+        var result = Enumerable
+            .Range(1, length)
+            .Select(n => AlphanumericCharacters[_Random.Next(0, AlphanumericCharacters.Length)])
+            .ToArray();
 
-            var response = await SendAsync(httpRequestMessage, prefix).ConfigureAwait(false);
+        return new string(result);
+    }
 
-            var responseMessage = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+    private string GetKey(string keyGen, IEnumerable<KeyValuePair<string, string>> parameters)
+    {
+        var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
+        var value = $"{queryString}{keyGen}";
 
-            return JsonSerializer.Deserialize<JiliLoginWithoutRedirectResponse>(responseMessage);
-        }
+        var hash = MD5Hash(value);
 
-        private string GenerateString(int length)
-        {
-            var result = Enumerable
-                .Range(1, length)
-                .Select(n => AlphanumericCharacters[_Random.Next(0, AlphanumericCharacters.Length)])
-                .ToArray();
+        return $"{GenerateString(6)}{hash}{GenerateString(6)}";
+    }
 
-            return new string(result);
-        }
+    private string GetKeyGen(
+        string agentId,
+        string agentKey)
+    {
+        var date = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-4D)).ToString("yyMMd");
+        var value = $"{date}{agentId}{agentKey}";
 
-        private string GetKey(string keyGen, IEnumerable<KeyValuePair<string, string>> parameters)
-        {
-            var queryString = string.Join("&", parameters.Select(pair => $"{pair.Key}={pair.Value}"));
-            var value = $"{queryString}{keyGen}";
+        return MD5Hash(value);
+    }
 
-            var hash = MD5Hash(value);
+    private string MD5Hash(string original)
+    {
+        var data = Encoding.UTF8.GetBytes(original);
+        var hash = MD5.HashData(data);
 
-            return $"{GenerateString(6)}{hash}{GenerateString(6)}";
-        }
+        var sb = new StringBuilder();
 
-        private string GetKeyGen(
-            string agentId,
-            string agentKey)
-        {
-            var date = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-4D)).ToString("yyMMd");
-            var value = $"{date}{agentId}{agentKey}";
+        foreach (var v in hash)
+            sb.Append(v.ToString("x2"));
 
-            return MD5Hash(value);
-        }
-
-        private string MD5Hash(string original)
-        {
-            var data = Encoding.UTF8.GetBytes(original);
-            var hash = MD5.HashData(data);
-
-            var sb = new StringBuilder();
-
-            foreach (var v in hash)
-                sb.Append(v.ToString("x2"));
-
-            return sb.ToString();
-        }
+        return sb.ToString();
     }
 }

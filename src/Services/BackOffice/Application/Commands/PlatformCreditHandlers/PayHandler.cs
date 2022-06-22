@@ -6,30 +6,29 @@ using TGS.Services.BackOffice.Application.Models.PlatformCredit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.PlatformCreditHandlers
+namespace TGS.Services.BackOffice.Application.Commands.PlatformCreditHandlers;
+
+public class PayHandler : Handler<PayRequest, MessageResponse>
 {
-    public class PayHandler : Handler<PayRequest, MessageResponse>
+    private readonly IPlatformCreditService _service;
+
+    public PayHandler(IPlatformCreditService service, IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IPlatformCreditService _service;
+        _service = service;
+    }
 
-        public PayHandler(IPlatformCreditService service, IHttpContextAccessor accessor) : base(accessor)
+    public override async Task<MessageResponse> Handle(PayRequest request,
+        CancellationToken cancellationToken)
+    {
+        var platformCredit = await _service.GetPlatformCreditAsync(q => q.Id == request.Id);
+
+        if (platformCredit == null)
         {
-            _service = service;
+            return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(PayRequest request,
-            CancellationToken cancellationToken)
-        {
-            var platformCredit = await _service.GetPlatformCreditAsync(q => q.Id == request.Id);
+        await _service.PayAsync(platformCredit, request);
 
-            if (platformCredit == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Brand.NotFound);
-            }
-
-            await _service.PayAsync(platformCredit, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

@@ -6,29 +6,28 @@ using NUnit.Framework;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class GameTests
 {
-    [TestFixture]
-    public class GameTests
+    [Test]
+    public async Task Get_Brand_Game_List()
     {
-        [Test]
-        public async Task Get_Brand_Game_List()
-        {
-            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            var sut = new GetAllGamesByBrandIdQueryService(moqBackOfficeRepository.Object);
+        var sut = new GetAllGamesByBrandIdQueryService(moqBackOfficeRepository.Object);
 
-            var query = new GetAllGamesByBrandIdQuery(Guid.NewGuid());
+        var query = new GetAllGamesByBrandIdQuery(Guid.NewGuid());
 
-            moqBackOfficeRepository
-                .Setup(fake => fake.QueryAllGamesAsync(It.IsAny<Guid>()))
-                .Returns(Array.Empty<GameData>().ToAsyncEnumerable());
+        moqBackOfficeRepository
+            .Setup(fake => fake.QueryAllGamesAsync(It.IsAny<Guid>()))
+            .Returns(Array.Empty<GameData>().ToAsyncEnumerable());
 
-            await sut.QueryAsync(query).ToArrayAsync();
+        await sut.QueryAsync(query).ToArrayAsync();
 
-            moqBackOfficeRepository.Verify(
-                fake => fake.QueryAllGamesAsync(It.Is<Guid>(x => x == query.BrandId)),
-                Times.Exactly(1));
-        }
+        moqBackOfficeRepository.Verify(
+            fake => fake.QueryAllGamesAsync(It.Is<Guid>(x => x == query.BrandId)),
+            Times.Exactly(1));
     }
 }

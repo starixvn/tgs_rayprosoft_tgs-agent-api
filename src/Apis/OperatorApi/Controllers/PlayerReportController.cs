@@ -10,86 +10,85 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class PlayerReportController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PlayerReportController : ControllerBase
+    private readonly IReportClient _client;
+
+    public PlayerReportController(IReportClient client) => _client = client;
+
+    /// <summary>
+    /// Get player round report
+    /// </summary>
+    [HttpGet("rounds", Name = "GetRounds")]
+    [Description("Get rounds")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
+        [FromQuery] GetPlayerRoundReportRequest request)
     {
-        private readonly IReportClient _client;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
 
-        public PlayerReportController(IReportClient client) => _client = client;
-
-        /// <summary>
-        /// Get player round report
-        /// </summary>
-        [HttpGet("rounds", Name = "GetRounds")]
-        [Description("Get rounds")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
-            [FromQuery] GetPlayerRoundReportRequest request)
+        var roundsRequest = new GetRoundsRequest
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            BrandId = brandId,
+            PlayerCode = playerTokenData.PlayerCode,
+            From = request.From,
+            To = request.To,
+            ClosedFrom = null,
+            ClosedTo = null,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
 
-            var roundsRequest = new GetRoundsRequest
-            {
-                BrandId = brandId,
-                PlayerCode = playerTokenData.PlayerCode,
-                From = request.From,
-                To = request.To,
-                ClosedFrom = null,
-                ClosedTo = null,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
-            };
+        var response = await _client.GetRoundsAsync(roundsRequest);
 
-            var response = await _client.GetRoundsAsync(roundsRequest);
-
-            return new PagingResponse<RoundModel>
-            {
-                TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<RoundModel>()
-            };
-        }
-
-        /// <summary>
-        /// Get the rounds total asynchronous.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpGet("rounds/total", Name = "GetRoundsTotal")]
-        [Description("Get rounds total about Bet Amount Sum & Valid Bet Amount Sum & Win Loss Sum")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<RoundTotalModel> GetRoundsTotalAsync(
-            [FromQuery] GetPlayerRoundTotalReportRequest request)
+        return new PagingResponse<RoundModel>
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
+            TotalCount = response.TotalCount,
+            Items = response.Items ?? Array.Empty<RoundModel>()
+        };
+    }
 
-            var roundsRequest = new GetRoundsTotalRequest
-            {
-                BrandId = brandId,
-                PlayerCode = playerTokenData.PlayerCode,
-                From = request.From,
-                To = request.To,
-                ClosedFrom = null,
-                ClosedTo = null
-            };
+    /// <summary>
+    /// Get the rounds total asynchronous.
+    /// </summary>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpGet("rounds/total", Name = "GetRoundsTotal")]
+    [Description("Get rounds total about Bet Amount Sum & Valid Bet Amount Sum & Win Loss Sum")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<RoundTotalModel> GetRoundsTotalAsync(
+        [FromQuery] GetPlayerRoundTotalReportRequest request)
+    {
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
 
-            var response = await _client.GetRoundsTotalAsync(roundsRequest);
+        var roundsRequest = new GetRoundsTotalRequest
+        {
+            BrandId = brandId,
+            PlayerCode = playerTokenData.PlayerCode,
+            From = request.From,
+            To = request.To,
+            ClosedFrom = null,
+            ClosedTo = null
+        };
 
-            return new RoundTotalModel
-            {
-                BetAmount = response.BetAmount,
-                ValidBetAmount = response.ValidBetAmount,
-                WinLoss = response.WinLoss
-            };
-        }
+        var response = await _client.GetRoundsTotalAsync(roundsRequest);
+
+        return new RoundTotalModel
+        {
+            BetAmount = response.BetAmount,
+            ValidBetAmount = response.ValidBetAmount,
+            WinLoss = response.WinLoss
+        };
     }
 }

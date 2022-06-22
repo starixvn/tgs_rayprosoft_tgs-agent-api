@@ -6,34 +6,33 @@ using Microsoft.AspNetCore.Http;
 using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Models;
 
-namespace TGS.Services.BackOffice.Application.Middlewares
+namespace TGS.Services.BackOffice.Application.Middlewares;
+
+public class PipelineBehavior<TIn, TOut> : IPipelineBehavior<TIn, TOut> where TIn : IRequest<TOut>
 {
-    public class PipelineBehavior<TIn, TOut> : IPipelineBehavior<TIn, TOut> where TIn : IRequest<TOut>
+    private readonly HttpContext _httpContext;
+
+    public PipelineBehavior(IHttpContextAccessor accessor)
     {
-        private readonly HttpContext _httpContext;
+        _httpContext = accessor.HttpContext;
+    }
 
-        public PipelineBehavior(IHttpContextAccessor accessor)
+    public async Task<TOut> Handle(
+        TIn request,
+        CancellationToken cancellationToken,
+        RequestHandlerDelegate<TOut> next)
+    {
+        var userInfoMap = _httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
+        var property = request.GetType().GetProperty("EditorUsername");
+        property?.SetValue(request, userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey]);
+
+        if (request is BaseRequest br)
         {
-            _httpContext = accessor.HttpContext;
+            br.EditorUsername = userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
         }
 
-        public async Task<TOut> Handle(
-            TIn request,
-            CancellationToken cancellationToken,
-            RequestHandlerDelegate<TOut> next)
-        {
-            var userInfoMap = _httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-            var property = request.GetType().GetProperty("EditorUsername");
-            property?.SetValue(request, userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey]);
+        var result = await next();
 
-            if (request is BaseRequest br)
-            {
-                br.EditorUsername = userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
-            }
-
-            var result = await next();
-
-            return result;
-        }
+        return result;
     }
 }

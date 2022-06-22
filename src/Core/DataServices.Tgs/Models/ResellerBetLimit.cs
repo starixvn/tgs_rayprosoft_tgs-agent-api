@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
+namespace TGS.Core.DataServices.Tgs.Models;
+
+public class ResellerBetLimit
 {
-    public class ResellerBetLimit
-    {
-        public int BetLimitId { get; set; }
+    public int BetLimitId { get; set; }
 
-        public virtual BetLimit BetLimit { get; set; }
+    public virtual BetLimit BetLimit { get; set; }
 
-        public Guid ResellerId { get; set; }
+    public Guid ResellerId { get; set; }
 
-        public virtual Reseller Reseller { get; set; }
-    }
+    public virtual Reseller Reseller { get; set; }
 }

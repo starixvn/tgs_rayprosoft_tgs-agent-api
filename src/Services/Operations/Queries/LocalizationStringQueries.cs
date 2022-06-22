@@ -6,33 +6,32 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Services.Data;
 
-namespace TGS.Services.Operations.Queries
+namespace TGS.Services.Operations.Queries;
+
+public interface ILocalizationStringQueries
 {
-    public interface ILocalizationStringQueries
+    Task<LocalizedStringResult[]> GetLocalizationByGameProviderIdAsync(Guid gameProviderId);
+}
+
+public sealed class LocalizationStringQueries : ILocalizationStringQueries
+{
+    private readonly ITgsRepository _repository;
+
+    public LocalizationStringQueries(ITgsRepository repository)
     {
-        Task<LocalizedStringResult[]> GetLocalizationByGameProviderIdAsync(Guid gameProviderId);
+        _repository = repository;
     }
 
-    public sealed class LocalizationStringQueries : ILocalizationStringQueries
+    async Task<LocalizedStringResult[]> ILocalizationStringQueries.GetLocalizationByGameProviderIdAsync(
+        Guid gameProviderId)
     {
-        private readonly ITgsRepository _repository;
+        const string spName = "dbo.localization_get_localization_by_game_provider_id";
+        var r = await _repository.SqlQueryMultipleAsync<LocalizedStringResult>(spName,
+            parameters: new Dictionary<string, object>
+            {
+                {":game_provider_id", gameProviderId}
+            });
 
-        public LocalizationStringQueries(ITgsRepository repository)
-        {
-            _repository = repository;
-        }
-
-        async Task<LocalizedStringResult[]> ILocalizationStringQueries.GetLocalizationByGameProviderIdAsync(
-            Guid gameProviderId)
-        {
-            const string spName = "dbo.localization_get_localization_by_game_provider_id";
-            var r = await _repository.SqlQueryMultipleAsync<LocalizedStringResult>(spName,
-                parameters: new Dictionary<string, object>
-                {
-                    {":game_provider_id", gameProviderId}
-                });
-
-            return r.ToArray();
-        }
+        return r.ToArray();
     }
 }

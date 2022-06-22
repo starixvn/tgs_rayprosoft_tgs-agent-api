@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Services.Operator.ApplicationServices.Player
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+public class BrandEmailDuplicateException : Exception
 {
-    public class BrandEmailDuplicateException : Exception
-    {
-    }
 }

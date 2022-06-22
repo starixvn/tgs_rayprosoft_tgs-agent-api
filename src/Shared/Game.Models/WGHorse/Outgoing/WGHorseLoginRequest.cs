@@ -1,8 +1,7 @@
-﻿namespace TGS.Shared.Game.Models.WGHorse.Outgoing
+﻿namespace TGS.Shared.Game.Models.WGHorse.Outgoing;
+
+public record WGHorseLoginRequest
 {
-    public record WGHorseLoginRequest
-    {
-        public string Token { get; init; }
-        public string Lang { get; init; }
-    }
+    public string Token { get; init; }
+    public string Lang { get; init; }
 }

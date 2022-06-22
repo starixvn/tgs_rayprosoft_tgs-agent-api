@@ -7,26 +7,25 @@ using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 
-namespace TGS.Services.Operator.ApplicationServices.Withdraw
+namespace TGS.Services.Operator.ApplicationServices.Withdraw;
+
+internal class GetRequireAmountQueryService : IGetService<GetRequireAmountQuery, decimal>
 {
-    internal class GetRequireAmountQueryService : IGetService<GetRequireAmountQuery, decimal>
+    private readonly ITgsRepository _tgsRepository;
+
+    public GetRequireAmountQueryService(ITgsRepository tgsRepository)
     {
-        private readonly ITgsRepository _tgsRepository;
+        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    }
 
-        public GetRequireAmountQueryService(ITgsRepository tgsRepository)
-        {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        }
+    public async ValueTask<decimal> GetAsync(GetRequireAmountQuery query, CancellationToken cancellationToken = default)
+    {
+        var playerBuckets = await _tgsRepository.PlayerBuckets
+            .AsQueryable()
+            .Where(x => x.PlayerCode == query.PlayerCode)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
 
-        public async ValueTask<decimal> GetAsync(GetRequireAmountQuery query, CancellationToken cancellationToken = default)
-        {
-            var playerBuckets = await _tgsRepository.PlayerBuckets
-                .AsQueryable()
-                .Where(x => x.PlayerCode == query.PlayerCode)
-                .ToArrayAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return playerBuckets.Sum(p => p.BucketAmount) - playerBuckets.Sum(p => p.CurrentBucketAmount);
-        }
+        return playerBuckets.Sum(p => p.BucketAmount) - playerBuckets.Sum(p => p.CurrentBucketAmount);
     }
 }

@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Core.DataServices.Tgs.Migrations
+namespace TGS.Core.DataServices.Tgs.Migrations;
+
+public partial class AddBrandCodeConstract : Migration
 {
-    public partial class AddBrandCodeConstract : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(@"
+        migrationBuilder.Sql(@"
                 DROP INDEX IF EXISTS dbo.ix_trgm_resellers_code_name_description_operational_email;
 
                 CREATE INDEX ix_trgm_resellers_code_name_description_operational_email ON dbo.resellers USING gin (
@@ -28,17 +28,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     lower(code::TEXT)
                 );
             ");
-        }
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(@"
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.Sql(@"
                 DROP INDEX IF EXISTS dbo.ux_brands_code_lowercase;
 
                 DROP INDEX IF EXISTS dbo.ux_resellers_code_lowercase;
 
                 DROP INDEX IF EXISTS dbo.ux_licensees_code_lowercase;
             ");
-        }
     }
 }

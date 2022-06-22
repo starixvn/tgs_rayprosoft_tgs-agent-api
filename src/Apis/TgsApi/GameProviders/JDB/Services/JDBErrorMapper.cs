@@ -8,57 +8,56 @@ using TGS.Shared.Game.Models.JDB.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.JDB.Enums.GameApiStatus;
 
-namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
+namespace TGS.Apis.TgsApi.GameProviders.JDB.Services;
+
+public sealed class JDBErrorMapper : IErrorMapper
 {
-    public sealed class JDBErrorMapper : IErrorMapper
-    {
-        private static readonly IReadOnlyDictionary<Type, GameApiStatus> _ApiErrorByException =
-            new Dictionary<Type, GameApiStatus>
+    private static readonly IReadOnlyDictionary<Type, GameApiStatus> _ApiErrorByException =
+        new Dictionary<Type, GameApiStatus>
+        {
+            {typeof(BrandUnderMaintenanceException), SystemIsMaintained},
+            {typeof(GameProviderUnderMaintenanceException), SystemIsMaintained},
+            {typeof(GameUnderMaintenanceException), SystemIsMaintained},
+            {typeof(PlayerDisabledException), UserIdCannotBeFound},
+            {typeof(PlayerNotFoundException), UserIdCannotBeFound},
+            {typeof(PlayerLoginExpiredException), UserIdCannotBeFound},
+            {typeof(PlayerHasInsufficientFundsException), BalanceNotEnough},
+            {typeof(ArgumentException), InvalidParameters}
+        };
+
+    private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiStatus>
+        _ApiErrorByInvalidGameActionErrorCode =
+            new Dictionary<InvalidGameActionErrorCode, GameApiStatus>
             {
-                {typeof(BrandUnderMaintenanceException), SystemIsMaintained},
-                {typeof(GameProviderUnderMaintenanceException), SystemIsMaintained},
-                {typeof(GameUnderMaintenanceException), SystemIsMaintained},
-                {typeof(PlayerDisabledException), UserIdCannotBeFound},
-                {typeof(PlayerNotFoundException), UserIdCannotBeFound},
-                {typeof(PlayerLoginExpiredException), UserIdCannotBeFound},
-                {typeof(PlayerHasInsufficientFundsException), BalanceNotEnough},
-                {typeof(ArgumentException), InvalidParameters}
+                {Cancelled, Succeed},
+                {Settled, Succeed},
+                {Duplicate, DuplicateTransactions},
+                {TransactionNotFound, DataDoesNotExist},
+                {TransactionBeingCancelledNotFound, DataDoesNotExist},
+                {TransactionBeingReferencedNotFound, DataDoesNotExist},
+                {RoundNotFound, DataDoesNotExist}
             };
 
-        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiStatus>
-            _ApiErrorByInvalidGameActionErrorCode =
-                new Dictionary<InvalidGameActionErrorCode, GameApiStatus>
-                {
-                    {Cancelled, Succeed},
-                    {Settled, Succeed},
-                    {Duplicate, DuplicateTransactions},
-                    {TransactionNotFound, DataDoesNotExist},
-                    {TransactionBeingCancelledNotFound, DataDoesNotExist},
-                    {TransactionBeingReferencedNotFound, DataDoesNotExist},
-                    {RoundNotFound, DataDoesNotExist}
-                };
-
-        int IErrorMapper.GetApiErrorByException(Exception exception)
+    int IErrorMapper.GetApiErrorByException(Exception exception)
+    {
+        if (exception == null)
         {
-            if (exception == null)
-            {
-                return (int)Succeed;
-            }
-
-            if (exception is InvalidGameActionException e &&
-                _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
-            {
-                return (int)error;
-            }
-
-            var type = exception.GetType();
-            return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Failed;
+            return (int)Succeed;
         }
 
-        int IErrorMapper.GetHttpStatusByException(Exception exception) =>
-            StatusCodes.Status200OK;
+        if (exception is InvalidGameActionException e &&
+            _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+        {
+            return (int)error;
+        }
 
-        string IErrorMapper.GetMessageByException(Exception exception) =>
-            exception.Message;
+        var type = exception.GetType();
+        return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Failed;
     }
+
+    int IErrorMapper.GetHttpStatusByException(Exception exception) =>
+        StatusCodes.Status200OK;
+
+    string IErrorMapper.GetMessageByException(Exception exception) =>
+        exception.Message;
 }

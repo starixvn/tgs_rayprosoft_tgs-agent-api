@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using TGS.Core.Models.Services.Games;
 
-namespace TGS.Services.GameOperations.Models.Data
-{
-    internal class BatchBetPartitionState
-    {
-        internal BatchBetPartitionState(Guid batchId)
-        {
-            BatchId = batchId;
-        }
+namespace TGS.Services.GameOperations.Models.Data;
 
-        internal Guid BatchId { get; }
-        internal int Successes { get; set; } = 0;
-        internal Dictionary<string, decimal> PlayerBalances { get; } = new();
-        internal List<BatchBetResultData> Errors { get; } = new();
-        internal List<BatchBetResultData> Results { get; } = new();
+internal class BatchBetPartitionState
+{
+    internal BatchBetPartitionState(Guid batchId)
+    {
+        BatchId = batchId;
     }
+
+    internal Guid BatchId { get; }
+    internal int Successes { get; set; } = 0;
+    internal Dictionary<string, decimal> PlayerBalances { get; } = new();
+    internal List<BatchBetResultData> Errors { get; } = new();
+    internal List<BatchBetResultData> Results { get; } = new();
 }

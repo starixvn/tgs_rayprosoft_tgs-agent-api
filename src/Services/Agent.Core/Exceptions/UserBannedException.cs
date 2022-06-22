@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.Exceptions
+namespace TGS.Services.Agent.Exceptions;
+
+public class UserBannedException : Exception
 {
-    public class UserBannedException : Exception
-    {
-    }
 }

@@ -31,230 +31,229 @@ using TGS.Core.Models;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.TgsApi.GameProviders.WMCasino
+namespace TGS.Apis.TgsApi.GameProviders.WMCasino;
+
+public class WMCasinoStartup
 {
-    public class WMCasinoStartup
+    private readonly IConfiguration _configuration;
+
+    public WMCasinoStartup(
+        IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public WMCasinoStartup(
-            IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseGlobalExceptionHandler();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseGlobalExceptionHandler();
+        app.UseGameApiLogger(
+            "wmcasino",
+            new[] { "/health", "/favicon.ico", "/metrics" });
 
-            app.UseGameApiLogger(
-                "wmcasino",
-                new[] { "/health", "/favicon.ico", "/metrics" });
-
-            app.UseWhen(
-                context =>
-                    context.Request.Path.StartsWithSegments("/api/wm/entrance", StringComparison.OrdinalIgnoreCase) &&
-                    HttpMethods.IsPost(context.Request.Method),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
-                    builder.UseMiddleware<WMCasinoDispatcherMiddleware>();
-                });
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseWhen(
-                context =>
-                {
-                    if (context.Request.ContentType != MediaTypeNames.Application.Json)
-                    {
-                        return false;
-                    }
-
-                    var route = "/api/wm";
-
-                    return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
-                           !context.Request.Path.StartsWithSegments($"{route}/gamerecord",
-                               StringComparison.OrdinalIgnoreCase);
-                },
-                builder =>
-                {
-                    builder.UseMiddleware<AuthorizeWMCasinoMiddleware>();
-                });
-
-            app.UseEndpoints(endpoints =>
+        app.UseWhen(
+            context =>
+                context.Request.Path.StartsWithSegments("/api/wm/entrance", StringComparison.OrdinalIgnoreCase) &&
+                HttpMethods.IsPost(context.Request.Method),
+            builder =>
             {
-                endpoints.MapControllers();
-
-                endpoints.MapHealthChecks("/health");
-
-                endpoints.MapMetrics();
-                endpoints.MapProfileViewer();
-            });
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddTgsRepository(_configuration, "Tgs");
-
-            services
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddSystemJsonSerializer()
-                .AddSecurity()
-                .AddTransactions()
-                .AddOperations()
-                .AddApiClient()
-                .AddGameApiClients()
-                .AddGameOperations(sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
-                .AddGameProvidersoRepository()
-                .AddCashServiceClient((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
-                });
-
-            services
-                .AddRedis((options, sp) =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>();
-
-                    options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
-                });
-
-            services.AddHttpContextAccessor();
-
-            services.AddFeatureManagement();
-
-            services.AddControllers(options =>
-            {
-                options.Filters.Add<ValidateModelFilter>();
+                builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
+                builder.UseMiddleware<WMCasinoDispatcherMiddleware>();
             });
 
-            services.AddHealthChecks()
-                .ForwardToPrometheus();
+        app.UseRouting();
 
-            services
-                .AddMessageQueue()
-                .AddNatsMessageQueue(natsConfig =>
+        app.UseHttpMetrics();
+
+        app.UseWhen(
+            context =>
+            {
+                if (context.Request.ContentType != MediaTypeNames.Application.Json)
                 {
-                    natsConfig
-                        .ConfigQueueOptions((options, sp) =>
-                        {
-                            var config = sp.GetRequiredService<IConfiguration>();
+                    return false;
+                }
 
-                            options.Url = config.GetValue<string>("NatsSetting:Urls");
-                        })
-                        .AddReplyHandler<WMCasinoBetRequestInfoHandler>(
-                            "tgs.gameprovider.wm.betdetailrequest.process",
-                            "tgs.gameprovider.wm.betdetailrequest.process");
-                })
-                .AddNatsGlobPatternExchange("*");
+                var route = "/api/wm";
 
-            services
-                .AddOptions<OtlpExporterOptions>()
-                .Configure<IConfiguration>((options, config) =>
-                {
-                    var nodeIp = config.GetValue<string>("NODE_IP");
+                return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                       !context.Request.Path.StartsWithSegments($"{route}/gamerecord",
+                           StringComparison.OrdinalIgnoreCase);
+            },
+            builder =>
+            {
+                builder.UseMiddleware<AuthorizeWMCasinoMiddleware>();
+            });
 
-                    if (!string.IsNullOrWhiteSpace(nodeIp))
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+
+            endpoints.MapHealthChecks("/health");
+
+            endpoints.MapMetrics();
+            endpoints.MapProfileViewer();
+        });
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddTgsRepository(_configuration, "Tgs");
+
+        services
+            .AddWebApiServices()
+            .AddTgsLog()
+            .AddSystemJsonSerializer()
+            .AddSecurity()
+            .AddTransactions()
+            .AddOperations()
+            .AddApiClient()
+            .AddGameApiClients()
+            .AddGameOperations(sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+            .AddGameProvidersoRepository()
+            .AddCashServiceClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.BaseUrl = config.GetValue<Uri>("Game:CashBaseUrl");
+            });
+
+        services
+            .AddRedis((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+            });
+
+        services.AddHttpContextAccessor();
+
+        services.AddFeatureManagement();
+
+        services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidateModelFilter>();
+        });
+
+        services.AddHealthChecks()
+            .ForwardToPrometheus();
+
+        services
+            .AddMessageQueue()
+            .AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
                     {
-                        options.Endpoint = new Uri($"http://{nodeIp}:4317");
-                    }
+                        var config = sp.GetRequiredService<IConfiguration>();
 
-                    config.GetSection("OpenTelemetry:Tracing").Bind(options);
-                });
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .AddReplyHandler<WMCasinoBetRequestInfoHandler>(
+                        "tgs.gameprovider.wm.betdetailrequest.process",
+                        "tgs.gameprovider.wm.betdetailrequest.process");
+            })
+            .AddNatsGlobPatternExchange("*");
 
-            services
-                .AddOpenTelemetryTracing(builder
-                    => builder
-                        .SetResourceBuilder(
-                            ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
-                        .AddSource("TGS.*")
-                        .AddSource("Tgs.*")
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation(options =>
-                        {
-                            options.SetDbStatementForText = true;
-                        })
-                        .AddOtlpExporter()
-                        .AddProfileViewExporter())
-                .Configure<AspNetCoreInstrumentationOptions>(options =>
+        services
+            .AddOptions<OtlpExporterOptions>()
+            .Configure<IConfiguration>((options, config) =>
+            {
+                var nodeIp = config.GetValue<string>("NODE_IP");
+
+                if (!string.IsNullOrWhiteSpace(nodeIp))
                 {
-                    options.Filter = httpContext
-                        => !httpContext.Request.Path.HasValue
-                        || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                        && !httpContext.Request.Path.StartsWithSegments("/health")
-                        && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                        && !httpContext.Request.Path.StartsWithSegments("/metrics")
-                        && !new[]
-                        {
-                            "html",
-                            "ico",
-                            "png",
-                            "jpg"
-                        }.Any(
-                            ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
-                })
-                .AddProfileViewer();
+                    options.Endpoint = new Uri($"http://{nodeIp}:4317");
+                }
 
-            services
-                .AddInterceptionService()
-                .ConfigureDynamicProxy(config =>
-                {
-                    config.Interceptors.AddTyped<DiagnosticsInterceptor>(
-                            Predicates.ForNameSpace("Tgs.*"),
-                            Predicates.ForNameSpace("TGS.*"));
-                });
+                config.GetSection("OpenTelemetry:Tracing").Bind(options);
+            });
 
-            // custom registration of WMCasino
+        services
+            .AddOpenTelemetryTracing(builder
+                => builder
+                    .SetResourceBuilder(
+                        ResourceBuilder.CreateDefault().AddEnvironmentVariableDetector())
+                    .AddSource("TGS.*")
+                    .AddSource("Tgs.*")
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                    })
+                    .AddOtlpExporter()
+                    .AddProfileViewExporter())
+            .Configure<AspNetCoreInstrumentationOptions>(options =>
+            {
+                options.Filter = httpContext
+                    => !httpContext.Request.Path.HasValue
+                    || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                    && !httpContext.Request.Path.StartsWithSegments("/health")
+                    && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                    && !httpContext.Request.Path.StartsWithSegments("/metrics")
+                    && !new[]
+                    {
+                        "html",
+                        "ico",
+                        "png",
+                        "jpg"
+                    }.Any(
+                        ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+            })
+            .AddProfileViewer();
 
-            services.AddErrorMappers(new[]
-                {
-                    typeof(WMCasinoErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
+        services
+            .AddInterceptionService()
+            .ConfigureDynamicProxy(config =>
+            {
+                config.Interceptors.AddTyped<DiagnosticsInterceptor>(
+                        Predicates.ForNameSpace("Tgs.*"),
+                        Predicates.ForNameSpace("TGS.*"));
+            });
 
-            services.AddScoped<WMCasinoDispatcherMiddleware>();
-            services.AddScoped<AuthorizeWMCasinoMiddleware>();
-            services.AddScoped<HandleWMCasinoExceptionMiddleware>();
+        // custom registration of WMCasino
 
-            services.AddScoped<IWMCasinoServices, WMCasinoServices>();
-            services.AddScoped<IWMCasinoBetActionServices, WMCasinoBetActionServices>();
-            services.AddScoped<IWMCasinoGameProviderHistoryServices, WMCasinoGameProviderHistoryServices>();
+        services.AddErrorMappers(new[]
+            {
+                typeof(WMCasinoErrorMapper)
+            },
+            (provider, key) => key switch
+            {
+                Consts.GameProvider.WMCasino => provider.GetRequiredService<WMCasinoErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-            services.AddTransient<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
-            services.AddTransient<IWMCasinoUtility, WMCasinoUtility>();
-            services.AddTransient<IWMCasinoPlayerServices, WMCasinoPlayerServices>();
-            services.AddTransient<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
+        services.AddScoped<WMCasinoDispatcherMiddleware>();
+        services.AddScoped<AuthorizeWMCasinoMiddleware>();
+        services.AddScoped<HandleWMCasinoExceptionMiddleware>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[]
-                {
-                    typeof(WMCasinoGameInitializer)
-                },
-                (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
+        services.AddScoped<IWMCasinoServices, WMCasinoServices>();
+        services.AddScoped<IWMCasinoBetActionServices, WMCasinoBetActionServices>();
+        services.AddScoped<IWMCasinoGameProviderHistoryServices, WMCasinoGameProviderHistoryServices>();
 
-            services.AddScopedWithResolver<IGameHistory>(new[]
-                {
-                    typeof(WMCasinoGameHistory)
-                },
-                (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
+        services.AddTransient<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
+        services.AddTransient<IWMCasinoUtility, WMCasinoUtility>();
+        services.AddTransient<IWMCasinoPlayerServices, WMCasinoPlayerServices>();
+        services.AddTransient<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
 
-            services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
+        services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(WMCasinoGameInitializer)
+            },
+            (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
 
-            services.AddTransient<IWMCasinoDataStore>(sp =>
-                ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+        services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(WMCasinoGameHistory)
+            },
+            (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
 
-            services.AddHostedService<WMCasinoBetResultHandlerService>();
-        }
+        services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
+
+        services.AddTransient<IWMCasinoDataStore>(sp =>
+            ActivatorUtilities.CreateInstance<WMCasinoRedisDataStore>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+
+        services.AddHostedService<WMCasinoBetResultHandlerService>();
     }
 }

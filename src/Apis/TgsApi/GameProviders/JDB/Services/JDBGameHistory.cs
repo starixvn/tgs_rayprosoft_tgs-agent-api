@@ -15,97 +15,96 @@ using TGS.Shared.Game.ApiClients.JDB;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
+namespace TGS.Apis.TgsApi.GameProviders.JDB.Services;
+
+public sealed class JDBGameHistory : BaseBetHistory
 {
-    public sealed class JDBGameHistory : BaseBetHistory
+    private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+    private readonly IJDBApiClient _client;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly IJDBServices _services;
+    private readonly ISettingOperations _settingOperations;
+
+    public JDBGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        ISettingOperations settingOperations,
+        IJDBApiClient client,
+        IBrandGameProviderOperations brandGameProviderOperations,
+        IPlayerOperations playerOperations,
+        IJDBServices services)
+        : base(roundQueries, gameProviderOperations)
     {
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IJDBApiClient _client;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IJDBServices _services;
-        private readonly ISettingOperations _settingOperations;
+        _settingOperations = settingOperations;
+        _client = client;
+        _brandGameProviderOperations = brandGameProviderOperations;
+        _playerOperations = playerOperations;
+        _services = services;
+    }
 
-        public JDBGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ISettingOperations settingOperations,
-            IJDBApiClient client,
-            IBrandGameProviderOperations brandGameProviderOperations,
-            IPlayerOperations playerOperations,
-            IJDBServices services)
-            : base(roundQueries, gameProviderOperations)
-        {
-            _settingOperations = settingOperations;
-            _client = client;
-            _brandGameProviderOperations = brandGameProviderOperations;
-            _playerOperations = playerOperations;
-            _services = services;
-        }
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
-        {
-            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
-
-            var configuration =
-                await _settingOperations
-                    .GetValueFromJsonByKeyAsync<JDBConfiguration>(
-                        SettingConsts.GameProviderConfigurations.JDB)
-                    .ConfigureAwait(false);
-
-            var agent = _services.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
-
-            var cultureCode = await _brandGameProviderOperations
-                .MapCultureAsync(cachedGameProvider.Id, round.BrandId, language)
+        var configuration =
+            await _settingOperations
+                .GetValueFromJsonByKeyAsync<JDBConfiguration>(
+                    SettingConsts.GameProviderConfigurations.JDB)
                 .ConfigureAwait(false);
 
-            if (!long.TryParse(round.ExternalRoundId, out var externalRoundId))
-            {
-                throw new ArgumentException("Invalid external round id");
-            }
+        var agent = _services.GetAgent(configuration.Agents, player.DefaultWalletCurrencyCode);
 
-            var items = cachedGame.ExternalId.Split("_");
-            if (items.Length != 2 || !int.TryParse(items[0], out var gtype))
-            {
-                throw new ArgumentException($"Invalid external game id '{cachedGame.ExternalId}'");
-            }
+        var cultureCode = await _brandGameProviderOperations
+            .MapCultureAsync(cachedGameProvider.Id, round.BrandId, language)
+            .ConfigureAwait(false);
 
-            var request = new BetHistoryRequest
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                Parent = agent.Id,
-                UserId = playerCode,
-                Language = cultureCode,
-                GameType = gtype,
-                SequenceNo = externalRoundId
-            };
-
-            var response = await _client
-                .GetBetHistoryUrlAsync(
-                    configuration.ApiUrl,
-                    configuration.ClientDomain,
-                    configuration.AESIv,
-                    configuration.AESKey,
-                    request)
-                .ConfigureAwait(false);
-
-            var url = string.Empty;
-            if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
-            {
-                url = response.Data.FirstOrDefault()?.Path;
-            }
-
-            return new()
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Winloss = (round.WinLoss ?? 0).Negate(),
-                Turnover = round.Turnover ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new UrlData {Url = url}
-                }
-            };
+        if (!long.TryParse(round.ExternalRoundId, out var externalRoundId))
+        {
+            throw new ArgumentException("Invalid external round id");
         }
+
+        var items = cachedGame.ExternalId.Split("_");
+        if (items.Length != 2 || !int.TryParse(items[0], out var gtype))
+        {
+            throw new ArgumentException($"Invalid external game id '{cachedGame.ExternalId}'");
+        }
+
+        var request = new BetHistoryRequest
+        {
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            Parent = agent.Id,
+            UserId = playerCode,
+            Language = cultureCode,
+            GameType = gtype,
+            SequenceNo = externalRoundId
+        };
+
+        var response = await _client
+            .GetBetHistoryUrlAsync(
+                configuration.ApiUrl,
+                configuration.ClientDomain,
+                configuration.AESIv,
+                configuration.AESKey,
+                request)
+            .ConfigureAwait(false);
+
+        var url = string.Empty;
+        if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
+        {
+            url = response.Data.FirstOrDefault()?.Path;
+        }
+
+        return new()
+        {
+            BetAmount = round.BetAmount ?? 0,
+            Winloss = (round.WinLoss ?? 0).Negate(),
+            Turnover = round.Turnover ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
+            {
+                new UrlData {Url = url}
+            }
+        };
     }
 }

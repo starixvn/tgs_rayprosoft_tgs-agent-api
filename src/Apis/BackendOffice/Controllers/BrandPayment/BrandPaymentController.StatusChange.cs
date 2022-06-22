@@ -5,24 +5,23 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
+namespace TGS.Apis.BackendOffice.Controllers.BrandPayment;
+
+public partial class BrandPaymentController
 {
-    public partial class BrandPaymentController
+    [HttpPut("{paymentId:guid}/{status}")]
+    [Description("change a Payment's status")]
+    public async Task<MessageResponse> UpdateBrandPaymentStatusAsync(Guid paymentId, SwitchStatus status)
     {
-        [HttpPut("{paymentId:guid}/{status}")]
-        [Description("change a Payment's status")]
-        public async Task<MessageResponse> UpdateBrandPaymentStatusAsync(Guid paymentId, SwitchStatus status)
+        var payment = await _brandPaymentService.GetPaymentAsync(q => q.Id == paymentId);
+
+        if (payment == null)
         {
-            var payment = await _brandPaymentService.GetPaymentAsync(q => q.Id == paymentId);
-
-            if (payment == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.BrandPayment.PaymentNotFound);
-            }
-
-            await _brandPaymentService.ChangeStatusAsync(payment, status, Username);
-
-            return CreateValidResponse<MessageResponse>();
+            return CreateInvalidResponse<MessageResponse>(Resources.BrandPayment.PaymentNotFound);
         }
+
+        await _brandPaymentService.ChangeStatusAsync(payment, status, Username);
+
+        return CreateValidResponse<MessageResponse>();
     }
 }

@@ -4,35 +4,34 @@ using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.Agent
+namespace TGS.Services.Agent.ApplicationServices.Agent;
+
+internal class ValidateAgentPasswordCommandService : IGetService<ValidateAgentPasswordCommand, bool>
 {
-    internal class ValidateAgentPasswordCommandService : IGetService<ValidateAgentPasswordCommand, bool>
+    private readonly IAgentRepository _agentRepository;
+    private readonly IPasswordHandler _passwordHandler;
+
+    public ValidateAgentPasswordCommandService(
+        IAgentRepository agentRepository,
+        IPasswordHandler passwordHandler)
     {
-        private readonly IAgentRepository _agentRepository;
-        private readonly IPasswordHandler _passwordHandler;
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    }
 
-        public ValidateAgentPasswordCommandService(
-            IAgentRepository agentRepository,
-            IPasswordHandler passwordHandler)
-        {
-            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-            _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-        }
+    public async ValueTask<bool> GetAsync(
+        ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)
+    {
+        var agent = await _agentRepository
+            .GetAgentByIdAsync(query.AgentId)
+            .ConfigureAwait(false);
 
-        public async ValueTask<bool> GetAsync(
-            ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)
-        {
-            var agent = await _agentRepository
-                .GetAgentByIdAsync(query.AgentId)
-                .ConfigureAwait(false);
+        if (agent == null)
+            return false;
 
-            if (agent == null)
-                return false;
-
-            return _passwordHandler.Verify(
-                agent.Password,
-                agent.Salt,
-                query.Password);
-        }
+        return _passwordHandler.Verify(
+            agent.Password,
+            agent.Salt,
+            query.Password);
     }
 }

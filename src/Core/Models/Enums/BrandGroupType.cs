@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum BrandGroupType
 {
-    public enum BrandGroupType
-    {
-        Sports = 0,
-        NoneSports = 1
-    }
+    Sports = 0,
+    NoneSports = 1
 }

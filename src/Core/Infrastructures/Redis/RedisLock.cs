@@ -3,137 +3,136 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace TGS.Core.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis;
+
+internal sealed class RedisLock : IRedisLock
 {
-    internal sealed class RedisLock : IRedisLock
+    private readonly IRedisRepository _redisRepository;
+
+    public RedisLock(IRedisRepository redisRepository)
     {
-        private readonly IRedisRepository _redisRepository;
+        _redisRepository = redisRepository;
+    }
 
-        public RedisLock(IRedisRepository redisRepository)
+    async Task<TResult> IRedisLock.ExecuteLockAsync<TResult>(string resource, TimeSpan expiryTime,
+        Func<IRedisLockSummary, Task<TResult>> execFunc,
+        Func<IRedisLockSummary, TResult> handleFailureFunc,
+        TimeSpan? waitTime, TimeSpan? retryInterval)
+    {
+        if (execFunc == null || handleFailureFunc == null)
+            throw new ArgumentNullException();
+
+        var needRetry = waitTime.HasValue && retryInterval.HasValue && waitTime.Value.TotalMilliseconds > 0 &&
+                        retryInterval.Value.TotalMilliseconds > 0;
+
+        TResult res;
+
+        var stopwatch = Stopwatch.StartNew();
+
+        do
         {
-            _redisRepository = redisRepository;
-        }
-
-        async Task<TResult> IRedisLock.ExecuteLockAsync<TResult>(string resource, TimeSpan expiryTime,
-            Func<IRedisLockSummary, Task<TResult>> execFunc,
-            Func<IRedisLockSummary, TResult> handleFailureFunc,
-            TimeSpan? waitTime, TimeSpan? retryInterval)
-        {
-            if (execFunc == null || handleFailureFunc == null)
-                throw new ArgumentNullException();
-
-            var needRetry = waitTime.HasValue && retryInterval.HasValue && waitTime.Value.TotalMilliseconds > 0 &&
-                            retryInterval.Value.TotalMilliseconds > 0;
-
-            TResult res;
-
-            var stopwatch = Stopwatch.StartNew();
-
-            do
+            var (locker, result) = await AcquireAsync();
+            res = result;
+            if (locker.IsAcquired)
             {
-                var (locker, result) = await AcquireAsync();
-                res = result;
-                if (locker.IsAcquired)
-                {
-                    return result;
-                }
-
-                if (!needRetry)
-                    return result;
-
-                await Task.Delay(retryInterval.Value);
-            } while (stopwatch.Elapsed <= waitTime.Value);
-
-            return res;
-
-            async Task<(IRedisLockSummary summary, TResult result)> AcquireAsync()
-            {
-                using var locker = await CreateLockAsync(resource, expiryTime);
-                return locker.IsAcquired ? (locker, await execFunc(locker)) : (locker, handleFailureFunc(locker));
+                return result;
             }
-        }
 
-        async Task IRedisLock.ExecuteLockAsync(
-            string resource, TimeSpan expiryTime,
-            Func<Task> execFunc,
-            Func<Task> handleFailedFunc,
-            TimeSpan? waitTime,
-            TimeSpan? retryInterval)
+            if (!needRetry)
+                return result;
+
+            await Task.Delay(retryInterval.Value);
+        } while (stopwatch.Elapsed <= waitTime.Value);
+
+        return res;
+
+        async Task<(IRedisLockSummary summary, TResult result)> AcquireAsync()
         {
-            if (execFunc == null)
-                throw new ArgumentNullException();
+            using var locker = await CreateLockAsync(resource, expiryTime);
+            return locker.IsAcquired ? (locker, await execFunc(locker)) : (locker, handleFailureFunc(locker));
+        }
+    }
 
-            var needRetry = waitTime.HasValue && retryInterval.HasValue && waitTime.Value.TotalMilliseconds > 0 &&
-                            retryInterval.Value.TotalMilliseconds > 0;
+    async Task IRedisLock.ExecuteLockAsync(
+        string resource, TimeSpan expiryTime,
+        Func<Task> execFunc,
+        Func<Task> handleFailedFunc,
+        TimeSpan? waitTime,
+        TimeSpan? retryInterval)
+    {
+        if (execFunc == null)
+            throw new ArgumentNullException();
 
-            var stopwatch = Stopwatch.StartNew();
+        var needRetry = waitTime.HasValue && retryInterval.HasValue && waitTime.Value.TotalMilliseconds > 0 &&
+                        retryInterval.Value.TotalMilliseconds > 0;
 
-            do
+        var stopwatch = Stopwatch.StartNew();
+
+        do
+        {
+            var locker = await AcquireAsync();
+
+            if (locker.IsAcquired)
             {
-                var locker = await AcquireAsync();
+                return;
+            }
 
-                if (locker.IsAcquired)
-                {
-                    return;
-                }
+            if (!needRetry)
+                return;
 
-                if (!needRetry)
-                    return;
+            await Task.Delay(retryInterval.Value);
+        } while (stopwatch.Elapsed <= waitTime.Value);
 
-                await Task.Delay(retryInterval.Value);
-            } while (stopwatch.Elapsed <= waitTime.Value);
-
-            async Task<IRedisLockSummary> AcquireAsync()
+        async Task<IRedisLockSummary> AcquireAsync()
+        {
+            using var locker = await CreateLockAsync(resource, expiryTime);
+            if (!locker.IsAcquired)
             {
-                using var locker = await CreateLockAsync(resource, expiryTime);
-                if (!locker.IsAcquired)
-                {
-                    if (handleFailedFunc != null)
-                        await handleFailedFunc();
-                    return locker;
-                }
-
-                await execFunc();
+                if (handleFailedFunc != null)
+                    await handleFailedFunc();
                 return locker;
             }
-        }
 
-        private async Task<IRedisLockSummary> CreateLockAsync(string resource, TimeSpan expiryTime)
-        {
-            var token = Guid.NewGuid().ToString();
-            var key = $"RedisLock:{resource}";
-            var locker = new InternalLock(key, token, expiryTime, _redisRepository.GetDb());
-            await locker.LockAsync();
+            await execFunc();
             return locker;
         }
+    }
 
-        private class InternalLock : IRedisLockSummary
+    private async Task<IRedisLockSummary> CreateLockAsync(string resource, TimeSpan expiryTime)
+    {
+        var token = Guid.NewGuid().ToString();
+        var key = $"RedisLock:{resource}";
+        var locker = new InternalLock(key, token, expiryTime, _redisRepository.GetDb());
+        await locker.LockAsync();
+        return locker;
+    }
+
+    private class InternalLock : IRedisLockSummary
+    {
+        private readonly IDatabase _database;
+        private readonly TimeSpan _expiryTime;
+        private readonly string _key;
+        private readonly string _token;
+        public bool IsAcquired { get; private set; }
+
+        public bool IsReleased { get; private set; }
+
+        public InternalLock(string key, string token, TimeSpan expiryTime, IDatabase database)
         {
-            private readonly IDatabase _database;
-            private readonly TimeSpan _expiryTime;
-            private readonly string _key;
-            private readonly string _token;
-            public bool IsAcquired { get; private set; }
+            _key = key;
+            _token = token;
+            _database = database;
+            _expiryTime = expiryTime;
+        }
 
-            public bool IsReleased { get; private set; }
+        public void Dispose()
+        {
+            IsReleased = _database.LockRelease(_key, _token);
+        }
 
-            public InternalLock(string key, string token, TimeSpan expiryTime, IDatabase database)
-            {
-                _key = key;
-                _token = token;
-                _database = database;
-                _expiryTime = expiryTime;
-            }
-
-            public void Dispose()
-            {
-                IsReleased = _database.LockRelease(_key, _token);
-            }
-
-            public async Task LockAsync()
-            {
-                IsAcquired = await _database.LockTakeAsync(_key, _token, _expiryTime);
-            }
+        public async Task LockAsync()
+        {
+            IsAcquired = await _database.LockTakeAsync(_key, _token, _expiryTime);
         }
     }
 }

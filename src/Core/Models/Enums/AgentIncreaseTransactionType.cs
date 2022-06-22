@@ -1,10 +1,9 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum AgentIncreaseTransactionType
 {
-    public enum AgentIncreaseTransactionType
-    {
-        Dividend = 1,
-        Recharge = 2,
-        Bonus = 3,
-        Other = 99
-    }
+    Dividend = 1,
+    Recharge = 2,
+    Bonus = 3,
+    Other = 99
 }

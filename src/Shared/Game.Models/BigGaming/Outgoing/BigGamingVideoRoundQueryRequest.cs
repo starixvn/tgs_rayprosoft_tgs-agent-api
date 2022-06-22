@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 
-namespace TGS.Shared.Game.Models.BigGaming.Outgoing
+namespace TGS.Shared.Game.Models.BigGaming.Outgoing;
+
+public record BigGamingVideoRoundQueryRequest : BigGamingParamsSignRequest
 {
-    public record BigGamingVideoRoundQueryRequest : BigGamingParamsSignRequest
-    {
-        [JsonPropertyName("round")]
-        public string Round { get; set; }
-    }
+    [JsonPropertyName("round")]
+    public string Round { get; set; }
 }

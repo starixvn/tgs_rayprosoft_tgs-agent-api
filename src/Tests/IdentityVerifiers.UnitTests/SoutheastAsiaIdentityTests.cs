@@ -1,21 +1,20 @@
 ﻿using NUnit.Framework;
 using TGS.IdentityVerifiers;
 
-namespace TGS.Tests.OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests;
+
+[TestFixture]
+public class SoutheastAsiaIdentityTests
 {
-    [TestFixture]
-    public class SoutheastAsiaIdentityTests
+    [Test]
+    public void SoutheastAsia_Identity_Always_Correct()
     {
-        [Test]
-        public void SoutheastAsia_Identity_Always_Correct()
-        {
-            var sut = new SoutheastAsiaIdentityVerifier();
+        var sut = new SoutheastAsiaIdentityVerifier();
 
-            var id = "anywords";
+        var id = "anywords";
 
-            var actual = sut.Verify(id);
+        var actual = sut.Verify(id);
 
-            Assert.IsTrue(actual);
-        }
+        Assert.IsTrue(actual);
     }
 }

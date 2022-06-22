@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Avia
+namespace TGS.Shared.Game.Models.Avia;
+
+public record AviaErrorResponse
 {
-    public record AviaErrorResponse
-    {
-        [JsonPropertyName("Error")]
-        public string Error { get; init; }
-    }
+    [JsonPropertyName("Error")]
+    public string Error { get; init; }
 }

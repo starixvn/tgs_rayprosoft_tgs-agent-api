@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 
-namespace TGS.Services.BackOffice.Validation.GameProvider
+namespace TGS.Services.BackOffice.Validation.GameProvider;
+
+public class CreateGameProviderRequestValidator : AbstractValidator<CreateGameProviderRequest>
 {
-    public class CreateGameProviderRequestValidator : AbstractValidator<CreateGameProviderRequest>
+    public CreateGameProviderRequestValidator()
     {
-        public CreateGameProviderRequestValidator()
-        {
-            Include(new GameProviderRequestValidator());
-        }
+        Include(new GameProviderRequestValidator());
     }
 }

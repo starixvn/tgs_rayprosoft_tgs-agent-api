@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.Saba.Incoming
+﻿namespace TGS.Shared.Game.Models.Saba.Incoming;
+
+public record SettleBetResponse : ErrorResponse
 {
-    public record SettleBetResponse : ErrorResponse
-    {
-    }
 }

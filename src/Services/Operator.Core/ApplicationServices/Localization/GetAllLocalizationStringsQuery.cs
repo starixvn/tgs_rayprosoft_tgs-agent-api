@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator.ApplicationServices.Localization
-{
-    public record GetAllLocalizationStringsQuery(string CultureCode);
-}
+﻿namespace TGS.Services.Operator.ApplicationServices.Localization;
+
+public record GetAllLocalizationStringsQuery(string CultureCode);

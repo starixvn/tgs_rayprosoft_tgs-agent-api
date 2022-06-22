@@ -9,34 +9,33 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandLiveChat;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BrandLiveChatController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandLiveChatController : ControllerBase
+    [HttpGet]
+    [Description("Get a brand's live chat")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
+        [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
     {
-        [HttpGet]
-        [Description("Get a brand's live chat")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
-            [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new BrandLiveChatQuery(brandId);
+
+        var info = await queryService.GetAsync(query).ConfigureAwait(false);
+
+        if (info == null)
+            return null;
+
+        return new BrandLiveChatModel()
         {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new BrandLiveChatQuery(brandId);
-
-            var info = await queryService.GetAsync(query).ConfigureAwait(false);
-
-            if (info == null)
-                return null;
-
-            return new BrandLiveChatModel()
-            {
-                Name = info.Name,
-                Setting = string.IsNullOrEmpty(info.Setting)
-                    ? JsonDocument.Parse("{}")
-                    : JsonDocument.Parse(info.Setting)
-            };
-        }
+            Name = info.Name,
+            Setting = string.IsNullOrEmpty(info.Setting)
+                ? JsonDocument.Parse("{}")
+                : JsonDocument.Parse(info.Setting)
+        };
     }
 }

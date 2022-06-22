@@ -1,11 +1,10 @@
-﻿namespace TGS.Shared.Game.Models.AllBet.Enums
+﻿namespace TGS.Shared.Game.Models.AllBet.Enums;
+
+public enum TransferType
 {
-    public enum TransferType
-    {
-        PlaceBet = 10,
-        Settle = 20,
-        ManuelSettle = 21,
-        FundIn = 30,
-        FundOut = 31
-    }
+    PlaceBet = 10,
+    Settle = 20,
+    ManuelSettle = 21,
+    FundIn = 30,
+    FundOut = 31
 }

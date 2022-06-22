@@ -1,16 +1,15 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum InvalidGameActionErrorCode
 {
-    public enum InvalidGameActionErrorCode
-    {
-        None,
-        Duplicate,
-        Cancelled,
-        Settled,
-        TransactionNotFound,
-        TransactionBeingCancelledNotFound,
-        TransactionBeingReferencedNotFound,
-        RoundNotFound,
-        GameNotFound,
-        ActionProhibited        
-    }
+    None,
+    Duplicate,
+    Cancelled,
+    Settled,
+    TransactionNotFound,
+    TransactionBeingCancelledNotFound,
+    TransactionBeingReferencedNotFound,
+    RoundNotFound,
+    GameNotFound,
+    ActionProhibited        
 }

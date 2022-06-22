@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
+﻿namespace TGS.Apis.TgsApi.GameProviders.Jili.Services;
+
+public interface IJiliPlayerService
 {
-    public interface IJiliPlayerService
-    {
-        string ToJiliPlayerId(string brandCode, string playerCode);
-    }
+    string ToJiliPlayerId(string brandCode, string playerCode);
 }

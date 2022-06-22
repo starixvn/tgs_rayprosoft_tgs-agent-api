@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Attributes
+namespace TGS.Apis.BackendOffice.Attributes;
+
+public class ByPassAdminLogAttribute : Attribute
 {
-    public class ByPassAdminLogAttribute : Attribute
-    {
-    }
 }

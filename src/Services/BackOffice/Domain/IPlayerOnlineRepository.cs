@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TGS.Services.BackOffice.Domain
+namespace TGS.Services.BackOffice.Domain;
+
+public interface IPlayerOnlineRepository
 {
-    public interface IPlayerOnlineRepository
-    {
-        ValueTask<string[]> GetQueryAsync(Guid brandId);
-    }
+    ValueTask<string[]> GetQueryAsync(Guid brandId);
 }

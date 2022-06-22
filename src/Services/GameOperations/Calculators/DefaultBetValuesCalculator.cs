@@ -1,6 +1,5 @@
-﻿namespace TGS.Services.GameOperations.Calculators
+﻿namespace TGS.Services.GameOperations.Calculators;
+
+internal sealed class DefaultBetValuesCalculator : BaseBetValuesCalculator
 {
-    internal sealed class DefaultBetValuesCalculator : BaseBetValuesCalculator
-    {
-    }
 }

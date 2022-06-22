@@ -5,31 +5,30 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Messages;
 using TGS.Workers.Schedulers.Hangfire.Services;
 
-namespace TGS.Workers.Schedulers.Jobs
+namespace TGS.Workers.Schedulers.Jobs;
+
+[Queue(Consts.Queue.ArrearsEmail)]
+public sealed class PlatformCreditBalanceWorker : BaseWork<TgsResponse>
 {
-    [Queue(Consts.Queue.ArrearsEmail)]
-    public sealed class PlatformCreditBalanceWorker : BaseWork<TgsResponse>
+    private readonly ITgsRepository _repository;
+
+    public PlatformCreditBalanceWorker(
+        ITgsRepository repository)
     {
-        private readonly ITgsRepository _repository;
+        _repository = repository;
+    }
 
-        public PlatformCreditBalanceWorker(
-            ITgsRepository repository)
+    public override async Task<TgsResponse> ExecuteAsync(object context)
+    {
+        var platformCredits = await _repository.PlatformCredits.AsQueryable().ToArrayAsync();
+        foreach (var platformCredit in platformCredits)
         {
-            _repository = repository;
+            platformCredit.Balance = platformCredit.Credit;
         }
 
-        public override async Task<TgsResponse> ExecuteAsync(object context)
-        {
-            var platformCredits = await _repository.PlatformCredits.AsQueryable().ToArrayAsync();
-            foreach (var platformCredit in platformCredits)
-            {
-                platformCredit.Balance = platformCredit.Credit;
-            }
+        _repository.PlatformCredits.UpdateRange(platformCredits);
+        await _repository.SaveChangesAsync();
 
-            _repository.PlatformCredits.UpdateRange(platformCredits);
-            await _repository.SaveChangesAsync();
-
-            return new();
-        }
+        return new();
     }
 }

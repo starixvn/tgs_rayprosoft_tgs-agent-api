@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace TGS.Services.Agent.Exceptions
+namespace TGS.Services.Agent.Exceptions;
+
+public class GenerateValidateCodeFailException : Exception
 {
-    public class GenerateValidateCodeFailException : Exception
-    {
-    }
 }

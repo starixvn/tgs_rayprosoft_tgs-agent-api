@@ -1,7 +1,6 @@
-﻿namespace TGS.IdentityVerifiers
+﻿namespace TGS.IdentityVerifiers;
+
+public class SoutheastAsiaIdentityVerifier : IIdentityVerifier
 {
-    public class SoutheastAsiaIdentityVerifier : IIdentityVerifier
-    {
-        public bool Verify(string id) => true;
-    }
+    public bool Verify(string id) => true;
 }

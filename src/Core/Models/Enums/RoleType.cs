@@ -1,10 +1,9 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum RoleType
 {
-    public enum RoleType
-    {
-        Admin = 0,
-        Reseller = 1,
-        Licensee = 2,
-        Brand = 3
-    }
+    Admin = 0,
+    Reseller = 1,
+    Licensee = 2,
+    Brand = 3
 }

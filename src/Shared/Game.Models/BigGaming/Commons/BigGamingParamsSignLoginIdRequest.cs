@@ -5,11 +5,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.BigGaming.Commons
+namespace TGS.Shared.Game.Models.BigGaming.Commons;
+
+public record BigGamingParamsSignLoginIdRequest : BigGamingParamsSignRequest
 {
-    public record BigGamingParamsSignLoginIdRequest : BigGamingParamsSignRequest
-    {
-        [JsonPropertyName("loginId")]
-        public string LoginId { get; set; }
-    }
+    [JsonPropertyName("loginId")]
+    public string LoginId { get; set; }
 }

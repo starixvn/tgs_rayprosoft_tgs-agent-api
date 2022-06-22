@@ -1,9 +1,8 @@
-﻿namespace TGS.Core.Infrastructures.Redis
-{
-    public record CacheKey
-    {
-        public object CacheType { get; init; }
+﻿namespace TGS.Core.Infrastructures.Redis;
 
-        public object Key { get; init; }
-    }
+public record CacheKey
+{
+    public object CacheType { get; init; }
+
+    public object Key { get; init; }
 }

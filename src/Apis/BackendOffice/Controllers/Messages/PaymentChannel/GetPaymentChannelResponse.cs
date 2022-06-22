@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel
+namespace TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
+
+public class GetPaymentChannelResponse : MessageResponse
 {
-    public class GetPaymentChannelResponse : MessageResponse
-    {
-        public PaymentChannelModel PaymentChannel { get; set; }
-    }
+    public PaymentChannelModel PaymentChannel { get; set; }
 }

@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.BetConstruct.Incoming
+﻿namespace TGS.Shared.Game.Models.BetConstruct.Incoming;
+
+public record BetPlacedResponse : ErrorResponse
 {
-    public record BetPlacedResponse : ErrorResponse
-    {
-    }
 }

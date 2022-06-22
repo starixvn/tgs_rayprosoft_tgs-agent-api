@@ -14,94 +14,93 @@ using TGS.Shared.Game.ApiClients.Skywind;
 using TGS.Shared.Game.Models.Skywind.Enums;
 using TGS.Shared.Game.Models.Skywind.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
+namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services;
+
+public sealed class SkywindGameInitializer : IGameInitializer
 {
-    public sealed class SkywindGameInitializer : IGameInitializer
+    private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+    private readonly ISkywindApiClient _client;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly IJsonSerializationProvider _jsonSerializationProvider;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly ISkywindService _service;
+    private readonly ISettingOperations _settingOperations;
+    private readonly ITokenProvider _tokenProvider;
+
+    public SkywindGameInitializer(
+        ISkywindApiClient client,
+        IPlayerOperations playerOperations,
+        ISkywindService service,
+        IJsonSerializationProvider jsonSerializationProvider,
+        ISettingOperations settingOperations,
+        ITokenProvider tokenProvider,
+        IBrandGameProviderOperations brandGameProviderOperations,
+        IGameProviderOperations gameProviderOperations
+    )
     {
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly ISkywindApiClient _client;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISkywindService _service;
-        private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
 
-        public SkywindGameInitializer(
-            ISkywindApiClient client,
-            IPlayerOperations playerOperations,
-            ISkywindService service,
-            IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations,
-            ITokenProvider tokenProvider,
-            IBrandGameProviderOperations brandGameProviderOperations,
-            IGameProviderOperations gameProviderOperations
-        )
+        _jsonSerializationProvider = jsonSerializationProvider ??
+            throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+
+        _brandGameProviderOperations = brandGameProviderOperations ??
+            throw new ArgumentNullException(nameof(brandGameProviderOperations));
+
+        _gameProviderOperations =
+            gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+    }
+
+    async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+    {
+        var token = request.Token;
+        var loginTokenId = token.LoginRecordId;
+        var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
+        var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
+        var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
+        var brandId = player.BrandId;
+
+        var cultureCode =
+            await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
+
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
+                .GameProviderConfigurations.Skywind);
+        var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId)
+            .ConfigureAwait(false);
+
+        string url;
+        if (cachedGame.Type == GameType.LiveDealerLobby)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
-
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-
-            _brandGameProviderOperations = brandGameProviderOperations ??
-                throw new ArgumentNullException(nameof(brandGameProviderOperations));
-
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
         }
-
-        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        else
         {
-            var token = request.Token;
-            var loginTokenId = token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
-            var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
-            var brandId = player.BrandId;
-
-            var cultureCode =
-                await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
-                    .GameProviderConfigurations.Skywind);
-            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId)
-                .ConfigureAwait(false);
-
-            string url;
-            if (cachedGame.Type == GameType.LiveDealerLobby)
+            var data = new SkywindGameUrlRequest
             {
-                url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
-            }
-            else
-            {
-                var data = new SkywindGameUrlRequest
-                {
-                    PlayerCode = player.PlayerCode,
-                    GameCode = cachedGame.ExternalId,
-                    Ticket = encryptedToken,
-                    Language = cultureCode
-                };
-
-                var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-
-                if (responseGameUrl.Code.ToString().IgnoreCaseNotEquals(((int)GameApiError.Success).ToString()))
-                {
-                    throw new GameProviderApiErrorException(
-                        _jsonSerializationProvider.SerializeToString(responseGameUrl));
-                }
-
-                url = responseGameUrl.Url;
-            }
-
-            return new()
-            {
-                Url = url
+                PlayerCode = player.PlayerCode,
+                GameCode = cachedGame.ExternalId,
+                Ticket = encryptedToken,
+                Language = cultureCode
             };
+
+            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+
+            if (responseGameUrl.Code.ToString().IgnoreCaseNotEquals(((int)GameApiError.Success).ToString()))
+            {
+                throw new GameProviderApiErrorException(
+                    _jsonSerializationProvider.SerializeToString(responseGameUrl));
+            }
+
+            url = responseGameUrl.Url;
         }
+
+        return new()
+        {
+            Url = url
+        };
     }
 }

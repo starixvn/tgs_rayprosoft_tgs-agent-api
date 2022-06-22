@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using TGS.Core.Models.GameProviders.Settings.Jili;
 
-namespace TGS.Core.Models.GameProviders.Settings
+namespace TGS.Core.Models.GameProviders.Settings;
+
+public record JiliConfiguration : PluggableConfigurationBase
 {
-    public record JiliConfiguration : PluggableConfigurationBase
-    {
-        public Uri ApiUrl { get; init; }
+    public Uri ApiUrl { get; init; }
 
-        public string ClientId { get; init; }
+    public string ClientId { get; init; }
 
-        public string SecretKey { get; init; }
+    public string SecretKey { get; init; }
 
-        public IEnumerable<JiliMerchant> Merchants { get; init; }
-    }
+    public IEnumerable<JiliMerchant> Merchants { get; init; }
 }

@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Common
+namespace TGS.Shared.Game.Models.PragmaticPlay.Common;
+
+public record HashRequest
 {
-    public record HashRequest
-    {
-        [JsonPropertyName("hash")]
-        public string Hash { get; init; }
-    }
+    [JsonPropertyName("hash")]
+    public string Hash { get; init; }
 }

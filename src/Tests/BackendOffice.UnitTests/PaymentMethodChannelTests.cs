@@ -8,64 +8,63 @@ using TGS.Services.BackOffice.Application.Commands.PaymentMethodChannel;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class PaymentMethodChannelTests
 {
-    [TestFixture]
-    public class PaymentMethodChannelTests
+    [Test]
+    public void Can_Create_PaymentMethodChannel_Data()
     {
-        [Test]
-        public void Can_Create_PaymentMethodChannel_Data()
-        {
-            var moqSystemPaymentRepository = new Mock<ISystemPaymentRepository>();
+        var moqSystemPaymentRepository = new Mock<ISystemPaymentRepository>();
 
-            var sut = new CreatePaymentMethodChannelCommandService(moqSystemPaymentRepository.Object);
+        var sut = new CreatePaymentMethodChannelCommandService(moqSystemPaymentRepository.Object);
 
-            var command = new CreatePaymentMethodChannelCommand(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid());
+        var command = new CreatePaymentMethodChannelCommand(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid());
 
-            sut.ExecuteAsync(command);
+        sut.ExecuteAsync(command);
 
-            moqSystemPaymentRepository
-                .Verify(
-                    fake => fake.CreatePaymentMethodChannelAsync(
-                        It.Is<Guid>(x => x == command.PaymentId),
-                        It.Is<Guid>(x => x == command.MethodId),
-                        It.Is<Guid>(x => x == command.ChannelId)),
-                    Times.Exactly(1));
-        }
-
-        [Test]
-        public void Can_Delete_PaymentMethodChannel_Data()
-        {
-            var moqSystemPaymentRepository = new Mock<ISystemPaymentRepository>();
-
-            var sut = new DeletePaymentMethodChannelCommandService(moqSystemPaymentRepository.Object);
-
-            var command = new DeletePaymentMethodChannelCommand(Guid.NewGuid());
-
-            sut.ExecuteAsync(command);
-
-            moqSystemPaymentRepository
-                .Verify(
-                    fake => fake.DeletePaymentMethodChannelAsync(
-                        It.Is<Guid>(x => x == command.Id)),
-                    Times.Exactly(1));
-        }
-
-        [Test]
-        public void Should_Get_All_PaymentMethodChannels()
-        {
-            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
-
-            var sut = new AllPaymentMethodChannelQueryService(moqPaymentServiceClient.Object);
-
-            sut.QueryAsync(new AllPaymentMethodChannelQuery());
-
-            moqPaymentServiceClient.Verify(
-                fake => fake.GetAllPaymentMethodChannelsAsync(It.IsAny<CancellationToken>()),
+        moqSystemPaymentRepository
+            .Verify(
+                fake => fake.CreatePaymentMethodChannelAsync(
+                    It.Is<Guid>(x => x == command.PaymentId),
+                    It.Is<Guid>(x => x == command.MethodId),
+                    It.Is<Guid>(x => x == command.ChannelId)),
                 Times.Exactly(1));
-        }
+    }
+
+    [Test]
+    public void Can_Delete_PaymentMethodChannel_Data()
+    {
+        var moqSystemPaymentRepository = new Mock<ISystemPaymentRepository>();
+
+        var sut = new DeletePaymentMethodChannelCommandService(moqSystemPaymentRepository.Object);
+
+        var command = new DeletePaymentMethodChannelCommand(Guid.NewGuid());
+
+        sut.ExecuteAsync(command);
+
+        moqSystemPaymentRepository
+            .Verify(
+                fake => fake.DeletePaymentMethodChannelAsync(
+                    It.Is<Guid>(x => x == command.Id)),
+                Times.Exactly(1));
+    }
+
+    [Test]
+    public void Should_Get_All_PaymentMethodChannels()
+    {
+        var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+        var sut = new AllPaymentMethodChannelQueryService(moqPaymentServiceClient.Object);
+
+        sut.QueryAsync(new AllPaymentMethodChannelQuery());
+
+        moqPaymentServiceClient.Verify(
+            fake => fake.GetAllPaymentMethodChannelsAsync(It.IsAny<CancellationToken>()),
+            Times.Exactly(1));
     }
 }

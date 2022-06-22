@@ -16,111 +16,106 @@ using TGS.Shared.Game.ApiClients.SexyGaming;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
+
+public sealed class SexyGamingGameInitializer : IGameInitializer
 {
-    public sealed class SexyGamingGameInitializer : IGameInitializer
+    private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+    private readonly ISexyGamingApiClient _client;
+    private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
+    private readonly IJsonSerializationProvider _jsonSerializationProvider;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly ISexyGamingServices _service;
+    private readonly ISettingOperations _settingOperations;
+    private readonly ITokenProvider _tokenProvider;
+
+    public SexyGamingGameInitializer(
+        IBrandGameProviderOperations brandGameProviderOperations,
+        ISexyGamingApiClient client,
+        IPlayerOperations playerOperations,
+        ISexyGamingServices service,
+        IJsonSerializationProvider jsonSerializationProvider,
+        ISettingOperations settingOperations,
+        IGameProviderCurrencyCodeMapper currencyCodeMapper,
+        ITokenProvider tokenProvider
+    )
     {
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly ISexyGamingApiClient _client;
-        private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISexyGamingServices _service;
-        private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
+        _brandGameProviderOperations = brandGameProviderOperations ??
+            throw new ArgumentNullException(nameof(brandGameProviderOperations));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
 
-        public SexyGamingGameInitializer(
-            IBrandGameProviderOperations brandGameProviderOperations,
-            ISexyGamingApiClient client,
-            IPlayerOperations playerOperations,
-            ISexyGamingServices service,
-            IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations,
-            IGameProviderCurrencyCodeMapper currencyCodeMapper,
-            ITokenProvider tokenProvider
-        )
+        _jsonSerializationProvider = jsonSerializationProvider ??
+            throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+    }
+
+    async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+    {
+        var token = request.Token;
+        var loginTokenId = token.LoginRecordId;
+        var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
+        var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
+        var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
+        var brandId = player.BrandId;
+
+        var cultureCode =
+            await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
+
+        var configuration =
+            await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(SettingConsts
+                .GameProviderConfigurations.SexyGaming);
+
+        var data = new SexyGamingLoginGameRequest
         {
-            _brandGameProviderOperations = brandGameProviderOperations ??
-                throw new ArgumentNullException(nameof(brandGameProviderOperations));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
+            UserId = player.PlayerCode,
+            IsMobileLogin = request.Token.PlatformType == PlatformType.Mobile,
+            Language = cultureCode,
+            Extension1 = _jsonSerializationProvider.SerializeToString(new
+            {
+                token = encryptedToken
+            })
+        };
 
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-        }
+        var url = default(string);
+        var responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
 
-        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        if (responseGameUrl.Status.IgnoreCaseNotEquals(((int)GameApiError.Success).ToString("d4")))
         {
-            var token = request.Token;
-            var loginTokenId = token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
-            var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
-            var brandId = player.BrandId;
-
-            var cultureCode =
-                await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(SettingConsts
-                    .GameProviderConfigurations.SexyGaming);
-
-            var data = new SexyGamingLoginGameRequest
+            if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.AccountIsNotExists).ToString("d4")))
             {
-                UserId = player.PlayerCode,
-                IsMobileLogin = request.Token.PlatformType == PlatformType.Mobile,
-                Language = cultureCode,
-                Extension1 = _jsonSerializationProvider.SerializeToString(new
+                var BetLime = configuration.BetLimit.SexybcrtMapper
+                    .Where(x => x.Value == player.DefaultWalletCurrencyCode).Select(x => x.Key).ToArray();
+
+                var currencyCode =
+                    await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode,
+                        gameProviderId);
+
+                var createMemberRequest = new SexyGamingCreateMemberRequest
                 {
-                    token = encryptedToken
-                })
-            };
-
-            var url = default(string);
-            var responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-
-            if (responseGameUrl.Status.IgnoreCaseNotEquals(((int)GameApiError.Success).ToString("d4")))
-            {
-                if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.AccountIsNotExists).ToString("d4")))
-                {
-                    var BetLime = configuration.BetLimit.SexybcrtMapper
-                        .Where(x => x.Value == player.DefaultWalletCurrencyCode).Select(x => x.Key).ToArray();
-
-                    var currencyCode =
-                        await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode,
-                            gameProviderId);
-
-                    var createMemberRequest = new SexyGamingCreateMemberRequest
+                    UserId = player.PlayerCode,
+                    Currency = currencyCode,
+                    BetLimit = _jsonSerializationProvider.SerializeToString(new
                     {
-                        UserId = player.PlayerCode,
-                        Currency = currencyCode,
-                        BetLimit = _jsonSerializationProvider.SerializeToString(new
+                        SEXYBCRT = new
                         {
-                            SEXYBCRT = new
+                            LIVE = new
                             {
-                                LIVE = new
-                                {
-                                    limitId = BetLime
-                                }
+                                limitId = BetLime
                             }
-                        }),
-                        Language = cultureCode
-                    };
-                    await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
-                    responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+                        }
+                    }),
+                    Language = cultureCode
+                };
+                await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
+                responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
 
-                    if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.Success).ToString("d4")))
-                    {
-                        url = responseGameUrl.Url;
-                    }
-                    else
-                    {
-                        throw new GameProviderApiErrorException(responseGameUrl.Desc);
-                    }
+                if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.Success).ToString("d4")))
+                {
+                    url = responseGameUrl.Url;
                 }
                 else
                 {
@@ -129,13 +124,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             }
             else
             {
-                url = responseGameUrl.Url;
+                throw new GameProviderApiErrorException(responseGameUrl.Desc);
             }
-
-            return new()
-            {
-                Url = url
-            };
         }
+        else
+        {
+            url = responseGameUrl.Url;
+        }
+
+        return new()
+        {
+            Url = url
+        };
     }
 }

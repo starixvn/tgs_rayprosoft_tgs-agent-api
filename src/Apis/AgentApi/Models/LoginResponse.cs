@@ -1,17 +1,16 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.AgentApi.Models
-{
-    public record LoginResponse : TgsResponse
-    {
-        [JsonPropertyName("token")]
-        public string AgentToken { get; init; }
+namespace TGS.Apis.AgentApi.Models;
 
-        /// <summary>
-        ///     unix timestamp to milliseconds
-        /// </summary>
-        [JsonPropertyName("logintime")]
-        public long LoginTime { get; init; }
-    }
+public record LoginResponse : TgsResponse
+{
+    [JsonPropertyName("token")]
+    public string AgentToken { get; init; }
+
+    /// <summary>
+    ///     unix timestamp to milliseconds
+    /// </summary>
+    [JsonPropertyName("logintime")]
+    public long LoginTime { get; init; }
 }

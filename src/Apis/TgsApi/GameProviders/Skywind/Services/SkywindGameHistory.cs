@@ -12,52 +12,51 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.Skywind;
 using TGS.Shared.Game.Models.Skywind.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
+namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services;
+
+public sealed class SkywindGameHistory : BaseBetHistory
 {
-    public sealed class SkywindGameHistory : BaseBetHistory
+    private readonly ISkywindApiClient _client;
+    private readonly ISettingOperations _settingOperations;
+
+    public SkywindGameHistory(
+        IRoundQueries roundQueries,
+        IGameProviderOperations gameProviderOperations,
+        ISkywindApiClient client,
+        ISettingOperations settingOperations
+    ) : base(roundQueries, gameProviderOperations)
     {
-        private readonly ISkywindApiClient _client;
-        private readonly ISettingOperations _settingOperations;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+    }
 
-        public SkywindGameHistory(
-            IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ISkywindApiClient client,
-            ISettingOperations settingOperations
-        ) : base(roundQueries, gameProviderOperations)
+    protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+    {
+        var roundId = round.ExternalRoundId;
+        if (roundId.IndexOf("_") != -1)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            roundId = roundId.Split("_")[0];
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        var configuration = await _settingOperations
+            .GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind)
+            .ConfigureAwait(false);
+
+        var response = await _client
+            .GetGamHistoryRoundDetailsAsync(configuration,
+                new SkywindGamHistoryRoundDetailsRequest { RoundId = roundId }).ConfigureAwait(false);
+
+        return new RoundResult
         {
-            var roundId = round.ExternalRoundId;
-            if (roundId.IndexOf("_") != -1)
+            BetAmount = round.BetAmount ?? 0,
+            Turnover = round.Turnover ?? 0,
+            Winloss = round.WinLoss ?? 0,
+            GameResult = round.ClientStatus.ToString(),
+            Data = new BaseData[]
             {
-                roundId = roundId.Split("_")[0];
+                new UrlData {Url = response.ImageUrl}
             }
-
-            var configuration = await _settingOperations
-                .GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind)
-                .ConfigureAwait(false);
-
-            var response = await _client
-                .GetGamHistoryRoundDetailsAsync(configuration,
-                    new SkywindGamHistoryRoundDetailsRequest { RoundId = roundId }).ConfigureAwait(false);
-
-            return new RoundResult
-            {
-                BetAmount = round.BetAmount ?? 0,
-                Turnover = round.Turnover ?? 0,
-                Winloss = round.WinLoss ?? 0,
-                GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[]
-                {
-                    new UrlData {Url = response.ImageUrl}
-                }
-            };
-        }
+        };
     }
 }

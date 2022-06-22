@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Models.Commons
+namespace TGS.Apis.TgsApi.GameProviders.DreamGame.Models.Commons;
+
+public record DreamGameResponse
 {
-    public record DreamGameResponse
-    {
-        [JsonPropertyName("codeId")]
-        public int CodeId { get; init; }
-        [JsonPropertyName("token")]
-        public string Token { get; init; }
-    }
+    [JsonPropertyName("codeId")]
+    public int CodeId { get; init; }
+    [JsonPropertyName("token")]
+    public string Token { get; init; }
 }

@@ -1,8 +1,7 @@
-﻿namespace TGS.Apis.TgsApi.GameProviders.Jili.Services
+﻿namespace TGS.Apis.TgsApi.GameProviders.Jili.Services;
+
+internal class JiliPlayerService : IJiliPlayerService
 {
-    internal class JiliPlayerService : IJiliPlayerService
-    {
-        public string ToJiliPlayerId(string brandCode, string playerCode)
-            => $"{brandCode}_{playerCode}";
-    }
+    public string ToJiliPlayerId(string brandCode, string playerCode)
+        => $"{brandCode}_{playerCode}";
 }

@@ -3,31 +3,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Operator.ApplicationServices.Player
+namespace TGS.Services.Operator.ApplicationServices.Player;
+
+internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
 {
-    internal class GetPlayerQueryService : IGetService<GetPlayerQuery, PlayerInfo>
+    private readonly IPlayerRepository _playerRepository;
+
+    public GetPlayerQueryService(IPlayerRepository playerRepository)
     {
-        private readonly IPlayerRepository _playerRepository;
+        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+    }
 
-        public GetPlayerQueryService(IPlayerRepository playerRepository)
+    public async ValueTask<PlayerInfo> GetAsync(
+        GetPlayerQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var player = await _playerRepository
+        .GetPlayerInfoAsync(query.PlayerCode)
+        .ConfigureAwait(false);
+
+        if (player == null)
         {
-            _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            throw new PlayerNotFoundException("Player not found.");
         }
 
-        public async ValueTask<PlayerInfo> GetAsync(
-            GetPlayerQuery query,
-            CancellationToken cancellationToken = default)
-        {
-            var player = await _playerRepository
-            .GetPlayerInfoAsync(query.PlayerCode)
-            .ConfigureAwait(false);
-
-            if (player == null)
-            {
-                throw new PlayerNotFoundException("Player not found.");
-            }
-
-            return player;
-        }
+        return player;
     }
 }

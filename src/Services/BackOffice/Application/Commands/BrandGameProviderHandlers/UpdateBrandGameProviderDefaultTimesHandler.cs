@@ -7,28 +7,27 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGameProviderSchedule;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameProviderHandlers;
+
+public class UpdateBrandGameProviderDefaultTimesHandler : Handler<UpdateDefaultTimesRequest, MessageResponse>
 {
-    public class UpdateBrandGameProviderDefaultTimesHandler : Handler<UpdateDefaultTimesRequest, MessageResponse>
+    private readonly IBrandGameProviderScheduleService _service;
+
+    public UpdateBrandGameProviderDefaultTimesHandler(IBrandGameProviderScheduleService service,
+        IHttpContextAccessor accessor) : base(accessor)
     {
-        private readonly IBrandGameProviderScheduleService _service;
+        _service = service;
+    }
 
-        public UpdateBrandGameProviderDefaultTimesHandler(IBrandGameProviderScheduleService service,
-            IHttpContextAccessor accessor) : base(accessor)
-        {
-            _service = service;
-        }
+    public override async Task<MessageResponse> Handle(UpdateDefaultTimesRequest request,
+        CancellationToken cancellationToken)
+    {
+        var schedules = await _service.GetBrandGameProviderScheduleQueries(q =>
+                q.Where(x => x.BrandGameProviderId == request.BrandGameProviderId && !x.IsDefault))
+            .ToArrayAsync(cancellationToken);
 
-        public override async Task<MessageResponse> Handle(UpdateDefaultTimesRequest request,
-            CancellationToken cancellationToken)
-        {
-            var schedules = await _service.GetBrandGameProviderScheduleQueries(q =>
-                    q.Where(x => x.BrandGameProviderId == request.BrandGameProviderId && !x.IsDefault))
-                .ToArrayAsync(cancellationToken);
+        await _service.UpdateBrandGameProviderDefaultTimesAsync(schedules, request);
 
-            await _service.UpdateBrandGameProviderDefaultTimesAsync(schedules, request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

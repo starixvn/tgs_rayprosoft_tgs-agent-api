@@ -12,65 +12,64 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
+namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming;
+
+public sealed class AsiaGamingStartup : BaseStartup
 {
-    public sealed class AsiaGamingStartup : BaseStartup
+    protected override string LogPrefix => "asiagaming";
+
+    public AsiaGamingStartup(IConfiguration configuration, IWebHostEnvironment env)
+                : base(configuration, env)
     {
-        protected override string LogPrefix => "asiagaming";
+    }
 
-        public AsiaGamingStartup(IConfiguration configuration, IWebHostEnvironment env)
-                    : base(configuration, env)
-        {
-        }
-
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(AsiaGamingErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.AsiaGaming => provider.GetRequiredService<AsiaGamingErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                }
-            );
-
-            services.AddScoped<AuthorizeAsiaGamingMiddleware>();
-            services.AddScoped<HandleAsiaGamingExceptionMiddleware>();
-
-            services.AddScoped<IAsiaGamingServices, AsiaGamingServices>();
-            services.AddSingleton<IAsiaGamingActionModelMapper, AsiaGamingActionModelMapper>();
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(AsiaGamingGameHistory)
-            }, (provider, _) =>
-                provider.GetRequiredService<AsiaGamingGameHistory>());
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+                typeof(AsiaGamingErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(AsiaGamingGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<AsiaGamingGameInitializer>());
+                GameProvider.AsiaGaming => provider.GetRequiredService<AsiaGamingErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            }
+        );
 
-            services.AddTransient<IAsiaGamingDataStore>(sp =>
-                ActivatorUtilities.CreateInstance<AsiaGamingRedisDataStore>(
-                    sp,
-                    sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-        }
+        services.AddScoped<AuthorizeAsiaGamingMiddleware>();
+        services.AddScoped<HandleAsiaGamingExceptionMiddleware>();
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<IAsiaGamingServices, AsiaGamingServices>();
+        services.AddSingleton<IAsiaGamingActionModelMapper, AsiaGamingActionModelMapper>();
+
+        services.AddScopedWithResolver<IGameHistory>(new[]
         {
-            const string Route = "/api/ag";
+            typeof(AsiaGamingGameHistory)
+        }, (provider, _) =>
+            provider.GetRequiredService<AsiaGamingGameHistory>());
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleAsiaGamingExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeAsiaGamingMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IGameInitializer>(new[]
+        {
+            typeof(AsiaGamingGameInitializer)
+        }, (provider, _) =>
+            provider.GetRequiredService<AsiaGamingGameInitializer>());
+
+        services.AddTransient<IAsiaGamingDataStore>(sp =>
+            ActivatorUtilities.CreateInstance<AsiaGamingRedisDataStore>(
+                sp,
+                sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/ag";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleAsiaGamingExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeAsiaGamingMiddleware>();
+            });
     }
 }

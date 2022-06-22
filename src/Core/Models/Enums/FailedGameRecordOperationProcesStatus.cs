@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Core.Models.Enums
+namespace TGS.Core.Models.Enums;
+
+public enum FailedGameRecordOperationProcesStatus
 {
-    public enum FailedGameRecordOperationProcesStatus
-    {
-        Process = 1,
-        ProcessSuccess,
-        ProcessFailed
-    }
+    Process = 1,
+    ProcessSuccess,
+    ProcessFailed
 }

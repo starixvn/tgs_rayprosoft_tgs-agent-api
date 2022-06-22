@@ -1,9 +1,17 @@
-﻿using MediatR;
-using TGS.Core.Models.Messages;
+﻿#nullable enable
 
-namespace TGS.Services.BackOffice.Application.Models.PlayerBank
+using System;
+using System.Text.Json;
+
+namespace TGS.Services.BackOffice.Application.Models.PlayerBank;
+
+public class CreatePlayerBankRequest
 {
-    public class CreatePlayerBankRequest : PlayerBankRequest, IRequest<MessageResponse>
-    {
-    }
+    public string BankType { get; init; } = default!;
+
+    public Guid BrandId { get; init; } = default!;
+
+    public JsonDocument Detail { get; init; } = default!;
+
+    public Guid PaymentChannelId { get; init; } = default!;
 }

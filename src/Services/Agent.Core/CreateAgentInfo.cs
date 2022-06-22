@@ -1,11 +1,10 @@
-﻿namespace TGS.Services.Agent
+﻿namespace TGS.Services.Agent;
+
+public class CreateAgentInfo
 {
-    public class CreateAgentInfo
-    {
-        public string AgentId { get; init; } = default!;
+    public string AgentId { get; init; } = default!;
 
-        public bool IsNew { get; init; }
+    public bool IsNew { get; init; }
 
-        public string Message { get; init; } = default!;
-    }
+    public string Message { get; init; } = default!;
 }

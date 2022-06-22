@@ -13,41 +13,40 @@ using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
+namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
+
+public sealed class HandleSBOBETExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
 {
-    public sealed class HandleSBOBETExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
+    private const string _GameProviderCode = Consts.GameProvider.SBOBET;
+    private readonly IGamePlayActions _actions;
+
+    public HandleSBOBETExceptionMiddleware(
+        Func<string, IErrorMapper> mapper,
+        ITgsLog log,
+        IGamePlayActions actions)
+        : base(mapper, _GameProviderCode, log, "sbo")
     {
-        private const string _GameProviderCode = Consts.GameProvider.SBOBET;
-        private readonly IGamePlayActions _actions;
+        _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+    }
 
-        public HandleSBOBETExceptionMiddleware(
-            Func<string, IErrorMapper> mapper,
-            ITgsLog log,
-            IGamePlayActions actions)
-            : base(mapper, _GameProviderCode, log, "sbo")
+    protected override async Task CreateResponseAsync(
+        HttpContext context, int statusCode, int errorCode, Exception exception)
+    {
+        var error = (GameApiError)errorCode;
+        var message = ErrorMapper.GetMessageByException(exception);
+        var desc = error.Description(message);
+
+        var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
+
+        var res = new BaseResponse
         {
-            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-        }
+            ErrorCode = (int)error,
+            ErrorMessage = desc,
+            PlayerCode = request.PlayerCode,
+            Balance = 0
+        };
 
-        protected override async Task CreateResponseAsync(
-            HttpContext context, int statusCode, int errorCode, Exception exception)
-        {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
-            var desc = error.Description(message);
-
-            var request = await context.Request.ReadAsObjectFromJsonAsync<BaseRequest>();
-
-            var res = new BaseResponse
-            {
-                ErrorCode = (int)error,
-                ErrorMessage = desc,
-                PlayerCode = request.PlayerCode,
-                Balance = 0
-            };
-
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(res);
-        }
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(res);
     }
 }

@@ -9,48 +9,47 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
+namespace TGS.Apis.BackendOffice.Controllers.BrandPayment;
+
+[Route("api/[controller]")]
+[ApiController]
+public class PaymentController : BaseContextController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PaymentController : BaseContextController
+    /// <summary>
+    /// Creates the payment.
+    /// </summary>
+    /// <param name="createService">The create service.</param>
+    /// <param name="request">The request.</param>
+    /// <returns></returns>
+    [HttpPut]
+    public ValueTask CreatePaymentAsync(
+        [FromServices] ICommandService<CreatePaymentCommand> createService,
+        [FromBody] CreatePaymentRequest request)
     {
-        /// <summary>
-        /// Creates the payment.
-        /// </summary>
-        /// <param name="createService">The create service.</param>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        [HttpPut]
-        public ValueTask CreatePaymentAsync(
-            [FromServices] ICommandService<CreatePaymentCommand> createService,
-            [FromBody] CreatePaymentRequest request)
-        {
-            var command = new CreatePaymentCommand(
-                request.Code,
-                request.Description,
-                request.ExtendedData);
+        var command = new CreatePaymentCommand(
+            request.Code,
+            request.Description,
+            request.ExtendedData);
 
-            return createService.ExecuteAsync(command);
-        }
+        return createService.ExecuteAsync(command);
+    }
 
-        [HttpGet]
-        [Description("Get Payments")]
-        public GenericResponse<IEnumerable<PaymentModel>> GetAllPayments(
-            [FromServices] IQueryService<AllPaymentQuery, PaymentInfo> queryService)
+    [HttpGet]
+    [Description("Get Payments")]
+    public GenericResponse<IEnumerable<PaymentModel>> GetAllPayments(
+        [FromServices] IQueryService<AllPaymentQuery, PaymentInfo> queryService)
+    {
+        return new GenericResponse<IEnumerable<PaymentModel>>
         {
-            return new GenericResponse<IEnumerable<PaymentModel>>
-            {
-                Valid = true,
-                Data = queryService.QueryAsync(new AllPaymentQuery())
-                    .Select(p => new PaymentModel
-                    {
-                        Id = p.Id,
-                        Name = p.Code,
-                        Code = p.Code
-                    })
-                    .ToEnumerable()
-            };
-        }
+            Valid = true,
+            Data = queryService.QueryAsync(new AllPaymentQuery())
+                .Select(p => new PaymentModel
+                {
+                    Id = p.Id,
+                    Name = p.Code,
+                    Code = p.Code
+                })
+                .ToEnumerable()
+        };
     }
 }

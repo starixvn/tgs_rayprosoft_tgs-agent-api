@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandToken
+namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandToken;
+
+public class GetBrandTokenResponse : MessageResponse
 {
-    public class GetBrandTokenResponse : MessageResponse
-    {
-        public string Token { get; init; }
-    }
+    public string Token { get; init; }
 }

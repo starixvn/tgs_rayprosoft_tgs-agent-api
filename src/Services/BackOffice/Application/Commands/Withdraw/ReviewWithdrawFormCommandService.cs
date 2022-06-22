@@ -5,67 +5,66 @@ using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Commands.Withdraw
+namespace TGS.Services.BackOffice.Application.Commands.Withdraw;
+
+internal class ReviewWithdrawFormCommandService : ICommandService<ReviewWithdrawFormCommand>
 {
-    internal class ReviewWithdrawFormCommandService : ICommandService<ReviewWithdrawFormCommand>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+    private readonly IWalletExchangeService _walletExchangeService;
+
+    public ReviewWithdrawFormCommandService(
+        IPaymentServiceClient paymentServiceClient,
+        IWalletExchangeService walletExchangeService)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
-        private readonly IWalletExchangeService _walletExchangeService;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+        _walletExchangeService = walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));
+    }
 
-        public ReviewWithdrawFormCommandService(
-            IPaymentServiceClient paymentServiceClient,
-            IWalletExchangeService walletExchangeService)
+    public async ValueTask ExecuteAsync(
+        ReviewWithdrawFormCommand command, CancellationToken cancellationToken = default)
+    {
+        var formData = await _paymentServiceClient
+            .GetWithdrawFormAsync(command.BrandId, command.FormId)
+            .ConfigureAwait(false);
+
+        var fsm = _paymentServiceClient.CreateWithdrawStateMachine(formData.Status);
+
+        if (command.Status == ReviewState.Approve)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-            _walletExchangeService = walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));
+            if (!fsm.CanFire(PaymentTrigger.Approve))
+                return;
+
+            await _paymentServiceClient
+                .ReviewWithdrawFormAsync(
+                    command.FormId,
+                    command.BrandPaymentId.Value,
+                    command.Status,
+                    command.ReviewUserId,
+                    command.ReviewUserName,
+                    command.Remark)
+                .ConfigureAwait(false);
         }
-
-        public async ValueTask ExecuteAsync(
-            ReviewWithdrawFormCommand command, CancellationToken cancellationToken = default)
+        else
         {
-            var formData = await _paymentServiceClient
-                .GetWithdrawFormAsync(command.BrandId, command.FormId)
+            if (!fsm.CanFire(PaymentTrigger.Reject))
+                return;
+
+            await _paymentServiceClient
+                .ReviewWithdrawFormAsync(
+                    command.FormId,
+                    command.BrandPaymentId,
+                    command.Status,
+                    command.ReviewUserId,
+                    command.ReviewUserName,
+                    command.Remark)
                 .ConfigureAwait(false);
 
-            var fsm = _paymentServiceClient.CreateWithdrawStateMachine(formData.Status);
-
-            if (command.Status == ReviewState.Approve)
-            {
-                if (!fsm.CanFire(PaymentTrigger.Approve))
-                    return;
-
-                await _paymentServiceClient
-                    .ReviewWithdrawFormAsync(
-                        command.FormId,
-                        command.BrandPaymentId.Value,
-                        command.Status,
-                        command.ReviewUserId,
-                        command.ReviewUserName,
-                        command.Remark)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                if (!fsm.CanFire(PaymentTrigger.Reject))
-                    return;
-
-                await _paymentServiceClient
-                    .ReviewWithdrawFormAsync(
-                        command.FormId,
-                        command.BrandPaymentId,
-                        command.Status,
-                        command.ReviewUserId,
-                        command.ReviewUserName,
-                        command.Remark)
-                    .ConfigureAwait(false);
-
-                await _walletExchangeService.RollbackWithdrawAsync(
-                    formData.BrandId,
-                    formData.UserType,
-                    formData.UserId,
-                    formData.Amount,
-                    command.ReviewUserId).ConfigureAwait(false);
-            }
+            await _walletExchangeService.RollbackWithdrawAsync(
+                formData.BrandId,
+                formData.UserType,
+                formData.UserId,
+                formData.Amount,
+                command.ReviewUserId).ConfigureAwait(false);
         }
     }
 }

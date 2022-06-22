@@ -19,114 +19,113 @@ using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
+
+internal sealed class SexyGamingServices : ISexyGamingServices
 {
-    internal sealed class SexyGamingServices : ISexyGamingServices
+    private readonly IBrandOperations _brandOperations;
+    private readonly ISexyGamingApiClient _client;
+    private readonly IGameActionQueries _gameActionQueries;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly IJsonSerializationProvider _jsonSerializationProvider;
+    private readonly ILogger<SexyGamingServices> _logger;
+    private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly ITokenProvider _tokenProvider;
+
+    public SexyGamingServices(
+        IGameProviderOperations gameProviderOperations,
+        IGameActionQueries gameActionQueries,
+        IBrandOperations brandOperations,
+        IPlayerOperations playerOperations,
+        ITokenProvider tokenProvider,
+        ISexyGamingApiClient client,
+        ILogger<SexyGamingServices> logger,
+        IJsonSerializationProvider jsonSerializationProvider,
+        IRedisPlayerLoginRecordService playerLoginRecordService
+    )
     {
-        private readonly IBrandOperations _brandOperations;
-        private readonly ISexyGamingApiClient _client;
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly ILogger<SexyGamingServices> _logger;
-        private readonly IRedisPlayerLoginRecordService _playerLoginRecordService;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ITokenProvider _tokenProvider;
+        _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+        _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
+        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
+    }
 
-        public SexyGamingServices(
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries,
-            IBrandOperations brandOperations,
-            IPlayerOperations playerOperations,
-            ITokenProvider tokenProvider,
-            ISexyGamingApiClient client,
-            ILogger<SexyGamingServices> logger,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IRedisPlayerLoginRecordService playerLoginRecordService
-        )
+    public async ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token)
+    {
+        if (token.IsNullOrEmpty())
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _playerLoginRecordService = playerLoginRecordService ?? throw new ArgumentNullException(nameof(playerLoginRecordService));
+            throw new MissingTokenException("empty token");
         }
 
-        public async ValueTask<PlayerLoginRecordModel> DecryptTokenAsync(string token)
+        var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+
+        return await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
+    }
+
+    public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
+                => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+
+    public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
+        Guid gameProviderId, string playerCode, string externalTransactionId)
+        => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
+            .ConfigureAwait(false);
+
+    public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+        Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
+    {
+        var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+            .ConfigureAwait(false);
+
+        return new()
         {
-            if (token.IsNullOrEmpty())
-            {
-                throw new MissingTokenException("empty token");
-            }
+            GameProviderId = gameProviderId,
+            GameProviderConfigurationId = gameProviderConfigurationId,
+            AutoCloseRound = autoCloseRound,
+            PlatformType = platformType
+        };
+    }
 
-            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+    public async ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+    {
+        var cachedBrandGameProviderConfiguration = await _brandOperations
+            .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId).ConfigureAwait(false);
 
-            return await _playerLoginRecordService.GetAsync(loginRecordId).ConfigureAwait(false);
-        }
+        return cachedBrandGameProviderConfiguration.GameProviderConfigurationId;
+    }
 
-        public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
-                    => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+    public async ValueTask<Guid> GetGameProviderIdAsync() => await _gameProviderOperations
+        .GetGameProviderIdByCodeAsync(GameProvider.SexyGaming).ConfigureAwait(false);
 
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
-            Guid gameProviderId, string playerCode, string externalTransactionId)
-            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
-                .ConfigureAwait(false);
+    public async ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(
+        SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
+    {
+        var tryCount = 3;
+        var seconds = 1;
 
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
-            Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
-        {
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                .ConfigureAwait(false);
-
-            return new()
-            {
-                GameProviderId = gameProviderId,
-                GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
-            };
-        }
-
-        public async ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
-        {
-            var cachedBrandGameProviderConfiguration = await _brandOperations
-                .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId).ConfigureAwait(false);
-
-            return cachedBrandGameProviderConfiguration.GameProviderConfigurationId;
-        }
-
-        public async ValueTask<Guid> GetGameProviderIdAsync() => await _gameProviderOperations
-            .GetGameProviderIdByCodeAsync(GameProvider.SexyGaming).ConfigureAwait(false);
-
-        public async ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(
-            SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
-        {
-            var tryCount = 3;
-            var seconds = 1;
-
-            var retryPolicy = Policy.HandleResult<SexyGamingGameUrlResponse>(r
-                    => r.Status.IgnoreCaseEquals(((int)GameApiError.UnableToProceedPleaseTryAgainLater).ToString("d4")))
-                .WaitAndRetryAsync(tryCount,
-                    retryAttempt => TimeSpan.FromSeconds(seconds),
-                    (response, retryTime, context) =>
+        var retryPolicy = Policy.HandleResult<SexyGamingGameUrlResponse>(r
+                => r.Status.IgnoreCaseEquals(((int)GameApiError.UnableToProceedPleaseTryAgainLater).ToString("d4")))
+            .WaitAndRetryAsync(tryCount,
+                retryAttempt => TimeSpan.FromSeconds(seconds),
+                (response, retryTime, context) =>
+                {
+                    var data = new
                     {
-                        var data = new
-                        {
-                            GameProviderCode = GameProvider.SexyGaming,
-                            Request = request,
-                            Response = response,
-                            Delay = retryTime,
-                            CreationTime = DateTimeOffset.UtcNow
-                        };
-                        _logger.LogWarning(_jsonSerializationProvider.SerializeToString(data));
-                    });
+                        GameProviderCode = GameProvider.SexyGaming,
+                        Request = request,
+                        Response = response,
+                        Delay = retryTime,
+                        CreationTime = DateTimeOffset.UtcNow
+                    };
+                    _logger.LogWarning(_jsonSerializationProvider.SerializeToString(data));
+                });
 
-            return await retryPolicy.ExecuteAsync(async ()
-                => await _client.GetGameUrlAsync(configuration, request).ConfigureAwait(false));
-        }
+        return await retryPolicy.ExecuteAsync(async ()
+            => await _client.GetGameUrlAsync(configuration, request).ConfigureAwait(false));
     }
 }

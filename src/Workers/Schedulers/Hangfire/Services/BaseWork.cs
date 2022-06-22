@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace TGS.Workers.Schedulers.Hangfire.Services
-{
-    public abstract class BaseWork<T>
-    {
-        [DisplayName("{0}")]
-        public Task<object> ExecuteWorkerAsync(string name, object context) =>
-            ExecuteAsync(context).ContinueWith(a => (object) a.Result);
+namespace TGS.Workers.Schedulers.Hangfire.Services;
 
-        public abstract Task<T> ExecuteAsync(object context);
-    }
+public abstract class BaseWork<T>
+{
+    [DisplayName("{0}")]
+    public Task<object> ExecuteWorkerAsync(string name, object context) =>
+        ExecuteAsync(context).ContinueWith(a => (object) a.Result);
+
+    public abstract Task<T> ExecuteAsync(object context);
 }

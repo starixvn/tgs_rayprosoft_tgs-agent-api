@@ -1,8 +1,7 @@
 ﻿using MediatR;
 
-namespace TGS.Apis.AgentApi.Models
+namespace TGS.Apis.AgentApi.Models;
+
+public record LogoutRequest : IRequest<LogoutResponse>
 {
-    public record LogoutRequest : IRequest<LogoutResponse>
-    {
-    }
 }

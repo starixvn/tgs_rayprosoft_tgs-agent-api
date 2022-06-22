@@ -1,9 +1,8 @@
 ﻿using StackExchange.Redis;
 
-namespace TGS.Core.Infrastructures.Redis
+namespace TGS.Core.Infrastructures.Redis;
+
+public interface IRedisConnectionFactory
 {
-    public interface IRedisConnectionFactory
-    {
-        public IConnectionMultiplexer GetConnection();
-    }
+    public IConnectionMultiplexer GetConnection();
 }

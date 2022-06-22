@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.GameProviders.Repositories.Models.ScheduleConfig.BigGaming
+namespace TGS.GameProviders.Repositories.Models.ScheduleConfig.BigGaming;
+
+public record BigGamingGameProviderScheduleConfig
 {
-    public record BigGamingGameProviderScheduleConfig
-    {
-        public decimal IntervalMinuteMax { get; set; }
-        public decimal IntervalMinute { get; set; }
-        public DateTimeOffset StartTime { get; set; }
-        public DateTimeOffset EndTime { get; set; }
-        public DateTimeOffset LastGameRecordTime { get; set; }
-    }
+    public decimal IntervalMinuteMax { get; set; }
+    public decimal IntervalMinute { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public DateTimeOffset EndTime { get; set; }
+    public DateTimeOffset LastGameRecordTime { get; set; }
 }

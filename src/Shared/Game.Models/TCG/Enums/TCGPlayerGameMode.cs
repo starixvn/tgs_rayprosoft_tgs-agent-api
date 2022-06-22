@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.TCG.Enums
+namespace TGS.Shared.Game.Models.TCG.Enums;
+
+public enum TCGPlayerGameMode
 {
-    public enum TCGPlayerGameMode
-    {
-        /// <summary>
-        /// The trial player
-        /// </summary>
-        TrialPlayer = 0,
-        /// <summary>
-        /// The real player
-        /// </summary>
-        RealPlayer = 1
-    }
+    /// <summary>
+    /// The trial player
+    /// </summary>
+    TrialPlayer = 0,
+    /// <summary>
+    /// The real player
+    /// </summary>
+    RealPlayer = 1
 }

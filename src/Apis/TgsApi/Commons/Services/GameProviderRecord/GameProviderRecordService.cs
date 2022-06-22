@@ -6,38 +6,37 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 
-namespace TGS.Apis.TgsApi.Commons.Services.GameProviderRecord
+namespace TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
+
+public interface IGameProviderRecordService
 {
-    public interface IGameProviderRecordService
+    ValueTask<(Player Player, Guid? GameProviderConfigurationId)> GetPlayerInfoAsync(Guid gameProviderId, string playerCode);
+}
+public class GameProviderRecordService : IGameProviderRecordService
+{
+    private readonly IPlayerOperations _playerOperations;
+    private readonly IBrandOperations _brandOperations;
+    private readonly IGameProviderOperations _gameProviderOperations;
+
+    public GameProviderRecordService(
+        IPlayerOperations playerOperations,
+        IBrandOperations brandOperations,
+        IGameProviderOperations gameProviderOperations)
     {
-        ValueTask<(Player Player, Guid? GameProviderConfigurationId)> GetPlayerInfoAsync(Guid gameProviderId, string playerCode);
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
     }
-    public class GameProviderRecordService : IGameProviderRecordService
+
+    async ValueTask<(Player Player, Guid? GameProviderConfigurationId)> IGameProviderRecordService.GetPlayerInfoAsync(Guid gameProviderId, string playerCode)
     {
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-
-        public GameProviderRecordService(
-            IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations)
+        var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
+        if (player == null)
         {
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            return (null, null);
         }
+        var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
 
-        async ValueTask<(Player Player, Guid? GameProviderConfigurationId)> IGameProviderRecordService.GetPlayerInfoAsync(Guid gameProviderId, string playerCode)
-        {
-            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-            if (player == null)
-            {
-                return (null, null);
-            }
-            var gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
-
-            return (player, gameProviderConfigurationId);
-        }
+        return (player, gameProviderConfigurationId);
     }
 }

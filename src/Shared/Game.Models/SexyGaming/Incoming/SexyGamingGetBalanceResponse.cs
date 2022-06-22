@@ -6,13 +6,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Incoming
+namespace TGS.Shared.Game.Models.SexyGaming.Incoming;
+
+public record SexyGamingGetBalanceResponse : SexyGamingBaseResponse
 {
-    public record SexyGamingGetBalanceResponse : SexyGamingBaseResponse
-    {
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; set; }
-        [JsonPropertyName("balanceTs")]
-        public string BalanceTs { get; set; }
-    }
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+    [JsonPropertyName("balanceTs")]
+    public string BalanceTs { get; set; }
 }

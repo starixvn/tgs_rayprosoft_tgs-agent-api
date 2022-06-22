@@ -12,65 +12,64 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming;
+
+public sealed class SexyGamingStartup : BaseStartup
 {
-    public sealed class SexyGamingStartup : BaseStartup
+    protected override string LogPrefix => "sexygaming";
+
+    public SexyGamingStartup(IConfiguration configuration, IWebHostEnvironment env) :
+                base(configuration, env)
     {
-        protected override string LogPrefix => "sexygaming";
+    }
 
-        public SexyGamingStartup(IConfiguration configuration, IWebHostEnvironment env) :
-                    base(configuration, env)
-        {
-        }
-
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(SexyGamingErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.SexyGaming => provider.GetRequiredService<SexyGamingErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
-
-            services.AddScoped<AuthorizeSexyGamingMiddleware>();
-            services.AddScoped<HandleSexyGamingExceptionMiddleware>();
-            services.AddScoped<ISexyGamingServices, SexyGamingServices>();
-            services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
-            services.AddScoped<ISexyGamingRedisCacheService, SexyGamingRedisCacheService>();
-            services.AddScoped<ISexyGamingGameHistoryService, SexyGamingGameHistoryService>();
-
-            services.AddTransient<ISexyGamingRedisCacheService>(sp
-              => ActivatorUtilities.CreateInstance<SexyGamingRedisCacheService>(
-                  sp,
-                  sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(SexyGamingGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<SexyGamingGameInitializer>());
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
+                typeof(SexyGamingErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(SexyGamingGameHistory)
-            }, (provider, _) =>
-                provider.GetRequiredService<SexyGamingGameHistory>());
-        }
+                GameProvider.SexyGaming => provider.GetRequiredService<SexyGamingErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<AuthorizeSexyGamingMiddleware>();
+        services.AddScoped<HandleSexyGamingExceptionMiddleware>();
+        services.AddScoped<ISexyGamingServices, SexyGamingServices>();
+        services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
+        services.AddScoped<ISexyGamingRedisCacheService, SexyGamingRedisCacheService>();
+        services.AddScoped<ISexyGamingGameHistoryService, SexyGamingGameHistoryService>();
+
+        services.AddTransient<ISexyGamingRedisCacheService>(sp
+          => ActivatorUtilities.CreateInstance<SexyGamingRedisCacheService>(
+              sp,
+              sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/api/sg";
+            typeof(SexyGamingGameInitializer)
+        }, (provider, _) =>
+            provider.GetRequiredService<SexyGamingGameInitializer>());
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleSexyGamingExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeSexyGamingMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IGameHistory>(new[]
+        {
+            typeof(SexyGamingGameHistory)
+        }, (provider, _) =>
+            provider.GetRequiredService<SexyGamingGameHistory>());
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/sg";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleSexyGamingExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeSexyGamingMiddleware>();
+            });
     }
 }

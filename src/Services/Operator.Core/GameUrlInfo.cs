@@ -1,4 +1,3 @@
-﻿namespace TGS.Services.Operator
-{
-    public record GameUrlInfo(int Error, string ErrorMessage, string Url);
-}
+﻿namespace TGS.Services.Operator;
+
+public record GameUrlInfo(int Error, string ErrorMessage, string Url);

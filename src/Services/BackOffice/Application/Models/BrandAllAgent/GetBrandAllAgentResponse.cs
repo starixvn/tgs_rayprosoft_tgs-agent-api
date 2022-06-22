@@ -1,9 +1,8 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent
-{
-    public record GetBrandAllAgentResponse
-    {
-        public bool Switch { get; set; }
+﻿namespace TGS.Services.BackOffice.Application.Models.BrandAllAgent;
 
-        public BrandAllAgentGameTypeModel[] BrandAllAgentGameTypes { get; set; }
-    }
+public record GetBrandAllAgentResponse
+{
+    public bool Switch { get; set; }
+
+    public BrandAllAgentGameTypeModel[] BrandAllAgentGameTypes { get; set; }
 }

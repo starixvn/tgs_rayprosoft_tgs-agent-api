@@ -2,12 +2,11 @@
 using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.BrandAgentDividend
-{
-    public class UpdateBrandAgentDividendConditionRequest : IRequest<MessageResponse>
-    {
-        public Guid BrandId { get; set; }
+namespace TGS.Services.BackOffice.Application.Models.BrandAgentDividend;
 
-        public BrandAgentDividendConditionModel[] BrandAgentDividendConditions { get; init; }
-    }
+public class UpdateBrandAgentDividendConditionRequest : IRequest<MessageResponse>
+{
+    public Guid BrandId { get; set; }
+
+    public BrandAgentDividendConditionModel[] BrandAgentDividendConditions { get; init; }
 }

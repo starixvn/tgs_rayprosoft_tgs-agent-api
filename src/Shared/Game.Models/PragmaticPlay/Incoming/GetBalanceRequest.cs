@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
+namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming;
+
+public record GetBalanceRequest : TokenRequest
 {
-    public record GetBalanceRequest : TokenRequest
-    {
-        [JsonPropertyName("userId")]
-        public string UserId { get; init; }
-    }
+    [JsonPropertyName("userId")]
+    public string UserId { get; init; }
 }

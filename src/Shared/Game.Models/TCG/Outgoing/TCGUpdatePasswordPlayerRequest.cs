@@ -2,18 +2,17 @@
 using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.TCG.Common;
 
-namespace TGS.Shared.Game.Models.TCG.Outgoing
+namespace TGS.Shared.Game.Models.TCG.Outgoing;
+
+public record TCGUpdatePasswordPlayerRequest
 {
-    public record TCGUpdatePasswordPlayerRequest
-    {
-        [Required]
-        [JsonPropertyName("method")]
-        public string Method => "up";
-        [Required]
-        [JsonPropertyName("username")]
-        public string UserName { get; init; }
-        [Required]
-        [JsonPropertyName("password")]
-        public string Password { get; init; }
-    }
+    [Required]
+    [JsonPropertyName("method")]
+    public string Method => "up";
+    [Required]
+    [JsonPropertyName("username")]
+    public string UserName { get; init; }
+    [Required]
+    [JsonPropertyName("password")]
+    public string Password { get; init; }
 }

@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.Operator
+﻿namespace TGS.Services.Operator;
+
+public class BetConstructHtmlContentInfo
 {
-    public class BetConstructHtmlContentInfo
-    {
-        public string Html { get; init; } = default!;
-    }
+    public string Html { get; init; } = default!;
 }

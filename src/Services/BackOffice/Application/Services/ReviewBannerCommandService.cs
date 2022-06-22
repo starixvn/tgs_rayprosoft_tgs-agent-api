@@ -4,22 +4,21 @@ using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Services
+namespace TGS.Services.BackOffice.Application.Services;
+
+internal class ReviewBannerCommandService : ICommandService<ReviewBannerCommand>
 {
-    internal class ReviewBannerCommandService : ICommandService<ReviewBannerCommand>
+    private readonly IBackOfficeRepository _backOfficeRepository;
+
+    public ReviewBannerCommandService(IBackOfficeRepository backOfficeRepository)
     {
-        private readonly IBackOfficeRepository _backOfficeRepository;
-
-        public ReviewBannerCommandService(IBackOfficeRepository backOfficeRepository)
-        {
-            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
-        }
-
-        public ValueTask ExecuteAsync(ReviewBannerCommand command, CancellationToken cancellationToken = default)
-            => _backOfficeRepository.ReviewBannerAsync(
-                command.BannerId,
-                command.ReviewState,
-                command.Remark,
-                command.Reviewer);
+        _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
     }
+
+    public ValueTask ExecuteAsync(ReviewBannerCommand command, CancellationToken cancellationToken = default)
+        => _backOfficeRepository.ReviewBannerAsync(
+            command.BannerId,
+            command.ReviewState,
+            command.Remark,
+            command.Reviewer);
 }

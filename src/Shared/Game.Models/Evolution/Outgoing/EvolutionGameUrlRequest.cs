@@ -2,15 +2,14 @@
 using TGS.Shared.Game.Models.Evolution.Commons;
 using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGameUrl;
 
-namespace TGS.Shared.Game.Models.Evolution.Outgoing
+namespace TGS.Shared.Game.Models.Evolution.Outgoing;
+
+public record EvolutionGameUrlRequest
 {
-    public record EvolutionGameUrlRequest
-    {
-        [JsonPropertyName("uuid")]
-        public string Uuid { get; set; }
-        [JsonPropertyName("player")]
-        public EvolutionGameUrlPlayer Player { get; set; }
-        [JsonPropertyName("config")]
-        public EvolutionGameUrlConfig Config { get; set; }
-    }
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; }
+    [JsonPropertyName("player")]
+    public EvolutionGameUrlPlayer Player { get; set; }
+    [JsonPropertyName("config")]
+    public EvolutionGameUrlConfig Config { get; set; }
 }

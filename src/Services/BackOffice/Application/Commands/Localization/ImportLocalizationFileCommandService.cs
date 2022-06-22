@@ -9,63 +9,62 @@ using ClosedXML.Excel;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Commands.Localization
+namespace TGS.Services.BackOffice.Application.Commands.Localization;
+
+internal class ImportLocalizationFileCommandService : ICommandService<ImportLocalizationFileCommand>
 {
-    internal class ImportLocalizationFileCommandService : ICommandService<ImportLocalizationFileCommand>
+    private readonly IBackOfficeRepository _backOfficeRepository;
+
+    public ImportLocalizationFileCommandService(IBackOfficeRepository backOfficeRepository)
     {
-        private readonly IBackOfficeRepository _backOfficeRepository;
+        _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
+    }
 
-        public ImportLocalizationFileCommandService(IBackOfficeRepository backOfficeRepository)
-        {
-            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
-        }
-
-        public ValueTask ExecuteAsync(ImportLocalizationFileCommand command, CancellationToken cancellationToken = default)
-            => _backOfficeRepository.ImportLocalizationStringsAsync(
+    public ValueTask ExecuteAsync(ImportLocalizationFileCommand command, CancellationToken cancellationToken = default)
+        => _backOfficeRepository.ImportLocalizationStringsAsync(
+            command.SystemCode,
+            ReadLocalizationFileAsync(
                 command.SystemCode,
-                ReadLocalizationFileAsync(
-                    command.SystemCode,
-                    command.FileStream).ToEnumerable());
+                command.FileStream).ToEnumerable());
 
-        private async IAsyncEnumerable<LocalizationStringInfo> ReadLocalizationFileAsync(string systemCode, Stream fileStream)
+    private async IAsyncEnumerable<LocalizationStringInfo> ReadLocalizationFileAsync(string systemCode, Stream fileStream)
+    {
+        using var reader = new XLWorkbook(fileStream);
+
+        foreach (var sheet in reader.Worksheets)
         {
-            using var reader = new XLWorkbook(fileStream);
+            if (!TryGetCultureInfo(sheet.Name, out var cultureInfo))
+                continue;
 
-            foreach (var sheet in reader.Worksheets)
+            var cultureCode = cultureInfo.Name;
+
+            var index = 2;
+            var messageId = sheet.Cell(index, 1).GetFormattedString();
+
+            while (!string.IsNullOrWhiteSpace(messageId))
             {
-                if (!TryGetCultureInfo(sheet.Name, out var cultureInfo))
-                    continue;
+                var text = sheet.Cell(index, 2).GetFormattedString();
 
-                var cultureCode = cultureInfo.Name;
+                yield return new LocalizationStringInfo(systemCode, cultureCode, messageId, text);
 
-                var index = 2;
-                var messageId = sheet.Cell(index, 1).GetFormattedString();
-
-                while (!string.IsNullOrWhiteSpace(messageId))
-                {
-                    var text = sheet.Cell(index, 2).GetFormattedString();
-
-                    yield return new LocalizationStringInfo(systemCode, cultureCode, messageId, text);
-
-                    messageId = sheet.Cell(++index, 1).GetFormattedString();
-                }
+                messageId = sheet.Cell(++index, 1).GetFormattedString();
             }
-
-            await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        private bool TryGetCultureInfo(string cultureCode, out CultureInfo cultureInfo)
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
+
+    private bool TryGetCultureInfo(string cultureCode, out CultureInfo cultureInfo)
+    {
+        try
         {
-            try
-            {
-                cultureInfo = CultureInfo.GetCultureInfo(cultureCode);
-                return true;
-            }
-            catch
-            {
-                cultureInfo = null;
-                return false;
-            }
+            cultureInfo = CultureInfo.GetCultureInfo(cultureCode);
+            return true;
+        }
+        catch
+        {
+            cultureInfo = null;
+            return false;
         }
     }
 }

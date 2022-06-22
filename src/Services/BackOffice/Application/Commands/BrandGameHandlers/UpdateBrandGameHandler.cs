@@ -8,40 +8,39 @@ using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
+namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers;
+
+public class UpdateBrandGameHandler : Handler<UpdateBrandGameRequest, MessageResponse>
 {
-    public class UpdateBrandGameHandler : Handler<UpdateBrandGameRequest, MessageResponse>
+    private readonly IRedisCacheManager _cacheManager;
+    private readonly IBrandGameService _service;
+
+    public UpdateBrandGameHandler(
+        IBrandGameService service,
+        IHttpContextAccessor accessor,
+        IRedisCacheManager cacheManager)
+        : base(accessor)
     {
-        private readonly IRedisCacheManager _cacheManager;
-        private readonly IBrandGameService _service;
+        _service = service;
+        _cacheManager = cacheManager;
+    }
 
-        public UpdateBrandGameHandler(
-            IBrandGameService service,
-            IHttpContextAccessor accessor,
-            IRedisCacheManager cacheManager)
-            : base(accessor)
+    public override async Task<MessageResponse> Handle(UpdateBrandGameRequest request,
+        CancellationToken cancellationToken)
+    {
+        var brandGame = await _service.GetBrandGameAsync(q => q.Id == request.Id);
+
+        if (brandGame == null)
         {
-            _service = service;
-            _cacheManager = cacheManager;
+            return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
         }
 
-        public override async Task<MessageResponse> Handle(UpdateBrandGameRequest request,
-            CancellationToken cancellationToken)
-        {
-            var brandGame = await _service.GetBrandGameAsync(q => q.Id == request.Id);
+        brandGame.EffectiveBettingPercentage = request.EffectiveBettingPercentage;
+        brandGame.Rebate = request.Rebate;
 
-            if (brandGame == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(BrandGame.NotFound);
-            }
+        await _service.UpdateBrandGameAsync(brandGame);
+        await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brandGame.BrandId, true);
 
-            brandGame.EffectiveBettingPercentage = request.EffectiveBettingPercentage;
-            brandGame.Rebate = request.Rebate;
-
-            await _service.UpdateBrandGameAsync(brandGame);
-            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brandGame.BrandId, true);
-
-            return CreateValidResponse<MessageResponse>();
-        }
+        return CreateValidResponse<MessageResponse>();
     }
 }

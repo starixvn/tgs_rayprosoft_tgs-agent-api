@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
 using System;
 
-namespace TGS.Services.Operator.ApplicationServices.Withdraw
+namespace TGS.Services.Operator.ApplicationServices.Withdraw;
+
+public record CheckWithdrawPayPasswordCommand(
+    string PlayerCode,
+    string PayPassword)
 {
-    public record CheckWithdrawPayPasswordCommand(
-        string PlayerCode,
-        string PayPassword)
-    {
-        public TaskCompletionSource<bool> ReturnSource { get; } = new TaskCompletionSource<bool>();
-    }
+    public TaskCompletionSource<bool> ReturnSource { get; } = new TaskCompletionSource<bool>();
 }

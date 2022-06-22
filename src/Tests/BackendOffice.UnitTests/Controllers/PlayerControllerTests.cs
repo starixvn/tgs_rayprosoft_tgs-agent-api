@@ -15,236 +15,235 @@ using Tgs.Promotion.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 
-namespace TGS.Tests.BackendOffice.UnitTests.Controllers
+namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
+
+[TestFixture]
+[Parallelizable]
+public class PlayerControllerTests : BaseTests
 {
-    [TestFixture]
-    [Parallelizable]
-    public class PlayerControllerTests : BaseTests
+    private readonly Mock<IMediator> _mediatorMock = new();
+
+    private readonly Mock<IPromotionClient> _promotionClientMock = new();
+
+    private PlayerController _controller = default!;
+
+    [Test]
+    public async Task Can_Get_Player()
     {
-        private readonly Mock<IMediator> _mediatorMock = new();
+        var fixture = new Fixture();
+        var player = CreatePlayersModelFixture().Create<PlayerModel>();
 
-        private readonly Mock<IPromotionClient> _promotionClientMock = new();
-
-        private PlayerController _controller = default!;
-
-        [Test]
-        public async Task Can_Get_Player()
-        {
-            var fixture = new Fixture();
-            var player = CreatePlayersModelFixture().Create<PlayerModel>();
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetPlayerResponse
-                {
-                    Valid = true,
-                    Player = player
-                });
-
-            var response = await _controller.GetSingleAsync(It.IsAny<string>());
-
-            response.Valid.Should().BeTrue();
-            response.Player.Status.Should().Be(player.Status);
-            response.Player.Username.Should().Be(player.Username);
-            response.Player.RealName.Should().Be(player.RealName);
-            response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
-            response.Player.AgentUsername.Should().Be(player.AgentUsername);
-            response.Player.Balance.Should().Be(player.Balance);
-            response.Player.Phone.Should().Be(player.Phone);
-            response.Player.Email.Should().Be(player.Email);
-            response.Player.QQ.Should().Be(player.QQ);
-            response.Player.WeChat.Should().Be(player.WeChat);
-            response.Player.FacebookMessenger.Should().Be(player.FacebookMessenger);
-            response.Player.Viber.Should().Be(player.Viber);
-            response.Player.Line.Should().Be(player.Line);
-            response.Player.Telegram.Should().Be(player.Telegram);
-            response.Player.WhatsApp.Should().Be(player.WhatsApp);
-
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Player_Operations(bool showAll)
-        {
-            var playerCode = Generator.RandomString(12);
-
-            var request = new GetPlayerOperationRequest
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetPlayerResponse
             {
-                Page = 1,
-                Rows = 10,
-                SortBy = "CreatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
+                Valid = true,
+                Player = player
+            });
 
-            var fixture = new Fixture();
-            var list = fixture
-                .CreateMany<PlayerOperationModel>(105)
-                .AsQueryable()
-                .BuildMock();
+        var response = await _controller.GetSingleAsync(It.IsAny<string>());
 
-            var (skip, take) = GetPage(request);
-            var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
+        response.Valid.Should().BeTrue();
+        response.Player.Status.Should().Be(player.Status);
+        response.Player.Username.Should().Be(player.Username);
+        response.Player.RealName.Should().Be(player.RealName);
+        response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
+        response.Player.AgentUsername.Should().Be(player.AgentUsername);
+        response.Player.Balance.Should().Be(player.Balance);
+        response.Player.Phone.Should().Be(player.Phone);
+        response.Player.Email.Should().Be(player.Email);
+        response.Player.QQ.Should().Be(player.QQ);
+        response.Player.WeChat.Should().Be(player.WeChat);
+        response.Player.FacebookMessenger.Should().Be(player.FacebookMessenger);
+        response.Player.Viber.Should().Be(player.Viber);
+        response.Player.Line.Should().Be(player.Line);
+        response.Player.Telegram.Should().Be(player.Telegram);
+        response.Player.WhatsApp.Should().Be(player.WhatsApp);
 
-            var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<PlayerOperationModel>
-                {
-                    Valid = true,
-                    Items = expectedPlayers
-                });
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Can_Get_Player_Operations(bool showAll)
+    {
+        var playerCode = Generator.RandomString(12);
 
-            var response = await _controller.GetPlayerOperationsAsync(playerCode, request);
-            response.Valid.Should().BeTrue();
+        var request = new GetPlayerOperationRequest
+        {
+            Page = 1,
+            Rows = 10,
+            SortBy = "CreatedOn",
+            OrderBy = SortOrder.Descending,
+            ShowAll = showAll
+        };
 
-            for (var i = 0; i < response.Items.Length; i++)
+        var fixture = new Fixture();
+        var list = fixture
+            .CreateMany<PlayerOperationModel>(105)
+            .AsQueryable()
+            .BuildMock();
+
+        var (skip, take) = GetPage(request);
+        var orderedPlayers = list.OrderByDescending(p => p.CreatedOn);
+
+        var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PlayerOperationModel>
             {
-                response.Items[i].CreatedOn.Should().Be(expectedPlayers[i].CreatedOn);
-                response.Items[i].CreatedByUsername.Should().Be(expectedPlayers[i].CreatedByUsername);
-                response.Items[i].Operation.Should().Be(expectedPlayers[i].Operation);
-            }
+                Valid = true,
+                Items = expectedPlayers
+            });
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()));
+        var response = await _controller.GetPlayerOperationsAsync(playerCode, request);
+        response.Valid.Should().BeTrue();
+
+        for (var i = 0; i < response.Items.Length; i++)
+        {
+            response.Items[i].CreatedOn.Should().Be(expectedPlayers[i].CreatedOn);
+            response.Items[i].CreatedByUsername.Should().Be(expectedPlayers[i].CreatedByUsername);
+            response.Items[i].Operation.Should().Be(expectedPlayers[i].Operation);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Players(bool showAll)
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()));
+    }
+
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task Can_Get_Players(bool showAll)
+    {
+        var request = new GetPlayersRequest
         {
-            var request = new GetPlayersRequest
+            Page = 1,
+            Rows = 10,
+            SortBy = "Username",
+            OrderBy = SortOrder.Descending,
+            ShowAll = showAll
+        };
+
+        var list = CreatePlayersModelFixture()
+            .CreateMany<PlayersModel>(105)
+            .AsQueryable()
+            .BuildMock();
+
+        var (skip, take) = GetPage(request);
+        var orderedPlayers = list.OrderByDescending(p => p.Username);
+
+        var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PlayersModel>
             {
-                Page = 1,
-                Rows = 10,
-                SortBy = "Username",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
+                Valid = true,
+                Items = expectedPlayers
+            });
 
-            var list = CreatePlayersModelFixture()
-                .CreateMany<PlayersModel>(105)
-                .AsQueryable()
-                .BuildMock();
+        var response = await _controller.GetListAsync(request);
+        response.Valid.Should().BeTrue();
 
-            var (skip, take) = GetPage(request);
-            var orderedPlayers = list.OrderByDescending(p => p.Username);
+        for (var i = 0; i < response.Items.Length; i++)
+        {
+            response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
+            response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
+            response.Items[i].Status.Should().Be(expectedPlayers[i].Status);
+        }
 
-            var expectedPlayers = showAll ? orderedPlayers.ToArray() : orderedPlayers.Skip(skip).Take(take).ToArray();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<PlayersModel>
-                {
-                    Valid = true,
-                    Items = expectedPlayers
-                });
+    [Test]
+    public async Task Cannot_Get_Player_Not_Found()
+    {
+        var playerCode = Generator.RandomString(12);
 
-            var response = await _controller.GetListAsync(request);
-            response.Valid.Should().BeTrue();
-
-            for (var i = 0; i < response.Items.Length; i++)
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetPlayerResponse
             {
-                response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
-                response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
-                response.Items[i].Status.Should().Be(expectedPlayers[i].Status);
-            }
+                Valid = false,
+                Message = Player.NotFound
+            });
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.GetSingleAsync(playerCode);
+        response.Valid.Should().BeFalse();
+        response.Message.Should().Be(Player.NotFound);
 
-        [Test]
-        public async Task Cannot_Get_Player_Not_Found()
-        {
-            var playerCode = Generator.RandomString(12);
+        _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetPlayerResponse
-                {
-                    Valid = false,
-                    Message = Player.NotFound
-                });
+    [Test]
+    public async Task Cannot_Update_Player_Not_Found()
+    {
+        var playerCode = Generator.RandomString(12);
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse
+            {
+                Valid = false,
+                Message = Player.NotFound
+            });
 
-            var response = await _controller.GetSingleAsync(playerCode);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Player.NotFound);
+        var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.UpdateAsync(playerCode, "info", request);
 
-        [Test]
-        public async Task Cannot_Update_Player_Not_Found()
-        {
-            var playerCode = Generator.RandomString(12);
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse
-                {
-                    Valid = false,
-                    Message = Player.NotFound
-                });
+        response.Valid.Should().BeFalse();
+        response.Message.Should().Be(Player.NotFound);
 
-            var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            var response = await _controller.UpdateAsync(playerCode, "info", request);
+    [Test]
+    public async Task Cannot_Update_Player_With_Invalid_Update_Type()
+    {
+        var playerCode = Generator.RandomString(12);
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MessageResponse
+            {
+                Valid = false,
+                Message = Player.UpdateTypeNotFound
+            });
 
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Player.NotFound);
+        var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
-        }
+        var response = await _controller.UpdateAsync(playerCode, "info2", request);
 
-        [Test]
-        public async Task Cannot_Update_Player_With_Invalid_Update_Type()
-        {
-            var playerCode = Generator.RandomString(12);
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse
-                {
-                    Valid = false,
-                    Message = Player.UpdateTypeNotFound
-                });
+        response.Valid.Should().BeFalse();
+        response.Message.Should().Be(Player.UpdateTypeNotFound);
 
-            var request = CreateUpdatePlayerRequestFixture().Create<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>();
+        _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
+    }
 
-            var response = await _controller.UpdateAsync(playerCode, "info2", request);
+    [SetUp]
+    public override void Setup()
+    {
+        base.Setup();
+        _controller = new(
+            _mediatorMock.Object,
+            _promotionClientMock.Object);
+    }
 
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Player.UpdateTypeNotFound);
+    private Fixture CreatePlayersModelFixture()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<PlayerModel>(u => u
+            .With(s => s.Banks, new PlayerModel.BankModel[]
+            {
+            }));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        return fixture;
+    }
 
-            _mediatorMock.Verify(x => x.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()));
-        }
-
-        [SetUp]
-        public override void Setup()
-        {
-            base.Setup();
-            _controller = new(
-                _mediatorMock.Object,
-                _promotionClientMock.Object);
-        }
-
-        private Fixture CreatePlayersModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Customize<PlayerModel>(u => u
-                .With(s => s.Banks, new PlayerModel.BankModel[]
-                {
-                }));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            return fixture;
-        }
-
-        private Fixture CreateUpdatePlayerRequestFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Customize<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>(u => u
-                .With(s => s.Birthdate, new DateOnly()));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            return fixture;
-        }
+    private Fixture CreateUpdatePlayerRequestFixture()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<Apis.BackendOffice.Controllers.Messages.Player.UpdatePlayerRequest>(u => u
+            .With(s => s.Birthdate, new DateOnly()));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        return fixture;
     }
 }

@@ -1,9 +1,8 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.Agent
+namespace TGS.Services.BackOffice.Application.Models.Agent;
+
+public class GetAgentResponse : MessageResponse
 {
-    public class GetAgentResponse : MessageResponse
-    {
-        public AgentModel Agent { get; set; }
-    }
+    public AgentModel Agent { get; set; }
 }

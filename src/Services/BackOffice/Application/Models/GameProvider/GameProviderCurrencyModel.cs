@@ -1,8 +1,7 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.GameProvider
+﻿namespace TGS.Services.BackOffice.Application.Models.GameProvider;
+
+public class GameProviderCurrencyModel
 {
-    public class GameProviderCurrencyModel
-    {
-        public string Code { get; set; }
-        public string GameProviderCurrencyCode { get; set; }
-    }
+    public string Code { get; set; }
+    public string GameProviderCurrencyCode { get; set; }
 }

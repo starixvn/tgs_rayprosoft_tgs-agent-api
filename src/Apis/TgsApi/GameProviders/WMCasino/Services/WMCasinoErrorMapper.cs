@@ -8,65 +8,64 @@ using TGS.Shared.Game.Models.WMCasino.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.WMCasino.Enums.GameApiError;
 
-namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
+namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
+
+public class WMCasinoErrorMapper : IErrorMapper
 {
-    public class WMCasinoErrorMapper : IErrorMapper
-    {
-        private static readonly IReadOnlyDictionary<Type, GameApiError> _ApiErrorByException =
-            new Dictionary<Type, GameApiError>
+    private static readonly IReadOnlyDictionary<Type, GameApiError> _ApiErrorByException =
+        new Dictionary<Type, GameApiError>
+        {
+            { typeof(InvalidCredentialsException), InvalidCredential },
+            { typeof(MissingTokenException), InvalidParameter },
+            { typeof(PlayerLoginExpiredException), UserNotExist },
+            { typeof(PlayerNotFoundException), UserNotExist },
+            { typeof(PlayerDisabledException), SuspendPlayer },
+            { typeof(CountryRestrictedException), SystemError },
+            { typeof(PlayerHasInsufficientFundsException), InsufficientFunds },
+            { typeof(InvalidGameActionException), SystemError },
+            { typeof(InvalidAmountException), InvalidParameter },
+            { typeof(ArgumentException), InvalidParameter },
+            { typeof(ModelBindingException), InvalidParameter },
+            { typeof(FormatException), InvalidParameter },
+            { typeof(BrandUnderMaintenanceException), Maintenance },
+            { typeof(GameProviderUnderMaintenanceException), Maintenance },
+            { typeof(GameUnderMaintenanceException), Maintenance },
+            { typeof(InvalidStatusException), InvalidParameter },
+            { typeof(InvalidOperationException), SystemError }
+        };
+
+    private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
+        _ApiErrorByInvalidGameActionErrorCode =
+            new Dictionary<InvalidGameActionErrorCode, GameApiError>
             {
-                { typeof(InvalidCredentialsException), InvalidCredential },
-                { typeof(MissingTokenException), InvalidParameter },
-                { typeof(PlayerLoginExpiredException), UserNotExist },
-                { typeof(PlayerNotFoundException), UserNotExist },
-                { typeof(PlayerDisabledException), SuspendPlayer },
-                { typeof(CountryRestrictedException), SystemError },
-                { typeof(PlayerHasInsufficientFundsException), InsufficientFunds },
-                { typeof(InvalidGameActionException), SystemError },
-                { typeof(InvalidAmountException), InvalidParameter },
-                { typeof(ArgumentException), InvalidParameter },
-                { typeof(ModelBindingException), InvalidParameter },
-                { typeof(FormatException), InvalidParameter },
-                { typeof(BrandUnderMaintenanceException), Maintenance },
-                { typeof(GameProviderUnderMaintenanceException), Maintenance },
-                { typeof(GameUnderMaintenanceException), Maintenance },
-                { typeof(InvalidStatusException), InvalidParameter },
-                { typeof(InvalidOperationException), SystemError }
+                { Settled, Success },
+                { TransactionNotFound, TransactionIsNotFound },
+                { TransactionBeingCancelledNotFound, TransactionIsNotFound },
+                { TransactionBeingReferencedNotFound, TransactionIsNotFound },
+                { RoundNotFound, RoundIsNotFound },
+                { GameNotFound, GameIsNotFound }
             };
 
-        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
-            _ApiErrorByInvalidGameActionErrorCode =
-                new Dictionary<InvalidGameActionErrorCode, GameApiError>
-                {
-                    { Settled, Success },
-                    { TransactionNotFound, TransactionIsNotFound },
-                    { TransactionBeingCancelledNotFound, TransactionIsNotFound },
-                    { TransactionBeingReferencedNotFound, TransactionIsNotFound },
-                    { RoundNotFound, RoundIsNotFound },
-                    { GameNotFound, GameIsNotFound }
-                };
-
-        int IErrorMapper.GetApiErrorByException(Exception exception)
+    int IErrorMapper.GetApiErrorByException(Exception exception)
+    {
+        if (exception == null)
         {
-            if (exception == null)
-            {
-                return (int)Success;
-            }
-
-            if (exception is InvalidGameActionException e &&
-                _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
-            {
-                return (int)error;
-            }
-
-            var type = exception.GetType();
-            return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
+            return (int)Success;
         }
 
-        int IErrorMapper.GetHttpStatusByException(Exception exception) =>
-            StatusCodes.Status200OK;
+        if (exception is InvalidGameActionException e &&
+            _ApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
+        {
+            return (int)error;
+        }
 
-        string IErrorMapper.GetMessageByException(Exception exception) =>
-            exception.Message;
+        var type = exception.GetType();
+        return _ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
     }
+
+    int IErrorMapper.GetHttpStatusByException(Exception exception) =>
+        StatusCodes.Status200OK;
+
+    string IErrorMapper.GetMessageByException(Exception exception) =>
+        exception.Message;
 }

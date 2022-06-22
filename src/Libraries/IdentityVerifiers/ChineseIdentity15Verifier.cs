@@ -3,29 +3,28 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TGS.IdentityVerifiers
+namespace TGS.IdentityVerifiers;
+
+public class ChineseIdentity15Verifier : IIdentityVerifier
 {
-    public class ChineseIdentity15Verifier : IIdentityVerifier
+    public bool Verify(string id)
     {
-        public bool Verify(string id)
-        {
-            var regex = new Regex(@"\d{15}");
+        var regex = new Regex(@"\d{15}");
 
-            if (!regex.IsMatch(id))
-                return false;
+        if (!regex.IsMatch(id))
+            return false;
 
-            var birthday = "19" + id.Substring(6, 6);
-            var sequence = id.Substring(12, 3);
+        var birthday = "19" + id.Substring(6, 6);
+        var sequence = id.Substring(12, 3);
 
-            if (!DateTime.TryParseExact(
-                birthday,
-                "yyyyMMdd",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out _))
-                return false;
+        if (!DateTime.TryParseExact(
+            birthday,
+            "yyyyMMdd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out _))
+            return false;
 
-            return true;
-        }
+        return true;
     }
 }

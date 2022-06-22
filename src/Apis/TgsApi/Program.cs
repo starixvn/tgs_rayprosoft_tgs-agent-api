@@ -8,62 +8,61 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TGS.Core.Models;
 
-namespace TGS.Apis.TgsApi
+namespace TGS.Apis.TgsApi;
+
+public partial class Program
 {
-    public partial class Program
+    public static IHostBuilder CreateHostBuilder(string[] args)
     {
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ??
-                string.Empty;
+        var gpCode = Environment.GetEnvironmentVariable(Consts.EnvironmentVariable.GameProviderCode) ??
+            string.Empty;
 
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(config =>
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration(config =>
+            {
+                if (!_ConfigFileMap.TryGetValue(gpCode, out var filePath))
                 {
-                    if (!_ConfigFileMap.TryGetValue(gpCode, out var filePath))
+                    throw new ArgumentException($"No configuration file mapping is found of '{gpCode}'");
+                }
+
+                config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", false)
+                    .AddEnvironmentVariables();
+            })
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                if (!_StartupMap.TryGetValue(gpCode, out var startup))
+                {
+                    throw new InvalidOperationException($"No startup configuration is found of '{gpCode}'");
+                }
+
+                webBuilder.UseStartup(startup)
+                    .UseKestrel(options => options.AddServerHeader = false);
+            })
+            .ConfigureLogging((ctx, logging) =>
+            {
+                logging
+                    .AddOpenTelemetry(options =>
                     {
-                        throw new ArgumentException($"No configuration file mapping is found of '{gpCode}'");
-                    }
-
-                    config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", false)
-                        .AddEnvironmentVariables();
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    if (!_StartupMap.TryGetValue(gpCode, out var startup))
-                    {
-                        throw new InvalidOperationException($"No startup configuration is found of '{gpCode}'");
-                    }
-
-                    webBuilder.UseStartup(startup)
-                        .UseKestrel(options => options.AddServerHeader = false);
-                })
-                .ConfigureLogging((ctx, logging) =>
-                {
-                    logging
-                        .AddOpenTelemetry(options =>
+                        options.IncludeFormattedMessage = true;
+                        options.ParseStateValues = true;
+                        _ = options.AddFluentdForwardExporter(fluentOptions =>
                         {
-                            options.IncludeFormattedMessage = true;
-                            options.ParseStateValues = true;
-                            _ = options.AddFluentdForwardExporter(fluentOptions =>
-                            {
-                                var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
-                                fluentOptions.Host = nodeIp;
-                                fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
-                                fluentOptions.UseMessagePack();
-                            });
+                            var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
+                            fluentOptions.Host = nodeIp;
+                            fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+                            fluentOptions.UseMessagePack();
                         });
-                })
-                .UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
-        }
+                    });
+            })
+            .UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
+    }
 
-        public static async Task Main(string[] args)
-        {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    public static async Task Main(string[] args)
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            var builder = CreateHostBuilder(args).Build();
+        var builder = CreateHostBuilder(args).Build();
 
-            await builder.RunAsync();
-        }
+        await builder.RunAsync();
     }
 }

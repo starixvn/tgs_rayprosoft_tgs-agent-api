@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.TF.Incoming
+namespace TGS.Shared.Game.Models.TF.Incoming;
+
+public record GetClientBalanceResponse
 {
-    public record GetClientBalanceResponse
-    {
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; set; }
-    }
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
 }

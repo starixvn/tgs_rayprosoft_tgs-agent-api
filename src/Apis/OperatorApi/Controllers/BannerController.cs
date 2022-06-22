@@ -12,46 +12,45 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Banner;
 
-namespace TGS.Apis.OperatorApi.Controllers
+namespace TGS.Apis.OperatorApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BannerController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BannerController : ControllerBase
+    [HttpGet]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public IAsyncEnumerable<BannerResponse> GetBannersAsync(
+        [FromServices] IQueryService<GetBannersQuery, BannerInfo> queryService,
+        [FromServices] IOptions<JsonOptions> optionsAccessor,
+        [FromServices] IJsonSerializationProvider jsonSerializationProvider)
     {
-        [HttpGet]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public IAsyncEnumerable<BannerResponse> GetBannersAsync(
-            [FromServices] IQueryService<GetBannersQuery, BannerInfo> queryService,
-            [FromServices] IOptions<JsonOptions> optionsAccessor,
-            [FromServices] IJsonSerializationProvider jsonSerializationProvider)
-        {
-            var jsonOptions = optionsAccessor.Value;
+        var jsonOptions = optionsAccessor.Value;
 
-            var brandId = HttpContext.Items.GetBrandId();
-            var cultureCode = CultureInfo.CurrentUICulture.Name;
+        var brandId = HttpContext.Items.GetBrandId();
+        var cultureCode = CultureInfo.CurrentUICulture.Name;
 
-            var query = new GetBannersQuery(brandId);
+        var query = new GetBannersQuery(brandId);
 
-            return from info in queryService.QueryAsync(query)
-                   let loc = string.IsNullOrWhiteSpace(info.Localization)
-                    ? null
-                    : jsonSerializationProvider.DeserializeFromString<IDictionary<string, BannerContent>>(
-                        info.Localization,
-                        jsonOptions.JsonSerializerOptions)
-                   let content = loc?.ContainsKey(cultureCode) == true
-                    ? loc[cultureCode]
-                    : loc?.ContainsKey("en-US") == true
-                    ? loc["en-US"]
-                    : null
-                   select new BannerResponse
-                   {
-                       Id = info.Id,
-                       Title = content?.Title ?? info.Title,
-                       DesktopBannerUrl = content?.DesktopBannerUrl,
-                       MobileBannerUrl = content?.MobileBannerUrl,
-                       NavigateUrl = content?.NavigateUrl,
-                       PictureAlt = content?.PictureAlt
-                   };
-        }
+        return from info in queryService.QueryAsync(query)
+               let loc = string.IsNullOrWhiteSpace(info.Localization)
+                ? null
+                : jsonSerializationProvider.DeserializeFromString<IDictionary<string, BannerContent>>(
+                    info.Localization,
+                    jsonOptions.JsonSerializerOptions)
+               let content = loc?.ContainsKey(cultureCode) == true
+                ? loc[cultureCode]
+                : loc?.ContainsKey("en-US") == true
+                ? loc["en-US"]
+                : null
+               select new BannerResponse
+               {
+                   Id = info.Id,
+                   Title = content?.Title ?? info.Title,
+                   DesktopBannerUrl = content?.DesktopBannerUrl,
+                   MobileBannerUrl = content?.MobileBannerUrl,
+                   NavigateUrl = content?.NavigateUrl,
+                   PictureAlt = content?.PictureAlt
+               };
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace TGS.Apis.OperatorApi.Models
+namespace TGS.Apis.OperatorApi.Models;
+
+public class UmPayApiException : Exception
 {
-    public class UmPayApiException : Exception
+    public UmPayApiException()
+        : base($"UmPay api has error.")
     {
-        public UmPayApiException()
-            : base($"UmPay api has error.")
-        {
-        }
     }
 }

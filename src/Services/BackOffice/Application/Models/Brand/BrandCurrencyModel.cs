@@ -1,8 +1,7 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.Brand
+﻿namespace TGS.Services.BackOffice.Application.Models.Brand;
+
+public class BrandCurrencyModel
 {
-    public class BrandCurrencyModel
-    {
-        public string Code { get; set; }
-        public string Name { get; set; }
-    }
+    public string Code { get; set; }
+    public string Name { get; set; }
 }

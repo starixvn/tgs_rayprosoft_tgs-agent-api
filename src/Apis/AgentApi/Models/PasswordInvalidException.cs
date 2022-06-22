@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Apis.AgentApi.Models
+namespace TGS.Apis.AgentApi.Models;
+
+public class PasswordInvalidException : Exception
 {
-    public class PasswordInvalidException : Exception
+    public PasswordInvalidException()
     {
-        public PasswordInvalidException()
-        {
-        }
     }
 }

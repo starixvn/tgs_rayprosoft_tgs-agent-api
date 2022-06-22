@@ -7,24 +7,23 @@ using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.Agent.ApplicationServices.BrandPayments
+namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
+
+internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
 {
-    internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
+    private readonly IPaymentServiceClient _paymentServiceClient;
+
+    public AllPaymentChannelsQueryService(IPaymentServiceClient paymentServiceClient)
     {
-        private readonly IPaymentServiceClient _paymentServiceClient;
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    }
 
-        public AllPaymentChannelsQueryService(IPaymentServiceClient paymentServiceClient)
-        {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        }
+    public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
+    {
+        var allPaymentChannels = await _paymentServiceClient.GetAllPaymentChannelsAsync()
+            .ToDictionaryAsync(method => method.Id)
+            .ConfigureAwait(false);
 
-        public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
-        {
-            var allPaymentChannels = await _paymentServiceClient.GetAllPaymentChannelsAsync()
-                .ToDictionaryAsync(method => method.Id)
-                .ConfigureAwait(false);
-
-            return new ReadOnlyDictionary<Guid, PaymentChannelInfo>(allPaymentChannels);
-        }
+        return new ReadOnlyDictionary<Guid, PaymentChannelInfo>(allPaymentChannels);
     }
 }

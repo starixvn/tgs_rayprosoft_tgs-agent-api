@@ -10,27 +10,26 @@ using TGS.Apis.AgentApi.Models;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.GameProvder;
 
-namespace TGS.Apis.AgentApi.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
-    public class GameProviderController : ControllerBase
-    {
-        [HttpGet]
-        [Description("Get game providers")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public IAsyncEnumerable<GameProviderBaseModel> GetGameProvidersAsync(
-            [FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> queryService)
-        {
-            var brandId = HttpContext.Items.GetBrandId();
+namespace TGS.Apis.AgentApi.Controllers;
 
-            return queryService.QueryAsync(new GetGameProvidersQuery(brandId))
-                .Select(info => new GameProviderBaseModel
-                {
-                    Id = info.Id,
-                    Name = info.Name
-                });
-        }
+[Route("api/[controller]")]
+[ApiController]
+[Produces(MediaTypeNames.Application.Json)]
+public class GameProviderController : ControllerBase
+{
+    [HttpGet]
+    [Description("Get game providers")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public IAsyncEnumerable<GameProviderBaseModel> GetGameProvidersAsync(
+        [FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> queryService)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        return queryService.QueryAsync(new GetGameProvidersQuery(brandId))
+            .Select(info => new GameProviderBaseModel
+            {
+                Id = info.Id,
+                Name = info.Name
+            });
     }
 }

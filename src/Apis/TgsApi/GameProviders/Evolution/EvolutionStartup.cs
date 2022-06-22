@@ -12,62 +12,61 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.Evolution
+namespace TGS.Apis.TgsApi.GameProviders.Evolution;
+
+public sealed class EvolutionStartup : BaseStartup
 {
-    public sealed class EvolutionStartup : BaseStartup
+    protected override string LogPrefix => "evo";
+
+    public EvolutionStartup(IConfiguration configuration, IWebHostEnvironment env) :
+                base(configuration, env)
     {
-        protected override string LogPrefix => "evo";
+    }
 
-        public EvolutionStartup(IConfiguration configuration, IWebHostEnvironment env) :
-                    base(configuration, env)
-        {
-        }
-
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(EvolutionErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.Evolution => provider.GetRequiredService<EvolutionErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
-                });
-            services.AddHttpContextAccessor();
-            services.AddScoped<HandleEvolutionExceptionMiddleware>();
-            services.AddScoped<AuthorizeEvolutionMiddleware>();
-
-            services.AddScoped<IEvolutionService, EvolutionService>();
-            services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
-            services.AddScoped<IEvolutionCacheService, EvolutionCacheService>(
-                sp => ActivatorUtilities.CreateInstance<EvolutionCacheService>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
-            services.AddScoped<IEvolutionGameHistoryService, EvolutionGameHistoryService>();
-            services.AddScoped<EvolutionExternalTransactionService>();
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(EvolutionGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<EvolutionGameInitializer>());
-            services.AddScopedWithResolver<IGameHistory>(new[]
+                typeof(EvolutionErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(EvolutionGameHistory)
-            }, (provider, _) =>
-                provider.GetRequiredService<EvolutionGameHistory>());
-        }
+                GameProvider.Evolution => provider.GetRequiredService<EvolutionErrorMapper>(),
+                _ => provider.GetRequiredService<TgsErrorMapper>()
+            });
+        services.AddHttpContextAccessor();
+        services.AddScoped<HandleEvolutionExceptionMiddleware>();
+        services.AddScoped<AuthorizeEvolutionMiddleware>();
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScoped<IEvolutionService, EvolutionService>();
+        services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
+        services.AddScoped<IEvolutionCacheService, EvolutionCacheService>(
+            sp => ActivatorUtilities.CreateInstance<EvolutionCacheService>(sp, sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase()));
+        services.AddScoped<IEvolutionGameHistoryService, EvolutionGameHistoryService>();
+        services.AddScoped<EvolutionExternalTransactionService>();
+
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/evo/api";
+            typeof(EvolutionGameInitializer)
+        }, (provider, _) =>
+            provider.GetRequiredService<EvolutionGameInitializer>());
+        services.AddScopedWithResolver<IGameHistory>(new[]
+        {
+            typeof(EvolutionGameHistory)
+        }, (provider, _) =>
+            provider.GetRequiredService<EvolutionGameHistory>());
+    }
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
-                builder =>
-                {
-                    builder.UseMiddleware<HandleEvolutionExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeEvolutionMiddleware>();
-                });
-        }
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/evo/api";
+
+        app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            builder =>
+            {
+                builder.UseMiddleware<HandleEvolutionExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeEvolutionMiddleware>();
+            });
     }
 }

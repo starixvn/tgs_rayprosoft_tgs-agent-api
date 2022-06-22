@@ -8,44 +8,43 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 
-namespace TGS.Apis.BackendOffice.Services
+namespace TGS.Apis.BackendOffice.Services;
+
+public class AutoRejectWithdrawProcessor : IMessageHandler
 {
-    public class AutoRejectWithdrawProcessor : IMessageHandler
+    private readonly ILogger<AutoRejectWithdrawProcessor> _logger;
+    private readonly ICommandService<ReviewWithdrawFormCommand> _reviewCommandService;
+
+    public AutoRejectWithdrawProcessor(
+        ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
+        ILogger<AutoRejectWithdrawProcessor> logger)
     {
-        private readonly ILogger<AutoRejectWithdrawProcessor> _logger;
-        private readonly ICommandService<ReviewWithdrawFormCommand> _reviewCommandService;
+        _reviewCommandService = reviewCommandService ?? throw new System.ArgumentNullException(nameof(reviewCommandService));
+        _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+    }
 
-        public AutoRejectWithdrawProcessor(
-            ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
-            ILogger<AutoRejectWithdrawProcessor> logger)
-        {
-            _reviewCommandService = reviewCommandService ?? throw new System.ArgumentNullException(nameof(reviewCommandService));
-            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
-        }
+    public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Receive AutoRejectWithdraw request.");
 
-        public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Receive AutoRejectWithdraw request.");
+        var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
 
-            var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
+        var formId = request.FormId.ToGuid();
+        var brandId = request.BrandId.ToGuid();
 
-            var formId = request.FormId.ToGuid();
-            var brandId = request.BrandId.ToGuid();
+        var command = new ReviewWithdrawFormCommand(
+            brandId,
+            formId,
+            null,
+            ReviewState.Reject,
+            null,
+            null,
+            null);
 
-            var command = new ReviewWithdrawFormCommand(
-                brandId,
-                formId,
-                null,
-                ReviewState.Reject,
-                null,
-                null,
-                null);
+        await _reviewCommandService
+            .ExecuteAsync(command, cancellationToken)
+            .ConfigureAwait(false);
 
-            await _reviewCommandService
-                .ExecuteAsync(command, cancellationToken)
-                .ConfigureAwait(false);
-
-            _logger.LogInformation("AutoRejectWithdraw processing completed.");
-        }
+        _logger.LogInformation("AutoRejectWithdraw processing completed.");
     }
 }

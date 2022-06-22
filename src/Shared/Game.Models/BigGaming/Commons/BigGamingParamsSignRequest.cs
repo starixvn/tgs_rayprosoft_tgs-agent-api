@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.BigGaming.Commons
+namespace TGS.Shared.Game.Models.BigGaming.Commons;
+
+public record BigGamingParamsSignRequest
 {
-    public record BigGamingParamsSignRequest
-    {
-        [JsonPropertyName("random")]
-        public string Random { get; set; }
-        [JsonPropertyName("sign")]
-        public string Sign { get; set; }
-        [JsonPropertyName("sn")]
-        public string Sn { get; set; }
-    }
+    [JsonPropertyName("random")]
+    public string Random { get; set; }
+    [JsonPropertyName("sign")]
+    public string Sign { get; set; }
+    [JsonPropertyName("sn")]
+    public string Sn { get; set; }
 }

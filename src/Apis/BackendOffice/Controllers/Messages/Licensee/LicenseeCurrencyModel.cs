@@ -1,8 +1,7 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
+
+public class LicenseeCurrencyModel
 {
-    public class LicenseeCurrencyModel
-    {
-        public string Code { get; set; }
-        public string Name { get; set; }
-    }
+    public string Code { get; set; }
+    public string Name { get; set; }
 }

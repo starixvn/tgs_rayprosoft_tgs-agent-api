@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Core.DataServices.Tgs.Models
-{
-    public class PlayerIdentity
-    {
-        public Guid PlayerAuthenticationFormId { get; set; }
+namespace TGS.Core.DataServices.Tgs.Models;
 
-        public string PlayerCode { get; set; }
-    }
+public class PlayerIdentity
+{
+    public Guid PlayerAuthenticationFormId { get; set; }
+
+    public string PlayerCode { get; set; }
 }

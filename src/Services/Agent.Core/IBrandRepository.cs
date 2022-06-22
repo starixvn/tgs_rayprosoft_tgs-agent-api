@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TGS.Services.Agent
-{
-    public interface IBrandRepository
-    {
-        ValueTask<BrandInfo?> GetBrandInfoAsync(Guid brandId);
+namespace TGS.Services.Agent;
 
-        IAsyncEnumerable<VipLevelInfo> GetVipLevelsAsync(Guid brandId);
-    }
+public interface IBrandRepository
+{
+    ValueTask<BrandInfo?> GetBrandInfoAsync(Guid brandId);
+
+    IAsyncEnumerable<VipLevelInfo> GetVipLevelsAsync(Guid brandId);
 }

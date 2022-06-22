@@ -13,150 +13,149 @@ using TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
 using TGS.Services.BackOffice.Application.Queries.GameProviders;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
-namespace TGS.Tests.BackendOffice.UnitTests
+namespace TGS.Tests.BackendOffice.UnitTests;
+
+[TestFixture]
+public class GameProvidersLocalizationTests
 {
-    [TestFixture]
-    public class GameProvidersLocalizationTests
+    [Test]
+    public async Task Can_Query_SubGameProvider_Data()
     {
-        [Test]
-        public async Task Can_Query_SubGameProvider_Data()
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        await repository.SubGameProviders.AddRangeAsync(
+            new CoreModels.SubGameProvider
+            {
+                Code = "Test",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System",
+                Name = "Test"
+            });
+        await repository.SaveChangesAsync();
+
+        var sut = new GetGameProvidersLocalizationQueryService(repository);
+
+        var actual = await sut.QueryAsync(new GetGameProvidersLocalizationQuery()).CountAsync();
+
+        Assert.AreEqual(1, actual);
+    }
+
+    [Test]
+    public async Task GameProviders_Language_Should_Get_Distinct_Culture_Code_Count()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        await repository.GameProviderLanguages.AddRangeAsync(
+            new CoreModels.GameProviderLanguage()
+            {
+                GameProviderId = Guid.NewGuid(),
+                CultureCode = "en-US",
+                GameProviderCultureCode = "en-US"
+            },
+            new CoreModels.GameProviderLanguage()
+            {
+                GameProviderId = Guid.NewGuid(),
+                CultureCode = "en-US",
+                GameProviderCultureCode = "en-US"
+            },
+            new CoreModels.GameProviderLanguage()
+            {
+                GameProviderId = Guid.NewGuid(),
+                CultureCode = "zh-CN",
+                GameProviderCultureCode = "zh-CN"
+            });
+        await repository.SaveChangesAsync();
+
+        var sut = new GetAllSupportLanguagesQueryService(repository);
+
+        var actual = await sut.QueryAsync(new GetAllSupportLanguagesQuery()).CountAsync();
+
+        Assert.AreEqual(2, actual);
+    }
+
+    [Test]
+    public async Task Update_Game_Prodvier_Location_With_Exist_Id_Should_Success()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        await repository.SubGameProviders.AddAsync(
+            new CoreModels.SubGameProvider()
+            {
+                Code = "SubGp",
+                Name = "SubGp",
+                CreatedByUsername = "System",
+                UpdatedByUsername = "System"
+            });
+        await repository.SaveChangesAsync();
+
+        var sut = new UpdateGameProvidersLocalizationQueryService(
+            repository,
+            new JsonSerializationProvider());
+
+        var localization = new Dictionary<string, JsonDocument>()
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            { "en-US", JsonDocument.Parse("{ \"name\": \"Happy\" }") },
+            { "zh-CN", JsonDocument.Parse("{ \"name\": \"開心\" }") },
+            { "zh-TW", JsonDocument.Parse("{ \"name\": \"开心\" }") }
+        };
 
-            await repository.SubGameProviders.AddRangeAsync(
-                new CoreModels.SubGameProvider
-                {
-                    Code = "Test",
-                    CreatedByUsername = "System",
-                    UpdatedByUsername = "System",
-                    Name = "Test"
-                });
-            await repository.SaveChangesAsync();
-
-            var sut = new GetGameProvidersLocalizationQueryService(repository);
-
-            var actual = await sut.QueryAsync(new GetGameProvidersLocalizationQuery()).CountAsync();
-
-            Assert.AreEqual(1, actual);
-        }
-
-        [Test]
-        public async Task GameProviders_Language_Should_Get_Distinct_Culture_Code_Count()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            await repository.GameProviderLanguages.AddRangeAsync(
-                new CoreModels.GameProviderLanguage()
-                {
-                    GameProviderId = Guid.NewGuid(),
-                    CultureCode = "en-US",
-                    GameProviderCultureCode = "en-US"
-                },
-                new CoreModels.GameProviderLanguage()
-                {
-                    GameProviderId = Guid.NewGuid(),
-                    CultureCode = "en-US",
-                    GameProviderCultureCode = "en-US"
-                },
-                new CoreModels.GameProviderLanguage()
-                {
-                    GameProviderId = Guid.NewGuid(),
-                    CultureCode = "zh-CN",
-                    GameProviderCultureCode = "zh-CN"
-                });
-            await repository.SaveChangesAsync();
-
-            var sut = new GetAllSupportLanguagesQueryService(repository);
-
-            var actual = await sut.QueryAsync(new GetAllSupportLanguagesQuery()).CountAsync();
-
-            Assert.AreEqual(2, actual);
-        }
-
-        [Test]
-        public async Task Update_Game_Prodvier_Location_With_Exist_Id_Should_Success()
-        {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            await repository.SubGameProviders.AddAsync(
-                new CoreModels.SubGameProvider()
-                {
+        var command = new UpdateGameProvidersLocalizationCommand(
+            new List<SubGameProvidersLocalizationModel>() {
+                new SubGameProvidersLocalizationModel() {
                     Code = "SubGp",
-                    Name = "SubGp",
-                    CreatedByUsername = "System",
-                    UpdatedByUsername = "System"
-                });
-            await repository.SaveChangesAsync();
+                    Localization = localization
+                }},
+            "Tester");
 
-            var sut = new UpdateGameProvidersLocalizationQueryService(
-                repository,
-                new JsonSerializationProvider());
+        _ = await sut.QueryAsync(command, default).CountAsync();
 
-            var localization = new Dictionary<string, JsonDocument>()
-            {
-                { "en-US", JsonDocument.Parse("{ \"name\": \"Happy\" }") },
-                { "zh-CN", JsonDocument.Parse("{ \"name\": \"開心\" }") },
-                { "zh-TW", JsonDocument.Parse("{ \"name\": \"开心\" }") }
-            };
+        var actual = repository.SubGameProviders.FirstOrDefault(x => x.Code == "SubGp");
 
-            var command = new UpdateGameProvidersLocalizationCommand(
-                new List<SubGameProvidersLocalizationModel>() {
-                    new SubGameProvidersLocalizationModel() {
-                        Code = "SubGp",
-                        Localization = localization
-                    }},
-                "Tester");
+        Assert.IsNotNull(actual!.Localization);
+    }
 
-            _ = await sut.QueryAsync(command, default).CountAsync();
+    [Test]
+    public async Task Update_Game_Provider_Localization_With_NonExist_Id_Should_Failed()
+    {
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-            var actual = repository.SubGameProviders.FirstOrDefault(x => x.Code == "SubGp");
+        var sut = new UpdateGameProvidersLocalizationQueryService(
+            repository,
+            new JsonSerializationProvider());
 
-            Assert.IsNotNull(actual!.Localization);
-        }
-
-        [Test]
-        public async Task Update_Game_Provider_Localization_With_NonExist_Id_Should_Failed()
+        var localization = new Dictionary<string, JsonDocument>()
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            { "en-US", JsonDocument.Parse("{ \"name\": \"Happy\" }") },
+            { "zh-CN", JsonDocument.Parse("{ \"name\": \"開心\" }") },
+            { "zh-TW", JsonDocument.Parse("{ \"name\": \"开心\" }") }
+        };
 
-            var sut = new UpdateGameProvidersLocalizationQueryService(
-                repository,
-                new JsonSerializationProvider());
+        var command = new UpdateGameProvidersLocalizationCommand(
+            new List<SubGameProvidersLocalizationModel>() {
+                new SubGameProvidersLocalizationModel() {
+                    Code = "SubGp",
+                    Localization = localization
+                }},
+            "Tester");
 
-            var localization = new Dictionary<string, JsonDocument>()
-            {
-                { "en-US", JsonDocument.Parse("{ \"name\": \"Happy\" }") },
-                { "zh-CN", JsonDocument.Parse("{ \"name\": \"開心\" }") },
-                { "zh-TW", JsonDocument.Parse("{ \"name\": \"开心\" }") }
-            };
+        var actual = await sut.QueryAsync(command, default).CountAsync();
 
-            var command = new UpdateGameProvidersLocalizationCommand(
-                new List<SubGameProvidersLocalizationModel>() {
-                    new SubGameProvidersLocalizationModel() {
-                        Code = "SubGp",
-                        Localization = localization
-                    }},
-                "Tester");
-
-            var actual = await sut.QueryAsync(command, default).CountAsync();
-
-            Assert.IsTrue(actual == 1);
-        }
+        Assert.IsTrue(actual == 1);
     }
 }

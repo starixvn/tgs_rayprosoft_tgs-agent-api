@@ -1,14 +1,13 @@
 ﻿using System;
 using TGS.Core.Models.Services.BetHistories;
 
-namespace TGS.Apis.TgsApi.Models.BetHistory
+namespace TGS.Apis.TgsApi.Models.BetHistory;
+
+public record RoundResult
 {
-    public record RoundResult
-    {
-        public decimal BetAmount { get; init; }
-        public decimal Turnover { get; init; }
-        public decimal Winloss { get; init; }
-        public string GameResult { get; init; }
-        public BaseData[] Data { get; init; } = Array.Empty<BaseData>();
-    }
+    public decimal BetAmount { get; init; }
+    public decimal Turnover { get; init; }
+    public decimal Winloss { get; init; }
+    public string GameResult { get; init; }
+    public BaseData[] Data { get; init; } = Array.Empty<BaseData>();
 }

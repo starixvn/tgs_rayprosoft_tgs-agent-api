@@ -1,8 +1,7 @@
 ﻿using TGS.Shared.Game.Models.TCG.Common;
 
-namespace TGS.Shared.Game.Models.TCG.Outgoing
+namespace TGS.Shared.Game.Models.TCG.Outgoing;
+
+public record TCGRegisterPlayerResponse: TCGBaseResponse
 {
-    public record TCGRegisterPlayerResponse: TCGBaseResponse
-    {
-    }
 }

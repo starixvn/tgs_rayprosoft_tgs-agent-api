@@ -1,7 +1,6 @@
-﻿namespace TGS.Apis.OperatorApi
+﻿namespace TGS.Apis.OperatorApi;
+
+public class RedisOptions
 {
-    public class RedisOptions
-    {
-        public string ConnectionString { get; set; } = "localhost";
-    }
+    public string ConnectionString { get; set; } = "localhost";
 }

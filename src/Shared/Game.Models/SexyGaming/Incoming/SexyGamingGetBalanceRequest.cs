@@ -6,11 +6,10 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Incoming
+namespace TGS.Shared.Game.Models.SexyGaming.Incoming;
+
+public record SexyGamingGetBalanceRequest : SexyGamingSingleWalletBaseRequest
 {
-    public record SexyGamingGetBalanceRequest : SexyGamingSingleWalletBaseRequest
-    {
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-    }
+    [JsonPropertyName("userId")]
+    public string UserId { get; set; }
 }

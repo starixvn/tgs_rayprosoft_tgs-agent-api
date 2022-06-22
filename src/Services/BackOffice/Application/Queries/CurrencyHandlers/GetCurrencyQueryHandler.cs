@@ -5,44 +5,43 @@ using TGS.Services.BackOffice.Application.Models.Currency;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers
+namespace TGS.Services.BackOffice.Application.Queries.CurrencyHandlers;
+
+public class GetCurrencyQueryHandler : Handler<GetCurrencyRequest,
+    GetCurrencyResponse>
 {
-    public class GetCurrencyQueryHandler : Handler<GetCurrencyRequest,
-        GetCurrencyResponse>
+    private readonly ICurrencyService _service;
+
+    public GetCurrencyQueryHandler(ICurrencyService service, IHttpContextAccessor accessor) :
+        base(accessor)
     {
-        private readonly ICurrencyService _service;
+        _service = service;
+    }
 
-        public GetCurrencyQueryHandler(ICurrencyService service, IHttpContextAccessor accessor) :
-            base(accessor)
+    public override async Task<GetCurrencyResponse> Handle(
+        GetCurrencyRequest request,
+        CancellationToken cancellationToken)
+    {
+        var currency = await _service.GetCurrencyAsync(x => x.Code == request.Code);
+        if (currency == null)
         {
-            _service = service;
+            return CreateInvalidResponse<GetCurrencyResponse>(Currency.NotFound);
         }
 
-        public override async Task<GetCurrencyResponse> Handle(
-            GetCurrencyRequest request,
-            CancellationToken cancellationToken)
+        return new GetCurrencyResponse
         {
-            var currency = await _service.GetCurrencyAsync(x => x.Code == request.Code);
-            if (currency == null)
+            Valid = true,
+            Currency = new CurrencyModel
             {
-                return CreateInvalidResponse<GetCurrencyResponse>(Currency.NotFound);
+                Code = currency.Code,
+                Name = currency.Name,
+                NativeName = currency.NativeName,
+                Symbol = currency.Symbol,
+                CreatedByUsername = currency.CreatedByUsername,
+                CreatedOn = currency.CreatedOn,
+                UpdatedByUsername = currency.UpdatedByUsername,
+                UpdatedOn = currency.UpdatedOn
             }
-
-            return new GetCurrencyResponse
-            {
-                Valid = true,
-                Currency = new CurrencyModel
-                {
-                    Code = currency.Code,
-                    Name = currency.Name,
-                    NativeName = currency.NativeName,
-                    Symbol = currency.Symbol,
-                    CreatedByUsername = currency.CreatedByUsername,
-                    CreatedOn = currency.CreatedOn,
-                    UpdatedByUsername = currency.UpdatedByUsername,
-                    UpdatedOn = currency.UpdatedOn
-                }
-            };
-        }
+        };
     }
 }

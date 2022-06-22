@@ -2,35 +2,34 @@
 using TGS.Core.Models.Messages;
 using Tgs.Promotion.Clients;
 
-namespace TGS.Workers.Schedulers.Jobs.Promotion
+namespace TGS.Workers.Schedulers.Jobs.Promotion;
+
+public interface IPromotionSettlementWeeklyWorkerService
 {
-    public interface IPromotionSettlementWeeklyWorkerService
+    Task<TgsResponse> ExecutionAsync();
+    Task<TgsResponse> ManualExecutionAsync(string from, string to);
+}
+
+public class PromotionSettlementWeeklyWorkerService : IPromotionSettlementWeeklyWorkerService
+{
+    private readonly IPromotionBonusClient _client;
+
+    public PromotionSettlementWeeklyWorkerService(
+        IPromotionBonusClient client)
     {
-        Task<TgsResponse> ExecutionAsync();
-        Task<TgsResponse> ManualExecutionAsync(string from, string to);
+        _client = client;
     }
 
-    public class PromotionSettlementWeeklyWorkerService : IPromotionSettlementWeeklyWorkerService
+    async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ExecutionAsync()
     {
-        private readonly IPromotionBonusClient _client;
+        var response = await _client.CreatePromotionSettleDataWeeklyAsync(new()).ConfigureAwait(false);
+        return new() {ErrorMessage = response.Message};
+    }
 
-        public PromotionSettlementWeeklyWorkerService(
-            IPromotionBonusClient client)
-        {
-            _client = client;
-        }
-
-        async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ExecutionAsync()
-        {
-            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new()).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
-        }
-
-        async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ManualExecutionAsync(string from,
-            string to)
-        {
-            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new(from, to)).ConfigureAwait(false);
-            return new() {ErrorMessage = response.Message};
-        }
+    async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ManualExecutionAsync(string from,
+        string to)
+    {
+        var response = await _client.CreatePromotionSettleDataWeeklyAsync(new(from, to)).ConfigureAwait(false);
+        return new() {ErrorMessage = response.Message};
     }
 }

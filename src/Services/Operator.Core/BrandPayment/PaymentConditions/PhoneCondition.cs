@@ -1,17 +1,16 @@
 ﻿using Tgs.Payment.Clients;
 
-namespace TGS.Services.Operator.BrandPayment.PaymentConditions
+namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
+
+internal class PhoneCondition : IBrandPaymentCondition
 {
-    internal class PhoneCondition : IBrandPaymentCondition
+    private readonly bool _enabled;
+
+    public PhoneCondition(bool enabled)
     {
-        private readonly bool _enabled;
-
-        public PhoneCondition(bool enabled)
-        {
-            _enabled = enabled;
-        }
-
-        public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-            => _enabled ? player.PhoneAuthentication : true;
+        _enabled = enabled;
     }
+
+    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+        => _enabled ? player.PhoneAuthentication : true;
 }

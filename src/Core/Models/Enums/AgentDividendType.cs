@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum AgentDividendType
 {
-    public enum AgentDividendType
-    {
-        OneLayer = 0,
-        MultipleLayer = 1
-    }
+    OneLayer = 0,
+    MultipleLayer = 1
 }

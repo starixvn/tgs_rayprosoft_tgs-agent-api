@@ -15,73 +15,72 @@ using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
-namespace TGS.Apis.TgsApi.GameProviders.SBOBET
+namespace TGS.Apis.TgsApi.GameProviders.SBOBET;
+
+public sealed class SBOBETStartup : BaseStartup
 {
-    public sealed class SBOBETStartup : BaseStartup
+    public SBOBETStartup(IConfiguration configuration, IWebHostEnvironment env) :
+        base(configuration, env)
     {
-        public SBOBETStartup(IConfiguration configuration, IWebHostEnvironment env) :
-            base(configuration, env)
-        {
-        }
+    }
 
-        protected override string LogPrefix => "sbo";
+    protected override string LogPrefix => "sbo";
 
-        protected override void AddCustomDependencyServices(IServiceCollection services)
-        {
-            services.AddErrorMappers(
-                new[]
-                {
-                    typeof(SBOBETErrorMapper)
-                },
-                (provider, key) => key switch
-                {
-                    GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
-                    _                   => provider.GetRequiredService<TgsErrorMapper>()
-                });
-
-            services.AddScoped<AuthorizeSBOBETMiddleware>();
-            services.AddScoped<HandleSBOBETExceptionMiddleware>();
-
-            services.AddScoped<ISBOBETServices, SBOBETServices>();
-            services.AddSingleton<ISBOBETActionModelMapper, SBOBetActionModelMapper>();
-
-            services.AddScopedWithResolver<IGameInitializer>(new[]
+    protected override void AddCustomDependencyServices(IServiceCollection services)
+    {
+        services.AddErrorMappers(
+            new[]
             {
-                typeof(SBOBETGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<SBOBETGameInitializer>());
-
-            services.AddScopedWithResolver<IGameHistory>(new[]
+                typeof(SBOBETErrorMapper)
+            },
+            (provider, key) => key switch
             {
-                typeof(SBOBETGameHistory)
-            }, (provider, _) =>
-                provider.GetRequiredService<SBOBETGameHistory>());
+                GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
+                _                   => provider.GetRequiredService<TgsErrorMapper>()
+            });
 
-            services.AddScopedWithResolver<IPlayerAction>(new[]
-            {
-                typeof(SBOBETPlayerAction)
-            }, (provider, _) =>
-                provider.GetRequiredService<SBOBETPlayerAction>());
+        services.AddScoped<AuthorizeSBOBETMiddleware>();
+        services.AddScoped<HandleSBOBETExceptionMiddleware>();
 
-            services.AddTransient<IBetServiceFactory, BetServiceFactory>();
-        }
+        services.AddScoped<ISBOBETServices, SBOBETServices>();
+        services.AddSingleton<ISBOBETActionModelMapper, SBOBetActionModelMapper>();
 
-        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        services.AddScopedWithResolver<IGameInitializer>(new[]
         {
-            const string Route = "/api/sbo";
+            typeof(SBOBETGameInitializer)
+        }, (provider, _) =>
+            provider.GetRequiredService<SBOBETGameInitializer>());
 
-            app.UseWhen(context =>
-                {
-                    var path = context.Request.Path;
+        services.AddScopedWithResolver<IGameHistory>(new[]
+        {
+            typeof(SBOBETGameHistory)
+        }, (provider, _) =>
+            provider.GetRequiredService<SBOBETGameHistory>());
 
-                    return path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase) &&
-                        path.Value.IgnoreCaseNotContains("batch");
-                },
-                builder =>
-                {
-                    builder.UseMiddleware<HandleSBOBETExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeSBOBETMiddleware>();
-                });
-        }
+        services.AddScopedWithResolver<IPlayerAction>(new[]
+        {
+            typeof(SBOBETPlayerAction)
+        }, (provider, _) =>
+            provider.GetRequiredService<SBOBETPlayerAction>());
+
+        services.AddTransient<IBetServiceFactory, BetServiceFactory>();
+    }
+
+    protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+    {
+        const string Route = "/api/sbo";
+
+        app.UseWhen(context =>
+            {
+                var path = context.Request.Path;
+
+                return path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase) &&
+                    path.Value.IgnoreCaseNotContains("batch");
+            },
+            builder =>
+            {
+                builder.UseMiddleware<HandleSBOBETExceptionMiddleware>();
+                builder.UseMiddleware<AuthorizeSBOBETMiddleware>();
+            });
     }
 }

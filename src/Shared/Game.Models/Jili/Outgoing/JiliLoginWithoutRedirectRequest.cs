@@ -2,17 +2,16 @@
 
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Jili.Outgoing
+namespace TGS.Shared.Game.Models.Jili.Outgoing;
+
+public record JiliLoginWithoutRedirectRequest
 {
-    public record JiliLoginWithoutRedirectRequest
-    {
-        [JsonPropertyName("Token")]
-        public string Token { get; init; }
+    [JsonPropertyName("Token")]
+    public string Token { get; init; }
 
-        [JsonPropertyName("GameId")]
-        public string GameExternalId { get; init; }
+    [JsonPropertyName("GameId")]
+    public string GameExternalId { get; init; }
 
-        [JsonPropertyName("Lang")]
-        public string Language { get; init; }
-    }
+    [JsonPropertyName("Lang")]
+    public string Language { get; init; }
 }

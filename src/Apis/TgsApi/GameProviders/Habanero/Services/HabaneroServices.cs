@@ -9,58 +9,57 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 
-namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
+namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services;
+
+public interface IHabaneroServices
 {
-    public interface IHabaneroServices
+    ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+    ValueTask<bool> GameActionExistsAsync(QueryDetail detail);
+}
+
+public sealed class HabaneroServices : IHabaneroServices
+{
+    private readonly IGameActionQueries _gameActionQueries;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly HttpContext _httpContext;
+
+    public HabaneroServices(
+        IHttpContextAccessor httpContextAccessor,
+        IGameProviderOperations gameProviderOperations,
+        IGameActionQueries gameActionQueries)
     {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
-        ValueTask<bool> GameActionExistsAsync(QueryDetail detail);
+        _httpContext = httpContextAccessor.HttpContext;
+        _gameProviderOperations = gameProviderOperations;
+        _gameActionQueries = gameActionQueries;
     }
 
-    public sealed class HabaneroServices : IHabaneroServices
+    async ValueTask<GameProviderConfigurationData> IHabaneroServices.GetGameProviderConfigurationDataAsync()
     {
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
+        var items = _httpContext?.Items ??
+            throw new InvalidOperationException("Can not get http context items");
 
-        public HabaneroServices(
-            IHttpContextAccessor httpContextAccessor,
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+        var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+        var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+            .ConfigureAwait(false);
+
+        return new()
         {
-            _httpContext = httpContextAccessor.HttpContext;
-            _gameProviderOperations = gameProviderOperations;
-            _gameActionQueries = gameActionQueries;
-        }
+            GameProviderId = gameProviderId,
+            GameProviderConfigurationId = gameProviderConfigurationId,
+            AutoCloseRound = autoCloseRound,
+            PlatformType = platformType
+        };
+    }
 
-        async ValueTask<GameProviderConfigurationData> IHabaneroServices.GetGameProviderConfigurationDataAsync()
-        {
-            var items = _httpContext?.Items ??
-                throw new InvalidOperationException("Can not get http context items");
+    async ValueTask<bool> IHabaneroServices.GameActionExistsAsync(QueryDetail detail)
+    {
+        var items = _httpContext?.Items ?? throw new InvalidOperationException("Can not get http context items");
 
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
-
-            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                .ConfigureAwait(false);
-
-            return new()
-            {
-                GameProviderId = gameProviderId,
-                GameProviderConfigurationId = gameProviderConfigurationId,
-                AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
-            };
-        }
-
-        async ValueTask<bool> IHabaneroServices.GameActionExistsAsync(QueryDetail detail)
-        {
-            var items = _httpContext?.Items ?? throw new InvalidOperationException("Can not get http context items");
-
-            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            return await _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, detail.PlayerCode,
-                detail.ClientRoundId.ToString(), detail.TransactionId).ConfigureAwait(false);
-        }
+        var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+        return await _gameActionQueries.ReferencedGameActionExistsAsync(gameProviderId, detail.PlayerCode,
+            detail.ClientRoundId.ToString(), detail.TransactionId).ConfigureAwait(false);
     }
 }

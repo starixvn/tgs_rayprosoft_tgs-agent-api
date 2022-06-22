@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Services.GameOperations.Models.Data
+namespace TGS.Services.GameOperations.Models.Data;
+
+public record GameRoundsDetailData
 {
-    public record GameRoundsDetailData
-    {
-        public string AdditionalData { get; set; }
-    }
+    public string AdditionalData { get; set; }
 }

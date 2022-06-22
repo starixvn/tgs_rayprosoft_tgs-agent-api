@@ -1,17 +1,16 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Core.Models.Messages
+namespace TGS.Core.Models.Messages;
+
+public record TgsResponse
 {
-    public record TgsResponse
-    {
-        [JsonPropertyName("err")]
-        public int Error { get; init; } = (int)TgsApiError.None;
+    [JsonPropertyName("err")]
+    public int Error { get; init; } = (int)TgsApiError.None;
 
-        [JsonPropertyName("errmsg")]
-        public string ErrorMessage { get; init; } = string.Empty;
+    [JsonPropertyName("errmsg")]
+    public string ErrorMessage { get; init; } = string.Empty;
 
-        [JsonPropertyName("errmsgid")]
-        public string ErrorMessageKey { get; init; }
-    }
+    [JsonPropertyName("errmsgid")]
+    public string ErrorMessageKey { get; init; }
 }

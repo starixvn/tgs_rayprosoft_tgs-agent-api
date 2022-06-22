@@ -1,7 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Application.Models.ReportPlayer
+﻿namespace TGS.Services.BackOffice.Application.Models.ReportPlayer;
+
+public class PlayerAccountChangesTotalModel
 {
-    public class PlayerAccountChangesTotalModel
-    {
-        public decimal Amount { get; init; }
-    }
+    public decimal Amount { get; init; }
 }

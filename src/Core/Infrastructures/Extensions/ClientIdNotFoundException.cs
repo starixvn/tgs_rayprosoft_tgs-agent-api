@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace TGS.Core.Infrastructures.Extensions
+namespace TGS.Core.Infrastructures.Extensions;
+
+public class ClientIdNotFoundException : Exception
 {
-    public class ClientIdNotFoundException : Exception
+    public ClientIdNotFoundException(string message) : base(message)
     {
-        public ClientIdNotFoundException(string message) : base(message)
-        {
-        }
     }
 }

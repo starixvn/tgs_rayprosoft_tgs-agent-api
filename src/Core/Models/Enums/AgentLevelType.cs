@@ -1,8 +1,7 @@
-﻿namespace TGS.Core.Models.Enums
+﻿namespace TGS.Core.Models.Enums;
+
+public enum AgentLevelType
 {
-    public enum AgentLevelType
-    {
-        Chief = 1,
-        Agent = 2
-    }
+    Chief = 1,
+    Agent = 2
 }

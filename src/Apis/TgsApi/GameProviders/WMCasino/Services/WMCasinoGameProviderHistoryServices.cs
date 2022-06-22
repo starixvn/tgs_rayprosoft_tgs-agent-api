@@ -15,154 +15,153 @@ using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
 using TGS.Shared.Game.Models.WMCasino.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
+namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
+
+public interface IWMCasinoGameProviderHistoryServices
 {
-    public interface IWMCasinoGameProviderHistoryServices
+    ValueTask<GameProviderGameRecordResponse> GetGameRecordAsync(GameProviderGameRecordRequest request);
+}
+
+public class WMCasinoGameProviderHistoryServices : IWMCasinoGameProviderHistoryServices
+{
+    private readonly IWMCasinoAgentMapper _agentMapper;
+    private readonly IBrandOperations _brandOperations;
+    private readonly IWMCasinoApiClient _client;
+    private readonly IGameProviderOperations _gameProviderOperations;
+    private readonly ITgsLog _log;
+    private readonly IPlayerOperations _playerOperations;
+    private readonly IWMCasinoPlayerServices _playerServices;
+    private readonly IWMCasinoBetActionServices _services;
+    private readonly ISettingOperations _settingOperations;
+    private readonly IWMCasinoUtility _utility;
+
+    public WMCasinoGameProviderHistoryServices(
+        ISettingOperations settingOperations,
+        IGameProviderOperations gameProviderOperations,
+        IBrandOperations brandOperations,
+        IPlayerOperations playerOperations,
+        IWMCasinoApiClient client,
+        IWMCasinoAgentMapper agentMapper,
+        IWMCasinoBetActionServices services,
+        IWMCasinoPlayerServices playerServices,
+        IWMCasinoUtility utility,
+        ITgsLog log)
     {
-        ValueTask<GameProviderGameRecordResponse> GetGameRecordAsync(GameProviderGameRecordRequest request);
+        _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        _gameProviderOperations = gameProviderOperations ??
+            throw new ArgumentNullException(nameof(gameProviderOperations));
+        _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _agentMapper = agentMapper ?? throw new ArgumentNullException(nameof(agentMapper));
+        _services = services ?? throw new ArgumentNullException(nameof(services));
+        _playerServices = playerServices ?? throw new ArgumentNullException(nameof(playerServices));
+        _utility = utility ?? throw new ArgumentNullException(nameof(utility));
+        _log = log.SetLogger(nameof(WMCasinoGameProviderHistoryServices)) ??
+            throw new ArgumentNullException(nameof(log));
     }
 
-    public class WMCasinoGameProviderHistoryServices : IWMCasinoGameProviderHistoryServices
+    public async ValueTask<GameProviderGameRecordResponse> GetGameRecordAsync(GameProviderGameRecordRequest request)
     {
-        private readonly IWMCasinoAgentMapper _agentMapper;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IWMCasinoApiClient _client;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ITgsLog _log;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IWMCasinoPlayerServices _playerServices;
-        private readonly IWMCasinoBetActionServices _services;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IWMCasinoUtility _utility;
+        var configuration = await _settingOperations
+            .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts.GameProviderConfigurations.WMCasino)
+            .ConfigureAwait(false);
 
-        public WMCasinoGameProviderHistoryServices(
-            ISettingOperations settingOperations,
-            IGameProviderOperations gameProviderOperations,
-            IBrandOperations brandOperations,
-            IPlayerOperations playerOperations,
-            IWMCasinoApiClient client,
-            IWMCasinoAgentMapper agentMapper,
-            IWMCasinoBetActionServices services,
-            IWMCasinoPlayerServices playerServices,
-            IWMCasinoUtility utility,
-            ITgsLog log)
+        var agent = _agentMapper.GetAgentById(configuration.BrandMerchants, request.AgentId);
+
+        var response = await _client.GetDateTimeReportAsync(configuration.ApiUrl,
+            new GetDateTimeReportRequest
+            {
+                VendorId = agent.AgentId,
+                Signature = agent.Signature,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime
+            }).ConfigureAwait(false);
+
+        if (response.ErrorCode != (int)ServiceApiError.Success &&
+            response.ErrorCode != (int)ServiceApiError.NoResult)
         {
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _gameProviderOperations = gameProviderOperations ??
-                throw new ArgumentNullException(nameof(gameProviderOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _agentMapper = agentMapper ?? throw new ArgumentNullException(nameof(agentMapper));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
-            _playerServices = playerServices ?? throw new ArgumentNullException(nameof(playerServices));
-            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
-            _log = log.SetLogger(nameof(WMCasinoGameProviderHistoryServices)) ??
-                throw new ArgumentNullException(nameof(log));
+            throw new GameProviderApiErrorException(response.ErrorMessage);
         }
 
-        public async ValueTask<GameProviderGameRecordResponse> GetGameRecordAsync(GameProviderGameRecordRequest request)
+        if (response.Results == null || response.Results.Length == 0)
         {
-            var configuration = await _settingOperations
-                .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts.GameProviderConfigurations.WMCasino)
-                .ConfigureAwait(false);
+            return new GameProviderGameRecordResponse { Success = true };
+        }
 
-            var agent = _agentMapper.GetAgentById(configuration.BrandMerchants, request.AgentId);
+        var gameProviderId = await _gameProviderOperations
+            .GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino)
+            .ConfigureAwait(false);
 
-            var response = await _client.GetDateTimeReportAsync(configuration.ApiUrl,
-                new GetDateTimeReportRequest
+        var results = (from r in response.Results
+                       let externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId)
+                       let playerCode = _playerServices.GetPlayerCode(r.User, agent.Prefix, agent.Suffix)
+                       group r by new
+                       {
+                           PlayerCode = playerCode,
+                           ExternalRoundId = externalRoundId
+                       }
+                       into g
+                       select g).ToDictionary(g => g.Key, g => g.ToArray());
+
+        var configurationIds = new ConcurrentDictionary<Guid, Guid>();
+
+        List<ExecuteResult> executeResults = new();
+
+        foreach (var r in results)
+        {
+            var playerCode = r.Key.PlayerCode;
+
+            ExecuteResult executeResult;
+
+            try
+            {
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+
+                if (!configurationIds.TryGetValue(brandId, out var gameProviderConfigurationId))
                 {
-                    VendorId = agent.AgentId,
-                    Signature = agent.Signature,
-                    StartTime = request.StartTime,
-                    EndTime = request.EndTime
-                }).ConfigureAwait(false);
-
-            if (response.ErrorCode != (int)ServiceApiError.Success &&
-                response.ErrorCode != (int)ServiceApiError.NoResult)
-            {
-                throw new GameProviderApiErrorException(response.ErrorMessage);
-            }
-
-            if (response.Results == null || response.Results.Length == 0)
-            {
-                return new GameProviderGameRecordResponse { Success = true };
-            }
-
-            var gameProviderId = await _gameProviderOperations
-                .GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino)
-                .ConfigureAwait(false);
-
-            var results = (from r in response.Results
-                           let externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId)
-                           let playerCode = _playerServices.GetPlayerCode(r.User, agent.Prefix, agent.Suffix)
-                           group r by new
-                           {
-                               PlayerCode = playerCode,
-                               ExternalRoundId = externalRoundId
-                           }
-                           into g
-                           select g).ToDictionary(g => g.Key, g => g.ToArray());
-
-            var configurationIds = new ConcurrentDictionary<Guid, Guid>();
-
-            List<ExecuteResult> executeResults = new();
-
-            foreach (var r in results)
-            {
-                var playerCode = r.Key.PlayerCode;
-
-                ExecuteResult executeResult;
-
-                try
-                {
-                    var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-
-                    if (!configurationIds.TryGetValue(brandId, out var gameProviderConfigurationId))
-                    {
-                        var bgpc = await _brandOperations
-                            .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
-                            .ConfigureAwait(false);
-
-                        gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
-                        configurationIds[brandId] = gameProviderConfigurationId;
-                    }
-
-                    await _services.ExecuteBetResultsByRoundAsync(
-                            gameProviderId, gameProviderConfigurationId, playerCode, r.Value, true)
+                    var bgpc = await _brandOperations
+                        .GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
                         .ConfigureAwait(false);
 
-                    executeResult = new(true, playerCode, string.Empty);
-                }
-                catch (Exception ex)
-                {
-                    executeResult = new(false, playerCode, ex.GetMessageChain());
+                    gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
+                    configurationIds[brandId] = gameProviderConfigurationId;
                 }
 
-                executeResults.Add(executeResult);
+                await _services.ExecuteBetResultsByRoundAsync(
+                        gameProviderId, gameProviderConfigurationId, playerCode, r.Value, true)
+                    .ConfigureAwait(false);
+
+                executeResult = new(true, playerCode, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                executeResult = new(false, playerCode, ex.GetMessageChain());
             }
 
-            if (executeResults.Any(r => !r.Success))
-            {
-                var errors = executeResults.Where(r => !r.Success)
-                    .Select(r => $"Execute round results failed, player code: {r.PlayerCode}, error: {r.ErrorMessage}");
-
-                var message = string.Join(Environment.NewLine, errors);
-                _log.LogError(message);
-
-                return new GameProviderGameRecordResponse { Success = false };
-            }
-
-            var lastGameRecord = response.Results.Where(r => !string.IsNullOrWhiteSpace(r.SettleTime))
-                .Max(r => _utility.ParseDateTimeOffset(r.SettleTime));
-
-            return new GameProviderGameRecordResponse
-            {
-                Success = true,
-                LastGameRecordTime = lastGameRecord
-            };
+            executeResults.Add(executeResult);
         }
 
-        private record ExecuteResult(bool Success, string PlayerCode, string ErrorMessage);
+        if (executeResults.Any(r => !r.Success))
+        {
+            var errors = executeResults.Where(r => !r.Success)
+                .Select(r => $"Execute round results failed, player code: {r.PlayerCode}, error: {r.ErrorMessage}");
+
+            var message = string.Join(Environment.NewLine, errors);
+            _log.LogError(message);
+
+            return new GameProviderGameRecordResponse { Success = false };
+        }
+
+        var lastGameRecord = response.Results.Where(r => !string.IsNullOrWhiteSpace(r.SettleTime))
+            .Max(r => _utility.ParseDateTimeOffset(r.SettleTime));
+
+        return new GameProviderGameRecordResponse
+        {
+            Success = true,
+            LastGameRecordTime = lastGameRecord
+        };
     }
+
+    private record ExecuteResult(bool Success, string PlayerCode, string ErrorMessage);
 }

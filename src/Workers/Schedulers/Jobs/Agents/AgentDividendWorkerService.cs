@@ -8,54 +8,53 @@ using TGS.Core.Models.Messages;
 using Tgs.ProfitRebate.Client;
 using Tgs.ProfitRebate.Client.Models;
 
-namespace TGS.Workers.Schedulers.Jobs.Agents
+namespace TGS.Workers.Schedulers.Jobs.Agents;
+
+public interface IAgentDividendWorkerService
 {
-    public interface IAgentDividendWorkerService
+    Task<TgsResponse> ExecutionAsync();
+    Task<TgsResponse> ManualExecutionAsync(string date = null);
+}
+
+public class AgentDividendWorkerService : IAgentDividendWorkerService
+{
+    private readonly IProfitRebateClient _client;
+    private readonly ITgsRepository _tgsRepository;
+
+    public AgentDividendWorkerService(
+        IProfitRebateClient client, ITgsRepository tgsRepository)
     {
-        Task<TgsResponse> ExecutionAsync();
-        Task<TgsResponse> ManualExecutionAsync(string date = null);
+        _client = client;
+        _tgsRepository = tgsRepository;
     }
 
-    public class AgentDividendWorkerService : IAgentDividendWorkerService
+    async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
     {
-        private readonly IProfitRebateClient _client;
-        private readonly ITgsRepository _tgsRepository;
+        var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
+        var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
+        var brands = await _tgsRepository.Brands.AsQueryable()
+            .Where(x => queryDate.ToUniversalTime() > x.CurrentSettlementTo)
+            .Select(x => new { x.Code })
+            .ToArrayAsync();
 
-        public AgentDividendWorkerService(
-            IProfitRebateClient client, ITgsRepository tgsRepository)
+        var responses = new List<TgsResponse>();
+
+        foreach (var brand in brands)
         {
-            _client = client;
-            _tgsRepository = tgsRepository;
-        }
-
-        async Task<TgsResponse> IAgentDividendWorkerService.ExecutionAsync()
-        {
-            var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-            var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
-            var brands = await _tgsRepository.Brands.AsQueryable()
-                .Where(x => queryDate.ToUniversalTime() > x.CurrentSettlementTo)
-                .Select(x => new { x.Code })
-                .ToArrayAsync();
-
-            var responses = new List<TgsResponse>();
-
-            foreach (var brand in brands)
+            var response = await _client.CreateAgentDividendAsync(new(brand.Code));
+            if (response.Message != null)
             {
-                var response = await _client.CreateAgentDividendAsync(new(brand.Code));
-                if (response.Message != null)
-                {
-                    responses.Add(new TgsResponse { ErrorMessage = $"{brand} : {response.Message}" });
-                }
+                responses.Add(new TgsResponse { ErrorMessage = $"{brand} : {response.Message}" });
             }
-
-            return new() { ErrorMessage = responses.Count > 0 ? responses.ToString() : "" };
         }
 
-        async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
-        {
-            var response =
-                await _client.CreateAgentDividendAsync(new CreateAgentDividendsRequest(brandCode));
-            return new() { ErrorMessage = response?.Message };
-        }
+        return new() { ErrorMessage = responses.Count > 0 ? responses.ToString() : "" };
+    }
+
+    async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
+    {
+        var response =
+            await _client.CreateAgentDividendAsync(new CreateAgentDividendsRequest(brandCode));
+        return new() { ErrorMessage = response?.Message };
     }
 }

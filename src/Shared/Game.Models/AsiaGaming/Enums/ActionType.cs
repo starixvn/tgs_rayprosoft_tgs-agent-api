@@ -1,10 +1,9 @@
-﻿namespace TGS.Shared.Game.Models.AsiaGaming.Enums
+﻿namespace TGS.Shared.Game.Models.AsiaGaming.Enums;
+
+public enum TransactionType
 {
-    public enum TransactionType
-    {
-        BET,
-        WIN,
-        LOSE,
-        REFUND
-    }
+    BET,
+    WIN,
+    LOSE,
+    REFUND
 }

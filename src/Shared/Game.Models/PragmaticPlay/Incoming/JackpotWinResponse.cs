@@ -1,6 +1,5 @@
-﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming
+﻿namespace TGS.Shared.Game.Models.PragmaticPlay.Incoming;
+
+public record JackpotWinResponse : TransactionResponse
 {
-    public record JackpotWinResponse : TransactionResponse
-    {
-    }
 }

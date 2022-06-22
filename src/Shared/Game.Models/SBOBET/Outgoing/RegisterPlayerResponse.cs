@@ -1,8 +1,7 @@
 ﻿// ReSharper disable IdentifierTypo
 
-namespace TGS.Shared.Game.Models.SBOBET.Outgoing
+namespace TGS.Shared.Game.Models.SBOBET.Outgoing;
+
+public record RegisterPlayerResponse : BaseResponse
 {
-    public record RegisterPlayerResponse : BaseResponse
-    {
-    }
 }

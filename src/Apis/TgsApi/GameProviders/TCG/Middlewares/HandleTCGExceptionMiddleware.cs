@@ -9,31 +9,30 @@ using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.TCG.Common;
 using TGS.Shared.Game.Models.TCG.Enums;
 
-namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares;
+
+public sealed class HandleTCGExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
 {
-    public sealed class HandleTCGExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
+    public HandleTCGExceptionMiddleware(
+        Func<string, IErrorMapper> mapper,
+        ITgsLog log)
+        : base(mapper, Consts.GameProvider.TCG, log, "tcg")
     {
-        public HandleTCGExceptionMiddleware(
-            Func<string, IErrorMapper> mapper,
-            ITgsLog log)
-            : base(mapper, Consts.GameProvider.TCG, log, "tcg")
+    }
+
+    protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
+        Exception exception)
+    {
+        var error = (GameApiError)errorCode;
+        var message = ErrorMapper.GetMessageByException(exception);
+
+        var response = new TCGSingleWalletResponse()
         {
-        }
+            Status = ((int)error),
+            ErrorDesc = (!string.IsNullOrEmpty(error.Description())) ? error.Description() : message
+        };
 
-        protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
-            Exception exception)
-        {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
-
-            var response = new TCGSingleWalletResponse()
-            {
-                Status = ((int)error),
-                ErrorDesc = (!string.IsNullOrEmpty(error.Description())) ? error.Description() : message
-            };
-
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(response, response.GetType());
-        }
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(response, response.GetType());
     }
 }

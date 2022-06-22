@@ -20,329 +20,328 @@ using TGS.Core.Models.Tokens;
 using TGS.Tests.ApiClients.Operators;
 using TGS.Tests.TestsCommon;
 
-namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
+namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps;
+
+public abstract class BaseGameEndpoint : SpecFlowIntegrationTestBase
 {
-    public abstract class BaseGameEndpoint : SpecFlowIntegrationTestBase
+    protected BaseGameEndpoint(ScenarioContext context)
+        : base(context)
     {
-        protected BaseGameEndpoint(ScenarioContext context)
-            : base(context)
+    }
+
+    protected static async Task<T> GetSettingAsync<T>(ServiceProvider serviceProvider, string key)
+    {
+        var db = GetDb<ITgsRepository>(serviceProvider);
+        var setting = await db.Settings.AsQueryable().FirstAsync(s => s.Key == key);
+
+        var json = serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+
+        return json.DeserializeFromString<T>(setting.Value);
+    }
+
+    protected async Task ChangeBrandStatusAsync(
+        IServiceProvider serviceProvider, BrandStatus status,
+        bool hasTag = false)
+    {
+        if (hasTag && !HasTag("ChangeBrandStatus"))
         {
+            return;
         }
 
-        protected static async Task<T> GetSettingAsync<T>(ServiceProvider serviceProvider, string key)
+        var brandCode = Get<string>(SR.BrandCode);
+
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
+        brand.Status = status;
+
+        await db.SaveChangesAsync();
+
+        var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+        await cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
+    }
+
+    protected async Task ChangeGameProviderConfigurationStatusAsync(
+        IServiceProvider serviceProvider,
+        string gameProviderCode, Status status, bool hasTag = false)
+    {
+        if (hasTag && !HasTag("ChangeGameProviderConfigurationStatus"))
         {
-            var db = GetDb<ITgsRepository>(serviceProvider);
-            var setting = await db.Settings.AsQueryable().FirstAsync(s => s.Key == key);
-
-            var json = serviceProvider.GetRequiredService<IJsonSerializationProvider>();
-
-            return json.DeserializeFromString<T>(setting.Value);
+            return;
         }
 
-        protected async Task ChangeBrandStatusAsync(
-            IServiceProvider serviceProvider, BrandStatus status,
-            bool hasTag = false)
+        var brandCode = Get<string>(SR.BrandCode);
+
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var gameProviderConfiguration = await (
+            from bgp in db.BrandGameProviders.AsQueryable()
+            join brand in from b in db.Brands.AsQueryable() where b.Code == brandCode select b
+                on bgp.BrandId equals brand.Id
+            join gameProvider in from gp in db.GameProviders.AsQueryable()
+                                 where gp.Code == gameProviderCode
+                                 select gp
+                on bgp.GameProviderId equals gameProvider.Id
+            join gpc in db.GameProviderConfigurations
+                on bgp.GameProviderConfigurationId equals gpc.Id
+            select gpc).FirstAsync();
+
+        gameProviderConfiguration.Status = status;
+
+        await db.SaveChangesAsync();
+
+        var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+
+        await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration,
+            gameProviderConfiguration.GameProviderId);
+    }
+
+    protected async Task ChangeGameProviderStatusAsync(
+        IServiceProvider serviceProvider,
+        string gameProviderCode, Status status, bool hasTag = false)
+    {
+        if (hasTag && !HasTag("ChangeGameProviderStatus"))
         {
-            if (hasTag && !HasTag("ChangeBrandStatus"))
+            return;
+        }
+
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var gameProvider = await db.GameProviders.AsQueryable().FirstAsync(gp => gp.Code == gameProviderCode);
+        gameProvider.Status = status;
+
+        await db.SaveChangesAsync();
+
+        var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+        await cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
+    }
+
+    protected async Task ChangeGameStatusAsync(
+        IServiceProvider serviceProvider, string gameProviderCode,
+        string externalGameId, GameStatus gameStatus, bool hasTag = false)
+    {
+        if (hasTag && !HasTag("ChangeGameStatus"))
+        {
+            return;
+        }
+
+        var platformType = Get<PlatformType>(SR.PlatformType);
+
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var gamePlatformTypes = GetGamePlatformTypes();
+
+        var game = await (
+            from g in db.Games
+            join gameProvider in from gp in db.GameProviders.AsQueryable()
+                                 where gp.Code == gameProviderCode
+                                 select gp
+                on g.GameProviderId equals gameProvider.Id
+            where g.ExternalId == externalGameId && gamePlatformTypes.Contains(g.PlatformType)
+            select g).FirstAsync();
+
+        game.Status = gameStatus;
+
+        await db.SaveChangesAsync();
+
+        var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+        await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
+
+        GamePlatformType[] GetGamePlatformTypes() =>
+            platformType switch
             {
-                return;
-            }
-
-            var brandCode = Get<string>(SR.BrandCode);
-
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
-            brand.Status = status;
-
-            await db.SaveChangesAsync();
-
-            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
-        }
-
-        protected async Task ChangeGameProviderConfigurationStatusAsync(
-            IServiceProvider serviceProvider,
-            string gameProviderCode, Status status, bool hasTag = false)
-        {
-            if (hasTag && !HasTag("ChangeGameProviderConfigurationStatus"))
-            {
-                return;
-            }
-
-            var brandCode = Get<string>(SR.BrandCode);
-
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var gameProviderConfiguration = await (
-                from bgp in db.BrandGameProviders.AsQueryable()
-                join brand in from b in db.Brands.AsQueryable() where b.Code == brandCode select b
-                    on bgp.BrandId equals brand.Id
-                join gameProvider in from gp in db.GameProviders.AsQueryable()
-                                     where gp.Code == gameProviderCode
-                                     select gp
-                    on bgp.GameProviderId equals gameProvider.Id
-                join gpc in db.GameProviderConfigurations
-                    on bgp.GameProviderConfigurationId equals gpc.Id
-                select gpc).FirstAsync();
-
-            gameProviderConfiguration.Status = status;
-
-            await db.SaveChangesAsync();
-
-            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-
-            await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration,
-                gameProviderConfiguration.GameProviderId);
-        }
-
-        protected async Task ChangeGameProviderStatusAsync(
-            IServiceProvider serviceProvider,
-            string gameProviderCode, Status status, bool hasTag = false)
-        {
-            if (hasTag && !HasTag("ChangeGameProviderStatus"))
-            {
-                return;
-            }
-
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var gameProvider = await db.GameProviders.AsQueryable().FirstAsync(gp => gp.Code == gameProviderCode);
-            gameProvider.Status = status;
-
-            await db.SaveChangesAsync();
-
-            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
-        }
-
-        protected async Task ChangeGameStatusAsync(
-            IServiceProvider serviceProvider, string gameProviderCode,
-            string externalGameId, GameStatus gameStatus, bool hasTag = false)
-        {
-            if (hasTag && !HasTag("ChangeGameStatus"))
-            {
-                return;
-            }
-
-            var platformType = Get<PlatformType>(SR.PlatformType);
-
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var gamePlatformTypes = GetGamePlatformTypes();
-
-            var game = await (
-                from g in db.Games
-                join gameProvider in from gp in db.GameProviders.AsQueryable()
-                                     where gp.Code == gameProviderCode
-                                     select gp
-                    on g.GameProviderId equals gameProvider.Id
-                where g.ExternalId == externalGameId && gamePlatformTypes.Contains(g.PlatformType)
-                select g).FirstAsync();
-
-            game.Status = gameStatus;
-
-            await db.SaveChangesAsync();
-
-            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.Games, game.GameProviderId);
-
-            GamePlatformType[] GetGamePlatformTypes() =>
-                platformType switch
+                PlatformType.Desktop => new[]
                 {
-                    PlatformType.Desktop => new[]
-                    {
-                        GamePlatformType.Desktop,
-                        GamePlatformType.DesktopAndMobile
-                    },
-                    PlatformType.Mobile => new[]
-                    {
-                        GamePlatformType.Mobile,
-                        GamePlatformType.DesktopAndMobile
-                    },
-                    _ => throw new NotImplementedException()
-                };
-        }
-
-        protected async Task ChangePlayerStatusAsync(
-            ServiceProvider serviceProvider, string playerCode,
-            PlayerStatus status)
-        {
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var player = await db.Players.AsQueryable().FirstAsync(r => r.PlayerCode == playerCode);
-            player.Status = status;
-
-            await db.SaveChangesAsync();
-
-            var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
-            await cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
-        }
-
-        protected async Task DeauthorizePlayerAsync(IServiceProvider serviceProvider, string playerCode)
-        {
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var records = await db.PlayerLoginRecords.AsQueryable()
-                .Where(r => r.PlayerCode == playerCode).ToArrayAsync()
-                .ConfigureAwait(false);
-
-            foreach (var r in records)
-            {
-                r.Status = LoginStatus.Deauthorized;
-            }
-
-            _ = await db.SaveChangesAsync().ConfigureAwait(false);
-        }
-
-        protected async Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
-        {
-            await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
-            var playerCode = Get<string>(SR.PlayerCode);
-
-            return await db.Wallets.AsQueryable().FirstAsync(w => w.PlayerCode == playerCode);
-        }
-
-        protected async Task PlayerLoginAsync(
-            IServiceProvider serviceProvider, string username,
-            PlatformType platformType, string brandCode, string currencyCode)
-        {
-            var db = GetDb<ITgsRepository>(serviceProvider);
-
-            var player = await db.Players.AsQueryable()
-                .FirstOrDefaultAsync(p => p.Brand.Code == brandCode
-                    && p.Username.ToLower() == username.ToLower());
-
-            var playerCode = string.Empty;
-
-            if (player != null)
-            {
-                playerCode = player.PlayerCode;
-
-                var key = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
-                var tokenData = Get<PlayerTokenData>(key);
-
-                if (tokenData != null)
+                    GamePlatformType.Desktop,
+                    GamePlatformType.DesktopAndMobile
+                },
+                PlatformType.Mobile => new[]
                 {
-                    var loginRecord =
-                        await db.PlayerLoginRecords.AsQueryable()
-                            .FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
-
-                    if (loginRecord?.Status == LoginStatus.Enabled)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            var brandCacheKey = $"{SR.Brand}:{brandCode}";
-            var brand = Get<Brand>(brandCacheKey);
-
-            if (brand == null)
-            {
-                brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
-                Set(brandCacheKey, brand);
-            }
-
-            var apiClient = serviceProvider.GetRequiredService<IPlayerApiClient>();
-
-            var brandTokenCacheKey = $"{SR.BrandToken}:{brandCode}";
-            var brandToken = Get<string>(brandTokenCacheKey);
-
-            var brandTokenExpireTimeCacheKey = $"{SR.BrandTokenExpireTime}:{brandCode}";
-            var brandTokenExpireTime = Get<long>(brandTokenExpireTimeCacheKey);
-
-            if (brandToken.IsNullOrEmpty() || brandTokenExpireTime < DateTimeOffset.Now.ToUnixTimeMilliseconds())
-            {
-                var r = await apiClient.GetBrandTokenAsync(new()
-                {
-                    ApiKey = brand.ApiKey,
-                    Currency = player?.DefaultWalletCurrencyCode ?? currencyCode
-                });
-
-                brandToken = r.Token;
-
-                Set(brandTokenCacheKey, brandToken);
-                Set(brandTokenExpireTimeCacheKey, r.ExpiredOn);
-            }
-
-            const string password = "TgsP@ssw0rd";
-
-            var headers = new Dictionary<string, string>
-            {
-                {
-                    "Authorization", $"Bearer {brandToken}"
-                }
+                    GamePlatformType.Mobile,
+                    GamePlatformType.DesktopAndMobile
+                },
+                _ => throw new NotImplementedException()
             };
+    }
 
-            if (player == null)
+    protected async Task ChangePlayerStatusAsync(
+        ServiceProvider serviceProvider, string playerCode,
+        PlayerStatus status)
+    {
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var player = await db.Players.AsQueryable().FirstAsync(r => r.PlayerCode == playerCode);
+        player.Status = status;
+
+        await db.SaveChangesAsync();
+
+        var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+        await cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
+    }
+
+    protected async Task DeauthorizePlayerAsync(IServiceProvider serviceProvider, string playerCode)
+    {
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var records = await db.PlayerLoginRecords.AsQueryable()
+            .Where(r => r.PlayerCode == playerCode).ToArrayAsync()
+            .ConfigureAwait(false);
+
+        foreach (var r in records)
+        {
+            r.Status = LoginStatus.Deauthorized;
+        }
+
+        _ = await db.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    protected async Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
+    {
+        await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
+        var playerCode = Get<string>(SR.PlayerCode);
+
+        return await db.Wallets.AsQueryable().FirstAsync(w => w.PlayerCode == playerCode);
+    }
+
+    protected async Task PlayerLoginAsync(
+        IServiceProvider serviceProvider, string username,
+        PlatformType platformType, string brandCode, string currencyCode)
+    {
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        var player = await db.Players.AsQueryable()
+            .FirstOrDefaultAsync(p => p.Brand.Code == brandCode
+                && p.Username.ToLower() == username.ToLower());
+
+        var playerCode = string.Empty;
+
+        if (player != null)
+        {
+            playerCode = player.PlayerCode;
+
+            var key = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+            var tokenData = Get<PlayerTokenData>(key);
+
+            if (tokenData != null)
             {
-                var createResponse = await apiClient.CreatePlayerAsync(
-                    new()
-                    {
-                        UserName = username,
-                        Password = password,
-                        IsTestPlayer = !username.StartsWith("RP", StringComparison.OrdinalIgnoreCase)
-                    },
-                    headers);
+                var loginRecord =
+                    await db.PlayerLoginRecords.AsQueryable()
+                        .FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
 
-                playerCode = createResponse.PlayerCode;
+                if (loginRecord?.Status == LoginStatus.Enabled)
+                {
+                    return;
+                }
             }
+        }
 
-            var res = await apiClient.PlayerLoginAsync(new()
+        var brandCacheKey = $"{SR.Brand}:{brandCode}";
+        var brand = Get<Brand>(brandCacheKey);
+
+        if (brand == null)
+        {
+            brand = await db.Brands.AsQueryable().FirstAsync(b => b.Code == brandCode);
+            Set(brandCacheKey, brand);
+        }
+
+        var apiClient = serviceProvider.GetRequiredService<IPlayerApiClient>();
+
+        var brandTokenCacheKey = $"{SR.BrandToken}:{brandCode}";
+        var brandToken = Get<string>(brandTokenCacheKey);
+
+        var brandTokenExpireTimeCacheKey = $"{SR.BrandTokenExpireTime}:{brandCode}";
+        var brandTokenExpireTime = Get<long>(brandTokenExpireTimeCacheKey);
+
+        if (brandToken.IsNullOrEmpty() || brandTokenExpireTime < DateTimeOffset.Now.ToUnixTimeMilliseconds())
+        {
+            var r = await apiClient.GetBrandTokenAsync(new()
             {
-                Username = username,
-                Password = password,
-                PlatformType = platformType
-            },
+                ApiKey = brand.ApiKey,
+                Currency = player?.DefaultWalletCurrencyCode ?? currencyCode
+            });
+
+            brandToken = r.Token;
+
+            Set(brandTokenCacheKey, brandToken);
+            Set(brandTokenExpireTimeCacheKey, r.ExpiredOn);
+        }
+
+        const string password = "TgsP@ssw0rd";
+
+        var headers = new Dictionary<string, string>
+        {
+            {
+                "Authorization", $"Bearer {brandToken}"
+            }
+        };
+
+        if (player == null)
+        {
+            var createResponse = await apiClient.CreatePlayerAsync(
+                new()
+                {
+                    UserName = username,
+                    Password = password,
+                    IsTestPlayer = !username.StartsWith("RP", StringComparison.OrdinalIgnoreCase)
+                },
                 headers);
 
-            var handler = serviceProvider.GetRequiredService<IJwtTokenHandler>();
-            var jwt = handler.ReadToken(res.PlayerToken);
-            var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
-
-            var tokenProvider = serviceProvider.GetRequiredService<ITokenProvider>();
-            var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
-
-            var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
-
-            Set(SR.BrandCode, brandCode);
-            Set(SR.PlayerCode, playerCode);
-            Set(SR.CurrencyCode, currencyCode);
-            Set(SR.PlatformType, platformType);
-            Set(tokenKey, data);
+            playerCode = createResponse.PlayerCode;
         }
 
-        protected async Task SetPlayerBalanceAsync(ServiceProvider serviceProvider, decimal balance)
+        var res = await apiClient.PlayerLoginAsync(new()
         {
-            var playerCode = Get<string>(SR.PlayerCode);
-            var db = GetDb<ITgsRepository>(serviceProvider);
+            Username = username,
+            Password = password,
+            PlatformType = platformType
+        },
+            headers);
 
-            const string sql = "update dbo.wallets w set balance=:balance where w.player_code=:player_code";
+        var handler = serviceProvider.GetRequiredService<IJwtTokenHandler>();
+        var jwt = handler.ReadToken(res.PlayerToken);
+        var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
-            await db.ExecuteSqlCommandAsync(sql,
-                CommandType.Text,
-                new Dictionary<string, object>
+        var tokenProvider = serviceProvider.GetRequiredService<ITokenProvider>();
+        var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
+
+        var tokenKey = $"{SR.PlayerTokenData}:{playerCode}:{platformType}";
+
+        Set(SR.BrandCode, brandCode);
+        Set(SR.PlayerCode, playerCode);
+        Set(SR.CurrencyCode, currencyCode);
+        Set(SR.PlatformType, platformType);
+        Set(tokenKey, data);
+    }
+
+    protected async Task SetPlayerBalanceAsync(ServiceProvider serviceProvider, decimal balance)
+    {
+        var playerCode = Get<string>(SR.PlayerCode);
+        var db = GetDb<ITgsRepository>(serviceProvider);
+
+        const string sql = "update dbo.wallets w set balance=:balance where w.player_code=:player_code";
+
+        await db.ExecuteSqlCommandAsync(sql,
+            CommandType.Text,
+            new Dictionary<string, object>
+            {
                 {
-                    {
-                        ":balance", balance
-                    },
-                    {
-                        ":player_code", playerCode
-                    }
-                });
-        }
+                    ":balance", balance
+                },
+                {
+                    ":player_code", playerCode
+                }
+            });
+    }
 
-        protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<ITgsRepository>(serviceProvider);
+    protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
+    {
+        var externalRoundId = Get<string>(SR.ExternalRoundId);
+        var db = GetDb<ITgsRepository>(serviceProvider);
 
-            var status = await db.Rounds.AsQueryable().Where(r => r.ExternalRoundId == externalRoundId)
-                .Select(r => r.Status)
-                .FirstAsync();
+        var status = await db.Rounds.AsQueryable().Where(r => r.ExternalRoundId == externalRoundId)
+            .Select(r => r.Status)
+            .FirstAsync();
 
-            status.Should().Be(expectedStatus);
-        }
+        status.Should().Be(expectedStatus);
     }
 }

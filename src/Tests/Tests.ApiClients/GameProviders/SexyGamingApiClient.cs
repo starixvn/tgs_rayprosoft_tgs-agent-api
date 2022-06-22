@@ -12,79 +12,78 @@ using TGS.Shared.Game.Models.SexyGaming.Common;
 using TGS.Shared.Game.Models.SexyGaming.Incoming;
 using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
 
-namespace TGS.Tests.ApiClients.GameProviders
+namespace TGS.Tests.ApiClients.GameProviders;
+
+public interface ISexyGamingApiClient
 {
-    public interface ISexyGamingApiClient
+    ValueTask<SexyGamingGetBalanceResponse> GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request);
+    ValueTask<SexyGamingGetBalanceResponse> PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request);
+    ValueTask<SexyGamingBaseResponse> SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request);
+}
+
+public sealed class SexyGamingApiClient : BaseApiClient, ISexyGamingApiClient
+{
+    private static readonly string RoutePrefix = "api/sg";
+    private readonly HttpClient _client;
+    private readonly IJsonSerializationProvider _json;
+    public SexyGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
+        base(client, logger, json)
     {
-        ValueTask<SexyGamingGetBalanceResponse> GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request);
-        ValueTask<SexyGamingGetBalanceResponse> PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request);
-        ValueTask<SexyGamingBaseResponse> SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request);
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _json = json ?? throw new ArgumentNullException(nameof(json));
     }
 
-    public sealed class SexyGamingApiClient : BaseApiClient, ISexyGamingApiClient
+    async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request)
     {
-        private static readonly string RoutePrefix = "api/sg";
-        private readonly HttpClient _client;
-        private readonly IJsonSerializationProvider _json;
-        public SexyGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
-            base(client, logger, json)
+        var data = new SexyGamingSingleWalletRequest()
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _json = json ?? throw new ArgumentNullException(nameof(json));
-        }
+            Key = key,
+            Message = Json.SerializeToString(request),
+            Extension1 = _json.SerializeToString(new { token })
+        };
+        var parameters = ConvertToKeyValue(data);
+        return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
+            .ConfigureAwait(false);
+    }
 
-        async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request)
+    async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request)
+    {
+        var data = new SexyGamingSingleWalletRequest()
         {
-            var data = new SexyGamingSingleWalletRequest()
-            {
-                Key = key,
-                Message = Json.SerializeToString(request),
-                Extension1 = _json.SerializeToString(new { token })
-            };
-            var parameters = ConvertToKeyValue(data);
-            return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
-                .ConfigureAwait(false);
-        }
+            Key = key,
+            Message = Json.SerializeToString(request),
+            Extension1 = _json.SerializeToString(new { token })
+        };
+        var parameters = ConvertToKeyValue(data);
+        return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
+            .ConfigureAwait(false);
+    }
 
-        async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request)
+    async ValueTask<SexyGamingBaseResponse> ISexyGamingApiClient.SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request)
+    {
+        var data = new SexyGamingSingleWalletRequest()
         {
-            var data = new SexyGamingSingleWalletRequest()
-            {
-                Key = key,
-                Message = Json.SerializeToString(request),
-                Extension1 = _json.SerializeToString(new { token })
-            };
-            var parameters = ConvertToKeyValue(data);
-            return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
-                .ConfigureAwait(false);
-        }
+            Key = key,
+            Message = Json.SerializeToString(request)
+        };
+        var parameters = ConvertToKeyValue(data);
+        return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
+            .ConfigureAwait(false);
+    }
 
-        async ValueTask<SexyGamingBaseResponse> ISexyGamingApiClient.SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request)
+
+
+
+    private Dictionary<string, string> ConvertToKeyValue(object request)
+    {
+        var options = new JsonSerializerOptions
         {
-            var data = new SexyGamingSingleWalletRequest()
-            {
-                Key = key,
-                Message = Json.SerializeToString(request)
-            };
-            var parameters = ConvertToKeyValue(data);
-            return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
-                .ConfigureAwait(false);
-        }
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
-
-
-
-        private Dictionary<string, string> ConvertToKeyValue(object request)
-        {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = false,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            };
-
-            var value = Json.SerializeToString(request, request.GetType(), options);
-            var items = Json.DeserializeFromString<Dictionary<string, object>>(value, options);
-            return items.ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
-        }
+        var value = Json.SerializeToString(request, request.GetType(), options);
+        var items = Json.DeserializeFromString<Dictionary<string, object>>(value, options);
+        return items.ToDictionary(p => p.Key, p => p.Value?.ToString() ?? string.Empty);
     }
 }

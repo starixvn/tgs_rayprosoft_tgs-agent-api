@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace TGS.Services.BackOffice.Application.Models.Aggregate
+namespace TGS.Services.BackOffice.Application.Models.Aggregate;
+
+public record GenerateBrandGameProviderAggregateRequest
+    (DateTimeOffset StartDate, Guid? BrandId)
 {
-    public record GenerateBrandGameProviderAggregateRequest
-        (DateTimeOffset StartDate, Guid? BrandId)
-    {
-        public string UserId { get; set; }
-    }
+    public string UserId { get; set; }
 }
