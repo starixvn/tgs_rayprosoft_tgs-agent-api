@@ -47,9 +47,7 @@ internal class SetWithdrawBankInfoRegisterFlowStep : IRegisterFlowStep
             locationInfo.PlayerCode,
             request.PaymentChannelId,
             request.BankType,
-            request.Detail,
-            locationInfo.Ip,
-            locationInfo.HostName!);
+            request.Detail);
 
         await _createBankInfoService
             .ExecuteAsync(command, cancellationToken)

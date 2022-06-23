@@ -130,25 +130,30 @@ public class PlayerController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async Task CreateBankInfoAsync(
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
         CreateInitBankInfoViewModel viewModel)
     {
-        var brandId = HttpContext.GetBrandId();
-        var playerData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.GetBrandId()!.Value;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CreateInitBankInfoCommand(
-            brandId!.Value,
-            playerData.PlayerCode,
-            viewModel.PaymentChannelId,
-            viewModel.BankType,
-            viewModel.Detail,
-            ipAddress,
-            hostName);
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
 
-        await createService.ExecuteAsync(command).ConfigureAwait(false);
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(viewModel),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
     }
 
     [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
