@@ -16,21 +16,18 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IPasswordHandler _passwordHandler;
     private readonly IPlayerOperations _playerOperations;
-    private readonly IPlayerRepository _playerRepository;
     private readonly IPlayerServiceClient _playerServiceClient;
 
     public CreatePlayerCommandService(
         IPlayerOperations playerOperations,
         IPasswordHandler passwordHandler,
         IBrandOperations brandOperations,
-        IPlayerRepository playerRepository,
         IPlayerServiceClient playerServiceClient,
         IBrandServiceClient brandServiceClient)
     {
         _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
     }
@@ -47,8 +44,8 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
             return new CreatePlayerInfo(player.PlayerCode, false);
 
         var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
-
-        var brand = await _brandServiceClient
+        
+        _ = await _brandServiceClient
             .GetBrandInfoAsync(command.BrandId)
             .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
@@ -56,38 +53,13 @@ internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, Cre
             .GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
             .ConfigureAwait(false);
 
-        var playerStatus = brand.SmsRegisterFlowEnabled || brand.EmailRegisterFlowEnabled || brand.BankInfoRegisterFlowEnabled
-            ? PlayerStatus.InBlacklist
-            : PlayerStatus.Enabled;
-
         var resultPlayerCode = await CreatePlayerAsync(
             command,
             salt!,
             password!,
             command.CurrencyCode,
             betLimitId,
-            playerStatus).ConfigureAwait(false);
-
-        if (!string.IsNullOrEmpty(resultPlayerCode)
-            && !brand.SmsRegisterFlowEnabled
-            && !brand.EmailRegisterFlowEnabled
-            && !brand.BankInfoRegisterFlowEnabled)
-        {
-            await _playerRepository
-                .PlayerRegisterIpAsync(
-                    resultPlayerCode,
-                    command.IpAddress,
-                    command.HostName,
-                    DateTimeOffset.UtcNow)
-                .ConfigureAwait(false);
-
-            await _playerRepository
-                .PlayerLoginIpAsync(
-                    resultPlayerCode,
-                    command.IpAddress,
-                    command.HostName!)
-                .ConfigureAwait(false);
-        }
+            PlayerStatus.RegisterUndone).ConfigureAwait(false);
 
         return new CreatePlayerInfo(resultPlayerCode, true);
     }

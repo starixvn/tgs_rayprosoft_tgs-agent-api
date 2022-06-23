@@ -69,9 +69,7 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 request.Password,
                 brand!.Currency,
                 request.UpperPlayerCode,
-                request.IsTestPlayer,
-                locationInfo.Ip,
-                locationInfo.HostName);
+                request.IsTestPlayer);
 
             var info = await _createPlayerInvitationPlayerService
                 .GetAsync(command)
@@ -95,9 +93,7 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 request.Password,
                 brand!.Currency,
                 agentInvitationCode,
-                request.IsTestPlayer,
-                locationInfo.Ip,
-                locationInfo.HostName);
+                request.IsTestPlayer);
 
             var info = await _createAgentInvitationPlayerService
                 .GetAsync(command)
@@ -120,9 +116,7 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 request.UserName,
                 request.Password,
                 brand!.Currency,
-                request.IsTestPlayer,
-                locationInfo.Ip,
-                locationInfo.HostName);
+                request.IsTestPlayer);
 
             var info = await _createPlayerService.GetAsync(query).ConfigureAwait(false);
 
@@ -165,4 +159,6 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
         [JsonPropertyName("isnew")]
         public bool IsNew { get; init; }
     }
+
+    public void SetupStep(JsonElement jsonElement) => throw new NotImplementedException();
 }

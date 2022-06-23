@@ -1,30 +1,28 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, bool>
 {
-    private readonly ITgsRepository _tgsRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public CheckBrandPhoneQueryService(ITgsRepository tgsRepository)
+    public CheckBrandPhoneQueryService(IPlayerServiceClient playerServiceClient)
     {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
-    public ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
     {
-        var result = _tgsRepository.Players
-            .AsQueryable()
-            .Any(p => p.BrandId == query.BrandId
-                && p.AreaCode == query.AreaCode
-                && p.Phone == query.Phone
-                && p.PlayerCode != query.PlayerCode);
+        var player = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
+            query.BrandId,
+            query.AreaCode,
+            query.Phone,
+            cancellationToken).ConfigureAwait(false);
 
-        return ValueTask.FromResult(result);
+        return player is null || player.PlayerCode == query.PlayerCode;
     }
 }

@@ -15,16 +15,18 @@ internal class ExecutePlayerRegisterFlowCommandService : IGetService<ExecutePlay
         _brandRegisterFlowDefinitionManager = brandRegisterFlowDefinitionManager ?? throw new ArgumentNullException(nameof(brandRegisterFlowDefinitionManager));
     }
 
-    public async ValueTask<RegisterFlowProcessResult> GetAsync(ExecutePlayerRegisterFlowCommand query, CancellationToken cancellationToken = default)
+    public async ValueTask<RegisterFlowProcessResult> GetAsync(
+        ExecutePlayerRegisterFlowCommand command,
+        CancellationToken cancellationToken = default)
     {
         var flowDefinition = await _brandRegisterFlowDefinitionManager
-            .GetRegisterFlowDefinitionAsync(query.BrandId, cancellationToken)
+            .GetRegisterFlowDefinitionAsync(command.BrandId, cancellationToken)
             .ConfigureAwait(false);
 
         var flow = flowDefinition.BuildRegisterFlow();
 
         var isCompleted = await flow
-            .ConfirmCompletedAsync(query.LocationInfo.PlayerCode, cancellationToken)
+            .ConfirmCompletedAsync(command.LocationInfo.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
         if (isCompleted)
@@ -34,9 +36,9 @@ internal class ExecutePlayerRegisterFlowCommandService : IGetService<ExecutePlay
                 null);
 
         var result = await flow.ProcessInputAsync(
-            query.BrandId,
-            query.Input,
-            query.LocationInfo,
+            command.BrandId,
+            command.Input,
+            command.LocationInfo,
             cancellationToken).ConfigureAwait(false);
 
         return result;

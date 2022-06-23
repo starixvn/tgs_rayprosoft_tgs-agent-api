@@ -18,7 +18,6 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IPasswordHandler _passwordHandler;
     private readonly IPlayerOperations _playerOperations;
-    private readonly IPlayerRepository _playerRepository;
     private readonly IPlayerServiceClient _playerServiceClient;
 
     public CreateAgentInvitationPlayerCommandService(
@@ -26,7 +25,6 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         IPasswordHandler passwordHandler,
         IBrandOperations brandOperations,
         IAgentOperations agentOperations,
-        IPlayerRepository playerRepository,
         IPlayerServiceClient playerServiceClient,
         IBrandServiceClient brandServiceClient)
     {
@@ -34,7 +32,6 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
         _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
     }
@@ -52,7 +49,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
 
         var (salt, password) = _passwordHandler.GenerateCredential(command.Password);
 
-        var brand = await _brandServiceClient
+        _ = await _brandServiceClient
             .GetBrandInfoAsync(command.BrandId)
             .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
@@ -60,38 +57,13 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
             .GetBrandDefaultBetLimitAsync(command.BrandId, command.CurrencyCode)
             .ConfigureAwait(false);
 
-        var playerStatus = brand.SmsRegisterFlowEnabled || brand.EmailRegisterFlowEnabled || brand.BankInfoRegisterFlowEnabled
-            ? PlayerStatus.InBlacklist
-            : PlayerStatus.Enabled;
-
         var resultPlayerCode = await CreatePlayerByAgentAsync(
             command,
             salt!,
             password!,
             command.CurrencyCode,
             betLimitId,
-            playerStatus).ConfigureAwait(false);
-
-        if (!string.IsNullOrEmpty(resultPlayerCode)
-            && !brand.SmsRegisterFlowEnabled
-            && !brand.EmailRegisterFlowEnabled
-            && !brand.BankInfoRegisterFlowEnabled)
-        {
-            await _playerRepository
-                .PlayerRegisterIpAsync(
-                    resultPlayerCode,
-                    command.IpAddress,
-                    command.HostName,
-                    DateTimeOffset.UtcNow)
-                .ConfigureAwait(false);
-
-            await _playerRepository
-                .PlayerLoginIpAsync(
-                    resultPlayerCode,
-                    command.IpAddress,
-                    command.HostName!)
-                .ConfigureAwait(false);
-        }
+            PlayerStatus.RegisterUndone).ConfigureAwait(false);
 
         return new CreatePlayerInfo(resultPlayerCode, true);
     }
@@ -128,7 +100,7 @@ internal class CreateAgentInvitationPlayerCommandService : IGetService<CreatePla
                     Type = command.IsTestPlayer
                         ? Core.Models.Enums.PlayerType.TestPlayer
                         : Core.Models.Enums.PlayerType.RealPlayer,
-                    PlayerStatus = (Core.Models.Enums.PlayerStatus)(short)status
+                    PlayerStatus = (Core.Models.Enums.PlayerStatus)status
                 })
             .ConfigureAwait(false);
 

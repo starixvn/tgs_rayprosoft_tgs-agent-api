@@ -13,7 +13,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OperatorServiceCollectionExtensions
 {
-    private static readonly Dictionary<string, Type> _FlowTypes = new();
+    private static readonly Dictionary<string, Type> _FlowTypes = new()
+    {
+        ["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
+        ["InitMail"] = typeof(SetEmailRegisterFlowStep),
+        ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep)
+    };
 
     public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
     {
@@ -54,7 +59,11 @@ public static class OperatorServiceCollectionExtensions
             .AddScoped(sp => new RegisterFlowBuilder(
                 sp,
                 _FlowTypes.ToImmutableDictionary()))
-            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>();
+            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>()
+            .AddScoped<CreatePlayerRegisterFlowStep>();
+
+        foreach (var v in _FlowTypes.Values)
+            services.AddScoped(v);
 
         var opConfiguration = new OperatorConfiguration(services);
 

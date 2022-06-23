@@ -20,7 +20,7 @@ internal class RegisterFlowBuilder
     {
         var definition = new RegisterFlowDefinition();
 
-        definition.AddStep(ActivatorUtilities.CreateInstance<CreatePlayerRegisterFlowStep>(_serviceProvider));
+        definition.AddStep(_serviceProvider.GetRequiredService<CreatePlayerRegisterFlowStep>());
 
         foreach (var element in settingsJson.RootElement.EnumerateArray())
         {
@@ -29,9 +29,9 @@ internal class RegisterFlowBuilder
             if (string.IsNullOrWhiteSpace(type))
                 throw new InvalidOperationException("RegisterFlowStep type is not specified");
 
-            var step = (IRegisterFlowStep)ActivatorUtilities.CreateInstance(
-                _serviceProvider,
-                _registerFlowStepTypes[type]);
+            var step = (IRegisterFlowStep)_serviceProvider.GetRequiredService(_registerFlowStepTypes[type]);
+
+            step.SetupStep(element);
 
             definition.AddStep(step);
         }
