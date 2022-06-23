@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -393,9 +394,7 @@ public class PlayerController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     public async Task<CreatePlayerResponse> RegisterPlayerAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
-        [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
-        [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
-        [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
         [FromBody] CreatePlayerRequest request)
     {
@@ -417,67 +416,24 @@ public class PlayerController : ControllerBase
         var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var agentInvitationCode = string.IsNullOrWhiteSpace(invitationCode)
-            ? request.AgentInvitationCode
-            : invitationCode;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
-        {
-            var command = new CreatePlayerWithPlayerInvitationCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                request.UpperPlayerCode,
-                request.IsTestPlayer);
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            invitationCode);
 
-            var info = await createPlayerInvitationPlayerService
-                .GetAsync(command)
-                .ConfigureAwait(false);
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(request),
+            locationInfo);
 
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
-        else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
-        {
-            var command = new CreatePlayerWithAgentInvitationCodeCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                agentInvitationCode,
-                request.IsTestPlayer);
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
-            var info = await createAgentInvitationPlayerService
-                .GetAsync(command)
-                .ConfigureAwait(false);
-
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
-        else
-        {
-            var query = new CreatePlayerCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                request.IsTestPlayer);
-
-            var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
-
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
+        return result.StepResponse.Deserialize<CreatePlayerResponse>();
     }
 
     [HttpPost("register", Name = "RegisterPlayerFlow")]
@@ -516,7 +472,6 @@ public class PlayerController : ControllerBase
 
         var command = new ExecutePlayerRegisterFlowCommand(
             brandId,
-            model.Type,
             model.Input,
             locationInfo);
 
@@ -838,69 +793,47 @@ public class PlayerController : ControllerBase
         return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Starts to set phone with player token
-    /// </summary>
-    /// <param name="getBrandInfoService">The brand info query service.</param>
-    /// <param name="getPlayerInfoService">The get player information service.</param>
-    /// <param name="checkService">The check player phone service.</param>
-    /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
+    /// <summary>Starts to set phone with player token</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="request">The request.</param>
-    /// <returns>
-    /// security code
-    /// </returns>
+    /// <returns>security code</returns>
     [HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask<string> StartSetPhoneAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-        [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] StartInitPhoneRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Phone)
             || string.IsNullOrWhiteSpace(request.AreaCode))
             throw new PlayerPhoneRequiredException();
 
-        var brandId = HttpContext.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
 
-        if (!brand.SmsRegisterFlowEnabled)
-            throw new InvalidOperationException();
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
 
-        var playerInfo = await getPlayerInfoService
-            .GetAsync(new GetPlayerQuery(brand.BrandId, playerTokenData.PlayerCode))
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Init",
+                data = request
+            }),
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        if (playerInfo == null)
-            throw new CoreExceptions.PlayerNotFoundException("Player not found.");
-
-        var checkQuery = new CheckBrandPhoneQuery(
-            brand.BrandId,
-            playerInfo.PlayerCode,
-            request.AreaCode.Trim(),
-            request.Phone.Trim());
-
-        var isBrandHasSamePhone = await checkService
-            .GetAsync(checkQuery)
-            .ConfigureAwait(false);
-
-        if (isBrandHasSamePhone)
-            throw new BrandPhoneDuplicateException();
-
-        var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
-            playerInfo.PlayerCode,
-            request.AreaCode.Trim(),
-            request.Phone.Trim(),
-            CultureInfo.CurrentUICulture,
-            brand.SmsEnabled);
-
-        return await startSetPlayerPhoneService
-            .GetAsync(startSetPlayerPhoneCommand)
-            .ConfigureAwait(false);
+        return result.StepResponse.Deserialize<string>();
     }
 
     [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
@@ -977,33 +910,42 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Submits the change phone.
-    /// </summary>
-    /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+    /// <summary>Submits the change phone.</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
+    /// <returns>
+    ///   <br />
+    /// </returns>
     [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask SubmitChangePhoneAsync(
-        [FromServices] ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] SubmitInitPhoneRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CommitInitPlayerPhoneCommand(
-            request.SecurityKey,
-            request.ValidateCode,
-            ipAddress,
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
             hostName,
-            brandId);
+            null);
 
-        await commitPlayerInitPhoneService
-            .ExecuteAsync(command)
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Valid",
+                data = request
+            }),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 

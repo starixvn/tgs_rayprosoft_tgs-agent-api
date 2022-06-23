@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
@@ -13,23 +16,20 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
 {
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IRedisCacheManager _cacheManager;
-    private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public CommitInitPlayerPhoneCommandService(
         IValidateCodeOperator validateCodeOperator,
         IBrandServiceClient brandServiceClient,
-        IPlayerRepository playerRepository,
         IRedisCacheManager cacheManager,
-        IGetService<CheckBrandPhoneQuery, bool> checkService)
+        IPlayerServiceClient playerServiceClient)
     {
         _validateCodeOperator =
             validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-        _checkService = checkService ?? throw new ArgumentNullException(nameof(checkService));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
     public async ValueTask ExecuteAsync(CommitInitPlayerPhoneCommand command,
@@ -47,47 +47,34 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
             .ConfigureAwait(false);
 
         if (result == null)
-        {
             throw new ValidateCodeNotVerifyException();
-        }
 
         var playerCode = result.PlayerCode;
 
-        var checkQuery = new CheckBrandPhoneQuery(
+        var findPlayer = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
             command.BrandId,
-            playerCode,
             result.AreaCode,
-            result.Phone);
+            result.Phone,
+            cancellationToken).ConfigureAwait(false);
 
-        var isBrandHasSamePhone = await _checkService
-            .GetAsync(checkQuery, cancellationToken)
-            .ConfigureAwait(false);
+        var isBrandHasSamePhone = findPlayer is not null && findPlayer.PlayerCode != playerCode;
 
         if (isBrandHasSamePhone)
             throw new BrandPhoneDuplicateException();
 
-        await _playerRepository
-            .SetPlayerPhoneAsync(result.PlayerCode, result.AreaCode, result.Phone)
+        await _playerServiceClient.SetPlayerPropertiesAsync(
+            result.PlayerCode,
+            new Dictionary<PlayerPropertyName, string?>
+            {
+                [PlayerPropertyName.AreaCode] = result.AreaCode,
+                [PlayerPropertyName.Phone] = result.Phone,
+                [PlayerPropertyName.PhoneAuthentication] = true.ToString()
+            }.ToImmutableDictionary(),
+            cancellationToken)
             .ConfigureAwait(false);
 
         if (brand.EmailRegisterFlowEnabled)
             return;
-
-        await _playerRepository
-            .UpdatePlayerStatusAsync(playerCode, PlayerStatus.Enabled)
-            .ConfigureAwait(false);
-
-        await _playerRepository
-            .PlayerRegisterIpAsync(
-                result.PlayerCode,
-                command.IpAddress,
-                command.HostName,
-                DateTimeOffset.UtcNow)
-            .ConfigureAwait(false);
-
-        await _playerRepository
-            .PlayerLoginIpAsync(result.PlayerCode, command.IpAddress, command.HostName)
-            .ConfigureAwait(false);
 
         await _cacheManager
             .ClearCacheAsync(RedisCacheType.Player, playerCode)

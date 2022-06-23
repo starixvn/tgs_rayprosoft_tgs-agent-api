@@ -4,29 +4,29 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
 {
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly ICommandService<CommitInitPlayerPhoneCommand> _commitPlayerInitPhoneService;
-    private readonly IGetService<BrandQuery, BrandInfo> _getBrandInfoService;
     private readonly IPlayerServiceClient _playerServiceClient;
     private readonly IGetService<StartSetPlayerPhoneCommand, string> _startSetPlayerPhoneService;
     public string Type => "InitPhone";
 
     public SetPhoneRegisterFlowStep(
-        IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        IBrandServiceClient brandServiceClient,
         IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
         ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
         IPlayerServiceClient playerServiceClient)
     {
-        _getBrandInfoService = getBrandInfoService ?? throw new ArgumentNullException(nameof(getBrandInfoService));
+        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _startSetPlayerPhoneService = startSetPlayerPhoneService ?? throw new ArgumentNullException(nameof(startSetPlayerPhoneService));
         _commitPlayerInitPhoneService = commitPlayerInitPhoneService ?? throw new ArgumentNullException(nameof(commitPlayerInitPhoneService));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
@@ -76,9 +76,9 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             || string.IsNullOrWhiteSpace(data.AreaCode))
             throw new PlayerPhoneRequiredException();
 
-        var brand = await _getBrandInfoService
-           .GetAsync(new BrandQuery(brandId), cancellationToken)
-           .ConfigureAwait(false);
+        var brand = await _brandServiceClient
+            .GetBrandInfoAsync(brandId, cancellationToken)
+            .ConfigureAwait(false);
 
         if (brand is null)
             return new RegisterFlowProcessResult(false, null, null);
@@ -130,6 +130,9 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
         PlayerLocationInfo locationInfo,
         CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
+            return new RegisterFlowProcessResult(false, null, null);
+
         var command = new CommitInitPlayerPhoneCommand(
             data.SecurityKey,
             data.ValidateCode,
@@ -141,8 +144,12 @@ internal class SetPhoneRegisterFlowStep : IRegisterFlowStep
             .ExecuteAsync(command, cancellationToken)
             .ConfigureAwait(false);
 
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(locationInfo.PlayerCode!, cancellationToken)
+            .ConfigureAwait(false);
+
         return new RegisterFlowProcessResult(
-            true,
+            player is not null && player.PhoneAuthentication,
             null,
             null);
     }
