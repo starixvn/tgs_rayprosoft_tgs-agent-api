@@ -120,12 +120,13 @@ public class PlayerController : ControllerBase
         return new CheckUsernameResponse { Exists = isExist };
     }
 
-    /// <summary>
-    /// Create default withdraw bankinfo of register flow.
-    /// </summary>
+    /// <summary>Create default withdraw bankinfo of register flow.</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="createService"></param>
     /// <param name="viewModel"></param>
-    /// <returns></returns>
+    /// <returns>
+    ///   <br />
+    /// </returns>
     [HttpPost("init-bankinfo", Name = "CreatePlayerBankInfoOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
