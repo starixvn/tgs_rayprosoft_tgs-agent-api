@@ -741,56 +741,45 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Starts the change email of register flow.
-    /// </summary>
-    /// <param name="getBrandInfoService">The get brand info service.</param>
-    /// <param name="getPlayerInfoService">The get player info service.</param>
-    /// <param name="checkService">The check player email service.</param>
-    /// <param name="setPlayerEmailService">The set player email service.</param>
+    /// <summary>Starts the change email of register flow.</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
+    /// <returns>
+    ///   <br />
+    /// </returns>
     [HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask<string> StartSetEmailAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-        [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
-        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] StartInitEmailRequest request)
     {
-        var brandId = HttpContext.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var brandInfo = await getBrandInfoService
-            .GetAsync(new BrandQuery(brandId!.Value), HttpContext.RequestAborted)
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Init",
+                data = request
+            }),
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        if (!brandInfo.EmailRegisterFlowEnabled)
-            throw new InvalidOperationException();
-
-        var playerInfo = await getPlayerInfoService
-            .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
-            .ConfigureAwait(false);
-
-        var isBrandHasSameEmail = await checkService
-            .GetAsync(new CheckBrandEmailQuery(
-                brandId!.Value,
-                request.Email,
-                playerInfo.PlayerCode))
-            .ConfigureAwait(false);
-
-        if (isBrandHasSameEmail)
-            throw new BrandEmailDuplicateException();
-
-        var command = new StartSetPlayerEmailCommand(
-            playerTokenData.PlayerCode,
-            request.Email,
-            CultureInfo.CurrentUICulture,
-            true);
-
-        return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
+        return result.StepResponse.Deserialize<string>();
     }
 
     /// <summary>Starts to set phone with player token</summary>
@@ -840,23 +829,32 @@ public class PlayerController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask SubmitChangeEmailAsync(
-        [FromServices] ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] SubmitInitEmailRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CommitInitPlayerEmailCommand(
-            request.SecurityKey,
-            request.ValidateCode,
-            ipAddress,
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
             hostName,
-            brandId);
+            null);
 
-        await commitPlayerEmailService
-            .ExecuteAsync(command)
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Valid",
+                data = request
+            }),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 

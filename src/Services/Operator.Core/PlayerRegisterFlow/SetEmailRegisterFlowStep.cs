@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Brand;
@@ -14,18 +15,18 @@ namespace TGS.Services.Operator.PlayerRegisterFlow;
 internal class SetEmailRegisterFlowStep : IRegisterFlowStep
 {
     private readonly ICommandService<CommitInitPlayerEmailCommand> _commitPlayerEmailService;
-    private readonly IGetService<BrandQuery, BrandInfo> _getBrandInfoService;
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IPlayerServiceClient _playerServiceClient;
     private readonly IGetService<StartSetPlayerEmailCommand, string> _setPlayerEmailService;
     public string Type => "InitMail";
 
     public SetEmailRegisterFlowStep(
-        IGetService<BrandQuery, BrandInfo> getBrandInfoService,
+        IBrandServiceClient brandServiceClient,
         IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
         ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
         IPlayerServiceClient playerServiceClient)
     {
-        _getBrandInfoService = getBrandInfoService ?? throw new ArgumentNullException(nameof(getBrandInfoService));
+        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _setPlayerEmailService = setPlayerEmailService ?? throw new ArgumentNullException(nameof(setPlayerEmailService));
         _commitPlayerEmailService = commitPlayerEmailService ?? throw new ArgumentNullException(nameof(commitPlayerEmailService));
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
@@ -70,8 +71,8 @@ internal class SetEmailRegisterFlowStep : IRegisterFlowStep
         if (string.IsNullOrWhiteSpace(data.Email))
             return new RegisterFlowProcessResult(false, null, null);
 
-        var brand = await _getBrandInfoService
-            .GetAsync(new BrandQuery(brandId), cancellationToken)
+        var brand = await _brandServiceClient
+            .GetBrandInfoAsync(brandId, cancellationToken)
             .ConfigureAwait(false);
 
         if (brand is null)
@@ -122,16 +123,18 @@ internal class SetEmailRegisterFlowStep : IRegisterFlowStep
         var command = new CommitInitPlayerEmailCommand(
             data.SecurityKey,
             data.ValidateCode,
-            locationInfo.Ip,
-            locationInfo.HostName!,
             brandId);
 
         await _commitPlayerEmailService
             .ExecuteAsync(command, cancellationToken)
             .ConfigureAwait(false);
 
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(locationInfo.PlayerCode!, cancellationToken)
+            .ConfigureAwait(false);
+
         return new RegisterFlowProcessResult(
-            true,
+            player is not null && player.EmailAuthentication,
             null,
             null);
     }
