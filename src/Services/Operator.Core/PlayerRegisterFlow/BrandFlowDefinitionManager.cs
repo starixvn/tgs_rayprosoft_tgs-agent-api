@@ -37,6 +37,8 @@ internal class BrandFlowDefinitionManager : IBrandRegisterFlowDefinitionManager
                     .GetBrandFrontendInfoAsync(brandId)
                     .ConfigureAwait(false);
 
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8D);
+
                 return brandFrontendInfo?.PlayerRegisterFlowSettings;
             }).ConfigureAwait(false);
 

@@ -56,6 +56,13 @@ internal class RegisterFlow : IRegisterFlowStep
 
             var isCompleted = await ConfirmCompletedAsync(locationInfo.PlayerCode).ConfigureAwait(false);
 
+            if (!isCompleted && _flowSteps.Peek().Type == "Final")
+                return await ProcessInputAsync(
+                    brandId,
+                    input,
+                    locationInfo,
+                    cancellationToken).ConfigureAwait(false);
+
             return new RegisterFlowProcessResult(
                 isCompleted,
                 isCompleted ? null : _flowSteps.Peek().Type,
