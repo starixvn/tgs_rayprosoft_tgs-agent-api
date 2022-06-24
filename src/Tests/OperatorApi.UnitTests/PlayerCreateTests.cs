@@ -13,13 +13,43 @@ using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
 public class PlayerCreateTests
 {
+    [Test]
+    public async Task Get_Player_Current_Register_Step()
+    {
+        var fakeBrandRegisterFlowDefinitionManager = Substitute.For<IBrandRegisterFlowDefinitionManager>();
+
+        var sut = new GetCurrentPlayerRegisterFlowStepQueryService(
+            fakeBrandRegisterFlowDefinitionManager);
+
+        var query = new GetCurrentPlayerRegisterFlowStepQuery(Guid.NewGuid(), null);
+
+        var flowDefinition = new RegisterFlowDefinition();
+
+        var fakeCreatePlayerStep = new StubRegisterFlowStep()
+        {
+            Type = "AAA"
+        };
+
+        fakeCreatePlayerStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
+            new RegisterFlowProcessResult(true, null, null)));
+
+        flowDefinition.AddStep(fakeCreatePlayerStep);
+
+        fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(query.BrandId))
+            .Returns(flowDefinition);
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.AreEqual("AAA", actual);
+    }
+
     [Test]
     public async Task Register_Player_With_Existent_InvitationCode()
     {
