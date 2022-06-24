@@ -60,7 +60,8 @@ public static class OperatorServiceCollectionExtensions
                 sp,
                 _FlowTypes.ToImmutableDictionary()))
             .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>()
-            .AddScoped<CreatePlayerRegisterFlowStep>();
+            .AddScoped<CreatePlayerRegisterFlowStep>()
+            .AddScoped<FinalRegisterFlowStep>();
 
         foreach (var v in _FlowTypes.Values)
             services.AddScoped(v);
