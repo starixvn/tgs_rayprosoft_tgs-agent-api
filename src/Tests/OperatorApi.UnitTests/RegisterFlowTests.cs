@@ -1254,6 +1254,42 @@ public class RegisterFlowTests
     }
 
     [Test]
+    public async Task RegisterFlow_Can_Show_Current_Step()
+    {
+        var playerCode = "player1";
+
+        var step1 = new StubRegisterFlowStep
+        {
+            Type = "Step1"
+        };
+        step1.SetConfirmCompletedDelegate(_ => true);
+
+        var step2 = new StubRegisterFlowStep
+        {
+            Type = "Step2"
+        };
+        var step3 = new StubRegisterFlowStep
+        {
+            Type = "Step3"
+        };
+
+        var sut = new RegisterFlow(new[] {
+            step1,
+            step2,
+            step3
+        });
+
+        var actual = await sut.ConfirmCompletedAsync(playerCode);
+
+        var privateStack = typeof(RegisterFlow)
+            .GetField("_flowSteps", BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetValue(sut) as Queue<IRegisterFlowStep>;
+
+        Assert.IsFalse(actual);
+        Assert.AreEqual("Step2", sut.CurrentStep);
+    }
+
+    [Test]
     public async Task RegisterFlow_Will_Auto_Process_FinalRegisterFlowStep()
     {
         var brandId = Guid.NewGuid();

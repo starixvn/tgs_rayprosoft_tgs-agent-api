@@ -10,6 +10,8 @@ internal class RegisterFlow : IRegisterFlowStep
 {
     private readonly Queue<IRegisterFlowStep> _flowSteps = new Queue<IRegisterFlowStep>();
 
+    public string? CurrentStep => _flowSteps.Count == 0 ? null : _flowSteps.Peek().Type;
+
     public string Type => "RegisterFlow";
 
     public RegisterFlow(IEnumerable<IRegisterFlowStep> steps)
