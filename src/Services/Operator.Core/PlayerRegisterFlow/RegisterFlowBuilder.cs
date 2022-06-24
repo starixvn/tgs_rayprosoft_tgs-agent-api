@@ -36,6 +36,8 @@ internal class RegisterFlowBuilder
             definition.AddStep(step);
         }
 
+        definition.AddStep(_serviceProvider.GetRequiredService<FinalRegisterFlowStep>());
+
         return definition;
     }
 }
