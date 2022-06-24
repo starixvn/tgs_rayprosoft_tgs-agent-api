@@ -304,7 +304,9 @@ public class PlayerController : ControllerBase
             Viber = playerProperties.GetValueOrDefault("Viber"),
             Telegram = playerProperties.GetValueOrDefault("Telegram"),
             WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
-            BankInfoAuthentication = bankInfoAuthentication
+            BankInfoAuthentication = bankInfoAuthentication,
+            EmailAuthentication = player.EmailAuthentication,
+            PhoneAuthentication = player.PhoneAuthentication
         };
 
         return playerInfo;

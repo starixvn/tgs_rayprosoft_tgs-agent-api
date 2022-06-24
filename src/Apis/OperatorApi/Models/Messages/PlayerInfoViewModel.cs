@@ -15,6 +15,9 @@ public class PlayerInfoViewModel
     [JsonPropertyName("email")]
     public string Email { get; set; }
 
+    [JsonPropertyName("emailauthentication")]
+    public bool EmailAuthentication { get; set; }
+
     [JsonPropertyName("facebookmessenger")]
     public string FacebookMessenger { get; set; }
 
@@ -41,6 +44,9 @@ public class PlayerInfoViewModel
 
     [JsonPropertyName("areacode")]
     public string PhoneAreaCode { get; set; }
+
+    [JsonPropertyName("phoneauthentication")]
+    public bool PhoneAuthentication { get; set; }
 
     [JsonPropertyName("playercode")]
     public string PlayerCode { get; set; }
