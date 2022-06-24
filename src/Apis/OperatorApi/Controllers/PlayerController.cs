@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
@@ -239,7 +240,7 @@ public class PlayerController : ControllerBase
         [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
         [FromServices] IGetService<GetPlayerStatusQuery, Tgs.PlayerService.Client.PlayerStatus> getPlayerStatusQueryService,
         [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
-        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> getPlayerPropertiesQueryService,
         [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
         [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
         [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
