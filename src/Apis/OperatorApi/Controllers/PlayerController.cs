@@ -230,6 +230,19 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query);
     }
 
+    [HttpGet("register", Name = "GetCurrentRegisterStep")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<string> GetCurrentRegisterStepAsync(
+            [FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
+    {
+        var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var query = new GetCurrentPlayerRegisterFlowStepQuery(brandId, playerTokenData?.PlayerCode);
+
+        return getService.GetAsync(query, HttpContext.RequestAborted);
+    }
+
     /// <summary>
     /// Get player information
     /// </summary>
@@ -306,7 +319,8 @@ public class PlayerController : ControllerBase
             WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
             BankInfoAuthentication = bankInfoAuthentication,
             EmailAuthentication = player.EmailAuthentication,
-            PhoneAuthentication = player.PhoneAuthentication
+            PhoneAuthentication = player.PhoneAuthentication,
+            IsCompletedRegister = playerStatus != Tgs.PlayerService.Client.PlayerStatus.RegisterUndone
         };
 
         return playerInfo;

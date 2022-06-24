@@ -33,6 +33,9 @@ public class PlayerInfoViewModel
     [JsonPropertyName("autotransfertogame")]
     public bool IsAutoTransferToGame { get; set; }
 
+    [JsonPropertyName("registercompleted")]
+    public bool IsCompletedRegister { get; set; }
+
     [JsonPropertyName("issetpaypassword")]
     public bool IsSetPayPassword { get; set; }
 
