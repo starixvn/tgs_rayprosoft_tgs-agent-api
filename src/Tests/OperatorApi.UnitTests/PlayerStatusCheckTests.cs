@@ -11,10 +11,10 @@ using NUnit.Framework;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.ApplicationServices.Player;
+using Tgs.PlayerService.Client;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
