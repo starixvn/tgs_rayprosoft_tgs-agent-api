@@ -105,6 +105,22 @@ public class PlayerController : ControllerBase
         return identityVerifier.Verify(id);
     }
 
+    [HttpPost("phone/check")]
+    public ValueTask<bool> CheckPhoneCanUseAsync(
+            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+            [FromBody] StartSetPhoneRequest viewModel)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new CheckBrandPhoneQuery(
+            brandId,
+            null,
+            viewModel.AreaCode,
+            viewModel.Phone);
+
+        return checkService.GetAsync(query, HttpContext.RequestAborted);
+    }
+
     /// <summary>
     /// Check username exists
     /// </summary>
@@ -121,10 +137,11 @@ public class PlayerController : ControllerBase
         return new CheckUsernameResponse { Exists = isExist };
     }
 
-    /// <summary>Create default withdraw bankinfo of register flow.</summary>
-    /// <param name="executeFlowService"></param>
-    /// <param name="createService"></param>
-    /// <param name="viewModel"></param>
+    /// <summary>
+    /// Create default withdraw bankinfo of register flow.
+    /// </summary>
+    /// <param name="executeFlowService">The execute flow service.</param>
+    /// <param name="viewModel">The view model.</param>
     /// <returns>
     ///   <br />
     /// </returns>
@@ -133,7 +150,6 @@ public class PlayerController : ControllerBase
     [IgnoreUserBlacklistCheck]
     public async Task CreateBankInfoAsync(
         [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
-        [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
         CreateInitBankInfoViewModel viewModel)
     {
         var brandId = HttpContext.GetBrandId()!.Value;
@@ -461,6 +477,7 @@ public class PlayerController : ControllerBase
 
     [HttpPost("register", Name = "RegisterPlayerFlow")]
     [IgnoreUserBlacklistCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
     public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
         [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,

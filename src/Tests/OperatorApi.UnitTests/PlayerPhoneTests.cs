@@ -257,6 +257,33 @@ public class PlayerPhoneTests
     }
 
     [Test]
+    public async Task CheckPhone_If_Not_Input_PlayerCode()
+    {
+        var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+        var areaCode = "+852";
+        var phone = "66666666";
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new CheckBrandPhoneQueryService(fakePlayerServiceClient);
+
+        var query = new CheckBrandPhoneQuery(brandId, null, areaCode, phone);
+
+        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
+            Arg.Is(brandId),
+            Arg.Is(areaCode),
+            Arg.Is(phone))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = "playerCode"
+            });
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.IsFalse(actual);
+    }
+
+    [Test]
     public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_Should_Get_True()
     {
         var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
