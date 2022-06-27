@@ -57,7 +57,7 @@ public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
                 StatusCode = StatusCodes.Status403Forbidden
             };
         }
-        else if (status == PlayerStatus.InBlacklist)
+        else if (status is PlayerStatus.InBlacklist)
         {
             var ignoreBannedAttr = context.ActionDescriptor.EndpointMetadata
                 .OfType<IgnoreUserBlacklistCheckAttribute>().LastOrDefault();
@@ -69,6 +69,25 @@ public class CheckPlayerEnabledFilter : IAsyncAuthorizationFilter
                 new FailResponse
                 {
                     Error = (int)Core.Models.Enums.TgsApiError.UserBanned,
+                    ErrorMessage = string.Empty,
+                    ErrorMessageKey = "AccessDenied"
+                })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
+        }
+        else if (status is PlayerStatus.RegisterUndone)
+        {
+            var ignoreBannedAttr = context.ActionDescriptor.EndpointMetadata
+                .OfType<IgnoreUserBlacklistCheckAttribute>().LastOrDefault();
+
+            if (ignoreBannedAttr is not null)
+                return;
+
+            context.Result = new ObjectResult(
+                new FailResponse
+                {
+                    Error = (int)Core.Models.Enums.TgsApiError.RegisterUndone,
                     ErrorMessage = string.Empty,
                     ErrorMessageKey = "AccessDenied"
                 })

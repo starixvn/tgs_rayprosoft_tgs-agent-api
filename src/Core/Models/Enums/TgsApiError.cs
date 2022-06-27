@@ -24,6 +24,7 @@ public enum TgsApiError
     AgentNotFound = 211,
     PhoneNumberRequired = 212,
     GameBalanceFailed = 213,
+    RegisterUndone = 214,
 
     InvalidGameAction = 301,
     TransactionIdNotFound = 302,

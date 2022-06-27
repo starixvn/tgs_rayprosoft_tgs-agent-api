@@ -23,6 +23,6 @@ internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, b
             query.Phone,
             cancellationToken).ConfigureAwait(false);
 
-        return player is null || player.PlayerCode == query.PlayerCode;
+        return player is null || query.PlayerCode is not null && player.PlayerCode == query.PlayerCode;
     }
 }
