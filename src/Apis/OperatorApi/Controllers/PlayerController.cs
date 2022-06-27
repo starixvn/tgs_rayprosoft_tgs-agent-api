@@ -868,9 +868,6 @@ public class PlayerController : ControllerBase
 
         var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
 
-        if (!brand.SmsRegisterFlowEnabled)
-            throw new InvalidOperationException();
-
         var playerInfo = await getPlayerInfoService
             .GetAsync(new GetPlayerQuery(brand.BrandId, playerTokenData.PlayerCode))
             .ConfigureAwait(false);

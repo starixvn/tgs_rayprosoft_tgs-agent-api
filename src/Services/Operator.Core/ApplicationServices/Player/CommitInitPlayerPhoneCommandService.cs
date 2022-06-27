@@ -11,11 +11,11 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 
 public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPlayerPhoneCommand>
 {
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IRedisCacheManager _cacheManager;
     private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
-    private readonly IBrandServiceClient _brandServiceClient;
 
     public CommitInitPlayerPhoneCommandService(
         IValidateCodeOperator validateCodeOperator,
@@ -38,9 +38,6 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
         var brand = await _brandServiceClient
             .GetBrandInfoAsync(command.BrandId)
             .ConfigureAwait(false);
-
-        if (brand!.SmsRegisterFlowEnabled is false)
-            return;
 
         var result = await _validateCodeOperator
             .GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)
@@ -70,7 +67,8 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
             .SetPlayerPhoneAsync(result.PlayerCode, result.AreaCode, result.Phone)
             .ConfigureAwait(false);
 
-        if (brand.EmailRegisterFlowEnabled)
+        if (brand!.SmsRegisterFlowEnabled is false ||
+            brand.EmailRegisterFlowEnabled)
             return;
 
         await _playerRepository

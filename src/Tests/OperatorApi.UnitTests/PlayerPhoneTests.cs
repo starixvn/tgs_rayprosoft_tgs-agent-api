@@ -112,7 +112,7 @@ public class PlayerPhoneTests
     }
 
     [Test]
-    public async Task Commit_Init_Player_Phone_If_Brand_Not_Use_SmsRegisterFlow_Should_Not_Process()
+    public async Task Commit_Init_Player_Phone_If_Brand_Has_No_SmsRegisterFlow_Should_Set_Phone_Only()
     {
         var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
         var moqPlayerRepository = new Mock<IPlayerRepository>();
@@ -137,7 +137,9 @@ public class PlayerPhoneTests
         {
             Id = Guid.NewGuid(),
             Code = "code",
-            Currency = "CNY"
+            Currency = "CNY",
+            EmailRegisterFlowEnabled = false,
+            SmsRegisterFlowEnabled = false
         };
 
         var command = new CommitInitPlayerPhoneCommand(
@@ -167,7 +169,7 @@ public class PlayerPhoneTests
                 It.Is<string>(x => x == playerCode),
                 It.Is<string>(x => x == areaCode),
                 It.Is<string>(x => x == phone)),
-            Times.Never);
+            Times.Exactly(1));
 
         moqPlayerRepository.Verify(
             fake => fake.UpdatePlayerStatusAsync(
