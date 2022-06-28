@@ -6,16 +6,16 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
-internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, bool>
+internal class CheckBrandPhoneCanUseQueryService : IGetService<CheckBrandPhoneCanUseQuery, bool>
 {
     private readonly IPlayerServiceClient _playerServiceClient;
 
-    public CheckBrandPhoneQueryService(IPlayerServiceClient playerServiceClient)
+    public CheckBrandPhoneCanUseQueryService(IPlayerServiceClient playerServiceClient)
     {
         _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
-    public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> GetAsync(CheckBrandPhoneCanUseQuery query, CancellationToken cancellationToken = default)
     {
         var player = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
             query.BrandId,

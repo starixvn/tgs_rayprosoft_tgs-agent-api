@@ -107,12 +107,12 @@ public class PlayerController : ControllerBase
 
     [HttpPost("phone/check")]
     public ValueTask<bool> CheckPhoneCanUseAsync(
-            [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+            [FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
             [FromBody] StartSetPhoneRequest viewModel)
     {
         var brandId = HttpContext.Items.GetBrandId();
 
-        var query = new CheckBrandPhoneQuery(
+        var query = new CheckBrandPhoneCanUseQuery(
             brandId,
             null,
             viewModel.AreaCode,
@@ -743,7 +743,7 @@ public class PlayerController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<string> StartChangePhoneAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+        [FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
         [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
         [FromBody] StartSetPhoneRequest request)
     {
@@ -756,7 +756,7 @@ public class PlayerController : ControllerBase
 
         var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
 
-        var checkQuery = new CheckBrandPhoneQuery(
+        var checkQuery = new CheckBrandPhoneCanUseQuery(
             brand.BrandId,
             playerTokenData.PlayerCode,
             request.AreaCode.Trim(),
