@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Tgs.BrandCertificate;
+using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -16,7 +17,6 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
-using Tgs.Payment.Clients;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
@@ -100,6 +100,22 @@ public class PlayerController : ControllerBase
         var identityVerifier = identityVerifierSelector.GetIdentityVerifier(player.DefaultWalletCurrencyCode);
 
         return identityVerifier.Verify(id);
+    }
+
+    [HttpPost("phone/check")]
+    public ValueTask<bool> CheckPhoneCanUseAsync(
+        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+        [FromBody] StartSetPhoneRequest viewModel)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new CheckBrandPhoneQuery(
+            brandId,
+            null,
+            viewModel.AreaCode,
+            viewModel.Phone);
+
+        return checkService.GetAsync(query, HttpContext.RequestAborted);
     }
 
     /// <summary>
