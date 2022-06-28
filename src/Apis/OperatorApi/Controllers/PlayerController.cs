@@ -762,11 +762,11 @@ public class PlayerController : ControllerBase
             request.AreaCode.Trim(),
             request.Phone.Trim());
 
-        var isBrandHasSamePhone = await checkService
+        var canDoCommand = await checkService
             .GetAsync(checkQuery)
             .ConfigureAwait(false);
 
-        if (isBrandHasSamePhone)
+        if (!canDoCommand)
             throw new BrandPhoneDuplicateException();
 
         var command = new StartSetPlayerPhoneCommand(
