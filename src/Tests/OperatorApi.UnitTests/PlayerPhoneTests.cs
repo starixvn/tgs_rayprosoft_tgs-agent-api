@@ -444,7 +444,7 @@ public class PlayerPhoneTests
     }
 
     [Test]
-    public async Task Same_Brand_And_Different_Phone_And_Same_AreaCode_Should_Get_False()
+    public async Task Same_Brand_And_Different_Phone_And_Same_AreaCode_Should_Get_True()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
@@ -481,11 +481,11 @@ public class PlayerPhoneTests
 
         var actual = await sut.GetAsync(new CheckBrandPhoneQuery(brandId, playerCode, areaCode, "88888888"));
 
-        Assert.IsFalse(actual);
+        Assert.IsTrue(actual);
     }
 
     [Test]
-    public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_Should_Get_True()
+    public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_Should_Get_False()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
@@ -522,7 +522,7 @@ public class PlayerPhoneTests
 
         var actual = await sut.GetAsync(new CheckBrandPhoneQuery(brandId, playerCode, areaCode, phone));
 
-        Assert.IsTrue(actual);
+        Assert.IsFalse(actual);
     }
 
     [Test]
@@ -611,5 +611,45 @@ public class PlayerPhoneTests
             Times.Exactly(0));
 
         Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+    }
+
+    [Test]
+    public async Task CheckPhone_If_Not_Input_PlayerCode()
+    {
+        var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
+        var areaCode = "+852";
+        var phone = "66666666";
+
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+
+        dbContextOptionsBuilder
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+
+        var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+        fakeTgsRepository.Players.Add(new Player
+        {
+            PlayerCode = "player1",
+            BrandId = brandId,
+            AreaCode = "+852",
+            Phone = "66666666",
+            DefaultWalletCurrencyCode = "CNY",
+            Password = Array.Empty<byte>(),
+            Salt = Array.Empty<byte>(),
+            Username = "Player1",
+            WithdrawPassword = Array.Empty<byte>(),
+            WithdrawSalt = Array.Empty<byte>()
+        });
+
+        fakeTgsRepository.SaveChanges();
+
+        var sut = new CheckBrandPhoneQueryService(fakeTgsRepository);
+
+        var query = new CheckBrandPhoneQuery(brandId, null, areaCode, phone);
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.IsFalse(actual);
     }
 }
