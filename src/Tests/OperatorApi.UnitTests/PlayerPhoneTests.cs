@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -59,6 +60,12 @@ public class PlayerPhoneTests
             "127.0.0.1",
             "localhost",
             brandInfo.Id);
+
+        moqCheckService
+            .Setup(fake => fake.GetAsync(
+                It.IsAny<CheckBrandPhoneQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.FromResult(true));
 
         moqValidateCodeOperator
             .Setup(
@@ -149,6 +156,12 @@ public class PlayerPhoneTests
             "localhost",
             brandInfo.Id);
 
+        moqCheckService
+            .Setup(fake => fake.GetAsync(
+                It.IsAny<CheckBrandPhoneQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.FromResult(true));
+
         moqValidateCodeOperator
             .Setup(
                 fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
@@ -236,6 +249,12 @@ public class PlayerPhoneTests
             "127.0.0.1",
             "localhost",
             brandInfo.Id);
+
+        moqCheckService
+            .Setup(fake => fake.GetAsync(
+                It.IsAny<CheckBrandPhoneQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.FromResult(true));
 
         moqValidateCodeOperator
             .Setup(

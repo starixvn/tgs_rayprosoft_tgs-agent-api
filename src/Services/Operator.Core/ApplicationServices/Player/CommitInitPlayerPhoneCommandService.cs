@@ -56,11 +56,11 @@ public class CommitInitPlayerPhoneCommandService : ICommandService<CommitInitPla
             result.AreaCode,
             result.Phone);
 
-        var isBrandHasSamePhone = await _checkService
+        var canSetPhone = await _checkService
             .GetAsync(checkQuery, cancellationToken)
             .ConfigureAwait(false);
 
-        if (isBrandHasSamePhone)
+        if (!canSetPhone)
             throw new BrandPhoneDuplicateException();
 
         await _playerRepository
