@@ -128,7 +128,7 @@ public class PlayerPhoneTests
         var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
         var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeCacheManager = Substitute.For<IRedisCacheManager>();
-        var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneQuery, bool>>();
+        var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
         var sut = new CommitSetPlayerPhoneCommandService(
             fakeValidateCodeOperator,
@@ -150,8 +150,8 @@ public class PlayerPhoneTests
             .Returns(new PhoneValidateData(areaCode, phone, playerCode));
 
         fakeCheckService
-            .GetAsync(new CheckBrandPhoneQuery(brandId, playerCode, areaCode, phone))
-            .Returns(true);
+            .GetAsync(new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone))
+            .Returns(false);
 
         Assert.ThrowsAsync<BrandPhoneDuplicateException>(async () => await sut.ExecuteAsync(command));
     }
@@ -162,7 +162,7 @@ public class PlayerPhoneTests
         var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
         var moqPlayerRepository = new Mock<IPlayerRepository>();
         var moqCacheManager = new Mock<IRedisCacheManager>();
-        var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
+        var moqCheckService = new Mock<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
         var sut = new CommitSetPlayerPhoneCommandService(
             moqValidateCodeOperator.Object,
@@ -192,13 +192,13 @@ public class PlayerPhoneTests
         var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
         var moqPlayerRepository = new Mock<IPlayerRepository>();
         var moqCacheManager = new Mock<IRedisCacheManager>();
-        var moqCheckService = new Mock<IGetService<CheckBrandPhoneQuery, bool>>();
+        var fakeCheckService = Substitute.For<IGetService<CheckBrandPhoneCanUseQuery, bool>>();
 
         var sut = new CommitSetPlayerPhoneCommandService(
             moqValidateCodeOperator.Object,
             moqPlayerRepository.Object,
             moqCacheManager.Object,
-            moqCheckService.Object);
+            fakeCheckService);
 
         var playerCode = "testPlayerCode";
         var validateCode = "123456";
@@ -207,6 +207,9 @@ public class PlayerPhoneTests
         var areaCode = "886";
 
         var command = new CommitSetPlayerPhoneCommand(Guid.NewGuid(), playerCode, securityKey, validateCode);
+
+        fakeCheckService.GetAsync(Arg.Any<CheckBrandPhoneCanUseQuery>())
+            .Returns(true);
 
         moqValidateCodeOperator
             .Setup(
@@ -238,9 +241,9 @@ public class PlayerPhoneTests
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CheckBrandPhoneQueryService(fakePlayerServiceClient);
+        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var query = new CheckBrandPhoneQuery(brandId, playerCode, areaCode, phone);
+        var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
 
         _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
             Arg.Is(brandId),
@@ -265,9 +268,9 @@ public class PlayerPhoneTests
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CheckBrandPhoneQueryService(fakePlayerServiceClient);
+        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var query = new CheckBrandPhoneQuery(brandId, null, areaCode, phone);
+        var query = new CheckBrandPhoneCanUseQuery(brandId, null, areaCode, phone);
 
         _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
             Arg.Is(brandId),
@@ -293,9 +296,9 @@ public class PlayerPhoneTests
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        var sut = new CheckBrandPhoneQueryService(fakePlayerServiceClient);
+        var sut = new CheckBrandPhoneCanUseQueryService(fakePlayerServiceClient);
 
-        var query = new CheckBrandPhoneQuery(brandId, playerCode, areaCode, phone);
+        var query = new CheckBrandPhoneCanUseQuery(brandId, playerCode, areaCode, phone);
 
         _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(
             Arg.Is(brandId),

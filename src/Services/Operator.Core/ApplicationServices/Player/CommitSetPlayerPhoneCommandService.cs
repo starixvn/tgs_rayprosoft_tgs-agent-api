@@ -11,7 +11,7 @@ namespace TGS.Services.Operator.ApplicationServices.Player;
 internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
 {
     private readonly IRedisCacheManager _cacheManager;
-    private readonly IGetService<CheckBrandPhoneQuery, bool> _checkService;
+    private readonly IGetService<CheckBrandPhoneCanUseQuery, bool> _checkService;
     private readonly IPlayerRepository _playerRepository;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
@@ -19,7 +19,7 @@ internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPla
         IValidateCodeOperator validateCodeOperator,
         IPlayerRepository playerRepository,
         IRedisCacheManager cacheManager,
-        IGetService<CheckBrandPhoneQuery, bool> checkService)
+        IGetService<CheckBrandPhoneCanUseQuery, bool> checkService)
     {
         _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
@@ -37,17 +37,17 @@ internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPla
         if (result == null)
             throw new ValidateCodeNotVerifyException();
 
-        var checkQuery = new CheckBrandPhoneQuery(
+        var checkQuery = new CheckBrandPhoneCanUseQuery(
             command.BrandId,
             command.PlayerCode,
             result.AreaCode,
             result.Phone);
 
-        var isBrandHasSamePhone = await _checkService
+        var canSetPhone = await _checkService
             .GetAsync(checkQuery)
             .ConfigureAwait(false);
 
-        if (isBrandHasSamePhone)
+        if (!canSetPhone)
             throw new BrandPhoneDuplicateException();
 
         await _playerRepository.SetPlayerPhoneAsync(
