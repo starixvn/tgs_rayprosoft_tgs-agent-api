@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Tgs;
 using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
@@ -16,14 +15,14 @@ internal class GetMarketingReportAggregateInfosByAgentQueryService
 {
     private static readonly TimeSpan _Offset = TimeSpan.FromHours(8D);
 
+    private readonly IAgentRepository _agentRepository;
     private readonly IMarketingReportClient _reportClient;
-    private readonly ITgsRepository _tgsRepository;
 
     public GetMarketingReportAggregateInfosByAgentQueryService(
-        ITgsRepository tgsRepository,
+        IAgentRepository agentRepository,
         IMarketingReportClient reportClient)
     {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
     }
 
@@ -34,10 +33,9 @@ internal class GetMarketingReportAggregateInfosByAgentQueryService
         var startDate = query.StartDate;
         var endDate = query.EndDate;
 
-        var agent = await _tgsRepository.Agents
-            .Where(x => x.BrandId == query.BrandId && x.Username == query.AgentUserName)
-            .Select(a => new { AgentId = a.Id, AgentUserName = a.Username })
-            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        var agent = await _agentRepository
+            .GetAgentAsync(query.BrandId, query.AgentUserName, cancellationToken)
+            .ConfigureAwait(false);
 
         if (agent == null)
         {
@@ -64,7 +62,7 @@ internal class GetMarketingReportAggregateInfosByAgentQueryService
              {
                  ReportDate = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, _Offset),
                  AgentId = agent.AgentId,
-                 AgentUsername = agent.AgentUserName,
+                 AgentUsername = agent.UserName,
                  RegisterCount = items?.RegisterCount ?? 0,
                  FirstDepositCount = items?.FirstDepositCount ?? 0,
                  GamingCount = items?.GamingCount ?? 0

@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
@@ -16,14 +15,14 @@ internal class GetMarketingReportAggregateInfosQueryService
 {
     private static readonly TimeSpan _Offset = TimeSpan.FromHours(8D);
 
+    private readonly IAgentRepository _agentRepository;
     private readonly IMarketingReportClient _reportClient;
-    private readonly ITgsRepository _tgsRepository;
 
     public GetMarketingReportAggregateInfosQueryService(
-        ITgsRepository tgsRepository,
+        IAgentRepository agentRepository,
         IMarketingReportClient reportClient)
     {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
     }
 
@@ -34,10 +33,10 @@ internal class GetMarketingReportAggregateInfosQueryService
         var startDate = query.StartDate;
         var endDate = query.EndDate;
 
-        var agents = await _tgsRepository.Agents
-            .Where(a => a.BrandId == query.BrandId)
-            .Select(a => new { AgentId = a.Id, AgentUserName = a.Username })
-            .ToArrayAsync(cancellationToken);
+        var agents = await _agentRepository
+            .GetAgentsAsync(query.BrandId)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         var dates = Enumerable.Range(0, endDate.DayNumber - startDate.DayNumber)
             .Select(x => startDate.AddDays(x))
@@ -57,7 +56,7 @@ internal class GetMarketingReportAggregateInfosQueryService
              {
                  ReportDate = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, _Offset),
                  AgentId = agent.AgentId,
-                 AgentUsername = agent.AgentUserName,
+                 AgentUsername = agent.UserName,
                  RegisterCount = items?.RegisterCount ?? 0,
                  FirstDepositCount = items?.FirstDepositCount ?? 0,
                  GamingCount = items?.GamingCount ?? 0
