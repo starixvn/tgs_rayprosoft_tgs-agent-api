@@ -1,6 +1,5 @@
 ﻿using System;
-using TGS.Paging;
-using TGS.Services.BackOffice.Application.Models.ReportMarket;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
@@ -8,4 +7,4 @@ public record GetMarketingReportAggregateInfosQuery(
     Guid BrandId,
     DateOnly StartDate,
     DateOnly EndDate,
-    Paging<MarketReportModel> Paging);
+    PageableRequest Paging);

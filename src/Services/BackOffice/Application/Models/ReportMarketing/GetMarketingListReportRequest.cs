@@ -1,11 +1,10 @@
 ﻿#nullable enable
 
 using System;
-using Tgs.Report.Client.Models;
 
 namespace TGS.Services.BackOffice.Application.Models.ReportMarketing;
 
-public record GetMarketingListReportRequest : PageableRequest
+public record GetMarketingListReportRequest
 {
     public Guid BrandId { get; init; }
     public string? AgentUsername { get; init; }

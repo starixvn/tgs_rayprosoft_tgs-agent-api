@@ -1,12 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
-using Tgs.ServiceUtility;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report;
@@ -37,25 +35,38 @@ public class MarketingReportController : BaseContextController
             .GetAsync(request)
             .ConfigureAwait(false);
 
-    //[HttpGet]
-    //[Description("Get marketing report")]
-    //public Task<MarketingReportResponse> GetMarketingListAsync(
-    //    [FromServices] IGetService<GetMarketingListReportRequest, MarketingReportResponse>
-    //        marketsService,
-    //    [FromServices] IGetService<Get>
-    //    [FromQuery] GetMarketingListReportRequest request)
-    //{
-    //    return marketsService.GetAsync(request).AsTask();
-    //}
-
     [HttpGet]
     [Description("Get marketing report")]
     public Task<MarketingReportResponse> GetMarketingListAsync(
         [FromServices] IGetService<GetMarketingReportAggregateInfosQuery, MarketingReportResponse> queryService,
         [FromServices] IGetService<GetMarketingReportAggregateInfosByAgentQuery, MarketingReportResponse> agentQueryService,
-        [FromQuery] GetMarketingListReportRequest request)
+        [FromQuery] GetMarketingListReportRequest request,
+        [FromQuery] PageableRequest pagingRequest)
     {
-        throw new NotImplementedException();
+        var offset = TimeSpan.FromHours(8D);
+        var from = request.From.ToOffset(offset);
+        var to = request.To.ToOffset(offset);
+
+        var start = new DateOnly(from.Year, from.Month, from.Day);
+        var end = new DateOnly(to.Year, to.Month, to.Day);
+
+        if (string.IsNullOrEmpty(request.AgentUsername))
+        {
+            var query = new GetMarketingReportAggregateInfosQuery(request.BrandId, start, end, pagingRequest);
+
+            return queryService.GetAsync(query, HttpContext.RequestAborted).AsTask();
+        }
+        else
+        {
+            var query = new GetMarketingReportAggregateInfosByAgentQuery(
+                request.BrandId,
+                request.AgentUsername,
+                start,
+                end,
+                pagingRequest);
+
+            return agentQueryService.GetAsync(query, HttpContext.RequestAborted).AsTask();
+        }
     }
 
     [HttpGet("registerDetail")]

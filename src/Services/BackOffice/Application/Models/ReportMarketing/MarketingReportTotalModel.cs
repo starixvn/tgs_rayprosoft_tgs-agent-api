@@ -1,6 +1,10 @@
 ﻿namespace TGS.Services.BackOffice.Application.Models.ReportMarketing;
 
-public record MarketingReportTotalModel(
-    int RegisterCount,
-    int FirstDepositCount,
-    int GamingCount);
+public class MarketingReportTotalModel
+{
+    public int FirstDepositCount { get; init; }
+
+    public int GamingCount { get; init; }
+
+    public int RegisterCount { get; init; }
+}
