@@ -16,7 +16,7 @@ public partial class DataInitializer
 {
     internal record JiliTransferGameProvider : IGameProvider
     {
-        private const int UniqueId = 22;
+        private const int UniqueId = 41;
 
         private readonly IGame[] _games;
 
