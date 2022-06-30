@@ -4,6 +4,10 @@ namespace TGS.Services.BackOffice.Application.Models.ReportMarketing;
 
 public record MarketingReportModel
 {
+    public Guid AgentId { get; init; }
+
+    public string AgentUsername { get; set; }
+
     public DateTimeOffset ReportDate { get; init; }
 
     public int RegisterCount { get; init; }
