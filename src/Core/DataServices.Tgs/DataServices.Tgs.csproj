@@ -42,6 +42,7 @@
     <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
+    <None Remove="DataInitializers\Games\WMTF.csv" />
     <None Remove="SqlScripts\Functions\agent_get_agents_with_team_counts.sql" />
     <None Remove="SqlScripts\Functions\agent_get_all_sub_agents.sql" />
     <None Remove="SqlScripts\Functions\agent_update_path.sql" />
@@ -113,6 +114,7 @@
     <EmbeddedResource Include="DataInitializers\Games\WGFM.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WM.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\WMTF.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_no_second_deposit_details.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_first_deposit_details.sql" />

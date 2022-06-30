@@ -126,7 +126,8 @@ public partial class DataInitializer : BaseDataInitializer
             new AWC_SPADEGameProvider(),
             new AWC_VENUSGameProvider(),
             new AWC_YLGameProvider(),
-            new JiliTransferGameProvider()
+            new JiliTransferGameProvider(),
+            new WMCasinoTransferGameProvider()
         };
     }
 

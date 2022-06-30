@@ -145,6 +145,7 @@ public static class Consts
         public const string WGHorse = "WGVIA";
         public const string WGSports = "WGFM";
         public const string WMCasino = "WM";
+        public const string WMCasinoTransfer = "WMTF";
     }
 
     public static class LocalizationContext
