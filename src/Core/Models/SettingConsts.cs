@@ -57,5 +57,6 @@ public static class SettingConsts
         public static readonly string WGHorse = string.Format(Template, Consts.GameProvider.WGHorse);
         public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
         public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
+        public static readonly string WMCasinoTransfer = string.Format(Template, Consts.GameProvider.WMCasinoTransfer);
     }
 }

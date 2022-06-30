@@ -66,9 +66,13 @@ public partial class DataInitializer
 
         IGame[] IGameProvider.Games => _games;
 
-        bool IGameProvider.AllowKickPlayer => false;
+        bool IGameProvider.AllowKickPlayer => true;
 
         ushort IGameProvider.UniqueId => UniqueId;
+
+        bool IGameProvider.SupportTestPlayer => true;
+
+        bool IGameProvider.TransferWallet => true;
 
         GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
