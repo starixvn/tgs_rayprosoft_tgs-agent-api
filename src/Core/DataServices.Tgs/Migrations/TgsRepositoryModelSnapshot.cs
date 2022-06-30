@@ -5080,6 +5080,54 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bucket_histories", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerDailyPaymentStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<decimal?>("DailyDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_deposit_amount");
+
+                    b.Property<int?>("DailyDepositCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_deposit_count");
+
+                    b.Property<decimal?>("DailyWithdrawAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_withdraw_amount");
+
+                    b.Property<int?>("DailyWithdrawCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_withdraw_count");
+
+                    b.Property<decimal?>("TotalDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_deposit_amount");
+
+                    b.Property<int?>("TotalDepositCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_deposit_count");
+
+                    b.Property<decimal?>("TotalWithdrawAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_withdraw_amount");
+
+                    b.Property<int?>("TotalWithdrawCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_withdraw_count");
+
+                    b.HasKey("ReportDate", "PlayerCode")
+                        .HasName("pk_player_daily_payment_statistics");
+
+                    b.ToTable("player_daily_payment_statistics", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
                 {
                     b.Property<string>("PlayerCode")
