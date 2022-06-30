@@ -1,0 +1,11 @@
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Baccarat Classic,Baccarat_Classic,,MX-LIVE-001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Baccarat,Baccarat,,MX-LIVE-002,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Baccarat Insurance,Baccarat_Insurance,,MX-LIVE-003,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+DragonTiger,DragonTiger,,MX-LIVE-006,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+SicBo,SicBo,,MX-LIVE-007,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Roulette,Roulette,,MX-LIVE-009,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Red Blue Duel,Red_Blue_Duel,,MX-LIVE-010,LiveDealer,Mobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Thai Hi Lo,Thai_Hi_Lo,,MX-LIVE-014,LiveDealer,Mobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Thai Fish Prawn Crab,Thai_Fish_Prawn_Crab,,MX-LIVE-015,LiveDealer,Mobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
+Lobby,Lobby,,sglobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_SG
