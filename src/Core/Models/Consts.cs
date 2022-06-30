@@ -129,6 +129,7 @@ public static class Consts
         public const string IMESports = "IMES";
         public const string JDB = "JDB";
         public const string Jili = "JILI";
+        public const string JiliTransfer = "JILITF";
         public const string Joker = "JOKER";
         public const string KY = "KY";
         public const string LY = "LY";

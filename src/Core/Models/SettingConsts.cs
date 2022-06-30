@@ -41,6 +41,7 @@ public static class SettingConsts
         public static readonly string IMESports = string.Format(Template, Consts.GameProvider.IMESports);
         public static readonly string JDB = string.Format(Template, Consts.GameProvider.JDB);
         public static readonly string Jili = string.Format(Template, Consts.GameProvider.Jili);
+        public static readonly string JiliTransfer = string.Format(Template, Consts.GameProvider.JiliTransfer);
         public static readonly string Joker = string.Format(Template, Consts.GameProvider.Joker);
         public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
         public static readonly string LY = string.Format(Template, Consts.GameProvider.LY);
