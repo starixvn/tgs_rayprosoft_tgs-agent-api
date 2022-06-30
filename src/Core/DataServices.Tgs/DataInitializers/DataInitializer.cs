@@ -112,7 +112,9 @@ public partial class DataInitializer : BaseDataInitializer
             new TFGameProvider(),
             new DreamGameGameProvider(),
             new JokerGameProvider(),
-            new PragmaticPlayTransferGameProvider()
+            new PragmaticPlayTransferGameProvider(),
+            new AWC_AELOTTOGameProvider(),
+            new AWC_AWSGameProvider()
         };
     }
 
