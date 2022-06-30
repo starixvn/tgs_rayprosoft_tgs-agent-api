@@ -115,7 +115,17 @@ public partial class DataInitializer : BaseDataInitializer
             new PragmaticPlayTransferGameProvider(),
             new AWC_AELOTTOGameProvider(),
             new AWC_AWSGameProvider(),
-            new AWC_COCKFIGHTGameProvider()
+            new AWC_COCKFIGHTGameProvider(),
+            new AWC_FACAIGameProvider(),
+            new AWC_FSGameProvider(),
+            new AWC_KMGameProvider(),
+            new AWC_LUDOGameProvider(),
+            new AWC_PGSGameProvider(),
+            new AWC_RCBGameProvider(),
+            new AWC_SGGameProvider(),
+            new AWC_SPADEGameProvider(),
+            new AWC_VENUSGameProvider(),
+            new AWC_YLGameProvider()
         };
     }
 
