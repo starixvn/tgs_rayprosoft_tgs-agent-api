@@ -35,7 +35,7 @@ public partial class DataInitializer
                 .ToArray();
         }
 
-        Guid IGameProvider.Id => new("B957E28C-0E94-40AF-9D37-AB48CDEB5D29");
+        Guid IGameProvider.Id => new("c2b49256-0682-471a-9955-d3f40ab3b72e");
 
         string IGameProvider.Code => GameProviderConst.JiliTransfer;
 
