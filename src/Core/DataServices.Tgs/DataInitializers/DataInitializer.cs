@@ -114,7 +114,8 @@ public partial class DataInitializer : BaseDataInitializer
             new JokerGameProvider(),
             new PragmaticPlayTransferGameProvider(),
             new AWC_AELOTTOGameProvider(),
-            new AWC_AWSGameProvider()
+            new AWC_AWSGameProvider(),
+            new AWC_COCKFIGHTGameProvider()
         };
     }
 
