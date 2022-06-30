@@ -201,8 +201,7 @@ public abstract class BaseStartup
                 var jsonSerializerCheck = Predicates.Implement(typeof(IJsonSerializationProvider));
 
                 config.Interceptors.AddTyped<DiagnosticsInterceptor>(
-                    m => namespaceCheckTGS(m)
-                        && namespaceCheckTgs(m)
+                    m => (namespaceCheckTGS(m) || namespaceCheckTgs(m))
                         && !tgsLogCheck(m)
                         && !redisCheck(m)
                         && !jsonSerializerCheck(m));

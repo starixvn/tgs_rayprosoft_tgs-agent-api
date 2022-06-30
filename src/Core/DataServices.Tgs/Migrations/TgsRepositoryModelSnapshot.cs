@@ -649,6 +649,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_bank_infos", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyPaymentStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("FirstDepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_deposit_players");
+
+                    b.Property<int>("UndepositAgainPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("undeposit_again_players");
+
+                    b.HasKey("ReportDate", "BrandId", "AgentId")
+                        .HasName("pk_agent_daily_payment_statistics");
+
+                    b.ToTable("agent_daily_payment_statistics", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividend", b =>
                 {
                     b.Property<int>("Id")
@@ -1291,6 +1319,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_api_logs");
 
                     b.ToTable("api_logs", "log");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BackgroundPaymentStatisticsSettings", b =>
+                {
+                    b.Property<string>("RecordKey")
+                        .HasColumnType("text")
+                        .HasColumnName("record_key");
+
+                    b.Property<DateTime>("ProcessedTime")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_time");
+
+                    b.HasKey("RecordKey")
+                        .HasName("pk_background_payment_statistics_settings");
+
+                    b.ToTable("background_payment_statistics_settings", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Banner", b =>
