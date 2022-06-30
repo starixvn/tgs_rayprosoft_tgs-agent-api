@@ -32,6 +32,7 @@
     <None Remove="DataInitializers\Games\DG.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
     <None Remove="DataInitializers\Games\JILI.csv" />
+    <None Remove="DataInitializers\Games\JILITF.csv" />
     <None Remove="DataInitializers\Games\JOKER.csv" />
     <None Remove="DataInitializers\Games\LY.csv" />
     <None Remove="DataInitializers\Games\PPTF.csv" />
@@ -89,6 +90,7 @@
     <EmbeddedResource Include="DataInitializers\Games\AWC_VENUS.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AWC_YL.csv" />
     <EmbeddedResource Include="DataInitializers\Games\DG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\JILITF.csv" />
     <EmbeddedResource Include="DataInitializers\Games\JOKER.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PPTF.csv" />
     <EmbeddedResource Include="DataInitializers\Games\TF.csv" />

@@ -125,7 +125,8 @@ public partial class DataInitializer : BaseDataInitializer
             new AWC_SGGameProvider(),
             new AWC_SPADEGameProvider(),
             new AWC_VENUSGameProvider(),
-            new AWC_YLGameProvider()
+            new AWC_YLGameProvider(),
+            new JiliTransferGameProvider()
         };
     }
 
