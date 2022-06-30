@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
@@ -26,6 +27,97 @@ namespace TGS.Tests.OperatorApi.UnitTests;
 [TestFixture]
 public class WithdrawTests
 {
+    [Test]
+    public async Task Check_CreateWithdrawForm_If_Amount_Is_Zero_Return_False()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new CheckWithdrawFormCanCreateQueryService(fakePaymentServiceClient);
+
+        var query = new CreateWithdrawFormCommand(
+            "ThisIsPlayerCode",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            0M,
+            "ThisIsPlayerNote");
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.IsFalse(actual);
+    }
+
+    [Test]
+    public async Task Check_CreateWithdrawForm_If_No_BrandPayment_Match_Return_False()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new CheckWithdrawFormCanCreateQueryService(fakePaymentServiceClient);
+
+        var query = new CreateWithdrawFormCommand(
+            "ThisIsPlayerCode",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            1000M,
+            "ThisIsPlayerNote");
+
+        fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
+            .Returns(new[] {
+                new PlayerBankInfo
+                {
+                    Id = query.BankInfoId,
+                    BrandId = query.BrandId,
+                    BankType = "Bank",
+                    PaymentChannelId = Guid.NewGuid(),
+                    PlayerCode = query.PlayerCode
+                }
+            }.ToAsyncEnumerable());
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.IsFalse(actual);
+    }
+
+    [Test]
+    public async Task Check_CreateWithdrawForm_Should_Success()
+    {
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new CheckWithdrawFormCanCreateQueryService(fakePaymentServiceClient);
+
+        var query = new CreateWithdrawFormCommand(
+            "ThisIsPlayerCode",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            1000M,
+            "ThisIsPlayerNote");
+
+        var channelId = Guid.NewGuid();
+
+        fakePaymentServiceClient.GetPlayerBankInfosAsync(Arg.Is(query.PlayerCode))
+            .Returns(new[] {
+                new PlayerBankInfo
+                {
+                    Id = query.BankInfoId,
+                    BrandId = query.BrandId,
+                    BankType = "Bank",
+                    PaymentChannelId = channelId,
+                    PlayerCode = query.PlayerCode
+                }
+            }.ToAsyncEnumerable());
+
+        fakePaymentServiceClient.GetBrandPaymentsAsync(Arg.Is(query.BrandId))
+            .Returns(new[] {
+                new BrandPaymentInfo{
+                    Id = Guid.NewGuid(),
+                    ChannelId = channelId
+                }
+            }.ToAsyncEnumerable());
+
+        var actual = await sut.GetAsync(query);
+
+        Assert.IsTrue(actual);
+    }
+
     [Test]
     public void Create_Withdraw_Form_Not_Found_Player_Will_Throw_Exception()
     {
