@@ -25,5 +25,7 @@ internal class PlayerDailyPaymentStatisticsMap : BaseConfiguration, IEntityTypeC
         builder.Property(p => p.DailyWithdrawAmount);
         builder.Property(p => p.TotalWithdrawAmount);
         builder.Property(p => p.TotalWithdrawCount);
+        builder.Property(p => p.FirstDepositOn)
+            .HasColumnType("timestamptz");
     }
 }
