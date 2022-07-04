@@ -46,7 +46,7 @@ public class
                 Message = response.Message,
                 TotalCount = response.TotalCount,
                 Items = Array.Empty<MarketReportModel>(),
-                Total = new MarketReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                Total = new MarketReportTotalModel(0, 0,0,0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
             };
         }
 
@@ -55,6 +55,9 @@ public class
             ReportDate = x.ReportDate,
             RegisteredCount = x.RegisteredCount,
             FirstFundInCount = x.FirstFundInCount,
+            DepositCount = x.DepositCount,
+            ActivePlayer = x.ActivePlayer,
+            LoginPlayer = x.LoginPlayer,
             DepositAmount = x.DepositAmount,
             WithdrawalAmount = x.WithdrawalAmount,
             CompanyAdjustAmount = x.CompanyAdjustAmount,
@@ -77,6 +80,9 @@ public class
         var total = new MarketReportTotalModel(
             response.Items.Sum(x => x.RegisteredCount),
             response.Items.Sum(x => x.FirstFundInCount),
+            response.Items.Sum(x => x.DepositCount),
+            response.Items.Sum(x => x.ActivePlayer),
+            response.Items.Sum(x => x.LoginPlayer),
             response.Items.Sum(x => x.DepositAmount),
             response.Items.Sum(x => x.WithdrawalAmount),
             response.Items.Sum(x => x.CompanyAdjustAmount),
