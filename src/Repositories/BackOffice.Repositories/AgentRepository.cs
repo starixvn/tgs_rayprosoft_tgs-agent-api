@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Domain;
 
@@ -62,7 +61,7 @@ internal class AgentRepository : IAgentRepository
             .FindAsync(agentId, domainName)
             .ConfigureAwait(false);
 
-        _tgsRepository.AgentDomains.Remove(domainData);
+        _tgsRepository.AgentDomains.Remove(domainData!);
 
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }

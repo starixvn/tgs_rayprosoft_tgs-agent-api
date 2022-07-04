@@ -1323,6 +1323,44 @@ public class RegisterFlowTests
     }
 
     [Test]
+    public async Task Set_Phone_Without_Check_Duplicate_Step()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetPhoneDontCareDuplicateRegisterFlowStep(fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new PhoneData
+        {
+            AreaCode = "123",
+            Phone = "1345678"
+        };
+
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode,
+                PhoneAuthentication = true
+            });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerPropertiesAsync(
+                Arg.Is(locationInfo.PlayerCode),
+                Arg.Is<IImmutableDictionary<PlayerPropertyName, string?>>(
+                    dict => dict[PlayerPropertyName.AreaCode] == inputData.AreaCode
+                        && dict[PlayerPropertyName.Phone] == inputData.Phone
+                        && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString()));
+    }
+
+    [Test]
     public async Task SetEmailRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authenticate_Email_Should_Return_True()
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
