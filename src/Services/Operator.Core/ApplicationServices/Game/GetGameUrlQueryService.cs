@@ -68,7 +68,8 @@ internal class GetGameUrlQueryService : IGetService<GetGameUrlQuery, Uri?>
                 query.GameId,
                 query.LanguageCode,
                 query.IpAddress,
-                backUrl)
+                backUrl,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         return gameUrl;
