@@ -10,6 +10,7 @@ using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Tgs.Promotion.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
@@ -152,6 +153,67 @@ public class PlayerControllerTests : BaseTests
         }
 
         _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()));
+    }
+
+    [Test]
+    public async Task Can_Get_Players_By_RealName()
+    {
+        var request = new GetPlayersRequest
+        {
+            RealName = "nicole",
+            Page = 1,
+            Rows = 10,
+            SortBy = "Username",
+            OrderBy = SortOrder.Descending,
+            ShowAll = false
+        };
+
+        var list = new PlayersModel[]
+        {
+            new()
+            {
+                Balance = 1000,
+                PlayerCode = "player1",
+                Username = "player1",
+                RealName = "Nicole Yang",
+                Status =  PlayerStatus.Enabled
+            },
+            new()
+            {
+                Balance = 1000,
+                PlayerCode = "player2",
+                Username = "player2",
+                RealName = "Nicole Chang",
+                Status =  PlayerStatus.Enabled
+            },
+        };
+
+        var (skip, take) = GetPage(request);
+        var orderedPlayers = list.OrderByDescending(p => p.Username);
+
+        var expectedPlayers = orderedPlayers.Skip(skip).Take(take).ToArray();
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PlayersModel>
+            {
+                Valid = true,
+                Items = expectedPlayers
+            });
+
+        var response = await _controller.GetListAsync(request);
+        response.Valid.Should().BeTrue();
+
+        for (var i = 0; i < response.Items.Length; i++)
+        {
+            response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
+            response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
+            response.Items[i].Status.Should().Be(expectedPlayers[i].Status);
+        }
+
+        _mediatorMock.Verify(x => x.Send(
+            It.Is<GetPlayersRequest>(x => x.RealName == request.RealName),
+            It.IsAny<CancellationToken>()));
     }
 
     [Test]
