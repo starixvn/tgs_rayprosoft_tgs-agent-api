@@ -36,35 +36,43 @@ internal class CreateDepositFormCommandService : ICommandService<CreateDepositFo
                 command.Amount).ConfigureAwait(false);
 
             if (!canJoin)
-            {
                 throw new CannotJoinPromotionException();
-            }
         }
-
-        await _promotionClient
-            .TagPlayerDepositAsync(command.PlayerCode, command.PromotionId)
-            .ConfigureAwait(false);
 
         var createFormId = Guid.NewGuid();
 
-        var settings = command.CreatePaymentSettings(createFormId);
-        var applyInfo = await _paymentClient
-            .DepositAsync(command.Subject, command.Amount, settings)
-            .ConfigureAwait(false);
-
-        var form = new DepositFormCreateInfo
+        try
         {
-            Amount = command.Amount,
-            ApplyInfo = applyInfo,
-            BrandId = command.BrandId,
-            BrandPaymentId = command.BrandPaymentId,
-            PlayerCode = command.PlayerCode,
-            PromotionId = command.PromotionId
-        };
+            await _promotionClient
+                .TagPlayerDepositAsync(command.PlayerCode, command.PromotionId)
+                .ConfigureAwait(false);
 
-        await _paymentServiceClient
-            .CreateDepositFormAsync(createFormId, form)
-            .ConfigureAwait(false);
+            var settings = command.CreatePaymentSettings(createFormId);
+            var applyInfo = await _paymentClient
+                .DepositAsync(command.Subject, command.Amount, settings)
+                .ConfigureAwait(false);
+
+            var form = new DepositFormCreateInfo
+            {
+                Amount = command.Amount,
+                ApplyInfo = applyInfo,
+                BrandId = command.BrandId,
+                BrandPaymentId = command.BrandPaymentId,
+                PlayerCode = command.PlayerCode,
+                PromotionId = command.PromotionId
+            };
+
+            await _paymentServiceClient
+                .CreateDepositFormAsync(createFormId, form)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            await _promotionClient
+                .UntagPlayerDepositAsync(command.PlayerCode, command.PromotionId)
+                .ConfigureAwait(false);
+            throw;
+        }
 
         await _paymentServiceClient
             .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)
