@@ -31,7 +31,8 @@ public class GetBetConstructHtmlContentQueryService : IGetService<GetBetConstruc
                 2100001,
                 query.CultureName,
                 query.IP,
-                null)
+                null,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (bcUri == null)
