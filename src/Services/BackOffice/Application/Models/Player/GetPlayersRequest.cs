@@ -21,6 +21,8 @@ public class GetPlayersRequest : PageableRequest, IRequest<PagedResponse<Players
 
     public string? Phone { get; init; }
 
+    public string? RealName { get; init; }
+
     public string? RegisterHost { get; init; }
 
     public PlayerStatus? Status { get; init; }

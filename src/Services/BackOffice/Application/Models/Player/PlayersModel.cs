@@ -17,6 +17,8 @@ public class PlayersModel
 
     public string PlayerCode { get; init; } = default!;
 
+    public string? RealName { get; init; } = default!;
+
     public DateTimeOffset? RegisteredTime { get; init; }
 
     public string? RegisterHost { get; init; }

@@ -77,6 +77,12 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
                 && p.RegisteredOn <= request.EndRegisteredOn);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.RealName))
+        {
+            playerQuery = playerQuery.Where(p =>
+                EF.Functions.ILike(p.RealName, $"{request.RealName}%"));
+        }
+
         var walletQuery =
             from wallet in _tgsRepository.Wallets.AsQueryable()
             join player in playerQuery on wallet.Id equals player.DefaultWalletId
@@ -139,6 +145,7 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
                     {
                         player.PlayerCode,
                         player.Username,
+                        player.RealName,
                         wallet.Balance,
                         VipLevel = player.Vip.Level,
                         player.Status,
@@ -163,6 +170,7 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
         {
             PlayerCode = row.PlayerCode,
             Username = row.Username,
+            RealName = row.RealName,
             Balance = row.Balance,
             VipLevel = row.VipLevel,
             Status = row.Status,
