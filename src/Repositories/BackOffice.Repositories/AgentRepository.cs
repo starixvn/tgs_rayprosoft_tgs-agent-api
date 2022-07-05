@@ -62,7 +62,7 @@ internal class AgentRepository : IAgentRepository
             .FindAsync(agentId, domainName)
             .ConfigureAwait(false);
 
-        _tgsRepository.AgentDomains.Remove(domainData);
+        _tgsRepository.AgentDomains.Remove(domainData!);
 
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }

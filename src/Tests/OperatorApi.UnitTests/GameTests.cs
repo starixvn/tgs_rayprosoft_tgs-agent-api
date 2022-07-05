@@ -107,7 +107,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Call_All_GP_FundIn()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -165,7 +165,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Call_GP_FundIn_When_Amount_Equals_One_Dollar()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -223,7 +223,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Not_Call_GP_FundIn_When_Amount_LessThan_One_Dollar()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -281,7 +281,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Without_Ignore_Should_Call_All_GP_FundIn()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(

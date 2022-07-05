@@ -22,16 +22,11 @@ internal class FundOutGameBalanceCommandService : ICommandService<FundOutGameBal
 
     public async ValueTask ExecuteAsync(FundOutGameBalanceCommand command, CancellationToken cancellationToken = default)
     {
-        var response = await _gameProvidersOperatorPluggableClient.GameProviderFundOutAsync(
-           command.PlayerCode,
-           command.GameProviderCode,
-           command.Amount).ConfigureAwait(false);
-
-        if (response == null)
-        {
-            _logger.LogInformation("Failed to transfer the main wallet to the game manufacturer.");
-            throw new GameBalanceFundOutFailedException("Failed to transfer the main wallet to the game manufacturer.");
-        }
+        await _gameProvidersOperatorPluggableClient.GameProviderFundOutAsync(
+           playerCode: command.PlayerCode,
+           gameProviderCode: command.GameProviderCode,
+           amount: command.Amount,
+           cancellationToken: cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("The main wallet was successfully transferred to the game manufacturer.");
     }
