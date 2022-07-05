@@ -3,6 +3,9 @@
 public record MarketReportTotalModel(
     int RegisteredCount,
     int FirstFundInCount,
+    int DepositCount,
+    int ActivePlayer,
+    int LoginPlayer,
     decimal DepositAmount,
     decimal WithdrawalAmount,
     decimal CompanyAdjustAmount,
