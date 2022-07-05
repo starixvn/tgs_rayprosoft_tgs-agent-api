@@ -57,7 +57,10 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
             playerQuery = playerQuery.Where(player => player.BrandId == request.BrandId);
 
         if (!string.IsNullOrWhiteSpace(request.Username))
-            playerQuery = playerQuery.Where(player => player.Username == request.Username);
+        {
+            playerQuery = playerQuery.Where(player =>
+                EF.Functions.ILike(player.Username, $"{request.Username}%"));
+        }
 
         if (request.Status != null)
             playerQuery = playerQuery.Where(player => player.Status == request.Status);
