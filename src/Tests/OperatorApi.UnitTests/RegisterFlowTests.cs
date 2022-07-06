@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
@@ -29,7 +30,7 @@ public class RegisterFlowTests
     [Test]
     public void Add_Step_To_RegisterFlowDefinition()
     {
-        var sut = new RegisterFlowDefinition();
+        var sut = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         var privateList = typeof(RegisterFlowDefinition)
             .GetField("_stepDefinitions", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -56,7 +57,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -71,7 +72,7 @@ public class RegisterFlowTests
     [Test]
     public void Build_RegisterFlow()
     {
-        var sut = new RegisterFlowDefinition();
+        var sut = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         sut.AddStep(new StubRegisterFlowStep());
 
@@ -389,7 +390,7 @@ public class RegisterFlowTests
             JsonDocument.Parse("{}"),
             new PlayerLocationInfo(null, "127.0.0.1", null, null));
 
-        var flowDefinition = new RegisterFlowDefinition();
+        var flowDefinition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         var fakeCreatePlayerStep = new StubRegisterFlowStep()
         {
@@ -462,7 +463,7 @@ public class RegisterFlowTests
     [Test]
     public async Task If_Has_Any_Undone_Step_ConfirmCompleted_Should_Return_True()
     {
-        var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>());
+        var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>(), NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(null);
 
@@ -1302,7 +1303,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1336,7 +1337,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1368,7 +1369,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -1405,7 +1406,7 @@ public class RegisterFlowTests
         var sut = new RegisterFlow(new[] {
             step1,
             finalStep
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1770,7 +1771,7 @@ public class RegisterFlowTests
 
         var sut = new RegisterFlow(new[] {
             new StubRegisterFlowStep()
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 
