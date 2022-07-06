@@ -121,7 +121,7 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
             var info = await _createPlayerService.GetAsync(query).ConfigureAwait(false);
 
             return new RegisterFlowProcessResult(
-                info.IsNew,
+                true,
                 null,
                 JsonSerializer.SerializeToDocument(
                     new CreatePlayerResponse
