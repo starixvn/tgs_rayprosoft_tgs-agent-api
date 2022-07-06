@@ -55,6 +55,8 @@ internal class RegisterFlow : IRegisterFlowStep
             .ProcessInputAsync(brandId, input, locationInfo, cancellationToken)
             .ConfigureAwait(false);
 
+        _logger.LogInformation("Process result: {result}", result);
+
         if (result.IsCompleted)
         {
             _flowSteps.Dequeue();
