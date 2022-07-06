@@ -6,10 +6,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
@@ -98,6 +98,7 @@ public class RegisterFlowTests
             .AddSingleton<StubRegisterFlowStep>()
             .AddSingleton(new FinalRegisterFlowStep(
                 Substitute.For<IPlayerServiceClient>()))
+            .AddSingleton<ILogger<RegisterFlow>>(NullLogger<RegisterFlow>.Instance)
             .BuildServiceProvider();
         var sut = new RegisterFlowBuilder(
             serviceProvider,
@@ -491,6 +492,9 @@ public class RegisterFlowTests
             ]
         """);
 
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
@@ -604,6 +608,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -719,6 +726,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -843,6 +853,9 @@ public class RegisterFlowTests
             ]
         """);
 
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
@@ -925,6 +938,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1033,6 +1049,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1166,6 +1185,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
