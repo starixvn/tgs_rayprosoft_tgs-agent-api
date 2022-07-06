@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Text.Json;
+using Castle.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
@@ -18,7 +20,7 @@ internal class RegisterFlowBuilder
 
     public RegisterFlowDefinition LoadSettings(JsonDocument settingsJson)
     {
-        var definition = new RegisterFlowDefinition();
+        var definition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         definition.AddStep(_serviceProvider.GetRequiredService<CreatePlayerRegisterFlowStep>());
 
