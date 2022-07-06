@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using static TGS.Services.Operator.PlayerRegisterFlow.CreatePlayerRegisterFlowStep;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
@@ -67,16 +68,26 @@ internal class RegisterFlow : IRegisterFlowStep
             {
                 _logger.LogInformation("Register Flow Final Step Process Start");
 
-                var finalResult = await ProcessInputAsync(
+                if (currentStep.Type == "CreatePlayer" && result.StepResponse is not null)
+                {
+                    var createPlayerResponse = result.StepResponse.Deserialize<CreatePlayerResponse>()!;
+                    var finalResult = await ProcessInputAsync(
+                        brandId,
+                        input,
+                        locationInfo with { PlayerCode = createPlayerResponse.PlayerCode },
+                        cancellationToken).ConfigureAwait(false);
+
+                    return finalResult with
+                    {
+                        StepResponse = result.StepResponse
+                    };
+                }
+
+                return await ProcessInputAsync(
                     brandId,
                     input,
                     locationInfo,
                     cancellationToken).ConfigureAwait(false);
-
-                return finalResult with
-                {
-                    StepResponse = result.StepResponse
-                };
             }
 
             return new RegisterFlowProcessResult(

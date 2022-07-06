@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -834,6 +835,96 @@ public class RegisterFlowTests
             .ExecuteAsync(Arg.Is<CreateInitBankInfoCommand>(
                 cmd => cmd.PlayerCode == playerCode
                     && cmd.BrandId == brandId));
+    }
+
+    [Test]
+    public async Task Empty_Flow_Create_Player()
+    {
+        var flowTypes = new Dictionary<string, Type>
+        {
+        }.ToImmutableDictionary();
+        var fakeServiceProvider = Substitute.For<IServiceProvider>();
+
+        var sut = new RegisterFlowBuilder(fakeServiceProvider, flowTypes);
+
+        var flowSettings = JsonDocument.Parse("[]");
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(CreatePlayerRegisterFlowStep)))
+            .Returns(new CreatePlayerRegisterFlowStep(
+                fakeCreatePlayerService,
+                fakeCreateAgentInvitationPlayerService,
+                fakeCreatePlayerInvitationPlayerService,
+                fakePlayerServiceClient,
+                fakeBrandServiceClient));
+
+        var fakePlayerServiceClient2 = Substitute.For<IPlayerServiceClient>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(FinalRegisterFlowStep)))
+            .Returns(new FinalRegisterFlowStep(fakePlayerServiceClient2));
+
+        var flowDefinition = sut.LoadSettings(flowSettings);
+
+        var flow = flowDefinition.BuildRegisterFlow();
+
+        var brandId = Guid.NewGuid();
+        var inputData = new CreatePlayerInputData
+        {
+            UserName = "tester",
+            Password = "123456"
+        };
+        var locationInfo = new PlayerLocationInfo(null, "127.0.0.1", null, null);
+
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Currency = "CNY"
+            });
+
+        _ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
+            cmd => cmd.UserName == inputData.UserName
+                && cmd.BrandId == brandId))
+            .Returns(new CreatePlayerInfo("aabbcc", true));
+
+        var expectedResponse = new CreatePlayerResponse
+        {
+            IsNew = true,
+            PlayerCode = "aabbcc"
+        };
+
+        _ = fakePlayerServiceClient2.GetPlayerInfoAsync(Arg.Is(expectedResponse.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = expectedResponse.PlayerCode
+            });
+
+        _ = await flow.ConfirmCompletedAsync(null);
+        var actual = await flow.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+        Assert.IsNull(actual.NextStepType);
+
+        _ = fakePlayerServiceClient2.Received(1)
+            .SetPlayerStatusAsync(Arg.Is(expectedResponse.PlayerCode), Arg.Is(PlayerStatus.Enabled));
+
+        _ = fakePlayerServiceClient2.Received(1)
+            .RecordRegisterIpAsync(
+                Arg.Is(expectedResponse.PlayerCode),
+                Arg.Any<string>(),
+                Arg.Any<string>());
     }
 
     [Test]
