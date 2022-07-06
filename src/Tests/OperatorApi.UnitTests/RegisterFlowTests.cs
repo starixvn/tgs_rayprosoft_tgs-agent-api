@@ -162,7 +162,7 @@ public class RegisterFlowTests
 
         var brandId = Guid.NewGuid();
 
-        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        var input = new CreatePlayerInputData
         {
             IsTestPlayer = false,
             UserName = "abc",
@@ -198,6 +198,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -253,6 +256,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -309,6 +315,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -363,6 +372,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
