@@ -3,21 +3,24 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class RegisterFlow : IRegisterFlowStep
 {
     private readonly Queue<IRegisterFlowStep> _flowSteps = new Queue<IRegisterFlowStep>();
+    private readonly ILogger<RegisterFlow> _logger;
 
     public string? CurrentStep => _flowSteps.Count == 0 ? null : _flowSteps.Peek().Type;
 
     public string Type => "RegisterFlow";
 
-    public RegisterFlow(IEnumerable<IRegisterFlowStep> steps)
+    public RegisterFlow(IEnumerable<IRegisterFlowStep> steps, ILogger<RegisterFlow> logger)
     {
         foreach (var step in steps)
             _flowSteps.Enqueue(step);
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async ValueTask<bool> ConfirmCompletedAsync(string? playerCode, CancellationToken cancellationToken = default)
@@ -60,6 +63,8 @@ internal class RegisterFlow : IRegisterFlowStep
 
             if (!isCompleted && _flowSteps.Peek().Type == "Final")
             {
+                _logger.LogInformation("Register Flow Final Step Process Start");
+
                 var finalResult = await ProcessInputAsync(
                     brandId,
                     input,
