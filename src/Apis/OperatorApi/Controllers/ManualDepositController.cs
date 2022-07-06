@@ -130,6 +130,7 @@ public class ManualDepositController : ControllerBase
                     BankType = request.BankType,
                     SendBankAccount = request.BankAccount,
                     SendBankName = request.BankName,
+                    SendNote = request.Note,
                     ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
                     ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
                 }));
