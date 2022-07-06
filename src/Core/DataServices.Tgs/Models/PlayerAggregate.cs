@@ -23,9 +23,7 @@ public class PlayerAggregate
     public int RegisteredCount { get; set; }
 
     public int FirstFundInCount { get; set; }
-    public int DepositCount { get; set; }
-    public int ActivePlayer { get; set; }
-    public int LoginPlayer { get; set; }
+    
     public decimal DepositAmount { get; set; }
 
     public decimal WithdrawalAmount { get; set; }
