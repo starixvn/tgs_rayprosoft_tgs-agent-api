@@ -17,7 +17,8 @@ public static class OperatorServiceCollectionExtensions
     {
         ["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
         ["InitMail"] = typeof(SetEmailRegisterFlowStep),
-        ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep)
+        ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep),
+        ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep)
     };
 
     public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
