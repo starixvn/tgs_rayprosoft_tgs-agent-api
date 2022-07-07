@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -164,8 +165,6 @@ public class Startup
             {
                 c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
                 c.DisableDataAnnotationsValidation = true;
-                c.LocalizationEnabled = false;
-                c.ImplicitlyValidateChildProperties = true;
             });
 
         services.AddHttpContextAccessor();
