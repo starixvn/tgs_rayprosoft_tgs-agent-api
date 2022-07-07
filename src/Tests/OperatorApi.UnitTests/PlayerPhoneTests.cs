@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
@@ -283,11 +284,11 @@ public class PlayerPhoneTests
 
         var actual = await sut.GetAsync(query);
 
-        Assert.IsFalse(actual);
+        Assert.IsTrue(actual);
     }
 
     [Test]
-    public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_Should_Get_True()
+    public async Task Same_Brand_And_Same_Phone_And_Same_AreaCode_And_Same_Player_Should_Get_True()
     {
         var brandId = Guid.Parse("1D46DDD7-EB42-43A0-CB2F-724E59622CA5");
         var playerCode = "playerCode";
