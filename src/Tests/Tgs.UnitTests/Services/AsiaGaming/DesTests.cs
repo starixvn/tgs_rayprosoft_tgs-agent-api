@@ -25,7 +25,7 @@ public class DesTests
     }
 
     [Test]
-    public async Task Can_EncryptAsync()
+    public async Task Can_Encrypt()
     {
         var original = "cagent=81288128/\\\\\\\\/method=tc";
         var key = "12341234";
@@ -41,7 +41,7 @@ public class DesTests
     }
 
     [Test]
-    public async Task Can_DecryptAsync()
+    public async Task Can_Decrypt()
     {
         var encrypted = "IGcOAYEQN88F1NFLtBOK29IcQSW2a8b/G8UgSaeEyaA=";
         var key = "12341234";

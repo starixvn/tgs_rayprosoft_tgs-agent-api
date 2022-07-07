@@ -213,7 +213,7 @@ public class BackOfficeRepositoryTests
     }
 
     [Test]
-    public async Task Query_Banners_By_RejectedAsync()
+    public async Task Query_Banners_By_Rejected()
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
         dbContextOptionsBuilder

@@ -324,7 +324,7 @@ public class WithdrawFormTests
     }
 
     [Test]
-    public async Task Manager_Can_Paid_Manual_WithdrawFormAsync()
+    public async Task Manager_Can_Paid_Manual_WithdrawForm()
     {
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
         var fakeWalletExchangeService = Substitute.For<IWalletExchangeService>();
@@ -553,7 +553,7 @@ public class WithdrawFormTests
     }
 
     [Test]
-    public async Task User_Can_List_WithdrawFormAsync()
+    public async Task User_Can_List_WithdrawForm()
     {
         var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
