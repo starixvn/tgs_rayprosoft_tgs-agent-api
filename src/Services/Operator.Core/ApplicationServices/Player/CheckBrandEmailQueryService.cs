@@ -1,29 +1,26 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 
 internal class CheckBrandEmailQueryService : IGetService<CheckBrandEmailQuery, bool>
 {
-    private readonly ITgsRepository _tgsRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
 
-    public CheckBrandEmailQueryService(ITgsRepository tgsRepository)
+    public CheckBrandEmailQueryService(IPlayerServiceClient playerServiceClient)
     {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
     }
 
-    public ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
     {
-        var result = _tgsRepository.Players
-            .AsQueryable()
-            .Any(p => p.BrandId == query.BrandId
-                && p.Email!.ToLower() == query.Email.ToLower()
-                && p.PlayerCode != query.PlayerCode);
+        var player = await _playerServiceClient
+            .GetPlayerInfoByEmailAsync(query.BrandId, query.Email, cancellationToken)
+            .ConfigureAwait(false);
 
-        return ValueTask.FromResult(result);
+        return player is not null && player.PlayerCode != query.PlayerCode;
     }
 }

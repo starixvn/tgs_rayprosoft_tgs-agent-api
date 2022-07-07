@@ -12,11 +12,11 @@ internal class FundInAllGameBalanceCommandService : ICommandService<FundInAllGam
 {
     private readonly ICommandService<FundInGameBalanceCommand> _fundInService;
     private readonly IGameProviderRepository _gameProviderRepository;
-    private readonly IGetService<GetGameBalanceQuery, decimal?> _getGameBalanceService;
+    private readonly IGetService<GetGameBalanceQuery, decimal> _getGameBalanceService;
 
     public FundInAllGameBalanceCommandService(
         IGameProviderRepository gameProviderRepository,
-        IGetService<GetGameBalanceQuery, decimal?> getGameBalanceService,
+        IGetService<GetGameBalanceQuery, decimal> getGameBalanceService,
         ICommandService<FundInGameBalanceCommand> fundInService)
     {
         _gameProviderRepository =
@@ -51,10 +51,10 @@ internal class FundInAllGameBalanceCommandService : ICommandService<FundInAllGam
                         cancellationToken)
                     .ConfigureAwait(false);
 
-                if (!balance.HasValue)
+                if (balance == 0)
                     continue;
 
-                var fundInAmount = (int)Math.Floor(balance.Value);
+                var fundInAmount = (int)Math.Floor(balance);
 
                 if (fundInAmount > 0)
                 {

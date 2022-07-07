@@ -226,6 +226,12 @@ public class Startup
             options.BaseUrl = config.GetValue<Uri>("BackOffice:PlayerServiceBaseUrl");
         });
 
+        _ = services.AddMarketingReportClient((options, sp) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            options.BaseUrl = config.GetValue<Uri>("BackOffice:MarketingReportBaseUrl");
+        });
+
         _ = services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1",

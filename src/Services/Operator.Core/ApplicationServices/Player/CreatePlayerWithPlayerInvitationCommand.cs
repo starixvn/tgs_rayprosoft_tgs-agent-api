@@ -10,6 +10,4 @@ public record CreatePlayerWithPlayerInvitationCommand(
     string Password,
     string CurrencyCode,
     string UpperPlayerCode,
-    bool IsTestPlayer,
-    string IpAddress,
-    string? HostName);
+    bool IsTestPlayer);

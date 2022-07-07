@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Operations;
 using Tgs.ServiceUtility;
+using TGS.Services.Operations;
 using CoreEnums = TGS.Core.Models.Enums;
-using TGS.Services.Operator.ApplicationServices.Player;
 
 namespace TGS.Services.Operator.ApplicationServices.Player;
 

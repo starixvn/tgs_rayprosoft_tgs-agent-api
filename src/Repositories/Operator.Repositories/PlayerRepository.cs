@@ -42,37 +42,6 @@ internal class PlayerRepository : IPlayerRepository
         return createFormId;
     }
 
-    public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
-    {
-        var player = await _tgsRepository.Players.AsQueryable()
-            .Where(player => player.BrandId == brandId
-                             && player.AreaCode == areaCode
-                             && player.Phone == phone)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
-
-        if (player == null)
-            return null;
-
-        return new PlayerInfo(
-            player.PlayerCode,
-            player.BrandId,
-            player.AccumulatedDeposit,
-            player.IdentityAuthentication,
-            player.PhoneAuthentication,
-            player.Phone,
-            player.AreaCode,
-            player.VipId,
-            player.Status,
-            player.Username,
-            player.RealName,
-            player.Email,
-            player.Vip?.Level ?? 0,
-            player.QQ,
-            player.Wechat,
-            player.WithdrawPassword.Length > 0);
-    }
-
     public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
     {
         var settingData = await _tgsRepository.PlayerGameSettings
@@ -100,60 +69,6 @@ internal class PlayerRepository : IPlayerRepository
             : (PlayerIdentityReviewState)formData.Status;
 
         return ValueTask.FromResult(new PlayerIdentityFormInfo(formData?.Id, status));
-    }
-
-    public async ValueTask<PlayerInfo?> GetPlayerInfoAsync(string playerCode)
-    {
-        var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
-
-        return playerData == null
-            ? null
-            : new PlayerInfo(
-                playerData.PlayerCode,
-                playerData.BrandId,
-                playerData.AccumulatedDeposit,
-                playerData.IdentityAuthentication,
-                playerData.PhoneAuthentication,
-                playerData.Phone,
-                playerData.AreaCode,
-                playerData.VipId,
-                playerData.Status,
-                playerData.Username,
-                playerData.RealName,
-                playerData.Email,
-                playerData.Vip?.Level ?? 0,
-                playerData.QQ,
-                playerData.Wechat,
-                playerData.WithdrawPassword.Length > 0);
-    }
-
-    public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
-    {
-        var playerData = await _tgsRepository.Players.AsQueryable()
-            .FirstOrDefaultAsync(p => p.BrandId == brandId
-                                      && p.Username.ToLower() == userName.ToLower())
-            .ConfigureAwait(false);
-
-        if (playerData == null)
-            return null;
-
-        return new PlayerInfo(
-            playerData.PlayerCode,
-            playerData.BrandId,
-            playerData.AccumulatedDeposit,
-            playerData.IdentityAuthentication,
-            playerData.PhoneAuthentication,
-            playerData.Phone,
-            playerData.AreaCode,
-            playerData.VipId,
-            playerData.Status,
-            playerData.Username,
-            playerData.RealName,
-            playerData.Email,
-            playerData.Vip?.Level ?? 0,
-            playerData.QQ,
-            playerData.Wechat,
-            playerData.WithdrawPassword.Length > 0);
     }
 
     public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)

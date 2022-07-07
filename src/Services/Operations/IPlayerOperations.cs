@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations.Models.Services;
 

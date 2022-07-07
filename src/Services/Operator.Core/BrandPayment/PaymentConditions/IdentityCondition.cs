@@ -1,5 +1,4 @@
-﻿using Tgs.Payment;
-using Tgs.Payment.Clients;
+﻿using Tgs.Payment.Clients;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
 
@@ -12,6 +11,6 @@ internal class IdentityCondition : IBrandPaymentCondition
         _enabled = enabled;
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => _enabled ? player.IdentityAuthentication : true;
 }

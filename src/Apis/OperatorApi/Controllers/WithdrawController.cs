@@ -27,6 +27,7 @@ public class WithdrawController : ControllerBase
     [EnableUserBlockedCheck]
     public async Task<Guid> CreateWithdrawRequestAsync(
         [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
+        [FromServices] IGetService<CreateWithdrawFormCommand, bool> checkCanCreateService,
         [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
         CreateWithdrawRequest request)
     {
@@ -37,7 +38,9 @@ public class WithdrawController : ControllerBase
 
             var checkCommand = new CheckPlayerIdentityCommand(brandId, playerData.PlayerCode);
 
-            var playerCanWithdraw = await checkService.GetAsync(checkCommand).ConfigureAwait(false);
+            var playerCanWithdraw = await checkService
+                .GetAsync(checkCommand, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
 
             if (playerCanWithdraw is false)
                 throw new PlayerCanNotWithdrawException();
@@ -49,7 +52,14 @@ public class WithdrawController : ControllerBase
                 request.Amount,
                 request.Note);
 
-            await createFormService.ExecuteAsync(command).ConfigureAwait(false);
+            if (!await checkCanCreateService
+                    .GetAsync(command, HttpContext.RequestAborted)
+                    .ConfigureAwait(false))
+                throw new PlayerCanNotWithdrawException();
+
+            await createFormService
+                .ExecuteAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
 
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }

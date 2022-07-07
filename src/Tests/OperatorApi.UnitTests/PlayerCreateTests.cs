@@ -1,504 +1,54 @@
 using System;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.PlayerService.Client;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Validators;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
 public class PlayerCreateTests
 {
     [Test]
-    public async Task Create_Player_If_Brand_Not_Use_Any_RegisterFlow_Must_Record_Ip_Address()
+    public async Task Get_Player_Current_Register_Step()
     {
-        // arrange
-        var brandId = Guid.NewGuid();
+        var fakeBrandRegisterFlowDefinitionManager = Substitute.For<IBrandRegisterFlowDefinitionManager>();
 
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var sut = new GetCurrentPlayerRegisterFlowStepQueryService(
+            fakeBrandRegisterFlowDefinitionManager);
 
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
+        var query = new GetCurrentPlayerRegisterFlowStepQuery(Guid.NewGuid(), null);
 
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
+        var flowDefinition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
+        var fakeCreatePlayerStep = new StubRegisterFlowStep()
+        {
+            Type = "AAA"
+        };
 
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
+        fakeCreatePlayerStep.SetProcessInputDelegate((_, _, _) => Task.FromResult(
+            new RegisterFlowProcessResult(true, null, null)));
 
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
+        flowDefinition.AddStep(fakeCreatePlayerStep);
 
-        // act
-        var actual = await sut.GetAsync(command);
+        fakeBrandRegisterFlowDefinitionManager.GetRegisterFlowDefinitionAsync(Arg.Is(query.BrandId))
+            .Returns(flowDefinition);
 
-        // assert
-        _ = fakePlayerRepository.Received(1)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
+        var actual = await sut.GetAsync(query);
 
-        _ = fakePlayerRepository.Received(1)
-            .PlayerLoginIpAsync(
-            Arg.Any<string>(),
-            Arg.Is(command.IpAddress),
-            Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Not_Use_Any_RegisterFlow_PlayerStatus_Should_Be_Enable()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY"
-                }));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_BankInfoRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = brandId,
-                Code = "code",
-                Currency = "CNY",
-                BankInfoRegisterFlowEnabled = true
-            }));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-             .PlayerLoginIpAsync(
-                 Arg.Any<string>(),
-                 Arg.Is(command.IpAddress),
-                 Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_BankInfoRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = brandId,
-                Code = "code",
-                Currency = "CNY",
-                BankInfoRegisterFlowEnabled = true
-            });
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_EmailRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY",
-                    EmailRegisterFlowEnabled = true
-                }));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-             .PlayerLoginIpAsync(
-                 Arg.Any<string>(),
-                 Arg.Is(command.IpAddress),
-                 Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_EmailRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY",
-                    EmailRegisterFlowEnabled = true
-                }));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_SmsRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(ValueTask.FromResult(
-                new Tgs.BrandCertificate.Clients.BrandInfo
-                {
-                    Id = brandId,
-                    Code = "code",
-                    Currency = "CNY",
-                    SmsEnabled = true,
-                    SmsRegisterFlowEnabled = true
-                }));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-             .PlayerLoginIpAsync(
-                 Arg.Any<string>(),
-                 Arg.Is(command.IpAddress),
-                 Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Create_Player_If_Brand_Use_SmsRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
-            {
-                Id = brandId,
-                Code = "code",
-                Currency = "CNY",
-                SmsRegisterFlowEnabled = true
-            });
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        fakePlayerOperations.GetPlayerByCodeAsync(Arg.Any<string>())
-            .Returns(new Player
-            {
-                RegisteredOn = DateTimeOffset.UtcNow
-            });
-
-        var sut = new CreatePlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            false,
-            "192.168.50.123",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+        Assert.AreEqual("AAA", actual);
     }
 
     [Test]
@@ -512,7 +62,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeAgentOperations
@@ -538,7 +88,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakeAgentOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -547,540 +97,19 @@ public class PlayerCreateTests
             "password",
             "CNY",
             invitationCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         // act
         var actual = await sut.GetAsync(command);
 
         // assert
         Assert.IsTrue(actual.IsNew);
-    }
 
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Not_Use_Any_RegisterFlow_Must_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY"
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(1)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(1)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Not_Use_Any_RegisterFlow_PlayerStatus_Should_Be_Enable()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY"
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_BankInfoRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            BankInfoRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_BankInfoRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            BankInfoRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_EmailRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            EmailRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_EmailRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            EmailRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_SmsRegisterFlow_Not_Record_Ip_Address()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_InvitationCode_If_Brand_Use_SmsRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        // arrange
-        var brandId = Guid.NewGuid();
-        var invitationCode = "6rd4mq";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
-
-        fakeAgentOperations
-            .GetAgentByInvitationCodeAsync(
-                Arg.Is(brandId),
-                Arg.Is(invitationCode))
-            .Returns(Task.FromResult(new Agent()));
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreateAgentInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakeAgentOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithAgentInvitationCodeCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            invitationCode,
-            false,
-            "::1",
-            "localhost");
-
-        // act
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+        _ = fakePlayerOperations.Received(1)
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+                && data.UserName == command.UserName
+                && data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
+                && data.AgentInvitationCode == command.AgentInvitationCode));
     }
 
     [Test]
@@ -1092,8 +121,8 @@ public class PlayerCreateTests
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
             .Returns(ValueTask.FromResult(
@@ -1104,30 +133,18 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = brandId
+            });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1136,610 +153,18 @@ public class PlayerCreateTests
             "password",
             "CNY",
             upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         var actual = await sut.GetAsync(command);
 
         // assert
         Assert.IsTrue(actual.IsNew);
-    }
 
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Not_Use_Any_RegisterFlow_Must_Record_Ip_Address()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY"
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(1)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(1)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Not_Use_Any_RegisterFlow_PlayerStatus_Should_Be_Enable()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY"
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.Enabled));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_BankInfoRegisterFlow_Not_Record_Ip_Address()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            BankInfoRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_BankInfoRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            BankInfoRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_EmailRegisterFlow_Not_Record_Ip_Address()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            EmailRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_EmailRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            EmailRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_SmsRegisterFlow_Not_Record_Ip_Address()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = fakePlayerRepository.Received(0)
-            .PlayerRegisterIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName),
-                Arg.Any<DateTimeOffset>());
-
-        _ = fakePlayerRepository.Received(0)
-            .PlayerLoginIpAsync(
-                Arg.Any<string>(),
-                Arg.Is(command.IpAddress),
-                Arg.Is(command.HostName));
-    }
-
-    [Test]
-    public async Task Register_Player_With_Existent_Upper_PlayerCode_If_Brand_Use_SmsRegisterFlow_PlayerStatus_Should_Be_InBlackList()
-    {
-        var brandId = Guid.NewGuid();
-        var upperPlayerCode = "upper";
-
-        var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
-
-        var brandInfo = new Tgs.BrandCertificate.Clients.BrandInfo
-        {
-            Id = brandId,
-            Code = "code",
-            Currency = "CNY",
-            SmsRegisterFlowEnabled = true
-        };
-
-        fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
-            .Returns(brandInfo);
-
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                brandId,
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
-
-        fakePlayerOperations.CreatePlayerAsync(Arg.Any<CreatePlayerData>())
-            .Returns("TestPlayerCode");
-
-        var sut = new CreatePlayerInvitationPlayerCommandService(
-            fakePlayerOperations,
-            fakePasswordHandler,
-            fakeBrandOperations,
-            fakePlayerRepository,
-            fakeBrandServiceClient);
-
-        var command = new CreatePlayerWithPlayerInvitationCommand(
-            brandId,
-            "username",
-            "password",
-            "CNY",
-            upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
-
-        var actual = await sut.GetAsync(command);
-
-        // assert
-        _ = _ = fakePlayerOperations
-            .Received(1)
-            .CreatePlayerAsync(
-                Arg.Is<CreatePlayerData>(x => x.PlayerStatus == PlayerStatus.InBlacklist));
+        _ = fakePlayerOperations.Received(1)
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+                && data.UserName == command.UserName
+                && data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone
+                && data.UpperPlayerCode == command.UpperPlayerCode));
     }
 
     [Test]
@@ -1752,7 +177,7 @@ public class PlayerCreateTests
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1768,24 +193,28 @@ public class PlayerCreateTests
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var password = "password";
 
-        var query = new CreatePlayerCommand(
+        var command = new CreatePlayerCommand(
             brandId,
             "username",
             password,
             "CNY",
-            false,
-            "::1",
-            "localhost");
+            false);
 
         // act
-        var actual = await sut.GetAsync(query);
+        var actual = await sut.GetAsync(command);
+
         // assert
         Assert.IsTrue(actual.IsNew);
+
+        _ = fakePlayerOperations.Received(1)
+            .CreatePlayerAsync(Arg.Is<CreatePlayerData>(data => data.BrandId == command.BrandId
+                && data.UserName == command.UserName
+                && data.PlayerStatus == Core.Models.Enums.PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -1798,7 +227,7 @@ public class PlayerCreateTests
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1815,7 +244,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakeAgentOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var password = "password";
@@ -1827,9 +256,7 @@ public class PlayerCreateTests
             password,
             "CNY",
             invitationCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
     }
@@ -1843,7 +270,7 @@ public class PlayerCreateTests
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1859,7 +286,7 @@ public class PlayerCreateTests
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var command = new CreatePlayerWithPlayerInvitationCommand(
@@ -1868,9 +295,7 @@ public class PlayerCreateTests
             "password",
             "CNY",
             upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(command));
     }
@@ -1886,7 +311,7 @@ public class PlayerCreateTests
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeAgentOperations = Substitute.For<IAgentOperations>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeAgentOperations
@@ -1909,7 +334,7 @@ public class PlayerCreateTests
             fakePasswordHandler,
             fakeBrandOperations,
             fakeAgentOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var query = new CreatePlayerWithAgentInvitationCodeCommand(
@@ -1918,9 +343,7 @@ public class PlayerCreateTests
             "password",
             "CNY",
             invitationCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         // act
         Assert.ThrowsAsync<InvalidInvitationCodeException>(
@@ -1936,7 +359,7 @@ public class PlayerCreateTests
         var fakePlayerOperations = Substitute.For<IPlayerOperations>();
         var fakePasswordHandler = Substitute.For<IPasswordHandler>();
         var fakeBrandOperations = Substitute.For<IBrandOperations>();
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
@@ -1948,30 +371,18 @@ public class PlayerCreateTests
                     Currency = "CNY"
                 }));
 
-        fakePlayerRepository.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
-            .Returns(new PlayerInfo(
-                upperPlayerCode,
-                Guid.NewGuid(),
-                100000M,
-                false,
-                false,
-                null,
-                null,
-                null,
-                PlayerStatus.Enabled,
-                "username",
-                null,
-                null,
-                1,
-                null,
-                null,
-                false));
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(upperPlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = upperPlayerCode,
+                BrandId = Guid.NewGuid()
+            });
 
         var sut = new CreatePlayerInvitationPlayerCommandService(
             fakePlayerOperations,
             fakePasswordHandler,
             fakeBrandOperations,
-            fakePlayerRepository,
+            fakePlayerServiceClient,
             fakeBrandServiceClient);
 
         var query = new CreatePlayerWithPlayerInvitationCommand(
@@ -1980,9 +391,7 @@ public class PlayerCreateTests
             "password",
             "CNY",
             upperPlayerCode,
-            false,
-            "::1",
-            "localhost");
+            false);
 
         // act
         Assert.ThrowsAsync<InvalidInvitationCodeException>(

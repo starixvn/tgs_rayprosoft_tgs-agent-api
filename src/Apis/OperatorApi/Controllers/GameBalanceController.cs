@@ -79,7 +79,7 @@ public class GameBalanceController : ControllerBase
     [HttpGet("{gpCode}", Name = "GetGameBalance")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
-        [FromServices] IGetService<GetGameBalanceQuery, decimal?> getGameBalanceService,
+        [FromServices] IGetService<GetGameBalanceQuery, decimal> getGameBalanceService,
         [FromServices] IGameProviderStatusValidator gameStatusValidator,
         string gpCode)
     {
@@ -90,14 +90,28 @@ public class GameBalanceController : ControllerBase
 
         var query = new GetGameBalanceQuery(playerTokenData.PlayerCode, gpCode);
 
-        var balance = await getGameBalanceService.GetAsync(query).ConfigureAwait(false);
-
-        return new GetGameBalanceResponse
+        try
         {
-            Balance = balance.HasValue ? balance.Value : 0,
-            Error = (int)(balance.HasValue ? TgsApiError.None : TgsApiError.GameBalanceFailed),
-            ErrorMessage = balance.HasValue ? string.Empty : TgsApiError.GameBalanceFailed.ToString()
-        };
+            var balance = await getGameBalanceService.GetAsync(query).ConfigureAwait(false);
+
+            return new GetGameBalanceResponse
+            {
+                Balance = balance,
+                Error = (int)TgsApiError.None,
+                ErrorMessage = string.Empty
+            };
+        }
+        catch
+        {
+            return new GetGameBalanceResponse
+            {
+                Balance = 0,
+                Error = (int)TgsApiError.GameBalanceFailed,
+                ErrorMessage = TgsApiError.GameBalanceFailed.ToString()
+            };
+        }
+
+
     }
 
     [HttpGet("list", Name = "ListGameBalance")]

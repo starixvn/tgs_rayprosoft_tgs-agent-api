@@ -8,6 +8,4 @@ public record CreateInitBankInfoCommand(
     string PlayerCode,
     Guid PaymentChannelId,
     string BankType,
-    JsonDocument Detail,
-    string IpAddress,
-    string HostName);
+    JsonDocument Detail);

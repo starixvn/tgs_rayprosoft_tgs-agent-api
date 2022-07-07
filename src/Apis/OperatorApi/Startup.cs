@@ -258,8 +258,6 @@ public sealed class Startup
             {
                 c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
                 c.DisableDataAnnotationsValidation = true;
-                c.LocalizationEnabled = false;
-                c.ImplicitlyValidateChildProperties = true;
             })
             .AddJsonOptions(jsonOptions =>
             {

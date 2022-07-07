@@ -3,7 +3,7 @@ using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
-using TGS.Core.Models.Enums;
+using Tgs.PlayerService.Client;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
@@ -15,23 +15,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void AllMatchCondition_Should_All_SubConditions_Pass()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid()
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -63,19 +51,28 @@ public class BrandPaymentConditionTests
         var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition1
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var fakeCondition2 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition2
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var fakeCondition3 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition3
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var sut = new MatchAllCondition(
@@ -83,7 +80,7 @@ public class BrandPaymentConditionTests
             fakeCondition2.Object,
             fakeCondition3.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -91,23 +88,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void AllPlayers_Is_False_Will_Ignore_After_Conditions()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -139,7 +124,10 @@ public class BrandPaymentConditionTests
         var fakeCondition = new Mock<IBrandPaymentCondition>();
 
         fakeCondition
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var sut = new BrandPaymentFilterCondition(
@@ -148,7 +136,7 @@ public class BrandPaymentConditionTests
             new ShowOnAllPlayersCondition(),
             fakeCondition.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -156,23 +144,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Authenticate_Identity_Should_Always_Valid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -203,7 +179,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -211,23 +187,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Authenticate_Identity_Should_Invalid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -258,7 +222,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -266,23 +230,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Authenticate_Identity_Should_Success()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            true,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -313,7 +265,7 @@ public class BrandPaymentConditionTests
 
         var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -321,23 +273,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Authenticate_Phone_Should_Always_Valid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -368,7 +308,7 @@ public class BrandPaymentConditionTests
 
         var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -376,23 +316,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Authenticate_Phone_Should_Success()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            true,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -423,7 +351,7 @@ public class BrandPaymentConditionTests
 
         var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -431,23 +359,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void BlockList_Is_First_Check()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -484,7 +400,7 @@ public class BrandPaymentConditionTests
             new ShowOnAllPlayersCondition(),
             fakeCondition.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -492,23 +408,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void BrandPayment_Set_AllPlayers_False_Will_Invalid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -539,7 +443,7 @@ public class BrandPaymentConditionTests
 
         var sut = new ShowOnAllPlayersCondition();
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -547,23 +451,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void DepositedAmountCondition_Should_Success()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            10M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -594,7 +486,7 @@ public class BrandPaymentConditionTests
 
         var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 50M);
 
         Assert.IsTrue(actual);
     }
@@ -602,23 +494,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Player_In_BlockList_Should_Invalid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -649,7 +529,7 @@ public class BrandPaymentConditionTests
 
         var sut = new BlockListCondition(new[] { brandPayment.Id });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -657,23 +537,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Player_In_WhiteList_Should_Pass()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -704,7 +572,7 @@ public class BrandPaymentConditionTests
 
         var sut = new WhiteListCondition(new[] { brandPayment.Id });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -712,23 +580,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void Player_In_WhiteList_Will_Ignore_After_Conditions()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -765,7 +621,7 @@ public class BrandPaymentConditionTests
             new ShowOnAllPlayersCondition(),
             fakeCondition.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -773,23 +629,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void SomeOneCondition_Should_Any_One_SubCondition_Pass()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -821,19 +665,28 @@ public class BrandPaymentConditionTests
         var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition1
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(false);
 
         var fakeCondition2 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition2
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(true);
 
         var fakeCondition3 = new Mock<IBrandPaymentCondition>();
 
         fakeCondition3
-            .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+            .Setup(fake => fake.IsValid(
+                It.IsAny<BrandPaymentInfo>(),
+                It.IsAny<Tgs.PlayerService.Client.PlayerInfo>(),
+                It.IsAny<decimal>()))
             .Returns(false);
 
         var sut = new MatchOneCondition(
@@ -841,7 +694,7 @@ public class BrandPaymentConditionTests
             fakeCondition2.Object,
             fakeCondition3.Object);
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }
@@ -849,23 +702,11 @@ public class BrandPaymentConditionTests
     [Test]
     public void VipCondition_Is_Empty_Should_Invalid()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            null,
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -896,7 +737,7 @@ public class BrandPaymentConditionTests
 
         var sut = new VipCondition(Array.Empty<Guid>());
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsFalse(actual);
     }
@@ -904,23 +745,12 @@ public class BrandPaymentConditionTests
     [Test]
     public void VipCondition_Should_Success()
     {
-        var playerInfo = new PlayerInfo(
-            "ThisIsPlayerCode",
-            Guid.NewGuid(),
-            100M,
-            false,
-            false,
-            null,
-            null,
-            Guid.NewGuid(),
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            PlayerCode = "ThisIsPlayerCode",
+            BrandId = Guid.NewGuid(),
+            VipLevelId = Guid.NewGuid()
+        };
 
         var brandPayment = new BrandPaymentInfo
         {
@@ -951,7 +781,7 @@ public class BrandPaymentConditionTests
 
         var sut = new VipCondition(new[] { playerInfo.VipLevelId.Value });
 
-        var actual = sut.IsValid(brandPayment, playerInfo);
+        var actual = sut.IsValid(brandPayment, playerInfo, 0M);
 
         Assert.IsTrue(actual);
     }

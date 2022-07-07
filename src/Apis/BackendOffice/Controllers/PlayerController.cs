@@ -5,16 +5,19 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.GameProviders.Pluggable.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
+using TGS.Apis.BackendOffice.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
+using TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
 
 namespace TGS.Apis.BackendOffice.Controllers;
 
@@ -170,6 +173,33 @@ public partial class PlayerController : BaseContextController
         [FromServices]
         IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
         => service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
+
+    [HttpPost("{playerCode}/fundin/all", Name = "FundInAllPlayerGameProvider")]
+    [Description("FundIn All Player GameProvider")]
+    public async ValueTask<MessageResponse> FundInAllPlayerGameProviderAsync(
+        [FromServices] ICommandService<FundInAllPlayerGameProviderCommand> service,
+        string playerCode)
+    {
+        await service.ExecuteAsync(new FundInAllPlayerGameProviderCommand(
+            PlayerCode: playerCode)).ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPost("{playerCode}/fundin/", Name = "FundInPlayerGameProvider")]
+    [Description("FundIn Player GameProvider")]
+    public async ValueTask<MessageResponse> FundInPlayerGameProviderAsync(
+        [FromServices] ICommandService<FundInPlayerGameProviderCommand> service,
+        string playerCode,
+        FundInPlayerGameProviderModel model)
+    {
+        await service.ExecuteAsync(new FundInPlayerGameProviderCommand(
+            PlayerCode: playerCode,
+            GameProviderCode: model.GameProviderCode)).ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
 
     [HttpGet("{playerCode}/mainwallet", Name = "GetPlayerMainWalletBalance")]
     [Description("Get Player Main wallet")]

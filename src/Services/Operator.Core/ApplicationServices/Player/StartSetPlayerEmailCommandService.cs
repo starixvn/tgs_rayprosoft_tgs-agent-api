@@ -56,9 +56,9 @@ internal class StartSetPlayerEmailCommandService : IGetService<StartSetPlayerEma
             return saveResult.SecurityKey;
         }
 
-        var mailSubject =
-            Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject),
-                command.CultureInfo)!;
+        var mailSubject = Resources.ResourceManager.GetString(
+            nameof(Resources.ValidateCodeMailSubject),
+            command.CultureInfo)!;
         var mailBody = string.Format(
             Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
             saveResult.ValidateCode);

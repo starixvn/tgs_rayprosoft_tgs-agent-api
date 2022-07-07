@@ -23,7 +23,7 @@ public class PlayerAggregate
     public int RegisteredCount { get; set; }
 
     public int FirstFundInCount { get; set; }
-
+    
     public decimal DepositAmount { get; set; }
 
     public decimal WithdrawalAmount { get; set; }

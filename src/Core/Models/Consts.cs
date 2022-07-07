@@ -107,6 +107,19 @@ public static class Consts
         public const string AllBet = "AB";
         public const string AsiaGaming = "AG";
         public const string Avia = "AVIA";
+        public const string AWC_AELOTTO = "AWC_AELOTTO";
+        public const string AWC_AWS = "AWC_AWS";
+        public const string AWC_COCKFIGHT = "AWC_COCKFIGHT";
+        public const string AWC_FACAI = "AWC_FACAI";
+        public const string AWC_FS = "AWC_FS";
+        public const string AWC_KM = "AWC_KM";
+        public const string AWC_LUDO = "AWC_LUDO";
+        public const string AWC_PGS = "AWC_PGS";
+        public const string AWC_RCB = "AWC_RCB";
+        public const string AWC_SG = "AWC_SG";
+        public const string AWC_SPADE = "AWC_SPADE";
+        public const string AWC_VENUS = "AWC_VENUS";
+        public const string AWC_YL = "AWC_YL";
         public const string BetConstruct = "BC";
         public const string BigGaming = "BG";
         public const string Card365 = "365";
@@ -116,6 +129,7 @@ public static class Consts
         public const string IMESports = "IMES";
         public const string JDB = "JDB";
         public const string Jili = "JILI";
+        public const string JiliTransfer = "JILITF";
         public const string Joker = "JOKER";
         public const string KY = "KY";
         public const string LY = "LY";
@@ -131,6 +145,7 @@ public static class Consts
         public const string WGHorse = "WGVIA";
         public const string WGSports = "WGFM";
         public const string WMCasino = "WM";
+        public const string WMCasinoTransfer = "WMTF";
     }
 
     public static class LocalizationContext

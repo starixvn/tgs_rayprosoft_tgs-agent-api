@@ -1,20 +1,24 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
+using TGS.Services.Operator.PlayerRegisterFlow;
 using TGS.Services.Operator.ValidateCode;
-using Tgs.RouletteServices.Clients;
-using System.Collections.Generic;
-using System;
-using System.Collections.Immutable;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OperatorServiceCollectionExtensions
 {
-    private static readonly Dictionary<string, Type> _FlowTypes = new();
+    private static readonly Dictionary<string, Type> _FlowTypes = new()
+    {
+        ["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
+        ["InitMail"] = typeof(SetEmailRegisterFlowStep),
+        ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep)
+    };
 
     public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
     {
@@ -55,7 +59,12 @@ public static class OperatorServiceCollectionExtensions
             .AddScoped(sp => new RegisterFlowBuilder(
                 sp,
                 _FlowTypes.ToImmutableDictionary()))
-            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>();
+            .AddScoped<IBrandRegisterFlowDefinitionManager, BrandFlowDefinitionManager>()
+            .AddScoped<CreatePlayerRegisterFlowStep>()
+            .AddScoped<FinalRegisterFlowStep>();
+
+        foreach (var v in _FlowTypes.Values)
+            services.AddScoped(v);
 
         var opConfiguration = new OperatorConfiguration(services);
 

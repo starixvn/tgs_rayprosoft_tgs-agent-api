@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +24,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Brand;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
 
@@ -104,12 +107,12 @@ public class PlayerController : ControllerBase
 
     [HttpPost("phone/check")]
     public ValueTask<bool> CheckPhoneCanUseAsync(
-        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-        [FromBody] StartSetPhoneRequest viewModel)
+            [FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
+            [FromBody] StartSetPhoneRequest viewModel)
     {
         var brandId = HttpContext.Items.GetBrandId();
 
-        var query = new CheckBrandPhoneQuery(
+        var query = new CheckBrandPhoneCanUseQuery(
             brandId,
             null,
             viewModel.AreaCode,
@@ -137,32 +140,38 @@ public class PlayerController : ControllerBase
     /// <summary>
     /// Create default withdraw bankinfo of register flow.
     /// </summary>
-    /// <param name="createService"></param>
-    /// <param name="viewModel"></param>
-    /// <returns></returns>
+    /// <param name="executeFlowService">The execute flow service.</param>
+    /// <param name="viewModel">The view model.</param>
+    /// <returns>
+    ///   <br />
+    /// </returns>
     [HttpPost("init-bankinfo", Name = "CreatePlayerBankInfoOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async Task CreateBankInfoAsync(
-        [FromServices] ICommandService<CreateInitBankInfoCommand> createService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         CreateInitBankInfoViewModel viewModel)
     {
-        var brandId = HttpContext.GetBrandId();
-        var playerData = HttpContext.Items.GetPlayerTokenData();
+        var brandId = HttpContext.GetBrandId()!.Value;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CreateInitBankInfoCommand(
-            brandId!.Value,
-            playerData.PlayerCode,
-            viewModel.PaymentChannelId,
-            viewModel.BankType,
-            viewModel.Detail,
-            ipAddress,
-            hostName);
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
 
-        await createService.ExecuteAsync(command).ConfigureAwait(false);
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(viewModel),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
     }
 
     [HttpPost("identity/upload", Name = "CreateIdentityAuthenticationForm")]
@@ -237,6 +246,19 @@ public class PlayerController : ControllerBase
         return getService.GetAsync(query);
     }
 
+    [HttpGet("register", Name = "GetCurrentRegisterStep")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<string> GetCurrentRegisterStepAsync(
+            [FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
+    {
+        var brandId = HttpContext.GetBrandId() ?? throw new BrandNotFoundException();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var query = new GetCurrentPlayerRegisterFlowStepQuery(brandId, playerTokenData?.PlayerCode);
+
+        return getService.GetAsync(query, HttpContext.RequestAborted);
+    }
+
     /// <summary>
     /// Get player information
     /// </summary>
@@ -245,8 +267,9 @@ public class PlayerController : ControllerBase
     [IgnoreUserBlacklistCheck]
     public async ValueTask<PlayerInfoViewModel> GetPlayerAsync(
         [FromServices] IGetService<GetPlayerMainDataQuery, Tgs.PlayerService.Client.PlayerInfo> getPlayerMainDataQueryService,
+        [FromServices] IGetService<GetPlayerStatusQuery, Tgs.PlayerService.Client.PlayerStatus> getPlayerStatusQueryService,
         [FromServices] IGetService<GetPlayerVipLevelQuery, int> getPlayerVipLevelQueryService,
-        [FromServices] IGetService<GetPlayerPropertiesQuery, IReadOnlyDictionary<string, string>> getPlayerPropertiesQueryService,
+        [FromServices] IGetService<GetPlayerPropertiesQuery, IImmutableDictionary<string, string>> getPlayerPropertiesQueryService,
         [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService,
         [FromServices] IGetService<GetPlayerIdentityFormQuery, PlayerIdentityFormInfo> getIdentityFormStatusService,
         [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> getBankInfoQueryService)
@@ -259,9 +282,7 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
 
         if (player == null)
-        {
             throw new CoreExceptions.PlayerNotFoundException(playerCode, Player.NotFound);
-        }
 
         var vipLevel = await getPlayerVipLevelQueryService
             .GetAsync(new GetPlayerVipLevelQuery(player.VipLevelId))
@@ -281,7 +302,11 @@ public class PlayerController : ControllerBase
 
         var birthdateValue = playerProperties.GetValueOrDefault("Birthdate");
 
-        var bankInfoAuthentication = player.Status == Tgs.PlayerService.Client.PlayerStatus.Enabled
+        var playerStatus = await getPlayerStatusQueryService
+            .GetAsync(new GetPlayerStatusQuery(playerCode), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var bankInfoAuthentication = playerStatus == Tgs.PlayerService.Client.PlayerStatus.Enabled
               || await getBankInfoQueryService
                   .QueryAsync(new GetPlayerBankInfosQuery(playerCode))
                   .AnyAsync(info => info.IsDefault).ConfigureAwait(false);
@@ -308,7 +333,10 @@ public class PlayerController : ControllerBase
             Viber = playerProperties.GetValueOrDefault("Viber"),
             Telegram = playerProperties.GetValueOrDefault("Telegram"),
             WhatsApp = playerProperties.GetValueOrDefault("WhatsApp"),
-            BankInfoAuthentication = bankInfoAuthentication
+            BankInfoAuthentication = bankInfoAuthentication,
+            EmailAuthentication = player.EmailAuthentication,
+            PhoneAuthentication = player.PhoneAuthentication,
+            IsCompletedRegister = playerStatus != Tgs.PlayerService.Client.PlayerStatus.RegisterUndone
         };
 
         return playerInfo;
@@ -405,9 +433,7 @@ public class PlayerController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     public async Task<CreatePlayerResponse> RegisterPlayerAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
-        [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerService,
-        [FromServices] IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo> createAgentInvitationPlayerService,
-        [FromServices] IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo> createPlayerInvitationPlayerService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromHeader(Name = "Agent-Invitation-Code")] string invitationCode,
         [FromBody] CreatePlayerRequest request)
     {
@@ -429,77 +455,29 @@ public class PlayerController : ControllerBase
         var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var agentInvitationCode = string.IsNullOrWhiteSpace(invitationCode)
-            ? request.AgentInvitationCode
-            : invitationCode;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        if (!string.IsNullOrWhiteSpace(request.UpperPlayerCode))
-        {
-            var command = new CreatePlayerWithPlayerInvitationCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                request.UpperPlayerCode,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            invitationCode);
 
-            var info = await createPlayerInvitationPlayerService
-                .GetAsync(command)
-                .ConfigureAwait(false);
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(request),
+            locationInfo);
 
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
-        else if (!string.IsNullOrWhiteSpace(agentInvitationCode))
-        {
-            var command = new CreatePlayerWithAgentInvitationCodeCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                agentInvitationCode,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
-            var info = await createAgentInvitationPlayerService
-                .GetAsync(command)
-                .ConfigureAwait(false);
-
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
-        else
-        {
-            var query = new CreatePlayerCommand(
-                brandId,
-                request.UserName,
-                request.Password,
-                brand.Currency,
-                request.IsTestPlayer,
-                ipAddress.ToString(),
-                hostName);
-
-            var info = await createPlayerService.GetAsync(query).ConfigureAwait(false);
-
-            return new CreatePlayerResponse
-            {
-                PlayerCode = info.PlayerCode,
-                IsNew = info.IsNew
-            };
-        }
+        return result.StepResponse.Deserialize<CreatePlayerResponse>();
     }
 
     [HttpPost("register", Name = "RegisterPlayerFlow")]
     [IgnoreUserBlacklistCheck]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
     public async Task<PlayerRegisterFlowResponseViewModel> RegisterPlayerAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandService,
         [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
@@ -534,7 +512,6 @@ public class PlayerController : ControllerBase
 
         var command = new ExecutePlayerRegisterFlowCommand(
             brandId,
-            model.Type,
             model.Input,
             locationInfo);
 
@@ -756,56 +733,6 @@ public class PlayerController : ControllerBase
     }
 
     /// <summary>
-    /// Starts the change email of register flow.
-    /// </summary>
-    /// <param name="getBrandInfoService">The get brand info service.</param>
-    /// <param name="getPlayerInfoService">The get player info service.</param>
-    /// <param name="checkService">The check player email service.</param>
-    /// <param name="setPlayerEmailService">The set player email service.</param>
-    /// <param name="request">The request.</param>
-    /// <returns></returns>
-    [HttpPost("init-email", Name = "StartChangeEmailOfPlayerRegister")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangeEmailAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-        [FromServices] IGetService<CheckBrandEmailQuery, bool> checkService,
-        [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
-        [FromBody] StartInitEmailRequest request)
-    {
-        var brandId = HttpContext.GetBrandId();
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-        var brandInfo = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
-
-        if (!brandInfo.EmailRegisterFlowEnabled)
-            throw new InvalidOperationException();
-
-        var playerInfo = await getPlayerInfoService
-            .GetAsync(new GetPlayerQuery(brandId!.Value, playerTokenData.PlayerCode))
-            .ConfigureAwait(false);
-
-        var isBrandHasSameEmail = await checkService
-            .GetAsync(new CheckBrandEmailQuery(
-                brandId!.Value,
-                request.Email,
-                playerInfo.PlayerCode))
-            .ConfigureAwait(false);
-
-        if (isBrandHasSameEmail)
-            throw new BrandEmailDuplicateException();
-
-        var command = new StartSetPlayerEmailCommand(
-            playerTokenData.PlayerCode,
-            request.Email,
-            CultureInfo.CurrentUICulture,
-            true);
-
-        return await setPlayerEmailService.GetAsync(command).ConfigureAwait(false);
-    }
-
-    /// <summary>
     /// Starts the change phone.
     /// </summary>
     /// <param name="getBrandInfoService">The brand info query service.</param>
@@ -816,7 +743,7 @@ public class PlayerController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<string> StartChangePhoneAsync(
         [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
+        [FromServices] IGetService<CheckBrandPhoneCanUseQuery, bool> checkService,
         [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
         [FromBody] StartSetPhoneRequest request)
     {
@@ -829,7 +756,7 @@ public class PlayerController : ControllerBase
 
         var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
 
-        var checkQuery = new CheckBrandPhoneQuery(
+        var checkQuery = new CheckBrandPhoneCanUseQuery(
             brand.BrandId,
             playerTokenData.PlayerCode,
             request.AreaCode.Trim(),
@@ -854,89 +781,120 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Starts to set phone with player token
-    /// </summary>
-    /// <param name="getBrandInfoService">The brand info query service.</param>
-    /// <param name="getPlayerInfoService">The get player information service.</param>
-    /// <param name="checkService">The check player phone service.</param>
-    /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
+    /// <summary>Starts the change email of register flow.</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="request">The request.</param>
     /// <returns>
-    /// security code
+    ///   <br />
     /// </returns>
-    [HttpPost("init-phone", Name = "StartChangePhoneOfPlayerRegister")]
+    [HttpPost("init-email", Name = "StartSetEmailOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
-    public async ValueTask<string> StartChangePhoneAsync(
-        [FromServices] IGetService<BrandQuery, BrandInfo> getBrandInfoService,
-        [FromServices] IGetService<GetPlayerQuery, PlayerInfo> getPlayerInfoService,
-        [FromServices] IGetService<CheckBrandPhoneQuery, bool> checkService,
-        [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+    public async ValueTask<string> StartSetEmailAsync(
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
+        [FromBody] StartInitEmailRequest request)
+    {
+        var brandId = HttpContext.GetBrandId()!.Value;
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Init",
+                data = request
+            }),
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return result.StepResponse.Deserialize<string>();
+    }
+
+    /// <summary>Starts to set phone with player token</summary>
+    /// <param name="executeFlowService"></param>
+    /// <param name="request">The request.</param>
+    /// <returns>security code</returns>
+    [HttpPost("init-phone", Name = "StartSetPhoneOfPlayerRegister")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
+    public async ValueTask<string> StartSetPhoneAsync(
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] StartInitPhoneRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Phone)
             || string.IsNullOrWhiteSpace(request.AreaCode))
             throw new PlayerPhoneRequiredException();
 
-        var brandId = HttpContext.GetBrandId();
+        var brandId = HttpContext.GetBrandId()!.Value;
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var brand = await getBrandInfoService.GetAsync(new BrandQuery(brandId!.Value)).ConfigureAwait(false);
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
 
-        var playerInfo = await getPlayerInfoService
-            .GetAsync(new GetPlayerQuery(brand.BrandId, playerTokenData.PlayerCode))
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
+            hostName,
+            null);
+
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Init",
+                data = request
+            }),
+            locationInfo);
+
+        var result = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        if (playerInfo == null)
-            throw new CoreExceptions.PlayerNotFoundException("Player not found.");
-
-        var checkQuery = new CheckBrandPhoneQuery(
-            brand.BrandId,
-            playerInfo.PlayerCode,
-            request.AreaCode.Trim(),
-            request.Phone.Trim());
-
-        var canDoCommand = await checkService
-            .GetAsync(checkQuery)
-            .ConfigureAwait(false);
-
-        if (!canDoCommand)
-            throw new BrandPhoneDuplicateException();
-
-        var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
-            playerInfo.PlayerCode,
-            request.AreaCode.Trim(),
-            request.Phone.Trim(),
-            CultureInfo.CurrentUICulture,
-            brand.SmsEnabled);
-
-        return await startSetPlayerPhoneService
-            .GetAsync(startSetPlayerPhoneCommand)
-            .ConfigureAwait(false);
+        return result.StepResponse.Deserialize<string>();
     }
 
     [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask SubmitChangeEmailAsync(
-        [FromServices] ICommandService<CommitInitPlayerEmailCommand> commitPlayerEmailService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] SubmitInitEmailRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CommitInitPlayerEmailCommand(
-            request.SecurityKey,
-            request.ValidateCode,
-            ipAddress,
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
             hostName,
-            brandId);
+            null);
 
-        await commitPlayerEmailService
-            .ExecuteAsync(command)
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Valid",
+                data = request
+            }),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 
@@ -990,33 +948,42 @@ public class PlayerController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Submits the change phone.
-    /// </summary>
-    /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+    /// <summary>Submits the change phone.</summary>
+    /// <param name="executeFlowService"></param>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
+    /// <returns>
+    ///   <br />
+    /// </returns>
     [HttpPut("init-phone", Name = "SubmitChangePhoneOfPlayerRegister")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
     public async ValueTask SubmitChangePhoneAsync(
-        [FromServices] ICommandService<CommitInitPlayerPhoneCommand> commitPlayerInitPhoneService,
+        [FromServices] IGetService<ExecutePlayerRegisterFlowCommand, RegisterFlowProcessResult> executeFlowService,
         [FromBody] SubmitInitPhoneRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
         var hostName = Request.Host.Host;
 
-        var command = new CommitInitPlayerPhoneCommand(
-            request.SecurityKey,
-            request.ValidateCode,
-            ipAddress,
+        var locationInfo = new PlayerLocationInfo(
+            playerTokenData?.PlayerCode,
+            ipAddress.ToString(),
             hostName,
-            brandId);
+            null);
 
-        await commitPlayerInitPhoneService
-            .ExecuteAsync(command)
+        var command = new ExecutePlayerRegisterFlowCommand(
+            brandId,
+            JsonSerializer.SerializeToDocument(new
+            {
+                input = "Valid",
+                data = request
+            }),
+            locationInfo);
+
+        _ = await executeFlowService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 

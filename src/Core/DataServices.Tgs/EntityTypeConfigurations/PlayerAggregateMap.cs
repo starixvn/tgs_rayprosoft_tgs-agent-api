@@ -25,7 +25,7 @@ internal class PlayerAggregateMap : IEntityTypeConfiguration<PlayerAggregate>
             .IsRequired();
 
         builder.Property(b => b.FirstFundInCount)
-            .IsRequired();
+            .IsRequired();        
 
         builder.Property(b => b.DepositAmount)
             .HasPrecision(18, 6)

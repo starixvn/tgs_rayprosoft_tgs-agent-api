@@ -1,6 +1,5 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Tokens;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 

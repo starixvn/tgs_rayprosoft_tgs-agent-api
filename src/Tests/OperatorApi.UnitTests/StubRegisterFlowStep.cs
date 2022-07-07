@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operator;
+using TGS.Services.Operator.PlayerRegisterFlow;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 

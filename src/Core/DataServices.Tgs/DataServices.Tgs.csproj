@@ -15,10 +15,24 @@
     <None Remove="DataInitializers\Games\365.csv" />
     <None Remove="DataInitializers\Games\AB.csv" />
     <None Remove="DataInitializers\Games\Avia.csv" />
+    <None Remove="DataInitializers\Games\AWC_AELOTTO.csv" />
+    <None Remove="DataInitializers\Games\AWC_AWS.csv" />
+    <None Remove="DataInitializers\Games\AWC_COCKFIGHT.csv" />
+    <None Remove="DataInitializers\Games\AWC_FACAI.csv" />
+    <None Remove="DataInitializers\Games\AWC_FS.csv" />
+    <None Remove="DataInitializers\Games\AWC_KM.csv" />
+    <None Remove="DataInitializers\Games\AWC_LUDO.csv" />
+    <None Remove="DataInitializers\Games\AWC_PGS.csv" />
+    <None Remove="DataInitializers\Games\AWC_RCB.csv" />
+    <None Remove="DataInitializers\Games\AWC_SG.csv" />
+    <None Remove="DataInitializers\Games\AWC_SPADE.csv" />
+    <None Remove="DataInitializers\Games\AWC_VENUS.csv" />
+    <None Remove="DataInitializers\Games\AWC_YL.csv" />
     <None Remove="DataInitializers\Games\BC.csv" />
     <None Remove="DataInitializers\Games\DG.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
     <None Remove="DataInitializers\Games\JILI.csv" />
+    <None Remove="DataInitializers\Games\JILITF.csv" />
     <None Remove="DataInitializers\Games\JOKER.csv" />
     <None Remove="DataInitializers\Games\LY.csv" />
     <None Remove="DataInitializers\Games\PPTF.csv" />
@@ -28,6 +42,7 @@
     <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
+    <None Remove="DataInitializers\Games\WMTF.csv" />
     <None Remove="SqlScripts\Functions\agent_get_agents_with_team_counts.sql" />
     <None Remove="SqlScripts\Functions\agent_get_all_sub_agents.sql" />
     <None Remove="SqlScripts\Functions\agent_update_path.sql" />
@@ -62,7 +77,21 @@
     <EmbeddedResource Include="DataInitializers\Games\365.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AVIA.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_AELOTTO.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_AWS.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_COCKFIGHT.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_FACAI.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_FS.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_KM.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_LUDO.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_PGS.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_RCB.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_SG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_SPADE.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_VENUS.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\AWC_YL.csv" />
     <EmbeddedResource Include="DataInitializers\Games\DG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\JILITF.csv" />
     <EmbeddedResource Include="DataInitializers\Games\JOKER.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PPTF.csv" />
     <EmbeddedResource Include="DataInitializers\Games\TF.csv" />
@@ -85,6 +114,7 @@
     <EmbeddedResource Include="DataInitializers\Games\WGFM.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WM.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\WMTF.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_no_second_deposit_details.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_first_deposit_details.sql" />
@@ -166,11 +196,11 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="27.2.1" />
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
   </ItemGroup>
