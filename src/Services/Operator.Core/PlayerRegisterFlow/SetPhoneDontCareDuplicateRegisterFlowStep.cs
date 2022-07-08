@@ -6,12 +6,14 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
+using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
 
 namespace TGS.Services.Operator.PlayerRegisterFlow;
 
 internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
 {
     private readonly IPlayerServiceClient _playerServiceClient;
+    private bool _compatible;
 
     public string Type => "SetPhoneDontCareDuplicate";
 
@@ -38,7 +40,7 @@ internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
         PlayerLocationInfo locationInfo,
         CancellationToken cancellationToken = default)
     {
-        var request = input.Deserialize<PhoneData>()!;
+        var request = DeserializeInputData(input);
 
         if (string.IsNullOrWhiteSpace(locationInfo.PlayerCode))
             return new RegisterFlowProcessResult(false, null, null);
@@ -61,6 +63,24 @@ internal class SetPhoneDontCareDuplicateRegisterFlowStep : IRegisterFlowStep
             player is not null && player.PhoneAuthentication,
             null,
             null);
+    }
+
+    public void SetupStep(JsonElement jsonElement)
+    {
+        if (jsonElement.TryGetProperty("compatible", out var prop))
+            _compatible = prop.GetBoolean();
+    }
+
+    private PhoneData DeserializeInputData(JsonDocument input)
+    {
+        if (_compatible)
+        {
+            var inputData = input.Deserialize<InitPhoneStepInputData>()!;
+
+            return inputData.Data.Deserialize<PhoneData>()!;
+        }
+        else
+            return input.Deserialize<PhoneData>()!;
     }
 
     internal record PhoneData
