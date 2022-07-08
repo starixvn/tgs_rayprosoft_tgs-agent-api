@@ -862,7 +862,7 @@ public class PlayerController : ControllerBase
             .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        return result.StepResponse.Deserialize<string>();
+        return result.StepResponse?.Deserialize<string>();
     }
 
     [HttpPut("init-email", Name = "SubmitChangeEmailOfPlayerRegister")]
