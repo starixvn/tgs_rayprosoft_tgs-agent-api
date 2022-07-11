@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.BackOffice.Repositories;
+namespace TGS.Services.BackOffice;
 
 internal class DefaultSystemClock : ISystemClock
 {
