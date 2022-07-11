@@ -663,6 +663,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<int>("DepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("deposit_players");
+
                     b.Property<int>("FirstDepositPlayers")
                         .HasColumnType("integer")
                         .HasColumnName("first_deposit_players");
