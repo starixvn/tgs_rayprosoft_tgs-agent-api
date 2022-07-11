@@ -61,7 +61,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ITransactionService, TransactionService>();
         services.AddTgsTransactionRepositoriesServices();
 
-        services.AddSingleton<ISystemClock, DefaultSystemClock>();
+        services.AddSingleton<ISystemClock, DefaultSystemClock>()
+            .AddTransient<IDateLimiter, DateLimiter>();
 
         return services;
     }
