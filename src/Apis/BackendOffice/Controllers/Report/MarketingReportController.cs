@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
@@ -40,15 +41,11 @@ public class MarketingReportController : BaseContextController
     public Task<MarketingReportResponse> GetMarketingListAsync(
         [FromServices] IGetService<GetMarketingReportAggregateInfosQuery, MarketingReportResponse> queryService,
         [FromServices] IGetService<GetMarketingReportAggregateInfosByAgentQuery, MarketingReportResponse> agentQueryService,
+        [FromServices] IDateLimiter dateLimiter,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
-        var offset = TimeSpan.FromHours(8D);
-        var from = request.From.ToOffset(offset);
-        var to = request.To.ToOffset(offset);
-
-        var start = new DateOnly(from.Year, from.Month, from.Day);
-        var end = new DateOnly(to.Year, to.Month, to.Day);
+        var (start, end) = dateLimiter.FutureToToday(request.From, request.To, TimeSpan.FromHours(8D));
 
         if (string.IsNullOrEmpty(request.AgentUsername))
         {
