@@ -11,11 +11,10 @@ public static class ServiceCollectionExtensions
         Func<IServiceProvider, IDatabase> redisDatabaseResolver)
     {
         services
-              .AddTransient<ISettingRepository, SettingRepository>()
-              .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
-              .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
-              .AddTransient<IAgentRepository, AgentRepository>()
-              .AddSingleton<ISystemClock, DefaultSystemClock>();
+            .AddTransient<ISettingRepository, SettingRepository>()
+            .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
+            .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
+            .AddTransient<IAgentRepository, AgentRepository>();
 
         services.AddTransient<IPlayerOnlineRepository>(sp => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(sp, redisDatabaseResolver(sp)));
 

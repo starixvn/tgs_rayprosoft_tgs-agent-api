@@ -10,7 +10,7 @@ using TGS.Services.BackOffice.Infrastructure.Services;
 
 namespace TGS.Services.BackOffice.Extensions;
 
-public static class ServiceExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBackOfficeApplicationServices(this IServiceCollection services)
     {
@@ -60,6 +60,8 @@ public static class ServiceExtensions
         services.AddTransient<IPlayerBucketService, PlayerBucketService>();
         services.AddTransient<ITransactionService, TransactionService>();
         services.AddTgsTransactionRepositoriesServices();
+
+        services.AddSingleton<ISystemClock, DefaultSystemClock>();
 
         return services;
     }
