@@ -14,6 +14,8 @@ public class PlayerDailyPaymentStatistics
 
     public int? DailyWithdrawCount { get; set; }
 
+    public decimal? FirstDepositAmount { get; set; }
+
     public DateTime? FirstDepositOn { get; set; }
 
     public string PlayerCode { get; set; } = default!;
