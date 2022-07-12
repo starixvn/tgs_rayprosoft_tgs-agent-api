@@ -1,0 +1,28 @@
+﻿using System;
+using StackExchange.Redis;
+using TGS.BackOffice.Repositories;
+using TGS.Services.BackOffice.Domain;
+
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddBackendOfficeRepositories(this IServiceCollection services,
+        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+    {
+        services
+            .AddTransient<ISettingRepository, SettingRepository>()
+            .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
+            .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
+            .AddTransient<IAgentRepository, AgentRepository>()
+            .AddSingleton<ISystemClock, DefaultSystemClock>()
+            .AddTransient<IPaymentReportingRepository, PaymentReportingReposiory>();
+
+        services.AddTransient<IPlayerOnlineRepository>(
+            sp => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(
+                sp,
+                redisDatabaseResolver(sp)));
+
+        return services;
+    }
+}

@@ -12,6 +12,8 @@ public interface ITgsRepository : IBaseRepository
 
     DbSet<AgentBank> AgentBanks { get; set; }
 
+    DbSet<AgentDailyPaymentStatistics> AgentDailyPaymentStatistics { get; set; }
+
     DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
     DbSet<AgentDividend> AgentDividends { get; set; }
