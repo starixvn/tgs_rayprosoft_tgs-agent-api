@@ -5142,6 +5142,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("daily_withdraw_count");
 
+                    b.Property<decimal?>("FirstDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("first_deposit_amount");
+
                     b.Property<DateTime?>("FirstDepositOn")
                         .HasColumnType("timestamptz")
                         .HasColumnName("first_deposit_on");
