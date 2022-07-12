@@ -14,9 +14,13 @@ public static class ServiceCollectionExtensions
             .AddTransient<ISettingRepository, SettingRepository>()
             .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
             .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
-            .AddTransient<IAgentRepository, AgentRepository>();
+            .AddTransient<IAgentRepository, AgentRepository>()
+            .AddTransient<IPaymentReportingRepository, PaymentReportingReposiory>();
 
-        services.AddTransient<IPlayerOnlineRepository>(sp => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(sp, redisDatabaseResolver(sp)));
+        services.AddTransient<IPlayerOnlineRepository>(
+            sp => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(
+                sp,
+                redisDatabaseResolver(sp)));
 
         return services;
     }
