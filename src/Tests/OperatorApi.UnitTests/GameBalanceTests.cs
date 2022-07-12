@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.GameProviders.Pluggable.Client;
-using Tgs.GameProviders.Pluggable.ViewModels;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -35,22 +34,17 @@ public class GameBalanceTests
         var playerCode = "playerCode";
         int amount = 10000;
 
-        var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
-            Guid.NewGuid(),
-            Guid.NewGuid().ToString("N"));
-
-        fakeGameProvidersOperatorPluggableClient
-            .GameProviderFundInAsync(
-            playerCode,
-            gameProviderCode,
-            amount)
-            .Returns(gameProviderFundResultViewModel);
-
         var sut = new FundInGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
 
         // act
         var command = new FundInGameBalanceCommand(gameProviderCode, playerCode, amount);
         await sut.ExecuteAsync(command, default);
+
+        await fakeGameProvidersOperatorPluggableClient.Received(1)
+            .GameProviderFundInAsync(
+            playerCode,
+            gameProviderCode,
+            amount).ConfigureAwait(false);
     }
 
     [Test]
@@ -64,21 +58,17 @@ public class GameBalanceTests
         var playerCode = "playerCode";
         int amount = 10000;
 
-        var gameProviderFundResultViewModel = new GameProviderFundResultViewModel(
-            Guid.NewGuid(),
-            Guid.NewGuid().ToString("N"));
-        fakeGameProvidersOperatorPluggableClient
-            .GameProviderFundOutAsync(
-            playerCode,
-            gameProviderCode,
-            amount)
-            .Returns(gameProviderFundResultViewModel);
-
         var sut = new FundOutGameBalanceCommandService(fakeGameProvidersOperatorPluggableClient, fakeLogger);
 
         // act
         var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
         await sut.ExecuteAsync(command, default);
+
+        await fakeGameProvidersOperatorPluggableClient.Received(1)
+            .GameProviderFundOutAsync(
+            playerCode,
+            gameProviderCode,
+            amount).ConfigureAwait(false);
     }
 
     [Test]

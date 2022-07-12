@@ -75,6 +75,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 .GetAsync(command)
                 .ConfigureAwait(false);
 
+            if (info.IsNew)
+                await _playerServiceClient
+                    .SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone)
+                    .ConfigureAwait(false);
+
             return new RegisterFlowProcessResult(
                 info.IsNew,
                 null,
@@ -99,6 +104,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 .GetAsync(command)
                 .ConfigureAwait(false);
 
+            if (info.IsNew)
+                await _playerServiceClient
+                    .SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone)
+                    .ConfigureAwait(false);
+
             return new RegisterFlowProcessResult(
                 info.IsNew,
                 null,
@@ -119,6 +129,11 @@ internal class CreatePlayerRegisterFlowStep : IRegisterFlowStep
                 request.IsTestPlayer);
 
             var info = await _createPlayerService.GetAsync(query).ConfigureAwait(false);
+
+            if (info.IsNew)
+                await _playerServiceClient
+                    .SetPlayerStatusAsync(info.PlayerCode, PlayerStatus.RegisterUndone)
+                    .ConfigureAwait(false);
 
             return new RegisterFlowProcessResult(
                 info.IsNew,

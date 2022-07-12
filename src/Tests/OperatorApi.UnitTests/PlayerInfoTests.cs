@@ -1,23 +1,18 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.PlayerService.Client;
-using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using CoreEnums = TGS.Core.Models.Enums;
-using PlayerInfo = TGS.Services.Operator.PlayerInfo;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -171,7 +166,7 @@ public class PlayerInfoTests
     }
 
     [Test]
-    public async Task Set_Player_Birthdate_Should_SuccessAsync()
+    public async Task Set_Player_Birthdate_Should_Success()
     {
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var sut = new SetBirthdateCommandService(fakePlayerServiceClient);

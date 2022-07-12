@@ -22,16 +22,11 @@ internal class FundInGameBalanceCommandService : ICommandService<FundInGameBalan
 
     public async ValueTask ExecuteAsync(FundInGameBalanceCommand command, CancellationToken cancellationToken = default)
     {
-        var response = await _gameProvidersOperatorPluggableClient.GameProviderFundInAsync(
-            command.PlayerCode,
-            command.GameProviderCode,
-            command.Amount).ConfigureAwait(false);
-
-        if (response == null)
-        {
-            _logger.LogInformation("Failed to transfer the game wallet to the main wallet.");
-            throw new GameBalanceFundInFailedException("Failed to transfer the game wallet to the main wallet.");
-        }
+        await _gameProvidersOperatorPluggableClient.GameProviderFundInAsync(
+          playerCode: command.PlayerCode,
+          gameProviderCode: command.GameProviderCode,
+          amount: command.Amount,
+          cancellationToken: cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("The game wallet was successfully transferred to the main wallet.");
     }

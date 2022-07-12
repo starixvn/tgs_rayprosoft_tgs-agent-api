@@ -4614,10 +4614,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ActivePlayer")
-                        .HasColumnType("integer")
-                        .HasColumnName("active_player");
-
                     b.Property<decimal>("AgentAdjustAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4665,10 +4661,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
-                    b.Property<int>("DepositCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("deposit_count");
-
                     b.Property<decimal>("DepositHandlingFee")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -4686,10 +4678,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("Hour")
                         .HasColumnType("integer")
                         .HasColumnName("hour");
-
-                    b.Property<int>("LoginPlayer")
-                        .HasColumnType("integer")
-                        .HasColumnName("login_player");
 
                     b.Property<int>("Minute")
                         .HasColumnType("integer")

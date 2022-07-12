@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
             .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
             .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
             .AddTransient<IAgentRepository, AgentRepository>()
-            .AddSingleton<ISystemClock, DefaultSystemClock>()
             .AddTransient<IPaymentReportingRepository, PaymentReportingReposiory>();
 
         services.AddTransient<IPlayerOnlineRepository>(

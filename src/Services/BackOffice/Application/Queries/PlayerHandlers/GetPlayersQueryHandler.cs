@@ -57,7 +57,10 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
             playerQuery = playerQuery.Where(player => player.BrandId == request.BrandId);
 
         if (!string.IsNullOrWhiteSpace(request.Username))
-            playerQuery = playerQuery.Where(player => player.Username == request.Username);
+        {
+            playerQuery = playerQuery.Where(player =>
+                EF.Functions.ILike(player.Username, $"{request.Username}%"));
+        }
 
         if (request.Status != null)
             playerQuery = playerQuery.Where(player => player.Status == request.Status);
@@ -75,6 +78,12 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
             playerQuery = playerQuery.Where(p =>
                 p.RegisteredOn > request.BeginRegisteredOn
                 && p.RegisteredOn <= request.EndRegisteredOn);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.RealName))
+        {
+            playerQuery = playerQuery.Where(p =>
+                EF.Functions.ILike(p.RealName, $"{request.RealName}%"));
         }
 
         var walletQuery =
@@ -139,6 +148,7 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
                     {
                         player.PlayerCode,
                         player.Username,
+                        player.RealName,
                         wallet.Balance,
                         VipLevel = player.Vip.Level,
                         player.Status,
@@ -163,6 +173,7 @@ public class GetPlayersQueryHandler : Handler<GetPlayersRequest, PagedResponse<P
         {
             PlayerCode = row.PlayerCode,
             Username = row.Username,
+            RealName = row.RealName,
             Balance = row.Balance,
             VipLevel = row.VipLevel,
             Status = row.Status,

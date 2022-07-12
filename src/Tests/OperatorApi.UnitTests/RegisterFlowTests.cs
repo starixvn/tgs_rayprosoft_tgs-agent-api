@@ -6,9 +6,10 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
@@ -29,7 +30,7 @@ public class RegisterFlowTests
     [Test]
     public void Add_Step_To_RegisterFlowDefinition()
     {
-        var sut = new RegisterFlowDefinition();
+        var sut = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         var privateList = typeof(RegisterFlowDefinition)
             .GetField("_stepDefinitions", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -56,7 +57,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -71,7 +72,7 @@ public class RegisterFlowTests
     [Test]
     public void Build_RegisterFlow()
     {
-        var sut = new RegisterFlowDefinition();
+        var sut = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         sut.AddStep(new StubRegisterFlowStep());
 
@@ -97,6 +98,7 @@ public class RegisterFlowTests
             .AddSingleton<StubRegisterFlowStep>()
             .AddSingleton(new FinalRegisterFlowStep(
                 Substitute.For<IPlayerServiceClient>()))
+            .AddSingleton<ILogger<RegisterFlow>>(NullLogger<RegisterFlow>.Instance)
             .BuildServiceProvider();
         var sut = new RegisterFlowBuilder(
             serviceProvider,
@@ -162,7 +164,7 @@ public class RegisterFlowTests
 
         var brandId = Guid.NewGuid();
 
-        var input = new CreatePlayerRegisterFlowStep.CreatePlayerInputData
+        var input = new CreatePlayerInputData
         {
             IsTestPlayer = false,
             UserName = "abc",
@@ -198,6 +200,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -253,6 +258,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -309,6 +317,9 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
     }
 
     [Test]
@@ -363,6 +374,99 @@ public class RegisterFlowTests
             locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
+
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerStatusAsync(Arg.Is("test"), Arg.Is(PlayerStatus.RegisterUndone));
+    }
+
+    [Test]
+    public async Task Empty_Flow_Create_Player()
+    {
+        var flowTypes = new Dictionary<string, Type>
+        {
+        }.ToImmutableDictionary();
+        var fakeServiceProvider = Substitute.For<IServiceProvider>();
+
+        var sut = new RegisterFlowBuilder(fakeServiceProvider, flowTypes);
+
+        var flowSettings = JsonDocument.Parse("[]");
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(CreatePlayerRegisterFlowStep)))
+            .Returns(new CreatePlayerRegisterFlowStep(
+                fakeCreatePlayerService,
+                fakeCreateAgentInvitationPlayerService,
+                fakeCreatePlayerInvitationPlayerService,
+                fakePlayerServiceClient,
+                fakeBrandServiceClient));
+
+        var fakePlayerServiceClient2 = Substitute.For<IPlayerServiceClient>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(FinalRegisterFlowStep)))
+            .Returns(new FinalRegisterFlowStep(fakePlayerServiceClient2));
+
+        var flowDefinition = sut.LoadSettings(flowSettings);
+
+        var flow = flowDefinition.BuildRegisterFlow();
+
+        var brandId = Guid.NewGuid();
+        var inputData = new CreatePlayerInputData
+        {
+            UserName = "tester",
+            Password = "123456"
+        };
+        var locationInfo = new PlayerLocationInfo(null, "127.0.0.1", null, null);
+
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Currency = "CNY"
+            });
+
+        _ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
+            cmd => cmd.UserName == inputData.UserName
+                && cmd.BrandId == brandId))
+            .Returns(new CreatePlayerInfo("aabbcc", true));
+
+        var expectedResponse = new CreatePlayerResponse
+        {
+            IsNew = true,
+            PlayerCode = "aabbcc"
+        };
+
+        _ = fakePlayerServiceClient2.GetPlayerInfoAsync(Arg.Is(expectedResponse.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = expectedResponse.PlayerCode
+            });
+
+        _ = await flow.ConfirmCompletedAsync(null);
+        var actual = await flow.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+        Assert.IsNull(actual.NextStepType);
+
+        _ = fakePlayerServiceClient2.Received(1)
+            .SetPlayerStatusAsync(Arg.Is(expectedResponse.PlayerCode), Arg.Is(PlayerStatus.Enabled));
+
+        _ = fakePlayerServiceClient2.Received(1)
+            .RecordRegisterIpAsync(
+                Arg.Is(expectedResponse.PlayerCode),
+                Arg.Any<string>(),
+                Arg.Any<string>());
     }
 
     [Test]
@@ -377,7 +481,7 @@ public class RegisterFlowTests
             JsonDocument.Parse("{}"),
             new PlayerLocationInfo(null, "127.0.0.1", null, null));
 
-        var flowDefinition = new RegisterFlowDefinition();
+        var flowDefinition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         var fakeCreatePlayerStep = new StubRegisterFlowStep()
         {
@@ -450,11 +554,186 @@ public class RegisterFlowTests
     [Test]
     public async Task If_Has_Any_Undone_Step_ConfirmCompleted_Should_Return_True()
     {
-        var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>());
+        var sut = new RegisterFlow(Array.Empty<IRegisterFlowStep>(), NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(null);
 
         Assert.IsTrue(actual);
+    }
+
+    [Test]
+    public async Task PB_Flow_Input_Phone_Step()
+    {
+        var flowTypes = new Dictionary<string, Type>
+        {
+            ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep)
+        }.ToImmutableDictionary();
+        var fakeServiceProvider = Substitute.For<IServiceProvider>();
+
+        var sut = new RegisterFlowBuilder(fakeServiceProvider, flowTypes);
+
+        var flowSettings = JsonDocument.Parse("""
+            [
+                { "type": "SetPhoneDontCareDuplicate" }
+            ]
+        """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
+            .Returns(new SetPhoneDontCareDuplicateRegisterFlowStep(
+                fakePlayerServiceClient));
+
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(CreatePlayerRegisterFlowStep)))
+            .Returns(new CreatePlayerRegisterFlowStep(
+                fakeCreatePlayerService,
+                fakeCreateAgentInvitationPlayerService,
+                fakeCreatePlayerInvitationPlayerService,
+                fakePlayerServiceClient,
+                fakeBrandServiceClient));
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(FinalRegisterFlowStep)))
+            .Returns(new FinalRegisterFlowStep(fakePlayerServiceClient));
+
+        var flowDefinition = sut.LoadSettings(flowSettings);
+
+        var flow = flowDefinition.BuildRegisterFlow();
+
+        var brandId = Guid.NewGuid();
+        var inputData = new PhoneData
+        {
+            AreaCode = "123",
+            Phone = "12345678"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        _ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode
+            });
+
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Currency = "CNY"
+            });
+
+        fakePlayerServiceClient
+            .When(fake => fake.SetPlayerPropertiesAsync(
+                Arg.Is(locationInfo.PlayerCode),
+                Arg.Is<IImmutableDictionary<PlayerPropertyName, string>>(dict => dict[PlayerPropertyName.AreaCode] == inputData.AreaCode
+                    && dict[PlayerPropertyName.Phone] == inputData.Phone
+                    && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString())))
+            .Do(_ =>
+            {
+                fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+                    .Returns(new Tgs.PlayerService.Client.PlayerInfo
+                    {
+                        PlayerCode = locationInfo.PlayerCode,
+                        PhoneAuthentication = true
+                    });
+            });
+
+        _ = await flow.ConfirmCompletedAsync("player1");
+        var actual = await flow.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+        Assert.IsNull(actual.NextStepType);
+    }
+
+    [Test]
+    public async Task PB_Flow_Start_Step()
+    {
+        var flowTypes = new Dictionary<string, Type>
+        {
+            ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep)
+        }.ToImmutableDictionary();
+        var fakeServiceProvider = Substitute.For<IServiceProvider>();
+
+        var sut = new RegisterFlowBuilder(fakeServiceProvider, flowTypes);
+
+        var flowSettings = JsonDocument.Parse("""
+            [
+                { "type": "SetPhoneDontCareDuplicate" }
+            ]
+        """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
+
+        fakeServiceProvider.GetService(Arg.Is(flowTypes["SetPhoneDontCareDuplicate"]))
+            .Returns(new SetPhoneDontCareDuplicateRegisterFlowStep(
+                fakePlayerServiceClient));
+
+        var fakeCreatePlayerService = Substitute.For<IGetService<CreatePlayerCommand, CreatePlayerInfo>>();
+        var fakeCreateAgentInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithAgentInvitationCodeCommand, CreatePlayerInfo>>();
+        var fakeCreatePlayerInvitationPlayerService = Substitute.For<IGetService<CreatePlayerWithPlayerInvitationCommand, CreatePlayerInfo>>();
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(CreatePlayerRegisterFlowStep)))
+            .Returns(new CreatePlayerRegisterFlowStep(
+                fakeCreatePlayerService,
+                fakeCreateAgentInvitationPlayerService,
+                fakeCreatePlayerInvitationPlayerService,
+                fakePlayerServiceClient,
+                fakeBrandServiceClient));
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(FinalRegisterFlowStep)))
+            .Returns(new FinalRegisterFlowStep(fakePlayerServiceClient));
+
+        var flowDefinition = sut.LoadSettings(flowSettings);
+
+        var flow = flowDefinition.BuildRegisterFlow();
+
+        var brandId = Guid.NewGuid();
+        var inputData = new CreatePlayerInputData
+        {
+            UserName = "tester",
+            Password = "123456"
+        };
+        var locationInfo = new PlayerLocationInfo(null, "127.0.0.1", null, null);
+
+        _ = fakeBrandServiceClient.GetBrandInfoAsync(Arg.Is(brandId))
+            .Returns(new Tgs.BrandCertificate.Clients.BrandInfo
+            {
+                Id = brandId,
+                Currency = "CNY"
+            });
+
+        _ = fakeCreatePlayerService.GetAsync(Arg.Is<CreatePlayerCommand>(
+            cmd => cmd.UserName == inputData.UserName
+                && cmd.BrandId == brandId))
+            .Returns(new CreatePlayerInfo("aabbcc", true));
+
+        var expectedResponse = new CreatePlayerResponse
+        {
+            IsNew = true,
+            PlayerCode = "aabbcc"
+        };
+
+        _ = await flow.ConfirmCompletedAsync(null);
+        var actual = await flow.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsFalse(actual.IsCompleted);
+        Assert.AreEqual("SetPhoneDontCareDuplicate", actual.NextStepType);
     }
 
     [Test]
@@ -477,6 +756,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -592,6 +874,9 @@ public class RegisterFlowTests
             ]
         """);
 
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
@@ -706,6 +991,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -834,6 +1122,9 @@ public class RegisterFlowTests
             ]
         """);
 
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
+
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
 
@@ -941,6 +1232,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1074,6 +1368,9 @@ public class RegisterFlowTests
                 { "type": "SetWithdrawBankInfo" }
             ]
         """);
+
+        _ = fakeServiceProvider.GetService(Arg.Is(typeof(ILogger<RegisterFlow>)))
+            .Returns(NullLogger<RegisterFlow>.Instance);
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1211,7 +1508,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1245,7 +1542,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
@@ -1277,7 +1574,7 @@ public class RegisterFlowTests
             step1,
             step2,
             step3
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 
@@ -1314,12 +1611,50 @@ public class RegisterFlowTests
         var sut = new RegisterFlow(new[] {
             step1,
             finalStep
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ProcessInputAsync(brandId, JsonDocument.Parse("{}"), locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
         Assert.IsNull(actual.NextStepType);
+    }
+
+    [Test]
+    public async Task Set_Phone_Without_Check_Duplicate_Step()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetPhoneDontCareDuplicateRegisterFlowStep(fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new PhoneData
+        {
+            AreaCode = "123",
+            Phone = "1345678"
+        };
+
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+            .Returns(new Tgs.PlayerService.Client.PlayerInfo
+            {
+                PlayerCode = locationInfo.PlayerCode,
+                PhoneAuthentication = true
+            });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+        _ = fakePlayerServiceClient.Received(1)
+            .SetPlayerPropertiesAsync(
+                Arg.Is(locationInfo.PlayerCode),
+                Arg.Is<IImmutableDictionary<PlayerPropertyName, string>>(
+                    dict => dict[PlayerPropertyName.AreaCode] == inputData.AreaCode
+                        && dict[PlayerPropertyName.Phone] == inputData.Phone
+                        && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString()));
     }
 
     [Test]
@@ -1641,7 +1976,7 @@ public class RegisterFlowTests
 
         var sut = new RegisterFlow(new[] {
             new StubRegisterFlowStep()
-        });
+        }, NullLogger<RegisterFlow>.Instance);
 
         var actual = await sut.ConfirmCompletedAsync(playerCode);
 

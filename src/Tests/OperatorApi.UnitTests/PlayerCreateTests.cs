@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
@@ -30,7 +31,7 @@ public class PlayerCreateTests
 
         var query = new GetCurrentPlayerRegisterFlowStepQuery(Guid.NewGuid(), null);
 
-        var flowDefinition = new RegisterFlowDefinition();
+        var flowDefinition = new RegisterFlowDefinition(NullLogger<RegisterFlow>.Instance);
 
         var fakeCreatePlayerStep = new StubRegisterFlowStep()
         {

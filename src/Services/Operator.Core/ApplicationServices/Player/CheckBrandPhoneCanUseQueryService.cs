@@ -17,6 +17,9 @@ internal class CheckBrandPhoneCanUseQueryService : IGetService<CheckBrandPhoneCa
 
     public async ValueTask<bool> GetAsync(CheckBrandPhoneCanUseQuery query, CancellationToken cancellationToken = default)
     {
+        if (query.PlayerCode is null)
+            return true;
+
         var player = await _playerServiceClient.GetPlayerInfoByPhoneAsync(
             query.BrandId,
             query.AreaCode,
