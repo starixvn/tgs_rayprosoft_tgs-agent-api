@@ -38,20 +38,31 @@ public class MarketingReportController : BaseContextController
 
     [HttpGet]
     [Description("Get marketing report")]
-    public Task<MarketingReportResponse> GetMarketingListAsync(
+    public async Task<MarketingReportResponse> GetMarketingListAsync(
         [FromServices] IGetService<GetMarketingReportAggregateInfosQuery, MarketingReportResponse> queryService,
         [FromServices] IGetService<GetMarketingReportAggregateInfosByAgentQuery, MarketingReportResponse> agentQueryService,
-        [FromServices] IDateLimiter dateLimiter,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
-        var (start, end) = dateLimiter.FutureToToday(request.From, request.To, TimeSpan.FromHours(8D));
+        var start = DateOnly.FromDateTime(request.From.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+        var end = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+
+        if (start > today)
+            return new MarketingReportResponse
+            {
+                Items = Array.Empty<MarketingReportModel>(),
+                Total = new MarketingReportTotalModel()
+            };
+
+        end = end > today ? today : end;
 
         if (string.IsNullOrEmpty(request.AgentUsername))
         {
             var query = new GetMarketingReportAggregateInfosQuery(request.BrandId, start, end, pagingRequest);
 
-            return queryService.GetAsync(query, HttpContext.RequestAborted).AsTask();
+            return await queryService.GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
         }
         else
         {
@@ -62,7 +73,8 @@ public class MarketingReportController : BaseContextController
                 end,
                 pagingRequest);
 
-            return agentQueryService.GetAsync(query, HttpContext.RequestAborted).AsTask();
+            return await agentQueryService.GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
         }
     }
 
