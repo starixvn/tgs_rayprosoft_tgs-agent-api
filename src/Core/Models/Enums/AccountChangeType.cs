@@ -38,5 +38,6 @@ public enum AccountChangeType
     /// <summary>
     ///     The promotion vip level season
     /// </summary>
-    PromotionVipLevelSeason = 3850
+    PromotionVipLevelSeason = 3850,
+    PromotionVipLevelBirthday = 3860
 }
