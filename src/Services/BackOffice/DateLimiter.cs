@@ -21,7 +21,7 @@ internal class DateLimiter : IDateLimiter
         var end = new DateOnly(offsetTo.Year, offsetTo.Month, offsetTo.Day);
         var today = new DateOnly(now.Year, now.Month, now.Day);
 
-        if (end >= today)
+        if (end > today || end == start)
             end = today.AddDays(1);
 
         if (start > today)
