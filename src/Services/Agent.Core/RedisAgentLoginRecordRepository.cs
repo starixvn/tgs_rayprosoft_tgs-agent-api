@@ -33,9 +33,7 @@ internal class RedisAgentLoginRecordRepository : IAgentLoginRecordRepository
         var json = await _redisDatabase.StringGetAsync(key).ConfigureAwait(false);
 
         if (json.HasValue)
-        {
-            return JsonSerializer.Deserialize<AgentLoginRecordInfo>(json, _SerializerOptions);
-        }
+            return JsonSerializer.Deserialize<AgentLoginRecordInfo>(((string?)json)!, _SerializerOptions);
 
         var loginRecord = await _loginRecordRepository
             .GetAgentLoginRecordByIdAsync(loginRecordId)

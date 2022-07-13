@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Operator.GameProviders;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Game;
+using TGS.Services.Operator.GameProviders;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 

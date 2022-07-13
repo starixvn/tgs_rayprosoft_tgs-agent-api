@@ -11,10 +11,10 @@ namespace TGS.Services.Operator;
 
 internal class GameProviderStatusValidator : IGameProviderStatusValidator
 {
+    private readonly IBrandOperations _brandOperations;
     private readonly IGameProviderOperations _gameProviderOperations;
     private readonly IPlayerOperations _playerOperations;
     private readonly IValidStatus<Status> _validStatus;
-    private readonly IBrandOperations _brandOperations;
 
     public GameProviderStatusValidator(
         IGameProviderOperations gameProviderOperations,

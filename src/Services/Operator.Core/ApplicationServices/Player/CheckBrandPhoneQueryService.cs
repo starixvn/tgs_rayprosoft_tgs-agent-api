@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
 
@@ -16,15 +17,15 @@ internal class CheckBrandPhoneQueryService : IGetService<CheckBrandPhoneQuery, b
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
     }
 
-    public ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> GetAsync(CheckBrandPhoneQuery query, CancellationToken cancellationToken = default)
     {
-        var result = _tgsRepository.Players
-            .AsQueryable()
-            .Any(p => p.BrandId == query.BrandId
+        var player = await _tgsRepository.Players.AsQueryable()
+            .Where(p => p.BrandId == query.BrandId
                 && p.AreaCode == query.AreaCode
-                && p.Phone == query.Phone
-                && p.PlayerCode != query.PlayerCode);
+                && p.Phone == query.Phone)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-        return ValueTask.FromResult(result);
+        return player is null || query.PlayerCode is not null && player.PlayerCode == query.PlayerCode;
     }
 }

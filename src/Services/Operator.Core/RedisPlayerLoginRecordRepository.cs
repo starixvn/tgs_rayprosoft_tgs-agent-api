@@ -66,7 +66,8 @@ internal class RedisPlayerLoginRecordRepository : IPlayerLoginRecordRepository
 
         if (json.HasValue)
         {
-            return JsonSerializer.Deserialize<LoginRecordInfo>(json, _SerializerOptions);
+            var j = (string?)json;
+            return JsonSerializer.Deserialize<LoginRecordInfo>(j!, _SerializerOptions);
         }
 
         var loginRecord = await _loginRecordRepository.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);

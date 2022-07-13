@@ -24,12 +24,12 @@ internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoComm
             Detail = command.Detail
         };
 
-       _ = await _paymentServiceClient
-            .CreatePlayerBankInfoAsync(
-                command.BrandId,
-                command.PlayerCode, 
-                bankInfo,
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        _ = await _paymentServiceClient
+             .CreatePlayerBankInfoAsync(
+                 command.BrandId,
+                 command.PlayerCode,
+                 bankInfo,
+                 cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
     }
 }

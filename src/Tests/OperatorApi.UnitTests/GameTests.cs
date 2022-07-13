@@ -107,7 +107,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Call_All_GP_FundIn()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -165,7 +165,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Call_GP_FundIn_When_Amount_Equals_One_Dollar()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -223,7 +223,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Should_Not_Call_GP_FundIn_When_Amount_LessThan_One_Dollar()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -281,7 +281,7 @@ public class GameTests
     public async Task FundInAllGameBalance_Without_Ignore_Should_Call_All_GP_FundIn()
     {
         var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal?>>();
+        var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, decimal>>();
         var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
         var sut = new FundInAllGameBalanceCommandService(
@@ -1158,33 +1158,14 @@ public class GameTests
     [Test]
     public async Task Should_Fund_In_All_Game_Balance_Before_Get_Game_Url()
     {
-        var fakePlayerRepository = Substitute.For<IPlayerRepository>();
         var fakeGetGpCodeService = Substitute.For<IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>>();
         var fakeGetGameUrlQueryService = Substitute.For<IGetService<GetGameUrlQuery, Uri>>();
         var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
         var fakeFundService = Substitute.For<ICommandService<FundOutBeforeEnterGameCommand>>();
 
-        var playerInfo = new PlayerInfo(
-            "playerCode",
-            Guid.NewGuid(),
-            100,
-            false,
-            false,
-            null,
-            null,
-            Guid.NewGuid(),
-            PlayerStatus.Enabled,
-            "username",
-            null,
-            null,
-            1,
-            null,
-            null,
-            false);
-
         var playerTokenData = new PlayerTokenData
         {
-            PlayerCode = playerInfo.PlayerCode,
+            PlayerCode = "playerCode",
             PlatformType = PlatformType.Desktop,
             LoginRecordId = Guid.NewGuid(),
             ExpiredOn = DateTimeOffset.Now
@@ -1195,9 +1176,6 @@ public class GameTests
         var httpContext = new DefaultHttpContext();
         httpContext.Items.Add("playerToken", playerTokenData);
         httpContext.Items.Add("brandId", Guid.NewGuid());
-
-        fakePlayerRepository.GetPlayerInfoAsync(playerTokenData.PlayerCode)
-            .Returns(ValueTask.FromResult(playerInfo));
 
         var sut = new GameController
         {

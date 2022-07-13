@@ -11,6 +11,6 @@ internal class PhoneCondition : IBrandPaymentCondition
         _enabled = enabled;
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => _enabled ? player.PhoneAuthentication : true;
 }

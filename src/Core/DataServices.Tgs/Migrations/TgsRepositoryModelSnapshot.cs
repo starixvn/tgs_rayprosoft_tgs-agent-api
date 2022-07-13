@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
@@ -647,6 +647,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_agent_bank_infos_player_code");
 
                     b.ToTable("agent_bank_infos", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyPaymentStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("FirstDepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_deposit_players");
+
+                    b.Property<int>("UndepositAgainPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("undeposit_again_players");
+
+                    b.HasKey("ReportDate", "BrandId", "AgentId")
+                        .HasName("pk_agent_daily_payment_statistics");
+
+                    b.ToTable("agent_daily_payment_statistics", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividend", b =>
@@ -1291,6 +1319,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_api_logs");
 
                     b.ToTable("api_logs", "log");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BackgroundPaymentStatisticsSettings", b =>
+                {
+                    b.Property<string>("RecordKey")
+                        .HasColumnType("text")
+                        .HasColumnName("record_key");
+
+                    b.Property<DateTime>("ProcessedTime")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_time");
+
+                    b.HasKey("RecordKey")
+                        .HasName("pk_background_payment_statistics_settings");
+
+                    b.ToTable("background_payment_statistics_settings", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Banner", b =>
@@ -3991,6 +4035,40 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("log_records", "log");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketingReportDailyAggregate", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("FirstDepositCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("first_deposit_count");
+
+                    b.Property<int>("GamingCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("gaming_count");
+
+                    b.Property<int>("RegisterCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("register_count");
+
+                    b.HasKey("ReportDate", "AgentId")
+                        .HasName("pk_marketing_report_daily_aggregates_report_date_agent_id");
+
+                    b.ToTable("marketing_report_daily_aggregates", "report");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5032,6 +5110,58 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_bucket_histories_player_code");
 
                     b.ToTable("player_bucket_histories", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerDailyPaymentStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<decimal?>("DailyDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_deposit_amount");
+
+                    b.Property<int?>("DailyDepositCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_deposit_count");
+
+                    b.Property<decimal?>("DailyWithdrawAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("daily_withdraw_amount");
+
+                    b.Property<int?>("DailyWithdrawCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_withdraw_count");
+
+                    b.Property<DateTime?>("FirstDepositOn")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("first_deposit_on");
+
+                    b.Property<decimal?>("TotalDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_deposit_amount");
+
+                    b.Property<int?>("TotalDepositCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_deposit_count");
+
+                    b.Property<decimal?>("TotalWithdrawAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_withdraw_amount");
+
+                    b.Property<int?>("TotalWithdrawCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_withdraw_count");
+
+                    b.HasKey("ReportDate", "PlayerCode")
+                        .HasName("pk_player_daily_payment_statistics");
+
+                    b.ToTable("player_daily_payment_statistics", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>

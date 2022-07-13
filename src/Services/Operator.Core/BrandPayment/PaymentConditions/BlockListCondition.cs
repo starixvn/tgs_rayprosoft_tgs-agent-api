@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions;
@@ -15,6 +14,6 @@ internal class BlockListCondition : IBrandPaymentCondition
         _blockList = playerBlockedBrandPaymentIds.ToArray();
     }
 
-    public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+    public bool IsValid(BrandPaymentInfo brandPayment, Tgs.PlayerService.Client.PlayerInfo player, decimal depositedAmount)
         => !_blockList.Contains(brandPayment.Id);
 }

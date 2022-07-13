@@ -3,10 +3,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
+using Tgs.ServiceUtility;
 using TGS.Core.Models;
 using TGS.Services.Operations;
-using Tgs.ServiceUtility;
-using TGS.Services.Operator.ApplicationServices.Auth;
 
 namespace TGS.Services.Operator.ApplicationServices.Auth;
 

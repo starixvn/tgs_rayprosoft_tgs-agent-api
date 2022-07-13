@@ -14,11 +14,11 @@ namespace TGS.Services.Operator.ApplicationServices.PayPassowrd;
 
 internal class StartChangePayPasswordCommandService : IGetService<StartChangePayPasswordCommand, string>
 {
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IValidateCodeGenerator _codeGenerator;
     private readonly IEmailClient _emailClient;
     private readonly IPlayerOperations _playerOperations;
     private readonly ISmsServiceClient _smsServiceClient;
-    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public StartChangePayPasswordCommandService(

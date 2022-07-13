@@ -10,6 +10,4 @@ public record CreatePlayerWithAgentInvitationCodeCommand(
     string Password,
     string CurrencyCode,
     string AgentInvitationCode,
-    bool IsTestPlayer,
-    string IpAddress,
-    string? HostName);
+    bool IsTestPlayer);

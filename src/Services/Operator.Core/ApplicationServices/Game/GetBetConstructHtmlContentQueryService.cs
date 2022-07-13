@@ -5,7 +5,6 @@ using Tgs.GameProviders.Pluggable.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operator.ApplicationServices.Game;
 
 namespace TGS.Services.Operator.ApplicationServices.Game;
 
@@ -32,7 +31,8 @@ public class GetBetConstructHtmlContentQueryService : IGetService<GetBetConstruc
                 2100001,
                 query.CultureName,
                 query.IP,
-                null)
+                null,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (bcUri == null)

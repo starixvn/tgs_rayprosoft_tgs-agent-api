@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.PlayerService.Client;
@@ -23,6 +24,8 @@ internal class SetFacebookMessengerCommandService : ICommandService<SetFacebookM
             [PlayerPropertyName.FacebookMessenger] = command.FacebookMessengerId
         };
 
-        return _client.SetPlayerPropertiesAsync(command.PlayerCode, properties);
+        return _client.SetPlayerPropertiesAsync(
+            command.PlayerCode,
+            properties.ToImmutableDictionary());
     }
 }

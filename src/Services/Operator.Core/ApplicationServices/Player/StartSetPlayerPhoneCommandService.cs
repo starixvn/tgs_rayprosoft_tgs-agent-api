@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using Tgs.BrandCertificate.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
 using TGS.Services.Operator.Properties;
 using TGS.Services.Operator.ValidateCode;
@@ -14,18 +15,18 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
 {
     private readonly IBrandServiceClient _brandServiceClient;
     private readonly IValidateCodeGenerator _codeGenerator;
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerServiceClient _playerServiceClient;
     private readonly ISmsServiceClient _smsServiceClient;
     private readonly IValidateCodeOperator _validateCodeOperator;
 
     public StartSetPlayerPhoneCommandService(
-        IPlayerRepository playerRepository,
+        IPlayerServiceClient playerServiceClient,
         IBrandServiceClient brandServiceClient,
         IValidateCodeGenerator codeGenerator,
         IValidateCodeOperator validateCodeOperator,
         ISmsServiceClient smsServiceClient)
     {
-        _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
         _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
         _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
@@ -37,8 +38,8 @@ internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPho
         StartSetPlayerPhoneCommand command,
         CancellationToken cancellationToken = default)
     {
-        var player = await _playerRepository
-            .GetPlayerInfoAsync(command.PlayerCode)
+        var player = await _playerServiceClient
+            .GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
         if (player is null)

@@ -282,7 +282,7 @@ public class DepositTests
     }
 
     [Test]
-    public async Task Get_Brand_Payment_Should_SuccessAsync()
+    public async Task Get_Brand_Payment_Should_Success()
     {
         var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
