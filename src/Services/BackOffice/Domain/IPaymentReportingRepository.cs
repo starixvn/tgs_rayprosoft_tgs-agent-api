@@ -10,4 +10,9 @@ public interface IPaymentReportingRepository
         Guid brandId,
         DateOnly queryLatestDate,
         CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<PlayerDailyPaymentItem> QueryPlayerDailyDepositStatisticsAsync(
+        Guid brandId,
+        DateOnly queryDate,
+        CancellationToken cancellationToken = default);
 }
