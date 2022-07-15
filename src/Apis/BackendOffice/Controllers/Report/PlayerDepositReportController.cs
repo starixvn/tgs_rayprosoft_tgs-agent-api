@@ -8,7 +8,6 @@ using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportPlayerDeposit;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
-using TGS.Services.BackOffice.Application.Queries.ReportPlayerDepositQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 

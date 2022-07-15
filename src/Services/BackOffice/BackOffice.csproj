@@ -42,6 +42,7 @@
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="Polly" Version="7.2.3" />
+    <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.16-beta" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.0" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
