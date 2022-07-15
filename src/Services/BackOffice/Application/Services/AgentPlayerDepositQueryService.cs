@@ -4,7 +4,7 @@ using System.Threading;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Queries.ReportPlayerDepositQueries;
+namespace TGS.Services.BackOffice.Application.Services;
 
 internal class AgentPlayerDepositQueryService : IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>
 {
