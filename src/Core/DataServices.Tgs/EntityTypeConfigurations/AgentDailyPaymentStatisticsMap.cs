@@ -23,5 +23,7 @@ internal class AgentDailyPaymentStatisticsMap : BaseConfiguration, IEntityTypeCo
             .IsRequired();
         builder.Property(a => a.UndepositAgainPlayers)
             .IsRequired();
+        builder.Property(a => a.DepositPlayers)
+            .IsRequired();
     }
 }

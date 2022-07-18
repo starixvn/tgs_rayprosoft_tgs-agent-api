@@ -663,6 +663,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<int>("DepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("deposit_players");
+
                     b.Property<int>("FirstDepositPlayers")
                         .HasColumnType("integer")
                         .HasColumnName("first_deposit_players");
@@ -5137,6 +5141,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int?>("DailyWithdrawCount")
                         .HasColumnType("integer")
                         .HasColumnName("daily_withdraw_count");
+
+                    b.Property<decimal?>("FirstDepositAmount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("first_deposit_amount");
 
                     b.Property<DateTime?>("FirstDepositOn")
                         .HasColumnType("timestamptz")
