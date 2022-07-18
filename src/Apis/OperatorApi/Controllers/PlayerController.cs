@@ -248,6 +248,7 @@ public class PlayerController : ControllerBase
 
     [HttpGet("register", Name = "GetCurrentRegisterStep")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    [IgnoreUserBlacklistCheck]
     public ValueTask<string> GetCurrentRegisterStepAsync(
             [FromServices] IGetService<GetCurrentPlayerRegisterFlowStepQuery, string> getService)
     {
