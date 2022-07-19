@@ -3292,6 +3292,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("game_action_batches", "bet");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GamePlayerTransformIdnLive", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 10000001L, null, null, null, null, null);
+
+                    b.Property<string>("Configuration")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("configuration");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_player_transform_idnlive");
+
+                    b.HasIndex(new[] { "PlayerCode" }, "ix_game_player_transform_idnlive_player_code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_game_player_transform_idnlive_player_code");
+
+                    b.ToTable("game_player_transform_idnlive", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProvider", b =>
                 {
                     b.Property<Guid>("Id")
