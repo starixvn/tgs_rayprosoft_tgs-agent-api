@@ -4,17 +4,16 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Dapper;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories;
 
-internal class PaymentReportingReposiory : IPaymentReportingRepository
+internal class PaymentReportingRepository : IPaymentReportingRepository
 {
     private readonly ITgsRepository _tgsRepository;
 
-    public PaymentReportingReposiory(ITgsRepository tgsRepository)
+    public PaymentReportingRepository(ITgsRepository tgsRepository)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
     }
