@@ -2398,6 +2398,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_live_chats", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandMaintenance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("BeginTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("begin_time");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("content");
+
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_time");
+
+                    b.HasKey("Id")
+                        .HasName("pk_brand_maintenance");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_maintenance_brand_id");
+
+                    b.ToTable("brand_maintenance", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -8387,6 +8420,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_brand_live_chats_brands_brand_id");
+
+                    b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandMaintenance", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_brand_maintenance_brands_brand_id");
 
                     b.Navigation("Brand");
                 });
