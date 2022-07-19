@@ -2414,8 +2414,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("brand_id");
 
                     b.Property<string>("Content")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
                         .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("EndTime")

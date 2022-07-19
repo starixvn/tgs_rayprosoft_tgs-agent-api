@@ -17,7 +17,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     begin_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    content = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
+                    content = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     end_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

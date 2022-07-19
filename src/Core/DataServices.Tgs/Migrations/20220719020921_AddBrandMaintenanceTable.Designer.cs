@@ -12,7 +12,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220718074646_AddBrandMaintenanceTable")]
+    [Migration("20220719020921_AddBrandMaintenanceTable")]
     partial class AddBrandMaintenanceTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2416,8 +2416,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("brand_id");
 
                     b.Property<string>("Content")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
                         .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("EndTime")

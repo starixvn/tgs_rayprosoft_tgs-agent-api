@@ -18,7 +18,7 @@ internal class BrandMaintenanceMap : IEntityTypeConfiguration<BrandMaintenance>
             .HasConstraintName("fk_brand_maintenance_brands_brand_id");
 
         builder.Property(bm => bm.Content)
-            .HasMaxLength(4000);
+            .HasMaxLength(2000);
 
         builder.Property(bm => bm.BeginTime)
             .IsRequired();
