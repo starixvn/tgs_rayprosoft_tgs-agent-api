@@ -8675,6 +8675,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("GameProvider");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GamePlayerTransformIdnLive", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_player_transform_idnlive_players_player_code");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderBetLimit", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Currency", "Currency")

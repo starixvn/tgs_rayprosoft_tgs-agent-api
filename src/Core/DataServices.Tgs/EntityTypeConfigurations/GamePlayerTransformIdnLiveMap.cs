@@ -35,5 +35,11 @@ internal class GamePlayerTransformIdnLiveMap : BaseConfiguration, IEntityTypeCon
         builder.Property(e => e.UpdatedOn)
             .HasColumnType("timestamp with time zone")
             .HasColumnName("updated_on");
+
+        builder.HasOne<Player>()
+            .WithMany()
+            .HasForeignKey(b => b.PlayerCode)
+            .HasConstraintName("fk_game_player_transform_idnlive_players_player_code")
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
