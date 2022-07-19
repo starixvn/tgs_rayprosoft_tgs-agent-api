@@ -1895,6 +1895,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_currencies", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandDailyPaymentStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("DepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("deposit_players");
+
+                    b.Property<int>("FirstDepositPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_deposit_players");
+
+                    b.Property<int>("UndepositAgainPlayers")
+                        .HasColumnType("integer")
+                        .HasColumnName("undeposit_again_players");
+
+                    b.HasKey("ReportDate", "BrandId")
+                        .HasName("pk_brand_daily_payment_statistics");
+
+                    b.ToTable("brand_daily_payment_statistics", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandDomain", b =>
                 {
                     b.Property<Guid>("Id")
