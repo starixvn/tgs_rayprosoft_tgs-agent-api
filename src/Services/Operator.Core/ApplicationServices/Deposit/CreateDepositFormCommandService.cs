@@ -7,7 +7,7 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
-internal class CreateDepositFormCommandService : ICommandService<CreateDepositFormCommand>
+internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCommand, Guid>
 {
     private readonly IPaymentClient _paymentClient;
     private readonly IPaymentServiceClient _paymentServiceClient;
@@ -23,9 +23,7 @@ internal class CreateDepositFormCommandService : ICommandService<CreateDepositFo
         _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
     }
 
-    public async ValueTask ExecuteAsync(
-        CreateDepositFormCommand command,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<Guid> GetAsync(CreateDepositFormCommand command, CancellationToken cancellationToken = default)
     {
         if (command.PromotionId != null)
         {
@@ -78,6 +76,6 @@ internal class CreateDepositFormCommandService : ICommandService<CreateDepositFo
             .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)
             .ConfigureAwait(false);
 
-        command.ReturnFormIdSource.SetResult(createFormId);
+        return createFormId;
     }
 }

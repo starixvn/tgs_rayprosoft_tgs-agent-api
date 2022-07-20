@@ -105,7 +105,7 @@ public class CryptoDepositController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [EnableUserBlockedCheck]
     public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
         [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
@@ -137,11 +137,9 @@ public class CryptoDepositController : ControllerBase
                         "http://localhost",
                         brandPaymentInfo.RootElement.GetProperty("channel").GetString())));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -149,7 +147,7 @@ public class CryptoDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<LeePayDepositApplyInfo>(formData.ApplyInfo!);
@@ -162,7 +160,7 @@ public class CryptoDepositController : ControllerBase
             applyInfo.Response.OrderNo);
 
         await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new LeePayDepositFormCreatedResponse
@@ -176,7 +174,7 @@ public class CryptoDepositController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [EnableUserBlockedCheck]
     public async ValueTask<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetUmPayExchangeRateQuery, string> getUmPayExchangeRateService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -188,7 +186,7 @@ public class CryptoDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -199,7 +197,7 @@ public class CryptoDepositController : ControllerBase
                 new UmPayQueryExchangeRateSettings()));
 
         var response = await getUmPayExchangeRateService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var exchangeRateApplyInfo = serializer.Deserialize<UmPayQueryExchangeRateApplyInfo>(response);
@@ -213,6 +211,7 @@ public class CryptoDepositController : ControllerBase
         {
             throw new UmPayApiException();
         }
+
         var currency = brandPaymentInfo.RootElement.GetProperty("currency").GetString();
         var usdt = rateResponse.RootElement.GetProperty("USDT");
         var rate = usdt.GetProperty(currency.ToUpper()).GetProperty("rate").GetDecimal();
@@ -235,11 +234,9 @@ public class CryptoDepositController : ControllerBase
                     Rate: rate,
                     formId.ToString())));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -247,7 +244,7 @@ public class CryptoDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -260,7 +257,7 @@ public class CryptoDepositController : ControllerBase
                 applyInfo.Response.TradeNo);
 
         await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new UmPayDepositFormCreatedResponse
