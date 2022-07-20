@@ -15,6 +15,7 @@ using TGS.Core.Models.Messages;
 using Tgs.Promotion.Clients;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers;
 
@@ -286,7 +287,8 @@ public class PlayerControllerTests : BaseTests
         base.Setup();
         _controller = new(
             _mediatorMock.Object,
-            _promotionClientMock.Object);
+            _promotionClientMock.Object,
+            NullLogger<PlayerController>.Instance);
     }
 
     private Fixture CreatePlayersModelFixture()

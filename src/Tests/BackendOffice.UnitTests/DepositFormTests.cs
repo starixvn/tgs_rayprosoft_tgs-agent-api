@@ -21,6 +21,7 @@ using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
 using System.Threading;
 using Tgs.Promotion.Clients;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -77,7 +78,8 @@ public class DepositFormTests
             fakePromotionClient,
             fakeRedisDatabaseFactory,
             fakeBrandService,
-            fakePlayerGPBalanceService);
+            fakePlayerGPBalanceService,
+            NullLogger<ReviewDepositFormCommandService>.Instance);
 
         fakeRedisDatabase.StringSetAsync(
                 Arg.Any<RedisKey>(),
@@ -138,7 +140,8 @@ public class DepositFormTests
             fakePromotionClient,
             fakeRedisDatabaseFactory,
             fakeBrandService,
-            fakePlayerGPBalanceService);
+            fakePlayerGPBalanceService,
+            NullLogger<ReviewDepositFormCommandService>.Instance);
 
         fakeRedisDatabase.StringSetAsync(
                 Arg.Any<RedisKey>(),
@@ -200,7 +203,8 @@ public class DepositFormTests
             moqPromotionClient.Object,
             fakeRedisDatabaseFactory,
             moqBrandService.Object,
-            fakePlayerGPBalanceService);
+            fakePlayerGPBalanceService,
+            NullLogger<ReviewDepositFormCommandService>.Instance);
 
         var brandId = Guid.NewGuid();
         var formId = Guid.NewGuid();

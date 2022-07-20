@@ -13,6 +13,8 @@ using Tgs.ServiceUtility;
 using Tgs.Promotion.Clients;
 using GetGPBalanceService = Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
         , TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceResponse[]>;
+using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit;
 
@@ -21,7 +23,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
     private readonly IBrandService _brandService;
 
     private readonly GetGPBalanceService _getPlayerGameProviderBalanceService;
-
+    private readonly ILogger<ReviewDepositFormCommandService> _logger;
     private readonly IPaymentServiceClient _paymentServiceClient;
     private readonly IPlayerBucketRepository _playerBucketRepository;
     private readonly IPlayerService _playerService;
@@ -35,7 +37,8 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
         IPromotionClient promotionClient,
         IRedisConnectionFactory redisConnectionFactory,
         IBrandService brandService,
-        GetGPBalanceService getPlayerGameProviderBalanceService)
+        GetGPBalanceService getPlayerGameProviderBalanceService,
+        ILogger<ReviewDepositFormCommandService> logger)
     {
         if (redisConnectionFactory is null)
             throw new ArgumentNullException(nameof(redisConnectionFactory));
@@ -50,6 +53,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
         _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
         _getPlayerGameProviderBalanceService = getPlayerGameProviderBalanceService ??
             throw new ArgumentNullException(nameof(getPlayerGameProviderBalanceService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async ValueTask ExecuteAsync(
@@ -91,16 +95,22 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
 
                 if (brand.AutoClearWageringRequirement)
                 {
-                    var playerAllBalances = await _getPlayerGameProviderBalanceService.GetAsync(
-                        new GetPlayerGameProviderBalanceCommand(form.PlayerCode),
-                        cancellationToken).ConfigureAwait(false);
-
-                    var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
-
-                    if (balance <= brand.AutoClearWageringRequirementBalance)
+                    try
                     {
-                        await _playerBucketRepository.ClearPlayerBucketsAsync(form.PlayerCode)
-                            .ConfigureAwait(false);
+                        var playerAllBalances = await _getPlayerGameProviderBalanceService.GetAsync(
+                            new GetPlayerGameProviderBalanceCommand(form.PlayerCode),
+                            cancellationToken).ConfigureAwait(false);
+
+                        var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
+
+                        if (balance <= brand.AutoClearWageringRequirementBalance)
+                            await _playerBucketRepository
+                                .ClearPlayerBucketsAsync(form.PlayerCode)
+                                .ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "ClearWagering has error.");
                     }
                 }
             }
