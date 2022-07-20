@@ -180,35 +180,28 @@ internal class BackOfficeRepository : IBackOfficeRepository
 
     public IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string BrandCode)
     {
-        var query = _tgsRepository.BrandMaintenances.AsQueryable();
+        var query = from b in _tgsRepository.Brands.AsQueryable()
+                    join bm in _tgsRepository.BrandMaintenances on b.Id equals bm.BrandId into temp
+                    from bm in temp.DefaultIfEmpty()
+                    select new
+                    {
+                        b.Name,
+                        b.Code,
+                        LicenseeName = b.Licensee.Name,
+                        bm.BeginTime,
+                        bm.EndTime
+                    };
 
         if (!string.IsNullOrWhiteSpace(BrandCode))
-            query = query.Where(bm => bm.Brand.Code == BrandCode);
+            query = query.Where(bm => bm.Code == BrandCode);
 
         return query.Select(bm => new BrandMaintenanceInfo(
-            bm.Brand.Name,
-            bm.Brand.Code,
-            bm.Brand.Licensee.Name,
-            bm.Brand.Description,
-            bm.Id,
-            bm.Content,
+            bm.Name,
+            bm.Code,
+            bm.LicenseeName,            
             bm.BeginTime,
             bm.EndTime)).ToAsyncEnumerable();
-    }
-
-    public Task<BrandMaintenanceInfo[]> QueryBrandMaintenanceByIdsAsync(Guid[] ids)
-        => _tgsRepository.BrandMaintenances
-            .Where(bm => ids.Contains(bm.Id))
-            .Select(bm => new BrandMaintenanceInfo(
-               bm.Brand.Name,
-               bm.Brand.Code,
-               bm.Brand.Licensee.Name,
-               bm.Brand.Description,
-               bm.Id,
-               bm.Content,
-               bm.BeginTime,
-               bm.EndTime))
-           .ToArrayAsync();
+    }   
 
     public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
     {
@@ -324,11 +317,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
         return query.ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryRejectPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
-    }
-
+   
     public IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId)
     {
         var query = from banner in _tgsRepository.Banners.AsQueryable()
@@ -374,10 +363,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
         return query.ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryWaitingVerifyPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
     {
@@ -447,10 +433,10 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask UpdateBrandMaintenanceAsync(Guid[] ids, DateTimeOffset beginTime, DateTimeOffset endTime)
+    public async ValueTask UpdateBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime)
     {
         var brandMaintenance = _tgsRepository.BrandMaintenances
-           .Where(bm => ids.Contains(bm.Id))
+           .Where(bm => brandCodes.Contains(bm.Brand.Code))
            .AsQueryable();
 
         foreach (var item in brandMaintenance)
@@ -460,6 +446,15 @@ internal class BackOfficeRepository : IBackOfficeRepository
         }
 
         _tgsRepository.BrandMaintenances.UpdateRange(brandMaintenance);
+
+        var brandCodeExcepts = brandCodes.Except(brandMaintenance.Select(bm => bm.Brand.Code));
+
+        var brands = await _tgsRepository.Brands.Where(b => brandCodeExcepts.Contains(b.Code)).ToArrayAsync();
+
+        foreach (var brand in brands)
+        {
+            _tgsRepository.BrandMaintenances.Add(new BrandMaintenance { BeginTime = beginTime, EndTime = endTime, BrandId = brand.Id });
+        }        
 
         await _tgsRepository
            .SaveChangesAsync()

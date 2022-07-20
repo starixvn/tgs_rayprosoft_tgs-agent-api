@@ -11,42 +11,20 @@ namespace TGS.Services.BackOffice.Application.Services
 {
     internal class UpdateBrandMaintenanceCommandService : ICommandService<BatchUpdateBrandMaintenanceCommand>
     {
-        private readonly IBackOfficeRepository _backOfficeRepository;
-        private readonly IRedisCacheManager _cacheManager;
+        private readonly IBackOfficeRepository _backOfficeRepository;        
 
         public UpdateBrandMaintenanceCommandService(
-            IBackOfficeRepository backOfficeRepository,
-            IRedisCacheManager cacheManager)
+            IBackOfficeRepository backOfficeRepository)
         {
-            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
-            _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
+            _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));            
         }
 
         public async ValueTask ExecuteAsync(BatchUpdateBrandMaintenanceCommand command, CancellationToken cancellationToken = default)
         {
             await _backOfficeRepository.UpdateBrandMaintenanceAsync(
-                command.Ids,
+                command.BrandCodes,
                 command.BeginTime,
-                command.EndTime).ConfigureAwait(false);
-
-            var brandMaintenanceInfos = await _backOfficeRepository
-                .QueryBrandMaintenanceByIdsAsync(command.Ids)
-                .ConfigureAwait(false);
-
-            var data =
-                brandMaintenanceInfos.Select(bmi => new
-                {
-                    bmi.BrandCode,
-                    bmi.BeginTime,
-                    bmi.EndTime,
-                    bmi.Content
-                })
-                .ToArray();
-
-            foreach (var bmi in data)
-            {
-                await _cacheManager.SafeCacheForeverAsync(RedisCacheType.BrandMaintenance, bmi.BrandCode, bmi);
-            }
+                command.EndTime).ConfigureAwait(false);            
         }
     }
 }

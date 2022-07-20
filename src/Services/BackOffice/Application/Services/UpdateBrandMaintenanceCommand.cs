@@ -3,7 +3,7 @@
 namespace TGS.Services.BackOffice.Application.Services
 {
     public record BatchUpdateBrandMaintenanceCommand(
-        Guid[] Ids,
+        string[] BrandCodes,
         DateTimeOffset BeginTime,
         DateTimeOffset EndTime);
 }

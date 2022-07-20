@@ -24,9 +24,7 @@ public interface IBackOfficeRepository
         string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings);
 
-    IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string brandCode);
-
-    Task<BrandMaintenanceInfo[]> QueryBrandMaintenanceByIdsAsync(Guid[] ids);
+    IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string brandCode);    
     IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
     IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
@@ -52,7 +50,7 @@ public interface IBackOfficeRepository
 
     ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
 
-    ValueTask UpdateBrandMaintenanceAsync(Guid[] ids, DateTimeOffset beginTime, DateTimeOffset endTime);
+    ValueTask UpdateBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
 
     ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
 }

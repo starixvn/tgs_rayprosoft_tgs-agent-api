@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -52,8 +53,7 @@ public class BrandMaintenanceController : BaseContextController
                     BrandCode = b.BrandCode,
                     LicenseeName = b.LicenseeName,
                     BeginTime = b.BeginTime,
-                    EndTime = b.EndTime,
-                    Id = b.Id
+                    EndTime = b.EndTime
                 })
                 .ToArrayAsync()
                 .ConfigureAwait(false)
@@ -67,7 +67,7 @@ public class BrandMaintenanceController : BaseContextController
         [FromServices] ICommandService<BatchUpdateBrandMaintenanceCommand> updateService)
     {
         var command = new BatchUpdateBrandMaintenanceCommand(
-            request.Ids,
+            request.BrandCodes,
             request.BeginTime,
             request.EndTime);
 
