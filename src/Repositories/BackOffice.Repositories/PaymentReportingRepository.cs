@@ -49,8 +49,6 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
         DateOnly queryDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        SqlMapper.AddTypeMap(typeof(DateOnly), DbType.Date);
-
         var conn = _tgsRepository.GetDbConnection();
 
         var result = await conn.QueryAsync<PlayerDailyPaymentItem>(
