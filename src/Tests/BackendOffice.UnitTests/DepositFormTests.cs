@@ -63,7 +63,7 @@ public class DepositFormTests
         var fakeMediator = Substitute.For<IMediator>();
         var fakeBrandService = Substitute.For<IBrandService>();
         var fakePlayerGPBalanceService = Substitute
-            .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
+            .For<IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse>>();
 
         fakeRedisDatabaseFactory.GetConnection()
             .Returns(fakeRedisConnection);
@@ -125,7 +125,7 @@ public class DepositFormTests
         var fakeMediator = Substitute.For<IMediator>();
         var fakeBrandService = Substitute.For<IBrandService>();
         var fakePlayerGPBalanceService = Substitute
-            .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
+            .For<IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse>>();
 
         fakeRedisDatabaseFactory.GetConnection()
             .Returns(fakeRedisConnection);
@@ -188,7 +188,7 @@ public class DepositFormTests
         var fakeMediator = Substitute.For<IMediator>();
         var moqBrandService = new Mock<IBrandService>();
         var fakePlayerGPBalanceService = Substitute
-            .For<IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]>>();
+            .For<IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse>>();
 
         fakeRedisDatabaseFactory.GetConnection()
             .Returns(fakeRedisConnection);
