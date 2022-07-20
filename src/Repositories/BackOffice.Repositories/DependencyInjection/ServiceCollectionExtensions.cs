@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
             .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
             .AddTransient<IAgentRepository, AgentRepository>()
-            .AddTransient<IPaymentReportingRepository, PaymentReportingReposiory>();
+            .AddTransient<IPaymentReportingRepository, PaymentReportingRepository>();
 
         services.AddTransient<IPlayerOnlineRepository>(
             sp => ActivatorUtilities.CreateInstance<PlayerOnlineRepository>(

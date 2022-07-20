@@ -4,17 +4,16 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Dapper;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories;
 
-internal class PaymentReportingReposiory : IPaymentReportingRepository
+internal class PaymentReportingRepository : IPaymentReportingRepository
 {
     private readonly ITgsRepository _tgsRepository;
 
-    public PaymentReportingReposiory(ITgsRepository tgsRepository)
+    public PaymentReportingRepository(ITgsRepository tgsRepository)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
     }
@@ -119,16 +118,16 @@ internal class PaymentReportingReposiory : IPaymentReportingRepository
                             PS.player_code
                     )
                     SELECT
-                        CTE.player_code,
-                        P.username,
-                        P.agent_id,
-                        CTE.is_first_deposit,
-                        CTE.un_second_deposit,
-                        Info.first_deposit_on,
-                        Info.first_deposit_amount,
-                        Info.total_deposit_amount,
-                        Info.total_withdraw_amount,
-                        PIR.ip AS register_ip
+                        CTE.player_code AS PlayerCode,
+                        P.username AS PlayerName,
+                        P.agent_id AS AgentId,
+                        CTE.is_first_deposit AS IsFirstDeposit,
+                        CTE.un_second_deposit AS UnSecondDeposit,
+                        Info.first_deposit_on AS FirstDepositOn,
+                        Info.first_deposit_amount AS FirstDepositAmount,
+                        Info.total_deposit_amount AS TotalDepositAmount,
+                        Info.total_withdraw_amount AS TotalWithdrawAmount,
+                        PIR.ip AS RegisterIp
                     FROM
                         CTE
                         JOIN

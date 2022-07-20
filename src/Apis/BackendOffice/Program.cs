@@ -1,5 +1,7 @@
 using System;
+using System.Data;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -38,6 +40,8 @@ public class Program
     public static async Task Main(string[] args)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+        SqlMapper.AddTypeMap(typeof(DateOnly), DbType.Date);
 
         var host = CreateHostBuilder(args).Build();
 
