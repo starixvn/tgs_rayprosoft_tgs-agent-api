@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -48,6 +49,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
         DateOnly queryDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        SqlMapper.AddTypeMap(typeof(DateOnly), DbType.Date);
+
         var conn = _tgsRepository.GetDbConnection();
 
         var result = await conn.QueryAsync<PlayerDailyPaymentItem>(
@@ -118,16 +121,16 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                             PS.player_code
                     )
                     SELECT
-                        CTE.player_code,
-                        P.username,
-                        P.agent_id,
-                        CTE.is_first_deposit,
-                        CTE.un_second_deposit,
-                        Info.first_deposit_on,
-                        Info.first_deposit_amount,
-                        Info.total_deposit_amount,
-                        Info.total_withdraw_amount,
-                        PIR.ip AS register_ip
+                        CTE.player_code AS PlayerCode,
+                        P.username AS PlayerName,
+                        P.agent_id AS AgentId,
+                        CTE.is_first_deposit AS IsFirstDeposit,
+                        CTE.un_second_deposit AS UnSecondDeposit,
+                        Info.first_deposit_on AS FirstDepositOn,
+                        Info.first_deposit_amount AS FirstDepositAmount,
+                        Info.total_deposit_amount AS TotalDepositAmount,
+                        Info.total_withdraw_amount AS TotalWithdrawAmount,
+                        PIR.ip AS RegisterIp
                     FROM
                         CTE
                         JOIN
