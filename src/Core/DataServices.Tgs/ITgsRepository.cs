@@ -68,6 +68,8 @@ public interface ITgsRepository : IBaseRepository
 
     DbSet<BrandLiveChat> BrandLiveChats { get; set; }
 
+    DbSet<BrandMaintenance> BrandMaintenances { get; set; }
+
     DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
     DbSet<BrandPayment> BrandPayments { get; set; }

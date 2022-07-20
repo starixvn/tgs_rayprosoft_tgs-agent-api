@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Services.BackOffice.Domain;
 
 public interface IBackOfficeRepository
 {
     ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
+
+    ValueTask ChangeStatusAsync(Guid id, int status, string modifier);
 
     ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier);
 
@@ -23,19 +24,21 @@ public interface IBackOfficeRepository
         string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings);
 
+    IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string brandCode);
+
+    Task<BrandMaintenanceInfo[]> QueryBrandMaintenanceByIdsAsync(Guid[] ids);
     IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
-    IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
-        Guid brandId, 
-        PlayerIdentityReviewState? status, 
-        string username, 
-        DateTimeOffset? beginCreatedOn, 
-        DateTimeOffset? endCreatedOn, 
-        DateTimeOffset? beginReviewedOn, 
-        DateTimeOffset? endReviewedOn);
-    
-
     IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
+
+    IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
+            Guid brandId,
+        PlayerIdentityReviewState? status,
+        string username,
+        DateTimeOffset? beginCreatedOn,
+        DateTimeOffset? endCreatedOn,
+        DateTimeOffset? beginReviewedOn,
+        DateTimeOffset? endReviewedOn);
 
     IAsyncEnumerable<BannerInfo> QueryRejectedBannersAsync(Guid brandId);
 
@@ -49,6 +52,7 @@ public interface IBackOfficeRepository
 
     ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
 
+    ValueTask UpdateBrandMaintenanceAsync(Guid[] ids, DateTimeOffset beginTime, DateTimeOffset endTime);
+
     ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
-    ValueTask ChangeStatusAsync(Guid id, int status, string modifier);
 }

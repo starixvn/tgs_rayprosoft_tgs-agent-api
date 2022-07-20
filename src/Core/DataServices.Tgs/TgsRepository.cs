@@ -71,6 +71,8 @@ public class TgsRepository : DbContext, ITgsRepository
 
     public DbSet<BrandLiveChat> BrandLiveChats { get; set; }
 
+    public DbSet<BrandMaintenance> BrandMaintenances { get; set; }
+
     public DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
     public DbSet<BrandPayment> BrandPayments { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice;
@@ -176,6 +177,38 @@ internal class BackOfficeRepository : IBackOfficeRepository
     {
         throw new NotImplementedException();
     }
+
+    public IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string BrandCode)
+    {
+        var query = _tgsRepository.BrandMaintenances.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(BrandCode))
+            query = query.Where(bm => bm.Brand.Code == BrandCode);
+
+        return query.Select(bm => new BrandMaintenanceInfo(
+            bm.Brand.Name,
+            bm.Brand.Code,
+            bm.Brand.Licensee.Name,
+            bm.Brand.Description,
+            bm.Id,
+            bm.Content,
+            bm.BeginTime,
+            bm.EndTime)).ToAsyncEnumerable();
+    }
+
+    public Task<BrandMaintenanceInfo[]> QueryBrandMaintenanceByIdsAsync(Guid[] ids)
+        => _tgsRepository.BrandMaintenances
+            .Where(bm => ids.Contains(bm.Id))
+            .Select(bm => new BrandMaintenanceInfo(
+               bm.Brand.Name,
+               bm.Brand.Code,
+               bm.Brand.Licensee.Name,
+               bm.Brand.Description,
+               bm.Id,
+               bm.Content,
+               bm.BeginTime,
+               bm.EndTime))
+           .ToArrayAsync();
 
     public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
     {
@@ -414,12 +447,31 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
     }
 
-    private static BannerFlowStatus ConvertBannerStatus(int status)
-        => status switch
+    public async ValueTask UpdateBrandMaintenanceAsync(Guid[] ids, DateTimeOffset beginTime, DateTimeOffset endTime)
+    {
+        var brandMaintenance = _tgsRepository.BrandMaintenances
+           .Where(bm => ids.Contains(bm.Id))
+           .AsQueryable();
+
+        foreach (var item in brandMaintenance)
         {
-            0 => BannerFlowStatus.WaitApproving,
-            1000 => BannerFlowStatus.Approved,
-            2000 => BannerFlowStatus.Rejected,
-            _ => BannerFlowStatus.Unknown
-        };
+            item.BeginTime = beginTime;
+            item.EndTime = endTime;
+        }
+
+        _tgsRepository.BrandMaintenances.UpdateRange(brandMaintenance);
+
+        await _tgsRepository
+           .SaveChangesAsync()
+           .ConfigureAwait(false);
+    }
+
+    private static BannerFlowStatus ConvertBannerStatus(int status)
+            => status switch
+            {
+                0 => BannerFlowStatus.WaitApproving,
+                1000 => BannerFlowStatus.Approved,
+                2000 => BannerFlowStatus.Rejected,
+                _ => BannerFlowStatus.Unknown
+            };
 }
