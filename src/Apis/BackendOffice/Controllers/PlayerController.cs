@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
@@ -197,18 +198,21 @@ public partial class PlayerController : BaseContextController
 
     [HttpGet("{playerCode}/transferwallet", Name = "GetPlayerGameProviderBalances")]
     [Description("Get Player Transfer Wallet")]
-    public ValueTask<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode,
-        [FromServices]
-        IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
+    public async IAsyncEnumerable<GetPlayerGameProviderBalanceResponse> GetPlayerGameProviderBalancesAsync(
+        [FromServices] IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> service,
+        string playerCode)
     {
-        try
+
+        var datas = await service.QueryAsync(new GetPlayerGameProviderBalanceCommand(playerCode)).ToArrayAsync().ConfigureAwait(false);
+
+        if (!datas.Any())
         {
-            return service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
+            yield break;
         }
-        catch (Exception ex)
+
+        foreach (var data in datas)
         {
-            _logger.LogWarning(ex, "GetTransferWallet has error.");
-            return ValueTask.FromResult(Array.Empty<GetPlayerGameProviderBalanceResponse>());
+            yield return data;
         }
     }
 
