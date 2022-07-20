@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ public class ThirdPartyDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<DepositFormCreatedResponse> SubmitMalakiPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] MalakiPaySerializer serializer,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -32,7 +33,7 @@ public class ThirdPartyDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -51,11 +52,9 @@ public class ThirdPartyDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
                     formId)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -63,7 +62,7 @@ public class ThirdPartyDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<MalakiPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -73,7 +72,7 @@ public class ThirdPartyDepositController : ControllerBase
             applyInfo.Response.TradeNo);
 
         await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new DepositFormCreatedResponse

@@ -65,7 +65,7 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<DepositFormCreatedResponse> SubmitHelp2PayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
         [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
@@ -102,11 +102,9 @@ public class BankDepositController : ControllerBase
                     clientIp,
                     brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal())));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -114,7 +112,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<Help2PayDepositApplyInfo>(formData.ApplyInfo!);
@@ -126,7 +124,7 @@ public class BankDepositController : ControllerBase
                 applyInfo.Response.PaymentDepositId);
 
             await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
             var identityId = Guid.NewGuid();
@@ -148,14 +146,13 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
-       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
        [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
        [FromServices] IPlayerServiceClient playerServiceClient,
        [FromServices] MaticPaySerializer serializer,
-       [FromBody] SubmitDepositRequest request
-       )
+       [FromBody] SubmitDepositRequest request)
     {
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
         var brandId = HttpContext.Items.GetBrandId();
@@ -194,11 +191,9 @@ public class BankDepositController : ControllerBase
                     request.Amount,
                     realName)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -206,7 +201,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<MaticPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -223,7 +218,7 @@ public class BankDepositController : ControllerBase
                 thirdPartyOrderNo);
 
             await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
             if (applyInfo.Response.Detail.PayURL.ToString() == string.Empty)
@@ -248,7 +243,7 @@ public class BankDepositController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [EnableUserBlockedCheck]
     public async Task<DepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
         [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
@@ -283,11 +278,9 @@ public class BankDepositController : ControllerBase
                         ? prop.GetString()
                         : null)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -295,7 +288,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
@@ -307,7 +300,7 @@ public class BankDepositController : ControllerBase
                 ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceId);
 
             await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
             return new DepositFormCreatedResponse
@@ -328,7 +321,7 @@ public class BankDepositController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [EnableUserBlockedCheck]
     public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] SkyPaySerializer serializer,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -360,11 +353,9 @@ public class BankDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
                     formId)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -372,7 +363,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -382,7 +373,7 @@ public class BankDepositController : ControllerBase
                 applyInfo.Response.TradeNo);
 
         await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new DepositFormCreatedResponse
@@ -396,7 +387,7 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<DepositFormCreatedResponse> SubmitTuPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] TuPaySerializer serializer,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -426,11 +417,9 @@ public class BankDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
                     formId)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -462,7 +451,7 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
         [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
@@ -474,7 +463,7 @@ public class BankDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -507,11 +496,9 @@ public class BankDepositController : ControllerBase
                     1m,
                     formId.ToString())));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -519,7 +506,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -531,7 +518,7 @@ public class BankDepositController : ControllerBase
                 applyInfo.Response.TradeNo);
 
             await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
             return new UmPayDepositFormCreatedResponse
@@ -552,7 +539,7 @@ public class BankDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<DepositFormCreatedResponse> SubmitZeroNineNinePayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
         [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
@@ -591,11 +578,9 @@ public class BankDepositController : ControllerBase
                     clientIp?.ToString(),
                     null)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -603,7 +588,7 @@ public class BankDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         _loger.LogTrace($"zeronineninepay formData.ApplyInfo:{formData.ApplyInfo}");
@@ -617,7 +602,7 @@ public class BankDepositController : ControllerBase
                 applyInfo.Response.Data.TradeNo);
 
             await updateDepositFormService
-                .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
             return new DepositFormCreatedResponse
