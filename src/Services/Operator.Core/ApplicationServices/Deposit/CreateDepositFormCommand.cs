@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
@@ -10,7 +9,4 @@ public record CreateDepositFormCommand(
     decimal Amount,
     string Subject,
     Guid? PromotionId,
-    Func<Guid, string?> CreatePaymentSettings)
-{
-    public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();
-}
+    Func<Guid, string?> CreatePaymentSettings);

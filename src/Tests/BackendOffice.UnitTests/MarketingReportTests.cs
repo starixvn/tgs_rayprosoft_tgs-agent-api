@@ -6,7 +6,9 @@ using TGS.Core.Models.Enums;
 using Tgs.MarketingReport.Client;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
+using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
+using Tgs.ServiceUtility;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -68,6 +70,8 @@ internal class MarketingReportTests
     {
         var fakeAgentRepository = Substitute.For<IAgentRepository>();
         var fakeReportClient = Substitute.For<IMarketingReportClient>();
+        var fakeAgentPlayerDepositQueryService =
+            Substitute.For<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>>();
 
         var paging = new PageableRequest
         {
@@ -83,6 +87,7 @@ internal class MarketingReportTests
             paging);
 
         var sut = new GetMarketingReportAggregateInfosQueryService(
+            fakeAgentPlayerDepositQueryService,
             fakeAgentRepository,
             fakeReportClient);
 
@@ -91,6 +96,10 @@ internal class MarketingReportTests
         _ = fakeAgentRepository
             .Received(1)
             .GetAgentsAsync(Arg.Is(query.BrandId));
+
+        _ = fakeAgentPlayerDepositQueryService
+            .Received(1)
+            .QueryAsync(Arg.Is(new AgentPlayerDepositQuery(query.BrandId)));
 
         _ = fakeReportClient
             .Received(1)

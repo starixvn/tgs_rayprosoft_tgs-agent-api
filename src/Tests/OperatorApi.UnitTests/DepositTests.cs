@@ -114,7 +114,7 @@ public class DepositTests
                 })
         }.ToExpectedObject();
 
-        await sut.ExecuteAsync(command);
+        await sut.GetAsync(command);
 
         moqPaymentServiceClient.Verify(
             fake => fake.CreateDepositFormAsync(
@@ -203,7 +203,7 @@ public class DepositTests
             PromotionId = command.PromotionId
         }.ToExpectedObject();
 
-        await sut.ExecuteAsync(command);
+        await sut.GetAsync(command);
 
         moqPaymentServiceClient.Verify(
             fake => fake.CreateDepositFormAsync(
@@ -235,7 +235,7 @@ public class DepositTests
             Guid.NewGuid(),
             _ => "{}");
 
-        Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.ExecuteAsync(command));
+        Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.GetAsync(command));
     }
 
     [Test]

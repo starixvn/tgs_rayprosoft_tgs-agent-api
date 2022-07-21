@@ -119,7 +119,7 @@ public partial class PlayerController : BaseContextController
                 Amount = x.Amount,
                 Balance = x.Balance,
                 TransactionType = (TransactionType?)x.TransactionType,
-                GameActionType = (GameActionType?)x.GameActionType,
+                GameActionType = (TransactionGameActionType?)x.GameActionType,
                 RecordedOn = x.RecordedOn,
                 IncludeInNetProfit = x.IncludeInNetProfit,
                 Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
