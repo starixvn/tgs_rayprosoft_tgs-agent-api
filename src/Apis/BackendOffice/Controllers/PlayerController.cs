@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.GameProviders.Pluggable.Client;
+using Microsoft.Extensions.Logging;
 using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
@@ -26,12 +27,14 @@ namespace TGS.Apis.BackendOffice.Controllers;
 public partial class PlayerController : BaseContextController
 {
     private readonly IPromotionClient _client;
+    private readonly ILogger<PlayerController> _logger;
     private readonly IMediator _mediator;
 
-    public PlayerController(IMediator mediator, IPromotionClient client)
+    public PlayerController(IMediator mediator, IPromotionClient client, ILogger<PlayerController> logger)
     {
         _mediator = mediator;
         _client = client;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     [HttpPut("{playerCode}/clear", Name = "ClearPlayerBuckets")]
@@ -55,6 +58,32 @@ public partial class PlayerController : BaseContextController
     {
         request.PlayerCode = playerCode;
         return _mediator.Send(request);
+    }
+
+    [HttpPost("{playerCode}/fundin/all", Name = "FundInAllPlayerGameProvider")]
+    [Description("FundIn All Player GameProvider")]
+    public async ValueTask<MessageResponse> FundInAllPlayerGameProviderAsync(
+        [FromServices] ICommandService<FundInAllPlayerGameProviderCommand> service,
+        string playerCode)
+    {
+        await service.ExecuteAsync(new FundInAllPlayerGameProviderCommand(
+            PlayerCode: playerCode)).ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPost("{playerCode}/fundin/", Name = "FundInPlayerGameProvider")]
+    [Description("FundIn Player GameProvider")]
+    public async ValueTask<MessageResponse> FundInPlayerGameProviderAsync(
+        [FromServices] ICommandService<FundInPlayerGameProviderCommand> service,
+        string playerCode,
+        FundInPlayerGameProviderModel model)
+    {
+        await service.ExecuteAsync(new FundInPlayerGameProviderCommand(
+            PlayerCode: playerCode,
+            GameProviderCode: model.GameProviderCode)).ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
     }
 
     [HttpGet("accountChanges", Name = "GetPlayerAccountChanges")]
@@ -169,37 +198,23 @@ public partial class PlayerController : BaseContextController
 
     [HttpGet("{playerCode}/transferwallet", Name = "GetPlayerGameProviderBalances")]
     [Description("Get Player Transfer Wallet")]
-    public ValueTask<GetPlayerGameProviderBalanceResponse[]> GetPlayerGameProviderBalancesAsync(string playerCode,
-        [FromServices]
-        IGetService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse[]> service)
-        => service.GetAsync(new GetPlayerGameProviderBalanceCommand(playerCode));
-
-    [HttpPost("{playerCode}/fundin/all", Name = "FundInAllPlayerGameProvider")]
-    [Description("FundIn All Player GameProvider")]
-    public async ValueTask<MessageResponse> FundInAllPlayerGameProviderAsync(
-        [FromServices] ICommandService<FundInAllPlayerGameProviderCommand> service,
+    public async IAsyncEnumerable<GetPlayerGameProviderBalanceResponse> GetPlayerGameProviderBalancesAsync(
+        [FromServices] IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> service,
         string playerCode)
     {
-        await service.ExecuteAsync(new FundInAllPlayerGameProviderCommand(
-            PlayerCode: playerCode)).ConfigureAwait(false);
 
-        return CreateValidResponse<MessageResponse>();
+        var datas = await service.QueryAsync(new GetPlayerGameProviderBalanceCommand(playerCode)).ToArrayAsync().ConfigureAwait(false);
+
+        if (!datas.Any())
+        {
+            yield break;
+        }
+
+        foreach (var data in datas)
+        {
+            yield return data;
+        }
     }
-
-    [HttpPost("{playerCode}/fundin/", Name = "FundInPlayerGameProvider")]
-    [Description("FundIn Player GameProvider")]
-    public async ValueTask<MessageResponse> FundInPlayerGameProviderAsync(
-        [FromServices] ICommandService<FundInPlayerGameProviderCommand> service,
-        string playerCode,
-        FundInPlayerGameProviderModel model)
-    {
-        await service.ExecuteAsync(new FundInPlayerGameProviderCommand(
-            PlayerCode: playerCode,
-            GameProviderCode: model.GameProviderCode)).ConfigureAwait(false);
-
-        return CreateValidResponse<MessageResponse>();
-    }
-
 
     [HttpGet("{playerCode}/mainwallet", Name = "GetPlayerMainWalletBalance")]
     [Description("Get Player Main wallet")]

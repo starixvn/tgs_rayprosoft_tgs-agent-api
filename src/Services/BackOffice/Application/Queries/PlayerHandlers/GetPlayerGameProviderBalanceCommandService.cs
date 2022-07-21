@@ -11,8 +11,7 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
 
-internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlayerGameProviderBalanceCommand,
-    GetPlayerGameProviderBalanceResponse[]>
+internal class GetPlayerGameProviderBalanceCommandService : IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse>
 {
     private readonly IBrandGameProviderService _brandGameProviderService;
     private readonly ICashServiceClient _cashServiceClient;
@@ -33,12 +32,12 @@ internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlaye
             throw new ArgumentNullException(nameof(brandGameProviderService));
     }
 
-    public async ValueTask<GetPlayerGameProviderBalanceResponse[]> GetAsync(
-        GetPlayerGameProviderBalanceCommand request,
-        CancellationToken cancellationToken)
+    public async IAsyncEnumerable<GetPlayerGameProviderBalanceResponse> QueryAsync(
+        GetPlayerGameProviderBalanceCommand query,
+        CancellationToken cancellationToken = default)
     {
-        var gameProviderBalance = new List<GetPlayerGameProviderBalanceResponse>();
-        var player = await _playerService.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
+        var gameProviderBalances = new List<GetPlayerGameProviderBalanceResponse>();
+        var player = await _playerService.GetPlayerAsync(p => p.PlayerCode == query.PlayerCode);
         var brandGameProviders = _brandGameProviderService
             .GetBrandGameProviderQueries(q => q.Where(x =>
                 x.BrandId == player.BrandId &&
@@ -54,23 +53,27 @@ internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlaye
             .OrderBy(x => x.GameProviderCode)
             .ToArray();
 
-        var walletBalance = default(decimal?);
         try
         {
-            walletBalance = await _cashServiceClient.GetBalanceAsync(player.DefaultWalletId).ConfigureAwait(false);
+            var walletBalance = await _cashServiceClient.GetBalanceAsync(player.DefaultWalletId).ConfigureAwait(false);
+
+            gameProviderBalances.Add(new GetPlayerGameProviderBalanceResponse(
+                GameProviderCode: "DEFAULT",
+                GameProviderName: "DEFAULT",
+                IsMainWallet: true,
+                IsMaintain: false,
+                Balance: walletBalance));
         }
         catch
         {
-            walletBalance = null;
+            gameProviderBalances.Add(new GetPlayerGameProviderBalanceResponse(
+                GameProviderCode: "DEFAULT",
+                GameProviderName: "DEFAULT",
+                IsMainWallet: true,
+                IsMaintain: true,
+                Balance: null));
         }
 
-        gameProviderBalance.Add(new()
-        {
-            IsMainWallet = true,
-            GameProviderCode = "DEFAULT",
-            GameProviderName = "DEFAULT",
-            Balance = walletBalance
-        });
 
         var tasks = new List<Task>();
 
@@ -78,26 +81,46 @@ internal class GetPlayerGameProviderBalanceCommandService : IGetService<GetPlaye
         {
             tasks.Add(Task.Run(async () =>
             {
-                var balance = default(decimal?);
-
-                balance = await _gameProvidersBackofficePluggableClient
-                    .GetBalanceAsync(
-                        player.PlayerCode,
-                        brandGameProvider.GameProviderCode)
-                    .ConfigureAwait(false);
-
-                gameProviderBalance.Add(new()
+                try
                 {
-                    IsMainWallet = false,
-                    GameProviderCode = brandGameProvider.GameProviderCode,
-                    GameProviderName = brandGameProvider.GameProviderName,
-                    Balance = balance
-                });
-            }));
+                    var balance = default(decimal?);
+
+                    balance = await _gameProvidersBackofficePluggableClient
+                        .GetBalanceAsync(
+                            player.PlayerCode,
+                            brandGameProvider.GameProviderCode)
+                        .ConfigureAwait(false);
+
+                    gameProviderBalances.Add(new GetPlayerGameProviderBalanceResponse(
+                        GameProviderCode: brandGameProvider.GameProviderCode,
+                        GameProviderName: brandGameProvider.GameProviderName,
+                        IsMainWallet: false,
+                        IsMaintain: false,
+                        Balance: balance));
+                }
+                catch
+                {
+                    gameProviderBalances.Add(new GetPlayerGameProviderBalanceResponse(
+                        GameProviderCode: brandGameProvider.GameProviderCode,
+                        GameProviderName: brandGameProvider.GameProviderName,
+                        IsMainWallet: false,
+                        IsMaintain: true,
+                        Balance: null));
+                }
+            }, cancellationToken: cancellationToken));
         }
 
         await Task.WhenAll(tasks);
 
-        return gameProviderBalance.ToArray();
+
+        if (!gameProviderBalances.Any())
+        {
+            yield break;
+        }
+
+        foreach (var gameProviderBalance in gameProviderBalances)
+        {
+            yield return gameProviderBalance;
+        }
     }
 }
