@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Castle.Core.Logging;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
 
@@ -12,10 +14,12 @@ namespace TGS.BackOffice.Repositories;
 internal class PaymentReportingRepository : IPaymentReportingRepository
 {
     private readonly ITgsRepository _tgsRepository;
+    private readonly ILogger<PaymentReportingRepository> _logger;
 
-    public PaymentReportingRepository(ITgsRepository tgsRepository)
+    public PaymentReportingRepository(ITgsRepository tgsRepository, ILogger<PaymentReportingRepository> logger)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public IAsyncEnumerable<AgentPlayerDepositStatistics> QueryAgentDailyDepositStatisticsAsync(
@@ -48,6 +52,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
         DateOnly queryDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("query date: {queryDate}", queryDate);
+
         var conn = _tgsRepository.GetDbConnection();
 
         var result = await conn.QueryAsync<PlayerDailyPaymentItem>(
