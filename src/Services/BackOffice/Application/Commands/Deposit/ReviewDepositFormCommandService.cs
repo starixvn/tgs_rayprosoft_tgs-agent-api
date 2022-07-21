@@ -11,8 +11,6 @@ using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using Tgs.ServiceUtility;
 using Tgs.Promotion.Clients;
-using GetGPBalanceService = Tgs.ServiceUtility.IGetService<TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceCommand
-        , TGS.Services.BackOffice.Application.Models.Player.GetPlayerGameProviderBalanceResponse[]>;
 using Castle.Core.Logging;
 using Microsoft.Extensions.Logging;
 
@@ -21,8 +19,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit;
 internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
 {
     private readonly IBrandService _brandService;
-
-    private readonly GetGPBalanceService _getPlayerGameProviderBalanceService;
+    private readonly IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> _getPlayerGameProviderBalanceService;
     private readonly ILogger<ReviewDepositFormCommandService> _logger;
     private readonly IPaymentServiceClient _paymentServiceClient;
     private readonly IPlayerBucketRepository _playerBucketRepository;
@@ -37,7 +34,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
         IPromotionClient promotionClient,
         IRedisConnectionFactory redisConnectionFactory,
         IBrandService brandService,
-        GetGPBalanceService getPlayerGameProviderBalanceService,
+        IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> getPlayerGameProviderBalanceService,
         ILogger<ReviewDepositFormCommandService> logger)
     {
         if (redisConnectionFactory is null)
@@ -51,8 +48,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
         _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
         _redisDatabase = redisConnectionFactory.GetConnection().GetDatabase();
         _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
-        _getPlayerGameProviderBalanceService = getPlayerGameProviderBalanceService ??
-            throw new ArgumentNullException(nameof(getPlayerGameProviderBalanceService));
+        _getPlayerGameProviderBalanceService = getPlayerGameProviderBalanceService ?? throw new ArgumentNullException(nameof(getPlayerGameProviderBalanceService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -97,16 +93,19 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                 {
                     try
                     {
-                        var playerAllBalances = await _getPlayerGameProviderBalanceService.GetAsync(
-                            new GetPlayerGameProviderBalanceCommand(form.PlayerCode),
-                            cancellationToken).ConfigureAwait(false);
+                        var playerAllBalances = await _getPlayerGameProviderBalanceService.QueryAsync(
+                            query: new GetPlayerGameProviderBalanceCommand(form.PlayerCode),
+                            cancellationToken: cancellationToken).ToArrayAsync().ConfigureAwait(false);
 
-                        var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
+                        if (!playerAllBalances.Where(x => x.IsMaintain).Any())
+                        {
+                            var balance = playerAllBalances.Sum(x => x.Balance) ?? 0M;
 
-                        if (balance <= brand.AutoClearWageringRequirementBalance)
-                            await _playerBucketRepository
-                                .ClearPlayerBucketsAsync(form.PlayerCode)
-                                .ConfigureAwait(false);
+                            if (balance <= brand.AutoClearWageringRequirementBalance)
+                                _ = await _playerBucketRepository
+                                      .ClearPlayerBucketsAsync(form.PlayerCode)
+                                      .ConfigureAwait(false);
+                        }
                     }
                     catch (Exception ex)
                     {
