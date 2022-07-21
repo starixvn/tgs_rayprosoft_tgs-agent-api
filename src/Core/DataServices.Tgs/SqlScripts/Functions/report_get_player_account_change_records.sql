@@ -15,7 +15,8 @@ RETURNS TABLE(
 	 "GameActionType" smallint, 
 	 "RecordedOn" timestamptz,
 	 "TotalCount" bigint, 
-	 "Description" text)
+	 "Description" text,
+	 "ExternalTransactionId" text)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -29,7 +30,8 @@ BEGIN
 	GAME_ACTION_TYPE as "GameActionType",
 	RECORDED_ON as "RecordedOn",
 	count(*) over() as "TotalCount",
-	DESCRIPTION as "Description"
+	DESCRIPTION as "Description",	
+	EXTERNAL_TRANSACTION_ID as "ExternalTransactionId"
 FROM
 				(SELECT ID AS TRANSACTION_ID,
 						NULL AS GAME_ACTION_ID,
@@ -38,7 +40,8 @@ FROM
 						TYPE AS TRANSACTION_TYPE,
 						NULL AS GAME_ACTION_TYPE,
 						RECORDED_ON,
-						DESCRIPTION
+						DESCRIPTION,
+						EXTERNAL_TRANSACTION_ID
 					FROM DBO.TRANSACTIONS
 					WHERE RECORDED_ON >= _from
 									AND RECORDED_ON < _to
@@ -52,7 +55,8 @@ FROM
 						NULL AS TRANSACTION_TYPE,
 						TYPE AS GAME_ACTION_TYPE,
 						RECORDED_ON,
-						NULL as DESCRIPTION
+						NULL as DESCRIPTION,
+						NULL as EXTERNAL_TRANSACTION_ID
 					FROM BET.GAME_ACTIONS
 					WHERE RECORDED_ON >= _from
 									AND RECORDED_ON < _to

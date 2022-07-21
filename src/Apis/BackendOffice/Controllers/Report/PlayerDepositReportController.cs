@@ -69,7 +69,9 @@ public class PlayerDepositReportController : BaseContextController
             .CountAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        dataQuery = dataQuery.ApplyPaging(paging);
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
 
         var agentNameDict = await agentQuery
             .ToDictionaryAsync(
@@ -133,7 +135,9 @@ public class PlayerDepositReportController : BaseContextController
 
         var totalCount = statisticsData.Length;
 
-        dataQuery = dataQuery.ApplyPaging(paging);
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
 
         return new PagedResponse<PlayerDepositDetailReportModel>
         {
@@ -190,7 +194,9 @@ public class PlayerDepositReportController : BaseContextController
 
         var totalCount = statisticsData.Length;
 
-        dataQuery = dataQuery.ApplyPaging(paging);
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
 
         return new PagedResponse<PlayerDepositDetailReportModel>
         {
@@ -247,7 +253,9 @@ public class PlayerDepositReportController : BaseContextController
 
         var totalCount = statisticsData.Length;
 
-        dataQuery = dataQuery.ApplyPaging(paging);
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
 
         return new PagedResponse<PlayerDepositDetailReportModel>
         {

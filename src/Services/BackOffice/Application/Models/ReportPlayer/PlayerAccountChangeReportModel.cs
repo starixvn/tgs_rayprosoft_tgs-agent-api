@@ -14,4 +14,5 @@ public record PlayerAccountChangeReportModel
     public DateTimeOffset RecordedOn { get; init; }
     public bool IncludeInNetProfit { get; init; }
     public string Remark { get; set; }
+    public string ExternalTransactionId { get; init; }
 }

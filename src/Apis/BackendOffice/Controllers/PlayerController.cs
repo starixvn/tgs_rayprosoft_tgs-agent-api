@@ -122,7 +122,8 @@ public partial class PlayerController : BaseContextController
                 GameActionType = (TransactionGameActionType?)x.GameActionType,
                 RecordedOn = x.RecordedOn,
                 IncludeInNetProfit = x.IncludeInNetProfit,
-                Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
+                Remark = GetRemark((TransactionType?)x.TransactionType, x.Description),
+                ExternalTransactionId = x.ExternalTransactionId
             }).ToArray()
         };
     }
@@ -281,7 +282,9 @@ public partial class PlayerController : BaseContextController
             case TransactionType.BonusAdjust:
                 _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                 return remark.GetString();
-
+            case TransactionType.GameProviderFundOut:
+            case TransactionType.GameProviderFundIn:
+                return description;
             default:
                 return string.Empty;
         }
