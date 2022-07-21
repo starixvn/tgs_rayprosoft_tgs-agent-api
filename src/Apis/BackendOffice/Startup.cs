@@ -158,6 +158,7 @@ public class Startup
 
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new ValidationFilter());
+                options.UseDateOnlyTimeOnlyStringConverters();
             })
             .AddDataAnnotationsLocalization()
             .AddFluentValidation(c =>
@@ -171,6 +172,7 @@ public class Startup
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 options.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.UseDateOnlyTimeOnlyStringConverters();
             });
 
         _ = services
@@ -250,6 +252,8 @@ public class Startup
             {
                 c.IncludeXmlComments(path);
             }
+
+            c.UseDateOnlyTimeOnlyStringConverters();
         });
 
         _ = services
