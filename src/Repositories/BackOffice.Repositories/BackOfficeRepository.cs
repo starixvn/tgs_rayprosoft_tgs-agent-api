@@ -433,7 +433,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
     }
 
-    public async ValueTask UpdateBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime)
+    public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime)
     {
         var brandMaintenance = _tgsRepository.BrandMaintenances
            .Where(bm => brandCodes.Contains(bm.Brand.Code))

@@ -50,7 +50,7 @@ public interface IBackOfficeRepository
 
     ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
 
-    ValueTask UpdateBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
+    ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
 
     ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
 }
