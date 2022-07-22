@@ -12,6 +12,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandMaintenance
 
         public DateTimeOffset? EndTime { get; set; }
 
+        public Guid? Id { get; set; }
+
         public string LicenseeName { get; set; }
     }
 }

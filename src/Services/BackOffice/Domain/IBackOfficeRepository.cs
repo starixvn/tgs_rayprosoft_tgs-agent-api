@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
-using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Services.BackOffice.Domain;
 
 public interface IBackOfficeRepository
 {
+    ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
+
     ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
 
     ValueTask ChangeStatusAsync(Guid id, int status, string modifier);
@@ -20,12 +21,15 @@ public interface IBackOfficeRepository
 
     ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId);
 
+    ValueTask<BrandMaintenanceModel> GetBrandMaintenanceByBrandCodeAsync(Guid brandMaintenanceId);
+
     ValueTask ImportLocalizationStringsAsync(
-        string systemCode,
+            string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings);
 
-    IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string brandCode);    
     IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
+
+    IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string brandCode);
 
     IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
 
@@ -50,7 +54,7 @@ public interface IBackOfficeRepository
 
     ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
 
-    ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
-
     ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
+
+    ValueTask UpdateBrandMaintenanceAsync(Guid brandMaintenanceId, string Content);
 }

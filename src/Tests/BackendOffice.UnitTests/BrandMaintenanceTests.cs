@@ -55,6 +55,27 @@ public class BrandMaintenanceTests
     }
 
     [Test]
+    public async Task User_Can_Get_a_Brand_Maintenance()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new GetBrandMaintenanceQueryService(moqBackOfficeRepository.Object);
+
+        var id = Guid.NewGuid();
+        var query = new GetBrandMaintenanceQuery(id);
+
+        moqBackOfficeRepository
+            .Setup(fake => fake.GetBrandMaintenanceByBrandCodeAsync(It.Is<Guid>(x => x == query.Id)))
+            .Returns(ValueTask.FromResult(new BrandMaintenanceModel("This is Content")));
+
+        await sut.GetAsync(query);
+
+        moqBackOfficeRepository.Verify(
+            fake => fake.GetBrandMaintenanceByBrandCodeAsync(It.Is<Guid>(x => x == query.Id)),
+            Times.Exactly(1));
+    }
+
+    [Test]
     public async Task User_Can_Query_Brand_Maintenance()
     {
         var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
@@ -89,7 +110,7 @@ public class BrandMaintenanceTests
     {
         var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-        var sut = new UpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
+        var sut = new BatchUpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
 
         var command = new BatchUpdateBrandMaintenanceCommand(
             new string[] { "GPI", "GPI_PHP" },
@@ -103,6 +124,26 @@ public class BrandMaintenanceTests
                 It.Is<string[]>(x => x == command.BrandCodes),
                 It.Is<DateTimeOffset>(x => x == command.BeginTime),
                 It.Is<DateTimeOffset>(x => x == command.EndTime)),
+            Times.Exactly(1));
+    }
+
+    [Test]
+    public async Task User_Can_Update_Brand_Maintenance_Content()
+    {
+        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+        var sut = new UpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
+
+        var id = Guid.NewGuid();
+        var content = "This is Content";
+        var command = new UpdateBrandMaintenanceCommand(id, content);
+
+        await sut.ExecuteAsync(command);
+
+        moqBackOfficeRepository.Verify(
+            fake => fake.UpdateBrandMaintenanceAsync(
+                It.Is<Guid>(x => x == command.Id),
+                It.Is<string>(x => x == command.Content)),
             Times.Exactly(1));
     }
 }

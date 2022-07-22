@@ -16,6 +16,22 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand;
 [ApiController]
 public class BrandMaintenanceController : BaseContextController
 {
+    [HttpPut("batchupdatetime", Name = "BatchUpdateBrandMaintenance")]
+    [Description("Batch Update multiple brand maintenance")]
+    public async Task<MessageResponse> BatchUpdateBrandMaintenanceAsync(
+        [FromBody] BatchUpdateBrandMaintenanceRequest request,
+        [FromServices] ICommandService<BatchUpdateBrandMaintenanceCommand> updateService)
+    {
+        var command = new BatchUpdateBrandMaintenanceCommand(
+            request.BrandCodes,
+            request.BeginTime,
+            request.EndTime);
+
+        await updateService.ExecuteAsync(command).ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
     [HttpGet(Name = "GetAllBrandMaintenance")]
     [Description("Get all brand maintenance")]
     public async Task<PagedResponse<BrandMaintenanceResult>> GetAllBrandMaintenanceAsync(
@@ -47,29 +63,48 @@ public class BrandMaintenanceController : BaseContextController
                 .GetAsync(query)
                 .ConfigureAwait(false),
             Items = await queryService.QueryAsync(query)
-                .Select(b => new BrandMaintenanceResult
+                .Select(bmi => new BrandMaintenanceResult
                 {
-                    BrandName = b.BrandName,
-                    BrandCode = b.BrandCode,
-                    LicenseeName = b.LicenseeName,
-                    BeginTime = b.BeginTime,
-                    EndTime = b.EndTime
+                    BrandName = bmi.BrandName,
+                    BrandCode = bmi.BrandCode,
+                    LicenseeName = bmi.LicenseeName,
+                    BeginTime = bmi.BeginTime,
+                    EndTime = bmi.EndTime,
+                    Id = bmi.Id,
                 })
                 .ToArrayAsync()
                 .ConfigureAwait(false)
         };
     }
 
-    [HttpPut(Name = "UpdateBrandMaintenance")]
-    [Description("Update multiple brand maintenance")]
-    public async Task<MessageResponse> UpdateBrandMaintenanceAsync(
-        [FromBody] UpdateBrandMaintenanceRequest request,
-        [FromServices] ICommandService<BatchUpdateBrandMaintenanceCommand> updateService)
+    [HttpGet("{Id}", Name = "GetBrandMaintenance")]
+    [Description("Get a brand maintenance")]
+    public async Task<BrandMaintenanceViewModel> GetBrandMaintenanceAsync(
+        Guid Id,
+        [FromServices] IGetService<GetBrandMaintenanceQuery, BrandMaintenanceModel> getService)
     {
-        var command = new BatchUpdateBrandMaintenanceCommand(
-            request.BrandCodes,
-            request.BeginTime,
-            request.EndTime);
+        var query = new GetBrandMaintenanceQuery(Id);
+
+        var brandMaintenance = await getService
+            .GetAsync(query)
+            .ConfigureAwait(false);
+
+        return new BrandMaintenanceViewModel
+        {
+            Content = brandMaintenance.Content
+        };
+    }
+
+    [HttpPut("{Id}", Name = "UpdateBrandMaintenance")]
+    [Description("Update a brand maintenance's content")]
+    public async Task<MessageResponse> UpdateBrandMaintenanceAsync(
+        Guid Id,
+        [FromBody] UpdateBrandMaintenanceRequest request,
+        [FromServices] ICommandService<UpdateBrandMaintenanceCommand> updateService)
+    {
+        var command = new UpdateBrandMaintenanceCommand(
+            Id,
+            request.Content);
 
         await updateService.ExecuteAsync(command).ConfigureAwait(false);
 

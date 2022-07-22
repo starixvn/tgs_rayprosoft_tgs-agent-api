@@ -7,5 +7,6 @@ namespace TGS.Services.BackOffice.Domain
         string BrandCode,
         string LicenseeName,
         DateTimeOffset? BeginTime = null,
-        DateTimeOffset? EndTime = null);
+        DateTimeOffset? EndTime = null,
+        Guid? Id = null);
 }
