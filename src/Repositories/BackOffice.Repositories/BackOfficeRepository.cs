@@ -25,7 +25,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
 
     public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, DateTimeOffset beginTime, DateTimeOffset endTime)
     {
-        var brandQuery = from brandId in brandIds
+        var brandMaintenances = (from brandId in brandIds
                          join bm in _tgsRepository.BrandMaintenances.AsQueryable() on brandId equals bm.BrandId into temp
                          from bm in temp.DefaultIfEmpty()
                          where brandIds.Contains(brandId)
@@ -33,9 +33,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
                          {
                              BrandMaintenance = bm,
                              BrandId = brandId
-                         };
-
-        var brandMaintenances = brandQuery.ToArray();  
+                         }).ToArray();        
 
         var updates = new List<BrandMaintenance>();
         var adds = new List<BrandMaintenance>();
