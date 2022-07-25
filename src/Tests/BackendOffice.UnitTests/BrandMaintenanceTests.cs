@@ -113,7 +113,7 @@ public class BrandMaintenanceTests
         var sut = new BatchUpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
 
         var command = new BatchUpdateBrandMaintenanceCommand(
-            new string[] { "GPI", "GPI_PHP" },
+            new Guid[] { Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"), Guid.Parse("5dea25ae-431d-4514-aa36-81ab9d81b1dc") },
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow);
 
@@ -121,7 +121,7 @@ public class BrandMaintenanceTests
 
         moqBackOfficeRepository.Verify(
             fake => fake.BatchUpdateOrAddBrandMaintenanceAsync(
-                It.Is<string[]>(x => x == command.BrandCodes),
+                It.Is<Guid[]>(x => x == command.BrandIds),
                 It.Is<DateTimeOffset>(x => x == command.BeginTime),
                 It.Is<DateTimeOffset>(x => x == command.EndTime)),
             Times.Exactly(1));

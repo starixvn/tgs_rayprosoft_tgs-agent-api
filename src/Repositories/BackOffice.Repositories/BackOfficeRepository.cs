@@ -25,27 +25,27 @@ internal class BackOfficeRepository : IBackOfficeRepository
 
     public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, DateTimeOffset beginTime, DateTimeOffset endTime)
     {
-        var brandQuery = from b in _tgsRepository.Brands.AsQueryable()
-                         join bm in _tgsRepository.BrandMaintenances.AsQueryable() on b.Id equals bm.BrandId into temp
+        var brandQuery = from brandId in brandIds
+                         join bm in _tgsRepository.BrandMaintenances.AsQueryable() on brandId equals bm.BrandId into temp
                          from bm in temp.DefaultIfEmpty()
-                         where brandIds.Contains(b.Id)
+                         where brandIds.Contains(brandId)
                          select new
                          {
-                             bm,
-                             b.Id
+                             BrandMaintenance = bm,
+                             BrandId = brandId
                          };
 
-        var brandMaintenances = await brandQuery.ToArrayAsync().ConfigureAwait(false);        
+        var brandMaintenances = brandQuery.ToArray();  
 
         var updates = new List<BrandMaintenance>();
         var adds = new List<BrandMaintenance>();
         foreach (var item in brandMaintenances)
         {
-            if (item.bm != null)
+            if (item.BrandMaintenance != null)
             {
-                item.bm.BeginTime = beginTime;
-                item.bm.EndTime = endTime;
-                updates.Add(item.bm);
+                item.BrandMaintenance.BeginTime = beginTime;
+                item.BrandMaintenance.EndTime = endTime;
+                updates.Add(item.BrandMaintenance);
             }
             else
             {
@@ -53,7 +53,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
                 {
                     BeginTime = beginTime,
                     EndTime = endTime,
-                    BrandId = item.Id
+                    BrandId = item.BrandId
                 });
             }
         }
