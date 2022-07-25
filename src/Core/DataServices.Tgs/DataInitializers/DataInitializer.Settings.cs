@@ -376,6 +376,14 @@ public partial class DataInitializer
                             new MenuSetting("View"),
                             new MenuSetting("Update")
                         }
+                    },
+                    new MenuSetting("Maintenance")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update")
+                        }
                     }
                 }
             },
@@ -775,6 +783,37 @@ public partial class DataInitializer
                         {
                             Zh = "輪盤",
                             En = "Roulette"
+                        }
+                    },
+                    new PromotionType
+                    {
+                        Name = "DepositLottery",
+                        SettlementIntervalType = "Instantly",
+                        Trans = new()
+                        {
+                            Zh = "充值抽獎",
+                            En = "Deposit Lottery"
+                        }
+                    }
+                },
+            },
+            new PromotionTypeGroup
+            {
+                Name = "Dummy",
+                Trans = new()
+                {
+                    Zh = "Dummy",
+                    En = "Dummy"
+                },
+                Types = new[]
+                {
+                    new PromotionType
+                    {
+                        Name = "Dummy",
+                        Trans = new()
+                        {
+                            Zh = "Dummy",
+                            En = "Dummy"
                         }
                     }
                 }
