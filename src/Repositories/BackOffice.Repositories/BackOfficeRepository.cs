@@ -25,26 +25,42 @@ internal class BackOfficeRepository : IBackOfficeRepository
 
     public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime)
     {
-        var brandMaintenance = _tgsRepository.BrandMaintenances
-           .Where(bm => brandCodes.Contains(bm.Brand.Code))
-           .AsQueryable();
+        var brandQuery = from b in _tgsRepository.Brands.AsQueryable()
+                         join bm in _tgsRepository.BrandMaintenances.AsQueryable() on b.Id equals bm.BrandId into temp
+                         from bm in temp.DefaultIfEmpty()
+                         where brandCodes.Contains(b.Code)
+                         select new
+                         {
+                             bm,
+                             b.Id
+                         };
 
-        foreach (var item in brandMaintenance)
+        var brandMaintenances = await brandQuery.ToArrayAsync().ConfigureAwait(false);        
+
+        var updates = new List<BrandMaintenance>();
+        var adds = new List<BrandMaintenance>();
+        foreach (var item in brandMaintenances)
         {
-            item.BeginTime = beginTime;
-            item.EndTime = endTime;
+            if (item.bm != null)
+            {
+                item.bm.BeginTime = beginTime;
+                item.bm.EndTime = endTime;
+                updates.Add(item.bm);
+            }
+            else
+            {
+                adds.Add(new BrandMaintenance
+                {
+                    BeginTime = beginTime,
+                    EndTime = endTime,
+                    BrandId = item.Id
+                });
+            }
         }
+           
+        _tgsRepository.BrandMaintenances.UpdateRange(updates);        
 
-        _tgsRepository.BrandMaintenances.UpdateRange(brandMaintenance);
-
-        var brandCodeExcepts = brandCodes.Except(brandMaintenance.Select(bm => bm.Brand.Code));
-
-        var brands = await _tgsRepository.Brands.Where(b => brandCodeExcepts.Contains(b.Code)).ToArrayAsync();
-
-        foreach (var brand in brands)
-        {
-            _tgsRepository.BrandMaintenances.Add(new BrandMaintenance { BeginTime = beginTime, EndTime = endTime, BrandId = brand.Id });
-        }
+        _tgsRepository.BrandMaintenances.AddRange(adds);
 
         await _tgsRepository
            .SaveChangesAsync()
