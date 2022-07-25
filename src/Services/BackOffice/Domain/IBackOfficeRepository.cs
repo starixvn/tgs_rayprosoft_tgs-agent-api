@@ -7,7 +7,7 @@ namespace TGS.Services.BackOffice.Domain;
 
 public interface IBackOfficeRepository
 {
-    ValueTask BatchUpdateOrAddBrandMaintenanceAsync(string[] brandCodes, DateTimeOffset beginTime, DateTimeOffset endTime);
+    ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, DateTimeOffset beginTime, DateTimeOffset endTime);
 
     ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
 

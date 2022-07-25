@@ -6,7 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandMaintenance
     {
         public DateTimeOffset BeginTime { get; init; }
 
-        public string[] BrandCodes { get; init; }
+        public Guid[] BrandIds { get; init; }
 
         public DateTimeOffset EndTime { get; init; }
     }

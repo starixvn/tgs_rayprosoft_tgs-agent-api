@@ -23,7 +23,7 @@ public class BrandMaintenanceController : BaseContextController
         [FromServices] ICommandService<BatchUpdateBrandMaintenanceCommand> updateService)
     {
         var command = new BatchUpdateBrandMaintenanceCommand(
-            request.BrandCodes,
+            request.BrandIds,
             request.BeginTime,
             request.EndTime);
 

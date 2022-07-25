@@ -19,7 +19,7 @@ namespace TGS.Services.BackOffice.Application.Services
         public async ValueTask ExecuteAsync(BatchUpdateBrandMaintenanceCommand command, CancellationToken cancellationToken = default)
         {
             await _backOfficeRepository.BatchUpdateOrAddBrandMaintenanceAsync(
-                command.BrandCodes,
+                command.BrandIds,
                 command.BeginTime,
                 command.EndTime).ConfigureAwait(false);
         }
