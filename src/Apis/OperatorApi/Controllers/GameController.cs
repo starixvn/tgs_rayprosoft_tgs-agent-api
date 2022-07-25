@@ -42,7 +42,7 @@ public class GameController : ControllerBase
             .ExecuteAsync(new FundInAllGameBalanceCommand(
                 brandId,
                 playerTokenData.PlayerCode,
-                ""))
+                null))
             .ConfigureAwait(false);
 
         var query = new GetBetConstructHtmlContentQuery(playerTokenData, brandId, ip, currentCultureName);
@@ -216,7 +216,7 @@ public class GameController : ControllerBase
             .ExecuteAsync(new FundInAllGameBalanceCommand(
                 brandId,
                 playerTokenData.PlayerCode,
-                subGp.Code))
+                subGp.GpCode))
             .ConfigureAwait(false);
 
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
@@ -239,7 +239,7 @@ public class GameController : ControllerBase
                 .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     brandId,
                     playerTokenData.PlayerCode,
-                    subGp.Code))
+                    subGp.GpCode))
                 .ConfigureAwait(false);
         }
 
@@ -288,7 +288,7 @@ public class GameController : ControllerBase
             .ExecuteAsync(new FundInAllGameBalanceCommand(
                 brandId,
                 playerTokenData.PlayerCode,
-                subGp.Code))
+                subGp.GpCode))
             .ConfigureAwait(false);
 
         if (subGp.IsTransferWallet)
@@ -297,7 +297,7 @@ public class GameController : ControllerBase
                 .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     brandId,
                     playerTokenData.PlayerCode,
-                    subGp.Code))
+                    subGp.GpCode))
                 .ConfigureAwait(false);
         }
 

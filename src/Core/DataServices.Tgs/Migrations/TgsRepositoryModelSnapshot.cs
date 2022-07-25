@@ -2454,6 +2454,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_brand_maintenance");
 
                     b.HasIndex("BrandId")
+                        .IsUnique()
                         .HasDatabaseName("ix_brand_maintenance_brand_id");
 
                     b.ToTable("brand_maintenance", "dbo");
@@ -8493,8 +8494,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandMaintenance", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.BrandMaintenance", "BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_brand_maintenance_brands_brand_id");
