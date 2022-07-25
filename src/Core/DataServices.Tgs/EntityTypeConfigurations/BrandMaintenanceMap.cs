@@ -13,9 +13,9 @@ internal class BrandMaintenanceMap : IEntityTypeConfiguration<BrandMaintenance>
         builder.HasKey(bm => bm.Id);
 
         builder.HasOne(bm => bm.Brand)
-            .WithMany()
-            .HasForeignKey(bm => bm.BrandId)
-            .HasConstraintName("fk_brand_maintenance_brands_brand_id");
+           .WithOne()
+           .HasForeignKey<BrandMaintenance>(bm => bm.BrandId)
+           .HasConstraintName("fk_brand_maintenance_brands_brand_id");        
 
         builder.Property(bm => bm.Content)
             .HasMaxLength(2000);
