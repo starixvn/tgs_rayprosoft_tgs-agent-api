@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice;
@@ -20,6 +21,50 @@ internal class BackOfficeRepository : IBackOfficeRepository
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+    }
+
+    public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, DateTimeOffset beginTime, DateTimeOffset endTime)
+    {
+        var brandQuery = from brandId in brandIds
+                         join bm in _tgsRepository.BrandMaintenances.AsQueryable() on brandId equals bm.BrandId into temp
+                         from bm in temp.DefaultIfEmpty()
+                         where brandIds.Contains(brandId)
+                         select new
+                         {
+                             BrandMaintenance = bm,
+                             BrandId = brandId
+                         };
+
+        var brandMaintenances = brandQuery.ToArray();  
+
+        var updates = new List<BrandMaintenance>();
+        var adds = new List<BrandMaintenance>();
+        foreach (var item in brandMaintenances)
+        {
+            if (item.BrandMaintenance != null)
+            {
+                item.BrandMaintenance.BeginTime = beginTime;
+                item.BrandMaintenance.EndTime = endTime;
+                updates.Add(item.BrandMaintenance);
+            }
+            else
+            {
+                adds.Add(new BrandMaintenance
+                {
+                    BeginTime = beginTime,
+                    EndTime = endTime,
+                    BrandId = item.BrandId
+                });
+            }
+        }
+           
+        _tgsRepository.BrandMaintenances.UpdateRange(updates);        
+
+        _tgsRepository.BrandMaintenances.AddRange(adds);
+
+        await _tgsRepository
+           .SaveChangesAsync()
+           .ConfigureAwait(false);
     }
 
     public async ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier)
@@ -115,8 +160,17 @@ internal class BackOfficeRepository : IBackOfficeRepository
         return JsonSerializer.Deserialize<BrandLogoInfo>(brand.LogoInfo);
     }
 
+    public async ValueTask<BrandMaintenanceModel> GetBrandMaintenanceByBrandCodeAsync(Guid brandMaintenanceId)
+    {
+        var brandMaintenance = await _tgsRepository.BrandMaintenances
+            .FirstAsync(bm => bm.Id == brandMaintenanceId)
+            .ConfigureAwait(false);
+
+        return new BrandMaintenanceModel(brandMaintenance.Content);
+    }
+
     public async ValueTask ImportLocalizationStringsAsync(
-        string systemCode,
+            string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings)
     {
         var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
@@ -175,6 +229,33 @@ internal class BackOfficeRepository : IBackOfficeRepository
     public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryApprovePlayerIdentityAuthenticationsAsync(Guid brandId)
     {
         throw new NotImplementedException();
+    }
+
+    public IAsyncEnumerable<BrandMaintenanceInfo> QueryBrandMaintenanceByBrandCodeAsync(string BrandCode)
+    {
+        var query = from b in _tgsRepository.Brands.AsQueryable()
+                    join bm in _tgsRepository.BrandMaintenances on b.Id equals bm.BrandId into temp
+                    from bm in temp.DefaultIfEmpty()
+                    select new
+                    {
+                        b.Name,
+                        b.Code,
+                        LicenseeName = b.Licensee.Name,
+                        bm.BeginTime,
+                        bm.EndTime,
+                        bm.Id
+                    };
+
+        if (!string.IsNullOrWhiteSpace(BrandCode))
+            query = query.Where(bm => bm.Code == BrandCode);
+
+        return query.Select(bm => new BrandMaintenanceInfo(
+            bm.Name,
+            bm.Code,
+            bm.LicenseeName,
+            bm.BeginTime,
+            bm.EndTime,
+            bm.Id)).ToAsyncEnumerable();
     }
 
     public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
@@ -291,11 +372,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
         return query.ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryRejectPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
-    }
-
     public IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId)
     {
         var query = from banner in _tgsRepository.Banners.AsQueryable()
@@ -339,11 +415,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
                         banner.UpdatedOn);
 
         return query.ToAsyncEnumerable();
-    }
-
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryWaitingVerifyPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
     }
 
     public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
@@ -414,12 +485,23 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask UpdateBrandMaintenanceAsync(Guid brandMaintenanceId, string Content)
+    {
+        var brandMaintenance = await _tgsRepository.BrandMaintenances
+            .FirstAsync(bm => bm.Id == brandMaintenanceId)
+            .ConfigureAwait(false);
+
+        brandMaintenance.Content = Content;
+
+        _ = await _tgsRepository.SaveChangesAsync();
+    }
+
     private static BannerFlowStatus ConvertBannerStatus(int status)
-        => status switch
-        {
-            0 => BannerFlowStatus.WaitApproving,
-            1000 => BannerFlowStatus.Approved,
-            2000 => BannerFlowStatus.Rejected,
-            _ => BannerFlowStatus.Unknown
-        };
+                => status switch
+                {
+                    0 => BannerFlowStatus.WaitApproving,
+                    1000 => BannerFlowStatus.Approved,
+                    2000 => BannerFlowStatus.Rejected,
+                    _ => BannerFlowStatus.Unknown
+                };
 }
