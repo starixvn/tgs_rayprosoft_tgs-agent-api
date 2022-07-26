@@ -119,7 +119,19 @@ public partial class PlayerController : BaseContextController
                 Amount = x.Amount,
                 Balance = x.Balance,
                 TransactionType = (TransactionType?)x.TransactionType,
-                GameActionType = (TransactionGameActionType?)x.GameActionType,
+                GameActionType = (GameActionType?)x.GameActionType switch
+                {
+                    GameActionType.PlaceBet => TransactionGameActionType.GameBet,
+                    GameActionType.WinBet => TransactionGameActionType.GameSettleWin,
+                    GameActionType.LoseBet => TransactionGameActionType.GameSettleLose,
+                    GameActionType.FreeBet => TransactionGameActionType.GameSettleFree,
+                    GameActionType.TieBet => TransactionGameActionType.GameSettleTie,
+                    GameActionType.CancelTransaction => TransactionGameActionType.GameCancel,
+                    GameActionType.LockAmount => TransactionGameActionType.GameLock,
+                    GameActionType.UnlockAmount => TransactionGameActionType.GameUnlock,
+                    GameActionType.WinJackpot => TransactionGameActionType.GameWinJackpot,
+                    _ => null
+                },
                 RecordedOn = x.RecordedOn,
                 IncludeInNetProfit = x.IncludeInNetProfit,
                 Remark = GetRemark((TransactionType?)x.TransactionType, x.Description),
