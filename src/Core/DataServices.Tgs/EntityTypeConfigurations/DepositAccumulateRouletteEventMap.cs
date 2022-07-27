@@ -19,14 +19,9 @@ internal class DepositAccumulateRouletteEventMap : IEntityTypeConfiguration<Depo
         builder.Property(e => e.BrandId)
             .IsRequired();
 
-        builder.Property(e => e.DistributeTime)
+        builder.Property(e => e.Date)
             .IsRequired()
-            .HasColumnType("timestamptz");
-
-        builder.Property(e => e.CreatedOn)
-            .IsRequired()
-            .HasColumnType("timestamptz")
-            .HasDefaultValueSql("Now()");
+            .HasColumnType("date");
 
         builder.Property(e => e.PromotionId)
             .IsRequired();
@@ -34,11 +29,6 @@ internal class DepositAccumulateRouletteEventMap : IEntityTypeConfiguration<Depo
         builder.Property(e => e.RouletteCount)
             .HasDefaultValue(0)
             .IsRequired();
-
-        builder.Property(e => e.SettingDepositAmount)
-            .IsRequired()
-            .HasDefaultValue(0M)
-            .HasPrecision(18, 6);
 
         builder.Property(e => e.TotalDepositAmount)
             .IsRequired()

@@ -16,12 +16,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_on = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "Now()"),
-                    distribute_time = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    date = table.Column<DateTime>(type: "date", nullable: false),
                     player_code = table.Column<string>(type: "character varying(16)", nullable: false),
                     promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
                     roulette_count = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
-                    setting_deposit_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false, defaultValue: 0m),
                     total_deposit_amount = table.Column<decimal>(type: "numeric(18,6)", precision: 18, scale: 6, nullable: false, defaultValue: 0m)
                 },
                 constraints: table =>
@@ -72,13 +70,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         column: x => x.brand_id,
                         principalSchema: "dbo",
                         principalTable: "brands",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_game_events_deposit_accumulate_roulette_events_id",
-                        column: x => x.id,
-                        principalSchema: "dbo",
-                        principalTable: "deposit_accumulate_roulette_events",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -137,11 +128,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "deposit_accumulate_roulette_game_events",
+                name: "deposit_accumulate_roulette_events",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "deposit_accumulate_roulette_events",
+                name: "deposit_accumulate_roulette_game_events",
                 schema: "dbo");
         }
     }

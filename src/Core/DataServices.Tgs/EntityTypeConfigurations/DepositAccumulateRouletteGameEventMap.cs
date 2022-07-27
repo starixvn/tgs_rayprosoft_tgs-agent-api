@@ -59,11 +59,5 @@ internal class DepositAccumulateRouletteGameEventMap : IEntityTypeConfiguration<
             .HasForeignKey(e => e.PromotionId)
             .HasConstraintName("fk_game_events_promotions_promotion_id")
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne<DepositAccumulateRouletteEvent>()
-            .WithMany()
-            .HasForeignKey(e => e.Id)
-            .HasConstraintName("fk_game_events_deposit_accumulate_roulette_events_id")
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -6,9 +6,7 @@ public class DepositAccumulateRouletteEvent
 {
     public Guid BrandId { get; set; }
 
-    public DateTime CreatedOn { get; set; }
-
-    public DateTime DistributeTime { get; set; }
+    public DateTime Date { get; set; }
 
     public Guid Id { get; set; }
 
@@ -17,8 +15,6 @@ public class DepositAccumulateRouletteEvent
     public Guid PromotionId { get; set; }
 
     public int RouletteCount { get; set; }
-
-    public decimal SettingDepositAmount { get; set; }
 
     public decimal TotalDepositAmount { get; set; }
 }

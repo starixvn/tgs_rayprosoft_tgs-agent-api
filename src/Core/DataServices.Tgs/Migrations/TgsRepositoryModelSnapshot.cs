@@ -2811,15 +2811,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateTime>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("created_on")
-                        .HasDefaultValueSql("Now()");
-
-                    b.Property<DateTime>("DistributeTime")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("distribute_time");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
@@ -2835,13 +2829,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("roulette_count");
-
-                    b.Property<decimal>("SettingDepositAmount")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasDefaultValue(0m)
-                        .HasColumnName("setting_deposit_amount");
 
                     b.Property<decimal>("TotalDepositAmount")
                         .ValueGeneratedOnAdd()
@@ -2868,6 +2855,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositAccumulateRouletteGameEvent", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -8745,13 +8733,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_game_events_brands_brand_id");
-
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.DepositAccumulateRouletteEvent", null)
-                        .WithMany()
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_game_events_deposit_accumulate_roulette_events_id");
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
                         .WithMany()
