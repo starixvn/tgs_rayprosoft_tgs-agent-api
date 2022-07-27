@@ -12,7 +12,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220727070652_AddDepositAccumulateRouletteTables")]
+    [Migration("20220727084037_AddDepositAccumulateRouletteTables")]
     partial class AddDepositAccumulateRouletteTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2813,7 +2813,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("date")
                         .HasColumnName("date");
 

@@ -20,8 +20,7 @@ internal class DepositAccumulateRouletteEventMap : IEntityTypeConfiguration<Depo
             .IsRequired();
 
         builder.Property(e => e.Date)
-            .IsRequired()
-            .HasColumnType("date");
+            .IsRequired();
 
         builder.Property(e => e.PromotionId)
             .IsRequired();

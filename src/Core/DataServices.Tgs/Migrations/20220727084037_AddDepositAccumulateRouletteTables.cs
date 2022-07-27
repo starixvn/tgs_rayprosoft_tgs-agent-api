@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    date = table.Column<DateTime>(type: "date", nullable: false),
+                    date = table.Column<DateOnly>(type: "date", nullable: false),
                     player_code = table.Column<string>(type: "character varying(16)", nullable: false),
                     promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
                     roulette_count = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
