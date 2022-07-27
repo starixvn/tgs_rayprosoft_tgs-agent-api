@@ -119,10 +119,23 @@ public partial class PlayerController : BaseContextController
                 Amount = x.Amount,
                 Balance = x.Balance,
                 TransactionType = (TransactionType?)x.TransactionType,
-                GameActionType = (GameActionType?)x.GameActionType,
+                GameActionType = (GameActionType?)x.GameActionType switch
+                {
+                    GameActionType.PlaceBet => TransactionGameActionType.GameBet,
+                    GameActionType.WinBet => TransactionGameActionType.GameSettleWin,
+                    GameActionType.LoseBet => TransactionGameActionType.GameSettleLose,
+                    GameActionType.FreeBet => TransactionGameActionType.GameSettleFree,
+                    GameActionType.TieBet => TransactionGameActionType.GameSettleTie,
+                    GameActionType.CancelTransaction => TransactionGameActionType.GameCancel,
+                    GameActionType.LockAmount => TransactionGameActionType.GameLock,
+                    GameActionType.UnlockAmount => TransactionGameActionType.GameUnlock,
+                    GameActionType.WinJackpot => TransactionGameActionType.GameWinJackpot,
+                    _ => null
+                },
                 RecordedOn = x.RecordedOn,
                 IncludeInNetProfit = x.IncludeInNetProfit,
-                Remark = GetRemark((TransactionType?)x.TransactionType, x.Description)
+                Remark = GetRemark((TransactionType?)x.TransactionType, x.Description),
+                ExternalTransactionId = x.ExternalTransactionId
             }).ToArray()
         };
     }
@@ -281,7 +294,9 @@ public partial class PlayerController : BaseContextController
             case TransactionType.BonusAdjust:
                 _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                 return remark.GetString();
-
+            case TransactionType.GameProviderFundOut:
+            case TransactionType.GameProviderFundIn:
+                return description;
             default:
                 return string.Empty;
         }

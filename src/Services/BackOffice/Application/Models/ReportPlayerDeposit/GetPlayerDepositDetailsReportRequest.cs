@@ -3,9 +3,9 @@ using Tgs.Report.Client.Models;
 
 namespace TGS.Services.BackOffice.Application.Models.ReportPlayerDeposit;
 
-public record GetPlayerFirstDepositDetailsReportRequest : PageableRequest
+public record GetPlayerDepositDetailsReportRequest : PageableRequest
 {
     public Guid BrandId { get; init; }
     public string AgentUsername { get; init; } = default!;
-    public DateTimeOffset Date { get; init; }
+    public DateOnly Date { get; init; }
 }

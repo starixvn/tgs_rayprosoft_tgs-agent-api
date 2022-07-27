@@ -2,7 +2,7 @@
 
 namespace TGS.Services.BackOffice.Application.Models.ReportPlayerDeposit;
 
-public record PlayerFirstDepositDetailReportModel
+public record PlayerDepositDetailReportModel
 {
     public string Username { get; init; } = default!;
     public DateTimeOffset FirstDepositOn { get; init; }

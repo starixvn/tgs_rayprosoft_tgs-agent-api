@@ -103,7 +103,7 @@ public class ManualDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositBankRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] ManualDepositSerializer serializer,
         [FromBody] SubmitManualDepositBankRequest request)
@@ -112,7 +112,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -135,18 +135,16 @@ public class ManualDepositController : ControllerBase
                     ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     [HttpPut("ewallet", Name = "SubmitDepositEWalletRequest")]
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositEWalletRequestAsync(
-       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] ManualDepositSerializer serializer,
        [FromBody] SubmitManualDepositEWalletRequest request)
@@ -155,7 +153,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -179,11 +177,9 @@ public class ManualDepositController : ControllerBase
                     BankType = request.BankType
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     [HttpPost("{id}")]
@@ -217,7 +213,7 @@ public class ManualDepositController : ControllerBase
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositFpsRequestAsync(
-       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] ManualDepositSerializer serializer,
        [FromBody] SubmitManualDepositFpsRequest request)
@@ -226,7 +222,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -255,18 +251,16 @@ public class ManualDepositController : ControllerBase
                     Phone = phone
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     [HttpPut("pulsa", Name = "SubmitDepositPulsaRequest")]
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositPulsaRequestAsync(
-       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] ManualDepositSerializer serializer,
        [FromBody] SubmitManualDepositPulsaRequest request)
@@ -275,7 +269,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -295,18 +289,16 @@ public class ManualDepositController : ControllerBase
                     BankType = request.BankType,
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     [HttpPut("thirdparty")]
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositThirdPartyRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] ManualDepositSerializer serializer,
         [FromBody] SubmitManualDepositThirdPartyRequest request)
@@ -315,7 +307,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -334,18 +326,16 @@ public class ManualDepositController : ControllerBase
                     QrCode = brandPaymentBankInfo.RootElement.GetProperty("qrCode").GetString()
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     [HttpPut("usdt", Name = "SubmitDepositUsdtRequest")]
     [EnableUserBlockedCheck]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<Guid> SubmitDepositUsdtRequestAsync(
-       [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+       [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
        [FromServices] ManualDepositSerializer serializer,
        [FromBody] SubmitManualDepositUsdtRequest request)
@@ -354,7 +344,7 @@ public class ManualDepositController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new(request.BrandPaymentId))
+            .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -378,11 +368,9 @@ public class ManualDepositController : ControllerBase
                     SendAmount = request.Amount
                 }));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        return await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
     }
 
     private ManualDepositApplyInfo GetApplyInfo(ManualDepositSerializer serializer, string bankType, string applyInfo)

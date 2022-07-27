@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ public class ZaloDepositController : ControllerBase
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [EnableUserBlockedCheck]
     public async Task<DepositFormCreatedResponse> SubmitSkyPayDepositRequestAsync(
-        [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+        [FromServices] IGetService<CreateDepositFormCommand, Guid> createDepositFormService,
         [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
         [FromServices] SkyPaySerializer serializer,
         [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
@@ -32,7 +33,7 @@ public class ZaloDepositController : ControllerBase
         var brandId = HttpContext.GetBrandId().Value;
 
         var brandPayment = await getBrandPaymentService
-            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+            .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -52,11 +53,9 @@ public class ZaloDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("exchangeRate").GetDecimal(),
                     formId)));
 
-        await createDepositFormService
-            .ExecuteAsync(command)
+        var createdFormId = await createDepositFormService
+            .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
         var getDepositFormQuery = new GetDepositFormQuery(
             playerTokenData.PlayerCode,
@@ -64,7 +63,7 @@ public class ZaloDepositController : ControllerBase
             brandId);
 
         var formData = await getDepositFormService
-            .GetAsync(getDepositFormQuery)
+            .GetAsync(getDepositFormQuery, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         var applyInfo = serializer.Deserialize<SkyPayDepositApplyInfo>(formData.ApplyInfo!);
@@ -74,7 +73,7 @@ public class ZaloDepositController : ControllerBase
                 applyInfo.Response.TradeNo);
 
         await updateDepositFormService
-            .ExecuteAsync(updateThirdPartyOrderNoCommand)
+            .ExecuteAsync(updateThirdPartyOrderNoCommand, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new DepositFormCreatedResponse

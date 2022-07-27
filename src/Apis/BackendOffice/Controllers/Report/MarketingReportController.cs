@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
@@ -16,14 +15,23 @@ public class MarketingReportController : BaseContextController
 {
     [HttpGet("firstDepositDetail")]
     [Description("Get first deposit details report")]
-    public async Task<PagedResponse<MarketingFirstDepositDetailReportModel>> GetMarketingFirstDepositDetailsAsync(
+    public Task<PagedResponse<MarketingFirstDepositDetailReportModel>> GetMarketingFirstDepositDetailsAsync(
         [FromServices]
-        IGetService<GetMarketingFirstDepositDetailReportRequest, PagedResponse<MarketingFirstDepositDetailReportModel>>
+        IGetService<GetMarketingFirstDepositDetailQuery, PagedResponse<MarketingFirstDepositDetailReportModel>>
             marketsService,
-        [FromQuery] GetMarketingFirstDepositDetailReportRequest request)
-        => await marketsService
-            .GetAsync(request)
-            .ConfigureAwait(false);
+        [FromQuery] GetMarketingFirstDepositDetailReportRequest request,
+        [FromQuery] PageableRequest pagingRequest)
+    {
+        var date = DateOnly.FromDateTime(request.Date.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+
+        var query = new GetMarketingFirstDepositDetailQuery(
+            request.BrandId,
+            date,
+            request.AgentUsername,
+            pagingRequest);
+
+        return marketsService.GetAsync(query).AsTask();
+    }
 
     [HttpGet("gamingDetail")]
     [Description("Get gaming details report")]

@@ -8,6 +8,8 @@ public class AgentDailyPaymentStatistics
 
     public Guid BrandId { get; set; }
 
+    public int DepositPlayers { get; set; }
+
     public int FirstDepositPlayers { get; set; }
 
     public DateOnly ReportDate { get; set; }

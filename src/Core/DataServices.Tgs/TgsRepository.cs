@@ -15,6 +15,8 @@ public class TgsRepository : DbContext, ITgsRepository
 
     public DbSet<AgentBank> AgentBanks { get; set; }
 
+    public DbSet<AgentDailyPaymentStatistics> AgentDailyPaymentStatistics { get; set; }
+
     public DbSet<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
 
     public DbSet<AgentDividend> AgentDividends { get; set; }
