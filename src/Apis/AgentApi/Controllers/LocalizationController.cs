@@ -13,9 +13,6 @@ namespace TGS.Apis.AgentApi.Controllers;
 [ApiController]
 public class LocalizationController : ControllerBase
 {
-    private static readonly PhysicalFileProvider _FileProvider =
-        new PhysicalFileProvider(Environment.CurrentDirectory);
-
     [HttpGet]
     public ValueTask<IDictionary<string, string>> GetLocalizeDictionaryAsync(
         [FromServices] IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>> getService)

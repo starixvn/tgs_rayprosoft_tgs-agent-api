@@ -50,7 +50,7 @@
     <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />    
     <PackageReference Include="Tgs.MarketingReport.Client" Version="0.0.3" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.6" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.1" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.2" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.15" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.15" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.19" />

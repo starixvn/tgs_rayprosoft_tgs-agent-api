@@ -25,6 +25,19 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
 
     public async ValueTask<Guid> GetAsync(CreateDepositFormCommand command, CancellationToken cancellationToken = default)
     {
+        var createFormId = Guid.NewGuid();
+
+        var brandPayment = await _paymentServiceClient
+            .GetBrandPaymentByIdAsync(command.BrandPaymentId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (brandPayment is null)
+            throw new Exception("BrandPayment can't found.");
+
+        var payment = await _paymentServiceClient
+            .GetPaymentByIdAsync(brandPayment.PaymentId)
+            .ConfigureAwait(false);
+
         if (command.PromotionId != null)
         {
             var canJoin = await _promotionClient.CheckCanJoinDepositPromotionAsync(
@@ -37,7 +50,12 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
                 throw new CannotJoinPromotionException();
         }
 
-        var createFormId = Guid.NewGuid();
+        var mutexId = await _paymentServiceClient
+            .LockDepositPaymentAsync(createFormId, payment!.Code, command.PlayerCode)
+            .ConfigureAwait(false);
+
+        if (mutexId != createFormId)
+            throw new Exception("Has other deposit processing");
 
         try
         {
@@ -66,8 +84,12 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
         }
         catch
         {
-            await _promotionClient
-                .UntagPlayerDepositAsync(command.PlayerCode, command.PromotionId)
+            await Task.WhenAll(
+                _paymentServiceClient.UnlockDepositPaymentAsync(
+                    createFormId,
+                    payment.Code,
+                    command.PlayerCode).AsTask(),
+                _promotionClient.UntagPlayerDepositAsync(command.PlayerCode, command.PromotionId))
                 .ConfigureAwait(false);
             throw;
         }
