@@ -2439,8 +2439,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("BeginTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<TimeOnly>("BeginTime")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("begin_time");
 
                     b.Property<Guid>("BrandId")
@@ -2452,8 +2452,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("content");
 
-                    b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("end_time");
 
                     b.HasKey("Id")
