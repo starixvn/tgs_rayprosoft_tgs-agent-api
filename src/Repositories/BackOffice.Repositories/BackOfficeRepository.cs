@@ -23,7 +23,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
     }
 
-    public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, DateTimeOffset beginTime, DateTimeOffset endTime)
+    public async ValueTask BatchUpdateOrAddBrandMaintenanceAsync(Guid[] brandIds, TimeOnly beginTime, TimeOnly endTime)
     {
         var brandMaintenances = (from brandId in brandIds
                          join bm in _tgsRepository.BrandMaintenances.AsQueryable() on brandId equals bm.BrandId into temp
@@ -238,6 +238,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
                     {
                         b.Name,
                         b.Code,
+                        BrandId = b.Id,
                         LicenseeName = b.Licensee.Name,
                         bm.BeginTime,
                         bm.EndTime,
@@ -251,6 +252,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
             bm.Name,
             bm.Code,
             bm.LicenseeName,
+            bm.BrandId,
             bm.BeginTime,
             bm.EndTime,
             bm.Id)).ToAsyncEnumerable();

@@ -39,14 +39,16 @@ public class BrandMaintenanceTests
                     "GameProvider Integration",
                     "GPI",
                     "Turnkey Game System",
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow),
+                    Guid.NewGuid(),
+                    TimeOnly.MinValue,
+                    TimeOnly.MinValue),
                 new BrandMaintenanceInfo(
                     "GPI_PHP",
                     "GPI_PHP",
                     "Turnkey Game System",
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow)
+                    Guid.NewGuid(),
+                    TimeOnly.MinValue,
+                    TimeOnly.MinValue)
             }.ToAsyncEnumerable());
 
         var actual = await sut.GetAsync(query);
@@ -114,16 +116,16 @@ public class BrandMaintenanceTests
 
         var command = new BatchUpdateBrandMaintenanceCommand(
             new Guid[] { Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"), Guid.Parse("5dea25ae-431d-4514-aa36-81ab9d81b1dc") },
-            DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow);
+            TimeOnly.MinValue,
+            TimeOnly.MinValue);
 
         await sut.ExecuteAsync(command);
 
         moqBackOfficeRepository.Verify(
             fake => fake.BatchUpdateOrAddBrandMaintenanceAsync(
                 It.Is<Guid[]>(x => x == command.BrandIds),
-                It.Is<DateTimeOffset>(x => x == command.BeginTime),
-                It.Is<DateTimeOffset>(x => x == command.EndTime)),
+                It.Is<TimeOnly>(x => x == command.BeginTime),
+                It.Is<TimeOnly>(x => x == command.EndTime)),
             Times.Exactly(1));
     }
 
