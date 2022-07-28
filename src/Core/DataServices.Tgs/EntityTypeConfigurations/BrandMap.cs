@@ -116,6 +116,10 @@ internal class BrandMap : BaseConfiguration, IEntityTypeConfiguration<Brand>
         builder.Property(c => c.PlayerRegisterFlowSettings)
             .HasColumnType(ColumnTypes.Jsonb);
 
+        builder.Property(c => c.DepositPaymentLockEnabled)
+            .HasDefaultValue(false)
+            .IsRequired();
+
         builder.HasOne(c => c.Licensee)
             .WithMany(c => c.Brands)
             .HasForeignKey(c => c.LicenseeId)
