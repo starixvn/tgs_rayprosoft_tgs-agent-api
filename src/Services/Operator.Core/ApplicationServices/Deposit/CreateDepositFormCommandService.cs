@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
@@ -10,14 +11,17 @@ namespace TGS.Services.Operator.ApplicationServices.Deposit;
 internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCommand, Guid>
 {
     private readonly IPaymentClient _paymentClient;
+    private readonly IBrandServiceClient _brandServiceClient;
     private readonly IPaymentServiceClient _paymentServiceClient;
     private readonly IPromotionClient _promotionClient;
 
     public CreateDepositFormCommandService(
+        IBrandServiceClient brandServiceClient,
         IPaymentServiceClient paymentServiceClient,
         IPaymentClient paymentClient,
         IPromotionClient promotionClient)
     {
+        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
         _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
         _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
@@ -50,11 +54,15 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
                 throw new CannotJoinPromotionException();
         }
 
+        var brandPaymentSettings = await _brandServiceClient
+            .GetBrandPaymentSettingsAsync(command.BrandId, cancellationToken)
+            .ConfigureAwait(false);
+
         var mutexId = await _paymentServiceClient
             .LockDepositPaymentAsync(createFormId, payment!.Code, command.PlayerCode)
             .ConfigureAwait(false);
 
-        if (mutexId != createFormId)
+        if (brandPaymentSettings is not null && brandPaymentSettings.PaymentDepositLockEnabled && mutexId != createFormId)
             throw new Exception("Has other deposit processing");
 
         try
