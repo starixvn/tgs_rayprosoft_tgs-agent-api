@@ -142,7 +142,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                         dbo.players AS P ON CTE.player_code = P.player_code
                         LEFT JOIN
                         dbo.player_ip_records AS PIR ON CTE.player_code = PIR.player_code
-                            AND PIR.ip_type = 2",
+                            AND PIR.ip_type = 1",
             new
             {
                 ReportDate = queryDate,
