@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoFixture;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -24,12 +24,21 @@ public class BrandMaintenanceTests
 
         var command = new UpdateAllBrandMaintenanceStatusCommand("editorUserName");
 
-        var list = CreateBrandFixture()
-           .CreateMany<Brand>(3)
+        var list = new Brand[]
+        {
+            new Brand
+            {
+                Status = BrandStatus.Active
+            },
+            new Brand
+            {
+                Status = BrandStatus.Active
+            }
+        }
            .AsQueryable()
            .BuildMock();
 
-        moqBrandSerivce
+        _ = moqBrandSerivce
             .Setup(b => b.GetBrandQueries(It.IsAny<Func<IQueryable<Brand>, IQueryable<Brand>>>(), false))
             .Returns(list);
 
@@ -39,32 +48,6 @@ public class BrandMaintenanceTests
             fake => fake.ChangeStatusAsync(
                 It.IsAny<Brand>(),
                 It.IsAny<UpdateBrandStatusRequest>()),
-            Times.Exactly(3));
-    }
-
-    private Fixture CreateBrandFixture()
-    {
-        var fixture = new Fixture();
-
-        fixture.Customize<Brand>(u => u
-            .With(b => b.Licensee, new Licensee())
-            .With(b => b.Announcements, Array.Empty<Announcement>())
-            .With(b => b.BetLimits, Array.Empty<BrandBetLimit>())
-            .With(b => b.BrandGroups, Array.Empty<BrandGroup>())
-            .With(b => b.BrandAgentDividendConditions, Array.Empty<BrandAgentDividendCondition>())
-            .With(b => b.Currencies, Array.Empty<BrandCurrency>())
-            .With(b => b.Currencies, Array.Empty<BrandCurrency>())
-            .With(b => b.Departments, Array.Empty<Department>())
-            .With(b => b.Domains, Array.Empty<BrandDomain>())
-            .With(b => b.GameProviders, Array.Empty<BrandGameProvider>())
-            .With(b => b.Games, Array.Empty<BrandGame>())
-            .With(b => b.Languages, Array.Empty<BrandLanguage>())
-            .With(b => b.PlayerLoginRecords, Array.Empty<PlayerLoginRecord>())
-            .With(b => b.Players, Array.Empty<Player>())
-            .With(b => b.StationLetters, Array.Empty<StationLetter>())
-            .With(b => b.VipLevels, Array.Empty<VipLevel>())
-            );
-
-        return fixture;
+            Times.Exactly(2));
     }
 }
