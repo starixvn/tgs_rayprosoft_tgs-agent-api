@@ -1,6 +1,6 @@
 ﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandMaintenance
 {
-    public class AllBrandMaintenanceRequest
+    public class GetBrandMaintenanceInfosRequest
     {
         public string BrandCode { get; set; }
     }
