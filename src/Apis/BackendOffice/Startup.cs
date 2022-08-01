@@ -143,6 +143,13 @@ public class Startup
             options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
         });
 
+        _ = services.AddBrandServiceClient((options, sp) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+
+            options.BrandCertificateBaseUrl = config.GetValue<Uri>("BackOffice:BrandCertificateBaseUrl");
+        });
+
         _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
 
         _ = services
