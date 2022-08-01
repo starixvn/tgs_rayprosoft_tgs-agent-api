@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoFixture;
+using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
-using TGS.Paging;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Application.Services;
-using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -13,139 +16,55 @@ namespace TGS.Tests.BackendOffice.UnitTests;
 public class BrandMaintenanceTests
 {
     [Test]
-    public async Task User_Can_Count_BrandMaintenance_Query()
+    public async Task User_Can_Update_All_Brand_To_Maintenance_Status()
     {
-        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+        var moqBrandSerivce = new Mock<IBrandService>();
 
-        var sut = new GetAllBrandMaintenanceQueryService(moqBackOfficeRepository.Object);
+        var sut = new UpdateAllBrandMaintenanceStatusCommandService(moqBrandSerivce.Object);
 
-        var paging = new Paging<BrandMaintenanceInfo>
-        {
-            RowCount = 10,
-            Page = 0
-        };
+        var command = new UpdateAllBrandMaintenanceStatusCommand("editorUserName");
 
-        paging.SortByPropertyName(nameof(BrandMaintenanceInfo.BrandCode), false);
+        var list = CreateBrandFixture()
+           .CreateMany<Brand>(3)
+           .AsQueryable()
+           .BuildMock();
 
-        var query = new GetAllBrandMaintenanceQuery(
-            "",
-            paging);
-
-        moqBackOfficeRepository
-            .Setup(fake => fake.QueryBrandMaintenanceByBrandCodeAsync(It.Is<string>(x => x == query.BrandCode)))
-            .Returns(new[]
-            {
-                new BrandMaintenanceInfo(
-                    "GameProvider Integration",
-                    "GPI",
-                    "Turnkey Game System",
-                    Guid.NewGuid(),
-                    TimeOnly.MinValue,
-                    TimeOnly.MinValue),
-                new BrandMaintenanceInfo(
-                    "GPI_PHP",
-                    "GPI_PHP",
-                    "Turnkey Game System",
-                    Guid.NewGuid(),
-                    TimeOnly.MinValue,
-                    TimeOnly.MinValue)
-            }.ToAsyncEnumerable());
-
-        var actual = await sut.GetAsync(query);
-
-        Assert.AreEqual(2, actual);
-    }
-
-    [Test]
-    public async Task User_Can_Get_a_Brand_Maintenance()
-    {
-        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-        var sut = new GetBrandMaintenanceQueryService(moqBackOfficeRepository.Object);
-
-        var id = Guid.NewGuid();
-        var query = new GetBrandMaintenanceQuery(id);
-
-        moqBackOfficeRepository
-            .Setup(fake => fake.GetBrandMaintenanceByBrandCodeAsync(It.Is<Guid>(x => x == query.Id)))
-            .Returns(ValueTask.FromResult(new BrandMaintenanceModel("This is Content")));
-
-        await sut.GetAsync(query);
-
-        moqBackOfficeRepository.Verify(
-            fake => fake.GetBrandMaintenanceByBrandCodeAsync(It.Is<Guid>(x => x == query.Id)),
-            Times.Exactly(1));
-    }
-
-    [Test]
-    public async Task User_Can_Query_Brand_Maintenance()
-    {
-        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-        var sut = new GetAllBrandMaintenanceQueryService(moqBackOfficeRepository.Object);
-
-        var paging = new Paging<BrandMaintenanceInfo>
-        {
-            RowCount = 10,
-            Page = 0
-        };
-
-        paging.SortByPropertyName(nameof(BrandMaintenanceInfo.BrandCode), false);
-
-        var query = new GetAllBrandMaintenanceQuery(
-            "",
-            paging);
-
-        moqBackOfficeRepository
-            .Setup(fake => fake.QueryBrandMaintenanceByBrandCodeAsync(It.Is<string>(x => x == query.BrandCode)))
-            .Returns(Array.Empty<BrandMaintenanceInfo>().ToAsyncEnumerable());
-
-        await sut.QueryAsync(query).ToArrayAsync();
-
-        moqBackOfficeRepository.Verify(
-            fake => fake.QueryBrandMaintenanceByBrandCodeAsync(It.Is<string>(x => x == query.BrandCode)),
-            Times.Exactly(1));
-    }
-
-    [Test]
-    public async Task User_Can_Update_Brand_Maintenance()
-    {
-        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
-
-        var sut = new BatchUpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
-
-        var command = new BatchUpdateBrandMaintenanceCommand(
-            new Guid[] { Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af"), Guid.Parse("5dea25ae-431d-4514-aa36-81ab9d81b1dc") },
-            TimeOnly.MinValue,
-            TimeOnly.MinValue);
+        moqBrandSerivce
+            .Setup(b => b.GetBrandQueries(It.IsAny<Func<IQueryable<Brand>, IQueryable<Brand>>>(), false))
+            .Returns(list);
 
         await sut.ExecuteAsync(command);
 
-        moqBackOfficeRepository.Verify(
-            fake => fake.BatchUpdateOrAddBrandMaintenanceAsync(
-                It.Is<Guid[]>(x => x == command.BrandIds),
-                It.Is<TimeOnly>(x => x == command.BeginTime),
-                It.Is<TimeOnly>(x => x == command.EndTime)),
-            Times.Exactly(1));
+        moqBrandSerivce.Verify(
+            fake => fake.ChangeStatusAsync(
+                It.IsAny<Brand>(),
+                It.IsAny<UpdateBrandStatusRequest>()),
+            Times.Exactly(3));
     }
 
-    [Test]
-    public async Task User_Can_Update_Brand_Maintenance_Content()
+    private Fixture CreateBrandFixture()
     {
-        var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+        var fixture = new Fixture();
 
-        var sut = new UpdateBrandMaintenanceCommandService(moqBackOfficeRepository.Object);
+        fixture.Customize<Brand>(u => u
+            .With(b => b.Licensee, new Licensee())
+            .With(b => b.Announcements, Array.Empty<Announcement>())
+            .With(b => b.BetLimits, Array.Empty<BrandBetLimit>())
+            .With(b => b.BrandGroups, Array.Empty<BrandGroup>())
+            .With(b => b.BrandAgentDividendConditions, Array.Empty<BrandAgentDividendCondition>())
+            .With(b => b.Currencies, Array.Empty<BrandCurrency>())
+            .With(b => b.Currencies, Array.Empty<BrandCurrency>())
+            .With(b => b.Departments, Array.Empty<Department>())
+            .With(b => b.Domains, Array.Empty<BrandDomain>())
+            .With(b => b.GameProviders, Array.Empty<BrandGameProvider>())
+            .With(b => b.Games, Array.Empty<BrandGame>())
+            .With(b => b.Languages, Array.Empty<BrandLanguage>())
+            .With(b => b.PlayerLoginRecords, Array.Empty<PlayerLoginRecord>())
+            .With(b => b.Players, Array.Empty<Player>())
+            .With(b => b.StationLetters, Array.Empty<StationLetter>())
+            .With(b => b.VipLevels, Array.Empty<VipLevel>())
+            );
 
-        var id = Guid.NewGuid();
-        var content = "This is Content";
-        var command = new UpdateBrandMaintenanceCommand(id, content);
-
-        await sut.ExecuteAsync(command);
-
-        moqBackOfficeRepository.Verify(
-            fake => fake.UpdateBrandMaintenanceAsync(
-                It.Is<Guid>(x => x == command.Id),
-                It.Is<string>(x => x == command.Content)),
-            Times.Exactly(1));
+        return fixture;
     }
 }
