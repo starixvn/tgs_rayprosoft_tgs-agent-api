@@ -42,15 +42,6 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        app.Use(async (httpContext, next) =>
-        {
-            await next();
-
-            var activity = Activity.Current;
-
-            if (activity is not null && !httpContext.Response.Headers.ContainsKey("X-Correlation-ID"))
-                httpContext.Response.Headers.TryAdd("X-Correlation-ID", activity.Id.ToString());
-        });
         app.UseRequestLocalization(options =>
         {
             var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
@@ -84,6 +75,16 @@ public class Startup
             endpoints.MapHealthChecks("/health");
 
             endpoints.MapMetrics();
+        });
+
+        app.Use(async (httpContext, next) =>
+        {
+            await next();
+
+            var activity = Activity.Current;
+
+            if (activity is not null && !httpContext.Response.Headers.ContainsKey("X-Correlation-ID"))
+                httpContext.Response.Headers.TryAdd("X-Correlation-ID", activity.Id.ToString());
         });
 
         app.UseSwagger();
