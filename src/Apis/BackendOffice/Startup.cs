@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -73,6 +75,16 @@ public class Startup
             endpoints.MapHealthChecks("/health");
 
             endpoints.MapMetrics();
+        });
+
+        app.Use(async (httpContext, next) =>
+        {
+            await next();
+
+            var activity = Activity.Current;
+
+            if (activity is not null && !httpContext.Response.Headers.ContainsKey("X-Correlation-ID"))
+                httpContext.Response.Headers.TryAdd("X-Correlation-ID", activity.Id.ToString());
         });
 
         app.UseSwagger();
@@ -298,13 +310,7 @@ public class Startup
                         || !httpContext.Request.Path.StartsWithSegments("/swagger")
                         && !httpContext.Request.Path.StartsWithSegments("/health")
                         && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                        && !new[]
-                        {
-                            "html",
-                            "ico",
-                            "png",
-                            "jpg"
-                        }.Any(
+                        && !new[] { "html", "ico", "png", "jpg" }.Any(
                             ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                 };
             });
