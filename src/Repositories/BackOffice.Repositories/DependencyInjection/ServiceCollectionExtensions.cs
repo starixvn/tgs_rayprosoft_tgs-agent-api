@@ -12,7 +12,6 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddTransient<ISettingRepository, SettingRepository>()
-            .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
             .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
             .AddTransient<IAgentRepository, AgentRepository>()
             .AddTransient<IPaymentReportingRepository, PaymentReportingRepository>();
