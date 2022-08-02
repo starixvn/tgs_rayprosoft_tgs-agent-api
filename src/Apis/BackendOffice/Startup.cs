@@ -159,7 +159,7 @@ public class Startup
         {
             var config = sp.GetRequiredService<IConfiguration>();
 
-            options.BrandCertificateBaseUrl = config.GetValue<Uri>("BackOffice:BrandCertificateBaseUrl");
+            options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
         });
 
         _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
