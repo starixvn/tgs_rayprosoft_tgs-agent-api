@@ -45,11 +45,14 @@ public class BrandMaintenanceController : BaseContextController
     [Description("Update all brand maintenance")]
     public async Task<MessageResponse> UpdateAllBrandMaintenanceTimeAsync(
         [FromBody] UpdateAllBrandMaintenanceTimeRequest request,
-        [FromServices] IBrandServiceClient brandServiceClient)
+        [FromServices] IBrandServiceClient brandServiceClient,
+        [FromServices] ICommandService<ClearAllBrandMaintenanceCacheCommand> commandService)
     {
         await brandServiceClient
             .UpdateAllBrandMaintenanceTimeAsync(request.BeginTime, request.EndTime)
             .ConfigureAwait(false);
+
+        await commandService.ExecuteAsync(new ClearAllBrandMaintenanceCacheCommand());
 
         return CreateValidResponse<MessageResponse>();
     }
@@ -63,6 +66,25 @@ public class BrandMaintenanceController : BaseContextController
     {
         await brandServiceClient
             .UpdateBrandMaintenanceContentAsync(brandMaintenanceId, request.Content)
+            .ConfigureAwait(false);
+
+        return CreateValidResponse<MessageResponse>();
+    }
+
+    [HttpPut("{brandId}", Name = "UpdateBrandMaintenanceTime")]
+    [Description("Update a brand maintenance's begin time and end time")]
+    public async Task<MessageResponse> UpdateBrandMaintenanceTimeAsync(
+        Guid brandId,
+        [FromBody] UpdateBrandMaintenanceTimeRequest request,
+        [FromServices] IBrandServiceClient brandServiceClient,
+        [FromServices] ICommandService<ClearBrandMaintenanceCacheCommand> commandService)
+    {
+        await brandServiceClient
+            .UpdateBrandMaintenanceTimeAsync(brandId, request.BeginTime, request.EndTime)
+            .ConfigureAwait(false);
+
+        await commandService
+            .ExecuteAsync(new ClearBrandMaintenanceCacheCommand(brandId))
             .ConfigureAwait(false);
 
         return CreateValidResponse<MessageResponse>();
