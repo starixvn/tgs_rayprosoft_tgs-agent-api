@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -20,6 +20,7 @@
     <None Remove="Assets\deposit_forms_template.xlsx" />
     <None Remove="Assets\localization_template.xlsx" />
     <None Remove="Assets\withdraw_forms_template.xlsx" />
+    <None Remove="Protos\brandservice.proto" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +35,11 @@
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="FluentValidation" Version="11.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.1.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.21.4" />
+    <PackageReference Include="Grpc.Tools" Version="2.47.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
@@ -41,6 +47,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
+    <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.19" />
@@ -67,6 +74,10 @@
     <ProjectReference Include="..\Operations\Operations.csproj" />
     <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\brandservice.proto" GrpcServices="None" />
   </ItemGroup>
 
   <ItemGroup>
