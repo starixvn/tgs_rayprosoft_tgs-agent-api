@@ -57,7 +57,7 @@ public class BrandMaintenanceController : BaseContextController
         return CreateValidResponse<MessageResponse>();
     }
 
-    [HttpPut("{brandMaintenanceId}", Name = "UpdateBrandMaintenanceContent")]
+    [HttpPut("content/{brandMaintenanceId}", Name = "UpdateBrandMaintenanceContent")]
     [Description("Update a brand maintenance's content")]
     public async Task<MessageResponse> UpdateBrandMaintenanceContentAsync(
         Guid brandMaintenanceId,
@@ -71,7 +71,7 @@ public class BrandMaintenanceController : BaseContextController
         return CreateValidResponse<MessageResponse>();
     }
 
-    [HttpPut("{brandId}", Name = "UpdateBrandMaintenanceTime")]
+    [HttpPut("time/{brandId}", Name = "UpdateBrandMaintenanceTime")]
     [Description("Update a brand maintenance's begin time and end time")]
     public async Task<MessageResponse> UpdateBrandMaintenanceTimeAsync(
         Guid brandId,
