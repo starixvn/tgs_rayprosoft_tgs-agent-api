@@ -12,7 +12,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220802083838_AddPlayerBonusAggregateAndExcutionTimeTables")]
+    [Migration("20220803072340_AddPlayerBonusAggregateAndExcutionTimeTables")]
     partial class AddPlayerBonusAggregateAndExcutionTimeTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -5321,6 +5321,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
                         .HasDatabaseName("ix_player_bonus_aggregates_multiple_keys");
+
+                    NpgsqlIndexBuilderExtensions.HasSortOrder(b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode"), new[] { SortOrder.Descending, SortOrder.Ascending, SortOrder.Ascending, SortOrder.Ascending });
 
                     b.ToTable("player_bonus_aggregates", "report");
                 });

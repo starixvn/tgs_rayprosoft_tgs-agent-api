@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.DataServices.Tgs.Models;
 
@@ -51,6 +52,7 @@ internal class PlayerBonusAggregateMap : IEntityTypeConfiguration<PlayerBonusAgg
                 b.AgentId,
                 b.PlayerCode
             })
-            .HasDatabaseName("ix_player_bonus_aggregates_multiple_keys");
+            .HasDatabaseName("ix_player_bonus_aggregates_multiple_keys")
+            .HasSortOrder(new[] { SortOrder.Descending, SortOrder.Ascending, SortOrder.Ascending, SortOrder.Ascending });
     }
 }

@@ -5320,6 +5320,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
                         .HasDatabaseName("ix_player_bonus_aggregates_multiple_keys");
 
+                    NpgsqlIndexBuilderExtensions.HasSortOrder(b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode"), new[] { SortOrder.Descending, SortOrder.Ascending, SortOrder.Ascending, SortOrder.Ascending });
+
                     b.ToTable("player_bonus_aggregates", "report");
                 });
 

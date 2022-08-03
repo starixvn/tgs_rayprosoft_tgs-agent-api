@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -56,7 +57,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "ix_player_bonus_aggregates_multiple_keys",
                 schema: "report",
                 table: "player_bonus_aggregates",
-                columns: new[] { "report_date", "brand_id", "agent_id", "player_code" });
+                columns: new[] { "report_date", "brand_id", "agent_id", "player_code" })
+                .Annotation("Npgsql:IndexSortOrder", new[] { SortOrder.Descending, SortOrder.Ascending, SortOrder.Ascending, SortOrder.Ascending });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
