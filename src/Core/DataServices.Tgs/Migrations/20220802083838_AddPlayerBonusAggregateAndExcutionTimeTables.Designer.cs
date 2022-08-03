@@ -12,8 +12,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20220801034040_PlayerBonusAggregateTable")]
-    partial class PlayerBonusAggregateTable
+    [Migration("20220802083838_AddPlayerBonusAggregateAndExcutionTimeTables")]
+    partial class AddPlayerBonusAggregateAndExcutionTimeTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1148,6 +1148,29 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_agent_wallets_currency_code");
 
                     b.ToTable("agent_wallets", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AggregateExecutionTime", b =>
+                {
+                    b.Property<short>("AggregateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.HasKey("AggregateType", "From", "To")
+                        .HasName("pk_aggregate_execution_time_id");
+
+                    b.HasIndex("AggregateType", "From", "To")
+                        .HasDatabaseName("ix_aggregate_execution_time_multiple_keys");
+
+                    b.ToTable("aggregate_execution_time", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Announcement", b =>

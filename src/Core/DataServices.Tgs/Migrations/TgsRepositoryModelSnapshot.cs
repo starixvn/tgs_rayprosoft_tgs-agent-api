@@ -1148,6 +1148,29 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_wallets", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AggregateExecutionTime", b =>
+                {
+                    b.Property<short>("AggregateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.HasKey("AggregateType", "From", "To")
+                        .HasName("pk_aggregate_execution_time_id");
+
+                    b.HasIndex("AggregateType", "From", "To")
+                        .HasDatabaseName("ix_aggregate_execution_time_multiple_keys");
+
+                    b.ToTable("aggregate_execution_time", "report");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Announcement", b =>
                 {
                     b.Property<Guid>("Id")

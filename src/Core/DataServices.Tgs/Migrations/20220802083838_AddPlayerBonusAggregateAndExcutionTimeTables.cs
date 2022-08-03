@@ -5,10 +5,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class PlayerBonusAggregateTable : Migration
+    public partial class AddPlayerBonusAggregateAndExcutionTimeTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "aggregate_execution_time",
+                schema: "report",
+                columns: table => new
+                {
+                    aggregate_type = table.Column<short>(type: "smallint", nullable: false),
+                    from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_aggregate_execution_time_id", x => new { x.aggregate_type, x.from, x.to });
+                });
+
             migrationBuilder.CreateTable(
                 name: "player_bonus_aggregates",
                 schema: "report",
@@ -33,6 +47,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_aggregate_execution_time_multiple_keys",
+                schema: "report",
+                table: "aggregate_execution_time",
+                columns: new[] { "aggregate_type", "from", "to" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_player_bonus_aggregates_multiple_keys",
                 schema: "report",
                 table: "player_bonus_aggregates",
@@ -41,6 +61,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "aggregate_execution_time",
+                schema: "report");
+
             migrationBuilder.DropTable(
                 name: "player_bonus_aggregates",
                 schema: "report");
