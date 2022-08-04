@@ -323,7 +323,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                 QueryDate = queryDate,
                 Begin = queryTimeRange.From,
                 End = queryTimeRange.To,
-                UndepositCheckDate = queryDate.AddDays(-2),
+                UndepositAgainCheckDate = queryDate.AddDays(-2),
                 BrandId = brandId
             }).ConfigureAwait(false);
 
