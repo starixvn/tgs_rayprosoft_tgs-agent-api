@@ -214,22 +214,8 @@ public class PromotionController : BaseContextController
                 .Select(promotion => new PromotionViewModel
                 {
                     Id = promotion.Id,
-                    Name = promotion.Name,
-                    From = promotion.EventDuring.From,
-                    To = promotion.EventDuring.To,
-                    PromotionType = promotion.PromotionType,
-                    Content = promotion.Content,
-                    DesktopBanner = promotion.PersonalComputerBanner,
-                    MobileBanner = promotion.MobileBanner,
-                    Localization = promotion.Localization,
-                    SubSubject = promotion.SubSubject,
-                    Terms = promotion.Convention,
-                    VipLevels = promotion.VipLevels,
-                    CampaignDetail = promotion.PromotionType == "Roulette"
-                        ? JsonSerializer.SerializeToDocument(
-                            promotion.CampaignDetail.Deserialize<RouletteSettingsViewModel>(jsonOptionsAccessor.Value.JsonSerializerOptions)!,
-                            jsonOptionsAccessor.Value.JsonSerializerOptions)
-                        : promotion.CampaignDetail
+                    Name = promotion.Name,                    
+                    Localization = promotion.Localization                    
                 });
     }
 
