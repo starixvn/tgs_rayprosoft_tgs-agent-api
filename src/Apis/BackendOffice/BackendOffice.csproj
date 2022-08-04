@@ -79,9 +79,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Update="Resources\Brand.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

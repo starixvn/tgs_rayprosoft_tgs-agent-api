@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Models;
 using TGS.Apis.BackendOffice.ViewModels;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
@@ -39,7 +40,7 @@ public class PlayerDepositReportController : BaseContextController
         var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
-                && item.UnSecondDeposit is not true)
+                && item.IsFirstDeposit is not null)
             .ToArrayAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
@@ -82,6 +83,7 @@ public class PlayerDepositReportController : BaseContextController
     public async Task<PlayerDepositsViewModel> GetPlayerDepositsAsync(
         [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryDetailService,
         [FromQuery] GetPlayerDepositsReportRequest request)
     {
         var query = new AgentPlayerDepositQuery(request.BrandId);
@@ -94,6 +96,41 @@ public class PlayerDepositReportController : BaseContextController
 
         var dataQuery = data.Where(s => s.ReportDate >= dateRange.From
             && s.ReportDate < dateRange.To);
+
+        var currentDate = new DateTimeOffset(DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(8D)).Date, TimeSpan.FromHours(8D));
+
+        if (request.To > currentDate)
+        {
+            var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
+                request.BrandId,
+                DateOnly.FromDateTime(currentDate.ToOffset(TimeSpan.FromHours(8D)).Date));
+            var currentDateDtailQuery = queryDetailService.QueryAsync(currentDateQuery)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(g => g.AggregateAsync(
+                    new PlayerPaymentDetailAggregateInfo()
+                    {
+                        AgentId = g.Key
+                    },
+                    (seed, item) =>
+                    {
+                        if (item.IsFirstDeposit == true)
+                            seed.FirstDepositPlayers++;
+                        if (item.UnSecondDeposit == true)
+                            seed.UndepositAgainPlayers++;
+                        if (item.IsFirstDeposit is not null)
+                            seed.DepositPlayers++;
+
+                        return seed;
+                    }, HttpContext.RequestAborted))
+                .Select(info => new AgentPlayerDepositStatistics(
+                    currentDateQuery.QueryDate,
+                    info.AgentId,
+                    info.FirstDepositPlayers,
+                    info.DepositPlayers,
+                    info.UndepositAgainPlayers));
+
+            dataQuery = dataQuery.Concat(currentDateDtailQuery);
+        }
 
         var agentQuery = queryAgentsService
             .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
