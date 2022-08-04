@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
@@ -6,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment.Clients;
+using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
 using TGS.Apis.BackendOffice.DataService.Services;
@@ -13,8 +16,10 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment;
 
@@ -160,6 +165,69 @@ public partial class BrandPaymentController : BaseContextController
         var players = GetDesignatedUsers(brandPayment);
 
         return new() { Valid = true, Players = players };
+    }
+
+    [HttpGet("player", Name = "GetPlayerBrandPayments")]
+    [Description("Get Brand Payments for player deposit")]
+    public async IAsyncEnumerable<BrandPaymentResponse> GetPlayerBrandPaymentsAsync(
+        [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+        [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+        [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService,
+        [FromQuery] GetPlayerBrandPaymentsRequest request)
+    {
+        var paymentMethods = await getAllPaymentMethodService
+            .GetAsync(new AllPaymentMethodsQuery())
+            .ConfigureAwait(false);
+
+        var query = new BrandPaymentsQuery(request.BrandId, request.PlayerCode);
+
+        var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
+
+        var brandPaymentQuery = await brandPayments
+            .Where(bp => bp.TransferType == TransferType.Deposit)
+            .AsParallel()
+            .WithCancellation(HttpContext.RequestAborted)
+            .Select(async bp =>
+            {
+                var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
+
+                var paymentInfo = await getPaymentService
+                    .GetAsync(getPaymentQuery)
+                    .ConfigureAwait(false);
+
+                var paymentMethod = paymentMethods[bp.MethodId];
+
+                return new BrandPaymentResponse
+                {
+                    Id = bp.Id,
+                    ChannelId = bp.ChannelId,
+                    ChannelName = bp.ChannelName,
+                    ChannelCode = bp.ChannelCode,
+                    TransferLimit = new Models.ValueRange<decimal>
+                    {
+                        From = bp.TransferLimit.From,
+                        To = bp.TransferLimit.To
+                    },
+                    ExtendedData = paymentInfo.Code == "Manual"
+                        ? JsonDocument.Parse(bp.ExtendedData)
+                        : JsonDocument.Parse("{}"),
+                    PaymentId = bp.PaymentId,
+                    PaymentCode = paymentInfo.Code,
+                    MethodId = bp.MethodId,
+                    MethodCode = paymentMethod.Name,
+                    BankType = paymentMethod.BankType,
+                    DisplayOrder = bp.DisplayOrder
+                };
+            })
+            .WhenAll()
+            .ConfigureAwait(false);
+
+        foreach (var bp in brandPaymentQuery)
+        {
+            yield return bp;
+        }
     }
 
     [HttpPut("{brandPaymentId:guid}")]
