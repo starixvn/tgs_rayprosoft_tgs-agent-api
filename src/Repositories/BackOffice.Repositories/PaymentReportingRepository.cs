@@ -265,7 +265,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                         Max(total_deposit_amount) AS total_deposit_amount,
                         Max(total_withdraw_amount) AS total_withdraw_amount
                     FROM
-                        player_daily_payment_statistics
+                        dbo.player_daily_payment_statistics
                     WHERE
                         report_date < @QueryDate
                     GROUP BY
@@ -312,11 +312,11 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                     LEFT JOIN
                     historyStatistics AS HS ON COALESCE(UAS.player_code, MS.player_code) = HS.player_code
                     JOIN
-                    players AS P ON COALESCE(MS.player_code, UAS.player_code) = P.player_code
+                    dbo.players AS P ON COALESCE(MS.player_code, UAS.player_code) = P.player_code
                         AND P.brand_id = @BrandId
                         AND P.agent_id IS NOT NULL
                     LEFT JOIN
-                    player_ip_records AS PIR ON P.player_code = PIR.player_code
+                    dbo.player_ip_records AS PIR ON P.player_code = PIR.player_code
                         AND PIR.ip_type = 1",
             new
             {

@@ -104,7 +104,7 @@ public class PlayerDepositReportController : BaseContextController
             var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
                 request.BrandId,
                 DateOnly.FromDateTime(currentDate.ToOffset(TimeSpan.FromHours(8D)).Date));
-            var currentDateDtailQuery = queryDetailService.QueryAsync(currentDateQuery)
+            var currentDateDetailQuery = queryDetailService.QueryAsync(currentDateQuery)
                 .GroupBy(item => item.AgentId)
                 .SelectAwait(g => g.AggregateAsync(
                     new PlayerPaymentDetailAggregateInfo()
@@ -129,7 +129,7 @@ public class PlayerDepositReportController : BaseContextController
                     info.DepositPlayers,
                     info.UndepositAgainPlayers));
 
-            dataQuery = dataQuery.Concat(currentDateDtailQuery);
+            dataQuery = dataQuery.Concat(currentDateDetailQuery);
         }
 
         var agentQuery = queryAgentsService
