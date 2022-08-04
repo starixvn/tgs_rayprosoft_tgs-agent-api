@@ -289,6 +289,13 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                 )
                 SELECT
                     COALESCE(MS.player_code, UAS.player_code) AS PlayerCode,
+                    P.brand_id AS BrandId,
+                    P.username AS UserName,
+                    P.agent_id AS AgentId,
+                    COALESCE(HS.first_deposit_on, MS.daily_first_deposit_on) AS FirstDepositOn,
+                    COALESCE(HS.first_deposit_amount, MS.daily_first_deposit_amount) AS FirstDepositAmount,
+                    COALESCE(MS.deposit_amount, 0) + COALESCE(HS.total_deposit_amount, 0) AS TotalDepositAmount,
+                    COALESCE(MS.withdraw_amount, 0) + COALESCE(HS.total_withdraw_amount, 0) AS TotalWithdrawAmount,
                     CASE UAS.player_code
                         WHEN NULL THEN false
                         ELSE TRUE
@@ -297,13 +304,6 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                         WHEN NULL THEN false
                         ELSE true
                     END AS IsCurrentDeposit,
-                    P.brand_id AS BrandId,
-                    P.username AS UserName,
-                    P.agent_id AS AgentId,
-                    COALESCE(HS.first_deposit_on, MS.daily_first_deposit_on) AS FirstDepositOn,
-                    COALESCE(HS.first_deposit_amount, MS.daily_first_deposit_amount) AS FirstDepositAmount,
-                    COALESCE(MS.deposit_amount, 0) + COALESCE(HS.total_deposit_amount, 0) AS TotalDepositAmount,
-                    COALESCE(MS.withdraw_amount, 0) + COALESCE(HS.total_withdraw_amount, 0) AS TotalWithdrawAmount,
                     PIR.ip AS RegisterIp
                 FROM
                     mergeStatistics AS MS
