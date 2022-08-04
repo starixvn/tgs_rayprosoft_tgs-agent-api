@@ -1148,6 +1148,29 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_wallets", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AggregateExecutionTime", b =>
+                {
+                    b.Property<short>("AggregateType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.HasKey("AggregateType", "From", "To")
+                        .HasName("pk_aggregate_execution_time_id");
+
+                    b.HasIndex("AggregateType", "From", "To")
+                        .HasDatabaseName("ix_aggregate_execution_time_multiple_keys");
+
+                    b.ToTable("aggregate_execution_time", "report");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Announcement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5233,6 +5256,73 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_bank_infos_player_code");
 
                     b.ToTable("player_bank_infos", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBonusAggregate", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("BirthdayAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("birthday_amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("PromotionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_amount");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
+
+                    b.Property<decimal>("SeasonAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("season_amount");
+
+                    b.Property<decimal>("UpgradeAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("upgrade_amount");
+
+                    b.HasKey("PlayerCode", "Hour", "Minute", "ReportDate")
+                        .HasName("pk_player_bonus_aggregates_id");
+
+                    b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
+                        .HasDatabaseName("ix_player_bonus_aggregates_multiple_keys");
+
+                    NpgsqlIndexBuilderExtensions.HasSortOrder(b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode"), new[] { SortOrder.Descending, SortOrder.Ascending, SortOrder.Ascending, SortOrder.Ascending });
+
+                    b.ToTable("player_bonus_aggregates", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucket", b =>
