@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.Models.Enums;
 using Tgs.MarketingReport.Client;
+using Tgs.ServiceUtility;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -68,10 +70,9 @@ internal class MarketingReportTests
     [Test]
     public async Task Can_Get_Marketing_Report_By_Brand()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
         var fakeReportClient = Substitute.For<IMarketingReportClient>();
-        var fakeAgentPlayerDepositQueryService =
-            Substitute.For<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>>();
+        var fakeAgentPlayerDepositQueryService = Substitute.For<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>>();
+        var fakeAgentQueryService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
 
         var paging = new PageableRequest
         {
@@ -86,16 +87,17 @@ internal class MarketingReportTests
             DateOnly.Parse("2022-06-10"),
             paging);
 
+        fakeAgentQueryService.QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
+            .Returns(new[] {
+                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
+            }.ToAsyncEnumerable());
+
         var sut = new GetMarketingReportAggregateInfosQueryService(
             fakeAgentPlayerDepositQueryService,
-            fakeAgentRepository,
+            fakeAgentQueryService,
             fakeReportClient);
 
         _ = await sut.GetAsync(query).ConfigureAwait(false);
-
-        _ = fakeAgentRepository
-            .Received(1)
-            .GetAgentsAsync(Arg.Is(query.BrandId));
 
         _ = fakeAgentPlayerDepositQueryService
             .Received(1)

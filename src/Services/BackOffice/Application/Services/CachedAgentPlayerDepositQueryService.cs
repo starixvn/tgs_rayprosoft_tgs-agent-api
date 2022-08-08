@@ -35,10 +35,12 @@ internal class CachedAgentPlayerDepositQueryService : IQueryService<AgentPlayerD
             key,
             async entry =>
             {
-                entry.AbsoluteExpiration = now
-                    .ToOffset(TimeSpan.FromHours(8D))
-                    .Date
-                    .AddHours(8D);
+                entry.AbsoluteExpiration = new DateTimeOffset(
+                    now
+                        .ToOffset(TimeSpan.FromHours(8D))
+                        .Date
+                        .AddHours(8D),
+                    TimeSpan.FromHours(8D));
 
                 return await _sourceService
                     .QueryAsync(query, cancellationToken)
