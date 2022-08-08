@@ -38,7 +38,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
 
         var conn = _tgsRepository.GetDbConnection();
 
-        var result = await conn.QueryAsync<RealTimePlayerRegisterItem>(
+        var result = await conn.QueryAsync<dynamic>(
             @"
                 SELECT
                     P.player_code AS PlayerCode,
