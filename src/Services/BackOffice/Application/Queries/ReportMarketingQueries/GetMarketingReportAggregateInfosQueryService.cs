@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,9 +109,16 @@ internal class GetMarketingReportAggregateInfosQueryService
         }
 
         var paging = new Paging<MarketingReportModel>();
+        var propertyMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["reportDate"] = nameof(MarketingReportModel.ReportDate),
+            ["registerCount"] = nameof(MarketingReportModel.RegisterCount),
+            ["firstDepositCount"] = nameof(MarketingReportModel.FirstDepositCount),
+            ["gamingCount"] = nameof(MarketingReportModel.GamingCount)
+        };
 
         if (!string.IsNullOrWhiteSpace(query.Paging.SortBy))
-            paging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
+            paging.SortByPropertyName(propertyMapping[query.Paging.SortBy], query.Paging.IsDesc);
 
         paging.Page = query.Paging.Page;
         paging.RowCount = query.Paging.Rows;
