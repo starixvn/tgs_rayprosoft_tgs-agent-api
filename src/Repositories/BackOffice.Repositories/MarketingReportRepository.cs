@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories;
-internal class MarketingReportRepository
+
+internal class MarketingReportRepository : IMarketingReportRepository
 {
     private readonly ITgsRepository _tgsRepository;
 
@@ -19,7 +18,7 @@ internal class MarketingReportRepository
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
     }
 
-    public async IAsyncEnumerable<object> QueryRealTimePlayerDailyDepositStatisticsAsync(
+    public async IAsyncEnumerable<PlayerDailyRegisterItem> QueryRealTimePlayerDailyRegisterStatisticsAsync(
         Guid brandId,
         DateOnly queryDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -88,6 +87,73 @@ internal class MarketingReportRepository
                 BrandId = brandId
             }).ConfigureAwait(false);
 
+        foreach (var row in result
+            .Select(row => new PlayerDailyRegisterItem(
+                row.PlayerCode,
+                row.UserName,
+                row.AgentId,
+                row.RegisteredOn,
+                row.LastLoginOn,
+                row.LoginCount)))
+            yield return row;
+    }
 
+    public async IAsyncEnumerable<PlayerDailyGamingItem> QueryRealTimePlayerDailyGamingStatisticsAsync(
+        Guid brandId,
+        DateOnly queryDate,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var reportDateTime = new DateTimeOffset(
+            queryDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified),
+            TimeSpan.FromHours(8D));
+
+        var conn = _tgsRepository.GetDbConnection();
+
+        var result = await conn.QueryAsync<RealTimePlayerGamingItem>(
+            @"
+                SELECT
+                    PGA.player_code AS PlayerCode,
+                    P.username AS PlayerName,
+                    PGA.agent_id AS AgentId,
+                    GP.code AS GpCode,
+                    G.sub_game_provider_code AS SubGpCode,
+                    Sum(PGA.win_loss) AS WinLossSummary
+                FROM
+                    report.player_game_rebate_aggregates AS PGA
+                    JOIN
+                    dbo.game_providers AS GP ON PGA.game_provider_id = GP.id
+                    JOIN
+                    dbo.games AS G ON PGA.game_provider_id = G.game_provider_id
+                        AND PGA.game_id = G.id
+                    JOIN
+                    dbo.players AS P ON PGA.player_code = P.player_code
+                WHERE
+                    PGA.brand_id = @BrandId
+                    AND
+                    PGA.report_date = @ReportDateTime
+                    AND
+                    P.agent_id IS NOT NULL
+                GROUP BY
+                    PGA.agent_id,
+                    PGA.player_code,
+                    P.username,
+                    GP.code,
+                    G.sub_game_provider_code,
+                    PGA.game_id",
+            new
+            {
+                BrandId = brandId,
+                ReportDateTime = reportDateTime
+            }).ConfigureAwait(false);
+
+        foreach (var row in result
+            .Select(row => new PlayerDailyGamingItem(
+                row.PlayerCode,
+                row.PlayerName,
+                row.AgentId,
+                row.GpCode,
+                row.SubGpCode,
+                row.WinLossSummary)))
+            yield return row;
     }
 }
