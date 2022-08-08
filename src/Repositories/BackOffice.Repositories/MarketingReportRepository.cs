@@ -92,9 +92,9 @@ internal class MarketingReportRepository : IMarketingReportRepository
                 row.PlayerCode,
                 row.UserName,
                 row.AgentId,
-                row.RegisteredOn,
-                row.LastLoginOn,
-                (int?)row.LoginCount)))
+                row.RegisteredOn.UtcDateTime,
+                row.LastLoginOn?.UtcDateTime,
+                row.LoginCount)))
             yield return row;
     }
 
