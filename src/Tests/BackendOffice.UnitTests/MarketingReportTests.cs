@@ -68,6 +68,52 @@ internal class MarketingReportTests
     }
 
     [Test]
+    public async Task Get_MarketingReport_By_Brand_Sort_PropertyName()
+    {
+        var fakeReportClient = Substitute.For<IMarketingReportClient>();
+        var fakeAgentPlayerDepositQueryService = Substitute.For<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>>();
+        var fakeAgentQueryService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
+
+        var paging = new PageableRequest
+        {
+            Page = 1,
+            Rows = 10,
+            SortBy = "reportDate",
+            ShowAll = false
+        };
+
+        var query = new GetMarketingReportAggregateInfosQuery(
+            Guid.NewGuid(),
+            DateOnly.Parse("2022-06-01"),
+            DateOnly.Parse("2022-06-10"),
+            paging);
+
+        _ = fakeAgentQueryService
+            .QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
+            .Returns(new[] {
+                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
+            }.ToAsyncEnumerable());
+
+        var sut = new GetMarketingReportAggregateInfosQueryService(
+            fakeAgentPlayerDepositQueryService,
+            fakeAgentQueryService,
+            fakeReportClient);
+
+        _ = await sut.GetAsync(query).ConfigureAwait(false);
+
+        _ = fakeAgentPlayerDepositQueryService
+            .Received(1)
+            .QueryAsync(Arg.Is(new AgentPlayerDepositQuery(query.BrandId)));
+
+        _ = fakeReportClient
+            .Received(1)
+            .GetDailyAggregateInfosAsync(
+                Arg.Is(query.BrandId),
+                Arg.Is(query.StartDate),
+                Arg.Is(query.EndDate));
+    }
+
+    [Test]
     public async Task Can_Get_Marketing_Report_By_Brand()
     {
         var fakeReportClient = Substitute.For<IMarketingReportClient>();
@@ -87,7 +133,8 @@ internal class MarketingReportTests
             DateOnly.Parse("2022-06-10"),
             paging);
 
-        fakeAgentQueryService.QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
+        _ = fakeAgentQueryService
+            .QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
             .Returns(new[] {
                 new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
             }.ToAsyncEnumerable());
