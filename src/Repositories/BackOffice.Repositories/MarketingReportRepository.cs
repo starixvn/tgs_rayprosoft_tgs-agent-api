@@ -73,13 +73,13 @@ internal class MarketingReportRepository : IMarketingReportRepository
                             P1.player_code
                     ) AS PLRC ON P.player_code = PLRC.player_code
                 WHERE
-                    brand_id = @BrandId
+                    P.brand_id = @BrandId
                     AND
-                    agent_id IS NOT NULL
+                    P.agent_id IS NOT NULL
                     AND
-                    registered_on >= @Begin
+                    P.registered_on >= @Begin
                     AND
-                    registered_on < @End",
+                    P.registered_on < @End",
             new
             {
                 BrandId = brandId,
