@@ -90,9 +90,7 @@ public class MarketingReportController : BaseContextController
     [HttpGet("registerDetail")]
     [Description("Get register details report")]
     public async Task<PagedResponse<MarketingRegisterDetailReportModel>> GetMarketingRegisterDetailsAsync(
-        [FromServices]
-        IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>>
-            marketsService,
+        [FromServices] IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>> marketsService,
         [FromQuery] GetMarketingRegisterDetailReportRequest request)
         => await marketsService
             .GetAsync(request)

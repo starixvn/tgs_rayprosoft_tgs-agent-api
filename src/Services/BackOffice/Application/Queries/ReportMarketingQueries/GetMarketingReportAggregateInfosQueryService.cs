@@ -21,15 +21,21 @@ internal class GetMarketingReportAggregateInfosQueryService
 
     private readonly IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> _agentPlayerDepositQueryService;
     private readonly IQueryService<AllAgentsByBrandQuery, AgentInfo> _agentQueryService;
+    private readonly IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> _playerPaymentDetailQueryService;
+    private readonly IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem> _playerRegisterDetailQueryService;
     private readonly IMarketingReportClient _reportClient;
 
     public GetMarketingReportAggregateInfosQueryService(
         IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> agentPlayerDepositQueryService,
         IQueryService<AllAgentsByBrandQuery, AgentInfo> agentQueryService,
+        IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> playerPaymentDetailQueryService,
+        IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem> playerRegisterDetailQueryService,
         IMarketingReportClient reportClient)
     {
         _agentPlayerDepositQueryService = agentPlayerDepositQueryService ?? throw new ArgumentNullException(nameof(agentPlayerDepositQueryService));
         _agentQueryService = agentQueryService ?? throw new ArgumentNullException(nameof(agentQueryService));
+        _playerPaymentDetailQueryService = playerPaymentDetailQueryService ?? throw new ArgumentNullException(nameof(playerPaymentDetailQueryService));
+        _playerRegisterDetailQueryService = playerRegisterDetailQueryService ?? throw new ArgumentNullException(nameof(playerRegisterDetailQueryService));
         _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
     }
 
@@ -94,14 +100,50 @@ internal class GetMarketingReportAggregateInfosQueryService
             var currentReportDate = new DateTimeOffset(
                 currentDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified),
                 _Offset);
+
+            var currentDatePaymentQuery = new PlayerPaymentStatisticsDetailQuery(
+                query.BrandId,
+                currentDate);
+            var currentDatePaymentDetailQuery = await _playerPaymentDetailQueryService
+                .QueryAsync(currentDatePaymentQuery, cancellationToken)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(async g => new
+                {
+                    AgentId = g.Key,
+                    FirstDepositPlayers = await g.CountAsync(
+                            item => item.IsFirstDeposit == true,
+                            cancellationToken)
+                            .ConfigureAwait(false)
+                })
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            var currentDateRegisterDetailQuery = await _playerRegisterDetailQueryService
+                .QueryAsync(new GetDailyMarketingRegisterDetailQuery(query.BrandId, currentDate), cancellationToken)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(async g => new
+                {
+                    AgentId = g.Key,
+                    RegisteredPlayers = await g.CountAsync(cancellationToken)
+                        .ConfigureAwait(false)
+                })
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             var currentDateQuery = from p in agentNameDict
+                                   join playerPayment in currentDatePaymentDetailQuery
+                                    on p.Key equals playerPayment.AgentId into pg
+                                   from playerPayment in pg.DefaultIfEmpty()
+                                   join playerRegister in currentDateRegisterDetailQuery
+                                    on p.Key equals playerRegister.AgentId into prg
+                                   from playerRegister in prg.DefaultIfEmpty()
                                    select new MarketingReportModel
                                    {
                                        ReportDate = currentReportDate,
                                        AgentId = p.Key,
                                        AgentUsername = p.Value,
-                                       RegisterCount = 0,
-                                       FirstDepositCount = 0,
+                                       RegisterCount = playerRegister?.RegisteredPlayers ?? 0,
+                                       FirstDepositCount = playerPayment?.FirstDepositPlayers ?? 0,
                                        GamingCount = 0
                                    };
 
