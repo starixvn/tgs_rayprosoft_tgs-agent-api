@@ -82,9 +82,9 @@ internal class MarketingReportRepository : IMarketingReportRepository
                     registered_on < @End",
             new
             {
+                BrandId = brandId,
                 Begin = queryTimeRange.From,
-                End = queryTimeRange.To,
-                BrandId = brandId
+                End = queryTimeRange.To
             }).ConfigureAwait(false);
 
         foreach (var row in result
