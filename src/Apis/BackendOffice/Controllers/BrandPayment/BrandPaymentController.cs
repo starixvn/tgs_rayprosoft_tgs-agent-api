@@ -205,7 +205,7 @@ public partial class BrandPaymentController : BaseContextController
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
                     ChannelCode = bp.ChannelCode,
-                    TransferLimit = new Models.ValueRange<decimal>
+                    TransferLimit = new ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
