@@ -92,7 +92,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
                 row.PlayerCode,
                 row.UserName,
                 row.AgentId,
-                row.RegisteredOn ?? DateTime.MinValue,
+                row.RegisteredOn,
                 row.LastLoginOn,
                 row.LoginCount)))
             yield return row;
