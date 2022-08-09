@@ -29,7 +29,7 @@ public class ManualDepositController : BaseContextController
             .GetAsync(new(request.BrandPaymentId), HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+        var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData!);
 
         var command = new CreateDepositFormCommand(
             request.PlayerCode,

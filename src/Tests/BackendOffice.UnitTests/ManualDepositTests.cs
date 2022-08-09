@@ -55,13 +55,13 @@ public class ManualDepositTests
                 It.Is<decimal>(x => x == command.Amount),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
+            .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())!));
 
         moqPaymentServiceClient
             .Setup(fake => fake.GetBrandPaymentByIdAsync(
                 It.Is<Guid>(x => x == command.BrandPaymentId),
                 It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new BrandPaymentInfo
+            .Returns(ValueTask.FromResult<BrandPaymentInfo?>(new BrandPaymentInfo
             {
                 Id = command.BrandPaymentId,
                 PaymentId = paymentId
@@ -71,7 +71,7 @@ public class ManualDepositTests
             .Setup(fake => fake.GetPaymentByIdAsync(
                 It.Is<Guid>(x => x == paymentId),
                 It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new PaymentInfo
+            .Returns(ValueTask.FromResult<PaymentInfo?>(new PaymentInfo
             {
                 Id = paymentId,
                 Code = "Test"
@@ -205,7 +205,7 @@ public class ManualDepositTests
             .Setup(fake => fake.GetBrandPaymentByIdAsync(
                 It.Is<Guid>(x => x == command.BrandPaymentId),
                 It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new BrandPaymentInfo
+            .Returns(ValueTask.FromResult<BrandPaymentInfo?>(new BrandPaymentInfo
             {
                 Id = command.BrandPaymentId,
                 PaymentId = paymentId
@@ -215,7 +215,7 @@ public class ManualDepositTests
             .Setup(fake => fake.GetPaymentByIdAsync(
                 It.Is<Guid>(x => x == paymentId),
                 It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult(new PaymentInfo
+            .Returns(ValueTask.FromResult<PaymentInfo?>(new PaymentInfo
             {
                 Id = paymentId,
                 Code = "Test"
