@@ -7,4 +7,4 @@ internal record RealTimePlayerRegisterItem(
     Guid AgentId,
     DateTime RegisteredOn,
     DateTime LastLoginOn,
-    int LoginCount);
+    long LoginCount);
