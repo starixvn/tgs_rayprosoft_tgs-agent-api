@@ -94,7 +94,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
                 row.AgentId,
                 row.RegisteredOn,
                 row.LastLoginOn,
-                row.LoginCount)))
+                (int)row.LoginCount)))
             yield return row;
     }
 
