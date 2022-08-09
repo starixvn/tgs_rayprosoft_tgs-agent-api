@@ -5,6 +5,6 @@ internal record RealTimePlayerRegisterItem(
     string PlayerCode,
     string UserName,
     Guid AgentId,
-    DateTime? RegisteredOn,
+    DateTime RegisteredOn,
     DateTime? LastLoginOn,
-    int? LoginCount);
+    int LoginCount);
