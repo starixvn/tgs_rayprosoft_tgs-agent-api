@@ -157,7 +157,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
         DateOnly queryDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var (From, To) = (queryDate.AddDays(-1), queryDate);
+        var (From, To) = (queryDate, queryDate.AddDays(1));
         var queryTimeRange = (
             From: new DateTimeOffset(
                 From

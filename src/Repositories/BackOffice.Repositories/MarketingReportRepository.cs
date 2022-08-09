@@ -38,7 +38,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
 
         var conn = _tgsRepository.GetDbConnection();
 
-        var result = await conn.QueryAsync<RealTimePlayerRegisterItem>(
+        var result = await conn.QueryAsync<dynamic>(
             @"
                 SELECT
                     P.player_code AS PlayerCode,
@@ -94,7 +94,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
                 row.AgentId,
                 row.RegisteredOn,
                 row.LastLoginOn,
-                (int)row.LoginCount)))
+                row.LoginCount)))
             yield return row;
     }
 
@@ -109,7 +109,7 @@ internal class MarketingReportRepository : IMarketingReportRepository
 
         var conn = _tgsRepository.GetDbConnection();
 
-        var result = await conn.QueryAsync<RealTimePlayerGamingItem>(
+        var result = await conn.QueryAsync<dynamic>(
             @"
                 SELECT
                     PGA.player_code AS PlayerCode,

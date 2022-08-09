@@ -192,7 +192,6 @@ public class Startup
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                options.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.UseDateOnlyTimeOnlyStringConverters();
             });
