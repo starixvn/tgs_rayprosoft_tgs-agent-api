@@ -142,6 +142,9 @@ public class PlayerDepositReportController : BaseContextController
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
+        var dateArray = Enumerable.Range(0, dateRange.To.DayNumber - dateRange.From.DayNumber)
+            .Select(n => dateRange.From.AddDays(n));
+
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
             if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
@@ -153,7 +156,20 @@ public class PlayerDepositReportController : BaseContextController
                 };
 
             dataQuery = dataQuery.Where(a => a.AgentId == agentId);
+
+            dataQuery = from date in dateArray.ToAsyncEnumerable()
+                        join statistics in dataQuery on date equals statistics.ReportDate into g
+                        from statistics in g.DefaultIfEmpty()
+                        select statistics ?? new AgentPlayerDepositStatistics(date, agentId, 0, 0, 0);
         }
+        else
+            dataQuery = from date in dateArray.ToAsyncEnumerable()
+                        from p in agentDict.ToAsyncEnumerable()
+                        join statistics in dataQuery
+                            on new { ReportDate = date, AgentId = p.Value } equals new { statistics.ReportDate, statistics.AgentId }
+                            into g
+                        from statistics in g.DefaultIfEmpty()
+                        select statistics ?? new AgentPlayerDepositStatistics(date, p.Value, 0, 0, 0);
 
         var paging = new Paging<AgentPlayerDepositStatistics>();
 
