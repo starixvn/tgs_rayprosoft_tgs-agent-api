@@ -45,8 +45,8 @@ public class ManualDepositController : BaseContextController
                     SendBankAccount = request.BankAccount,
                     SendBankName = request.BankName,
                     SendNote = request.Note,
-                    ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                    ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
+                    ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString()!,
+                    ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()!
                 }));
 
         return await createDepositFormService
