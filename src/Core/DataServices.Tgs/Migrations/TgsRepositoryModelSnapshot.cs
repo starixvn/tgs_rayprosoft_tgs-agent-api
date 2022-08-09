@@ -5447,12 +5447,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("player_code");
 
                     b.Property<string>("GpCode")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("gp_code");
 
                     b.Property<string>("SubGpCode")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("sub_gp_code");
 
@@ -5460,7 +5458,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("win_loss");
 
-                    b.HasKey("ReportDate", "PlayerCode")
+                    b.HasKey("ReportDate", "PlayerCode", "GpCode", "SubGpCode")
                         .HasName("pk_player_daily_gaming_statistics");
 
                     b.ToTable("player_daily_gaming_statistics", "dbo");

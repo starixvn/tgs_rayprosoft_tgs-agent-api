@@ -10,13 +10,9 @@ internal class PlayerDailyGamingStatisticsMap : IEntityTypeConfiguration<PlayerD
     {
         builder.ToTable("player_daily_gaming_statistics");
 
-        builder.HasKey(pgs => new { pgs.ReportDate, pgs.PlayerCode })
+        builder.HasKey(pgs => new { pgs.ReportDate, pgs.PlayerCode, pgs.GpCode, pgs.SubGpCode })
             .HasName("pk_player_daily_gaming_statistics");
 
-        builder.Property(pgs => pgs.GpCode)
-            .IsRequired();
-        builder.Property(pgs => pgs.SubGpCode)
-            .IsRequired();
         builder.Property(pgs => pgs.WinLoss)
             .IsRequired();
     }
