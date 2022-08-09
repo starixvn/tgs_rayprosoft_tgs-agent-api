@@ -28,6 +28,41 @@ public class WithdrawController : BaseContextController
         Guid brandId)
         => countService.GetAsync(new CountUntreatedWithdrawFormsQuery(brandId));
 
+    [HttpPost("player", Name = "CreatePlayerWithdrawRequest")]
+    public async Task<Guid> CreatePlayerWithdrawRequestAsync(
+        [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
+        [FromServices] IGetService<CreateWithdrawFormCommand, bool> checkCanCreateService,
+        [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
+        [FromBody] CreateWithdrawRequest request)
+    {
+        var checkCommand = new CheckPlayerIdentityCommand(request.BrandId, request.PlayerCode);
+
+        var playerCanWithdraw = await checkService
+            .GetAsync(checkCommand, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (playerCanWithdraw is false)
+            throw new Exception("Player Can Not Withdraw");
+
+        var command = new CreateWithdrawFormCommand(
+            request.PlayerCode,
+            request.BrandId,
+            request.BankInfoId,
+            request.Amount,
+            request.Note);
+
+        if (!await checkCanCreateService
+                .GetAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false))
+            throw new Exception("Player Can Not Withdraw");
+
+        await createFormService
+            .ExecuteAsync(command, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+    }
+
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
     [HttpGet("exportWithdraw/{brandId}")]

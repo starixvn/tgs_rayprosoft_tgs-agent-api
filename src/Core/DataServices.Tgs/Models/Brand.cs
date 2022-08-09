@@ -40,6 +40,8 @@ public class Brand : BaseEntity<Guid>
 
     public decimal DepositHandlingFeeRateTenPercentile { get; set; }
 
+    public bool DepositPaymentLockEnabled { get; set; }
+
     public string Description { get; set; }
 
     public virtual ICollection<BrandDomain> Domains { get; set; }

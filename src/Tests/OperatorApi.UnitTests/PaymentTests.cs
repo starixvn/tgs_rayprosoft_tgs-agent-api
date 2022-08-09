@@ -8,7 +8,6 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.BrandPayments;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
@@ -117,10 +116,32 @@ public class PaymentTests
             .GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>())
             .Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
 
+        var playerInfo = new Tgs.PlayerService.Client.PlayerInfo
+        {
+            BrandId = brandId,
+            PlayerCode = playerCode,
+            IdentityAuthentication = false,
+            PhoneAuthentication = false,
+            VipLevelId = null
+        };
+
+        fakePlayerServiceClient
+            .GetPlayerInfoAsync(query.PlayerCode)
+            .Returns(playerInfo);
+
         _ = await sut.QueryAsync(query).ToArrayAsync();
 
         fakePaymentServiceClient
             .Received(1)
             .GetBrandPaymentAclsAsync(Arg.Any<string>(), Arg.Any<IEnumerable<Guid>>());
+
+        fakePaymentServiceClient
+            .Received(1)
+            .FilterBrandPaymentsAsync(
+                Arg.Any<IEnumerable<BrandPaymentInfo>>(),
+                Arg.Any<Tgs.Payment.Clients.PlayerInfo>(),
+                Arg.Any<IEnumerable<Guid>>(),
+                Arg.Any<IEnumerable<Guid>>(),
+                Arg.Any<ILookup<Guid, Guid>>());
     }
 }

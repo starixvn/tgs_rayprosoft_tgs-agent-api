@@ -24,5 +24,6 @@ public enum RedisCacheType
     BrandDefaultBetLimit,
     BrandApiKeys,
     Announcements,
-    GameProviderIdAndConfigurationIdByCredentials
+    GameProviderIdAndConfigurationIdByCredentials,
+    BrandMaintenance
 }

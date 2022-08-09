@@ -45,8 +45,15 @@ FROM
 					FROM DBO.TRANSACTIONS
 					WHERE RECORDED_ON >= _from
 									AND RECORDED_ON < _to
-									AND ((_transaction_type IS NULL
-														OR "type" = _transaction_type) AND _game_action_type IS NULL)
+									AND (
+											(case 
+											 when _transaction_type = 0 then ("type" in (0, 1100))
+											 when _transaction_type = 1 then ("type" in (1, 2100))
+											 when _transaction_type = 9 then ("type" in (9,2300))
+											 when _transaction_type IS null then "type" != 2200
+											 else
+											 "type" = _transaction_type
+									         end) AND _game_action_type IS null)
 									AND PLAYER_CODE = _player_code
 					UNION ALL SELECT NULL AS TRANSACTION_ID,
 						ID AS GAME_ACTION_ID,

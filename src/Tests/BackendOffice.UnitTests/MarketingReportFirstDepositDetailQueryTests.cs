@@ -4,6 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
@@ -17,8 +18,7 @@ internal class MarketingReportFirstDepositDetailQueryTests
     {
         var fakeQueryService =
             Substitute.For<IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem>>();
-
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeAgentQueryService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
 
         var paging = new PageableRequest
         {
@@ -33,15 +33,12 @@ internal class MarketingReportFirstDepositDetailQueryTests
             "Agent123",
             paging);
 
+
         var sut = new GetMarketingFirstDepositDetailQueryService(
             fakeQueryService,
-            fakeAgentRepository);
+            fakeAgentQueryService);
 
         _ = await sut.GetAsync(query).ConfigureAwait(false);
-
-        _ = fakeAgentRepository
-            .Received(1)
-            .GetAgentAsync(Arg.Is(query.BrandId), Arg.Is(query.AgentUsername));
 
         _ = fakeQueryService
             .Received(1)

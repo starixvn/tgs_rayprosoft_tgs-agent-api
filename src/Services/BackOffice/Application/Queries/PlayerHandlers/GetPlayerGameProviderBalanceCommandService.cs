@@ -8,6 +8,7 @@ using Tgs.GameProviders.Pluggable.Client;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using Tgs.ServiceUtility;
+using System.Runtime.CompilerServices;
 
 namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
 
@@ -34,7 +35,7 @@ internal class GetPlayerGameProviderBalanceCommandService : IQueryService<GetPla
 
     public async IAsyncEnumerable<GetPlayerGameProviderBalanceResponse> QueryAsync(
         GetPlayerGameProviderBalanceCommand query,
-        CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var gameProviderBalances = new List<GetPlayerGameProviderBalanceResponse>();
         var player = await _playerService.GetPlayerAsync(p => p.PlayerCode == query.PlayerCode);

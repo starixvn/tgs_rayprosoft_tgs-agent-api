@@ -13,6 +13,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent.ApplicationServices.BrandPayments;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
 using TGS.Services.Agent.Exceptions;
+using BrandPaymentResponse = TGS.Apis.AgentApi.Models.Messages.BrandPaymentResponse;
 
 namespace TGS.Apis.AgentApi.Controllers;
 

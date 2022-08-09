@@ -55,15 +55,16 @@ public class MarketingReportController : BaseContextController
         var start = DateOnly.FromDateTime(request.From.ToOffset(TimeSpan.FromHours(8D)).DateTime);
         var end = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8D)).DateTime);
         var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+        var tomorrow = today.AddDays(1);
 
-        if (start > today)
+        if (start > tomorrow)
             return new MarketingReportResponse
             {
                 Items = Array.Empty<MarketingReportModel>(),
                 Total = new MarketingReportTotalModel()
             };
 
-        end = end > today ? today : end;
+        end = end > tomorrow ? tomorrow : end;
 
         if (string.IsNullOrEmpty(request.AgentUsername))
         {
@@ -89,9 +90,7 @@ public class MarketingReportController : BaseContextController
     [HttpGet("registerDetail")]
     [Description("Get register details report")]
     public async Task<PagedResponse<MarketingRegisterDetailReportModel>> GetMarketingRegisterDetailsAsync(
-        [FromServices]
-        IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>>
-            marketsService,
+        [FromServices] IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>> marketsService,
         [FromQuery] GetMarketingRegisterDetailReportRequest request)
         => await marketsService
             .GetAsync(request)

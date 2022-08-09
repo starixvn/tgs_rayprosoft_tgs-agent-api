@@ -13,17 +13,19 @@ internal class BrandMaintenanceMap : IEntityTypeConfiguration<BrandMaintenance>
         builder.HasKey(bm => bm.Id);
 
         builder.HasOne(bm => bm.Brand)
-            .WithMany()
-            .HasForeignKey(bm => bm.BrandId)
-            .HasConstraintName("fk_brand_maintenance_brands_brand_id");
+           .WithOne()
+           .HasForeignKey<BrandMaintenance>(bm => bm.BrandId)
+           .HasConstraintName("fk_brand_maintenance_brands_brand_id");
 
-        builder.Property(bm => bm.Content)
+        builder.Property(bm => bm.Content)            
             .HasMaxLength(2000);
 
         builder.Property(bm => bm.BeginTime)
+            .HasColumnType("time without time zone")
             .IsRequired();
 
         builder.Property(bm => bm.EndTime)
+            .HasColumnType("time without time zone")
             .IsRequired();
     }
 }

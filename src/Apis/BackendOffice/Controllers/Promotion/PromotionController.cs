@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
@@ -192,6 +194,29 @@ public class PromotionController : BaseContextController
                 Number = x.Number
             }).ToArray()
         };
+    }
+
+    [HttpGet("player", Name = "ListPlayerPromotions")]
+    public IAsyncEnumerable<PromotionViewModel> ListPlayerPromotionsAsync(
+        [FromServices] IPromotionServiceClient promotionServiceClient,
+        [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+        [FromQuery] ListPlayerPromotionsRequest request)
+    {
+        var allowPlayerSelectPromotionTypes = new string[] {
+            "FirstDeposit",
+            "DailySecondDeposit",
+            "DailyFirstDeposit"
+        };
+
+        return promotionServiceClient
+                .ListPromotionsAsync(request.BrandId, request.PlayerCode, HttpContext.RequestAborted)
+                .Where(promotion => allowPlayerSelectPromotionTypes.Contains(promotion.PromotionType))
+                .Select(promotion => new PromotionViewModel
+                {
+                    Id = promotion.Id,
+                    Name = promotion.Name,                    
+                    Localization = promotion.Localization                    
+                });
     }
 
     [HttpPut("{promotionId}", Name = "UpdatePromotion")]
