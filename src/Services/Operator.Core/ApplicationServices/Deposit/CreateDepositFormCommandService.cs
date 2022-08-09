@@ -10,8 +10,8 @@ namespace TGS.Services.Operator.ApplicationServices.Deposit;
 
 internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCommand, Guid>
 {
-    private readonly IPaymentClient _paymentClient;
     private readonly IBrandServiceClient _brandServiceClient;
+    private readonly IPaymentClient _paymentClient;
     private readonly IPaymentServiceClient _paymentServiceClient;
     private readonly IPromotionClient _promotionClient;
 
@@ -63,7 +63,7 @@ internal class CreateDepositFormCommandService : IGetService<CreateDepositFormCo
             .ConfigureAwait(false);
 
         if (brandPaymentSettings is not null && brandPaymentSettings.PaymentDepositLockEnabled && mutexId != createFormId)
-            throw new Exception("Has other deposit processing");
+            throw new PreviousDepositStillProcessingException();
 
         try
         {
