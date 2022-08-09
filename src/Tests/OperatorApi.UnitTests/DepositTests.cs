@@ -304,7 +304,7 @@ public class DepositTests
             Arg.Is(command.BrandId))
             .Returns(new BrandPaymentSettings(true));
 
-        Assert.ThrowsAsync<Exception>(async () => await sut.GetAsync(command));
+        Assert.ThrowsAsync<PreviousDepositStillProcessingException>(async () => await sut.GetAsync(command));
     }
 
     [Test]
