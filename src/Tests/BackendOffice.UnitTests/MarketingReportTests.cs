@@ -263,4 +263,10 @@ internal class MarketingReportTests
         _ = fakeMarketingReportRepository.Received(1)
             .QueryRealTimePlayerDailyRegisterStatisticsAsync(Arg.Is(query.BrandId), Arg.Is(query.QueryDate));
     }
+
+    [Test]
+    public void Get_RealTime_Gaming_Detail()
+    {
+        var sut = new GetDailyMarketingGamingDetailQueryService();
+    }
 }
