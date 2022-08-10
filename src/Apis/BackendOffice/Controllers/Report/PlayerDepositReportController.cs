@@ -40,8 +40,7 @@ public class PlayerDepositReportController : BaseContextController
         var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
-                && item.IsFirstDeposit is not null
-                && item.UnSecondDeposit is null)
+                && item.IsFirstDeposit is not null)
             .ToArrayAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
@@ -118,7 +117,7 @@ public class PlayerDepositReportController : BaseContextController
                             seed.FirstDepositPlayers++;
                         if (item.UnSecondDeposit == true)
                             seed.UndepositAgainPlayers++;
-                        if (item.IsFirstDeposit is not null && item.UnSecondDeposit != true)
+                        if (item.IsFirstDeposit is not null)
                             seed.DepositPlayers++;
 
                         return seed;
