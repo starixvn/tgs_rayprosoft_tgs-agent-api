@@ -337,7 +337,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
             row.PlayerCode,
             row.UserName,
             row.AgentId,
-            row.IsCurrentDeposit
+            row.IsCurrentDeposit == true
                 ? row.FirstDepositOn >= queryTimeRange.From && row.FirstDepositOn < queryTimeRange.To
                 : null,
             row.IsUndepositAgain,
