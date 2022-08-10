@@ -35,7 +35,7 @@ public class
             Rows = request.Rows,
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
-            ShowAll = true
+            ShowAll = request.ShowAll
         };
 
         var response = await _reportClient.GetVipReportAsync(reportRequest);
@@ -69,32 +69,36 @@ public class
             Turnover = x.Turnover,
             WinLossAmount = x.WinLossAmount,
             NetProfit = x.NetProfit
-        }).AsQueryable().CreatePagedResponse(new PageableRequest
-        {
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = request.OrderBy,
-            SortBy = request.SortBy
         });
 
+        var totalRequest = new GetVipReportTotalAmountRequest {
+            BrandId = request.BrandId,
+            Username = request.Username,
+            Level = request.Level,
+            From = request.From,
+            To = request.To
+        };
+
+        var totalResponse = await _reportClient.GetVipReportTotalAmountAsync(totalRequest);
+
         var total = new VipReportTotalModel(
-            response.Items.Sum(x => x.DepositAmount),
-            response.Items.Sum(x => x.WithdrawalAmount),
-            response.Items.Sum(x => x.CompanyAdjustAmount),
-            response.Items.Sum(x => x.BonusAdjustAmount),
-            response.Items.Sum(x => x.RebateAmount),
-            response.Items.Sum(x => x.BonusAmount),
-            response.Items.Sum(x => x.BetAmount),
-            response.Items.Sum(x => x.ValidBetAmount),
-            response.Items.Sum(x => x.Turnover),
-            response.Items.Sum(x => x.WinLossAmount),
-            response.Items.Sum(x => x.NetProfit)
+            totalResponse.DepositAmount,
+            totalResponse.WithdrawalAmount,
+            totalResponse.CompanyAdjustAmount,
+            totalResponse.BonusAdjustAmount,
+            totalResponse.RebateAmount,
+            totalResponse.BonusAmount,
+            totalResponse.BetAmount,
+            totalResponse.ValidBetAmount,
+            totalResponse.Turnover,
+            totalResponse.WinLossAmount,
+            totalResponse.NetProfit
         );
 
         return new GetVipReportReportResponse
         {
             TotalCount = response.TotalCount,
-            Items = pageArray.Items,
+            Items = pageArray.ToArray(),
             Total = total
         };
     }
