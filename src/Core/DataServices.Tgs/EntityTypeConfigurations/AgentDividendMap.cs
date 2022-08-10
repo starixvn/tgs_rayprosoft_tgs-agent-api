@@ -139,18 +139,6 @@ internal class AgentDividendMap : IEntityTypeConfiguration<AgentDividend>
             .HasPrecision(18, 6)
             .IsRequired();
 
-        builder.Property(b => b.UpgradeAmount)
-            .HasPrecision(18, 6)
-            .IsRequired();
-
-        builder.Property(b => b.SeasonAmount)
-            .HasPrecision(18, 6)
-            .IsRequired();
-
-        builder.Property(b => b.BirthdayAmount)
-            .HasPrecision(18, 6)
-            .IsRequired();
-
         builder.Property(b => b.From)
             .IsRequired();
 

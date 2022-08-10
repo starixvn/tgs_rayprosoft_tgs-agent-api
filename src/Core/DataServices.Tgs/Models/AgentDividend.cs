@@ -80,12 +80,6 @@ public class AgentDividend
 
     public decimal NoIncludeNetProfitBonusAdjustAmount { get; set; }
 
-    public decimal UpgradeAmount { get; set; }
-
-    public decimal SeasonAmount { get; set; }
-
-    public decimal BirthdayAmount { get; set; }
-
     public DateTimeOffset? SentOn { get; set; }
 
     public DateTimeOffset CreatedOn { get; set; }
