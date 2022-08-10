@@ -13,5 +13,5 @@ internal record RealTimePlayerPaymentItem(
     decimal TotalDepositAmount,
     decimal TotalWithdrawAmount,
     bool IsUndepositAgain,
-    bool IsCurrentDeposit,
+    bool? IsCurrentDeposit,
     string? RegisterIp);
