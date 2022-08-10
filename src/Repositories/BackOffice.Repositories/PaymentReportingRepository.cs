@@ -305,8 +305,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                     COALESCE(HS.first_deposit_amount, MS.daily_first_deposit_amount) AS FirstDepositAmount,
                     COALESCE(MS.deposit_amount, 0) + COALESCE(HS.total_deposit_amount, 0) AS TotalDepositAmount,
                     COALESCE(MS.withdraw_amount, 0) + COALESCE(HS.total_withdraw_amount, 0) AS TotalWithdrawAmount,
-                    CASE UAS.player_code
-                        WHEN NULL THEN false
+                    CASE
+                        WHEN UAS.player_code IS NULL THEN false
                         ELSE TRUE
                     END AS IsUndepositAgain,
                     MS.is_current_deposit AS IsCurrentDeposit,
