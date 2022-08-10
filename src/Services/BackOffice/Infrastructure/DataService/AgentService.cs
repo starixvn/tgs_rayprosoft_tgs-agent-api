@@ -174,6 +174,13 @@ public class AgentService : BaseRepositoryOperations<ITgsRepository>, IAgentServ
 
                 await DeleteEntitiesAsync(agent.AgentDividendConditions);
 
+                agent.Path =
+                    operation == AgentOperation.Agent &&
+                    request.ParentUsername.IsNotNullOrEmpty() &&
+                    agent.ParentAgentId != parentAgent?.Id
+                        ? new LTree($"{parentAgent!.Path}.{agent.Id:N}")
+                        : agent.Path;
+
                 agent.RealName = request.RealName;
                 agent.ParentAgentId = parentAgent?.Id;
                 agent.Status = request.Status;

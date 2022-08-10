@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TGS.Apis.BackendOffice.Workers;
 
 namespace TGS.Apis.BackendOffice;
 
@@ -35,6 +37,19 @@ public class Program
         .ConfigureWebHostDefaults(webBuilder =>
         {
             webBuilder.UseStartup<Startup>();
+        })
+        .ConfigureServices((context, services) =>
+        {
+            services.AddHostedService<StationLetterBackground>();
+            services.AddSingleton<IStationLetterTaskQueue>(_ =>
+            {
+                if (!int.TryParse(context.Configuration["QueueCapacity"], out var queueCapacity))
+                {
+                    queueCapacity = 100;
+                }
+
+                return new StationLetterTaskQueue(queueCapacity);
+            });
         });
 
     public static async Task Main(string[] args)
