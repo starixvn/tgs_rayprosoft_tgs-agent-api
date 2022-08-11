@@ -159,4 +159,16 @@
   <data name="PhoneRequired" xml:space="preserve">
     <value>Phone is required.</value>
   </data>
+  <data name="PlayerNotFoundOrIdentityAuthFailed" xml:space="preserve">
+    <value>Player is not found or player identity is not verify.</value>
+  </data>
+  <data name="InsufficientBucket" xml:space="preserve">
+    <value>Insufficient Bucket.</value>
+  </data>
+  <data name="InsufficientFunds" xml:space="preserve">
+    <value>Wallet amount is insufficient.</value>
+  </data>
+  <data name="WithdrawAmountOrBrandPaymentIsWrong" xml:space="preserve">
+    <value>Withdraw amount less than zero or equal to zero or No Brand Payment.</value>
+  </data>
 </root>
