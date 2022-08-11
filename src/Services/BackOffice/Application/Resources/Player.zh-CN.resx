@@ -144,4 +144,16 @@
   <data name="PhoneRequired" xml:space="preserve">
     <value>手机号码为必填</value>
   </data>
+  <data name="PlayerNotFoundOrIdentityAuthFailed" xml:space="preserve">
+    <value>玩家不存在或玩家身分證審核未通過</value>
+  </data>
+  <data name="InsufficientBucket" xml:space="preserve">
+    <value>需滿足提款金額不為0</value>
+  </data>
+  <data name="InsufficientFunds" xml:space="preserve">
+    <value>錢包餘額不足</value>
+  </data>
+  <data name="WithdrawAmountOrBrandPaymentIsWrong" xml:space="preserve">
+    <value>提款金額小於等於零或未找到支付金流</value>
+  </data>
 </root>
