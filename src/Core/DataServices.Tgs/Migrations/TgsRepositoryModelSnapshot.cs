@@ -5534,7 +5534,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("daily_login_count");
 
-                    b.Property<DateTime>("LastLoginOn")
+                    b.Property<DateTime?>("LastLoginOn")
                         .HasColumnType("timestamptz")
                         .HasColumnName("last_login_on");
 
