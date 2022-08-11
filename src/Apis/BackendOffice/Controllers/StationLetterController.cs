@@ -140,7 +140,6 @@ public class StationLetterController : BaseContextController
                 Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
                 Remarks = a.Remarks,
                 AssignedAllPlayers = a.AssignedAllPlayers,
-                PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
                 CreatedByUsername = a.CreatedByUsername,
                 VerifiedByUsername = a.VerifiedByUsername,
                 Status = a.Status.ToString(),
