@@ -656,6 +656,16 @@ public partial class DataInitializer
                             Zh = "流水反水",
                             En = "Turnover Rebate"
                         }
+                    },
+                    new PromotionType
+                    {
+                        Name = "TurnoverRebateWeekly",
+                        SettlementIntervalType = "Weekly",
+                        Trans = new()
+                        {
+                            Zh = "每周流水反水",
+                            En = "Turnover Rebate Weekly"
+                        }
                     }
                 }
             },
