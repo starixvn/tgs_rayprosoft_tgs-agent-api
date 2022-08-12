@@ -55,12 +55,6 @@ public static class ServiceCollectionExtensions
 
                 options.BaseUrl = config.GetValue<Uri>("Report:Url");
             })
-            .AddReportAggregateClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
-
-                options.BaseUrl = config.GetValue<Uri>("BackOffice:ReportAggregateUrl");
-            })
             .AddPromotionClientServices((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();

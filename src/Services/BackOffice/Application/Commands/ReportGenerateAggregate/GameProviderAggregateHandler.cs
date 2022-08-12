@@ -9,7 +9,6 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
 using Tgs.MessageQueue;
-using Tgs.Report.Aggregate.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using Tgs.ServiceUtility;
@@ -18,7 +17,6 @@ namespace TGS.Services.BackOffice.Application.Commands.ReportGenerateAggregate;
 
 public class GameProviderAggregateHandler : IGetService<GenerateGameProviderAggregateRequest, MessageResponse>
 {
-    private readonly IReportAggregateClient _client;
     private readonly IGameProviderAggregateAuditLogService _gameProviderAuditLogService;
     private readonly IGameProviderService _gameProviderService;
     private readonly IMessageSender _messageSender;
@@ -28,14 +26,12 @@ public class GameProviderAggregateHandler : IGetService<GenerateGameProviderAggr
         IMessageSender messageSender,
         IGameProviderService gameProviderService,
         IGameProviderAggregateAuditLogService gameProviderAuditLogService,
-        IRedisCacheManager redisCacheManager,
-        IReportAggregateClient client)
+        IRedisCacheManager redisCacheManager)
     {
         _gameProviderService = gameProviderService;
         _messageSender = messageSender;
         _gameProviderAuditLogService = gameProviderAuditLogService;
         _redisCacheManager = redisCacheManager;
-        _client = client;
     }
 
     public async ValueTask<MessageResponse> GetAsync(
@@ -76,9 +72,6 @@ public class GameProviderAggregateHandler : IGetService<GenerateGameProviderAggr
                     new CreateGameProviderAggregateAuditLogRequest(Guid.Parse(request.UserId),
                         request.GameProviderId))
                 .ConfigureAwait(false);
-
-        await _client.RemoveGameProviderAggregateAsync(new(request.GameProviderId, request.StartDate))
-            .ConfigureAwait(false);
 
         await _redisCacheManager.SetAddAsync("aggregate",
             "GP",

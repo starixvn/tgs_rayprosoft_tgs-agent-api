@@ -9,7 +9,6 @@ using StackExchange.Redis;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Messages;
 using Tgs.MessageQueue;
-using Tgs.Report.Aggregate.Client;
 using TGS.Services.BackOffice.Application.Models.Aggregate;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using Tgs.ServiceUtility;
@@ -21,7 +20,6 @@ public class
 {
     private readonly IBrandGameProviderAggregateAuditLogService _brandGameProviderAuditLogService;
     private readonly IBrandService _brandService;
-    private readonly IReportAggregateClient _client;
     private readonly IMessageSender _messageSender;
     private readonly IRedisCacheManager _redisCacheManager;
 
@@ -29,14 +27,12 @@ public class
         IMessageSender messageSender,
         IBrandService brandService,
         IBrandGameProviderAggregateAuditLogService brandGameProviderAuditLogService,
-        IRedisCacheManager redisCacheManager,
-        IReportAggregateClient client)
+        IRedisCacheManager redisCacheManager)
     {
         _brandService = brandService;
         _messageSender = messageSender;
         _brandGameProviderAuditLogService = brandGameProviderAuditLogService;
         _redisCacheManager = redisCacheManager;
-        _client = client;
     }
 
     public async ValueTask<MessageResponse> GetAsync(
@@ -77,9 +73,6 @@ public class
                     new CreateBrandGameProviderAggregateAuditLogRequest(Guid.Parse(request.UserId),
                         request.BrandId))
                 .ConfigureAwait(false);
-
-        await _client.RemoveBrandGameProviderAggregateAsync(new(request.BrandId, request.StartDate))
-            .ConfigureAwait(false);
 
         await _redisCacheManager.SetAddAsync("aggregate",
             "brandGP",
