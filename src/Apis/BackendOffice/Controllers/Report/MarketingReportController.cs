@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -90,8 +91,15 @@ public class MarketingReportController : BaseContextController
 
         var paging = new Paging<DailyAggregateInfo>();
 
-        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
-            paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
+        var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [nameof(MarketingReportModel.ReportDate)] = nameof(DailyAggregateInfo.ReportDate),
+            [nameof(MarketingReportModel.GamingCount)] = nameof(DailyAggregateInfo.GamingCount),
+            [nameof(MarketingReportModel.RegisterCount)] = nameof(DailyAggregateInfo.RegisterCount)
+        };
+
+        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy) && propertyMap.ContainsKey(pagingRequest.SortBy))
+            paging.SortByPropertyName(propertyMap[pagingRequest.SortBy], pagingRequest.IsDesc);
 
         paging.Page = pagingRequest.Page;
         paging.RowCount = pagingRequest.Rows;
