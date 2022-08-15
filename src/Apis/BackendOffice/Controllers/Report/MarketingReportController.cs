@@ -75,7 +75,7 @@ public class MarketingReportController : BaseContextController
             .Where(item => item.ReportDate >= start
                 && item.ReportDate < end);
 
-        if (string.IsNullOrEmpty(request.AgentUsername))
+        if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
             if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
                 return new MarketingReportResponse
