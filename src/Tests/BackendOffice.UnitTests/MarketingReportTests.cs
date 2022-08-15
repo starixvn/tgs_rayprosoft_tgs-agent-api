@@ -121,6 +121,21 @@ internal class MarketingReportTests
     }
 
     [Test]
+    public async Task Get_MarketingReport_By_Brand_Id()
+    {
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new AgentMarketingReportQueryService(fakeMarketingReportClient);
+
+        var query = new AgentMarketingReportQuery(Guid.NewGuid());
+
+        await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryMarketingStatisticsAsync(Arg.Is(query.BrandId), Arg.Any<DateOnly>());
+    }
+
+    [Test]
     public async Task Get_MarketingReport_By_Brand_Sort_PropertyName()
     {
         var fakeReportClient = Substitute.For<IMarketingReportClient>();

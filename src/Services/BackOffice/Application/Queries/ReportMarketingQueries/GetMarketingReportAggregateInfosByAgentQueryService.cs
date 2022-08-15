@@ -60,11 +60,10 @@ internal class GetMarketingReportAggregateInfosByAgentQueryService
              from items in gj.DefaultIfEmpty()
              select new MarketingReportModel
              {
-                 ReportDate = new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, _Offset),
+                 ReportDate = date,
                  AgentId = agent.AgentId,
                  AgentUsername = agent.UserName,
                  RegisterCount = items?.RegisterCount ?? 0,
-                 FirstDepositCount = items?.FirstDepositCount ?? 0,
                  GamingCount = items?.GamingCount ?? 0
              }).ToArray();
 
@@ -82,7 +81,7 @@ internal class GetMarketingReportAggregateInfosByAgentQueryService
             Valid = true,
             TotalCount = pagingResponse.TotalCount,
             Items = pagingResponse.Items,
-            Total = total
+            Summary = total
         };
     }
 }
