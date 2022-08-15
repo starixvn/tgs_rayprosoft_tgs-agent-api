@@ -34,7 +34,6 @@
     <PackageReference Include="ClosedXML.Report" Version="0.2.4" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.17.1" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation" Version="11.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.1.0" />
     <PackageReference Include="Google.Protobuf" Version="3.21.5" />
     <PackageReference Include="Grpc.Tools" Version="2.47.0">
@@ -57,7 +56,7 @@
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.22" />    
     <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />    
-    <PackageReference Include="Tgs.MarketingReport.Client" Version="0.0.3" />
+    <PackageReference Include="Tgs.MarketingReport.Client" Version="0.0.4-alpha" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.11" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.5" />
