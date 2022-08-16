@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
-using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Commands.PaymentMethodChannel;
 
 internal class DeletePaymentMethodChannelCommandService : ICommandService<DeletePaymentMethodChannelCommand>
 {
-    private readonly ISystemPaymentRepository _systemPaymentRepository;
+    private readonly IPaymentServiceClient _paymentServiceClient;
 
-    public DeletePaymentMethodChannelCommandService(ISystemPaymentRepository systemPaymentRepository)
+    public DeletePaymentMethodChannelCommandService(IPaymentServiceClient paymentServiceClient)
     {
-        _systemPaymentRepository = systemPaymentRepository ?? throw new ArgumentNullException(nameof(systemPaymentRepository));
+        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
     }
 
     public ValueTask ExecuteAsync(DeletePaymentMethodChannelCommand command, CancellationToken cancellationToken = default)
-        => _systemPaymentRepository.DeletePaymentMethodChannelAsync(command.Id);
+        => _paymentServiceClient.DeletePaymentMethodChannelAsync(command.Id, cancellationToken);
 }

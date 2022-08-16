@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,6 +30,7 @@ using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
+using TGS.Payment.ManualDeposit;
 
 namespace TGS.Apis.BackendOffice;
 
@@ -73,6 +76,16 @@ public class Startup
             endpoints.MapHealthChecks("/health");
 
             endpoints.MapMetrics();
+        });
+
+        app.Use(async (httpContext, next) =>
+        {
+            await next();
+
+            var activity = Activity.Current;
+
+            if (activity is not null && !httpContext.Response.Headers.ContainsKey("X-Correlation-ID"))
+                httpContext.Response.Headers.TryAdd("X-Correlation-ID", activity.Id.ToString());
         });
 
         app.UseSwagger();
@@ -143,6 +156,15 @@ public class Startup
             options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
         });
 
+        _ = services.AddSingleton<ManualDepositSerializer>();
+
+        _ = services.AddBrandServiceClient((options, sp) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+
+            options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
+        });
+
         _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
 
         _ = services
@@ -170,7 +192,6 @@ public class Startup
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                options.JsonSerializerOptions.Converters.Add(new DateOnlyConverter());
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.UseDateOnlyTimeOnlyStringConverters();
             });
@@ -291,13 +312,7 @@ public class Startup
                         || !httpContext.Request.Path.StartsWithSegments("/swagger")
                         && !httpContext.Request.Path.StartsWithSegments("/health")
                         && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                        && !new[]
-                        {
-                            "html",
-                            "ico",
-                            "png",
-                            "jpg"
-                        }.Any(
+                        && !new[] { "html", "ico", "png", "jpg" }.Any(
                             ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
                 };
             });

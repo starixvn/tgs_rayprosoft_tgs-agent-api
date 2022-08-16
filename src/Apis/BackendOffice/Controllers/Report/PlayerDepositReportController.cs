@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Models;
+using TGS.Apis.BackendOffice.ViewModels;
 using TGS.Core.Models.Messages;
 using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportPlayerDeposit;
@@ -17,89 +19,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report;
 [ApiController]
 public class PlayerDepositReportController : BaseContextController
 {
-    [HttpGet]
-    [Description("Get player deposits")]
-    public async Task<PagedResponse<PlayerDepositReportModel>> GetPlayerDepositsAsync(
-        [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryService,
-        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
-        [FromQuery] GetPlayerDepositsReportRequest request)
-    {
-        var query = new AgentPlayerDepositQuery(request.BrandId);
-
-        var data = queryService.QueryAsync(query, HttpContext.RequestAborted);
-
-        var dateRange = (
-            From: DateOnly.FromDateTime(request.From.ToOffset(TimeSpan.FromHours(8D)).DateTime),
-            To: DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8D)).DateTime));
-
-        var dataQuery = data.Where(s => s.ReportDate >= dateRange.From
-            && s.ReportDate < dateRange.To);
-
-        var agentQuery = queryAgentsService
-            .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
-
-        var agentDict = await agentQuery
-            .ToDictionaryAsync(
-                a => a.UserName,
-                a => a.AgentId,
-                HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        if (!string.IsNullOrWhiteSpace(request.AgentUsername))
-        {
-            if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
-                return new PagedResponse<PlayerDepositReportModel>
-                {
-                    TotalCount = 0,
-                    Items = Array.Empty<PlayerDepositReportModel>()
-                };
-
-            dataQuery = dataQuery.Where(a => a.AgentId == agentId);
-        }
-
-        var paging = new Paging<AgentPlayerDepositStatistics>();
-
-        if (!string.IsNullOrWhiteSpace(request.SortBy))
-            paging.SortByPropertyName(request.SortBy, request.IsDesc);
-
-        paging.Page = request.Page;
-        paging.RowCount = request.Rows;
-
-        var totalCount = await dataQuery
-            .CountAsync(HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        dataQuery = dataQuery
-            .ApplyOrderBy(paging)
-            .ApplyPaging(paging);
-
-        var agentNameDict = await agentQuery
-            .ToDictionaryAsync(
-                a => a.AgentId,
-                a => a.UserName,
-                HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        return new PagedResponse<PlayerDepositReportModel>
-        {
-            TotalCount = totalCount,
-            Items = await dataQuery
-                .Select(a => new PlayerDepositReportModel
-                {
-                    ReportDate = a.ReportDate,
-                    AgentUserName = agentNameDict[a.AgentId],
-                    DepositCount = a.DepositPlayers,
-                    FirstDepositCount = a.FirstDepositPlayers,
-                    NoSecondDepositCount = a.NoSecondDepositPlayers
-                })
-                .ToArrayAsync(HttpContext.RequestAborted)
-                .ConfigureAwait(false)
-        };
-    }
-
-    [HttpGet("playerFirstDepositDetails")]
-    [Description("Get player first deposit details report")]
-    public async Task<PagedResponse<PlayerDepositDetailReportModel>> GetPlayerFirstDepositDetailsAsync(
+    [HttpGet("playerDailyDepositDetails")]
+    public async Task<PagedResponse<PlayerDepositDetailReportModel>> GetPlayerDailyDepositDetailsAsync(
         [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromQuery] GetPlayerDepositDetailsReportRequest request)
@@ -119,7 +40,7 @@ public class PlayerDepositReportController : BaseContextController
         var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
-                && item.IsFirstDeposit == true)
+                && item.IsFirstDeposit is not null)
             .ToArrayAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
@@ -157,8 +78,154 @@ public class PlayerDepositReportController : BaseContextController
         };
     }
 
-    [HttpGet("playerDailyDepositDetails")]
-    public async Task<PagedResponse<PlayerDepositDetailReportModel>> GetPlayerDailyDepositDetailsAsync(
+    [HttpGet]
+    [Description("Get player deposits")]
+    public async Task<PlayerDepositsViewModel> GetPlayerDepositsAsync(
+        [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryService,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryDetailService,
+        [FromQuery] GetPlayerDepositsReportRequest request)
+    {
+        var query = new AgentPlayerDepositQuery(request.BrandId);
+
+        var data = queryService.QueryAsync(query, HttpContext.RequestAborted);
+
+        var dateRange = (
+            From: DateOnly.FromDateTime(request.From.ToOffset(TimeSpan.FromHours(8D)).DateTime),
+            To: DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8D)).DateTime));
+
+        var dataQuery = data.Where(s => s.ReportDate >= dateRange.From
+            && s.ReportDate < dateRange.To);
+
+        var currentDate = new DateTimeOffset(DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(8D)).Date, TimeSpan.FromHours(8D));
+
+        if (request.To > currentDate)
+        {
+            var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
+                request.BrandId,
+                DateOnly.FromDateTime(currentDate.ToOffset(TimeSpan.FromHours(8D)).Date));
+            var currentDateDetailQuery = queryDetailService.QueryAsync(currentDateQuery)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(g => g.AggregateAsync(
+                    new PlayerPaymentDetailAggregateInfo()
+                    {
+                        AgentId = g.Key
+                    },
+                    (seed, item) =>
+                    {
+                        if (item.IsFirstDeposit == true)
+                            seed.FirstDepositPlayers++;
+                        if (item.UnSecondDeposit == true)
+                            seed.UndepositAgainPlayers++;
+                        if (item.IsFirstDeposit is not null)
+                            seed.DepositPlayers++;
+
+                        return seed;
+                    }, HttpContext.RequestAborted))
+                .Select(info => new AgentPlayerDepositStatistics(
+                    currentDateQuery.QueryDate,
+                    info.AgentId,
+                    info.FirstDepositPlayers,
+                    info.DepositPlayers,
+                    info.UndepositAgainPlayers));
+
+            dataQuery = dataQuery.Concat(currentDateDetailQuery);
+        }
+
+        var agentQuery = queryAgentsService
+            .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var dateArray = Enumerable.Range(0, dateRange.To.DayNumber - dateRange.From.DayNumber)
+            .Select(n => dateRange.From.AddDays(n));
+
+        if (!string.IsNullOrWhiteSpace(request.AgentUsername))
+        {
+            if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
+                return new PlayerDepositsViewModel
+                {
+                    TotalCount = 0,
+                    Summary = new PlayerDepositsSummaryViewModel(),
+                    Items = Array.Empty<PlayerDepositReportModel>()
+                };
+
+            dataQuery = dataQuery.Where(a => a.AgentId == agentId);
+
+            dataQuery = from date in dateArray.ToAsyncEnumerable()
+                        join statistics in dataQuery on date equals statistics.ReportDate into g
+                        from statistics in g.DefaultIfEmpty()
+                        select statistics ?? new AgentPlayerDepositStatistics(date, agentId, 0, 0, 0);
+        }
+        else
+            dataQuery = from date in dateArray.ToAsyncEnumerable()
+                        from p in agentDict.ToAsyncEnumerable()
+                        join statistics in dataQuery
+                            on new { ReportDate = date, AgentId = p.Value } equals new { statistics.ReportDate, statistics.AgentId }
+                            into g
+                        from statistics in g.DefaultIfEmpty()
+                        select statistics ?? new AgentPlayerDepositStatistics(date, p.Value, 0, 0, 0);
+
+        var paging = new Paging<AgentPlayerDepositStatistics>();
+
+        if (!string.IsNullOrWhiteSpace(request.SortBy))
+            paging.SortByPropertyName(request.SortBy, request.IsDesc);
+
+        paging.Page = request.Page;
+        paging.RowCount = request.Rows;
+
+        var totalCount = await dataQuery
+            .CountAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+        var summary = await dataQuery.AggregateAsync(
+            new PlayerDepositsSummaryViewModel(),
+            (seed, statistics) =>
+            {
+                seed.DepositTotalCount += statistics.DepositPlayers;
+                seed.FirstDepositTotalCount += statistics.FirstDepositPlayers;
+                seed.NoSecondDepositTotalCount += statistics.NoSecondDepositPlayers;
+
+                return seed;
+            },
+            HttpContext.RequestAborted).ConfigureAwait(false);
+
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
+
+        var agentNameDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.AgentId,
+                a => a.UserName,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new PlayerDepositsViewModel
+        {
+            TotalCount = totalCount,
+            Summary = summary,
+            Items = await dataQuery
+                .Select(a => new PlayerDepositReportModel
+                {
+                    ReportDate = a.ReportDate,
+                    AgentUserName = agentNameDict[a.AgentId],
+                    DepositCount = a.DepositPlayers,
+                    FirstDepositCount = a.FirstDepositPlayers,
+                    NoSecondDepositCount = a.NoSecondDepositPlayers
+                })
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+        };
+    }
+
+    [HttpGet("playerFirstDepositDetails")]
+    [Description("Get player first deposit details report")]
+    public async Task<PagedResponse<PlayerDepositDetailReportModel>> GetPlayerFirstDepositDetailsAsync(
         [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromQuery] GetPlayerDepositDetailsReportRequest request)
@@ -178,7 +245,7 @@ public class PlayerDepositReportController : BaseContextController
         var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
-                && item.IsFirstDeposit == false)
+                && item.IsFirstDeposit == true)
             .ToArrayAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 

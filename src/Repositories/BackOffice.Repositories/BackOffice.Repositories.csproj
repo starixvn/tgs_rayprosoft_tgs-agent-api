@@ -16,4 +16,20 @@
     <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Remove="C:\Users\Phoenix\.nuget\packages\microsoft.visualstudio.threading.analyzers\17.2.32\build\AdditionalFiles\vs-threading.LegacyThreadSwitchingMembers.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="C:\Users\Phoenix\.nuget\packages\microsoft.visualstudio.threading.analyzers\17.2.32\build\AdditionalFiles\vs-threading.MainThreadAssertingMethods.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="C:\Users\Phoenix\.nuget\packages\microsoft.visualstudio.threading.analyzers\17.2.32\build\AdditionalFiles\vs-threading.MainThreadSwitchingMethods.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="C:\Users\Phoenix\.nuget\packages\microsoft.visualstudio.threading.analyzers\17.2.32\build\AdditionalFiles\vs-threading.MembersRequiringMainThread.txt" />
+  </ItemGroup>
+
 </Project>

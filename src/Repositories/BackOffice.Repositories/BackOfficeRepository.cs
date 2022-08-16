@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice;
@@ -116,7 +117,7 @@ internal class BackOfficeRepository : IBackOfficeRepository
     }
 
     public async ValueTask ImportLocalizationStringsAsync(
-        string systemCode,
+            string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings)
     {
         var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
@@ -170,11 +171,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
                     };
 
         return query.ToAsyncEnumerable();
-    }
-
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryApprovePlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
     }
 
     public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
@@ -291,11 +287,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
         return query.ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryRejectPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
-    }
-
     public IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId)
     {
         var query = from banner in _tgsRepository.Banners.AsQueryable()
@@ -339,11 +330,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
                         banner.UpdatedOn);
 
         return query.ToAsyncEnumerable();
-    }
-
-    public IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryWaitingVerifyPlayerIdentityAuthenticationsAsync(Guid brandId)
-    {
-        throw new NotImplementedException();
     }
 
     public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
@@ -414,12 +400,23 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
     }
 
+    public async ValueTask UpdateBrandMaintenanceAsync(Guid brandMaintenanceId, string Content)
+    {
+        var brandMaintenance = await _tgsRepository.BrandMaintenances
+            .FirstAsync(bm => bm.Id == brandMaintenanceId)
+            .ConfigureAwait(false);
+
+        brandMaintenance.Content = Content;
+
+        _ = await _tgsRepository.SaveChangesAsync();
+    }
+
     private static BannerFlowStatus ConvertBannerStatus(int status)
-        => status switch
-        {
-            0 => BannerFlowStatus.WaitApproving,
-            1000 => BannerFlowStatus.Approved,
-            2000 => BannerFlowStatus.Rejected,
-            _ => BannerFlowStatus.Unknown
-        };
+                => status switch
+                {
+                    0 => BannerFlowStatus.WaitApproving,
+                    1000 => BannerFlowStatus.Approved,
+                    2000 => BannerFlowStatus.Rejected,
+                    _ => BannerFlowStatus.Unknown
+                };
 }

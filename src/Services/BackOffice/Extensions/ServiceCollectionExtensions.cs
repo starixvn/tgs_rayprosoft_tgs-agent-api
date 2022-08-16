@@ -53,8 +53,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IBrandLanguageService, BrandLanguageService>();
         services.AddTransient<IBrandBetLimitService, BrandBetLimitService>();
         services.AddTransient<IBrandGroupService, BrandGroupService>();
-        services
-            .AddTransient<IBrandGameProviderAggregateAuditLogService, BrandGameProviderAggregateAuditLogService>();
+        services.AddTransient<IBrandGameProviderAggregateAuditLogService, BrandGameProviderAggregateAuditLogService>();
         services.AddTransient<IGameProviderAggregateAuditLogService, GameProviderAggregateAuditLogService>();
         services.AddTransient<IAdjustAgentAccountService, AdjustAgentAccountService>();
         services.AddTransient<IAdjustPlayerAccountService, AdjustPlayerAccountService>();

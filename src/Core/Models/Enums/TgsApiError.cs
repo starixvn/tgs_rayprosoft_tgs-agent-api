@@ -46,6 +46,7 @@ public enum TgsApiError
     PlayerCanNotWithdraw = 411,
     BrandPhoneDuplicate = 412,
     ZeroNineNinePayDepositNeedRealName = 413,
+    PreviousDepositStillProcessing = 414,
 
     DividendConditionError = 600,
     DividendPercentageError = 601,

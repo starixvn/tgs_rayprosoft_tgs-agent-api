@@ -14,6 +14,7 @@ using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
+using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers;
@@ -27,6 +28,55 @@ public class WithdrawController : BaseContextController
         [FromServices] IGetService<CountUntreatedWithdrawFormsQuery, int> countService,
         Guid brandId)
         => countService.GetAsync(new CountUntreatedWithdrawFormsQuery(brandId));
+
+    [HttpPost("player", Name = "CreatePlayerWithdrawRequest")]
+    public async Task<MessageResponse> CreatePlayerWithdrawRequestAsync(
+        [FromServices] IGetService<CheckPlayerIdentityCommand, bool> checkService,
+        [FromServices] IGetService<CreateWithdrawFormCommand, bool> checkCanCreateService,
+        [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
+        [FromBody] CreateWithdrawRequest request)
+    {
+        var checkCommand = new CheckPlayerIdentityCommand(request.BrandId, request.PlayerCode);
+
+        var playerCanWithdraw = await checkService
+            .GetAsync(checkCommand, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (playerCanWithdraw is false)
+            return CreateInvalidResponse<MessageResponse>(Player.PlayerNotFoundOrIdentityAuthFailed);
+
+        var command = new CreateWithdrawFormCommand(
+            request.PlayerCode,
+            request.BrandId,
+            request.BankInfoId,
+            request.Amount,
+            request.Note);
+
+        if (!await checkCanCreateService
+                .GetAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false))
+            return CreateInvalidResponse<MessageResponse>(Player.WithdrawAmountOrBrandPaymentIsWrong);
+
+        try
+        {
+            await createFormService
+                .ExecuteAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "Can't find player.")
+                return CreateInvalidResponse<MessageResponse>(Player.WithdrawAmountOrBrandPaymentIsWrong);
+            else if (ex.Message == "InsufficientBucket")
+                return CreateInvalidResponse<MessageResponse>(Player.InsufficientBucket);
+            else if (ex.Message == "InsufficientFunds")
+                return CreateInvalidResponse<MessageResponse>(Player.InsufficientFunds);
+            else
+                throw;
+        }
+
+        return CreateValidResponse<MessageResponse>();
+    }
 
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]

@@ -9,17 +9,28 @@ namespace TGS.Services.BackOffice.Application.Services;
 internal class PlayerPaymentStatisticsDetailQueryService : IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem>
 {
     private readonly IPaymentReportingRepository _paymentReportingRepository;
+    private readonly ISystemClock _systemClock;
 
-    public PlayerPaymentStatisticsDetailQueryService(IPaymentReportingRepository paymentReportingRepository)
+    public PlayerPaymentStatisticsDetailQueryService(IPaymentReportingRepository paymentReportingRepository, ISystemClock systemClock)
     {
         _paymentReportingRepository = paymentReportingRepository ?? throw new ArgumentNullException(nameof(paymentReportingRepository));
+        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
     }
 
     public IAsyncEnumerable<PlayerDailyPaymentItem> QueryAsync(
         PlayerPaymentStatisticsDetailQuery query,
         CancellationToken cancellationToken = default)
-        => _paymentReportingRepository.QueryPlayerDailyDepositStatisticsAsync(
-            query.BrandId,
-            query.QueryDate,
-            cancellationToken);
+    {
+        var currentDate = DateOnly.FromDateTime(_systemClock.UtcNow.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+
+        return query.QueryDate == currentDate
+            ? _paymentReportingRepository.QueryRealTimePlayerDailyDepositStatisticsAsync(
+                query.BrandId,
+                query.QueryDate,
+                cancellationToken)
+            : _paymentReportingRepository.QueryPlayerDailyDepositStatisticsAsync(
+                    query.BrandId,
+                    query.QueryDate,
+                    cancellationToken);
+    }
 }

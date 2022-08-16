@@ -53,7 +53,8 @@ public class OperatorApiErrorMapper : IErrorMapper
             [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired",
             [TgsApiError.PlayerCanNotWithdraw] = "PlayerCanNotWithdraw",
             [TgsApiError.BrandPhoneDuplicate] = "BrandPhoneDuplicate",
-            [TgsApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName"
+            [TgsApiError.ZeroNineNinePayDepositNeedRealName] = "ZeroNineNinePayDepositNeedRealName",
+            [TgsApiError.PreviousDepositStillProcessing] = "PreviousDepositStillProcessing"
         };
 
     private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -95,7 +96,8 @@ public class OperatorApiErrorMapper : IErrorMapper
             [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
             [TgsApiError.PlayerCanNotWithdraw] = StatusCodes.Status400BadRequest,
             [TgsApiError.BrandPhoneDuplicate] = StatusCodes.Status400BadRequest,
-            [TgsApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest
+            [TgsApiError.ZeroNineNinePayDepositNeedRealName] = StatusCodes.Status400BadRequest,
+            [TgsApiError.PreviousDepositStillProcessing] = StatusCodes.Status400BadRequest
         };
 
     private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -137,7 +139,8 @@ public class OperatorApiErrorMapper : IErrorMapper
             [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired,
             [typeof(PlayerCanNotWithdrawException)] = TgsApiError.PlayerCanNotWithdraw,
             [typeof(BrandPhoneDuplicateException)] = TgsApiError.BrandPhoneDuplicate,
-            [typeof(ZeroNineNinePayDepositNeedRealNameException)] = TgsApiError.ZeroNineNinePayDepositNeedRealName
+            [typeof(ZeroNineNinePayDepositNeedRealNameException)] = TgsApiError.ZeroNineNinePayDepositNeedRealName,
+            [typeof(PreviousDepositStillProcessingException)] = TgsApiError.PreviousDepositStillProcessing
         };
 
     public bool CanProcess(Exception exception)

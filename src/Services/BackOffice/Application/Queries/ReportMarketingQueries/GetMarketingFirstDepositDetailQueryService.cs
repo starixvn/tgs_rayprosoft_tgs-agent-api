@@ -2,43 +2,48 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Marketing;
+using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
-using Tgs.ServiceUtility;
-using TGS.Paging;
 
 namespace TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 
 public class GetMarketingFirstDepositDetailQueryService
     : IGetService<GetMarketingFirstDepositDetailQuery, PagedResponse<MarketingFirstDepositDetailReportModel>>
 {
-    private readonly IAgentRepository _agentRepository;
+    private readonly IQueryService<AllAgentsByBrandQuery, AgentInfo> _agentQueryService;
     private readonly IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> _queryService;
 
     public GetMarketingFirstDepositDetailQueryService(
          IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryService,
-         IAgentRepository agentRepository)
+         IQueryService<AllAgentsByBrandQuery, AgentInfo> agentQueryService)
     {
         _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+        _agentQueryService = agentQueryService ?? throw new ArgumentNullException(nameof(agentQueryService));
     }
 
     public async ValueTask<PagedResponse<MarketingFirstDepositDetailReportModel>> GetAsync(
         GetMarketingFirstDepositDetailQuery query,
         CancellationToken cancellationToken = default)
     {
-        var agent = await _agentRepository
-            .GetAgentAsync(query.BrandId, query.AgentUsername, cancellationToken)
+        var agentQuery = _agentQueryService
+            .QueryAsync(new AllAgentsByBrandQuery(query.BrandId), cancellationToken);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                cancellationToken)
             .ConfigureAwait(false);
 
         var detailQuery = new PlayerPaymentStatisticsDetailQuery(query.BrandId, query.Date);
         var statisticsData = await _queryService.QueryAsync(detailQuery, cancellationToken)
-            .Where(item => item.AgentId == agent!.AgentId
-                           && item.IsFirstDeposit == true)
+            .Where(item => item.AgentId == agentDict[query.AgentUsername]
+                && item.IsFirstDeposit == true)
             .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 

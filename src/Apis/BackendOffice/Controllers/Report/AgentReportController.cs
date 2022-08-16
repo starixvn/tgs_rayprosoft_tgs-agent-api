@@ -25,20 +25,6 @@ public class AgentReportController : BaseContextController
             .GetAsync(request)
             .ConfigureAwait(false);
 
-    [HttpGet("{id}/teamInfo")]
-    [Description("Get agent team Information")]
-    public async Task<PagedResponse<TeamInfoReportModel>> GetAgentTeamInformationAsync(
-        Guid id,
-        [FromServices] IGetService<GetAgentTeamInfoReportRequest, PagedResponse<TeamInfoReportModel>>
-            agentTeamInfoService,
-        [FromQuery] GetAgentTeamInfoReportRequest request)
-    {
-        request.AgentId = id;
-        return await agentTeamInfoService
-            .GetAsync(request)
-            .ConfigureAwait(false);
-    }
-
     [HttpGet("dividends")]
     [Description("Get agent dividends report")]
     public async Task<GetAgentDividendsReportResponse>

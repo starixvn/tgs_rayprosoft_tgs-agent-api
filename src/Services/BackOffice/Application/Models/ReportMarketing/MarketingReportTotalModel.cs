@@ -2,9 +2,9 @@
 
 public class MarketingReportTotalModel
 {
-    public int FirstDepositCount { get; init; }
+    public int FirstDepositCount { get; set; }
 
-    public int GamingCount { get; init; }
+    public int GamingCount { get; set; }
 
-    public int RegisterCount { get; init; }
+    public int RegisterCount { get; set; }
 }

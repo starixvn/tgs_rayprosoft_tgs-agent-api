@@ -6,7 +6,6 @@ using System.Threading;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
 namespace TGS.Services.Operator.ApplicationServices.BrandPayments;
 
@@ -62,40 +61,24 @@ internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, Bra
             .GetPlayerDepositedAmountAsync(query.PlayerCode, cancellationToken)
             .ConfigureAwait(false);
 
-        var blockListCondition = new BlockListCondition(blockList);
-        var whiteListCondition = new WhiteListCondition(whiteList);
-        var showOnAllPlayerCondition = new ShowOnAllPlayersCondition();
+        var brandPaymentInfos = await _paymentServiceClient
+                .FilterBrandPaymentsAsync(
+                    brandPayments,
+                    new Tgs.Payment.Clients.PlayerInfo(
+                        playerInfo!.BrandId,
+                        depositedAmount,
+                        playerInfo.IdentityAuthentication,
+                        playerInfo.PhoneAuthentication,
+                        playerInfo.PlayerCode,
+                        playerInfo.VipLevelId),
+                    blockList,
+                    whiteList,
+                    brandPaymentVipLevels,
+                    cancellationToken)
+                .ToArrayAsync(cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-        foreach (var bp in brandPayments)
-        {
-            if (!bp.Enabled)
-                continue;
-
-            var depositedAmountCondition = new DepositedAmountCondition(bp.DepositedAmountLimit);
-            var identityCondition = new IdentityCondition(bp.AuthenticateIdentity);
-            var phoneCondition = new PhoneCondition(bp.AuthenticatePhone);
-            var vipCondition = new VipCondition(brandPaymentVipLevels.Contains(bp.Id)
-                    ? brandPaymentVipLevels[bp.Id]
-                    : Array.Empty<Guid>());
-
-            var filterCondition = new BrandPaymentFilterCondition(
-                blockListCondition,
-                whiteListCondition,
-                showOnAllPlayerCondition,
-                bp.ConditionMatchType == ConditionMatchType.MatchAll
-                    ? new MatchAllCondition(
-                        depositedAmountCondition,
-                        identityCondition,
-                        phoneCondition,
-                        vipCondition)
-                    : new MatchOneCondition(
-                        depositedAmountCondition,
-                        identityCondition,
-                        phoneCondition,
-                        vipCondition));
-
-            if (filterCondition.IsValid(bp, playerInfo!, depositedAmount))
-                yield return bp;
-        }
+        foreach (var brandPaymentInfo in brandPaymentInfos)
+            yield return brandPaymentInfo;
     }
 }
