@@ -78,7 +78,7 @@ public class MarketingReportController : BaseContextController
             .Where(item => item.ReportDate >= start
                 && item.ReportDate < end);
 
-        var dateArray = Enumerable.Range(0, start.DayNumber - end.DayNumber)
+        var dateArray = Enumerable.Range(0, end.DayNumber - start.DayNumber)
             .Select(n => start.AddDays(n));
 
         var dataQuery = from date in dateArray.ToAsyncEnumerable()
