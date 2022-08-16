@@ -2,12 +2,10 @@
 
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Market;
 using Tgs.Report.Client.Models.Round;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Attributes;
@@ -20,6 +18,18 @@ namespace TGS.Apis.BackendOffice.Controllers.Report;
 [ApiController]
 public class RoundReportController : BaseContextController
 {
+    [HttpGet("exportSystemRounds")]
+    [Description("Export rounds")]
+    [ByPassAdminLog]
+    public async Task<IActionResult> ExportSystemRoundsAsync(
+        [FromServices] IReportClient client,
+        [FromQuery] ExportSystemRoundsRequest request)
+        => File(await client
+                .ExportSystemRoundsAsync(request)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Rounds.xlsx");
+
     [HttpGet("betRecords")]
     [Description("Get bet records")]
     public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
@@ -73,6 +83,15 @@ public class RoundReportController : BaseContextController
             .GetAsync(request)
             .ConfigureAwait(false);
 
+    [HttpGet("system")]
+    [Description("Get rounds")]
+    public async ValueTask<PagedResponse<SystemRoundView>> GetSystemRoundsAsync(
+        [FromServices] IGetService<GetSystemRoundsReportRequest, PagedResponse<SystemRoundView>> roundsService,
+        [FromQuery] GetSystemRoundsReportRequest request)
+        => await roundsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
     [HttpGet("system/total", Name = "GetSystemRoundsTotal")]
     [Description("Get rounds total about BetAmount & ValidBetAmount & Turnover & SettleAmount & WinLoss")]
     public async Task<SystemRoundTotalModel> GetSystemRoundsTotalAsync(
@@ -112,25 +131,4 @@ public class RoundReportController : BaseContextController
             WinLoss = response.WinLoss
         };
     }
-
-    [HttpGet("system")]
-    [Description("Get rounds")]
-    public async ValueTask<PagedResponse<SystemRoundView>> GetSystemRoundsAsync(
-        [FromServices] IGetService<GetSystemRoundsReportRequest, PagedResponse<SystemRoundView>> roundsService,
-        [FromQuery] GetSystemRoundsReportRequest request)
-        => await roundsService
-            .GetAsync(request)
-            .ConfigureAwait(false);
-
-    [HttpGet("exportSystemRounds")]
-    [Description("Export rounds")]
-    [ByPassAdminLog]
-    public async Task<IActionResult> ExportSystemRoundsAsync(
-        [FromServices] IReportClient client,
-        [FromQuery] ExportSystemRoundsRequest request) 
-        => File(await client
-                .ExportSystemRoundsAsync(request)
-                .ConfigureAwait(false),
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Rounds.xlsx");
 }
