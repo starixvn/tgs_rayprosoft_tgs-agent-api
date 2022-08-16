@@ -549,13 +549,6 @@ public class BankDepositController : ControllerBase
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
         var brandId = HttpContext.Items.GetBrandId();
 
-        var clientIp = HttpContext.Connection.RemoteIpAddress;
-
-        if (clientIp != null && clientIp.IsIPv4MappedToIPv6)
-            clientIp = clientIp.MapToIPv4();
-
-        _loger.LogTrace("zeronineninepay clientIp:{clientIp}", clientIp);
-
         var brandPayment = await getBrandPaymentService
             .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
             .ConfigureAwait(false);
@@ -575,7 +568,7 @@ public class BankDepositController : ControllerBase
                     brandPaymentInfo.RootElement.GetProperty("merchantKey").GetString(),
                     brandPaymentInfo.RootElement.GetProperty("payType").GetString(),
                     formId,
-                    clientIp?.ToString(),
+                    "127.0.0.1",
                     null)));
 
         var createdFormId = await createDepositFormService

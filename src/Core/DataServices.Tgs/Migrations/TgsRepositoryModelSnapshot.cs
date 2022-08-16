@@ -649,6 +649,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_bank_infos", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyMarketingStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("GamingCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("gaming_count");
+
+                    b.Property<int>("RegisterCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("register_count");
+
+                    b.HasKey("ReportDate", "BrandId", "AgentId")
+                        .HasName("pk_agent_daily_marketing_statistics");
+
+                    b.ToTable("agent_daily_marketing_statistics", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyPaymentStatistics", b =>
                 {
                     b.Property<DateOnly>("ReportDate")

@@ -8,7 +8,7 @@ public record MarketingReportModel
 
     public string AgentUsername { get; set; }
 
-    public DateTimeOffset ReportDate { get; init; }
+    public DateOnly ReportDate { get; init; }
 
     public int RegisterCount { get; init; }
 
