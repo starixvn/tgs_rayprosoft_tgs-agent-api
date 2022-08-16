@@ -2,12 +2,17 @@
 
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Market;
+using Tgs.Report.Client.Models.Round;
+using Tgs.ServiceUtility;
+using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportRound;
-using Tgs.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report;
 
@@ -15,6 +20,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Report;
 [ApiController]
 public class RoundReportController : BaseContextController
 {
+    [HttpGet("betRecords")]
+    [Description("Get bet records")]
+    public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
+        [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
+            betRecordsService,
+        [FromQuery] GetBetRecordsReportRequest request)
+        => await betRecordsService
+            .GetAsync(request)
+            .ConfigureAwait(false);
+
     [HttpGet("closedRounds")]
     [Description("Get closed rounds")]
     public async Task<PagedResponse<ClosedRoundReportModel>> GetClosedRoundsAsync(
@@ -58,13 +73,64 @@ public class RoundReportController : BaseContextController
             .GetAsync(request)
             .ConfigureAwait(false);
 
-    [HttpGet("betRecords")]
-    [Description("Get bet records")]
-    public async ValueTask<GetBetRecordsReportResponse> GetBetRecordsAsync(
-        [FromServices] IGetService<GetBetRecordsReportRequest, GetBetRecordsReportResponse>
-            betRecordsService,
-        [FromQuery] GetBetRecordsReportRequest request)
-        => await betRecordsService
+    [HttpGet("system/total", Name = "GetSystemRoundsTotal")]
+    [Description("Get rounds total about BetAmount & ValidBetAmount & Turnover & SettleAmount & WinLoss")]
+    public async Task<SystemRoundTotalModel> GetSystemRoundsTotalAsync(
+        [FromServices] IReportClient client,
+        [FromQuery] GetSystemRoundTotalReportRequest request)
+    {
+        var roundsRequest = new GetSystemRoundsTotalRequest
+        {
+            Username = request.Username,
+            PlayerCode = request.PlayerCode,
+            ExternalRoundId = request.ExternalRoundId,
+            RoundId = request.RoundId,
+            ExternalFrom = request.ExternalFrom,
+            ExternalTo = request.ExternalTo,
+            ExternalClosedFrom = request.ExternalClosedFrom,
+            ExternalClosedTo = request.ExternalClosedTo,
+            From = request.From,
+            To = request.To,
+            ClosedFrom = request.ClosedFrom,
+            ClosedTo = request.ClosedTo,
+            Status = (short?)request.Status,
+            BrandId = request.BrandId,
+            GameProviderId = request.GameProviderId,
+            SubGameProviderCode = request.SubGameProviderCode,
+            GameType = (short?)request.GameType,
+            CurrencyCode = request.CurrencyCode
+        };
+
+        var response = await client.GetSystemRoundsTotalAsync(roundsRequest);
+
+        return new SystemRoundTotalModel
+        {
+            BetAmount = response.BetAmount,
+            ValidBetAmount = response.ValidBetAmount,
+            Turnover = response.Turnover,
+            SettleAmount = response.SettleAmount,
+            WinLoss = response.WinLoss
+        };
+    }
+
+    [HttpGet("system")]
+    [Description("Get rounds")]
+    public async ValueTask<PagedResponse<SystemRoundView>> GetSystemRoundsAsync(
+        [FromServices] IGetService<GetSystemRoundsReportRequest, PagedResponse<SystemRoundView>> roundsService,
+        [FromQuery] GetSystemRoundsReportRequest request)
+        => await roundsService
             .GetAsync(request)
             .ConfigureAwait(false);
+
+    [HttpGet("exportSystemRounds")]
+    [Description("Export rounds")]
+    [ByPassAdminLog]
+    public async Task<IActionResult> ExportSystemRoundsAsync(
+        [FromServices] IReportClient client,
+        [FromQuery] ExportSystemRoundsRequest request) 
+        => File(await client
+                .ExportSystemRoundsAsync(request)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Rounds.xlsx");
 }
