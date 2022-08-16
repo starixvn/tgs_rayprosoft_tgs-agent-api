@@ -43,9 +43,7 @@ public class MarketingReportController : BaseContextController
     [HttpGet("gamingDetail")]
     [Description("Get gaming details report")]
     public async Task<PagedResponse<MarketingGamingDetailReportModel>> GetMarketingGamingDetailsAsync(
-        [FromServices]
-        IGetService<GetMarketingGamingDetailReportRequest, PagedResponse<MarketingGamingDetailReportModel>>
-            marketsService,
+        [FromServices] IGetService<GetMarketingGamingDetailReportRequest, PagedResponse<MarketingGamingDetailReportModel>> marketsService,
         [FromQuery] GetMarketingGamingDetailReportRequest request)
         => await marketsService
             .GetAsync(request)
@@ -150,9 +148,57 @@ public class MarketingReportController : BaseContextController
     [HttpGet("registerDetail")]
     [Description("Get register details report")]
     public async Task<PagedResponse<MarketingRegisterDetailReportModel>> GetMarketingRegisterDetailsAsync(
+        [FromServices] IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail> queryService,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromServices] IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>> marketsService,
         [FromQuery] GetMarketingRegisterDetailReportRequest request)
-        => await marketsService
-            .GetAsync(request)
+    {
+        var agentQuery = queryAgentsService
+           .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
             .ConfigureAwait(false);
+
+        var agentId = agentDict[request.AgentUsername];
+
+        var query = new AgentPlayerRegisterDetailQuery(request.BrandId, request.ReportDate);
+        var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Where(item => item.AgentId == agentId)
+            .ToArrayAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var dataQuery = statisticsData.AsQueryable();
+
+        var paging = new Paging<PlayerRegisterDetail>();
+
+        if (!string.IsNullOrWhiteSpace(request.SortBy))
+            paging.SortByPropertyName(request.SortBy, request.IsDesc);
+
+        paging.Page = request.Page;
+        paging.RowCount = request.Rows;
+
+        var totalCount = statisticsData.Length;
+
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
+
+        return new PagedResponse<MarketingRegisterDetailReportModel>
+        {
+            TotalCount = totalCount,
+            Items = dataQuery
+                .Select(item => new MarketingRegisterDetailReportModel
+                {
+                    Username = item.PlayerName,
+                    LastLoginOn = item.LastLoginOn,
+                    LoginCount = item.LoginCount,
+                    RegisteredOn = item.RegisteredOn
+                })
+                .ToArray()
+        };
+    }
 }
