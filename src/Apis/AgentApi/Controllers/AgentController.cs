@@ -13,7 +13,7 @@ using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices;
 using TGS.Services.Agent.ApplicationServices.Agent;

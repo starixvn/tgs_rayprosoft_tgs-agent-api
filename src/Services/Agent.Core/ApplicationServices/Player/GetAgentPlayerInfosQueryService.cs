@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Tgs.ServiceUtility;
-using TGS.Paging;
+using Tgs.Paging;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 

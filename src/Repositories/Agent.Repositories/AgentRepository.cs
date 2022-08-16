@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 

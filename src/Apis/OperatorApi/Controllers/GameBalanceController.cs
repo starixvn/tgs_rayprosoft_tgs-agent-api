@@ -8,7 +8,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.GameBalance;
 

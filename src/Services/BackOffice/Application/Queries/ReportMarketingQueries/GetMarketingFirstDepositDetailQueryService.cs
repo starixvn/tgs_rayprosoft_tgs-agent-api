@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;

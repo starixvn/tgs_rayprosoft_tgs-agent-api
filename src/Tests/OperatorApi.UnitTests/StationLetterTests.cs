@@ -11,7 +11,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Operator.StationLetters;
 using TGS.Services.Operator.ApplicationServices.StationLetters;
 

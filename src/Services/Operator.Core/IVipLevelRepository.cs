@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Operator.ApplicationServices.Vip;
 
 namespace TGS.Services.Operator;
