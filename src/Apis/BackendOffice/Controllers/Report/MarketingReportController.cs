@@ -150,7 +150,6 @@ public class MarketingReportController : BaseContextController
     public async Task<PagedResponse<MarketingRegisterDetailReportModel>> GetMarketingRegisterDetailsAsync(
         [FromServices] IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail> queryService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
-        [FromServices] IGetService<GetMarketingRegisterDetailReportRequest, PagedResponse<MarketingRegisterDetailReportModel>> marketsService,
         [FromQuery] GetMarketingRegisterDetailReportRequest request)
     {
         var agentQuery = queryAgentsService
