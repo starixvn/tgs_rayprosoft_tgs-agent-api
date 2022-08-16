@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.MarketingReport.Client;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
@@ -53,6 +53,7 @@ public class MarketingReportController : BaseContextController
     [Description("Get marketing report")]
     public async Task<MarketingReportResponse> GetMarketingListAsync(
         [FromServices] IQueryService<AgentMarketingReportQuery, DailyAggregateInfo> queryService,
+        [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryPaymentService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
@@ -70,9 +71,29 @@ public class MarketingReportController : BaseContextController
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        var queryData = queryService.QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
+        var paymentData = queryPaymentService.QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
             .Where(item => item.ReportDate >= start
                 && item.ReportDate < end);
+        var marketingData = queryService.QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
+            .Where(item => item.ReportDate >= start
+                && item.ReportDate < end);
+
+        var dateArray = Enumerable.Range(0, start.DayNumber - end.DayNumber)
+            .Select(n => start.AddDays(n));
+
+        var dataQuery = from date in dateArray.ToAsyncEnumerable()
+                        join marketingItem in marketingData on date equals marketingItem.ReportDate into gm
+                        from marketingItem in gm.DefaultIfEmpty()
+                        join paymentItem in paymentData on date equals paymentItem.ReportDate into gp
+                        from paymentItem in gp.DefaultIfEmpty()
+                        select new
+                        {
+                            ReportDate = date,
+                            AgentId = marketingItem?.AgentId ?? paymentItem.AgentId,
+                            RegisterCount = marketingItem?.RegisterCount ?? 0,
+                            FirstDepositPlayers = paymentItem?.FirstDepositPlayers ?? 0,
+                            GamingCount = marketingItem?.GamingCount ?? 0
+                        };
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
@@ -84,10 +105,10 @@ public class MarketingReportController : BaseContextController
                     Items = Array.Empty<MarketingReportModel>()
                 };
 
-            queryData = queryData.Where(item => item.AgentId == agentId);
+            dataQuery = dataQuery.Where(item => item.AgentId == agentId);
         }
 
-        var paging = new Paging<DailyAggregateInfo>();
+        var paging = dataQuery.CreatePaging();
 
         var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -102,22 +123,22 @@ public class MarketingReportController : BaseContextController
         paging.Page = pagingRequest.Page;
         paging.RowCount = pagingRequest.Rows;
 
-        var totalCount = await queryData
+        var totalCount = await dataQuery
             .CountAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
-        var summary = await queryData.AggregateAsync(
+        var summary = await dataQuery.AggregateAsync(
             new MarketingReportTotalModel(),
             (seed, statistics) =>
             {
                 seed.RegisterCount += statistics.RegisterCount;
-                // seed.FirstDepositCount += statistics;
+                seed.FirstDepositCount += statistics.FirstDepositPlayers;
                 seed.GamingCount += statistics.GamingCount;
 
                 return seed;
             },
             HttpContext.RequestAborted).ConfigureAwait(false);
 
-        queryData = queryData
+        dataQuery = dataQuery
             .ApplyOrderBy(paging)
             .ApplyPaging(paging);
 
@@ -132,12 +153,13 @@ public class MarketingReportController : BaseContextController
         {
             TotalCount = totalCount,
             Summary = summary,
-            Items = await queryData
+            Items = await dataQuery
                 .Select(a => new MarketingReportModel
                 {
                     ReportDate = a.ReportDate,
                     AgentUsername = agentNameDict[a.AgentId],
                     RegisterCount = a.RegisterCount,
+                    FirstDepositCount = a.FirstDepositPlayers,
                     GamingCount = a.GamingCount
                 })
                 .ToArrayAsync(HttpContext.RequestAborted)

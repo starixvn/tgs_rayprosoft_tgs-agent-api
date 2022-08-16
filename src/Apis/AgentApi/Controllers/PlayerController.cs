@@ -9,7 +9,7 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Enums;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Vip;
 
