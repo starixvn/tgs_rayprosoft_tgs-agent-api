@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report;
 
@@ -47,44 +54,97 @@ public class MarketingReportController : BaseContextController
     [HttpGet]
     [Description("Get marketing report")]
     public async Task<MarketingReportResponse> GetMarketingListAsync(
-        [FromServices] IGetService<GetMarketingReportAggregateInfosQuery, MarketingReportResponse> queryService,
-        [FromServices] IGetService<GetMarketingReportAggregateInfosByAgentQuery, MarketingReportResponse> agentQueryService,
+        [FromServices] IQueryService<AgentMarketingReportQuery, DailyAggregateInfo> queryService,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
         var start = DateOnly.FromDateTime(request.From.ToOffset(TimeSpan.FromHours(8D)).DateTime);
         var end = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8D)).DateTime);
-        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).DateTime);
-        var tomorrow = today.AddDays(1);
 
-        if (start > tomorrow)
-            return new MarketingReportResponse
+        var agentQuery = queryAgentsService
+            .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var queryData = queryService.QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
+            .Where(item => item.ReportDate >= start
+                && item.ReportDate < end);
+
+        if (!string.IsNullOrWhiteSpace(request.AgentUsername))
+        {
+            if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
+                return new MarketingReportResponse
+                {
+                    TotalCount = 0,
+                    Summary = new MarketingReportTotalModel(),
+                    Items = Array.Empty<MarketingReportModel>()
+                };
+
+            queryData = queryData.Where(item => item.AgentId == agentId);
+        }
+
+        var paging = new Paging<DailyAggregateInfo>();
+
+        var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [nameof(MarketingReportModel.ReportDate)] = nameof(DailyAggregateInfo.ReportDate),
+            [nameof(MarketingReportModel.GamingCount)] = nameof(DailyAggregateInfo.GamingCount),
+            [nameof(MarketingReportModel.RegisterCount)] = nameof(DailyAggregateInfo.RegisterCount)
+        };
+
+        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy) && propertyMap.ContainsKey(pagingRequest.SortBy))
+            paging.SortByPropertyName(propertyMap[pagingRequest.SortBy], pagingRequest.IsDesc);
+
+        paging.Page = pagingRequest.Page;
+        paging.RowCount = pagingRequest.Rows;
+
+        var totalCount = await queryData
+            .CountAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+        var summary = await queryData.AggregateAsync(
+            new MarketingReportTotalModel(),
+            (seed, statistics) =>
             {
-                Items = Array.Empty<MarketingReportModel>(),
-                Total = new MarketingReportTotalModel()
-            };
+                seed.RegisterCount += statistics.RegisterCount;
+                // seed.FirstDepositCount += statistics;
+                seed.GamingCount += statistics.GamingCount;
 
-        end = end > tomorrow ? tomorrow : end;
+                return seed;
+            },
+            HttpContext.RequestAborted).ConfigureAwait(false);
 
-        if (string.IsNullOrEmpty(request.AgentUsername))
+        queryData = queryData
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
+
+        var agentNameDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.AgentId,
+                a => a.UserName,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new MarketingReportResponse
         {
-            var query = new GetMarketingReportAggregateInfosQuery(request.BrandId, start, end, pagingRequest);
-
-            return await queryService.GetAsync(query, HttpContext.RequestAborted)
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            var query = new GetMarketingReportAggregateInfosByAgentQuery(
-                request.BrandId,
-                request.AgentUsername,
-                start,
-                end,
-                pagingRequest);
-
-            return await agentQueryService.GetAsync(query, HttpContext.RequestAborted)
-                .ConfigureAwait(false);
-        }
+            TotalCount = totalCount,
+            Summary = summary,
+            Items = await queryData
+                .Select(a => new MarketingReportModel
+                {
+                    ReportDate = a.ReportDate,
+                    AgentUsername = agentNameDict[a.AgentId],
+                    RegisterCount = a.RegisterCount,
+                    GamingCount = a.GamingCount
+                })
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+        };
     }
 
     [HttpGet("registerDetail")]

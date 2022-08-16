@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "6.0.6")
+                .HasAnnotation("ProductVersion", "6.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
@@ -647,6 +647,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_agent_bank_infos_player_code");
 
                     b.ToTable("agent_bank_infos", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyMarketingStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("GamingCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("gaming_count");
+
+                    b.Property<int>("RegisterCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("register_count");
+
+                    b.HasKey("ReportDate", "BrandId", "AgentId")
+                        .HasName("pk_agent_daily_marketing_statistics");
+
+                    b.ToTable("agent_daily_marketing_statistics", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyPaymentStatistics", b =>
@@ -4310,6 +4338,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("marketing_report_daily_aggregates", "report");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketingStatisticsSettings", b =>
+                {
+                    b.Property<string>("RecordKey")
+                        .HasColumnType("text")
+                        .HasColumnName("record_key");
+
+                    b.Property<DateTime>("ProcessedTime")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_time");
+
+                    b.HasKey("RecordKey")
+                        .HasName("pk_marketing_statistics_settings");
+
+                    b.ToTable("marketing_statistics_settings", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5420,6 +5464,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bucket_histories", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerDailyGamingStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("GpCode")
+                        .HasColumnType("text")
+                        .HasColumnName("gp_code");
+
+                    b.Property<string>("SubGpCode")
+                        .HasColumnType("text")
+                        .HasColumnName("sub_gp_code");
+
+                    b.Property<decimal>("WinLoss")
+                        .HasColumnType("numeric")
+                        .HasColumnName("win_loss");
+
+                    b.HasKey("ReportDate", "PlayerCode", "GpCode", "SubGpCode")
+                        .HasName("pk_player_daily_gaming_statistics");
+
+                    b.ToTable("player_daily_gaming_statistics", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerDailyPaymentStatistics", b =>
                 {
                     b.Property<DateOnly>("ReportDate")
@@ -5474,6 +5546,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_daily_payment_statistics");
 
                     b.ToTable("player_daily_payment_statistics", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerDailyRegisterStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("DailyLoginCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("daily_login_count");
+
+                    b.Property<DateTime?>("LastLoginOn")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_login_on");
+
+                    b.Property<int>("TotalLoginCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_login_count");
+
+                    b.HasKey("ReportDate", "PlayerCode")
+                        .HasName("pk_player_daily_register_statistics");
+
+                    b.ToTable("player_daily_register_statistics", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>

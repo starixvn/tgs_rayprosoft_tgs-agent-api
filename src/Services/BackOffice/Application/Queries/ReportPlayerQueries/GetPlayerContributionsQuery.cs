@@ -37,7 +37,7 @@ public class
             Rows = request.Rows,
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
-            ShowAll = true
+            ShowAll = request.ShowAll
         };
 
         var response = await _reportClient.GetPlayerContributionsAsync(reportRequest);
@@ -71,32 +71,38 @@ public class
             Turnover = x.Turnover,
             WinLossAmount = x.WinLossAmount,
             NetProfit = x.NetProfit
-        }).AsQueryable().CreatePagedResponse(new PageableRequest
-        {
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = request.OrderBy,
-            SortBy = request.SortBy
         });
 
+        var totalRequest = new GetPlayerContributionsTotalAmountRequest
+        {
+            BrandId = request.BrandId,
+            Username = request.Username,
+            Level = request.Level,
+            HasUpperAgent = request.HasUpperAgent,
+            From = request.From,
+            To = request.To
+        };
+
+        var totalResponse = await _reportClient.GetPlayerContributionsTotalAmountAsync(totalRequest);
+
         var total = new PlayerContributionReportTotalModel(
-            response.Items.Sum(x => x.DepositAmount),
-            response.Items.Sum(x => x.WithdrawalAmount),
-            response.Items.Sum(x => x.CompanyAdjustAmount),
-            response.Items.Sum(x => x.BonusAdjustAmount),
-            response.Items.Sum(x => x.AgentAdjustAmount),
-            response.Items.Sum(x => x.BonusAmount),
-            response.Items.Sum(x => x.BetAmount),
-            response.Items.Sum(x => x.ValidBetAmount),
-            response.Items.Sum(x => x.Turnover),
-            response.Items.Sum(x => x.WinLossAmount),
-            response.Items.Sum(x => x.NetProfit)
+            totalResponse.DepositAmount,
+            totalResponse.WithdrawalAmount,
+            totalResponse.CompanyAdjustAmount,
+            totalResponse.BonusAdjustAmount,
+            totalResponse.AgentAdjustAmount,
+            totalResponse.BonusAmount,
+            totalResponse.BetAmount,
+            totalResponse.ValidBetAmount,
+            totalResponse.Turnover,
+            totalResponse.WinLossAmount,
+            totalResponse.NetProfit
         );
 
         return new GetPlayerContributionsReportResponse
         {
             TotalCount = response.TotalCount,
-            Items = pageArray.Items,
+            Items = pageArray.ToArray(),
             Total = total
         };
     }

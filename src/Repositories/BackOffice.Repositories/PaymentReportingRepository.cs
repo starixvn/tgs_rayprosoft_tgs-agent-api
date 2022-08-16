@@ -197,6 +197,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                             FROM
                                 dbo.deposit_forms
                             WHERE
+                                brand_id = @BrandId
+                                AND
                                 status = 8000
                                 AND
                                 updated_on >= @Begin
@@ -219,6 +221,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                     FROM
                         dbo.withdraw_forms
                     WHERE
+                        brand_id = @BrandId
+                        AND
                         status = 9000
                         AND
                         user_type = 1
@@ -234,7 +238,8 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                     daily_first_deposit_amount,
                     daily_first_deposit_on,
                     deposit_amount,
-                    withdraw_amount
+                    withdraw_amount,
+                    is_current_deposit
                 )
                 AS
                 (
@@ -243,7 +248,11 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                         DS.daily_first_deposit_amount,
                         DS.daily_first_deposit_on,
                         DS.deposit_amount,
-                        WS.withdraw_amount
+                        WS.withdraw_amount,
+                        CASE
+                            WHEN DS.player_code IS NOT NULL THEN true
+                            ELSE false
+                        END AS is_current_deposit
                     FROM
                         depositStatistics AS DS
                         FULL OUTER JOIN
@@ -296,14 +305,11 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
                     COALESCE(HS.first_deposit_amount, MS.daily_first_deposit_amount) AS FirstDepositAmount,
                     COALESCE(MS.deposit_amount, 0) + COALESCE(HS.total_deposit_amount, 0) AS TotalDepositAmount,
                     COALESCE(MS.withdraw_amount, 0) + COALESCE(HS.total_withdraw_amount, 0) AS TotalWithdrawAmount,
-                    CASE UAS.player_code
-                        WHEN NULL THEN false
+                    CASE
+                        WHEN UAS.player_code IS NULL THEN false
                         ELSE TRUE
                     END AS IsUndepositAgain,
-                    CASE MS.player_code
-                        WHEN NULL THEN false
-                        ELSE true
-                    END AS IsCurrentDeposit,
+                    MS.is_current_deposit AS IsCurrentDeposit,
                     PIR.ip AS RegisterIp
                 FROM
                     mergeStatistics AS MS
@@ -331,7 +337,7 @@ internal class PaymentReportingRepository : IPaymentReportingRepository
             row.PlayerCode,
             row.UserName,
             row.AgentId,
-            row.IsCurrentDeposit
+            row.IsCurrentDeposit == true
                 ? row.FirstDepositOn >= queryTimeRange.From && row.FirstDepositOn < queryTimeRange.To
                 : null,
             row.IsUndepositAgain,

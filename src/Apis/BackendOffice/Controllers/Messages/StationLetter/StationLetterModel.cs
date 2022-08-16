@@ -21,8 +21,6 @@ public class StationLetterModel
 
     public JsonDocument Localization { get; set; }
 
-    public string[] PlayerUsernames { get; set; }
-
     public string Remarks { get; set; }
 
     public string Status { get; set; }

@@ -84,21 +84,17 @@ public class StationLetterController : BaseContextController
             UpdatedOn = DateTimeOffset.Now
         };
 
-        var allPlayers = await _playerQueries.GetQueries()
-            .Where(p => p.Status == PlayerStatus.Enabled
-                && p.BrandId == request.BrandId)
-            .ToArrayAsync();
-
-        if (!request.AssignedAllPlayers)
-        {
-            allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
-        }
-
-        var players = allPlayers.Select(p => new StationLetterPlayer
-        {
-            PlayerCode = p.PlayerCode,
-            StationLetterId = stationLetter.Id
-        }).ToArray();
+        var players = !request.AssignedAllPlayers
+            ? await _playerQueries.GetQueries()
+                .Where(p => p.Status == PlayerStatus.Enabled&& p.BrandId == request.BrandId)
+                .Where(p => request.PlayerUsernames.Contains(p.Username))
+                .Select(x => new StationLetterPlayer
+                {
+                    PlayerCode = x.PlayerCode,
+                    StationLetterId = stationLetter.Id
+                })
+                .ToArrayAsync()
+            : new StationLetterPlayer[]{};
 
         await _stationLetterService.CreateStationLetterAsync(stationLetter, players);
 
@@ -144,7 +140,6 @@ public class StationLetterController : BaseContextController
                 Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
                 Remarks = a.Remarks,
                 AssignedAllPlayers = a.AssignedAllPlayers,
-                PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
                 CreatedByUsername = a.CreatedByUsername,
                 VerifiedByUsername = a.VerifiedByUsername,
                 Status = a.Status.ToString(),
