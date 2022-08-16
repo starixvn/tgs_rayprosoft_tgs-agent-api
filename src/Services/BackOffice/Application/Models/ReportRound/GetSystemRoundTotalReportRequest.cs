@@ -1,6 +1,8 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
+#nullable enable
+
 namespace TGS.Services.BackOffice.Application.Models.ReportRound
 {
     public class GetSystemRoundTotalReportRequest
