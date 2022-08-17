@@ -82,9 +82,12 @@ public class MarketingReportController : BaseContextController
             .Select(n => start.AddDays(n));
 
         var dataQuery = from date in dateArray.ToAsyncEnumerable()
-                        join marketingItem in marketingData on date equals marketingItem.ReportDate into gm
+                        from agentId in agentDict.Values.ToAsyncEnumerable()
+                        join marketingItem in marketingData
+                            on new { ReportDate = date, AgentId = agentId } equals new { marketingItem.ReportDate, marketingItem.AgentId } into gm
                         from marketingItem in gm.DefaultIfEmpty()
-                        join paymentItem in paymentData on date equals paymentItem.ReportDate into gp
+                        join paymentItem in paymentData
+                            on new { ReportDate = date, AgentId = agentId } equals new { paymentItem.ReportDate, paymentItem.AgentId } into gp
                         from paymentItem in gp.DefaultIfEmpty()
                         select new
                         {
