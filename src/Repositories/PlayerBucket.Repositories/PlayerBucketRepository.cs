@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
@@ -71,7 +73,9 @@ public class PlayerBucketRepository : IPlayerBucketRepository
 
         if (request.PromotionId != null)
         {
-            var promotion = await _repository.Promotions.FindAsync(request.PromotionId.Value);
+            var promotion = await _repository.Promotions
+                .Include(x => x.PromotionVipLevels)
+                .FirstAsync(x => x.Id == request.PromotionId);
 
             var bonusAmount = promotion.Percentage * request.DepositAmount / 100M;
 
@@ -100,6 +104,38 @@ public class PlayerBucketRepository : IPlayerBucketRepository
                 0,
                 now.Offset);
 
+            var promotionData = new
+            {
+                promotion.Id,
+                promotion.BrandId,
+                promotion.From,
+                promotion.To,
+                Status = (PromotionStatus)promotion.Status,
+                promotion.Name,
+                promotion.AutoSentPlayerBonus,
+                promotion.PromotionType,
+                promotion.BonusAmountLimit,
+                promotion.AmountUsed,
+                promotion.Unlimited,
+                GameType = (GameType?)promotion.GameType,
+                promotion.Percentage,
+                promotion.TotalAmountLimit,
+                promotion.TurnoverMultiple,
+                VipLevels = promotion.PromotionVipLevels?.Select(v => v.Level).OrderBy(level => level).ToArray(),
+                promotion.CreatedOn,
+                promotion.UpdatedOn,
+                promotion.CreatedByUsername,
+                promotion.UpdatedByUsername,
+                promotion.SubSubject,
+                promotion.Content,
+                promotion.Terms,
+                promotion.DesktopBanner,
+                promotion.MobileBanner,
+                promotion.Localization,
+                Number = promotion.DisplayOrder,
+                promotion.CampaignDetail
+            };
+
             var bonusId = GuidExtensions.NewSequentialGuid();
 
             var bonus = new PromotionBonus
@@ -125,7 +161,13 @@ public class PlayerBucketRepository : IPlayerBucketRepository
                         BonusAmount = bonusAmount,
                         SentOn = promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null
                     }
-                }.ToHashSet()
+                }.ToHashSet(),
+                Detail = JsonSerializer.Serialize(promotionData,new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                })
             };
 
             await _repository.PromotionBonus.AddAsync(bonus).ConfigureAwait(false);

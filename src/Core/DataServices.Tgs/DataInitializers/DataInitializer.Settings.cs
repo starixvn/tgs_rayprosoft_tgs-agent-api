@@ -680,12 +680,12 @@ public partial class DataInitializer
                     },
                     new PromotionType
                     {
-                        Name = "WeeklyTurnoverRebate",
-                        SettlementIntervalType = "Daily",
+                        Name = "TurnoverRebateWeekly",
+                        SettlementIntervalType = "Weekly",
                         Trans = new()
                         {
-                            Zh = "流水反水",
-                            En = "Turnover Rebate"
+                            Zh = "每周流水反水",
+                            En = "Turnover Rebate Weekly"
                         }
                     }
                 }
