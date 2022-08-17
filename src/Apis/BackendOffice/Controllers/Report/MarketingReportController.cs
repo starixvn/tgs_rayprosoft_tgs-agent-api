@@ -10,7 +10,6 @@ using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
-using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
@@ -20,34 +19,61 @@ namespace TGS.Apis.BackendOffice.Controllers.Report;
 [ApiController]
 public class MarketingReportController : BaseContextController
 {
-    [HttpGet("firstDepositDetail")]
-    [Description("Get first deposit details report")]
-    public Task<PagedResponse<MarketingFirstDepositDetailReportModel>> GetMarketingFirstDepositDetailsAsync(
-        [FromServices]
-        IGetService<GetMarketingFirstDepositDetailQuery, PagedResponse<MarketingFirstDepositDetailReportModel>>
-            marketsService,
-        [FromQuery] GetMarketingFirstDepositDetailReportRequest request,
-        [FromQuery] PageableRequest pagingRequest)
-    {
-        var date = DateOnly.FromDateTime(request.Date.ToOffset(TimeSpan.FromHours(8D)).DateTime);
-
-        var query = new GetMarketingFirstDepositDetailQuery(
-            request.BrandId,
-            date,
-            request.AgentUsername,
-            pagingRequest);
-
-        return marketsService.GetAsync(query).AsTask();
-    }
-
     [HttpGet("gamingDetail")]
     [Description("Get gaming details report")]
     public async Task<PagedResponse<MarketingGamingDetailReportModel>> GetMarketingGamingDetailsAsync(
-        [FromServices] IGetService<GetMarketingGamingDetailReportRequest, PagedResponse<MarketingGamingDetailReportModel>> marketsService,
+        [FromServices] IQueryService<AgentPlayerGamingDetailQuery, PlayerGamingDetail> queryService,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromQuery] GetMarketingGamingDetailReportRequest request)
-        => await marketsService
-            .GetAsync(request)
+    {
+        var agentQuery = queryAgentsService
+           .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
             .ConfigureAwait(false);
+
+        var agentId = agentDict[request.AgentUsername];
+
+        var query = new AgentPlayerGamingDetailQuery(request.BrandId, request.ReportDate);
+        var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Where(item => item.AgentId == agentId)
+            .ToArrayAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var dataQuery = statisticsData.AsQueryable();
+
+        var paging = new Paging<PlayerGamingDetail>();
+
+        if (!string.IsNullOrWhiteSpace(request.SortBy))
+            paging.SortByPropertyName(request.SortBy, request.IsDesc);
+
+        paging.Page = request.Page;
+        paging.RowCount = request.Rows;
+
+        var totalCount = statisticsData.Length;
+
+        dataQuery = dataQuery
+            .ApplyOrderBy(paging)
+            .ApplyPaging(paging);
+
+        return new PagedResponse<MarketingGamingDetailReportModel>
+        {
+            TotalCount = totalCount,
+            Items = dataQuery
+                .Select(item => new MarketingGamingDetailReportModel
+                {
+                    Username = item.PlayerName,
+                    GameProviderName = item.GpCode,
+                    SubGameProviderName = item.SubGpCode,
+                    WinLossAmount = item.WinLossAmount
+                })
+                .ToArray()
+        };
+    }
 
     [HttpGet]
     [Description("Get marketing report")]
@@ -92,7 +118,7 @@ public class MarketingReportController : BaseContextController
                         select new
                         {
                             ReportDate = date,
-                            AgentId = marketingItem?.AgentId ?? paymentItem.AgentId,
+                            AgentId = agentId,
                             RegisterCount = marketingItem?.RegisterCount ?? 0,
                             FirstDepositPlayers = paymentItem?.FirstDepositPlayers ?? 0,
                             GamingCount = marketingItem?.GamingCount ?? 0
@@ -115,9 +141,10 @@ public class MarketingReportController : BaseContextController
 
         var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            [nameof(MarketingReportModel.ReportDate)] = nameof(DailyAggregateInfo.ReportDate),
-            [nameof(MarketingReportModel.GamingCount)] = nameof(DailyAggregateInfo.GamingCount),
-            [nameof(MarketingReportModel.RegisterCount)] = nameof(DailyAggregateInfo.RegisterCount)
+            [nameof(MarketingReportModel.ReportDate)] = "ReportDate",
+            [nameof(MarketingReportModel.GamingCount)] = "GamingCount",
+            [nameof(MarketingReportModel.RegisterCount)] = "RegisterCount",
+            [nameof(MarketingReportModel.FirstDepositCount)] = "FirstDepositPlayers"
         };
 
         if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy) && propertyMap.ContainsKey(pagingRequest.SortBy))
