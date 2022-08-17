@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.FileService.Clients;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages.Player;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
@@ -89,7 +89,7 @@ public class PlayerIdentityController : BaseContextController
         [FromQuery] GetPlayerIdentityAuthenticationListRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
-        var paging = new Paging<PlayerIdentityAuthenticationInfo>
+        var paging = new Tgs.Paging.Paging<PlayerIdentityAuthenticationInfo>
         {
             RowCount = pagingRequest.Rows,
             Page = pagingRequest.Page

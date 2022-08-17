@@ -1,4 +1,5 @@
 ﻿using System;
+using Tgs.Paging;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 using TGS.Services.BackOffice.Domain;
 
@@ -14,4 +15,4 @@ public record GetPlayerIdentityAuthenticationFormsQuery(
     DateTimeOffset? EndCreatedOn,
     DateTimeOffset? BeginReviewedOn,
     DateTimeOffset? EndReviewedOn,
-    Paging.Paging<PlayerIdentityAuthenticationInfo> Paging);
+    Paging<PlayerIdentityAuthenticationInfo> Paging);

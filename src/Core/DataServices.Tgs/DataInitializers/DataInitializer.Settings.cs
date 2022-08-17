@@ -175,7 +175,9 @@ public partial class DataInitializer
                             new MenuSetting("View"),
                             new MenuSetting("Update"),
                             new MenuSetting("PhoneFilter"),
-                            new MenuSetting("RealnameFilter")
+                            new MenuSetting("Contact"),
+                            new MenuSetting("DepositForm"),
+                            new MenuSetting("WithdrawalForm")
                         }
                     },
                     new MenuSetting("PlayerIdentity")
@@ -503,6 +505,15 @@ public partial class DataInitializer
                             new MenuSetting("Update")
                         }
                     },
+                    new MenuSetting("GameProviderRound")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update"),
+                            new MenuSetting("Export"),
+                        }
+                    },
                     new MenuSetting("GameProviderReport")
                     {
                         SubMenus = new[]
@@ -633,6 +644,16 @@ public partial class DataInitializer
                         {
                             Zh = "每日再充",
                             En = "Daily Re-Deposit"
+                        }
+                    },
+                    new PromotionType
+                    {
+                        Name = "AccountDeposit",
+                        SettlementIntervalType = "Instantly",
+                        Trans = new()
+                        {
+                            Zh = "充值",
+                            En = "Deposit"
                         }
                     }
                 }
@@ -797,7 +818,7 @@ public partial class DataInitializer
                     },
                     new PromotionType
                     {
-                        Name = "DepositLottery",
+                        Name = "DepositAccumulateRoulette",
                         SettlementIntervalType = "Instantly",
                         Trans = new()
                         {

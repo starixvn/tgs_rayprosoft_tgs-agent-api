@@ -188,80 +188,16 @@ internal class MarketingReportTests
     [Test]
     public async Task Get_Player_Register_Detail()
     {
-        var fakeReportClient = Substitute.For<IReportClient>();
-        var fakeQueryAgentService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
-        var fakeQueryPlayerDailyRegisterService = Substitute.For<IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem>>();
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
 
-        var sut = new GetMarketingRegisterDetailQuery(
-            fakeReportClient,
-            fakeQueryAgentService,
-            fakeQueryPlayerDailyRegisterService,
-            fakeSystemClock);
+        var sut = new AgentPlayerRegisterDetailQueryService(fakeMarketingReportClient);
 
-        var query = new GetMarketingRegisterDetailReportRequest
-        {
-            BrandId = Guid.NewGuid(),
-            Date = DateTime.Now.AddDays(-1D),
-            Page = 1,
-            Rows = 10
-        };
+        var query = new AgentPlayerRegisterDetailQuery(Guid.NewGuid(), DateOnly.Parse("2022-8-15"));
 
-        _ = fakeReportClient
-            .GetMarketingRegisterDetailsAsync(Arg.Is<GetMarketingRegisterDetailRequest>(
-                request => request.BrandId == query.BrandId
-                    && request.Date == new DateTimeOffset(
-                        query.Date.ToOffset(TimeSpan.FromHours(8D)).Date,
-                        TimeSpan.FromHours(8D))))
-            .Returns(new Tgs.Report.Client.Models.PagedResponse<MarketingRegisterDetailModel>
-            {
-                Valid = true,
-                TotalCount = 0,
-                Items = Array.Empty<MarketingRegisterDetailModel>()
-            });
+        _ = await sut.QueryAsync(query).ToArrayAsync();
 
-        var actual = await sut.GetAsync(query);
-
-        Assert.IsNotNull(actual);
-    }
-
-    [Test]
-    public async Task Get_ReadTime_PlayerRegister_Detail()
-    {
-        var fakeReportClient = Substitute.For<IReportClient>();
-        var fakeQueryAgentService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
-        var fakeQueryPlayerDailyRegisterService = Substitute.For<IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem>>();
-        var fakeSystemClock = Substitute.For<ISystemClock>();
-
-        var sut = new GetMarketingRegisterDetailQuery(
-            fakeReportClient,
-            fakeQueryAgentService,
-            fakeQueryPlayerDailyRegisterService,
-            fakeSystemClock);
-
-        var query = new GetMarketingRegisterDetailReportRequest
-        {
-            BrandId = Guid.NewGuid(),
-            AgentUsername = "Agent1",
-            Date = DateTime.Now,
-            Page = 1,
-            Rows = 10
-        };
-
-        _ = fakeSystemClock.UtcNow.Returns(DateTimeOffset.UtcNow);
-
-        _ = fakeQueryAgentService.QueryAsync(Arg.Any<AllAgentsByBrandQuery>())
-            .Returns(new[] {
-                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
-            }.ToAsyncEnumerable());
-
-        var actual = await sut.GetAsync(query);
-
-        _ = fakeQueryPlayerDailyRegisterService.Received(1)
-            .QueryAsync(Arg.Is<GetDailyMarketingRegisterDetailQuery>(q => q.BrandId == q.BrandId
-                && q.QueryDate == DateOnly.FromDateTime(query.Date.ToOffset(TimeSpan.FromHours(8D)).DateTime)));
-
-        Assert.IsNotNull(actual);
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryPlayerRegisterDetailAsync(Arg.Is(query.BrandId), Arg.Is(query.ReportDate));
     }
 
     [Test]
