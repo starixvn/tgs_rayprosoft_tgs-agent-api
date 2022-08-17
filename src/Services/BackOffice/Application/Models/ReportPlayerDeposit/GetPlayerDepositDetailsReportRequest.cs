@@ -7,5 +7,5 @@ public record GetPlayerDepositDetailsReportRequest : PageableRequest
 {
     public Guid BrandId { get; init; }
     public string AgentUsername { get; init; } = default!;
-    public DateOnly Date { get; init; }
+    public DateOnly ReportDate { get; init; }
 }
