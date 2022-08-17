@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using TGS.Paging;
+using Tgs.Paging;
 
 namespace TGS.Services.Agent;
 

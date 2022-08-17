@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
+using Tgs.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Vip;
 

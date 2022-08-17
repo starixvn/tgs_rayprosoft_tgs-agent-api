@@ -8,10 +8,10 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Banner;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 using Tgs.ServiceUtility;
+using Tgs.Paging;
 
 namespace TGS.Apis.BackendOffice.Controllers;
 
