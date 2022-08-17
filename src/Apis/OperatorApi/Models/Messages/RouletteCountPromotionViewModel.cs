@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public class RoulettePromotionViewModel
+public class RouletteCountPromotionViewModel
 {
     public Guid PromotionId { get; init; }
 

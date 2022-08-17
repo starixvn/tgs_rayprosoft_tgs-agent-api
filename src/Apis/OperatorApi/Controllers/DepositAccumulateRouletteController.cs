@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 
 namespace TGS.Apis.OperatorApi.Controllers;
@@ -16,46 +17,48 @@ namespace TGS.Apis.OperatorApi.Controllers;
 [ApiController]
 public class DepositAccumulateRouletteController : ControllerBase
 {
-    [HttpPost("roulette/{promotionId}", Name = "DepositAccumulateRoulette")]
+    [HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<RouletteResultResponse> DepositAccumulateRouletteAsync(
-        [FromServices] IGetService<DepositAccumulateRouletteCommand, RouletteResultWithCount> rouletteService,
+    public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
+        [FromServices] IGetService<GetDepositAccumulateRouletteSettingQuery, RouletteSetting?> rouletteService,
+        Guid promotionId)
+    {
+        var query = new GetDepositAccumulateRouletteSettingQuery(promotionId);
+
+        var setting = await rouletteService
+            .GetAsync(query, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new DepositAccumulateRouletteSettingViewModel
+        {
+            RouletteItems = setting is null
+                ? Array.Empty<DepositAccumulateRouletteItemViewModel>()
+                : setting.Items.Select(item => new DepositAccumulateRouletteItemViewModel
+                {
+                    Title = item.Title
+                })
+        };
+    }
+
+    [HttpPost("{promotionId}", Name = "PlayDepositAccumulateRoulette")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask<DepositAccumulateRouletteResultViewModel> PlayDepositAccumulateRouletteAsync(
+        [FromServices] IGetService<PlayDepositAccumulateRouletteCommand, RouletteResult> rouletteService,
         Guid promotionId)
     {
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
         var playerCode = playerTokenData.PlayerCode;
 
-        var command = new DepositAccumulateRouletteCommand(promotionId, playerCode);
+        var command = new PlayDepositAccumulateRouletteCommand(promotionId, playerCode);
 
         var result = await rouletteService
             .GetAsync(command, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        return new RouletteResultResponse
+        return new DepositAccumulateRouletteResultViewModel
         {
             ItemIndex = result.ItemIndex,
-            RouletteCount = result.RouletteCount
+            RouletteCount = result.RemainingCount
         };
-    }
-
-    [HttpPost("roulette/{promotionId}/settings", Name = "GetDepositAccumulateRouletteSettings")]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async IAsyncEnumerable<RouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-        [FromServices] IQueryService<DepositAccumulateRouletteSettingQuery, RouletteItem> rouletteService,
-        Guid promotionId)
-    {
-        var query = new DepositAccumulateRouletteSettingQuery(promotionId);
-
-        var items = await rouletteService
-            .QueryAsync(query, HttpContext.RequestAborted)
-            .ToArrayAsync(HttpContext.RequestAborted)
-            .ConfigureAwait(false);
-
-        foreach (var item in items)
-            yield return new RouletteSettingViewModel
-            {
-                Id = item.Id,
-                Title = item.Title
-            };
     }
 }

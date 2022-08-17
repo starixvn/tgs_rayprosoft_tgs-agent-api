@@ -2,7 +2,7 @@
 
 namespace TGS.Apis.OperatorApi.Models.Messages;
 
-public class RouletteResultResponse
+public class DepositAccumulateRouletteResultViewModel
 {
     [JsonPropertyName("itemindex")]
     public int ItemIndex { get; init; }

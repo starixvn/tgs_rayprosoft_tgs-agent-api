@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -19,18 +18,18 @@ public class PromotionTests
     {
         var fakeDepositAccumulateRouletteClient = Substitute.For<IDepositAccumulateRouletteClient>();
 
-        var command = new DepositAccumulateRouletteCommand(Guid.NewGuid(), "player1");
+        var command = new PlayDepositAccumulateRouletteCommand(Guid.NewGuid(), "player1");
 
-        var expected = new RouletteResultWithCount(Guid.NewGuid(), 3, 5);
+        var expected = new RouletteResult(Guid.NewGuid(), 3, 5);
 
         _ = fakeDepositAccumulateRouletteClient
             .RouletteAsync(
                 Arg.Is(command.PromotionId),
                 Arg.Is(command.PlayerCode),
                 Arg.Any<CancellationToken>())
-            .Returns(new RouletteResult(expected.Id, expected.ItemIndex, expected.RouletteCount));
+            .Returns(expected);
 
-        var sut = new DepositAccumulateRouletteCommandService(fakeDepositAccumulateRouletteClient);
+        var sut = new PlayDepositAccumulateRouletteCommandService(fakeDepositAccumulateRouletteClient);
 
         var actual = await sut.GetAsync(command);
 
@@ -47,11 +46,11 @@ public class PromotionTests
     public async Task Get_Deposit_Accumulate_Roulette_Settings()
     {
         var fakeDepositAccumulateRouletteClient = Substitute.For<IDepositAccumulateRouletteClient>();
-        var sut = new DepositAccumulateRouletteSettingQueryService(fakeDepositAccumulateRouletteClient);
+        var sut = new GetDepositAccumulateRouletteSettingQueryService(fakeDepositAccumulateRouletteClient);
 
-        var command = new DepositAccumulateRouletteSettingQuery(Guid.NewGuid());
+        var command = new GetDepositAccumulateRouletteSettingQuery(Guid.NewGuid());
 
-        await sut.QueryAsync(command).ToArrayAsync();
+        _ = await sut.GetAsync(command);
 
         _ = fakeDepositAccumulateRouletteClient.Received(1)
             .GetRouletteSettingAsync(

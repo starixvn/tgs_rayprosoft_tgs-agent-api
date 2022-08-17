@@ -4,27 +4,25 @@ using System.Threading.Tasks;
 using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.ServiceUtility;
 
+using Clients = Tgs.DepositAccumulateRoulette.Clients;
+
 namespace TGS.Services.Operator.ApplicationServices.Promotions;
 
-internal class DepositAccumulateRouletteCommandService : IGetService<DepositAccumulateRouletteCommand, RouletteResultWithCount>
+internal class PlayDepositAccumulateRouletteCommandService : IGetService<PlayDepositAccumulateRouletteCommand, Clients.RouletteResult>
 {
     private readonly IDepositAccumulateRouletteClient _depositAccumulateRouletteClient;
 
-    public DepositAccumulateRouletteCommandService(
+    public PlayDepositAccumulateRouletteCommandService(
         IDepositAccumulateRouletteClient depositAccumulateRouletteClient)
     {
         _depositAccumulateRouletteClient = depositAccumulateRouletteClient ?? throw new ArgumentNullException(nameof(depositAccumulateRouletteClient));
     }
 
-    public async ValueTask<RouletteResultWithCount> GetAsync(
-        DepositAccumulateRouletteCommand command,
+    public ValueTask<Clients.RouletteResult> GetAsync(
+        PlayDepositAccumulateRouletteCommand command,
         CancellationToken cancellationToken = default)
-    {
-        var result = await _depositAccumulateRouletteClient.RouletteAsync(
+        => _depositAccumulateRouletteClient.RouletteAsync(
             command.PromotionId,
             command.PlayerCode,
-            cancellationToken).ConfigureAwait(false);
-
-        return new RouletteResultWithCount(result.Id, result.ItemIndex, result.RemainingCount);
-    }
+            cancellationToken);
 }
