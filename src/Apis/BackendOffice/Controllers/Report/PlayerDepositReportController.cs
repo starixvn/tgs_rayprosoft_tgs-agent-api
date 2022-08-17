@@ -37,7 +37,7 @@ public class PlayerDepositReportController : BaseContextController
 
         var agentId = agentDict[request.AgentUsername];
 
-        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
+        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.ReportDate);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
                 && item.IsFirstDeposit is not null)
@@ -243,7 +243,7 @@ public class PlayerDepositReportController : BaseContextController
 
         var agentId = agentDict[request.AgentUsername];
 
-        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
+        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.ReportDate);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
                 && item.IsFirstDeposit == true)
@@ -302,7 +302,7 @@ public class PlayerDepositReportController : BaseContextController
 
         var agentId = agentDict[request.AgentUsername];
 
-        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.Date);
+        var query = new PlayerPaymentStatisticsDetailQuery(request.BrandId, request.ReportDate);
         var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Where(item => item.AgentId == agentId
                 && item.UnSecondDeposit == true)
