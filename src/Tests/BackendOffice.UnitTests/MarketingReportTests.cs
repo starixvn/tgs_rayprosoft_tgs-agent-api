@@ -4,13 +4,9 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.MarketingReport.Client;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Marketing;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice;
-using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
@@ -186,6 +182,21 @@ internal class MarketingReportTests
     }
 
     [Test]
+    public async Task Get_Player_Gaming_Detail()
+    {
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new AgentPlayerGamingDetailQueryService(fakeMarketingReportClient);
+
+        var query = new AgentPlayerGamingDetailQuery(Guid.NewGuid(), DateOnly.Parse("2022-8-15"));
+
+        _ = await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryPlayerGamingDetailAsync(Arg.Is(query.BrandId), Arg.Is(query.ReportDate));
+    }
+
+    [Test]
     public async Task Get_Player_Register_Detail()
     {
         var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
@@ -201,6 +212,12 @@ internal class MarketingReportTests
     }
 
     [Test]
+    public void Get_RealTime_Gaming_Detail()
+    {
+        var sut = new GetDailyMarketingGamingDetailQueryService();
+    }
+
+    [Test]
     public async Task Get_RealTime_PlayerRegister_Statistics()
     {
         var fakeMarketingReportRepository = Substitute.For<IMarketingReportRepository>();
@@ -213,11 +230,5 @@ internal class MarketingReportTests
 
         _ = fakeMarketingReportRepository.Received(1)
             .QueryRealTimePlayerDailyRegisterStatisticsAsync(Arg.Is(query.BrandId), Arg.Is(query.QueryDate));
-    }
-
-    [Test]
-    public void Get_RealTime_Gaming_Detail()
-    {
-        var sut = new GetDailyMarketingGamingDetailQueryService();
     }
 }
