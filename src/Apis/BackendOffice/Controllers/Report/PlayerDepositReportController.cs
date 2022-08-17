@@ -224,7 +224,7 @@ public class PlayerDepositReportController : BaseContextController
     }
 
     [HttpGet("playerFirstDepositDetails")]
-    [HttpGet("~/marketingReport/firstDepositDetail")]
+    [HttpGet("~/api/MarketingReport/firstDepositDetail")]
     [Description("Get player first deposit details report")]
     public async Task<PagedResponse<PlayerDepositDetailReportModel>> GetPlayerFirstDepositDetailsAsync(
         [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryService,
