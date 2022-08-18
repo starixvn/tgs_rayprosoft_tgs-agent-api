@@ -6,5 +6,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages;
 public class DepositAccumulateRouletteSettingViewModel
 {
     [JsonPropertyName("rouletteitems")]
-    public IEnumerable<DepositAccumulateRouletteItemViewModel> RouletteItems { get; set; }
+    public IEnumerable<DepositAccumulateRouletteItemViewModel> RouletteItems { get; init; }
 }
