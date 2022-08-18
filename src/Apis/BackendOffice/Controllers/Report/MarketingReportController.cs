@@ -100,6 +100,7 @@ public class MarketingReportController : BaseContextController
             .ToDictionaryAsync(
                 a => a.UserName,
                 a => a.AgentId,
+                StringComparer.OrdinalIgnoreCase,
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
