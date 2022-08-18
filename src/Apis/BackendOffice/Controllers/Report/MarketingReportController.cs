@@ -39,12 +39,18 @@ public class MarketingReportController : BaseContextController
         var agentId = agentDict[request.AgentUsername];
 
         var query = new AgentPlayerGamingDetailQuery(request.BrandId, request.ReportDate);
-        var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
-            .Where(item => item.AgentId == agentId)
-            .ToArrayAsync(HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        var statisticsData = queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Where(item => item.AgentId == agentId);
 
-        var dataQuery = statisticsData.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(request.PlayerUsername))
+            statisticsData = statisticsData.Where(item => string.Equals(
+                item.PlayerName,
+                request.PlayerUsername,
+                StringComparison.OrdinalIgnoreCase));
+
+        var dataQuery = (await statisticsData
+            .ToArrayAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false)).AsQueryable();
 
         var paging = new Paging<PlayerGamingDetail>();
 
