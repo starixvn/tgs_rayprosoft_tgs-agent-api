@@ -140,9 +140,9 @@ public class PromotionController : ControllerBase
                 });
     }
 
-    [HttpGet("roulette/count", Name = "ListRouletteCountPromotions")]
+    [HttpGet("roulette/count", Name = "ListRouletteCountItems")]
     [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-    public async IAsyncEnumerable<RouletteCountPromotionViewModel> ListRouletteCountPromotionsAsync(
+    public async IAsyncEnumerable<RouletteCountItemViewModel> ListRouletteCountItemsAsync(
         [FromServices] IMessageSender messageSender)
     {
         var promotionTypes = new[] { "DepositAccumulateRoulette" };
@@ -151,23 +151,23 @@ public class PromotionController : ControllerBase
 
         foreach (var promotionType in promotionTypes)
         {
-            var request = new RouletteCountPromotionsReqest
+            var request = new RouletteCountRequest
             {
                 PlayerCode = playerTokenData.PlayerCode
             };
 
-            var subject = $"tgs.promotion.{promotionType.ToLower()}.roulettecountpromotions.query";
+            var subject = $"tgs.promotion.{promotionType.ToLower()}.roulettecountitems.query";
 
             var data = await messageSender.RequestAsync(subject, request.ToByteArray()).ConfigureAwait(false);
 
-            var response = RouletteCountPromotionsResponse.Parser.ParseFrom(data.Span);
+            var response = RouletteCountResponse.Parser.ParseFrom(data.Span);
 
-            foreach (var promotion in response.Promotions)
-                yield return new RouletteCountPromotionViewModel
+            foreach (var item in response.Items)
+                yield return new RouletteCountItemViewModel
                 {
-                    PromotionId = promotion.PromotionId,
+                    PromotionId = item.PromotionId,
                     PromotionType = promotionType,
-                    RouletteCount = promotion.RouletteCount
+                    RouletteCount = item.RouletteCount
                 };
         }
     }
