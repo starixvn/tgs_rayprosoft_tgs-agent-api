@@ -86,6 +86,9 @@ public class MarketingReportController : BaseContextController
         [FromServices] IQueryService<AgentMarketingReportQuery, DailyAggregateInfo> queryService,
         [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryPaymentService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryPaymentDetailService,
+        [FromServices] IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail> queryRegisterDetailService,
+        [FromServices] IQueryService<AgentPlayerGamingDetailQuery, PlayerGamingDetail> queryGamingDetailService,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
@@ -129,6 +132,70 @@ public class MarketingReportController : BaseContextController
                             FirstDepositPlayers = paymentItem?.FirstDepositPlayers ?? 0,
                             GamingCount = marketingItem?.GamingCount ?? 0
                         };
+
+        var currentDate = new DateTimeOffset(DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(8D)).Date, TimeSpan.FromHours(8D));
+
+        if (request.To > currentDate)
+        {
+            var queryDate = DateOnly.FromDateTime(currentDate.ToOffset(TimeSpan.FromHours(8D)).Date);
+
+            var currentDateRegisterQuery = new AgentPlayerRegisterDetailQuery(request.BrandId, queryDate);
+            var currentDateRegisterDetails = queryRegisterDetailService.QueryAsync(currentDateRegisterQuery, HttpContext.RequestAborted)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(async g => new
+                {
+                    AgentId = g.Key,
+                    RegisterCount = await g
+                        .CountAsync(HttpContext.RequestAborted)
+                        .ConfigureAwait(false)
+                });
+
+            var currentDateGamingQuery = new AgentPlayerGamingDetailQuery(request.BrandId, queryDate);
+            var currentDateGamingDetails = queryGamingDetailService.QueryAsync(currentDateGamingQuery, HttpContext.RequestAborted)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(async g => new
+                {
+                    AgentId = g.Key,
+                    GamingCount = await g
+                        .Select(item => item.PlayerCode)
+                        .Distinct()
+                        .CountAsync(HttpContext.RequestAborted)
+                        .ConfigureAwait(false)
+                });
+
+            var currentDatePaymentQuery = new PlayerPaymentStatisticsDetailQuery(
+                request.BrandId,
+                queryDate);
+            var currentDatePaymentDetails = queryPaymentDetailService.QueryAsync(currentDatePaymentQuery)
+                .GroupBy(item => item.AgentId)
+                .SelectAwait(async g => new
+                {
+                    AgentId = g.Key,
+                    FirstDepositPlayers = await g
+                        .CountAsync(item => item.IsFirstDeposit == true, HttpContext.RequestAborted)
+                        .ConfigureAwait(false)
+                });
+
+            dataQuery = dataQuery.Concat(
+                from ag in agentDict.Values.ToAsyncEnumerable()
+                join register in currentDateRegisterDetails
+                    on ag equals register.AgentId into gr
+                from register in gr.DefaultIfEmpty()
+                join gaming in currentDateGamingDetails
+                    on ag equals gaming.AgentId into gg
+                from gaming in gg.DefaultIfEmpty()
+                join payment in currentDatePaymentDetails
+                    on ag equals payment.AgentId into gp
+                from payment in gp.DefaultIfEmpty()
+                select new
+                {
+                    ReportDate = queryDate,
+                    AgentId = ag,
+                    RegisterCount = register?.RegisterCount ?? 0,
+                    FirstDepositPlayers = payment?.FirstDepositPlayers ?? 0,
+                    GamingCount = gaming?.GamingCount ?? 0
+                });
+        }
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
