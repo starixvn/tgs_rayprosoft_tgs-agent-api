@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -144,18 +143,22 @@ public class MarketingReportController : BaseContextController
             dataQuery = dataQuery.Where(item => item.AgentId == agentId);
         }
 
-        var paging = dataQuery.CreatePaging();
+        var paging = dataQuery.CreatePaging()
+            .MapProperty(
+                nameof(MarketingReportModel.ReportDate),
+                item => item.ReportDate)
+            .MapProperty(
+                nameof(MarketingReportModel.GamingCount),
+                item => item.GamingCount)
+            .MapProperty(
+                nameof(MarketingReportModel.RegisterCount),
+                item => item.RegisterCount)
+            .MapProperty(
+                nameof(MarketingReportModel.FirstDepositCount),
+                item => item.FirstDepositPlayers);
 
-        var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            [nameof(MarketingReportModel.ReportDate)] = "ReportDate",
-            [nameof(MarketingReportModel.GamingCount)] = "GamingCount",
-            [nameof(MarketingReportModel.RegisterCount)] = "RegisterCount",
-            [nameof(MarketingReportModel.FirstDepositCount)] = "FirstDepositPlayers"
-        };
-
-        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy) && propertyMap.ContainsKey(pagingRequest.SortBy))
-            paging.SortByPropertyName(propertyMap[pagingRequest.SortBy], pagingRequest.IsDesc);
+        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
+            paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
 
         paging.Page = pagingRequest.Page;
         paging.RowCount = pagingRequest.Rows;
