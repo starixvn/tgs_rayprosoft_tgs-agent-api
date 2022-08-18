@@ -104,6 +104,9 @@ public class PlayerDepositReportController : BaseContextController
             toDate = today;
 
         if (toDate >= utcDate)
+        {
+            dataQuery = dataQuery.Where(s => s.ReportDate < utcDate);
+
             for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
             {
                 var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
@@ -136,6 +139,7 @@ public class PlayerDepositReportController : BaseContextController
 
                 dataQuery = dataQuery.Concat(currentDateDetailQuery);
             }
+        }
 
         var agentQuery = queryAgentsService
             .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
