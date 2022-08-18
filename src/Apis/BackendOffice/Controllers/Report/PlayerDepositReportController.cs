@@ -97,39 +97,48 @@ public class PlayerDepositReportController : BaseContextController
         var dataQuery = data.Where(s => s.ReportDate >= dateRange.From
             && s.ReportDate < dateRange.To);
 
-        var currentDate = new DateTimeOffset(DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(8D)).Date, TimeSpan.FromHours(8D));
+        var utcDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
+        var toDate = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8)).Date);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date);
+        if (toDate > today)
+            toDate = today;
 
-        if (request.To > currentDate)
+        if (toDate >= utcDate)
         {
-            var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
-                request.BrandId,
-                DateOnly.FromDateTime(currentDate.ToOffset(TimeSpan.FromHours(8D)).Date));
-            var currentDateDetailQuery = queryDetailService.QueryAsync(currentDateQuery)
-                .GroupBy(item => item.AgentId)
-                .SelectAwait(g => g.AggregateAsync(
-                    new PlayerPaymentDetailAggregateInfo()
-                    {
-                        AgentId = g.Key
-                    },
-                    (seed, item) =>
-                    {
-                        if (item.IsFirstDeposit == true)
-                            seed.FirstDepositPlayers++;
-                        if (item.UnSecondDeposit == true)
-                            seed.UndepositAgainPlayers++;
-                        if (item.IsFirstDeposit is not null)
-                            seed.DepositPlayers++;
+            dataQuery = dataQuery.Where(s => s.ReportDate < utcDate);
 
-                        return seed;
-                    }, HttpContext.RequestAborted))
-                .Select(info => new AgentPlayerDepositStatistics(
-                    currentDateQuery.QueryDate,
-                    info.AgentId,
-                    info.FirstDepositPlayers,
-                    info.DepositPlayers,
-                    info.UndepositAgainPlayers));
+            for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
+            {
+                var currentDateQuery = new PlayerPaymentStatisticsDetailQuery(
+                    request.BrandId,
+                    utcDate.AddDays(i));
+                var currentDateDetailQuery = queryDetailService.QueryAsync(currentDateQuery)
+                    .GroupBy(item => item.AgentId)
+                    .SelectAwait(g => g.AggregateAsync(
+                        new PlayerPaymentDetailAggregateInfo()
+                        {
+                            AgentId = g.Key
+                        },
+                        (seed, item) =>
+                        {
+                            if (item.IsFirstDeposit == true)
+                                seed.FirstDepositPlayers++;
+                            if (item.UnSecondDeposit == true)
+                                seed.UndepositAgainPlayers++;
+                            if (item.IsFirstDeposit is not null)
+                                seed.DepositPlayers++;
 
-            dataQuery = dataQuery.Concat(currentDateDetailQuery);
+                            return seed;
+                        }, HttpContext.RequestAborted))
+                    .Select(info => new AgentPlayerDepositStatistics(
+                        currentDateQuery.QueryDate,
+                        info.AgentId,
+                        info.FirstDepositPlayers,
+                        info.DepositPlayers,
+                        info.UndepositAgainPlayers));
+
+                dataQuery = dataQuery.Concat(currentDateDetailQuery);
+            }
         }
 
         var agentQuery = queryAgentsService

@@ -21,9 +21,9 @@ internal class PlayerPaymentStatisticsDetailQueryService : IQueryService<PlayerP
         PlayerPaymentStatisticsDetailQuery query,
         CancellationToken cancellationToken = default)
     {
-        var currentDate = DateOnly.FromDateTime(_systemClock.UtcNow.ToOffset(TimeSpan.FromHours(8D)).DateTime);
+        var currentDate = DateOnly.FromDateTime(_systemClock.UtcNow.DateTime);
 
-        return query.QueryDate == currentDate
+        return query.QueryDate >= currentDate
             ? _paymentReportingRepository.QueryRealTimePlayerDailyDepositStatisticsAsync(
                 query.BrandId,
                 query.QueryDate,
