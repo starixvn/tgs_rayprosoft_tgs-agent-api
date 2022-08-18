@@ -60,7 +60,7 @@ public class MarketingReportController : BaseContextController
         paging.Page = request.Page;
         paging.RowCount = request.Rows;
 
-        var totalCount = statisticsData.Length;
+        var totalCount = dataQuery.Count();
 
         dataQuery = dataQuery
             .ApplyOrderBy(paging)
