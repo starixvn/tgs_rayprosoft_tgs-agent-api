@@ -11,6 +11,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Attributes;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.ReportRound;
+using TGS.Services.BackOffice.Application.Services;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report;
 
@@ -18,6 +19,31 @@ namespace TGS.Apis.BackendOffice.Controllers.Report;
 [ApiController]
 public class RoundReportController : BaseContextController
 {
+    [HttpPut("system/addround")]
+    [Description("Add round")]
+    public ValueTask AddCompanyRoundAsync(
+        [FromServices] ICommandService<AddCompanyRoundCommand> commandService,
+        [FromServices] AddCompanyRoundRequest request)
+        => commandService
+            .ExecuteAsync(new AddCompanyRoundCommand
+            {
+                PlayerCode = request.PlayerCode,
+                ClientRoundStatus = request.ClientRoundStatus,
+                GameProviderId = request.GameProviderId,
+                GameId = request.GameId,
+                ExternalRoundId = request.ExternalRoundId,
+                ExternalCreatedOn = request.ExternalCreatedOn,
+                ExternalClosedOn = request.ExternalClosedOn,
+                BetAmount = request.BetAmount,
+                ValidBetAmount = request.ValidBetAmount,
+                SettleAmount = request.SettleAmount,
+                Turnover = request.Turnover,
+                Commission = request.Commission,
+                CompanyWinLoss = request.CompanyWinLoss,
+                OperatorId = UserId,
+                Remark = request.Remark
+            }, HttpContext.RequestAborted);
+
     [HttpGet("exportSystemRounds")]
     [Description("Export rounds")]
     [ByPassAdminLog]
