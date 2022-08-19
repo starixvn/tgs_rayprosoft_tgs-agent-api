@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
+﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Caching.Memory;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
@@ -36,11 +32,8 @@ internal class CachedAgentPlayerDepositQueryService : IQueryService<AgentPlayerD
             async entry =>
             {
                 entry.AbsoluteExpiration = new DateTimeOffset(
-                    now
-                        .ToOffset(TimeSpan.FromHours(8D))
-                        .Date
-                        .AddHours(8D),
-                    TimeSpan.FromHours(8D));
+                    now.ToUniversalTime().Date.AddDays(1D).AddHours(1),
+                    TimeSpan.Zero);
 
                 return await _sourceService
                     .QueryAsync(query, cancellationToken)
