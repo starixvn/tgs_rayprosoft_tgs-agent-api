@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
@@ -14,5 +15,6 @@ public static class ServiceCollectionExtensions
             .Decorate<IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem>, CachedPlayerPaymentStatisticsDetailQueryService>()
             .Decorate<IQueryService<AgentMarketingReportQuery, DailyAggregateInfo>, CachedAgentMarketingReportQueryService>()
             .Decorate<IQueryService<AgentPlayerGamingDetailQuery, PlayerGamingDetail>, CachedAgentPlayerGamingDetailQueryService>()
-            .Decorate<IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail>, CachedAgentPlayerRegisterDetailQueryService>();
+            .Decorate<IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail>, CachedAgentPlayerRegisterDetailQueryService>()
+            .Decorate<IQueryService<AllAgentsByBrandQuery, AgentInfo>, CachedAllAgentsByBrandQueryService>();
 }
