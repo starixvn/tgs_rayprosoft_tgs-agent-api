@@ -95,13 +95,6 @@ public class AgentReduceAmountHandler : Handler<CreateAgentReduceAmountRequest, 
             }
         }
 
-        var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
-
-        if (wallet.Balance - request.Amount < 0)
-        {
-            return CreateInvalidResponse<MessageResponse>(Agent.InsufficientBalance);
-        }
-
         var remark = _jsonSerializationProvider.SerializeToString(new
         {
             request.TransactionType,
