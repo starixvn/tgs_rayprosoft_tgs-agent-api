@@ -23,7 +23,7 @@ public class RoundReportController : BaseContextController
     [Description("Add round")]
     public ValueTask AddCompanyRoundAsync(
         [FromServices] ICommandService<AddCompanyRoundCommand> commandService,
-        [FromServices] AddCompanyRoundRequest request)
+        [FromBody] AddCompanyRoundRequest request)
         => commandService
             .ExecuteAsync(new AddCompanyRoundCommand
             {
