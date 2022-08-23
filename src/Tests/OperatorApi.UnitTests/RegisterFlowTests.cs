@@ -14,14 +14,17 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
 using TGS.Services.Operator.PlayerRegisterFlow;
 using static TGS.Services.Operator.PlayerRegisterFlow.CreatePlayerRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetEmailRegisterFlowStep;
+using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneDontCareDuplicateRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetWithdrawBankInfoRegisterFlowStep;
+using PhoneData = TGS.Services.Operator.PlayerRegisterFlow.SetPhoneDontCareDuplicateRegisterFlowStep.PhoneData;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -1781,6 +1784,88 @@ public class RegisterFlowTests
             brandId,
             JsonSerializer.SerializeToDocument(inputData),
             locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetPhoneDontCareDuplicateRegisterFlow_ProcessInput()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetPhoneDontCareDuplicateRegisterFlowStep(fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var phoneData = new PhoneData
+        {
+            AreaCode = "123",
+            Phone = "1345678"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient
+            .When(fake => fake
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(locationInfo.PlayerCode),
+                    Arg.Any<IImmutableDictionary<PlayerPropertyName, string>>()))
+            .Do(callInfo =>
+            {
+                var dict = callInfo.Arg<IImmutableDictionary<PlayerPropertyName, string>>();
+
+                if (dict[PlayerPropertyName.AreaCode] == phoneData.AreaCode
+                    && dict[PlayerPropertyName.Phone] == phoneData.Phone
+                    && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString())
+                {
+                    _ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+                        .Returns(new Tgs.PlayerService.Client.PlayerInfo
+                        {
+                            PhoneAuthentication = true
+                        });
+                }
+            });
+
+        var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(phoneData), locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetEmailDontCareDuplicateRegisterFlowStep_ProcessInput()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeCacheManager = Substitute.For<IRedisCacheManager>();
+
+        var sut = new SetEmailDontCareDuplicateRegisterFlowStep(
+            fakePlayerServiceClient,
+            fakeCacheManager);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new EmailData
+        {
+            Email = "tester@test.com"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient
+            .When(fake => fake
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(locationInfo.PlayerCode),
+                    Arg.Any<IImmutableDictionary<PlayerPropertyName, string>>()))
+            .Do(callInfo =>
+            {
+                var dict = callInfo.Arg<IImmutableDictionary<PlayerPropertyName, string>>();
+
+                if (dict[PlayerPropertyName.Email] == inputData.Email)
+                {
+                    _ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+                        .Returns(new Tgs.PlayerService.Client.PlayerInfo
+                        {
+                            EmailAuthentication = true
+                        });
+                }
+            });
+
+        var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(inputData), locationInfo);
 
         Assert.IsTrue(actual.IsCompleted);
     }
