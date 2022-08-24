@@ -19,7 +19,7 @@ unit-test:
     - echo $?
   needs:
     - job: build-code
-      artifacts: false
+      artifacts: true
   only:
     - merge_requests
   artifacts:
