@@ -22,8 +22,6 @@ unit-test:
     - merge_requests
   artifacts:
     when: always
-    paths:
-      - ./src/Tests/TestReports/*-TestReport.xml
     reports:
       junit:
         - ./src/Tests/TestReports/*-TestReport.xml
