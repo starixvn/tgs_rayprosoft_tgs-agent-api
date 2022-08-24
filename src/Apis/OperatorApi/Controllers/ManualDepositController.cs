@@ -174,6 +174,7 @@ public class ManualDepositController : ControllerBase
                     Phone = brandPaymentBankInfo.RootElement.GetProperty("phone").GetString(),
                     QrCode = qrCode,
                     SendNote = request.Note,
+                    SendEMoneyName = request.EMoneyName,
                     BankType = request.BankType
                 }));
 
