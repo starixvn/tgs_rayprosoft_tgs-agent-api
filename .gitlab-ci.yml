@@ -23,5 +23,4 @@ unit-test:
   artifacts:
     when: always
     reports:
-      junit:
-        - ./src/Tests/TestReports/*-TestReport.xml
+      junit: ./**/TestReports/*-TestReport.xml
