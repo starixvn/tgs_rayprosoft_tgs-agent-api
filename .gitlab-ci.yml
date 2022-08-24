@@ -8,19 +8,20 @@ build-code:
     - dotnet build -c $BuildConfiguration
   only:
     - merge_requests
-  artifacts:
-    untracked: true
-    expire_in: "1 days"
+  # artifacts:
+  #   untracked: true
+  #   expire_in: "1 days"
 
 unit-test:
   stage: test
   script:
-    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-build --no-restore
-  dependencies:
-    - build-code
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml"
+  needs:
+    - job: build-code
+      artifacts: false
   only:
     - merge_requests
   artifacts:
     when: always
     reports:
-      junit: ./src/Tests/TestReports/OperatorApi.UnitTests-TestReport.xml
+      junit: ./src/Tests/TestReports/*-TestReport.xml
