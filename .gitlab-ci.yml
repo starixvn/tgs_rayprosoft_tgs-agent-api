@@ -20,7 +20,3 @@ unit-test:
     - build-code
   only:
     - merge_requests
-  artifacts:
-    when: always
-    reports:
-      junit: ./**/TestReports/*-TestReport.xml
