@@ -23,7 +23,7 @@ unit-test:
   artifacts:
     when: always
     paths:
-      - ./TestReports/*-TestReport.xml
+      - src/Tests/TestReports/*-TestReport.xml
     reports:
       junit:
-        - ./TestReports/*-TestReport.xml
+        - src/Tests/TestReports/*-TestReport.xml
