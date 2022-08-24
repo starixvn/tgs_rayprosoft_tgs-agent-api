@@ -1,0 +1,29 @@
+stages:
+  - build
+  - test
+
+build-code:
+  stage: build
+  script:
+    - dotnet build -c $BuildConfiguration
+  only:
+    - merge_requests
+  artifacts:
+    untracked: true
+    expire_in: "1 days"
+
+unit-test:
+  stage: test
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" /p:CollectCoverage=true --no-build --no-restore
+  dependencies:
+    - build-code
+  only:
+    - merge_requests
+  artifacts:
+    when: always
+    paths:
+      - ./TestReports/*-TestReport.xml
+    reports:
+      junit:
+        - ./TestReports/*-TestReport.xml
