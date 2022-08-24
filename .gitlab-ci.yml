@@ -16,6 +16,7 @@ unit-test:
   stage: test
   script:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml"
+    - echo $?
   needs:
     - job: build-code
       artifacts: false
