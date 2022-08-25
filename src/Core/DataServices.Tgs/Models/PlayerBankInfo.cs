@@ -4,6 +4,8 @@ namespace TGS.Core.DataServices.Tgs.Models;
 
 public class PlayerBankInfo
 {
+    public byte[] BankInfoHash { get; set; }
+
     public string BankType { get; set; }
 
     public virtual Brand Brand { get; set; }

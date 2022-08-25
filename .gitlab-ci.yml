@@ -1,0 +1,49 @@
+variables: 
+  ImageName: pgtgs/migration
+  BuildConfiguration: Release
+
+stages:
+  - build
+  - test
+  - dbmigrations
+
+build-code:
+  stage: build
+  script:
+    - dotnet build -c $BuildConfiguration
+  only:
+    - merge_requests
+    - develop
+  artifacts:
+    untracked: true
+    expire_in: "1 days"
+
+unit-test:
+  stage: test
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+  needs:
+    - job: build-code
+      artifacts: true
+  only:
+    - merge_requests
+    - develop
+  artifacts:
+    when: always
+    reports:
+      junit: ./src/Tests/TestReports/*-TestReport.xml
+
+dev-migrations:
+  stage: dbmigrations
+  needs:
+    - unit-test
+    - job: build-code
+      artifacts: true
+  only:
+    - develop
+  script:
+    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID" --no-restore
+  when: manual
+  # rules:
+  #   - changes:
+  #     - src/Core/DataServices.Tgs/**/*
