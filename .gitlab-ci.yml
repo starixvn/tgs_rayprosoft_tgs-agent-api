@@ -1,5 +1,6 @@
 variables: 
   ImageName: pgtgs/migration
+  BuildConfiguration: Release
 
 stages:
   - build
@@ -41,5 +42,5 @@ dev-migrations:
   only:
     - develop
   script:
-    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c Release -t:ContainerBuild -p:DockerfileTag="$ImageName:$(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID" --no-restore --no-build
+    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID" --no-restore
   when: manual
