@@ -42,8 +42,7 @@ dev-migrations:
   only:
     - develop
   script:
-    - echo $CI_PIPELINE_CREATED_AT
-    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID" --no-restore
+    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID" --no-restore
   when: manual
   # rules:
   #   - changes:
