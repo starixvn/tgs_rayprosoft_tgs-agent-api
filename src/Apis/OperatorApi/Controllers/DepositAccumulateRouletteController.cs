@@ -4,12 +4,13 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Promotions;
+using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -20,7 +21,7 @@ public class DepositAccumulateRouletteController : ControllerBase
     [HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-        [FromServices] IGetService<GetDepositAccumulateRouletteSettingQuery, RouletteSetting?> rouletteService,
+        [FromServices] IGetService<GetDepositAccumulateRouletteSettingQuery, DepositAccumulateRouletteSetting?> rouletteService,
         Guid promotionId)
     {
         var query = new GetDepositAccumulateRouletteSettingQuery(promotionId);
@@ -33,7 +34,7 @@ public class DepositAccumulateRouletteController : ControllerBase
         {
             RouletteItems = setting is null
                 ? Array.Empty<DepositAccumulateRouletteItemViewModel>()
-                : setting.Items.Select(item => new DepositAccumulateRouletteItemViewModel
+                : setting.RouletteItems.Select(item => new DepositAccumulateRouletteItemViewModel
                 {
                     Title = item.Title
                 })
