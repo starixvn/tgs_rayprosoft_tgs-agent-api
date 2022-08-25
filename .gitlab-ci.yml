@@ -61,15 +61,16 @@ migrate-dev:
     - cat $KubeConfig_Raypro_dev
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
-    - export Tag='$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID'
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
+    - export release_name="tgs-$Tag"
     - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.ef-migration})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
     - |
       cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
         -n dev \
-        --name-template 'tgs-$Tag' \
-        --set image.tag='$Tag' \
+        --name-template $release_name \
+        --set image.tag=$Tag \
         -f -
       {
         "nodeSelector": $node_selector,
