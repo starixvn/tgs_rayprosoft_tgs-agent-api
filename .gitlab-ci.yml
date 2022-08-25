@@ -33,7 +33,6 @@ dev-migrations:
   variables:
     ImageName: pgtgs/migration
     BuildConfiguration: Release
-    Tag: $(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID
     
   stage: dbmigrations
   needs:
@@ -43,6 +42,7 @@ dev-migrations:
   only:
     - develop
   script:
+    - export Tag="$(date -d $PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
   when: manual
   # rules:
