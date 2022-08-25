@@ -58,6 +58,7 @@ migrate-dev:
   only:
     - develop
   before_script:
+    - cat $KubeConfig_Raypro_dev
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
@@ -67,7 +68,7 @@ migrate-dev:
     - |
       cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
         -n ${kube_ns} \
-        --name-template 'tgs-$Tag' \
+        --name-template tgs-$Tag' \
         --set image.tag=$Tag \
         -f -
       {
