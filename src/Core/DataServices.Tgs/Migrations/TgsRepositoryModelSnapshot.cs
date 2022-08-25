@@ -5238,6 +5238,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<byte[]>("BankInfoHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("bank_info_hash");
+
                     b.Property<string>("BankType")
                         .IsRequired()
                         .HasColumnType("text")
