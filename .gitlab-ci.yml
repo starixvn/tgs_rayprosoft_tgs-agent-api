@@ -13,6 +13,8 @@ build-code:
   artifacts:
     untracked: true
     expire_in: "1 days"
+  cache:
+    untracked: true
 
 unit-test:
   stage: test
@@ -45,6 +47,8 @@ dev-migrations:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
   when: manual
+  cache:
+    untracked: true
   # rules:
   #   - changes:
   #     - src/Core/DataServices.Tgs/**/*
