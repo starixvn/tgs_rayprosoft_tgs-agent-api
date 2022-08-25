@@ -2,14 +2,17 @@
 
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using Tgs.Promotion.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
+using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -20,23 +23,19 @@ public class DepositAccumulateRouletteController : ControllerBase
     [HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-        [FromServices] IGetService<GetDepositAccumulateRouletteSettingQuery, RouletteSetting?> rouletteService,
+        [FromServices] IPromotionServiceClient promotionServiceClient,
         Guid promotionId)
     {
-        var query = new GetDepositAccumulateRouletteSettingQuery(promotionId);
-
-        var setting = await rouletteService
-            .GetAsync(query, HttpContext.RequestAborted)
+        var rule = await promotionServiceClient
+            .GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new DepositAccumulateRouletteSettingViewModel
         {
-            RouletteItems = setting is null
-                ? Array.Empty<DepositAccumulateRouletteItemViewModel>()
-                : setting.Items.Select(item => new DepositAccumulateRouletteItemViewModel
-                {
-                    Title = item.Title
-                })
+            RouletteItems = rule?.CampaignDetail?
+                .RouletteItems
+                .Select(item => new DepositAccumulateRouletteItemViewModel { Title = item.Title })
+                            ?? Array.Empty<DepositAccumulateRouletteItemViewModel>()
         };
     }
 

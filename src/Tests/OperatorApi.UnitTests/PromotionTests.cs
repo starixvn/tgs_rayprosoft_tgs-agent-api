@@ -1,11 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.DepositAccumulateRoulette.Clients;
 using Tgs.RouletteServices.Clients;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 
@@ -39,22 +40,6 @@ public class PromotionTests
             .RouletteAsync(
                 Arg.Is(command.PromotionId),
                 Arg.Is(command.PlayerCode),
-                Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task Get_Deposit_Accumulate_Roulette_Settings()
-    {
-        var fakeDepositAccumulateRouletteClient = Substitute.For<IDepositAccumulateRouletteClient>();
-        var sut = new GetDepositAccumulateRouletteSettingQueryService(fakeDepositAccumulateRouletteClient);
-
-        var command = new GetDepositAccumulateRouletteSettingQuery(Guid.NewGuid());
-
-        _ = await sut.GetAsync(command);
-
-        _ = fakeDepositAccumulateRouletteClient.Received(1)
-            .GetRouletteSettingAsync(
-                Arg.Is(command.PromotionId),
                 Arg.Any<CancellationToken>());
     }
 
