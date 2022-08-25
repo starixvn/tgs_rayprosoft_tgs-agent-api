@@ -71,7 +71,8 @@ migrate-dev:
         -n dev \
         --name-template $release_name \
         --set image.tag=$Tag \
-        -f -
+        -f - \
+        | tee >&1 | kubectl -n dev apply -f -
       {
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
