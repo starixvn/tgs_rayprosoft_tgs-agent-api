@@ -1,18 +1,14 @@
 ﻿#nullable enable
 
 using System;
-using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.DepositAccumulateRoulette.Clients;
-using Tgs.Promotion.Clients;
 using Tgs.RouletteServices.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
-using PromotionRule = TGS.Services.Operator.ApplicationServices.Promotions.GetPromotionRuleQueryService.PromotionRule;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -45,50 +41,6 @@ public class PromotionTests
                 Arg.Is(command.PromotionId),
                 Arg.Is(command.PlayerCode),
                 Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task Get_Promotion_Rule()
-    {
-        var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
-        var sut = new GetPromotionRuleQueryService(fakePromotionServiceClient);
-
-        var campaignDetail = JsonDocument.Parse("{}");
-
-        var query = new GetPromotionRuleQuery(Guid.NewGuid());
-
-        _ = fakePromotionServiceClient.GetPromotionRuleAsync<PromotionRule>(
-                Arg.Is(query.PromotionId),
-                Arg.Any<CancellationToken>())
-            .Returns(new PromotionRule { CompaignDetail = campaignDetail });
-
-        var actual = await sut.GetAsync(query);
-
-        Assert.IsNotNull(actual);
-
-        _ = fakePromotionServiceClient
-            .Received(1)
-            .GetPromotionRuleAsync<PromotionRule>(
-                Arg.Is(query.PromotionId),
-                Arg.Any<CancellationToken>());
-    }
-
-    [Test]
-    public async Task Get_Promotion_Rule_When_Rule_Is_Null()
-    {
-        var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
-        var sut = new GetPromotionRuleQueryService(fakePromotionServiceClient);
-
-        var query = new GetPromotionRuleQuery(Guid.NewGuid());
-
-        _ = fakePromotionServiceClient.GetPromotionRuleAsync<PromotionRule>(
-                Arg.Is(query.PromotionId),
-                Arg.Any<CancellationToken>())
-            .Returns((PromotionRule?)null);
-
-        var actual = await sut.GetAsync(query);
-
-        Assert.IsNull(actual);
     }
 
     [Test]

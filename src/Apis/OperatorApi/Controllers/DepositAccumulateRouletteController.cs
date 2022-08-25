@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using Tgs.Promotion.Clients;
 using TGS.Services.Operator.ApplicationServices.Promotions;
 using RouletteResult = Tgs.DepositAccumulateRoulette.Clients.RouletteResult;
 
@@ -22,38 +23,19 @@ public class DepositAccumulateRouletteController : ControllerBase
     [HttpGet("setting/{promotionId}", Name = "GetDepositAccumulateRouletteSetting")]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask<DepositAccumulateRouletteSettingViewModel> GetDepositAccumulateRouletteSettingAsync(
-        [FromServices] IGetService<GetPromotionRuleQuery, JsonDocument?> getRuleService,
+        [FromServices] IPromotionServiceClient promotionServiceClient,
         Guid promotionId)
     {
-        var query = new GetPromotionRuleQuery(promotionId);
-
-        var campaignDetail = await getRuleService
-            .GetAsync(query, HttpContext.RequestAborted)
+        var rule = await promotionServiceClient
+            .GetPromotionRuleAsync<PromotionRule<RouletteSetting>>(promotionId, HttpContext.RequestAborted)
             .ConfigureAwait(false);
-
-        if (campaignDetail is null)
-        {
-            return new DepositAccumulateRouletteSettingViewModel
-            {
-                RouletteItems = Array.Empty<DepositAccumulateRouletteItemViewModel>()
-            };
-        }
-
-        var jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
-        var setting = campaignDetail.Deserialize<RouletteSetting>(jsonOptions);
 
         return new DepositAccumulateRouletteSettingViewModel
         {
-            RouletteItems = setting is null ?
-                Array.Empty<DepositAccumulateRouletteItemViewModel>() :
-                setting.RouletteItems.Select(item => new DepositAccumulateRouletteItemViewModel
-                {
-                    Title = item.Title
-                })
+            RouletteItems = rule?.CampaignDetail?
+                .RouletteItems
+                .Select(item => new DepositAccumulateRouletteItemViewModel { Title = item.Title })
+                            ?? Array.Empty<DepositAccumulateRouletteItemViewModel>()
         };
     }
 
@@ -77,17 +59,5 @@ public class DepositAccumulateRouletteController : ControllerBase
             ItemIndex = result.ItemIndex,
             RouletteCount = result.RemainingCount
         };
-    }
-
-    private class RouletteItem
-    {
-        public string Id { get; init; } = default!;
-
-        public string Title { get; init; } = default!;
-    }
-
-    private class RouletteSetting
-    {
-        public IEnumerable<RouletteItem> RouletteItems { get; init; } = Array.Empty<RouletteItem>();
     }
 }
