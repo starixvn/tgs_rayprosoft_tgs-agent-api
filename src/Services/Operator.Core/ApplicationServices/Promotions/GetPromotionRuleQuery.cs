@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Operator.ApplicationServices.Promotions;
 
-public record GetDepositAccumulateRouletteSettingQuery(Guid PromotionId);
+public record GetPromotionRuleQuery(Guid PromotionId);
