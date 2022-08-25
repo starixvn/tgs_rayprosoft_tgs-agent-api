@@ -112,7 +112,7 @@ public class PromotionTests
     }
 
     [Test]
-    public async Task Get_Deposit_Accumulate_Roulette_Settings_When_Promotion_Type_Is_Not_DepositAccumulateRoulette()
+    public void Get_Deposit_Accumulate_Roulette_Settings_When_Promotion_Type_Is_Not_DepositAccumulateRoulette()
     {
         var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
         var sut = new GetDepositAccumulateRouletteSettingQueryService(fakePromotionServiceClient);
