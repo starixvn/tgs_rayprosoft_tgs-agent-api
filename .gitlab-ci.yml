@@ -68,7 +68,7 @@ migrate-dev:
     - |
       cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
         -n ${kube_ns} \
-        --name-template tgs-$Tag' \
+        --name-template tgs-$Tag \
         --set image.tag=$Tag \
         -f -
       {
