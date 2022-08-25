@@ -66,7 +66,11 @@ migrate-dev:
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
     - |
-      cat << EOF | yq e -P
+      cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
+        -n dev \
+        --name-template 'tgs-$Tag' \
+        --set image.tag='$Tag' \
+        -f -
       {
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
