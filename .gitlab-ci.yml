@@ -1,3 +1,6 @@
+variables: 
+  MigrationImageName: pgtgs/migration
+
 stages:
   - build
   - test
@@ -32,7 +35,6 @@ unit-test:
 
 build-migrations-image:
   variables:
-    ImageName: pgtgs/migration
     BuildConfiguration: Release
 
   stage: publish
@@ -44,8 +46,8 @@ build-migrations-image:
     - develop
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
-    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
-    - docker push $ImageName:$Tag
+    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
+    - docker push $MigrationImageName:$Tag
   when: manual
   # rules:
   #   - changes:
