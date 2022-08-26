@@ -1,0 +1,94 @@
+variables: 
+  MigrationImageName: pgtgs/migration
+
+stages:
+  - build
+  - test
+  - publish
+  - dbmigrations
+
+build-code:
+  stage: build
+  script:
+    - dotnet build -c $BuildConfiguration
+  only:
+    - merge_requests
+    - develop
+  artifacts:
+    untracked: true
+    expire_in: "1 days"
+
+unit-test:
+  stage: test
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+  needs:
+    - job: build-code
+      artifacts: true
+  only:
+    - merge_requests
+    - develop
+  artifacts:
+    when: always
+    reports:
+      junit: ./src/Tests/TestReports/*-TestReport.xml
+
+build-migrations-image:
+  variables:
+    BuildConfiguration: Release
+
+  stage: publish
+  needs:
+    - unit-test
+    - job: build-code
+      artifacts: true
+  only:
+    - develop
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
+    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
+    - docker push $MigrationImageName:$Tag
+  when: manual
+  # rules:
+  #   - changes:
+  #     - src/Core/DataServices.Tgs/**/*
+
+migrate-dev:
+  stage: dbmigrations
+  needs:
+    - build-migrations-image
+  only:
+    - develop
+  before_script:
+    - export KUBECONFIG=$KubeConfig_Raypro_dev
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
+    - export release_name="tgs-$Tag"
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.ef-migration})
+    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
+    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
+    - |
+      cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
+        -n dev \
+        --name-template $release_name \
+        --set image.tag=$Tag \
+        -f - 
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
+    - |
+      cat << EOF | yq e -P | helm template deployment/k8s/ef-migration \
+        -n dev \
+        --name-template $release_name \
+        --set image.tag=$Tag \
+        -f - \
+        | kubectl -n dev apply -f -
+      {
+        "nodeSelector": $node_selector,
+        "tolerations": [$dedicated],
+        "resources": $resources
+      }
+      EOF
