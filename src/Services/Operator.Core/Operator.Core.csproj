@@ -23,7 +23,7 @@
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.22" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.5" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.15" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.16" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.24-alpha" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
