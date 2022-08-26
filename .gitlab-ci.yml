@@ -1,4 +1,4 @@
-variables: 
+variables:
   MigrationImageName: pgtgs/migration
 
 stages:
@@ -42,19 +42,19 @@ build-migrations-image:
     - unit-test
     - job: build-code
       artifacts: true
-  only:
-    - develop
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M)-dev.$CI_PIPELINE_IID"
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
     - docker push $MigrationImageName:$Tag
-  when: manual
+  when: never
   rules:
-    - changes:
-      - src/Core/DataServices.Tgs/**/*
+    - if: $CI_PIPELINE_SOURCE == "develop"
+      changes:
+        - src/Core/DataServices.Tgs/**/*
+      when: manual
 
 migrate-dev:
-  variables: 
+  variables:
     namespace: dev
   stage: dbmigrations
   needs:
@@ -96,7 +96,7 @@ migrate-dev:
       EOF
 
 migrate-staging:
-  variables: 
+  variables:
     namespace: staging
   stage: dbmigrations
   needs:
@@ -139,7 +139,7 @@ migrate-staging:
       EOF
 
 migrate-prod:
-  variables: 
+  variables:
     namespace: prod
   stage: dbmigrations
   needs:
