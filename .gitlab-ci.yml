@@ -49,9 +49,9 @@ build-migrations-image:
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
     - docker push $MigrationImageName:$Tag
   when: manual
-  # rules:
-  #   - changes:
-  #     - src/Core/DataServices.Tgs/**/*
+  rules:
+    - changes:
+      - src/Core/DataServices.Tgs/**/*
 
 migrate-dev:
   variables: 
