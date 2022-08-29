@@ -29,7 +29,9 @@ internal class SetRealNameRegisterFlowStep : IRegisterFlowStep
             .GetPlayerPropertiesAsync(playerCode, cancellationToken)
             .ConfigureAwait(false);
 
-        return props is not null && !string.IsNullOrEmpty(props[nameof(PlayerPropertyName.RealName)]);
+        return props is not null
+            && props.TryGetValue(nameof(PlayerPropertyName.RealName), out var realName)
+            && !string.IsNullOrEmpty(realName);
     }
 
     public async ValueTask<RegisterFlowProcessResult> ProcessInputAsync(
