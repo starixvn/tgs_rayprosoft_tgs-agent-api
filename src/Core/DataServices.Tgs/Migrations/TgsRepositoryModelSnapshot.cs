@@ -2573,11 +2573,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("extended_data");
 
-                    b.Property<decimal?>("FeePercentage")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("fee_percentage");
-
                     b.Property<decimal>("HandlingFeeRateTenPercentile")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(18, 6)
@@ -2585,19 +2580,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("handling_fee_rate_ten_percentile");
 
-                    b.Property<decimal?>("HighestFee")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("highest_fee");
-
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
-
-                    b.Property<decimal?>("LowestFee")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("lowest_fee");
 
                     b.Property<Guid>("PaymentMethodChannelId")
                         .HasColumnType("uuid")
