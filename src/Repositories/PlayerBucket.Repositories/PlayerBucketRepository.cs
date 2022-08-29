@@ -99,9 +99,10 @@ public class PlayerBucketRepository : IPlayerBucketRepository
                 .ConfigureAwait(false);
 
             var json = Encoding.UTF8.GetString(response.Span);
-            //var responseData = JsonSerializer.Deserialize<RegisterMessageData>(json)!;
+            var responseData = JsonSerializer.Deserialize<DepositMessageDataResponse>(json)!;
 
-            //promotionPlayerId = bonus.PromotionPlayers.First().Id;
+            promotionPlayerId = responseData.PromotionBonusPlayerId;
+            depositBonusAmount += responseData.DepositBonusAmount;
         }
 
         return new CreatePlayerBucketWithDepositResponse(depositBonusAmount, promotionPlayerId);
