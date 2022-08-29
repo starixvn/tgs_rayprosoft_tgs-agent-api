@@ -5322,6 +5322,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bank_infos", "dbo");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfoTag", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("BankInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bank_info_id");
+
+                    b.Property<string>("TagType")
+                        .HasColumnType("text")
+                        .HasColumnName("tag_type");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tag");
+
+                    b.HasKey("BrandId", "PlayerCode", "BankInfoId", "TagType")
+                        .HasName("pk_player_bank_info_tags");
+
+                    b.ToTable("player_bank_info_tags", "dbo");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBonusAggregate", b =>
                 {
                     b.Property<string>("PlayerCode")
