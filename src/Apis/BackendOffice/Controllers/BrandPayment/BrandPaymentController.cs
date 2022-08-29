@@ -124,7 +124,9 @@ public partial class BrandPaymentController : BaseContextController
                 UpdatedByUsername = x.UpdatedByUsername,
                 CreatedOn = x.CreatedOn,
                 UpdatedOn = x.UpdatedOn,
-                BankType = x.PaymentMethodChannel.Method.BankType
+                BankType = x.PaymentMethodChannel.Method.BankType,
+                HandlingFeeRateTenPercentile = x.HandlingFeeRateTenPercentile,
+                ReducePlayerAmount = x.ReducePlayerAmount,
             })
             .CreatePagedResponseAsync(request);
 
@@ -240,7 +242,7 @@ public partial class BrandPaymentController : BaseContextController
         await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
 
         return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
-    }    
+    }
 
     [HttpPost("upload")]
     [Description("Upload player file")]
