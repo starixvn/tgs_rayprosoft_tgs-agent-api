@@ -150,9 +150,6 @@ public partial class DataInitializer
                                              DepositedAmountMin = 0M,
                                              DepositedAmountMax = 0M,
                                              Reason = "Reason",
-                                             FeePercentage = 50,
-                                             LowestFee = 50,
-                                             HighestFee = 500,
                                              BrandPaymentPlayers = new[]
                                              {
                                                  new BrandPaymentPlayer
@@ -224,9 +221,6 @@ public partial class DataInitializer
                                       DepositedAmountMin = 0M,
                                       DepositedAmountMax = 0M,
                                       Reason = "Reason",
-                                      FeePercentage = 50,
-                                      LowestFee = 50,
-                                      HighestFee = 500,
                                       BrandPaymentPlayers = new[]
                                       {
                                           new BrandPaymentPlayer
@@ -301,9 +295,6 @@ public partial class DataInitializer
                                         DepositedAmountMin = 0M,
                                         DepositedAmountMax = 0M,
                                         Reason = "Reason",
-                                        FeePercentage = 50,
-                                        LowestFee = 50,
-                                        HighestFee = 500,
                                         BrandPaymentPlayers = new[]
                                         {
                                             new BrandPaymentPlayer
@@ -518,9 +509,6 @@ public partial class DataInitializer
                                       DepositedAmountMin = 0M,
                                       DepositedAmountMax = 0M,
                                       Reason = "Reason",
-                                      FeePercentage = 50,
-                                      LowestFee = 50,
-                                      HighestFee = 500,
                                       BrandPaymentPlayers = new[]
                                       {
                                           new BrandPaymentPlayer
@@ -585,9 +573,6 @@ public partial class DataInitializer
                                       DepositedAmountMin = 0M,
                                       DepositedAmountMax = 0M,
                                       Reason = "Reason",
-                                      FeePercentage = 50,
-                                      LowestFee = 50,
-                                      HighestFee = 500,
                                       BrandPaymentPlayers = new[]
                                       {
                                           new BrandPaymentPlayer
@@ -662,9 +647,6 @@ public partial class DataInitializer
                                         DepositedAmountMin = 0M,
                                         DepositedAmountMax = 0M,
                                         Reason = "Reason",
-                                        FeePercentage = 50,
-                                        LowestFee = 50,
-                                        HighestFee = 500,
                                         BrandPaymentPlayers = new[]
                                         {
                                             new BrandPaymentPlayer
