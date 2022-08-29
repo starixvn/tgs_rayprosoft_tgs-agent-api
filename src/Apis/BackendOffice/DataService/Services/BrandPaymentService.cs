@@ -214,16 +214,6 @@ public class BrandPaymentService : IBrandPaymentService
         await tran.CommitAsync();
     }
 
-    public Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
-        string username)
-    {
-        payment.FeePercentage = request.FeePercentage;
-        payment.LowestFee = request.LowestFee;
-        payment.HighestFee = request.HighestFee;
-        _repository.Entry(payment).State = EntityState.Modified;
-        return _repository.SaveChangesAsync();
-    }
-
     private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>
         new(
             payment.ChannelName,
