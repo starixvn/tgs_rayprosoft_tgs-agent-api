@@ -30,17 +30,11 @@ public class BrandPayment
 
     public string ExtendedData { get; set; }
 
-    public decimal? FeePercentage { get; set; }
-
     public decimal HandlingFeeRateTenPercentile { get; set; }
-
-    public decimal? HighestFee { get; set; }
 
     public Guid Id { get; set; }
 
     public bool IdentityAuthentication { get; set; }
-
-    public decimal? LowestFee { get; set; }
 
     public virtual PaymentMethodChannel PaymentMethodChannel { get; set; }
 

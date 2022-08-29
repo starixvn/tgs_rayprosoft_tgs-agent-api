@@ -53,15 +53,6 @@ public class BrandPaymentMap : IEntityTypeConfiguration<BrandPayment>
             .HasPrecision(18, 6)
             .IsRequired();
 
-        builder.Property(c => c.FeePercentage)
-            .HasPrecision(18, 6);
-
-        builder.Property(c => c.LowestFee)
-            .HasPrecision(18, 6);
-
-        builder.Property(c => c.HighestFee)
-            .HasPrecision(18, 6);
-
         builder.Property(c => c.ExtendedData)
             .HasColumnType(ColumnTypes.Jsonb)
             .IsRequired();
