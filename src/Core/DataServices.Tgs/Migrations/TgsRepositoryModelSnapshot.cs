@@ -5313,10 +5313,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<string>("PlayerCode")
-                        .HasColumnType("text")
-                        .HasColumnName("player_code");
-
                     b.Property<Guid>("BankInfoId")
                         .HasColumnType("uuid")
                         .HasColumnName("bank_info_id");
@@ -5325,13 +5321,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("tag_type");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
                     b.Property<string>("Tag")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("tag");
 
-                    b.HasKey("BrandId", "PlayerCode", "BankInfoId", "TagType")
+                    b.HasKey("BrandId", "BankInfoId", "TagType")
                         .HasName("pk_player_bank_info_tags");
+
+                    b.HasIndex("BankInfoId")
+                        .HasDatabaseName("ix_player_bank_info_tags_bank_info_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_bank_info_tags_player_code");
 
                     b.ToTable("player_bank_info_tags", "dbo");
                 });
@@ -9429,6 +9436,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PaymentChannel");
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfoTag", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", null)
+                        .WithMany()
+                        .HasForeignKey("BankInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_bank_info_tags_player_bank_infos_bank_info_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_bank_info_tags_players_player_code");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucket", b =>
