@@ -34,6 +34,9 @@ public class DepositFormMap : IEntityTypeConfiguration<DepositForm>
         builder.Property(c => c.ActualAmount)
             .HasPrecision(18, 6);
 
+        builder.Property(c => c.HandlingFee)
+            .HasPrecision(18, 6);
+
         builder.Property(c => c.BrandPaymentId)
             .IsRequired();
 

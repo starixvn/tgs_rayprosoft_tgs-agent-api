@@ -66,6 +66,11 @@ public class BrandPaymentMap : IEntityTypeConfiguration<BrandPayment>
             .HasColumnType(ColumnTypes.Jsonb)
             .IsRequired();
 
+        builder.Property(c => c.HandlingFeeRateTenPercentile)
+            .HasPrecision(18, 6)
+            .IsRequired()
+            .HasDefaultValue(0m);
+
         builder.Property(c => c.PaymentMethodChannelId)
             .IsRequired();
 
