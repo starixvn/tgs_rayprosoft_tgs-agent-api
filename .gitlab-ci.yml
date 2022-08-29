@@ -45,17 +45,15 @@ build-migrations-image:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
     - docker push $MigrationImageName:$Tag
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "develop"
-      changes:
-        - src/Core/DataServices.Tgs/**/*
-      when: manual
-    - when: never
+  when: manual
+  only: 
+    - develop
 
 push-migrations-k8s-template:
   stage: publish
   needs:
     - unit-test
+    - build-migrations-image    
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - mkdir -p artifacts/k8s
@@ -65,12 +63,8 @@ push-migrations-k8s-template:
         .image.repository = strenv(MigrationImageName) |
         .image.tag = strenv(Tag)
       ' artifacts/k8s/player-api/values.yaml
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "develop"
-      changes:
-        - src/Core/DataServices.Tgs/**/*
-      when: manual
-    - when: never
+  only:
+    - develop    
   artifacts:
     name: HelmTemplate
     untracked: false
