@@ -2578,6 +2578,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("fee_percentage");
 
+                    b.Property<decimal>("HandlingFeeRateTenPercentile")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("handling_fee_rate_ten_percentile");
+
                     b.Property<decimal?>("HighestFee")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -2612,6 +2619,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")
                         .HasColumnName("reason");
+
+                    b.Property<bool>("ReducePlayerAmount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reduce_player_amount");
 
                     b.Property<decimal>("TransferLimitFrom")
                         .HasPrecision(18, 6)
@@ -2999,6 +3010,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<decimal>("HandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("handling_fee");
 
                     b.Property<string>("OrderNo")
                         .HasMaxLength(50)
@@ -8247,6 +8263,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<decimal>("HandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("handling_fee");
 
                     b.Property<string>("Note")
                         .HasColumnType("text")
