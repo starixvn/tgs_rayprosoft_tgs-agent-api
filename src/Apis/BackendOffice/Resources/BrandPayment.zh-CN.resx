@@ -150,15 +150,6 @@
   <data name="PaymentRequired" xml:space="preserve">
     <value>支付厂商必填</value>
   </data>
-  <data name="HighestFeeGreaterLowestFee" xml:space="preserve">
-    <value>最高手续费必须大于最低手续费</value>
-  </data>
-  <data name="FeePercentageGreaterEqualZero" xml:space="preserve">
-    <value>手续费百分比必须大于或等于0</value>
-  </data>
-  <data name="LowestFeeGreaterEqualZero" xml:space="preserve">
-    <value>最低手续费必须大于或等于0</value>
-  </data>
   <data name="PaymentNotFound" xml:space="preserve">
     <value>找不到金流</value>
   </data>

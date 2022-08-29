@@ -25,6 +25,4 @@ public interface IBrandPaymentService
     IQueryable<BrandPayment> GetPaymentQueries(bool tracking = false);
 
     Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request, string username);
-
-    Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request, string username);
 }

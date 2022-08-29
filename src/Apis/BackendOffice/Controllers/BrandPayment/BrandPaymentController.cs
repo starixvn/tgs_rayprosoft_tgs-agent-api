@@ -68,24 +68,6 @@ public partial class BrandPaymentController : BaseContextController
         return await CreateBrandPaymentAsync(PaymentTransferType.Withdrawal, request);
     }
 
-    [HttpGet("{id}/handingFee")]
-    [Description("Get a Payment handing Fee")]
-    public async Task<GetPaymentFeeResponse> GetBrandPaymentHandingFeeAsync(Guid id)
-    {
-        var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id, p => p.AsNoTracking());
-
-        return new()
-        {
-            Valid = true,
-            PaymentFee = new()
-            {
-                FeePercentage = brandPayment.FeePercentage,
-                HighestFee = brandPayment.HighestFee,
-                LowestFee = brandPayment.LowestFee
-            }
-        };
-    }
-
     [HttpGet]
     [Description("Get brand payments")]
     public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request)
@@ -137,8 +119,6 @@ public partial class BrandPaymentController : BaseContextController
                 TransferLimitTo = x.TransferLimitTo,
                 PaymentStatus = x.PaymentStatus,
                 DesignatedUsers = GetDesignatedUsers(x).Any(),
-                PaymentFee =
-                    new() { FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee },
                 VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
                 CreatedByUsername = x.CreatedByUsername,
                 UpdatedByUsername = x.UpdatedByUsername,
@@ -260,24 +240,7 @@ public partial class BrandPaymentController : BaseContextController
         await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
 
         return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
-    }
-
-    [HttpPut("{brandPaymentId:guid}/handingFee")]
-    [Description("Update a Payment handing Fee")]
-    public async Task<MessageResponse> UpdateBrandPaymentHandlingFeeAsync(Guid brandPaymentId,
-        UpdatePaymentFeeRequest request)
-    {
-        var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == brandPaymentId, tracking: true);
-
-        if (brandPayment == null)
-        {
-            return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NotFound);
-        }
-
-        await _brandPaymentService.UpdatePaymentHandlingFeeAsync(brandPayment, request, Username);
-
-        return CreateValidResponse<MessageResponse>();
-    }
+    }    
 
     [HttpPost("upload")]
     [Description("Upload player file")]
