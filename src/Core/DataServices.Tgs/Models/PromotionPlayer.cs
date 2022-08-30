@@ -10,6 +10,7 @@ public class PromotionPlayer
     public Guid PromotionBonusId { get; set; }
     public virtual PromotionBonus PromotionBonus { get; set; }
     public decimal BonusAmount { get; set; }
+    public decimal BucketAmountByManual { get; set; }
     public DateTimeOffset? SentOn { get; set; }
     public string SentByUsername { get; set; }
 }

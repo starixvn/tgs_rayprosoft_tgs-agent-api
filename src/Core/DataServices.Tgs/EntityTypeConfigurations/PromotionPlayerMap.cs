@@ -25,6 +25,9 @@ internal class PromotionPlayerMap : IEntityTypeConfiguration<PromotionPlayer>
         builder.Property(c => c.BonusAmount)
             .HasPrecision(18, 6);
 
+        builder.Property(c => c.BucketAmountByManual)
+            .HasPrecision(18, 6);
+
         builder.Property(e => e.SentOn)
             .IsRequired(false);
 

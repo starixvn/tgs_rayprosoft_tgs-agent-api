@@ -6822,6 +6822,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bonus_amount");
 
+                    b.Property<decimal>("BucketAmountByManual")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bucket_amount_by_manual");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasColumnType("character varying(16)")
