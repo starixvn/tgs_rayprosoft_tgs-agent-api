@@ -8,8 +8,6 @@ public class DepositAccumulateRouletteEvent
 
     public DateOnly Date { get; set; }
 
-    public Guid Id { get; set; }
-
     public string PlayerCode { get; set; }
 
     public Guid PromotionId { get; set; }

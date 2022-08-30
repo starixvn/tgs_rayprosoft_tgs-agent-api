@@ -2855,27 +2855,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositAccumulateRouletteEvent", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("brand_id");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
                     b.Property<string>("PlayerCode")
-                        .IsRequired()
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
                     b.Property<Guid>("PromotionId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<int>("RouletteCount")
                         .ValueGeneratedOnAdd()
@@ -2890,14 +2884,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("total_deposit_amount");
 
-                    b.HasKey("Id")
+                    b.HasKey("PlayerCode", "PromotionId", "Date")
                         .HasName("pk_deposit_accumulate_roulette_events");
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_deposit_accumulate_roulette_events_brand_id");
-
-                    b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_deposit_accumulate_roulette_events_player_code");
 
                     b.HasIndex("PromotionId")
                         .HasDatabaseName("ix_deposit_accumulate_roulette_events_promotion_id");
@@ -2929,9 +2920,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
-                    b.Property<Guid>("DepositAccumulateRouletteEventId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("deposit_accumulate_roulette_event_id");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<int>("ItemIndex")
                         .HasColumnType("integer")
