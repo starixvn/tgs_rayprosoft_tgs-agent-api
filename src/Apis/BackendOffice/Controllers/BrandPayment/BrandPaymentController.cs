@@ -119,10 +119,8 @@ public partial class BrandPaymentController : BaseContextController
     [HttpGet]
     [Description("Get brand payments")]
     public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync(
-        [FromQuery] GetBrandPaymentsRequest request,
-        [FromServices] IPaymentServiceClient paymentServiceClient)
-    {
-        return _brandPaymentService.GetPaymentQueries()
+        [FromQuery] GetBrandPaymentsRequest request) 
+        => _brandPaymentService.GetPaymentQueries()
                 .Include(p => p.BrandPaymentPlayers)
                 .ThenInclude(pp => pp.Player)
                 .Include(p => p.VipLevels)
@@ -178,7 +176,6 @@ public partial class BrandPaymentController : BaseContextController
                     BankType = x.PaymentMethodChannel.Method.BankType,
                 })
                 .CreatePagedResponseAsync(request);
-    }
 
     [HttpGet("{id}/DesignatedUsers")]
     [Description("Get Designated Users")]
