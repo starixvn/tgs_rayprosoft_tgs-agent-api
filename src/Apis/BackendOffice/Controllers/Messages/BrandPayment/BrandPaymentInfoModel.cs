@@ -16,8 +16,6 @@ public class BrandPaymentInfoModel
 
     public bool DepositedAmountUnlimited { get; set; }
 
-    public bool DesignatedUsers { get; set; }
-
     public JsonDocument ExtendedData { get; set; }
 
     public decimal HandlingFeeRateTenPercentile { get; set; }
