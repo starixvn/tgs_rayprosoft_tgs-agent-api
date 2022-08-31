@@ -94,6 +94,7 @@ public partial class BrandPaymentController : BaseContextController
             PaymentId = info.PaymentId,
             PaymentMethodId = info.MethodId,
             PaymentChannelId = info.ChannelId,
+            ChannelName = info.ChannelName,
             ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
             HandlingFeeRateTenPercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile,
             ReducePlayerAmount = brandPaymentFeeInfo.ReducePlayerAmount,
@@ -117,63 +118,64 @@ public partial class BrandPaymentController : BaseContextController
 
     [HttpGet]
     [Description("Get brand payments")]
-    public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request)
+    public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync(
+        [FromQuery] GetBrandPaymentsRequest request) 
         => _brandPaymentService.GetPaymentQueries()
-            .Include(p => p.BrandPaymentPlayers)
-            .ThenInclude(pp => pp.Player)
-            .Include(p => p.VipLevels)
-            .Include(p => p.PaymentMethodChannel)
-            .ThenInclude(pmc => pmc.Payment)
-            .Include(p => p.PaymentMethodChannel)
-            .ThenInclude(pmc => pmc.Method)
-            .Include(p => p.PaymentMethodChannel)
-            .ThenInclude(pmc => pmc.Channel)
-            .Where(ResellerId, x => x.Brand.Licensee.ResellerId == ResellerId)
-            .Where(LicenseeId, x => x.Brand.LicenseeId == LicenseeId)
-            .Where(BrandId, x => x.BrandId == BrandId)
-            .Where(request.BrandId, x => x.BrandId == request.BrandId)
-            .Where(request.TransferType, x => x.TransferType == request.TransferType)
-            .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
-            .Where(
-                request.Keyword,
-                row => row.ChannelName.Contains(request.Keyword.Trim())
-                    || row.PaymentMethodChannel.Payment.Code == request.Keyword.Trim()
-                    || row.PaymentMethodChannel.Method.Code == request.Keyword.Trim()
-                    || row.PaymentMethodChannel.Channel.Code == request.Keyword.Trim())
-            .Select(x => new BrandPaymentModel
-            {
-                Id = x.Id,
-                BrandId = x.BrandId,
-                Number = x.DisplayOrder,
-                PaymentId = x.PaymentMethodChannel.Payment.Id,
-                PaymentName = x.PaymentMethodChannel.Payment.Code,
-                PaymentMethodId = x.PaymentMethodChannel.Method.Id,
-                PaymentMethodName = x.PaymentMethodChannel.Method.Code,
-                PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
-                PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
-                PaymentMethodChannelId = x.PaymentMethodChannel.Id,
-                TransferType = x.TransferType,
-                ChannelName = x.ChannelName,
-                ExtendedData = JsonDocument.Parse(x.ExtendedData, new JsonDocumentOptions()),
-                PlayerListCondition = x.PlayerListCondition,
-                AllPlayers = x.AllPlayers,
-                DepositedAmountMin = x.DepositedAmountMin,
-                DepositedAmountMax = x.DepositedAmountMax,
-                DepositedAmountUnlimited = x.DepositedAmountUnlimited,
-                IdentityAuthentication = x.IdentityAuthentication,
-                PhoneAuthentication = x.PhoneAuthentication,
-                TransferLimitFrom = x.TransferLimitFrom,
-                TransferLimitTo = x.TransferLimitTo,
-                PaymentStatus = x.PaymentStatus,
-                DesignatedUsers = GetDesignatedUsers(x).Any(),
-                VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
-                CreatedByUsername = x.CreatedByUsername,
-                UpdatedByUsername = x.UpdatedByUsername,
-                CreatedOn = x.CreatedOn,
-                UpdatedOn = x.UpdatedOn,
-                BankType = x.PaymentMethodChannel.Method.BankType,
-            })
-            .CreatePagedResponseAsync(request);
+                .Include(p => p.BrandPaymentPlayers)
+                .ThenInclude(pp => pp.Player)
+                .Include(p => p.VipLevels)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Payment)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Method)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Channel)
+                .Where(ResellerId, x => x.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, x => x.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, x => x.BrandId == BrandId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .Where(request.TransferType, x => x.TransferType == request.TransferType)
+                .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
+                .Where(
+                    request.Keyword,
+                    row => row.ChannelName.Contains(request.Keyword.Trim())
+                        || row.PaymentMethodChannel.Payment.Code == request.Keyword.Trim()
+                        || row.PaymentMethodChannel.Method.Code == request.Keyword.Trim()
+                        || row.PaymentMethodChannel.Channel.Code == request.Keyword.Trim())
+                .Select(x => new BrandPaymentModel
+                {
+                    Id = x.Id,
+                    BrandId = x.BrandId,
+                    Number = x.DisplayOrder,
+                    PaymentId = x.PaymentMethodChannel.Payment.Id,
+                    PaymentName = x.PaymentMethodChannel.Payment.Code,
+                    PaymentMethodId = x.PaymentMethodChannel.Method.Id,
+                    PaymentMethodName = x.PaymentMethodChannel.Method.Code,
+                    PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
+                    PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
+                    PaymentMethodChannelId = x.PaymentMethodChannel.Id,
+                    TransferType = x.TransferType,
+                    ChannelName = x.ChannelName,
+                    ExtendedData = JsonDocument.Parse(x.ExtendedData, new JsonDocumentOptions()),
+                    PlayerListCondition = x.PlayerListCondition,
+                    AllPlayers = x.AllPlayers,
+                    DepositedAmountMin = x.DepositedAmountMin,
+                    DepositedAmountMax = x.DepositedAmountMax,
+                    DepositedAmountUnlimited = x.DepositedAmountUnlimited,
+                    IdentityAuthentication = x.IdentityAuthentication,
+                    PhoneAuthentication = x.PhoneAuthentication,
+                    TransferLimitFrom = x.TransferLimitFrom,
+                    TransferLimitTo = x.TransferLimitTo,
+                    PaymentStatus = x.PaymentStatus,
+                    DesignatedUsers = GetDesignatedUsers(x).Any(),
+                    VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
+                    CreatedByUsername = x.CreatedByUsername,
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    CreatedOn = x.CreatedOn,
+                    UpdatedOn = x.UpdatedOn,
+                    BankType = x.PaymentMethodChannel.Method.BankType,
+                })
+                .CreatePagedResponseAsync(request);
 
     [HttpGet("{id}/DesignatedUsers")]
     [Description("Get Designated Users")]

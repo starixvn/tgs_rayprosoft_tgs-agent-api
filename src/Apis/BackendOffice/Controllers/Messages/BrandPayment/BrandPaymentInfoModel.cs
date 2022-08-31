@@ -8,15 +8,7 @@ public class BrandPaymentInfoModel
 {
     public bool AllPlayers { get; set; }
 
-    public string BankType { get; set; }
-
-    public Guid BrandId { get; set; }
-
     public string ChannelName { get; set; }
-
-    public string CreatedByUsername { get; set; }
-
-    public DateTimeOffset CreatedOn { get; set; }
 
     public decimal DepositedAmountMax { get; set; }
 
@@ -30,25 +22,13 @@ public class BrandPaymentInfoModel
 
     public decimal HandlingFeeRateTenPercentile { get; set; }
 
-    public Guid Id { get; set; }
-
     public bool IdentityAuthentication { get; set; }
-
-    public int Number { get; set; }
 
     public Guid? PaymentChannelId { get; set; }
 
-    public string PaymentChannelName { get; set; }
-
     public Guid? PaymentId { get; set; }
 
-    public Guid? PaymentMethodChannelId { get; set; }
-
     public Guid? PaymentMethodId { get; set; }
-
-    public string PaymentMethodName { get; set; }
-
-    public string PaymentName { get; set; }
 
     public SwitchStatus PaymentStatus { get; set; }
 
@@ -56,19 +36,11 @@ public class BrandPaymentInfoModel
 
     public PlayerListCondition PlayerListCondition { get; set; }
 
-    public string Reason { get; set; }
-
     public bool ReducePlayerAmount { get; set; }
 
     public decimal TransferLimitFrom { get; set; }
 
     public decimal TransferLimitTo { get; set; }
-
-    public PaymentTransferType TransferType { get; set; }
-
-    public string UpdatedByUsername { get; set; }
-
-    public DateTimeOffset UpdatedOn { get; set; }
 
     public Guid[] VipLevelIds { get; set; }
 }
