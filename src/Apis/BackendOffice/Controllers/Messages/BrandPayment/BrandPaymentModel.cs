@@ -30,8 +30,6 @@ public class BrandPaymentModel
 
     public JsonDocument ExtendedData { get; set; }
 
-    public decimal HandlingFeeRateTenPercentile { get; set; }
-
     public Guid Id { get; set; }
 
     public bool IdentityAuthentication { get; set; }
@@ -59,8 +57,6 @@ public class BrandPaymentModel
     public PlayerListCondition PlayerListCondition { get; set; }
 
     public string Reason { get; set; }
-
-    public bool ReducePlayerAmount { get; set; }
 
     public decimal TransferLimitFrom { get; set; }
 
