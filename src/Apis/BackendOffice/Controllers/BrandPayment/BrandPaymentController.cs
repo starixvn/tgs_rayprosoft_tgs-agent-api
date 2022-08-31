@@ -20,6 +20,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Services;
+using Player = TGS.Core.DataServices.Tgs.Models.Player;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment;
 
@@ -66,6 +67,52 @@ public partial class BrandPaymentController : BaseContextController
     public async Task<CreateUpdateBrandPaymentResponse> CreateWithdrawBrandPaymentAsync(CreateBrandPaymentRequest request)
     {
         return await CreateBrandPaymentAsync(PaymentTransferType.Withdrawal, request);
+    }
+
+    [HttpGet("info/{id}")]
+    [Description("Get brand payment detail info")]
+    public async Task<BrandPaymentInfoModel> GetBrandPaymentInfoAsync(
+        Guid id,
+        [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+        [FromServices] IPaymentServiceClient paymentServiceClient)
+    {
+        var info = await getBrandPaymentService
+            .GetAsync(new GetBrandPaymentQuery(id), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var brandPaymentVipLevels = await paymentServiceClient
+                .GetBrandPaymentVipsAsync(new Guid[] { id }, HttpContext.RequestAborted)
+                .ToArrayAsync()
+                .ConfigureAwait(false);
+
+        var brandPaymentFeeInfo = await paymentServiceClient
+            .GetBrandPaymentFeeSettingsAsync(id, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new BrandPaymentInfoModel
+        {
+            PaymentId = info.PaymentId,
+            PaymentMethodId = info.MethodId,
+            PaymentChannelId = info.ChannelId,
+            ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
+            HandlingFeeRateTenPercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile,
+            ReducePlayerAmount = brandPaymentFeeInfo.ReducePlayerAmount,
+            PaymentStatus = info.Enabled == true
+                ? SwitchStatus.Enabled
+                : SwitchStatus.Disabled,
+            TransferLimitFrom = info.TransferLimit.From,
+            TransferLimitTo = info.TransferLimit.To,
+            PlayerListCondition = info.ConditionMatchType == ConditionMatchType.MatchAll
+                ? PlayerListCondition.MatchAll
+                : PlayerListCondition.MatchOne,
+            AllPlayers = info.IsAllPlayers,
+            DepositedAmountMin = info.DepositedAmountLimit.From,
+            DepositedAmountMax = info.DepositedAmountLimit.To,
+            DepositedAmountUnlimited = info.DepositedAmountLimit.To == decimal.MaxValue,
+            PhoneAuthentication = info.AuthenticatePhone,
+            IdentityAuthentication = info.AuthenticateIdentity,
+            VipLevelIds = brandPaymentVipLevels.Select(x => x.VipLevelId).ToArray()
+        };
     }
 
     [HttpGet]
@@ -124,7 +171,7 @@ public partial class BrandPaymentController : BaseContextController
                 UpdatedByUsername = x.UpdatedByUsername,
                 CreatedOn = x.CreatedOn,
                 UpdatedOn = x.UpdatedOn,
-                BankType = x.PaymentMethodChannel.Method.BankType
+                BankType = x.PaymentMethodChannel.Method.BankType,
             })
             .CreatePagedResponseAsync(request);
 
@@ -240,7 +287,7 @@ public partial class BrandPaymentController : BaseContextController
         await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
 
         return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
-    }    
+    }
 
     [HttpPost("upload")]
     [Description("Upload player file")]
