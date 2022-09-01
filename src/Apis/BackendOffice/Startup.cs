@@ -31,6 +31,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.BackOffice.Cache.DependencyInjection;
 
 namespace TGS.Apis.BackendOffice;
 
@@ -117,6 +118,7 @@ public class Startup
             .AddBackendOfficeServices(_configuration)
             .AddBackendOfficeRepositories(
                 sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+            .AddBackOfficeCache()
             .AddMessageQueue()
             .AddNatsMessageQueue(config =>
             {

@@ -99,7 +99,9 @@ public class BrandPaymentService : IBrandPaymentService
             CreatedByUsername = username,
             UpdatedByUsername = username,
             CreatedOn = DateTimeOffset.Now,
-            UpdatedOn = DateTimeOffset.Now
+            UpdatedOn = DateTimeOffset.Now,
+            HandlingFeeRateTenPercentile = request.HandlingFeeRateTenPercentile,
+            ReducePlayerAmount = request.ReducePlayerAmount,
         };
 
         var whitelist = await GeneratePaymentPlayerListAsync(
@@ -161,7 +163,9 @@ public class BrandPaymentService : IBrandPaymentService
             PhoneAuthentication = payment.PhoneAuthentication,
             DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
             DepositedAmountMin = payment.DepositedAmountMin,
-            DepositedAmountMax = payment.DepositedAmountMax
+            DepositedAmountMax = payment.DepositedAmountMax,
+            HandlingFeeRateTenPercentile = payment.HandlingFeeRateTenPercentile,
+            ReducePlayerAmount = payment.ReducePlayerAmount,
         };
 
         payment.PaymentMethodChannelId = request.PaymentMethodChannelId;
@@ -180,6 +184,8 @@ public class BrandPaymentService : IBrandPaymentService
         payment.Reason = request.Reason;
         payment.UpdatedByUsername = username;
         payment.UpdatedOn = DateTimeOffset.Now;
+        payment.HandlingFeeRateTenPercentile = request.HandlingFeeRateTenPercentile;
+        payment.ReducePlayerAmount = request.ReducePlayerAmount;
 
         await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
         _repository.BrandPaymentPlayers.RemoveRange(payment.BrandPaymentPlayers);
@@ -212,16 +218,6 @@ public class BrandPaymentService : IBrandPaymentService
         await _repository.SaveChangesAsync();
 
         await tran.CommitAsync();
-    }
-
-    public Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
-        string username)
-    {
-        payment.FeePercentage = request.FeePercentage;
-        payment.LowestFee = request.LowestFee;
-        payment.HighestFee = request.HighestFee;
-        _repository.Entry(payment).State = EntityState.Modified;
-        return _repository.SaveChangesAsync();
     }
 
     private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>

@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dbo")
-                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("ProductVersion", "6.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "ltree");
@@ -647,6 +647,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_agent_bank_infos_player_code");
 
                     b.ToTable("agent_bank_infos", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyMarketingStatistics", b =>
+                {
+                    b.Property<DateOnly>("ReportDate")
+                        .HasColumnType("date")
+                        .HasColumnName("report_date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("GamingCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("gaming_count");
+
+                    b.Property<int>("RegisterCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("register_count");
+
+                    b.HasKey("ReportDate", "BrandId", "AgentId")
+                        .HasName("pk_agent_daily_marketing_statistics");
+
+                    b.ToTable("agent_daily_marketing_statistics", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDailyPaymentStatistics", b =>
@@ -2545,24 +2573,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("extended_data");
 
-                    b.Property<decimal?>("FeePercentage")
+                    b.Property<decimal>("HandlingFeeRateTenPercentile")
+                        .ValueGeneratedOnAdd()
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasColumnName("fee_percentage");
-
-                    b.Property<decimal?>("HighestFee")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("highest_fee");
+                        .HasDefaultValue(0m)
+                        .HasColumnName("handling_fee_rate_ten_percentile");
 
                     b.Property<bool>("IdentityAuthentication")
                         .HasColumnType("boolean")
                         .HasColumnName("identity_authentication");
-
-                    b.Property<decimal?>("LowestFee")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("lowest_fee");
 
                     b.Property<Guid>("PaymentMethodChannelId")
                         .HasColumnType("uuid")
@@ -2584,6 +2604,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("character varying(4000)")
                         .HasColumnName("reason");
+
+                    b.Property<bool>("ReducePlayerAmount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reduce_player_amount");
 
                     b.Property<decimal>("TransferLimitFrom")
                         .HasPrecision(18, 6)
@@ -2831,27 +2855,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.DepositAccumulateRouletteEvent", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("brand_id");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
                     b.Property<string>("PlayerCode")
-                        .IsRequired()
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
                     b.Property<Guid>("PromotionId")
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<int>("RouletteCount")
                         .ValueGeneratedOnAdd()
@@ -2866,14 +2884,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0m)
                         .HasColumnName("total_deposit_amount");
 
-                    b.HasKey("Id")
+                    b.HasKey("PlayerCode", "PromotionId", "Date")
                         .HasName("pk_deposit_accumulate_roulette_events");
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_deposit_accumulate_roulette_events_brand_id");
-
-                    b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_deposit_accumulate_roulette_events_player_code");
 
                     b.HasIndex("PromotionId")
                         .HasDatabaseName("ix_deposit_accumulate_roulette_events_promotion_id");
@@ -2905,9 +2920,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
-                    b.Property<Guid>("DepositAccumulateRouletteEventId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("deposit_accumulate_roulette_event_id");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<int>("ItemIndex")
                         .HasColumnType("integer")
@@ -2971,6 +2986,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<decimal>("HandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("handling_fee");
 
                     b.Property<string>("OrderNo")
                         .HasMaxLength(50)
@@ -5210,6 +5230,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<byte[]>("BankInfoHash")
+                        .HasColumnType("bytea")
+                        .HasColumnName("bank_info_hash");
+
                     b.Property<string>("BankType")
                         .IsRequired()
                         .HasColumnType("text")
@@ -5272,6 +5296,42 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_bank_infos_player_code");
 
                     b.ToTable("player_bank_infos", "dbo");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfoTag", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid>("BankInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bank_info_id");
+
+                    b.Property<string>("TagType")
+                        .HasColumnType("text")
+                        .HasColumnName("tag_type");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tag");
+
+                    b.HasKey("BrandId", "BankInfoId", "TagType")
+                        .HasName("pk_player_bank_info_tags");
+
+                    b.HasIndex("BankInfoId")
+                        .HasDatabaseName("ix_player_bank_info_tags_bank_info_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_bank_info_tags_player_code");
+
+                    b.ToTable("player_bank_info_tags", "dbo");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBonusAggregate", b =>
@@ -5534,7 +5594,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("daily_login_count");
 
-                    b.Property<DateTime>("LastLoginOn")
+                    b.Property<DateTime?>("LastLoginOn")
                         .HasColumnType("timestamptz")
                         .HasColumnName("last_login_on");
 
@@ -6545,6 +6605,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
                     b.Property<DateTimeOffset>("From")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
@@ -6757,6 +6821,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bonus_amount");
+
+                    b.Property<decimal>("BucketAmountByManual")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bucket_amount_by_manual");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
@@ -8212,6 +8281,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<decimal>("HandlingFee")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("handling_fee");
+
                     b.Property<string>("Note")
                         .HasColumnType("text")
                         .HasColumnName("note");
@@ -9358,6 +9432,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("PaymentChannel");
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfoTag", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", null)
+                        .WithMany()
+                        .HasForeignKey("BankInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_bank_info_tags_player_bank_infos_bank_info_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_player_bank_info_tags_players_player_code");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucket", b =>

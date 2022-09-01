@@ -39,7 +39,7 @@ internal class DepositAccumulateRouletteGameEventMap : IEntityTypeConfiguration<
             .HasPrecision(18, 6)
             .IsRequired();
 
-        builder.Property(e => e.DepositAccumulateRouletteEventId)
+        builder.Property(e => e.Date)
             .IsRequired();
 
         builder.HasOne<Brand>()

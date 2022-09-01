@@ -69,6 +69,7 @@ public class BetConstructActionModelMapper : IBetConstructActionModelMapper
             ExternalGameId = "sportsbook",
             GameActionType = GameActionType.PlaceBet,                
             TimeStamp = DateTimeOffset.UtcNow,
+            RoundDetail = JsonSerializer.Serialize(new { Bet = source.Selections })
         };
 
         return GetBetData(data, playerCode, transactions, data.AutoCloseRound);
@@ -100,8 +101,7 @@ public class BetConstructActionModelMapper : IBetConstructActionModelMapper
                 GameActionType = GameActionType.CancelTransaction,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
                 TimeStamp = DateTimeOffset.UtcNow,
-                RoundClosed = false,
-                RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+                RoundClosed = false                
             };
 
             var roundDetailData = new BetConstructRoundDetailData(
@@ -152,8 +152,7 @@ public class BetConstructActionModelMapper : IBetConstructActionModelMapper
             GameActionType = gameActionType,
             ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
             TimeStamp = DateTimeOffset.UtcNow,
-            RoundClosed = true,
-            RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+            RoundClosed = true            
         };
 
         var roundDetailData = new BetConstructRoundDetailData(
@@ -234,8 +233,7 @@ public class BetConstructActionModelMapper : IBetConstructActionModelMapper
             ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId,
             GameActionType = gameActionType,
             ExtraData = DateTimeOffset.FromUnixTimeSeconds(source.CalcDate.ToUnixTimeSeconds()).ToIso8601String(true),
-            TimeStamp = DateTimeOffset.UtcNow,
-            RoundDetail = JsonSerializer.Serialize(source.BetSelectionState)
+            TimeStamp = DateTimeOffset.UtcNow            
         };
 
         var roundDetailData = new BetConstructRoundDetailData(

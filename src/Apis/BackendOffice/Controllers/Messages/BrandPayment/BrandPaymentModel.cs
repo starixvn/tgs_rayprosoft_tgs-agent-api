@@ -40,8 +40,6 @@ public class BrandPaymentModel
 
     public string PaymentChannelName { get; set; }
 
-    public PaymentFeeModel PaymentFee { get; set; }
-
     public Guid? PaymentId { get; set; }
 
     public Guid? PaymentMethodChannelId { get; set; }

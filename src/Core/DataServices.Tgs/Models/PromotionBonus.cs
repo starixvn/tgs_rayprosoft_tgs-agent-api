@@ -19,5 +19,6 @@ public class PromotionBonus
     public decimal BonusAmountLimit { get; set; }
     public decimal TurnoverMultiple { get; set; }
     public DateTimeOffset CreatedOn { get; set; }
+    public string Detail { get; set; }
     public virtual ICollection<PromotionPlayer> PromotionPlayers { get; set; }
 }

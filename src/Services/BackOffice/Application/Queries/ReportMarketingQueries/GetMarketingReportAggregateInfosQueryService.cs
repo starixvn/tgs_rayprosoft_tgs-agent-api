@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.MarketingReport.Client;
+using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Paging;
 using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;
@@ -83,9 +83,7 @@ internal class GetMarketingReportAggregateInfosQueryService
                         from info in ga.DefaultIfEmpty()
                         select new MarketingReportModel
                         {
-                            ReportDate = new DateTimeOffset(
-                                reportDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified),
-                                _Offset),
+                            ReportDate = reportDate,
                             AgentId = p.Key,
                             AgentUsername = p.Value,
                             RegisterCount = info?.RegisterCount ?? 0,
@@ -139,7 +137,7 @@ internal class GetMarketingReportAggregateInfosQueryService
                                    from playerRegister in prg.DefaultIfEmpty()
                                    select new MarketingReportModel
                                    {
-                                       ReportDate = currentReportDate,
+                                       ReportDate = currentDate,
                                        AgentId = p.Key,
                                        AgentUsername = p.Value,
                                        RegisterCount = playerRegister?.RegisteredPlayers ?? 0,
@@ -185,7 +183,7 @@ internal class GetMarketingReportAggregateInfosQueryService
             Items = dataQuery.AsQueryable()
                 .ApplyOrderBy(paging)
                 .ApplyPaging(paging),
-            Total = summary
+            Summary = summary
         };
     }
 }

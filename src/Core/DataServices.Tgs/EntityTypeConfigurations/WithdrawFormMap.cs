@@ -44,6 +44,9 @@ public class WithdrawFormMap : IEntityTypeConfiguration<WithdrawForm>
         builder.Property(w => w.ActualAmount)
             .HasPrecision(18, 6);
 
+        builder.Property(w => w.HandlingFee)
+            .HasPrecision(18, 6);
+
         builder.Property(w => w.BrandPaymentId);
 
         builder.Property(w => w.Status)
