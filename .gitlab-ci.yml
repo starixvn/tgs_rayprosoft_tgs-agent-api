@@ -5,7 +5,9 @@ stages:
   - build
   - test
   - publish
-  - dbmigrations
+  - dbmigration-dev
+  - dbmigration-staging
+  - dbmigration-prod
 
 build-code:
   stage: build
@@ -76,7 +78,7 @@ migrate-dev:
   variables:
     namespace: dev
     GIT_STRATEGY: none
-  stage: dbmigrations
+  stage: dbmigration-dev
   needs:
     - build-migrations-image
     - job: push-migrations-k8s-template
@@ -119,7 +121,7 @@ migrate-staging:
   variables:
     namespace: staging
     GIT_STRATEGY: none
-  stage: dbmigrations
+  stage: dbmigration-staging
   needs:
     - migrate-dev
     - job: push-migrations-k8s-template
@@ -163,7 +165,7 @@ migrate-prod:
   variables:
     namespace: prod
     GIT_STRATEGY: none
-  stage: dbmigrations
+  stage: dbmigration-prod
   needs:
     - migrate-staging
     - job: push-migrations-k8s-template
