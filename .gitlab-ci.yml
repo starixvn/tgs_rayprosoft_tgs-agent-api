@@ -107,7 +107,7 @@ migrate-dev:
         -n $namespace \
         --name-template $release_name \
         -f - \
-        | kubectl -n dev apply -f -
+        | kubectl -n $namespace apply -f -
       {
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
@@ -151,7 +151,7 @@ migrate-staging:
         -n $namespace \
         --name-template $release_name \
         -f - \
-        | kubectl -n dev apply -f -
+        | kubectl -n $namespace apply -f -
       {
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
@@ -195,7 +195,7 @@ migrate-prod:
         -n $namespace \
         --name-template $release_name \
         -f - \
-        | kubectl -n dev apply -f -
+        | kubectl -n $namespace apply -f -
       {
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
