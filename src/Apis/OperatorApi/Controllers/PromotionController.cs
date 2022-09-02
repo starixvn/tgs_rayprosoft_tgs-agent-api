@@ -136,4 +136,22 @@ public class PromotionController : ControllerBase
                         : promotion.CampaignDetail
                 });
     }
+
+    [HttpGet("{promotionId}/{depositAmount}/canJoinDepositReward", Name = "CheckDepositRewardLimit")]
+    [Description("Check deposit reward limit")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = false)]
+    public async ValueTask<bool> CheckDepositRewardLimitAsync(
+        [FromServices] IPromotionClient promotionClient,
+        Guid promotionId,decimal depositAmount)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        return await promotionClient.CheckCanJoinDepositPromotionAsync(
+            brandId,
+            playerTokenData.PlayerCode,
+            promotionId,
+            depositAmount);
+    }
 }
