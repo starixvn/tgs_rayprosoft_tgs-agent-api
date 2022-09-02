@@ -21,7 +21,7 @@ public class PromotionTests
 
         var command = new PlayDepositAccumulateRouletteCommand(Guid.NewGuid(), "player1");
 
-        var expected = new RouletteResult(Guid.NewGuid(), 3, 5);
+        var expected = new RouletteResult(Guid.NewGuid(), 3);
 
         _ = fakeDepositAccumulateRouletteClient
             .RouletteAsync(
