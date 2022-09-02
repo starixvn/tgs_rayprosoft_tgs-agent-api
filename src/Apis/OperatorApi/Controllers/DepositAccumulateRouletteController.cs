@@ -56,8 +56,7 @@ public class DepositAccumulateRouletteController : ControllerBase
 
         return new DepositAccumulateRouletteResultViewModel
         {
-            ItemIndex = result.ItemIndex,
-            RouletteCount = result.RemainingCount
+            ItemIndex = result.ItemIndex
         };
     }
 }
