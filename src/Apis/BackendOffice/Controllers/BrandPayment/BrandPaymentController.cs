@@ -147,6 +147,7 @@ public partial class BrandPaymentController : BaseContextController
                     {
                         Id = x.Id,
                         Number = x.DisplayOrder,
+                        BrandId = x.BrandId,
                         PaymentId = x.PaymentId,
                         PaymentName = payments.FirstOrDefault(p => p.Id == x.PaymentId) != null
                             ? payments.FirstOrDefault(p => p.Id == x.PaymentId).Code
