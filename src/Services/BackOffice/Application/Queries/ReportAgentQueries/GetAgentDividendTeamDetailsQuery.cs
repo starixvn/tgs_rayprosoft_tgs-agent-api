@@ -59,7 +59,9 @@ public class
                 AgentDividendAmount = x.AgentDividendAmount,
                 AgentDividendPercentage = x.AgentDividendPercentage,
                 ExpenditureAmount = x.ExpenditureAmount,
-                BonusAmount = x.BonusAmount
+                BonusAmount = x.BonusAmount,
+                NetProfit = x.NetProfit,
+                CompanyWinLossTotalAmount = x.CompanyWinLossTotalAmount
             }).ToArray()
         };
     }
