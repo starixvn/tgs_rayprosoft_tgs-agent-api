@@ -1,19 +1,23 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
-public sealed class AuthRequestValidator : BaseFluentValidator<AuthRequest>
+public sealed class AuthRequestValidator : AbstractValidator<AuthRequest>
 {
     public AuthRequestValidator()
     {
         RuleFor(x => x.ApiKey)
             .NotEmpty()
-            .WithName(x => GetJsonPropertyName(x, nameof(x.ApiKey)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.ApiKey)
+                .GetJsonPropertyName(nameof(x.ApiKey)));
 
         RuleFor(x => x.Currency)
             .NotEmpty()
-            .WithName(x => GetJsonPropertyName(x, nameof(x.Currency)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.Currency)
+                .GetJsonPropertyName(nameof(x.Currency)));
     }
 }
