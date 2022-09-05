@@ -9,8 +9,6 @@ public class PlayersModel
 {
     public string? AgentName { get; init; }
 
-    public decimal Balance { get; set; }
-
     public Guid? IdentityFormId { get; init; }
 
     public string ParentUsername { get; init; } = default!;

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Tgs.Paging;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
@@ -18,7 +20,9 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers;
 
@@ -194,8 +198,77 @@ public partial class PlayerController : BaseContextController
 
     [HttpGet(Name = "GetPlayerList")]
     [Description("Get player list")]
-    public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
-        => _mediator.Send(request);
+    public async Task<PagedResponse<PlayersModel>> GetListAsync(
+        [FromServices] IPlayerServiceClient playerServiceClient,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromQuery] GetPlayersRequest request)
+    {
+        var agentQuery = queryAgentsService
+            .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var agentId = !string.IsNullOrWhiteSpace(request.AgentName)
+            ? agentDict.TryGetValue(request.AgentName, out var id)
+                ? id
+                : (Guid?)null
+            : null;
+
+        var parentPlayer = await playerServiceClient
+            .GetPlayerInfoByUserNameAsync(request.BrandId, request.ParentUsername, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var query = new PlayerListQuery
+        {
+            AgentId = agentId,
+            BeginRegisteredTime = request.BeginRegisteredOn?.UtcDateTime,
+            EndRegisteredTime = request.EndRegisteredOn?.UtcDateTime,
+            Phone = request.Phone,
+            RealName = request.RealName,
+            RegisteredDomainName = request.RegisterHost,
+            Status = (Tgs.PlayerService.Client.PlayerStatus?)request.Status,
+            UserName = request.Username,
+            VipId = request.VipId,
+            ParentPlayerCode = parentPlayer?.PlayerCode
+        };
+
+        var result = playerServiceClient.QueryPlayerListAsync(
+            request.BrandId,
+            query,
+            HttpContext.RequestAborted);
+
+        var paging = new Paging<PlayerListItem>();
+
+        paging.Page = request.Page;
+        paging.RowCount = request.Rows;
+
+        var totalCount = await result.CountAsync(HttpContext.RequestAborted).ConfigureAwait(false);
+
+        result = result.ApplyPaging(paging);
+
+        return new PagedResponse<PlayersModel>
+        {
+            Valid = true,
+            TotalCount = totalCount,
+            Items = await result
+                .Select(item => new PlayersModel
+                {
+                    PlayerCode = item.PlayerCode,
+                    RealName = item.RealName,
+                    RegisteredTime = item.RegisteredOn,
+                    RegisterHost = item.RegisteredDomainName,
+                    Status = (TGS.Core.Models.Enums.PlayerStatus)item.Status,
+                    Username = item.UserName
+                })
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+        };
+    }
 
     [HttpGet("{playerBucketId}/playerBucketHistories", Name = "GetPlayerBucketHistories")]
     [Description("Get player buckets")]
@@ -215,7 +288,6 @@ public partial class PlayerController : BaseContextController
         [FromServices] IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> service,
         string playerCode)
     {
-
         var datas = await service.QueryAsync(new GetPlayerGameProviderBalanceCommand(playerCode)).ToArrayAsync().ConfigureAwait(false);
 
         if (!datas.Any())
@@ -294,9 +366,11 @@ public partial class PlayerController : BaseContextController
             case TransactionType.BonusAdjust:
                 _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                 return remark.GetString();
+
             case TransactionType.GameProviderFundOut:
             case TransactionType.GameProviderFundIn:
                 return description;
+
             default:
                 return string.Empty;
         }
