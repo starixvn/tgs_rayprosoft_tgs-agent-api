@@ -13,7 +13,7 @@ public class GetPlayersRequest : PageableRequest, IRequest<PagedResponse<Players
 
     public DateTimeOffset? BeginRegisteredOn { get; init; }
 
-    public Guid? BrandId { get; init; }
+    public Guid BrandId { get; init; }
 
     public DateTimeOffset? EndRegisteredOn { get; init; }
 
