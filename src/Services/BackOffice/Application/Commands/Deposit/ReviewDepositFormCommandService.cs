@@ -79,11 +79,21 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                 return;
 
             if (command.ActualAmount != null)
+            {
+                //TODO: Write Payment Service API
+                //Caculate deposit handling fee
+                //form.Id
+                //command.ActualAmount
+
+                //return DepositHandlingFee
+
+
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         form.Id,
                         actualAmount: command.ActualAmount)
                     .ConfigureAwait(false);
+            }
 
             if (command.Status == ReviewState.Approve)
             {
@@ -129,13 +139,17 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
+                //TODO:存款單手續費計算
+
+
+
                 var promotionResponse = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
                         form.PromotionId,
                         player.PlayerCode,
                         player.DefaultWalletId,
-                        command.ActualAmount ?? form.Amount,
+                        command.ActualAmount ?? form.Amount, //TODO:這裡需要扣除手續費
                         command.Remark,
                         command.FormId,
                         string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
@@ -148,7 +162,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                     .ConfigureAwait(false);
 
                 await _playerService
-                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount)
+                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount) //TODO:玩家總儲值金額調整
                     .ConfigureAwait(false);
 
                 if (form.PromotionId != null)
@@ -159,7 +173,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
             {
                 if (form.PromotionId != null)
                     await _promotionClient
-                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)
+                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)//TODO:這裡金額不用異動
                         .ConfigureAwait(false);
             }
         }
