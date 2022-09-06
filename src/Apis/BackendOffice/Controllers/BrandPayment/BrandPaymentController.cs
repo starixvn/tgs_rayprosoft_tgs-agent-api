@@ -180,7 +180,7 @@ public partial class BrandPaymentController : BaseContextController
                     });
 
         if (request.SortBy != null)
-            result = result.OrderBy(bp => request.SortBy);
+            result = result.OrderBy(bp => bp.Number);
 
         if (request.ShowAll || request.Rows == 0)
         {
