@@ -179,7 +179,21 @@ public partial class BrandPaymentController : BaseContextController
                             : string.Empty
                     });
 
-        return await result.CreatePagedResponseAsync(request.Rows);
+        if (request.SortBy != null)
+            result = result.OrderBy(bp => request.SortBy);
+
+        if (request.ShowAll || request.Rows == 0)
+        {
+            var allResult = result.ToArray();
+            return new PagedResponse<BrandPaymentModel>() { Valid = true, TotalCount = allResult.Length, Items = allResult };
+        }
+
+        var totalCount = result.Count();
+        var page = request.Page <= 0 ? 0 : request.Page - 1;
+        var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+        var items = result.Skip(page * pageSize).Take(pageSize).ToArray();
+
+        return new PagedResponse<BrandPaymentModel>() { Valid = true, TotalCount = totalCount, Items = items };
     }
 
     [HttpGet("{id}/DesignatedUsers")]
