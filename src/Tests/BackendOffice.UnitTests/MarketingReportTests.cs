@@ -4,13 +4,9 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.MarketingReport.Client;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Marketing;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice;
-using TGS.Services.BackOffice.Application.Models.ReportMarketing;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
@@ -121,6 +117,21 @@ internal class MarketingReportTests
     }
 
     [Test]
+    public async Task Get_MarketingReport_By_Brand_Id()
+    {
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
+
+        var sut = new AgentMarketingReportQueryService(fakeMarketingReportClient);
+
+        var query = new AgentMarketingReportQuery(Guid.NewGuid());
+
+        await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryMarketingStatisticsAsync(Arg.Is(query.BrandId), Arg.Any<DateOnly>());
+    }
+
+    [Test]
     public async Task Get_MarketingReport_By_Brand_Sort_PropertyName()
     {
         var fakeReportClient = Substitute.For<IMarketingReportClient>();
@@ -171,82 +182,39 @@ internal class MarketingReportTests
     }
 
     [Test]
-    public async Task Get_Player_Register_Detail()
+    public async Task Get_Player_Gaming_Detail()
     {
-        var fakeReportClient = Substitute.For<IReportClient>();
-        var fakeQueryAgentService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
-        var fakeQueryPlayerDailyRegisterService = Substitute.For<IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem>>();
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
 
-        var sut = new GetMarketingRegisterDetailQuery(
-            fakeReportClient,
-            fakeQueryAgentService,
-            fakeQueryPlayerDailyRegisterService,
-            fakeSystemClock);
+        var sut = new AgentPlayerGamingDetailQueryService(fakeMarketingReportClient);
 
-        var query = new GetMarketingRegisterDetailReportRequest
-        {
-            BrandId = Guid.NewGuid(),
-            Date = DateTime.Now.AddDays(-1D),
-            Page = 1,
-            Rows = 10
-        };
+        var query = new AgentPlayerGamingDetailQuery(Guid.NewGuid(), DateOnly.Parse("2022-8-15"));
 
-        _ = fakeReportClient
-            .GetMarketingRegisterDetailsAsync(Arg.Is<GetMarketingRegisterDetailRequest>(
-                request => request.BrandId == query.BrandId
-                    && request.Date == new DateTimeOffset(
-                        query.Date.ToOffset(TimeSpan.FromHours(8D)).Date,
-                        TimeSpan.FromHours(8D))))
-            .Returns(new Tgs.Report.Client.Models.PagedResponse<MarketingRegisterDetailModel>
-            {
-                Valid = true,
-                TotalCount = 0,
-                Items = Array.Empty<MarketingRegisterDetailModel>()
-            });
+        _ = await sut.QueryAsync(query).ToArrayAsync();
 
-        var actual = await sut.GetAsync(query);
-
-        Assert.IsNotNull(actual);
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryPlayerGamingDetailAsync(Arg.Is(query.BrandId), Arg.Is(query.ReportDate));
     }
 
     [Test]
-    public async Task Get_ReadTime_PlayerRegister_Detail()
+    public async Task Get_Player_Register_Detail()
     {
-        var fakeReportClient = Substitute.For<IReportClient>();
-        var fakeQueryAgentService = Substitute.For<IQueryService<AllAgentsByBrandQuery, AgentInfo>>();
-        var fakeQueryPlayerDailyRegisterService = Substitute.For<IQueryService<GetDailyMarketingRegisterDetailQuery, PlayerDailyRegisterItem>>();
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeMarketingReportClient = Substitute.For<IMarketingReportClient>();
 
-        var sut = new GetMarketingRegisterDetailQuery(
-            fakeReportClient,
-            fakeQueryAgentService,
-            fakeQueryPlayerDailyRegisterService,
-            fakeSystemClock);
+        var sut = new AgentPlayerRegisterDetailQueryService(fakeMarketingReportClient);
 
-        var query = new GetMarketingRegisterDetailReportRequest
-        {
-            BrandId = Guid.NewGuid(),
-            AgentUsername = "Agent1",
-            Date = DateTime.Now,
-            Page = 1,
-            Rows = 10
-        };
+        var query = new AgentPlayerRegisterDetailQuery(Guid.NewGuid(), DateOnly.Parse("2022-8-15"));
 
-        _ = fakeSystemClock.UtcNow.Returns(DateTimeOffset.UtcNow);
+        _ = await sut.QueryAsync(query).ToArrayAsync();
 
-        _ = fakeQueryAgentService.QueryAsync(Arg.Any<AllAgentsByBrandQuery>())
-            .Returns(new[] {
-                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
-            }.ToAsyncEnumerable());
+        _ = fakeMarketingReportClient.Received(1)
+            .QueryPlayerRegisterDetailAsync(Arg.Is(query.BrandId), Arg.Is(query.ReportDate));
+    }
 
-        var actual = await sut.GetAsync(query);
-
-        _ = fakeQueryPlayerDailyRegisterService.Received(1)
-            .QueryAsync(Arg.Is<GetDailyMarketingRegisterDetailQuery>(q => q.BrandId == q.BrandId
-                && q.QueryDate == DateOnly.FromDateTime(query.Date.ToOffset(TimeSpan.FromHours(8D)).DateTime)));
-
-        Assert.IsNotNull(actual);
+    [Test]
+    public void Get_RealTime_Gaming_Detail()
+    {
+        var sut = new GetDailyMarketingGamingDetailQueryService();
     }
 
     [Test]
@@ -262,11 +230,5 @@ internal class MarketingReportTests
 
         _ = fakeMarketingReportRepository.Received(1)
             .QueryRealTimePlayerDailyRegisterStatisticsAsync(Arg.Is(query.BrandId), Arg.Is(query.QueryDate));
-    }
-
-    [Test]
-    public void Get_RealTime_Gaming_Detail()
-    {
-        var sut = new GetDailyMarketingGamingDetailQueryService();
     }
 }

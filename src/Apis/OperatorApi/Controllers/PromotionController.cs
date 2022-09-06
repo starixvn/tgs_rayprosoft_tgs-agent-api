@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Promotion.Clients;
@@ -14,6 +15,8 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
+using Tgs.MessageQueue;
+using Tgs.Promotion.Clients.Protos;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -135,5 +138,37 @@ public class PromotionController : ControllerBase
                             jsonOptionsAccessor.Value.JsonSerializerOptions)
                         : promotion.CampaignDetail
                 });
+    }
+
+    [HttpGet("roulette/count", Name = "ListRouletteCountItems")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+    public async IAsyncEnumerable<RouletteCountItemViewModel> ListRouletteCountItemsAsync(
+        [FromServices] IMessageSender messageSender)
+    {
+        var promotionTypes = new[] { "DepositAccumulateRoulette" };
+
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        foreach (var promotionType in promotionTypes)
+        {
+            var request = new RouletteCountRequest
+            {
+                PlayerCode = playerTokenData.PlayerCode
+            };
+
+            var subject = $"tgs.promotion.{promotionType.ToLower()}.roulettecountitems.query";
+
+            var data = await messageSender.RequestAsync(subject, request.ToByteArray()).ConfigureAwait(false);
+
+            var response = RouletteCountResponse.Parser.ParseFrom(data.Span);
+
+            foreach (var item in response.Items)
+                yield return new RouletteCountItemViewModel
+                {
+                    PromotionId = item.PromotionId,
+                    PromotionType = promotionType,
+                    RouletteCount = item.RouletteCount
+                };
+        }
     }
 }

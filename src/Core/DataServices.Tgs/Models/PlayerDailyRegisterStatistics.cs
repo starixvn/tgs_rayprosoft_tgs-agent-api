@@ -6,7 +6,7 @@ public class PlayerDailyRegisterStatistics
 {
     public int DailyLoginCount { get; set; }
 
-    public DateTime LastLoginOn { get; set; }
+    public DateTime? LastLoginOn { get; set; }
 
     public string PlayerCode { get; set; }
 

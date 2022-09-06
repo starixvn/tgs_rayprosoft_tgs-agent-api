@@ -7,7 +7,7 @@ public class MarketingReportResponse : MessageResponse
 {
     public IEnumerable<MarketingReportModel> Items { get; init; }
 
-    public MarketingReportTotalModel Total { get; init; }
+    public MarketingReportTotalModel Summary { get; init; }
 
     public int TotalCount { get; init; }
 }

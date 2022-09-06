@@ -13,8 +13,7 @@ internal class PlayerDailyRegisterStatisticsMap : IEntityTypeConfiguration<Playe
         builder.HasKey(prs => new { prs.ReportDate, prs.PlayerCode });
 
         builder.Property(prs => prs.LastLoginOn)
-            .HasColumnType("timestamptz")
-            .IsRequired();
+            .HasColumnType("timestamptz");
         builder.Property(prs => prs.DailyLoginCount)
             .IsRequired();
         builder.Property(prs => prs.TotalLoginCount)

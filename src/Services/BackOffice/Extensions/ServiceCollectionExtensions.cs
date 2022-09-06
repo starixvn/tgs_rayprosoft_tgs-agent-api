@@ -2,9 +2,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Middlewares;
-using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.BackOffice.Infrastructure.RedisServices;
@@ -63,12 +61,6 @@ public static class ServiceCollectionExtensions
         services.AddTgsTransactionRepositoriesServices();
 
         services.AddSingleton<ISystemClock, DefaultSystemClock>();
-
-        services
-            .AddTransient<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>, AgentPlayerDepositQueryService>()
-            .Decorate<IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics>, CachedAgentPlayerDepositQueryService>()
-            .AddTransient<IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem>, PlayerPaymentStatisticsDetailQueryService>()
-            .Decorate<IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem>, CachedPlayerPaymentStatisticsDetailQueryService>();
 
         return services;
     }

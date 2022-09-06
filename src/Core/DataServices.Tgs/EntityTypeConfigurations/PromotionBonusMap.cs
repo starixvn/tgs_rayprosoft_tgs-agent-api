@@ -47,6 +47,9 @@ internal class PromotionBonusMap : IEntityTypeConfiguration<PromotionBonus>
         builder.Property(e => e.CreatedOn)
             .IsRequired();
 
+        builder.Property(c => c.Detail)
+            .HasColumnType(ColumnTypes.Jsonb);
+
         builder.HasOne(x => x.Promotion)
             .WithMany()
             .HasForeignKey(x => x.PromotionId)

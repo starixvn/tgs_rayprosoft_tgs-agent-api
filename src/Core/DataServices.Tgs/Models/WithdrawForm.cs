@@ -24,7 +24,13 @@ public class WithdrawForm
 
     public DateTimeOffset CreatedOn { get; set; }
 
+    public decimal HandlingFee { get; set; }
+
     public Guid Id { get; set; }
+
+    public string Note { get; set; }
+
+    public string OrderNo { get; set; }
 
     public DateTimeOffset? PaidOn { get; set; }
 
@@ -35,8 +41,6 @@ public class WithdrawForm
     public string PaymentReturn { get; set; }
 
     public string Remark { get; set; }
-
-    public string Note { get; set; }
 
     public DateTimeOffset? ReviewedOn { get; set; }
 
@@ -55,6 +59,4 @@ public class WithdrawForm
     public string UserName { get; set; }
 
     public int UserType { get; set; }
-
-    public string OrderNo { get; set; }
 }

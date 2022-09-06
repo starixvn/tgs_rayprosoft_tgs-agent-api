@@ -4,7 +4,7 @@ def message = "";
 pipeline {
     agent any
     environment {
-        ImageName="harbor.rpgp.cc/tgs/migration"
+        ImageName="pgtgs/migration"
     }
     stages {
         stage('Prepare') {

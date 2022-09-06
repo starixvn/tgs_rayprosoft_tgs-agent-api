@@ -10,7 +10,7 @@ public class DepositAccumulateRouletteGameEvent
 
     public DateTime CreatedOn { get; set; }
 
-    public Guid DepositAccumulateRouletteEventId { get; set; }
+    public DateOnly Date { get; set; }
 
     public Guid Id { get; set; }
 
