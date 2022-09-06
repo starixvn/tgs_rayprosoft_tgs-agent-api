@@ -100,7 +100,7 @@ public class BrandPaymentService : IBrandPaymentService
             UpdatedByUsername = username,
             CreatedOn = DateTimeOffset.Now,
             UpdatedOn = DateTimeOffset.Now,
-            HandlingFeeRateTenPercentile = request.HandlingFeeRatePercentile * 10m,
+            HandlingFeeRateTenPercentile = request.HandlingFeeRatePercentile * 10M,
             ReducePlayerAmount = request.ReducePlayerAmount,
         };
 
@@ -184,7 +184,7 @@ public class BrandPaymentService : IBrandPaymentService
         payment.Reason = request.Reason;
         payment.UpdatedByUsername = username;
         payment.UpdatedOn = DateTimeOffset.Now;
-        payment.HandlingFeeRateTenPercentile = request.HandlingFeeRatePercentile * 10m;
+        payment.HandlingFeeRateTenPercentile = request.HandlingFeeRatePercentile * 10M;
         payment.ReducePlayerAmount = request.ReducePlayerAmount;
 
         await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);

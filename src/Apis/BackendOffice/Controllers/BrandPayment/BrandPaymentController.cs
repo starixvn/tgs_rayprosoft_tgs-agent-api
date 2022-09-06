@@ -96,7 +96,7 @@ public partial class BrandPaymentController : BaseContextController
             PaymentChannelId = info.ChannelId,
             ChannelName = info.ChannelName,
             ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
-            HandlingFeeRatePercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile * 0.1m,
+            HandlingFeeRatePercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile * 0.1M,
             ReducePlayerAmount = brandPaymentFeeInfo.ReducePlayerAmount,
             PaymentStatus = info.Enabled == true
                 ? SwitchStatus.Enabled
