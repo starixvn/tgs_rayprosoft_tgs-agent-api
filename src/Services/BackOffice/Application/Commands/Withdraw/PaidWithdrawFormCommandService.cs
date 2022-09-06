@@ -34,7 +34,7 @@ internal class PaidWithdrawFormCommandService : ICommandService<PaidWithdrawForm
         await fsm
             .FireAsync(PaymentTrigger.PaymentWithdrawCompleted)
             .ConfigureAwait(false);
-
+        
         await _paymentServiceClient
             .SubmitWithdrawFormStatusAsync(
                 formData.Id,

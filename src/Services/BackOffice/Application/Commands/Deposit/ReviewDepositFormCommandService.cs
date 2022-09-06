@@ -2,17 +2,16 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Redis;
 using Tgs.Payment.Clients;
+using Tgs.Promotion.Clients;
+using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using Tgs.ServiceUtility;
-using Tgs.Promotion.Clients;
-using Castle.Core.Logging;
-using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit;
 
@@ -80,18 +79,15 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
 
             if (command.ActualAmount != null)
             {
-                //TODO: Write Payment Service API
-                //Caculate deposit handling fee
-                //form.Id
-                //command.ActualAmount
-
-                //return DepositHandlingFee
-
+                var handlingFee = await _paymentServiceClient
+                    .CalculateHandlingFeeAsync(form.BrandPaymentId, command.ActualAmount.Value, cancellationToken)
+                    .ConfigureAwait(false);
 
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         form.Id,
-                        actualAmount: command.ActualAmount)
+                        actualAmount: command.ActualAmount,
+                        handlingFee: handlingFee)
                     .ConfigureAwait(false);
             }
 
@@ -139,9 +135,13 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
-                //TODO:存款單手續費計算
-
-
+                var handlingFee = command.ActualAmount != null
+                    ? await _paymentServiceClient
+                        .CalculateHandlingFeeAsync(form.BrandPaymentId, command.ActualAmount.Value, cancellationToken)
+                        .ConfigureAwait(false)
+                    : await _paymentServiceClient
+                        .CalculateHandlingFeeAsync(form.BrandPaymentId, form.Amount, cancellationToken)
+                        .ConfigureAwait(false);
 
                 var promotionResponse = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
@@ -149,7 +149,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                         form.PromotionId,
                         player.PlayerCode,
                         player.DefaultWalletId,
-                        command.ActualAmount ?? form.Amount, //TODO:這裡需要扣除手續費
+                        (command.ActualAmount ?? form.Amount) - handlingFee,
                         command.Remark,
                         command.FormId,
                         string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
@@ -158,29 +158,33 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         command.FormId,
-                        promotionPlayerId: promotionResponse.PromotionPlayerId)
+                        promotionPlayerId: promotionResponse.PromotionPlayerId,
+                        handlingFee: handlingFee)
                     .ConfigureAwait(false);
 
                 await _playerService
-                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount) //TODO:玩家總儲值金額調整
+                    .TopUpAccumulatedDepositAsync(
+                        form.PlayerCode,
+                        (command.ActualAmount ?? form.Amount) - handlingFee)
                     .ConfigureAwait(false);
 
                 if (form.PromotionId != null)
-                    await _promotionClient.DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
+                    _ = await _promotionClient
+                        .DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
                         .ConfigureAwait(false);
             }
             else
             {
                 if (form.PromotionId != null)
                     await _promotionClient
-                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)//TODO:這裡金額不用異動
+                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)
                         .ConfigureAwait(false);
             }
         }
         finally
         {
             if (isSaveSuccess)
-                await _redisDatabase
+                _ = await _redisDatabase
                     .KeyDeleteAsync(
                         $"Tgs:BucketDeposit:{command.FormId:N}")
                     .ConfigureAwait(false);
