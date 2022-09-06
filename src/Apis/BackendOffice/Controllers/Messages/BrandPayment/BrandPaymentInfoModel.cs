@@ -18,7 +18,7 @@ public class BrandPaymentInfoModel
 
     public JsonDocument ExtendedData { get; set; }
 
-    public decimal HandlingFeeRateTenPercentile { get; set; }
+    public decimal HandlingFeeRatePercentile { get; set; }
 
     public bool IdentityAuthentication { get; set; }
 

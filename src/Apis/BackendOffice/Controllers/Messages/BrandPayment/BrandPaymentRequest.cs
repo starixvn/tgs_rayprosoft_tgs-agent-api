@@ -22,7 +22,7 @@ public class BrandPaymentRequest
 
     public JsonDocument ExtendedData { get; set; }
 
-    public decimal HandlingFeeRateTenPercentile { get; set; }
+    public decimal HandlingFeeRatePercentile { get; set; }
 
     public Guid Id { get; set; }
 
