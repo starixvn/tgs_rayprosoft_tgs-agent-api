@@ -171,7 +171,8 @@ public class Startup
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     http.BaseAddress = config.GetValue<Uri>("BackOffice:VipLevelServiceBaseUrl");
-                }));
+                })
+                .AddLoggingHandler<Startup>());
 
         _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
 
