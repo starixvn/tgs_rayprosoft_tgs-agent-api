@@ -219,9 +219,11 @@ public partial class PlayerController : BaseContextController
                 : (Guid?)null
             : null;
 
-        var parentPlayer = await playerServiceClient
-            .GetPlayerInfoByUserNameAsync(request.BrandId, request.ParentUsername, HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        var parentPlayer = !string.IsNullOrWhiteSpace(request.ParentUsername)
+            ? await playerServiceClient
+                .GetPlayerInfoByUserNameAsync(request.BrandId, request.ParentUsername, HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+            : null;
 
         var query = new PlayerListQuery
         {
