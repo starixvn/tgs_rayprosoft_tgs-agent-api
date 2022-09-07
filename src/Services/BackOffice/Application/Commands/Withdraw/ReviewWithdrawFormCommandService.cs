@@ -64,7 +64,8 @@ internal class ReviewWithdrawFormCommandService : ICommandService<ReviewWithdraw
                 formData.UserType,
                 formData.UserId,
                 formData.Amount,
-                command.ReviewUserId).ConfigureAwait(false);
+                command.ReviewUserId,
+                command.FormId).ConfigureAwait(false);
         }
     }
 }
