@@ -72,7 +72,8 @@ public class VipLevelController : BaseContextController
             .CountAsync(HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        var paging = new Paging<VipLevelInfo>();
+        var paging = new Paging<VipLevelInfo>()
+            .MapProperty("level", info => info.Level);
 
         paging.Page = request.Page;
         paging.RowCount = request.Rows;
