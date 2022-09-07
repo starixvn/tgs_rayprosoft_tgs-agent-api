@@ -251,6 +251,12 @@ public partial class PlayerController : BaseContextController
 
         result = result.ApplyPaging(paging);
 
+        var agentNameDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.AgentId,
+                a => a.UserName)
+            .ConfigureAwait(false);
+
         return new PagedResponse<PlayersModel>
         {
             Valid = true,
@@ -263,7 +269,10 @@ public partial class PlayerController : BaseContextController
                     RegisteredTime = item.RegisteredOn,
                     RegisterHost = item.RegisteredDomainName,
                     Status = (TGS.Core.Models.Enums.PlayerStatus)item.Status,
-                    Username = item.UserName
+                    Username = item.UserName,
+                    AgentName = agentId is not null && agentNameDict.TryGetValue(agentId.Value, out var agentName)
+                        ? agentName
+                        : null,
                 })
                 .ToArrayAsync(HttpContext.RequestAborted)
                 .ConfigureAwait(false)
