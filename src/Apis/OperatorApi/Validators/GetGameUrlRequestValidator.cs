@@ -14,12 +14,6 @@ public sealed class GetGameUrlRequestValidator : AbstractValidator<GetGameUrlReq
                 .WithPropertyExpression(o => o.SubGameProviderCode)
                 .GetBindPropertyName(nameof(x.SubGameProviderCode)));
 
-        RuleFor(x => x.GameId)
-            .NotEmpty()
-            .WithName(x => x
-                .WithPropertyExpression(o => o.GameId)
-                .GetBindPropertyName(nameof(x.GameId)));
-
         RuleFor(x => x.LanguageCode)
             .NotEmpty()
             .WithName(x => x
