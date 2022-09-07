@@ -157,7 +157,8 @@ public class WithdrawController : BaseContextController
                 PaidOn = formDetail.PaidOn,
                 PaidUserId = formDetail.PaidUserId,
                 PaidUserName = formDetail.PaidUserName,
-                Note = formDetail.Note
+                Note = formDetail.Note,
+                HandlingFee = formDetail.HandlingFee,
             }
         };
     }
