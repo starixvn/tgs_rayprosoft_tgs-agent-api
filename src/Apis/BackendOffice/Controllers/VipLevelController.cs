@@ -50,7 +50,7 @@ public class VipLevelController : BaseContextController
         _ = await vipLevelServiceClient.CreateVipLevelAsync(
             request.BrandId,
             createInfo,
-            request.EditorUsername,
+            Username,
             HttpContext.RequestAborted).ConfigureAwait(false);
 
         return new MessageResponse
@@ -143,7 +143,7 @@ public class VipLevelController : BaseContextController
         await vipLevelServiceClient.UpdateVipLevelAsync(
             id,
             updateInfo,
-            request.EditorUsername,
+            Username,
             HttpContext.RequestAborted).ConfigureAwait(false);
 
         return new MessageResponse
