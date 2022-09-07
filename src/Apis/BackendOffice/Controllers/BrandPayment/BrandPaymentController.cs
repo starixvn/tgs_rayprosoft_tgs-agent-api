@@ -178,9 +178,8 @@ public partial class BrandPaymentController : BaseContextController
                             ? paymentMethods.FirstOrDefault(pm => pm.Id == x.MethodId).BankType
                             : string.Empty
                     });
-
-        if (request.SortBy != null)
-            result = result.OrderBy(bp => bp.Number);
+        
+        result = result.OrderBy(bp => bp.Number);
 
         if (request.ShowAll || request.Rows == 0)
         {
