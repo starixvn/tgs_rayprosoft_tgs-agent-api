@@ -113,7 +113,10 @@ public partial class BrandPaymentController : BaseContextController
             DepositedAmountUnlimited = info.DepositedAmountLimit.To == decimal.MaxValue,
             PhoneAuthentication = info.AuthenticatePhone,
             IdentityAuthentication = info.AuthenticateIdentity,
-            VipLevelIds = brandPaymentVipLevels.Select(x => x.VipLevelId).ToArray()
+            VipLevelIds = brandPaymentVipLevels.Select(x => x.VipLevelId).ToArray(),
+            TransferType = info.TransferType == TransferType.Deposit
+                ? PaymentTransferType.Deposit
+                : PaymentTransferType.Withdrawal,
         };
     }
 
@@ -179,7 +182,7 @@ public partial class BrandPaymentController : BaseContextController
                             ? paymentMethods.FirstOrDefault(pm => pm.Id == x.MethodId).BankType
                             : string.Empty
                     });
-        
+
         result = result.OrderBy(bp => bp.Number);
 
         if (request.ShowAll || request.Rows == 0)
