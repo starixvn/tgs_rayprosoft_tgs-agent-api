@@ -94,6 +94,7 @@ public partial class BrandPaymentController : BaseContextController
             PaymentId = info.PaymentId,
             PaymentMethodId = info.MethodId,
             PaymentChannelId = info.ChannelId,
+            PaymentMethodChannelId = info.PaymentMethodChannelId,
             ChannelName = info.ChannelName,
             ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
             HandlingFeeRateTenPercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile,
@@ -119,7 +120,7 @@ public partial class BrandPaymentController : BaseContextController
     [HttpGet]
     [Description("Get brand payments")]
     public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync(
-        [FromQuery] GetBrandPaymentsRequest request) 
+        [FromQuery] GetBrandPaymentsRequest request)
         => _brandPaymentService.GetPaymentQueries()
                 .Include(p => p.BrandPaymentPlayers)
                 .ThenInclude(pp => pp.Player)
