@@ -62,10 +62,9 @@ public class OperatorConfiguration
         return this;
     }
 
-    public OperatorConfiguration AddPaymentServiceClient(
-        Action<PaymentServiceClientOptions, IServiceProvider> configure)
+    public OperatorConfiguration AddPaymentServiceClient(Action<IHttpClientBuilder> configureHttpClient)
     {
-        Services.AddPaymentServiceClient(configure);
+        Services.AddPaymentServiceClient(configureHttpClient);
 
         return this;
     }

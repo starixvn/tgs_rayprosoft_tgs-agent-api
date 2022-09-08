@@ -152,12 +152,13 @@ public class Startup
             .AddNatsGlobPatternExchange("*");
 
         _ = services
-            .AddPaymentServiceClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+            .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+                .ConfigureHttpClient((sp, http) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-                options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
-            })
+                    http.BaseAddress = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
+                }))
             .AddSingleton<ManualDepositSerializer>()
             .AddBrandServiceClient((options, sp) =>
             {

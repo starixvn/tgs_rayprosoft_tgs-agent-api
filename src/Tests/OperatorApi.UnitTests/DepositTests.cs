@@ -526,6 +526,7 @@ public class DepositTests
                 It.IsAny<decimal?>(),
                 It.IsAny<string>(),
                 It.IsAny<int?>(),
+                It.IsAny<decimal?>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(1));
     }
@@ -615,6 +616,7 @@ public class DepositTests
                 It.IsAny<decimal?>(),
                 It.IsAny<string>(),
                 It.IsAny<int?>(),
+                It.IsAny<decimal?>(),
                 It.IsAny<CancellationToken>()),
             Times.Exactly(0));
     }

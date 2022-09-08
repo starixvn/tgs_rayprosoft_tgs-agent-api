@@ -132,12 +132,13 @@ public class Startup
             {
                 config.GetSection("EmailSetting").Bind(options);
             })
-            .AddPaymentServiceClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+            .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+                .ConfigureHttpClient((sp, http) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-                options.PaymentServiceBaseUrl = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
-            })
+                    http.BaseAddress = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
+                }))
             .ConfigureWallet(config =>
             {
                 config.AddTgsAgentWalletRepositories();
