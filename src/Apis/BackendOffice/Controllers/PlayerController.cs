@@ -274,19 +274,23 @@ public partial class PlayerController : BaseContextController
                 .ToArrayAsync(HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
-        var parentPlayerDict = await playerServiceClient
-            .QueryPlayerListAsync(
-                request.BrandId,
-                new PlayerListQuery
-                {
-                    PlayerCodes = pagedView.Select(v => v.PlayerCode).Distinct()
-                },
-                HttpContext.RequestAborted)
-            .ToDictionaryAsync(
-                p => p.PlayerCode,
-                p => p.UserName,
-                HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        var parentPlayers = pagedView.Select(v => v.ParentPlayerCode).Distinct();
+
+        var parentPlayerDict = parentPlayers.Any()
+            ? await playerServiceClient
+                .QueryPlayerListAsync(
+                    request.BrandId,
+                    new PlayerListQuery
+                    {
+                        PlayerCodes = parentPlayers
+                    },
+                    HttpContext.RequestAborted)
+                .ToDictionaryAsync(
+                    p => p.PlayerCode,
+                    p => p.UserName,
+                    HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+            : new Dictionary<string, string>();
 
         return new PagedResponse<PlayersModel>
         {
