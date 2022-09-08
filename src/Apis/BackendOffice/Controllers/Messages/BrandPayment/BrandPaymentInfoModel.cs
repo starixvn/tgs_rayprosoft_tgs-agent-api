@@ -26,6 +26,8 @@ public class BrandPaymentInfoModel
 
     public Guid? PaymentId { get; set; }
 
+    public Guid? PaymentMethodChannelId { get; set; }
+
     public Guid? PaymentMethodId { get; set; }
 
     public SwitchStatus PaymentStatus { get; set; }

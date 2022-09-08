@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -94,6 +94,7 @@ public partial class BrandPaymentController : BaseContextController
             PaymentId = info.PaymentId,
             PaymentMethodId = info.MethodId,
             PaymentChannelId = info.ChannelId,
+            PaymentMethodChannelId = info.PaymentMethodChannelId,
             ChannelName = info.ChannelName,
             ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
             HandlingFeeRatePercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile * 0.1M,
