@@ -13,6 +13,7 @@ using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Apis.BackendOffice.Models;
 using TGS.Core.Models.Enums;
@@ -22,6 +23,7 @@ using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
 using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
+using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers;
@@ -201,6 +203,7 @@ public partial class PlayerController : BaseContextController
     public async Task<PagedResponse<PlayersModel>> GetListAsync(
         [FromServices] IPlayerServiceClient playerServiceClient,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<AllVipLevelsQuery, VipLevelInfo> queryVipService,
         [FromQuery] GetPlayersRequest request)
     {
         var agentQuery = queryAgentsService
@@ -259,6 +262,14 @@ public partial class PlayerController : BaseContextController
                 a => a.UserName)
             .ConfigureAwait(false);
 
+        var vipDict = await queryVipService
+            .QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
+            .ToDictionaryAsync(
+                info => info.Id,
+                info => info.Level,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
         return new PagedResponse<PlayersModel>
         {
             Valid = true,
@@ -275,6 +286,9 @@ public partial class PlayerController : BaseContextController
                     AgentName = agentId is not null && agentNameDict.TryGetValue(agentId.Value, out var agentName)
                         ? agentName
                         : null,
+                    VipLevel = item.VipId is not null && vipDict.TryGetValue(item.VipId.Value, out var level)
+                        ? level
+                        : null
                 })
                 .ToArrayAsync(HttpContext.RequestAborted)
                 .ConfigureAwait(false)
