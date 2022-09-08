@@ -65,9 +65,9 @@ public class AgentConfiguration
         return this;
     }
 
-    public AgentConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
+    public AgentConfiguration AddPaymentServiceClient(Action<IHttpClientBuilder> httpClientConfigure)
     {
-        _ = Services.AddPaymentServiceClient(configure);
+        _ = Services.AddPaymentServiceClient(httpClientConfigure);
 
         return this;
     }
