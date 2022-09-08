@@ -149,26 +149,39 @@ public class PromotionController : ControllerBase
 
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-        foreach (var promotionType in promotionTypes)
+        var rouletteCountItems = new List<RouletteCountItemViewModel>();
+
+        var tasks = promotionTypes.Select(promotionType =>
         {
-            var request = new RouletteCountRequest
-            {
-                PlayerCode = playerTokenData.PlayerCode
-            };
+            var request = new RouletteCountRequest { PlayerCode = playerTokenData.PlayerCode };
 
             var subject = $"tgs.promotion.{promotionType.ToLower()}.roulettecountitems.query";
 
-            var data = await messageSender.RequestAsync(subject, request.ToByteArray()).ConfigureAwait(false);
+            var task = Task.Run(async () =>
+            {
+                var data = await messageSender
+                    .RequestAsync(subject, request.ToByteArray())
+                    .ConfigureAwait(false);
 
-            var response = RouletteCountResponse.Parser.ParseFrom(data.Span);
+                var response = RouletteCountResponse.Parser.ParseFrom(data.Span);
 
-            foreach (var item in response.Items)
-                yield return new RouletteCountItemViewModel
-                {
-                    PromotionId = item.PromotionId,
-                    PromotionType = promotionType,
-                    RouletteCount = item.RouletteCount
-                };
-        }
+                var items = response.Items
+                    .Select(item => new RouletteCountItemViewModel
+                    {
+                        PromotionId = item.PromotionId,
+                        PromotionType = promotionType,
+                        RouletteCount = item.RouletteCount
+                    }).ToArray();
+
+                rouletteCountItems.AddRange(items);
+            });
+
+            return task;
+        }).ToArray();
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+
+        foreach (var item in rouletteCountItems)
+            yield return item;
     }
 }
