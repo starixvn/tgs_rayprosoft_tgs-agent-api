@@ -270,11 +270,29 @@ public partial class PlayerController : BaseContextController
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
+        var pagedView = await result
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+        var parentPlayerDict = await playerServiceClient
+            .QueryPlayerListAsync(
+                request.BrandId,
+                new PlayerListQuery
+                {
+                    PlayerCodes = pagedView.Select(v => v.PlayerCode).Distinct()
+                },
+                HttpContext.RequestAborted)
+            .ToDictionaryAsync(
+                p => p.PlayerCode,
+                p => p.UserName,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
         return new PagedResponse<PlayersModel>
         {
             Valid = true,
             TotalCount = totalCount,
-            Items = await result
+            Items = pagedView
                 .Select(item => new PlayersModel
                 {
                     PlayerCode = item.PlayerCode,
@@ -288,10 +306,13 @@ public partial class PlayerController : BaseContextController
                         : null,
                     VipLevel = item.VipId is not null && vipDict.TryGetValue(item.VipId.Value, out var level)
                         ? level
+                        : null,
+                    ParentUsername = !string.IsNullOrEmpty(item.ParentPlayerCode)
+                        && parentPlayerDict.TryGetValue(item.ParentPlayerCode, out var parentName)
+                        ? parentName
                         : null
                 })
-                .ToArrayAsync(HttpContext.RequestAborted)
-                .ConfigureAwait(false)
+                .ToArray()
         };
     }
 
