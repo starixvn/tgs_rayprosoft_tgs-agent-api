@@ -274,7 +274,10 @@ public partial class PlayerController : BaseContextController
                 .ToArrayAsync(HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
-        var parentPlayers = pagedView.Select(v => v.ParentPlayerCode).Distinct();
+        var parentPlayers = pagedView
+            .Where(p => p.ParentPlayerCode is not null)
+            .Select(p => p.ParentPlayerCode)
+            .Distinct();
 
         var parentPlayerDict = parentPlayers.Any()
             ? await playerServiceClient
