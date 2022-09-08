@@ -42,5 +42,7 @@ public class BrandPaymentInfoModel
 
     public decimal TransferLimitTo { get; set; }
 
+    public PaymentTransferType TransferType { get; set; }
+
     public Guid[] VipLevelIds { get; set; }
 }
