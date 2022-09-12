@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -94,9 +94,10 @@ public partial class BrandPaymentController : BaseContextController
             PaymentId = info.PaymentId,
             PaymentMethodId = info.MethodId,
             PaymentChannelId = info.ChannelId,
+            PaymentMethodChannelId = info.PaymentMethodChannelId,
             ChannelName = info.ChannelName,
             ExtendedData = JsonDocument.Parse(info.ExtendedData, new JsonDocumentOptions()),
-            HandlingFeeRateTenPercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile,
+            HandlingFeeRatePercentile = brandPaymentFeeInfo.HandlingFeeRateTenPercentile * 0.1M,
             ReducePlayerAmount = brandPaymentFeeInfo.ReducePlayerAmount,
             PaymentStatus = info.Enabled == true
                 ? SwitchStatus.Enabled
@@ -112,7 +113,10 @@ public partial class BrandPaymentController : BaseContextController
             DepositedAmountUnlimited = info.DepositedAmountLimit.To == decimal.MaxValue,
             PhoneAuthentication = info.AuthenticatePhone,
             IdentityAuthentication = info.AuthenticateIdentity,
-            VipLevelIds = brandPaymentVipLevels.Select(x => x.VipLevelId).ToArray()
+            VipLevelIds = brandPaymentVipLevels.Select(x => x.VipLevelId).ToArray(),
+            TransferType = info.TransferType == TransferType.Deposit
+                ? PaymentTransferType.Deposit
+                : PaymentTransferType.Withdrawal,
         };
     }
 
@@ -179,7 +183,20 @@ public partial class BrandPaymentController : BaseContextController
                             : string.Empty
                     });
 
-        return await result.CreatePagedResponseAsync(request.Rows);
+        result = result.OrderBy(bp => bp.Number);
+
+        if (request.ShowAll || request.Rows == 0)
+        {
+            var allResult = result.ToArray();
+            return new PagedResponse<BrandPaymentModel>() { Valid = true, TotalCount = allResult.Length, Items = allResult };
+        }
+
+        var totalCount = result.Count();
+        var page = request.Page <= 0 ? 0 : request.Page - 1;
+        var pageSize = request.Rows <= 0 ? 10 : request.Rows;
+        var items = result.Skip(page * pageSize).Take(pageSize).ToArray();
+
+        return new PagedResponse<BrandPaymentModel>() { Valid = true, TotalCount = totalCount, Items = items };
     }
 
     [HttpGet("{id}/DesignatedUsers")]

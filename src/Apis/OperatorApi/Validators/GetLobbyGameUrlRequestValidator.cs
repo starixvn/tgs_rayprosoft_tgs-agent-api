@@ -2,17 +2,16 @@
 using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
-public class GetLobbyGameUrlRequestValidator : BaseFluentValidator<GetLobbyGameUrlRequest>
+public class GetLobbyGameUrlRequestValidator : AbstractValidator<GetLobbyGameUrlRequest>
 {
     private readonly GameType[] _allowedGameTypes =
     {
-        GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports, 
-        GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby, 
+        GameType.Sportsbook, GameType.VirtualSportsLobby, GameType.ESports,
+        GameType.LiveDealerLobby, GameType.CardGameLobby, GameType.FishingLobby,
         GameType.ArcadeLobby, GameType.LotteryLobby
     };
 
@@ -20,16 +19,23 @@ public class GetLobbyGameUrlRequestValidator : BaseFluentValidator<GetLobbyGameU
     {
         RuleFor(x => x.SubGameProviderCode)
             .NotEmpty()
-            .WithName(x => GetBindPropertyName(x, nameof(x.SubGameProviderCode)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.SubGameProviderCode)
+                .GetBindPropertyName(nameof(x.SubGameProviderCode)));
 
         RuleFor(x => x.GameType)
             .IsInEnum()
             .Must(gameType => _allowedGameTypes.Contains(gameType))
-            .WithMessage(x =>
-                $"{GetBindPropertyName(x, nameof(x.GameType))} must be in ({_allowedGameTypes.Select(t => (int) t).JoinAsStringByComma()})");
+            .WithMessage(x => string.Format(
+                "{0} must be in ({1})",
+                x.WithPropertyExpression(o => o.GameType)
+                    .GetBindPropertyName(nameof(x.GameType)),
+                _allowedGameTypes.Select(t => (int)t).JoinAsStringByComma()));
 
         RuleFor(x => x.LanguageCode)
             .NotEmpty()
-            .WithName(x => GetBindPropertyName(x, nameof(x.LanguageCode)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.LanguageCode)
+                .GetBindPropertyName(nameof(x.LanguageCode)));
     }
 }

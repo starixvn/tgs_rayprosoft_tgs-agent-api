@@ -77,16 +77,16 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
                 playerWalletId,
                 command.Amount,
                 null,
-                null)
+                createFormId.ToString())
             .ConfigureAwait(false);
 
         if (result.Balance < 0)
         {
-            await _cashServiceClient.RollbackWithdrawAsync(
+            _ = await _cashServiceClient.RollbackWithdrawAsync(
                 playerWalletId,
                 command.Amount,
                 null,
-                null,
+                createFormId.ToString(),
                 null).ConfigureAwait(false);
 
             await _paymentServiceClient

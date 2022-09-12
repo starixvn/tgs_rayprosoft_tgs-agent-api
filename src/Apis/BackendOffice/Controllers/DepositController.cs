@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
+using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.Promotion;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
-using Tgs.Promotion.Clients;
-using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Application.Services;
@@ -131,7 +131,8 @@ public class DepositController : BaseContextController
                 Bonus = formDetail.PromotionPlayerId != null
                     && promotionBonus.TryGetValue(formDetail.PromotionPlayerId.Value, out var bonus)
                     ? bonus
-                    : null
+                    : null,
+                HandlingFee = formDetail.HandlingFee,
             }
         };
     }

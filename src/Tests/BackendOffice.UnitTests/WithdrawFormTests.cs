@@ -133,7 +133,8 @@ public class WithdrawFormTests
                 Arg.Any<UserType>(),
                 Arg.Any<string>(),
                 Arg.Is(1000M),
-                Arg.Any<string>());
+                Arg.Any<string>(),
+                Arg.Any<Guid>());
     }
 
     [Test]
@@ -253,7 +254,8 @@ public class WithdrawFormTests
             agentId.ToString(),
             amount,
             amount,
-            userId.ToString());
+            userId.ToString(),
+            Guid.NewGuid());
 
         _ = fakeAgentWalletRepository.Received(0)
             .ExchangeAsync(
@@ -289,7 +291,8 @@ public class WithdrawFormTests
             playerCode,
             amount,
             amount,
-            userId.ToString());
+            userId.ToString(),
+            Guid.NewGuid());
 
         _ = fakePlayerWalletExchangeService.Received(1)
             .CommitWithdrawalAsync(
@@ -392,7 +395,8 @@ public class WithdrawFormTests
                 Arg.Any<string>(),
                 Arg.Is(1000M),
                 Arg.Is(1000M),
-                Arg.Any<string>());
+                Arg.Any<string>(),
+                Arg.Any<Guid>());
     }
 
     [Test]
@@ -487,7 +491,8 @@ public class WithdrawFormTests
             userType,
             agentId.ToString(),
             amount,
-            userId.ToString());
+            userId.ToString(),
+            Guid.NewGuid());
 
         _ = fakeAgentWalletRepository.Received(1)
             .ExchangeAsync(
@@ -522,7 +527,8 @@ public class WithdrawFormTests
             userType,
             playerCode,
             amount,
-            userId.ToString());
+            userId.ToString(),
+            Guid.NewGuid());
 
         _ = fakePlayerWalletExchangeService.Received(1)
             .RollbackWithdrawalAsync(

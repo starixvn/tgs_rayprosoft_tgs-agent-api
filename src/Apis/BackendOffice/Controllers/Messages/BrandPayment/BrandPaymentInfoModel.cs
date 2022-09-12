@@ -18,13 +18,15 @@ public class BrandPaymentInfoModel
 
     public JsonDocument ExtendedData { get; set; }
 
-    public decimal HandlingFeeRateTenPercentile { get; set; }
+    public decimal HandlingFeeRatePercentile { get; set; }
 
     public bool IdentityAuthentication { get; set; }
 
     public Guid? PaymentChannelId { get; set; }
 
     public Guid? PaymentId { get; set; }
+
+    public Guid? PaymentMethodChannelId { get; set; }
 
     public Guid? PaymentMethodId { get; set; }
 
@@ -39,6 +41,8 @@ public class BrandPaymentInfoModel
     public decimal TransferLimitFrom { get; set; }
 
     public decimal TransferLimitTo { get; set; }
+
+    public PaymentTransferType TransferType { get; set; }
 
     public Guid[] VipLevelIds { get; set; }
 }

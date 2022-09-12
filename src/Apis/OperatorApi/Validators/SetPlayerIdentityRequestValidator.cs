@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
-public class SetPlayerIdentityRequestValidator : BaseFluentValidator<SetPlayerIdentityRequest>
+public class SetPlayerIdentityRequestValidator : AbstractValidator<SetPlayerIdentityRequest>
 {
     public SetPlayerIdentityRequestValidator(
         IHttpContextAccessor httpContextAccessor,
@@ -18,7 +18,9 @@ public class SetPlayerIdentityRequestValidator : BaseFluentValidator<SetPlayerId
         RuleFor(x => x.RealName)
             .NotNull()
             .NotEmpty()
-            .WithName(x => GetJsonPropertyName(x, nameof(x.RealName)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.RealName)
+                .GetJsonPropertyName(nameof(x.RealName)));
 
         RuleFor(x => x.Identity)
             .Must(id =>
@@ -37,6 +39,8 @@ public class SetPlayerIdentityRequestValidator : BaseFluentValidator<SetPlayerId
 
                 return identityVerifier.Verify(id);
             })
-            .WithName(x => GetJsonPropertyName(x, nameof(x.Identity)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.Identity)
+                .GetJsonPropertyName(nameof(x.Identity)));
     }
 }
