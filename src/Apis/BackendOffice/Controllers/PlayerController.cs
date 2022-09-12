@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Tgs.Paging;
+using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
@@ -202,6 +203,7 @@ public partial class PlayerController : BaseContextController
     [Description("Get player list")]
     public async Task<PagedResponse<PlayersModel>> GetListAsync(
         [FromServices] IPlayerServiceClient playerServiceClient,
+        [FromServices] IPaymentServiceClient paymentServiceClient,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
         [FromServices] IQueryService<AllVipLevelsQuery, VipLevelInfo> queryVipService,
         [FromQuery] GetPlayersRequest request)
@@ -216,20 +218,50 @@ public partial class PlayerController : BaseContextController
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
-        var agentId = !string.IsNullOrWhiteSpace(request.AgentName)
-            ? agentDict.TryGetValue(request.AgentName, out var id)
+        var agentId = string.IsNullOrWhiteSpace(request.AgentName)
+            ? (Guid?)null
+            : agentDict.TryGetValue(request.AgentName, out var id)
                 ? id
-                : (Guid?)null
-            : null;
+                : Guid.Empty;
 
         var parentPlayer = !string.IsNullOrWhiteSpace(request.ParentUsername)
             ? await playerServiceClient
                 .GetPlayerInfoByUserNameAsync(request.BrandId, request.ParentUsername, HttpContext.RequestAborted)
-                .ConfigureAwait(false)
+                .ConfigureAwait(false) ?? new Tgs.PlayerService.Client.PlayerInfo
+                {
+                    PlayerCode = string.Empty
+                }
             : null;
+
+        if (agentId == Guid.Empty || parentPlayer?.PlayerCode == string.Empty)
+            return new PagedResponse<PlayersModel>
+            {
+                Valid = true,
+                TotalCount = 0,
+                Items = Array.Empty<PlayersModel>()
+            };
+
+        string[] bankInfoPlayers = Array.Empty<string>();
+
+        if (!string.IsNullOrWhiteSpace(request.BankInfoTagType) && !string.IsNullOrWhiteSpace(request.BankInfoTag))
+        {
+            bankInfoPlayers = await paymentServiceClient
+                .GetPlayersByBankInfoTagAsync(request.BrandId, request.BankInfoTagType, request.BankInfoTag)
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+            if (bankInfoPlayers.Length == 0)
+                return new PagedResponse<PlayersModel>
+                {
+                    Valid = true,
+                    TotalCount = 0,
+                    Items = Array.Empty<PlayersModel>()
+                };
+        }
 
         var query = new PlayerListQuery
         {
+            PlayerCodes = bankInfoPlayers,
             AgentId = agentId,
             BeginRegisteredTime = request.BeginRegisteredOn?.UtcDateTime,
             EndRegisteredTime = request.EndRegisteredOn?.UtcDateTime,
