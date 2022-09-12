@@ -76,19 +76,6 @@ public class PlayerBucketRepository : IPlayerBucketRepository
             request.FormId.ToString(),
             request.UserId).ConfigureAwait(false);
 
-        var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
-        {
-            PlayerCode = request.PlayerCode,
-            BucketAmount = request.DepositAmount,
-            BucketType = BucketType.Deposit,
-            IsFull = false,
-            CreatedOn = DateTimeOffset.Now
-        };
-
-        await _repository.PlayerBuckets.AddAsync(bucket).ConfigureAwait(false);
-
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
-
         if (request.PromotionId != null)
         {
             var promotion = await _repository.Promotions.FirstAsync(x => x.Id == request.PromotionId);
@@ -103,6 +90,21 @@ public class PlayerBucketRepository : IPlayerBucketRepository
 
             promotionPlayerId = responseData.PromotionBonusPlayerId;
             depositBonusAmount += responseData.DepositBonusAmount;
+        }
+        else
+        {
+            var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+            {
+                PlayerCode = request.PlayerCode,
+                BucketAmount = request.DepositAmount,
+                BucketType = BucketType.Deposit,
+                IsFull = false,
+                CreatedOn = DateTimeOffset.Now
+            };
+
+            await _repository.PlayerBuckets.AddAsync(bucket).ConfigureAwait(false);
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         return new CreatePlayerBucketWithDepositResponse(depositBonusAmount, promotionPlayerId);

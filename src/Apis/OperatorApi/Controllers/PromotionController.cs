@@ -137,8 +137,8 @@ public class PromotionController : ControllerBase
                 });
     }
 
-    [HttpGet("{promotionId}/{depositAmount}/canJoinDepositReward", Name = "CheckDepositRewardLimit")]
-    [Description("Check deposit reward limit")]
+    [HttpGet("{promotionId}/{depositAmount}/canJoinDepositReward", Name = "CheckCanJoinDepositReward")]
+    [Description("Check can join deposit reward")]
     [Consumes(MediaTypeNames.Application.Json)]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = false)]
     public async ValueTask<bool> CheckDepositRewardLimitAsync(
