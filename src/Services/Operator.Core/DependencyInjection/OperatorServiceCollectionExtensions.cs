@@ -18,7 +18,9 @@ public static class OperatorServiceCollectionExtensions
         ["InitPhone"] = typeof(SetPhoneRegisterFlowStep),
         ["InitMail"] = typeof(SetEmailRegisterFlowStep),
         ["SetWithdrawBankInfo"] = typeof(SetWithdrawBankInfoRegisterFlowStep),
-        ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep)
+        ["SetPhoneDontCareDuplicate"] = typeof(SetPhoneDontCareDuplicateRegisterFlowStep),
+        ["SetEmailDontCareDuplicate"] = typeof(SetEmailDontCareDuplicateRegisterFlowStep),
+        ["SetRealName"] = typeof(SetRealNameRegisterFlowStep)
     };
 
     public static OperatorConfiguration AddOperatorApiCore(this IServiceCollection services)
@@ -54,7 +56,8 @@ public static class OperatorServiceCollectionExtensions
                 httpClient.BaseAddress = options.FileServiceBaseUrl;
             })
             .AddPaymentClient()
-            .AddRouletteSignInClient();
+            .AddRouletteSignInClient()
+            .AddDepositAccumulateRouletteClient();
 
         services
             .AddScoped(sp => new RegisterFlowBuilder(

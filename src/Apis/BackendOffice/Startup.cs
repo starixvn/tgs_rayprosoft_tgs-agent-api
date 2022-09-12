@@ -31,6 +31,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.BackOffice.Cache.DependencyInjection;
 
 namespace TGS.Apis.BackendOffice;
 
@@ -117,6 +118,7 @@ public class Startup
             .AddBackendOfficeServices(_configuration)
             .AddBackendOfficeRepositories(
                 sp => sp.GetRequiredService<IRedisConnectionFactory>().GetConnection().GetDatabase())
+            .AddBackOfficeCache()
             .AddMessageQueue()
             .AddNatsMessageQueue(config =>
             {
@@ -149,21 +151,29 @@ public class Startup
             })
             .AddNatsGlobPatternExchange("*");
 
-        _ = services.AddPaymentServiceClient((options, sp) =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
+        _ = services
+            .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+                .ConfigureHttpClient((sp, http) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-            options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
-        });
+                    http.BaseAddress = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
+                }))
+            .AddSingleton<ManualDepositSerializer>()
+            .AddBrandServiceClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-        _ = services.AddSingleton<ManualDepositSerializer>();
+                options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
+            })
+            .AddVipLevelServiceClient(httpClientBuilder => httpClientBuilder
+                .ConfigureHttpClient((sp, http) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-        _ = services.AddBrandServiceClient((options, sp) =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-
-            options.BrandCertificateBaseUrl = config.GetValue<Uri>("BrandCertificate:Url");
-        });
+                    http.BaseAddress = config.GetValue<Uri>("BackOffice:VipLevelServiceBaseUrl");
+                })
+                .AddLoggingHandler<Startup>());
 
         _ = services.AddLocalization(options => options.ResourcesPath = "Resources");
 

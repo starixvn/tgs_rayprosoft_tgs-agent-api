@@ -22,6 +22,7 @@ internal interface IWalletExchangeService
         decimal amount,
         decimal actualAmount,
         string reviewUserId,
+        Guid formId,
         CancellationToken cancellationToken = default);
 
     ValueTask RollbackWithdrawAsync(
@@ -30,5 +31,6 @@ internal interface IWalletExchangeService
         string userId,
         decimal amount,
         string reviewUserId,
+        Guid formId,
         CancellationToken cancellationToken = default);
 }

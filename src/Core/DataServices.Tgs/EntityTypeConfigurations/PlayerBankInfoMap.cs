@@ -48,6 +48,8 @@ internal class PlayerBankInfoMap : IEntityTypeConfiguration<PlayerBankInfo>
         builder.Property(c => c.UpdatedOn)
             .IsRequired();
 
+        builder.Property(pbi => pbi.BankInfoHash);
+
         builder.HasOne(c => c.Player)
             .WithMany(c => c.Banks)
             .HasForeignKey(c => c.PlayerCode)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Promotion.Clients;
@@ -14,6 +15,8 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
+using Tgs.MessageQueue;
+using Tgs.Promotion.Clients.Protos;
 
 namespace TGS.Apis.OperatorApi.Controllers;
 
@@ -135,6 +138,51 @@ public class PromotionController : ControllerBase
                             jsonOptionsAccessor.Value.JsonSerializerOptions)
                         : promotion.CampaignDetail
                 });
+    }
+
+    [HttpGet("roulette/count", Name = "ListRouletteCountItems")]
+    [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+    public async IAsyncEnumerable<RouletteCountItemViewModel> ListRouletteCountItemsAsync(
+        [FromServices] IMessageSender messageSender)
+    {
+        var promotionTypes = new[] { "DepositAccumulateRoulette" };
+
+        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+        var rouletteCountItems = new List<RouletteCountItemViewModel>();
+
+        var tasks = promotionTypes.Select(promotionType =>
+        {
+            var request = new RouletteCountRequest { PlayerCode = playerTokenData.PlayerCode };
+
+            var subject = $"tgs.promotion.{promotionType.ToLower()}.roulettecountitems.query";
+
+            var task = Task.Run(async () =>
+            {
+                var data = await messageSender
+                    .RequestAsync(subject, request.ToByteArray())
+                    .ConfigureAwait(false);
+
+                var response = RouletteCountResponse.Parser.ParseFrom(data.Span);
+
+                var items = response.Items
+                    .Select(item => new RouletteCountItemViewModel
+                    {
+                        PromotionId = item.PromotionId,
+                        PromotionType = promotionType,
+                        RouletteCount = item.RouletteCount
+                    }).ToArray();
+
+                rouletteCountItems.AddRange(items);
+            });
+
+            return task;
+        }).ToArray();
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+
+        foreach (var item in rouletteCountItems)
+            yield return item;
     }
 
     [HttpGet("{promotionId}/{depositAmount}/canJoinDepositReward", Name = "CheckCanJoinDepositReward")]

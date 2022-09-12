@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.OperatorApi.Validators;
 
@@ -9,10 +10,15 @@ public sealed class LoginRequestValidators : BaseUserRequestValidator<LoginReque
     {
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithName(x => GetJsonPropertyName(x, x.Password));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.Password)
+                .GetJsonPropertyName(x.Password));
 
         RuleFor(x => x.PlatformType)
             .IsInEnum()
-            .WithMessage(x => $"{GetJsonPropertyName(x, nameof(x.PlatformType))} does not exist");
+            .WithMessage(x => string.Format(
+                "{0} does not exist",
+                x.WithPropertyExpression(o => o.PlatformType)
+                    .GetJsonPropertyName(nameof(x.PlatformType))));
     }
 }

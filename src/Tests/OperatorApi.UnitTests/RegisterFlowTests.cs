@@ -14,6 +14,7 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Operator;
 using TGS.Services.Operator.ApplicationServices.Player;
 using TGS.Services.Operator.ApplicationServices.Withdraw;
@@ -22,6 +23,7 @@ using static TGS.Services.Operator.PlayerRegisterFlow.CreatePlayerRegisterFlowSt
 using static TGS.Services.Operator.PlayerRegisterFlow.SetEmailRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetPhoneRegisterFlowStep;
 using static TGS.Services.Operator.PlayerRegisterFlow.SetWithdrawBankInfoRegisterFlowStep;
+using PhoneData = TGS.Services.Operator.PlayerRegisterFlow.SetPhoneDontCareDuplicateRegisterFlowStep.PhoneData;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 
@@ -1658,6 +1660,47 @@ public class RegisterFlowTests
     }
 
     [Test]
+    public async Task SetEmailDontCareDuplicateRegisterFlowStep_ProcessInput()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeCacheManager = Substitute.For<IRedisCacheManager>();
+
+        var sut = new SetEmailDontCareDuplicateRegisterFlowStep(
+            fakePlayerServiceClient,
+            fakeCacheManager);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new EmailData
+        {
+            Email = "tester@test.com"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient
+            .When(fake => fake
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(locationInfo.PlayerCode),
+                    Arg.Any<IImmutableDictionary<PlayerPropertyName, string>>()))
+            .Do(callInfo =>
+            {
+                var dict = callInfo.Arg<IImmutableDictionary<PlayerPropertyName, string>>();
+
+                if (dict[PlayerPropertyName.Email] == inputData.Email)
+                {
+                    _ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+                        .Returns(new Tgs.PlayerService.Client.PlayerInfo
+                        {
+                            EmailAuthentication = true
+                        });
+                }
+            });
+
+        var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(inputData), locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
     public async Task SetEmailRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authenticate_Email_Should_Return_True()
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1786,6 +1829,47 @@ public class RegisterFlowTests
     }
 
     [Test]
+    public async Task SetPhoneDontCareDuplicateRegisterFlow_ProcessInput()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetPhoneDontCareDuplicateRegisterFlowStep(fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var phoneData = new PhoneData
+        {
+            AreaCode = "123",
+            Phone = "1345678"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient
+            .When(fake => fake
+                .SetPlayerPropertiesAsync(
+                    Arg.Is(locationInfo.PlayerCode),
+                    Arg.Any<IImmutableDictionary<PlayerPropertyName, string>>()))
+            .Do(callInfo =>
+            {
+                var dict = callInfo.Arg<IImmutableDictionary<PlayerPropertyName, string>>();
+
+                if (dict[PlayerPropertyName.AreaCode] == phoneData.AreaCode
+                    && dict[PlayerPropertyName.Phone] == phoneData.Phone
+                    && dict[PlayerPropertyName.PhoneAuthentication] == true.ToString())
+                {
+                    _ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(locationInfo.PlayerCode))
+                        .Returns(new Tgs.PlayerService.Client.PlayerInfo
+                        {
+                            PhoneAuthentication = true
+                        });
+                }
+            });
+
+        var actual = await sut.ProcessInputAsync(brandId, JsonSerializer.SerializeToDocument(phoneData), locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
     public async Task SetPhoneRegisterFlowStep_ConfirmCompleted_With_Player_Already_Authenticate_Phone_Should_Return_True()
     {
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
@@ -1897,6 +1981,47 @@ public class RegisterFlowTests
                 PlayerCode = locationInfo.PlayerCode,
                 PhoneAuthentication = true
             });
+
+        var actual = await sut.ProcessInputAsync(
+            brandId,
+            JsonSerializer.SerializeToDocument(inputData),
+            locationInfo);
+
+        Assert.IsTrue(actual.IsCompleted);
+    }
+
+    [Test]
+    public async Task SetRealNameRegisterFlowStep_ProcessInput()
+    {
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new SetRealNameRegisterFlowStep(fakePlayerServiceClient);
+
+        var brandId = Guid.NewGuid();
+        var inputData = new SetRealNameRegisterFlowStep.RealNameData
+        {
+            RealName = "RealName"
+        };
+        var locationInfo = new PlayerLocationInfo("player1", "127.0.0.1", null, null);
+
+        fakePlayerServiceClient
+           .When(fake => fake
+               .SetPlayerPropertiesAsync(
+                   Arg.Is(locationInfo.PlayerCode),
+                   Arg.Any<IImmutableDictionary<PlayerPropertyName, string>>()))
+           .Do(callInfo =>
+           {
+               var dict = callInfo.Arg<IImmutableDictionary<PlayerPropertyName, string>>();
+
+               if (dict[PlayerPropertyName.RealName] == inputData.RealName)
+               {
+                   _ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(locationInfo.PlayerCode))
+                       .Returns(new Dictionary<string, string>
+                       {
+                           [nameof(PlayerPropertyName.RealName)] = inputData.RealName
+                       }.ToImmutableDictionary());
+               }
+           });
 
         var actual = await sut.ProcessInputAsync(
             brandId,

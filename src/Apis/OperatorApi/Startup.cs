@@ -195,12 +195,13 @@ public sealed class Startup
 
                 options.BaseUrl = operatorOptions.CashBaseUrl;
             })
-            .AddPaymentServiceClient((options, sp) =>
-            {
-                var config = sp.GetRequiredService<IConfiguration>();
+            .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+                .ConfigureHttpClient((sp, http) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
 
-                options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
-            })
+                    http.BaseAddress = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+                }))
             .Services
             .AddSingleton<ManualDepositSerializer>()
             .AddSingleton<PrimePaySerializer>()

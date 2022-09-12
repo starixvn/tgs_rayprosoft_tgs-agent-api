@@ -10,7 +10,7 @@ internal class DepositAccumulateRouletteEventMap : IEntityTypeConfiguration<Depo
     {
         builder.ToTable("deposit_accumulate_roulette_events");
 
-        builder.HasKey(e => e.Id)
+        builder.HasKey(e => new { e.PlayerCode, e.PromotionId, e.Date })
             .HasName("pk_deposit_accumulate_roulette_events");
 
         builder.Property(e => e.PlayerCode)

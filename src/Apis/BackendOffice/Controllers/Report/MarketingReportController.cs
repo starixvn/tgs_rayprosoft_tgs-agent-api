@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,12 +38,18 @@ public class MarketingReportController : BaseContextController
         var agentId = agentDict[request.AgentUsername];
 
         var query = new AgentPlayerGamingDetailQuery(request.BrandId, request.ReportDate);
-        var statisticsData = await queryService.QueryAsync(query, HttpContext.RequestAborted)
-            .Where(item => item.AgentId == agentId)
-            .ToArrayAsync(HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        var statisticsData = queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Where(item => item.AgentId == agentId);
 
-        var dataQuery = statisticsData.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(request.PlayerUsername))
+            statisticsData = statisticsData.Where(item => string.Equals(
+                item.PlayerName,
+                request.PlayerUsername,
+                StringComparison.OrdinalIgnoreCase));
+
+        var dataQuery = (await statisticsData
+            .ToArrayAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false)).AsQueryable();
 
         var paging = new Paging<PlayerGamingDetail>();
 
@@ -54,7 +59,7 @@ public class MarketingReportController : BaseContextController
         paging.Page = request.Page;
         paging.RowCount = request.Rows;
 
-        var totalCount = statisticsData.Length;
+        var totalCount = dataQuery.Count();
 
         dataQuery = dataQuery
             .ApplyOrderBy(paging)
@@ -81,6 +86,9 @@ public class MarketingReportController : BaseContextController
         [FromServices] IQueryService<AgentMarketingReportQuery, DailyAggregateInfo> queryService,
         [FromServices] IQueryService<AgentPlayerDepositQuery, AgentPlayerDepositStatistics> queryPaymentService,
         [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<PlayerPaymentStatisticsDetailQuery, PlayerDailyPaymentItem> queryPaymentDetailService,
+        [FromServices] IQueryService<AgentPlayerRegisterDetailQuery, PlayerRegisterDetail> queryRegisterDetailService,
+        [FromServices] IQueryService<AgentPlayerGamingDetailQuery, PlayerGamingDetail> queryGamingDetailService,
         [FromQuery] GetMarketingListReportRequest request,
         [FromQuery] PageableRequest pagingRequest)
     {
@@ -94,6 +102,7 @@ public class MarketingReportController : BaseContextController
             .ToDictionaryAsync(
                 a => a.UserName,
                 a => a.AgentId,
+                StringComparer.OrdinalIgnoreCase,
                 HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
@@ -124,6 +133,79 @@ public class MarketingReportController : BaseContextController
                             GamingCount = marketingItem?.GamingCount ?? 0
                         };
 
+        var utcDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
+        var toDate = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8)).Date);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date);
+        if (toDate > today)
+            toDate = today;
+
+        if (toDate >= utcDate)
+        {
+            dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
+
+            for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
+            {
+                var queryDate = utcDate.AddDays(i);
+
+                var currentDateRegisterQuery = new AgentPlayerRegisterDetailQuery(request.BrandId, queryDate);
+                var currentDateRegisterDetails = queryRegisterDetailService.QueryAsync(currentDateRegisterQuery, HttpContext.RequestAborted)
+                    .GroupBy(item => item.AgentId)
+                    .SelectAwait(async g => new
+                    {
+                        AgentId = g.Key,
+                        RegisterCount = await g
+                            .CountAsync(HttpContext.RequestAborted)
+                            .ConfigureAwait(false)
+                    });
+
+                var currentDateGamingQuery = new AgentPlayerGamingDetailQuery(request.BrandId, queryDate);
+                var currentDateGamingDetails = queryGamingDetailService.QueryAsync(currentDateGamingQuery, HttpContext.RequestAborted)
+                    .GroupBy(item => item.AgentId)
+                    .SelectAwait(async g => new
+                    {
+                        AgentId = g.Key,
+                        GamingCount = await g
+                            .Select(item => item.PlayerCode)
+                            .Distinct()
+                            .CountAsync(HttpContext.RequestAborted)
+                            .ConfigureAwait(false)
+                    });
+
+                var currentDatePaymentQuery = new PlayerPaymentStatisticsDetailQuery(
+                    request.BrandId,
+                    queryDate);
+                var currentDatePaymentDetails = queryPaymentDetailService.QueryAsync(currentDatePaymentQuery)
+                    .GroupBy(item => item.AgentId)
+                    .SelectAwait(async g => new
+                    {
+                        AgentId = g.Key,
+                        FirstDepositPlayers = await g
+                            .CountAsync(item => item.IsFirstDeposit == true, HttpContext.RequestAborted)
+                            .ConfigureAwait(false)
+                    });
+
+                dataQuery = dataQuery.Concat(
+                    from ag in agentDict.Values.ToAsyncEnumerable()
+                    join register in currentDateRegisterDetails
+                        on ag equals register.AgentId into gr
+                    from register in gr.DefaultIfEmpty()
+                    join gaming in currentDateGamingDetails
+                        on ag equals gaming.AgentId into gg
+                    from gaming in gg.DefaultIfEmpty()
+                    join payment in currentDatePaymentDetails
+                        on ag equals payment.AgentId into gp
+                    from payment in gp.DefaultIfEmpty()
+                    select new
+                    {
+                        ReportDate = queryDate,
+                        AgentId = ag,
+                        RegisterCount = register?.RegisterCount ?? 0,
+                        FirstDepositPlayers = payment?.FirstDepositPlayers ?? 0,
+                        GamingCount = gaming?.GamingCount ?? 0
+                    });
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
             if (!agentDict.TryGetValue(request.AgentUsername, out var agentId))
@@ -137,18 +219,22 @@ public class MarketingReportController : BaseContextController
             dataQuery = dataQuery.Where(item => item.AgentId == agentId);
         }
 
-        var paging = dataQuery.CreatePaging();
+        var paging = dataQuery.CreatePaging()
+            .MapProperty(
+                nameof(MarketingReportModel.ReportDate),
+                item => item.ReportDate)
+            .MapProperty(
+                nameof(MarketingReportModel.GamingCount),
+                item => item.GamingCount)
+            .MapProperty(
+                nameof(MarketingReportModel.RegisterCount),
+                item => item.RegisterCount)
+            .MapProperty(
+                nameof(MarketingReportModel.FirstDepositCount),
+                item => item.FirstDepositPlayers);
 
-        var propertyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            [nameof(MarketingReportModel.ReportDate)] = "ReportDate",
-            [nameof(MarketingReportModel.GamingCount)] = "GamingCount",
-            [nameof(MarketingReportModel.RegisterCount)] = "RegisterCount",
-            [nameof(MarketingReportModel.FirstDepositCount)] = "FirstDepositPlayers"
-        };
-
-        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy) && propertyMap.ContainsKey(pagingRequest.SortBy))
-            paging.SortByPropertyName(propertyMap[pagingRequest.SortBy], pagingRequest.IsDesc);
+        if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
+            paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
 
         paging.Page = pagingRequest.Page;
         paging.RowCount = pagingRequest.Rows;

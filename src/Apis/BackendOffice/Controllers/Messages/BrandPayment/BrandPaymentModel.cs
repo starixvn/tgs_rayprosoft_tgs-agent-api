@@ -16,10 +16,6 @@ public class BrandPaymentModel
 
     public string ChannelName { get; set; }
 
-    public string CreatedByUsername { get; set; }
-
-    public DateTimeOffset CreatedOn { get; set; }
-
     public decimal DepositedAmountMax { get; set; }
 
     public decimal DepositedAmountMin { get; set; }
@@ -39,8 +35,6 @@ public class BrandPaymentModel
     public Guid? PaymentChannelId { get; set; }
 
     public string PaymentChannelName { get; set; }
-
-    public PaymentFeeModel PaymentFee { get; set; }
 
     public Guid? PaymentId { get; set; }
 
@@ -65,10 +59,6 @@ public class BrandPaymentModel
     public decimal TransferLimitTo { get; set; }
 
     public PaymentTransferType TransferType { get; set; }
-
-    public string UpdatedByUsername { get; set; }
-
-    public DateTimeOffset UpdatedOn { get; set; }
 
     public Guid[] VipLevelIds { get; set; }
 
