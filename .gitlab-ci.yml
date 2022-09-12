@@ -48,14 +48,14 @@ build-migrations-image:
     - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
     - docker push $MigrationImageName:$Tag
   when: manual
-  only: 
+  only:
     - develop
 
 push-migrations-k8s-template:
   stage: publish
   needs:
     - unit-test
-    - build-migrations-image    
+    - build-migrations-image
   script:
     - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
     - mkdir -p artifacts/k8s
@@ -66,7 +66,7 @@ push-migrations-k8s-template:
         .image.tag = strenv(Tag)
       ' artifacts/k8s/ef-migration/values.yaml
   only:
-    - develop    
+    - develop
   artifacts:
     name: HelmTemplate
     untracked: false
@@ -78,6 +78,8 @@ migrate-dev:
   variables:
     namespace: dev
     GIT_STRATEGY: none
+  environment:
+    name: dbmigration-dev
   stage: dbmigration-dev
   needs:
     - build-migrations-image
@@ -121,6 +123,8 @@ migrate-staging:
   variables:
     namespace: staging
     GIT_STRATEGY: none
+  environment:
+    name: dbmigration-staging
   stage: dbmigration-staging
   needs:
     - migrate-dev
@@ -165,6 +169,8 @@ migrate-prod:
   variables:
     namespace: prod
     GIT_STRATEGY: none
+  environment:
+    name: dbmigration-prod
   stage: dbmigration-prod
   needs:
     - migrate-staging
