@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
+using Tgs.MessageQueue;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 
@@ -18,13 +20,16 @@ namespace PlayerBucket.Repositories;
 
 public class PlayerBucketRepository : IPlayerBucketRepository
 {
+    private readonly IMessageSender _messageSender;
     private readonly ICashServiceClient _cashServiceClient;
     private readonly ITgsRepository _repository;
 
     public PlayerBucketRepository(
+        IMessageSender messageSender,
         ITgsRepository repository,
         ICashServiceClient cashServiceClient)
     {
+        _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
     }
@@ -73,128 +78,18 @@ public class PlayerBucketRepository : IPlayerBucketRepository
 
         if (request.PromotionId != null)
         {
-            var promotion = await _repository.Promotions
-                .Include(x => x.PromotionVipLevels)
-                .FirstAsync(x => x.Id == request.PromotionId);
+            var promotion = await _repository.Promotions.FirstAsync(x => x.Id == request.PromotionId);
 
-            var bonusAmount = promotion.Percentage * request.DepositAmount / 100M;
+            var subject = $"tgs.promotion.{promotion.PromotionType.ToLower()}.distribute";
 
-            bonusAmount = bonusAmount > promotion.BonusAmountLimit
-                ? promotion.BonusAmountLimit
-                : bonusAmount;
+            var response = await _messageSender.RequestAsync(subject, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request)))
+                .ConfigureAwait(false);
 
-            depositBonusAmount += bonusAmount;
+            var json = Encoding.UTF8.GetString(response.Span);
+            var responseData = JsonSerializer.Deserialize<DepositMessageDataResponse>(json)!;
 
-            var playerBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
-            {
-                PlayerCode = request.PlayerCode,
-                BucketAmount = depositBonusAmount * promotion.TurnoverMultiple,
-                BucketType = BucketType.Promotion,
-                IsFull = false,
-                CreatedOn = DateTimeOffset.Now
-            };
-
-            var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-
-            var reportDate = new DateTimeOffset(now.Year,
-                now.Month,
-                now.Day,
-                0,
-                0,
-                0,
-                now.Offset);
-
-            var promotionData = new
-            {
-                promotion.Id,
-                promotion.BrandId,
-                promotion.From,
-                promotion.To,
-                Status = (PromotionStatus)promotion.Status,
-                promotion.Name,
-                promotion.AutoSentPlayerBonus,
-                promotion.PromotionType,
-                promotion.BonusAmountLimit,
-                promotion.AmountUsed,
-                promotion.Unlimited,
-                GameType = (GameType?)promotion.GameType,
-                promotion.Percentage,
-                promotion.TotalAmountLimit,
-                promotion.TurnoverMultiple,
-                VipLevels = promotion.PromotionVipLevels?.Select(v => v.Level).OrderBy(level => level).ToArray(),
-                promotion.CreatedOn,
-                promotion.UpdatedOn,
-                promotion.CreatedByUsername,
-                promotion.UpdatedByUsername,
-                promotion.SubSubject,
-                promotion.Content,
-                promotion.Terms,
-                promotion.DesktopBanner,
-                promotion.MobileBanner,
-                promotion.Localization,
-                Number = promotion.DisplayOrder,
-                promotion.CampaignDetail
-            };
-
-            var bonusId = GuidExtensions.NewSequentialGuid();
-
-            var bonus = new PromotionBonus
-            {
-                Id = bonusId,
-                BrandId = request.BrandId,
-                PromotionId = promotion.Id,
-                From = reportDate,
-                To = reportDate,
-                PromotionType = promotion.PromotionType,
-                TotalAmountLimit = promotion.TotalAmountLimit,
-                GameType = promotion.GameType,
-                Percentage = promotion.Percentage,
-                BonusAmountLimit = promotion.BonusAmountLimit,
-                TurnoverMultiple = promotion.TurnoverMultiple,
-                CreatedOn = DateTimeOffset.Now,
-                PromotionPlayers = new[]
-                {
-                    new PromotionPlayer
-                    {
-                        PlayerCode = request.PlayerCode,
-                        PromotionBonusId = bonusId,
-                        BonusAmount = bonusAmount,
-                        SentOn = promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null
-                    }
-                }.ToHashSet(),
-                Detail = JsonSerializer.Serialize(promotionData,new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                })
-            };
-
-            await _repository.PromotionBonus.AddAsync(bonus).ConfigureAwait(false);
-
-            await _repository.PlayerBuckets.AddAsync(playerBucket).ConfigureAwait(false);
-
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
-
-            var response = await _cashServiceClient.PromotionAsync(
-                request.DefaultWalletId,
-                bonusAmount,
-                null,
-                null,
-                null).ConfigureAwait(false);
-
-            var transactionPromotion = new TransactionPromotion
-            {
-                TransactionId = response.TransactionId,
-                PromotionId = promotion.Id,
-                PromotionBonusId = bonusId,
-                PromotionType = promotion.PromotionType
-            };
-
-            await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
-
-            promotionPlayerId = bonus.PromotionPlayers.First().Id;
+            promotionPlayerId = responseData.PromotionBonusPlayerId;
+            depositBonusAmount += responseData.DepositBonusAmount;
         }
         else
         {
@@ -207,8 +102,7 @@ public class PlayerBucketRepository : IPlayerBucketRepository
                 CreatedOn = DateTimeOffset.Now
             };
 
-            await _repository.PlayerBuckets
-                .AddAsync(bucket).ConfigureAwait(false);
+            await _repository.PlayerBuckets.AddAsync(bucket).ConfigureAwait(false);
 
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }

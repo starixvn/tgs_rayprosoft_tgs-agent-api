@@ -26,13 +26,15 @@ public class DepositController : ControllerBase
     /// <param name="brandPaymentsQueryService">The brand payments query service.</param>
     /// <param name="getAllPaymentMethodService">The get all payment method service.</param>
     /// <param name="getPaymentService">The get payment service.</param>
+    /// <param name="paymentServiceClient">The payment service client.</param>
     /// <returns></returns>
     [HttpGet]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
+    public async IAsyncEnumerable<BrandPaymentViewModel> GetBrandPaymentsAsync(
         [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
         [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
-        [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
+        [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService,
+        [FromServices] IPaymentServiceClient paymentServiceClient)
     {
         var playerTokenData = HttpContext.Items.GetPlayerTokenData();
         var brandId = HttpContext.Items.GetBrandId();
@@ -44,6 +46,12 @@ public class DepositController : ControllerBase
         var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
 
         var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
+
+        var brandPaymentIds = brandPayments.Select(bp => bp.Id).ToArray();
+
+        var brandPaymentFeeSettings = await paymentServiceClient.GetBrandPaymentsFeeSettingsAsync(brandPaymentIds)
             .ToArrayAsync()
             .ConfigureAwait(false);
 
@@ -61,13 +69,13 @@ public class DepositController : ControllerBase
 
                 var paymentMethod = paymentMethods[bp.MethodId];
 
-                return new BrandPaymentResponse
+                return new BrandPaymentViewModel
                 {
                     Id = bp.Id,
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
                     ChannelCode = bp.ChannelCode,
-                    TransferLimit = new ValueRange<decimal>
+                    TransferLimit = new Models.ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
@@ -80,7 +88,8 @@ public class DepositController : ControllerBase
                     MethodId = bp.MethodId,
                     MethodCode = paymentMethod.Name,
                     BankType = paymentMethod.BankType,
-                    DisplayOrder = bp.DisplayOrder
+                    DisplayOrder = bp.DisplayOrder,
+                    HandlingFeeRatePercentile = GetHandlingFeeRatePercentile(brandPaymentFeeSettings, bp.Id),
                 };
             })
             .WhenAll()
@@ -172,5 +181,14 @@ public class DepositController : ControllerBase
            .Where(x => x is not (FlowState.Unknown or FlowState.WaitingPaid or FlowState.Paid))
            .ToDictionary(t => (int)t, t => t.ToString());
         return Task.FromResult(dict);
+    }
+
+    private static decimal GetHandlingFeeRatePercentile(BrandPaymentFeeInfo[] brandPaymentFeeSettings, Guid brandPaymentId)
+    {
+        var feeSetting = brandPaymentFeeSettings
+            .Where(bpfs => bpfs.BrandPaymentId == brandPaymentId)
+            .FirstOrDefault();
+
+        return feeSetting == null ? 0M : feeSetting.HandlingFeeRateTenPercentile * 0.1M;
     }
 }

@@ -72,7 +72,7 @@ public class WithdrawController : ControllerBase
     [HttpGet]
     [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [IgnoreUserBlacklistCheck]
-    public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
+    public async IAsyncEnumerable<BrandPaymentViewModel> GetBrandPaymentsAsync(
         [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
         [FromServices]
             IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
