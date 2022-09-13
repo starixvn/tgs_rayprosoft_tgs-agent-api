@@ -184,22 +184,4 @@ public class PromotionController : ControllerBase
         foreach (var item in rouletteCountItems)
             yield return item;
     }
-
-    [HttpGet("{promotionId}/{depositAmount}/canJoinDepositReward", Name = "CheckCanJoinDepositReward")]
-    [Description("Check can join deposit reward")]
-    [Consumes(MediaTypeNames.Application.Json)]
-    [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = false)]
-    public async ValueTask<bool> CheckDepositRewardLimitAsync(
-        [FromServices] IPromotionClient promotionClient,
-        Guid promotionId,decimal depositAmount)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
-        var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-        return await promotionClient.CheckCanJoinDepositPromotionAsync(
-            brandId,
-            playerTokenData.PlayerCode,
-            promotionId,
-            depositAmount);
-    }
 }
