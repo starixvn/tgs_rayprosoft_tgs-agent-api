@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -22,7 +22,7 @@
     <PackageReference Include="TGS.FileService.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.25" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.1" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.2" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.18" />
     <PackageReference Include="Tgs.Promotion.Client" Version="1.0.24-alpha" />  
     <PackageReference Include="Tgs.RouletteSignInClient" Version="0.0.3" />
