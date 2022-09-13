@@ -11,6 +11,10 @@ public class GetPlayersRequest : PageableRequest, IRequest<PagedResponse<Players
 {
     public string? AgentName { get; init; }
 
+    public string? BankInfoTag { get; init; }
+
+    public string? BankInfoTagType { get; init; }
+
     public DateTimeOffset? BeginRegisteredOn { get; init; }
 
     public Guid BrandId { get; init; }
