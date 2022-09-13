@@ -648,7 +648,7 @@ public partial class DataInitializer
                     },
                     new PromotionType
                     {
-                        Name = "AccountDeposit",
+                        Name = "DepositReward",
                         SettlementIntervalType = "Instantly",
                         Trans = new()
                         {
