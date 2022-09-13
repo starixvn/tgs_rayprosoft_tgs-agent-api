@@ -126,8 +126,15 @@ public partial class BrandPaymentController : BaseContextController
         [FromQuery] GetBrandPaymentsRequest request,
         [FromServices] IPaymentServiceClient paymentServiceClient)
     {
-        var transferType = request.TransferType == PaymentTransferType.Deposit ? TransferType.Deposit : TransferType.Withdraw;
-        var enabled = request.PaymentStatus == SwitchStatus.Enabled;
+        TransferType? transferType = request.TransferType == null
+            ? null
+            : request.TransferType == PaymentTransferType.Deposit
+                ? TransferType.Deposit
+                : TransferType.Withdraw;
+        bool? enabled = request.PaymentStatus == null
+            ? null
+            : request.PaymentStatus == SwitchStatus.Enabled;
+
         var brandPayments = paymentServiceClient
             .QueryBrandPaymentsAsync(request.BrandId, transferType, enabled, request.Keyword, HttpContext.RequestAborted)
             .ToEnumerable();
