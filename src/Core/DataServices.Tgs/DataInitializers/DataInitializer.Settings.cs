@@ -401,12 +401,30 @@ public partial class DataInitializer
                             new MenuSetting("Update")
                         }
                     },
-                    new MenuSetting("Withdraw")
+                    new MenuSetting("DepositHistory")
                     {
                         SubMenus = new[]
                         {
                             new MenuSetting("View"),
                             new MenuSetting("Update")
+                        }
+                    },
+                    new MenuSetting("Withdraw")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update"),
+                            new MenuSetting("Reject")
+                        }
+                    },
+                    new MenuSetting("WithdrawHistory")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update"),
+                            new MenuSetting("Reject")
                         }
                     }
                 }
@@ -479,6 +497,15 @@ public partial class DataInitializer
             {
                 SubMenus = new[]
                 {
+                    new MenuSetting("GameProviderRound")
+                    {
+                        SubMenus = new[]
+                        {
+                            new MenuSetting("View"),
+                            new MenuSetting("Update"),
+                            new MenuSetting("Export"),
+                        }
+                    },
                     new MenuSetting("GameRound")
                     {
                         SubMenus = new[]
@@ -503,15 +530,6 @@ public partial class DataInitializer
                         {
                             new MenuSetting("View"),
                             new MenuSetting("Update")
-                        }
-                    },
-                    new MenuSetting("GameProviderRound")
-                    {
-                        SubMenus = new[]
-                        {
-                            new MenuSetting("View"),
-                            new MenuSetting("Update"),
-                            new MenuSetting("Export"),
                         }
                     },
                     new MenuSetting("GameProviderReport")
@@ -648,7 +666,7 @@ public partial class DataInitializer
                     },
                     new PromotionType
                     {
-                        Name = "AccountDeposit",
+                        Name = "DepositReward",
                         SettlementIntervalType = "Instantly",
                         Trans = new()
                         {
