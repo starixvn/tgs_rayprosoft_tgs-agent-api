@@ -34,7 +34,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
-    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

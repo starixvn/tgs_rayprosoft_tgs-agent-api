@@ -180,7 +180,6 @@ internal sealed class GameActionDataOperations : IGameActionDataOperations
             foreach (var segment in segments)
             {
                 var subStates = await segment.EachAsync(degreeOfParallelism,
-                    CancellationToken.None,
                     () => new BatchBetPartitionState(batch.Id),
                     async (t, state, _) =>
                     {

@@ -1,9 +1,0 @@
-﻿using System;
-using MediatR;
-using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
-
-namespace TGS.Services.Promotion.Models.Promotion
-{
-    public record ChangePromotionStatusRequest(Guid Id, PromotionStatus Status) : IRequest<MessageResponse>;
-}
