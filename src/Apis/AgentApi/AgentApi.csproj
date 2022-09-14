@@ -42,8 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Repositories\Agent.Repositories\Agent.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Agent.Core\Agent.Core.csproj" />

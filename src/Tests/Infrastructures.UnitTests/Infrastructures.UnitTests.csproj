@@ -22,8 +22,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
-  </ItemGroup>
-
 </Project>

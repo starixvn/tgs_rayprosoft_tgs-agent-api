@@ -21,12 +21,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
-    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
+    <PackageReference Include="Tgs.Core" Version="1.0.1" />
+    <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
+    <PackageReference Include="Tgs.Logging" Version="0.0.19" />
   </ItemGroup>
 
 </Project>
