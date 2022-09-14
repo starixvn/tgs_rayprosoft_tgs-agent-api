@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
@@ -8,9 +9,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.WalletService;
 using TGS.Services.Operator.ApplicationServices.Wallet;
-using System.Threading;
 
 namespace TGS.Tests.OperatorApi.UnitTests;
 

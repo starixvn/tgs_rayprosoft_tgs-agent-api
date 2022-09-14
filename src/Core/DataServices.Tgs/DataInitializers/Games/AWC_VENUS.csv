@@ -1,9 +1,0 @@
-Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
-Baccarat Classic,Baccarat_Classic,,VN-LIVE-001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-Baccarat Speed,Baccarat_Speed,,VN-LIVE-002,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-Baccarat Insurance,Baccarat_Insurance,,VN-LIVE-003,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-DragonTiger,DragonTiger,,VN-LIVE-006,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-SicBo,SicBo,,VN-LIVE-007,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-FishPrawnCrab,FishPrawnCrab,,VN-LIVE-008,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-Roulette,Roulette,,VN-LIVE-009,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AWC_VENUS
-Lobby,Lobby,,vnlobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,AWC_VENUS
