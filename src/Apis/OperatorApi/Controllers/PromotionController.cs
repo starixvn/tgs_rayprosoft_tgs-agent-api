@@ -118,6 +118,7 @@ public class PromotionController : ControllerBase
                 .ListPromotionsAsync(brandId, HttpContext.RequestAborted)
             : promotionServiceClient
                 .ListPromotionsAsync(brandId, playerTokenData.PlayerCode, HttpContext.RequestAborted))
+                .OrderBy(promotion => promotion.Order)
                 .Select(promotion => new PromotionViewModel
                 {
                     Id = promotion.Id,
