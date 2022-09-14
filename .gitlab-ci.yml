@@ -1,0 +1,30 @@
+variables:
+  MigrationImageName: pgtgs/migration
+
+stages:
+  - build
+  - test
+
+build-code:
+  stage: build
+  script:
+    - dotnet build -c $BuildConfiguration
+  only:
+    - merge_requests
+  artifacts:
+    untracked: true
+    expire_in: "1 days"
+
+unit-test:
+  stage: test
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+  needs:
+    - job: build-code
+      artifacts: true
+  only:
+    - merge_requests
+  artifacts:
+    when: always
+    reports:
+      junit: ./src/Tests/TestReports/*-TestReport.xml
