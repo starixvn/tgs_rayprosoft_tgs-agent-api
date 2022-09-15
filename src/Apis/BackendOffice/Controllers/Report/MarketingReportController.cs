@@ -114,7 +114,7 @@ public class MarketingReportController : BaseContextController
             .Where(item => item.ReportDate >= start
                 && item.ReportDate < end);
 
-        var dateArray = Enumerable.Range(0, end.DayNumber - start.DayNumber - 1)
+        var dateArray = Enumerable.Range(0, end.DayNumber - start.DayNumber)
             .Select(n => start.AddDays(n));
 
         var dataQuery = from date in dateArray.ToAsyncEnumerable()
@@ -207,6 +207,9 @@ public class MarketingReportController : BaseContextController
                     });
             }
         }
+
+        dataQuery = dataQuery.Where(
+            item => item.ReportDate >= start && item.ReportDate < end);
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
