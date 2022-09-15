@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office.CustomUI;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.MarketingReport.Client;
 using Tgs.Paging;
@@ -124,7 +125,6 @@ public class MarketingReportController : BaseContextController
                         join paymentItem in paymentData
                             on new { ReportDate = date, AgentId = agentId } equals new { paymentItem.ReportDate, paymentItem.AgentId } into gp
                         from paymentItem in gp.DefaultIfEmpty()
-                        where paymentItem.ReportDate >= start && paymentItem.ReportDate < end
                         select new
                         {
                             ReportDate = date,
@@ -133,6 +133,7 @@ public class MarketingReportController : BaseContextController
                             FirstDepositPlayers = paymentItem?.FirstDepositPlayers ?? 0,
                             GamingCount = marketingItem?.GamingCount ?? 0
                         };
+
 
         var utcDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
         var toDate = end;
@@ -206,6 +207,9 @@ public class MarketingReportController : BaseContextController
                     });
             }
         }
+
+        dataQuery = dataQuery.Where(
+            item => item.ReportDate >= start && item.ReportDate < end);
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
