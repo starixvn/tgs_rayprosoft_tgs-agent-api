@@ -141,7 +141,7 @@ public class MarketingReportController : BaseContextController
 
         dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
 
-        if (toDate > utcDate)
+        if (toDate >= utcDate)
             for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
             {
                 var queryDate = utcDate.AddDays(i);
