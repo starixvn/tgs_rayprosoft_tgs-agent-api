@@ -124,6 +124,7 @@ public class MarketingReportController : BaseContextController
                         join paymentItem in paymentData
                             on new { ReportDate = date, AgentId = agentId } equals new { paymentItem.ReportDate, paymentItem.AgentId } into gp
                         from paymentItem in gp.DefaultIfEmpty()
+                        where paymentItem.ReportDate >= start && paymentItem.ReportDate < end
                         select new
                         {
                             ReportDate = date,
@@ -134,14 +135,15 @@ public class MarketingReportController : BaseContextController
                         };
 
         var utcDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
-        var toDate = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8)).Date);
+        var toDate = end;
         var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date);
         if (toDate > today)
             toDate = today;
 
-        dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
-
         if (toDate >= utcDate)
+        {
+            dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
+
             for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
             {
                 var queryDate = utcDate.AddDays(i);
@@ -203,6 +205,7 @@ public class MarketingReportController : BaseContextController
                         GamingCount = gaming?.GamingCount ?? 0
                     });
             }
+        }
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
