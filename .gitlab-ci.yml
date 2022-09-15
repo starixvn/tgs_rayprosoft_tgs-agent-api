@@ -11,9 +11,9 @@ build-code:
     - dotnet build -c $BuildConfiguration
   only:
     - merge_requests
-  artifacts:
+  cache:
+    key: Tgs.$CI_PIPELINE_ID
     untracked: true
-    expire_in: "1 days"
 
 unit-test:
   stage: test
@@ -21,10 +21,11 @@ unit-test:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
     - job: build-code
-      artifacts: true
   only:
     - merge_requests
+  cache:
+    key: Tgs.$CI_PIPELINE_ID
+    policy: pull
   artifacts:
-    when: always
     reports:
       junit: ./src/Tests/TestReports/*-TestReport.xml
