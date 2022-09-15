@@ -25,7 +25,9 @@ unit-test:
     - merge_requests
   cache:
     key: Tgs.$CI_PIPELINE_ID
+    untracked: true
     policy: pull
   artifacts:
+    when: always
     reports:
       junit: ./src/Tests/TestReports/*-TestReport.xml
