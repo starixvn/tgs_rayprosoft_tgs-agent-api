@@ -139,10 +139,9 @@ public class MarketingReportController : BaseContextController
         if (toDate > today)
             toDate = today;
 
-        if (toDate >= utcDate)
-        {
-            dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
+        dataQuery = dataQuery.Where(item => item.ReportDate < utcDate);
 
+        if (toDate >= utcDate)
             for (var i = 0; i < toDate.DayNumber - utcDate.DayNumber + 1; i++)
             {
                 var queryDate = utcDate.AddDays(i);
@@ -204,7 +203,6 @@ public class MarketingReportController : BaseContextController
                         GamingCount = gaming?.GamingCount ?? 0
                     });
             }
-        }
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {
