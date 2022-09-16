@@ -8,6 +8,8 @@ public class ExportDepositModel
 
     public DateTime ApplicationTime { get; init; }
 
+    public decimal? HandlingFee { get; init; }
+
     public string Id { get; init; }
 
     public string OrderNo { get; init; }

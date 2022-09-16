@@ -71,7 +71,8 @@ public class ExportDepositFormService : IGetService<ExportDepositForm, MemoryStr
             ApplicationTime = row.CreatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
             UpdateTime = row.UpdatedOn.ToOffset(TimeSpan.FromHours(8D)).DateTime,
             Status = resource.GetString(row.Status.ToString()) ?? row.Status.ToString(),
-            Remark = row.Remark
+            Remark = row.Remark,
+            HandlingFee = row.Status == PaymentFlowState.Approved ? row.HandlingFee : null,
         });
 
         using var workbook = new XLWorkbook();
