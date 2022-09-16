@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using NUnit.Framework;
 using TGS.Services.BackOffice.Application.Commands.BatchAdjust;
+using TGS.Services.BackOffice.Domain;
+using System;
+using NSubstitute;
+using System.Collections.Generic;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -41,5 +45,20 @@ public class BatchAdjustTests
 
         Assert.AreEqual(150, lastRow.AdjustAmount);
         Assert.AreEqual(150, lastRow.Turnover);
+    }
+
+    [Test]
+    public async Task Save_Batch()
+    {
+        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
+
+        var sut = new SaveBatchCommandService(fakeBatchTempRepository);
+
+        var command = new SaveBatchCommand(Array.Empty<BatchAdjustBalanceItem>().ToAsyncEnumerable());
+
+        _ = await sut.GetAsync(command);
+
+        _ = fakeBatchTempRepository.Received(1)
+            .SaveAdjustBalanceBatchAsync(Arg.Any<IEnumerable<BatchAdjustBalanceItem>>());
     }
 }
