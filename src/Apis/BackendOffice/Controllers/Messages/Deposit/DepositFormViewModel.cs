@@ -38,4 +38,6 @@ public record DepositFormViewModel
     public string PromotionName { get; init; }
 
     public decimal? Bonus { get; init; }
+
+    public decimal HandlingFee { get; init; }
 }
