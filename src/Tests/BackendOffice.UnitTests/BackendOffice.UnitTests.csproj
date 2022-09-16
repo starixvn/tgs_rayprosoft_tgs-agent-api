@@ -19,6 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\TestBatchAdjust.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\TestBatchAdjust.xlsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.17.0" />
     <PackageReference Include="AutoFixture.AutoMoq" Version="4.17.0" />
     <PackageReference Include="ExpectedObjects" Version="3.5.4" />
