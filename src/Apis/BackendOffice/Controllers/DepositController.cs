@@ -225,7 +225,8 @@ public class DepositController : BaseContextController
                     Bonus = form.PromotionPlayerId != null
                         && promotionBonus.TryGetValue(form.PromotionPlayerId.Value, out var bonus)
                         ? bonus
-                        : null
+                        : null,
+                    HandlingFee = form.HandlingFee,
                 })
                 .ToArray(),
             Sum = result.Sum
