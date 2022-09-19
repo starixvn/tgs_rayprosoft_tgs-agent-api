@@ -10,10 +10,9 @@ using ClosedXML.Excel;
 using ClosedXML.Report;
 using Microsoft.Extensions.FileProviders;
 using Tgs.Payment.Clients;
-using Tgs.Promotion.Clients.Models.Promotion;
 using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.Promotion;
 using Tgs.ServiceUtility;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.BackOffice.Application.Models.Deposit;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit;
@@ -50,7 +49,8 @@ public class ExportDepositFormService : IGetService<ExportDepositForm, MemoryStr
                 ThirdPartyOrderNo = query.ThirdPartyOrderNo,
                 FormId = query.FormId,
                 UpdateOnRange = query.UpdateOnRange,
-                UserName = query.UserName
+                UserName = query.UserName,
+                OrderNo = query.OrderNo,
             },
             new Tgs.Payment.Clients.Paging
             {
