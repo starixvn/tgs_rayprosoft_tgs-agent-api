@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +18,30 @@ internal class RedisBatchTempRepository : IBatchTempRepository
         _database = database ?? throw new ArgumentNullException(nameof(database));
     }
 
+    public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:Batch:{batchId}";
+
+        return _database.StringGetAsync(key)
+            .ToAsyncEnumerable()
+            .Select(value => JsonSerializer.Deserialize<BatchAdjustBalanceItem[]>(value))
+            .Where(arr => arr is not null)
+            .SelectMany(arr => arr.ToAsyncEnumerable());
+    }
+
+    public IAsyncEnumerable<BatchAdjustBalanceItemResult> GetAdjustBalanceItemResultsAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:BatchResult:{batchId}";
+
+        return _database.StringGetAsync(key)
+            .ToAsyncEnumerable()
+            .Select(value => JsonSerializer.Deserialize<BatchAdjustBalanceItemResult[]>(value))
+            .Where(arr => arr is not null)
+            .SelectMany(arr => arr.ToAsyncEnumerable());
+    }
+
     public async ValueTask<Guid> SaveAdjustBalanceBatchAsync(
-        IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
+                IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
         CancellationToken cancellationToken = default)
     {
         var id = Guid.NewGuid();
@@ -36,5 +59,18 @@ internal class RedisBatchTempRepository : IBatchTempRepository
         return id;
     }
 
-    public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public async ValueTask SaveAdjustBalanceBatchResultAsync(
+        Guid batchId,
+        IEnumerable<BatchAdjustBalanceItemResult> results,
+        CancellationToken cancellation = default)
+    {
+        var key = $"BackOffice:BatchResult:{batchId}";
+
+        var content = JsonSerializer.Serialize(results);
+
+        _ = await _database.StringSetAsync(
+            key,
+            content,
+            expiry: TimeSpan.FromHours(1D)).ConfigureAwait(false);
+    }
 }

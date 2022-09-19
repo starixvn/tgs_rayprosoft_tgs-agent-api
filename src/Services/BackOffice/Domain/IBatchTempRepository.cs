@@ -7,7 +7,20 @@ namespace TGS.Services.BackOffice.Domain;
 
 public interface IBatchTempRepository
 {
-    IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(
+        Guid batchId,
+        CancellationToken cancellationToken = default);
 
-    ValueTask<Guid> SaveAdjustBalanceBatchAsync(IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<BatchAdjustBalanceItemResult> GetAdjustBalanceItemResultsAsync(
+        Guid batchId,
+        CancellationToken cancellationToken = default);
+
+    ValueTask<Guid> SaveAdjustBalanceBatchAsync(
+        IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
+        CancellationToken cancellationToken = default);
+
+    ValueTask SaveAdjustBalanceBatchResultAsync(
+        Guid batchId,
+        IEnumerable<BatchAdjustBalanceItemResult> results,
+        CancellationToken cancellation = default);
 }
