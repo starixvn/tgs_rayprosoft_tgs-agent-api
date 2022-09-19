@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +18,19 @@ internal class RedisBatchTempRepository : IBatchTempRepository
         _database = database ?? throw new ArgumentNullException(nameof(database));
     }
 
+    public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:Batch:{batchId}";
+
+        return _database.StringGetAsync(key)
+            .ToAsyncEnumerable()
+            .Select(value => JsonSerializer.Deserialize<BatchAdjustBalanceItem[]>(value))
+            .Where(arr => arr is not null)
+            .SelectMany(arr => arr.ToAsyncEnumerable());
+    }
+
     public async ValueTask<Guid> SaveAdjustBalanceBatchAsync(
-        IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
+            IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
         CancellationToken cancellationToken = default)
     {
         var id = Guid.NewGuid();
@@ -35,6 +47,4 @@ internal class RedisBatchTempRepository : IBatchTempRepository
 
         return id;
     }
-
-    public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }
