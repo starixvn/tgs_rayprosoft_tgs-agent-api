@@ -20,6 +20,7 @@ internal class ReadBatchAdjustItemsQueryService : IQueryService<ReadBatchAdjustI
     {
         _playerServiceClient = playerServiceClient ?? throw new System.ArgumentNullException(nameof(playerServiceClient));
     }
+
     public async IAsyncEnumerable<BatchAdjustBalanceItem> QueryAsync(
         ReadBatchAdjustItemsQuery query,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -58,7 +59,7 @@ internal class ReadBatchAdjustItemsQueryService : IQueryService<ReadBatchAdjustI
             var item = new BatchAdjustBalanceItem(
                 walletId,
                 playerInfo.PlayerCode,
-                userName,
+                playerInfo.UserName,
                 adjustAmount,
                 turnover,
                 remark);
