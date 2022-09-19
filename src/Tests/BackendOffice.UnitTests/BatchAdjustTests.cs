@@ -33,6 +33,21 @@ public class BatchAdjustTests
     }
 
     [Test]
+    public async Task Get_Batch_Result()
+    {
+        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
+
+        var sut = new ProcessResultQueryService(fakeBatchTempRepository);
+
+        var query = new ProcessResultQuery(Guid.NewGuid());
+
+        await sut.QueryAsync(query).ToArrayAsync();
+
+        _ = fakeBatchTempRepository.Received(1)
+            .GetAdjustBalanceItemResultsAsync(Arg.Is(query.BatchId));
+    }
+
+    [Test]
     public async Task Preview_Batch()
     {
         var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
