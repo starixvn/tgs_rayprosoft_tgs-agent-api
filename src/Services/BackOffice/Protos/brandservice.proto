@@ -8,3 +8,10 @@ import "phoenix/protobuf/guid.proto";
 message ClearMaintenanceCacheRequest {
 	phoenix.protobuf.GuidValue brand_id = 1;	
 }
+
+message ProcessAdjustBalanceBatchRequest {
+	phoenix.protobuf.GuidValue brand_id = 1;
+	phoenix.protobuf.GuidValue batch_id = 2;
+	string adjust_transfer_type = 3;
+	phoenix.protobuf.GuidValue modify_user_id = 4;
+}

@@ -110,7 +110,10 @@ builder.Services
             "tgs.payment.withdraw.reject")
         .AddReplyHandler<AutoPaidWithdrawProcessor>(
             "tgs.payment.withdraw.paid_ex",
-            "tgs.payment.withdraw.paid_ex"))
+            "tgs.payment.withdraw.paid_ex")
+        .AddHandler<BatchAdjustBalanceHandler>(
+            "tgs.bo.background.adjust_batch",
+            "tgs.bo.background.adjust_batch"))
     .AddNatsGlobPatternExchange("*");
 
 builder.Services
