@@ -8,7 +8,7 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 
-namespace TGS.Apis.BackendOffice.Services;
+namespace TGS.Apis.BackendOffice.MessageQueue;
 
 public class AutoRejectWithdrawProcessor : IMessageHandler
 {
@@ -19,8 +19,8 @@ public class AutoRejectWithdrawProcessor : IMessageHandler
         ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
         ILogger<AutoRejectWithdrawProcessor> logger)
     {
-        _reviewCommandService = reviewCommandService ?? throw new System.ArgumentNullException(nameof(reviewCommandService));
-        _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+        _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)

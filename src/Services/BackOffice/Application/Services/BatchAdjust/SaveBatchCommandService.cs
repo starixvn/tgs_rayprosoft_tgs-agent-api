@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Commands.BatchAdjust;
+namespace TGS.Services.BackOffice.Application.Services.BatchAdjust;
 
 internal class SaveBatchCommandService : IGetService<SaveBatchCommand, Guid>
 {

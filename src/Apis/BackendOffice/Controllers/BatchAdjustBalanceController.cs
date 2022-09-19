@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
-using TGS.Services.BackOffice.Application.Commands.BatchAdjust;
+using TGS.Services.BackOffice.Application.Services.BatchAdjust;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers;
@@ -22,15 +22,16 @@ public class BatchAdjustBalanceController : BaseContextController
                 HttpContext.RequestAborted).ConfigureAwait(false),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-    [HttpPost]
+    [HttpPost("{brandId}")]
     public async Task<Guid> ImportBatchAsync(
         [FromServices] IQueryService<ReadBatchAdjustItemsQuery, BatchAdjustBalanceItem> readService,
         [FromServices] IGetService<SaveBatchCommand, Guid> saveService,
+        Guid brandId,
         [FromForm(Name = "file")] IFormFile file)
     {
         await using var fs = file.OpenReadStream();
 
-        var query = new ReadBatchAdjustItemsQuery(fs);
+        var query = new ReadBatchAdjustItemsQuery(brandId, fs);
 
         var items = readService.QueryAsync(query, HttpContext.RequestAborted);
 

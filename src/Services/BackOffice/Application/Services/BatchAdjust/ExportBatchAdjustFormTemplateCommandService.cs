@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using Tgs.ServiceUtility;
 
-namespace TGS.Services.BackOffice.Application.Commands.BatchAdjust;
+namespace TGS.Services.BackOffice.Application.Services.BatchAdjust;
 
 internal class ExportBatchAdjustFormTemplateCommandService : IGetService<ExportBatchAdjustFormTemplateCommand, Stream>
 {

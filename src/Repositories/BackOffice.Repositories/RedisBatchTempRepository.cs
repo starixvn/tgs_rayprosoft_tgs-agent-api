@@ -35,4 +35,6 @@ internal class RedisBatchTempRepository : IBatchTempRepository
 
         return id;
     }
+
+    public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

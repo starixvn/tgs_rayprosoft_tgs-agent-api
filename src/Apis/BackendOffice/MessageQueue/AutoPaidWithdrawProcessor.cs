@@ -10,7 +10,7 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 
-namespace TGS.Apis.BackendOffice.Services;
+namespace TGS.Apis.BackendOffice.MessageQueue;
 
 public class AutoPaidWithdrawProcessor : IMessageHandler
 {
