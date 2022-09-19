@@ -8,16 +8,16 @@ using Tgs.Payment.Protos;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 
-namespace TGS.Apis.BackendOffice.Services;
+namespace TGS.Apis.BackendOffice.MessageQueue;
 
-public class AutoApproveDepositProcessor : IMessageHandler
+public class AutoRejectDepositProcessor : IMessageHandler
 {
-    private readonly ILogger<AutoApproveDepositProcessor> _logger;
+    private readonly ILogger<AutoRejectDepositProcessor> _logger;
     private readonly ICommandService<ReviewDepositFormCommand> _reviewCommandService;
 
-    public AutoApproveDepositProcessor(
+    public AutoRejectDepositProcessor(
         ICommandService<ReviewDepositFormCommand> reviewCommandService,
-        ILogger<AutoApproveDepositProcessor> logger)
+        ILogger<AutoRejectDepositProcessor> logger)
     {
         _reviewCommandService = reviewCommandService ?? throw new ArgumentNullException(nameof(reviewCommandService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -25,18 +25,18 @@ public class AutoApproveDepositProcessor : IMessageHandler
 
     public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Receive AutoApproveDeposit request.");
+        _logger.LogInformation("Receive AutoRejectDeposit request.");
 
-        var request = ApproveDepositRequest.Parser.ParseFrom(data.Span);
+        var request = RejectDepositRequest.Parser.ParseFrom(data.Span);
 
-        var formId = Guid.Parse(request.FormId);
-        var brandId = Guid.Parse(request.BrandId);
+        var formId = request.FormId.ToGuid();
+        var brandId = request.BrandId.ToGuid();
 
         var command = new ReviewDepositFormCommand(
             brandId,
             formId,
-            ReviewState.Approve,
-            request.ActualAmount?.ToDecimal(),
+            ReviewState.Reject,
+            null,
             null,
             null,
             null);
@@ -45,6 +45,6 @@ public class AutoApproveDepositProcessor : IMessageHandler
             .ExecuteAsync(command, cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogInformation("AutoApproveDeposit processing completed.");
+        _logger.LogInformation("AutoRejectDeposit processing completed.");
     }
 }

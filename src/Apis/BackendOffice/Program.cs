@@ -27,8 +27,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Prometheus;
 using TGS.Apis.BackendOffice.Filters;
+using TGS.Apis.BackendOffice.MessageQueue;
 using TGS.Apis.BackendOffice.Middlewares;
-using TGS.Apis.BackendOffice.Services;
 using TGS.Apis.BackendOffice.Workers;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
@@ -110,7 +110,10 @@ builder.Services
             "tgs.payment.withdraw.reject")
         .AddReplyHandler<AutoPaidWithdrawProcessor>(
             "tgs.payment.withdraw.paid_ex",
-            "tgs.payment.withdraw.paid_ex"))
+            "tgs.payment.withdraw.paid_ex")
+        .AddHandler<BatchAdjustBalanceHandler>(
+            "tgs.bo.background.adjust_batch",
+            "tgs.bo.background.adjust_batch"))
     .AddNatsGlobPatternExchange("*");
 
 builder.Services
@@ -173,11 +176,12 @@ builder.Services
     .AddHealthChecks()
     .ForwardToPrometheus();
 
-builder.Services.AddAntiforgery(options =>
-{
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.HeaderName = Consts.BackendOffice.CsrfTokenName;
-});
+builder.Services
+    .AddAntiforgery(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.HeaderName = Consts.BackendOffice.CsrfTokenName;
+    });
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -316,8 +320,6 @@ app.UseRequestLocalization(options =>
 });
 
 app.UseMiddleware<ExceptionMiddleware>();
-
-app.UseRouting();
 
 app.UseHttpMetrics();
 
