@@ -29,6 +29,21 @@ public class BatchAdjustBalanceController : BaseContextController
                 HttpContext.RequestAborted).ConfigureAwait(false),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
+    [HttpGet("result/{batchId}")]
+    public IAsyncEnumerable<BatchAdjustBalanceItemResultViewModel> GetBatchResultAsync(
+        [FromServices] IQueryService<ProcessResultQuery, BatchAdjustBalanceItemResult> queryService,
+        Guid batchId)
+    {
+        var query = new ProcessResultQuery(batchId);
+
+        return queryService.QueryAsync(query, HttpContext.RequestAborted)
+            .Select(item => new BatchAdjustBalanceItemResultViewModel
+            {
+                Id = item.Id,
+                IsSuccess = item.IsSuccess
+            });
+    }
+
     [HttpPost("{brandId}")]
     public async Task<Guid> ImportBatchAsync(
         [FromServices] IQueryService<ReadBatchAdjustItemsQuery, BatchAdjustBalanceItem> readService,
@@ -57,6 +72,7 @@ public class BatchAdjustBalanceController : BaseContextController
         return queryService.QueryAsync(query, HttpContext.RequestAborted)
             .Select(item => new BatchAdjustBalanceItemViewModel
             {
+                Id = item.Id,
                 UserName = item.UserName,
                 AdjustAmount = item.AdjustAmount,
                 Turnover = item.Turnover,
