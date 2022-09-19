@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.CashService.Client;
@@ -56,7 +57,8 @@ public class BatchAdjustTests
         var sut = new ProcessBatchCommandService(
             fakeBatchTempRepository,
             fakeCashServiceClient,
-            fakePlayerBucketRepository);
+            fakePlayerBucketRepository,
+            NullLogger<ProcessBatchCommandService>.Instance);
 
         var command = new ProcessBatchCommand(
             Guid.NewGuid(),
@@ -68,6 +70,7 @@ public class BatchAdjustTests
             .Returns(
                 new[] {
                     new BatchAdjustBalanceItem(
+                        1,
                         Guid.NewGuid(),
                         "test1",
                         "test1",
@@ -97,7 +100,8 @@ public class BatchAdjustTests
         var sut = new ProcessBatchCommandService(
             fakeBatchTempRepository,
             fakeCashServiceClient,
-            fakePlayerBucketRepository);
+            fakePlayerBucketRepository,
+            NullLogger<ProcessBatchCommandService>.Instance);
 
         var command = new ProcessBatchCommand(
             Guid.NewGuid(),
@@ -109,6 +113,7 @@ public class BatchAdjustTests
             .Returns(
                 new[] {
                     new BatchAdjustBalanceItem(
+                        1,
                         Guid.NewGuid(),
                         "test1",
                         "test1",
@@ -138,7 +143,8 @@ public class BatchAdjustTests
         var sut = new ProcessBatchCommandService(
             fakeBatchTempRepository,
             fakeCashServiceClient,
-            fakePlayerBucketRepository);
+            fakePlayerBucketRepository,
+            NullLogger<ProcessBatchCommandService>.Instance);
 
         var command = new ProcessBatchCommand(
             Guid.NewGuid(),
@@ -148,6 +154,7 @@ public class BatchAdjustTests
 
         var items = new[] {
             new BatchAdjustBalanceItem(
+                1,
                 Guid.NewGuid(),
                 "test1",
                 "test1",

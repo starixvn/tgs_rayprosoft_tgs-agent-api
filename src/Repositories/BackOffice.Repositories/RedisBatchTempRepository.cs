@@ -29,8 +29,19 @@ internal class RedisBatchTempRepository : IBatchTempRepository
             .SelectMany(arr => arr.ToAsyncEnumerable());
     }
 
+    public IAsyncEnumerable<BatchAdjustBalanceItemResult> GetAdjustBalanceItemResultsAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:BatchResult:{batchId}";
+
+        return _database.StringGetAsync(key)
+            .ToAsyncEnumerable()
+            .Select(value => JsonSerializer.Deserialize<BatchAdjustBalanceItemResult[]>(value))
+            .Where(arr => arr is not null)
+            .SelectMany(arr => arr.ToAsyncEnumerable());
+    }
+
     public async ValueTask<Guid> SaveAdjustBalanceBatchAsync(
-            IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
+                IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
         CancellationToken cancellationToken = default)
     {
         var id = Guid.NewGuid();
@@ -46,5 +57,20 @@ internal class RedisBatchTempRepository : IBatchTempRepository
             when: When.NotExists).ConfigureAwait(false);
 
         return id;
+    }
+
+    public async ValueTask SaveAdjustBalanceBatchResultAsync(
+        Guid batchId,
+        IEnumerable<BatchAdjustBalanceItemResult> results,
+        CancellationToken cancellation = default)
+    {
+        var key = $"BackOffice:BatchResult:{batchId}";
+
+        var content = JsonSerializer.Serialize(results);
+
+        _ = await _database.StringSetAsync(
+            key,
+            content,
+            expiry: TimeSpan.FromHours(1D)).ConfigureAwait(false);
     }
 }

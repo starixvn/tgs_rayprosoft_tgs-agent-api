@@ -57,6 +57,7 @@ internal class ReadBatchAdjustItemsQueryService : IQueryService<ReadBatchAdjustI
             var remark = sheet.Cell(index, 4).GetFormattedString();
 
             var item = new BatchAdjustBalanceItem(
+                index - 2,
                 walletId,
                 playerInfo.PlayerCode,
                 playerInfo.UserName,
