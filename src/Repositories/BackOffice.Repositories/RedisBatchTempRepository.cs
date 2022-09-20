@@ -18,6 +18,30 @@ internal class RedisBatchTempRepository : IBatchTempRepository
         _database = database ?? throw new ArgumentNullException(nameof(database));
     }
 
+    public async ValueTask<bool> BidBatchAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:BatchProcess:{batchId}";
+
+        var machineName = Environment.MachineName;
+
+        return await _database.StringSetAsync(
+            key,
+            machineName,
+            expiry: TimeSpan.FromHours(1D),
+            when: When.NotExists).ConfigureAwait(false);
+    }
+
+    public async ValueTask CompleteBatchAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:BatchProcess:{batchId}";
+
+        _ = await _database.StringSetAsync(
+            key,
+            "Completed",
+            expiry: TimeSpan.FromHours(1D),
+            when: When.Exists).ConfigureAwait(false);
+    }
+
     public IAsyncEnumerable<BatchAdjustBalanceItem> GetAdjustBalanceBatchAsync(Guid batchId, CancellationToken cancellationToken = default)
     {
         var key = $"BackOffice:Batch:{batchId}";
@@ -40,8 +64,20 @@ internal class RedisBatchTempRepository : IBatchTempRepository
             .SelectMany(arr => arr.ToAsyncEnumerable());
     }
 
+    public async ValueTask<bool?> GetBatchIsCompletedAsync(Guid batchId, CancellationToken cancellationToken = default)
+    {
+        var key = $"BackOffice:BatchProcess:{batchId}";
+
+        var value = await _database.StringGetAsync(key).ConfigureAwait(false);
+
+        if (value.HasValue)
+            return value == "Completed";
+        else
+            return null;
+    }
+
     public async ValueTask<Guid> SaveAdjustBalanceBatchAsync(
-                IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
+                    IEnumerable<BatchAdjustBalanceItem> batchAdjustBalanceItems,
         CancellationToken cancellationToken = default)
     {
         var id = Guid.NewGuid();
