@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Castle.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Promotion.Clients;
 using Tgs.Promotion.Clients.Models.Promotion;
@@ -22,6 +24,13 @@ namespace TGS.Apis.BackendOffice.Controllers;
 [ApiController]
 public class DepositController : BaseContextController
 {
+    private readonly ILogger<DepositController> _logger;
+
+    public DepositController(ILogger<DepositController> logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     [HttpGet("untreated/{brandId}")]
     public ValueTask<int> CountUntreatedDepositFormsAsync(
         [FromServices] IGetService<CountUntreatedDepositFormsQuery, int> countService,
@@ -79,6 +88,8 @@ public class DepositController : BaseContextController
         Guid brandId,
         Guid formId)
     {
+        _logger.LogInformation("{0}", User.Identity.Name);
+
         var formDetail = await getDepositFormService
             .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
             .ConfigureAwait(false);
