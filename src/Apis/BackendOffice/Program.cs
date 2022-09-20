@@ -75,7 +75,8 @@ builder.Services
         var config = sp.GetRequiredService<IConfiguration>();
 
         options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
-    });
+    })
+    .AddSignalR();
 
 builder.Services
     .AddBackendOfficeServices(builder.Configuration)
