@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
@@ -87,9 +89,7 @@ public class DepositController : BaseContextController
         Guid formId)
     {
         _logger.LogInformation("GetDepositFormDetailAsync");
-        _logger.LogInformation("{0}", User);
-        _logger.LogInformation("{0}", User.Identity);
-        _logger.LogInformation("{0}", User.Identity.Name);
+        _logger.LogInformation("{0}", User.FindFirstValue(Consts.BackendOffice.UserInfo.UserIdKey));
 
         var formDetail = await getDepositFormService
             .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
