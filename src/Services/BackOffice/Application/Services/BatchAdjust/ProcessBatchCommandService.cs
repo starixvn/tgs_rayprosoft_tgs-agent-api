@@ -33,6 +33,11 @@ internal class ProcessBatchCommandService : ICommandService<ProcessBatchCommand>
 
     public async ValueTask ExecuteAsync(ProcessBatchCommand command, CancellationToken cancellationToken = default)
     {
+        if (!await _batchTempRepository
+            .BidBatchAsync(command.BatchId, cancellationToken)
+            .ConfigureAwait(false))
+            return;
+
         var batch = await _batchTempRepository.GetAdjustBalanceBatchAsync(command.BatchId, cancellationToken)
             .Select(async item =>
             {
@@ -115,5 +120,9 @@ internal class ProcessBatchCommandService : ICommandService<ProcessBatchCommand>
             command.BatchId,
             batch,
             cancellationToken).ConfigureAwait(false);
+
+        await _batchTempRepository
+            .CompleteBatchAsync(command.BatchId, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

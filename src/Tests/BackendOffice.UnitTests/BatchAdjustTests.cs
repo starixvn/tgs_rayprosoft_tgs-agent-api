@@ -81,6 +81,9 @@ public class BatchAdjustTests
             PlayerAdjustmentTransactionType.CompanyAdjust,
             Guid.NewGuid());
 
+        _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
+            .Returns(true);
+
         _ = fakeBatchTempRepository.GetAdjustBalanceBatchAsync(Arg.Is(command.BatchId))
             .Returns(
                 new[] {
@@ -103,6 +106,12 @@ public class BatchAdjustTests
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Is(command.ModifyUserId));
+
+        _ = fakeBatchTempRepository.Received(1)
+            .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
+
+        _ = fakeBatchTempRepository.Received(1)
+            .CompleteBatchAsync(Arg.Is(command.BatchId));
     }
 
     [Test]
@@ -123,6 +132,9 @@ public class BatchAdjustTests
             Guid.NewGuid(),
             PlayerAdjustmentTransactionType.BonusAdjust,
             Guid.NewGuid());
+
+        _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
+            .Returns(true);
 
         _ = fakeBatchTempRepository.GetAdjustBalanceBatchAsync(Arg.Is(command.BatchId))
             .Returns(
@@ -146,6 +158,12 @@ public class BatchAdjustTests
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Is(command.ModifyUserId));
+
+        _ = fakeBatchTempRepository.Received(1)
+            .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
+
+        _ = fakeBatchTempRepository.Received(1)
+            .CompleteBatchAsync(Arg.Is(command.BatchId));
     }
 
     [Test]
@@ -166,6 +184,9 @@ public class BatchAdjustTests
             Guid.NewGuid(),
             PlayerAdjustmentTransactionType.CompanyAdjust,
             Guid.NewGuid());
+
+        _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
+            .Returns(true);
 
         var items = new[] {
             new BatchAdjustBalanceItem(
@@ -192,6 +213,12 @@ public class BatchAdjustTests
                     item.WalletId,
                     BucketType.Adjustment,
                     item.Turnover)).ToArray())));
+
+        _ = fakeBatchTempRepository.Received(1)
+            .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
+
+        _ = fakeBatchTempRepository.Received(1)
+            .CompleteBatchAsync(Arg.Is(command.BatchId));
     }
 
     [Test]
@@ -244,5 +271,20 @@ public class BatchAdjustTests
 
         _ = fakeBatchTempRepository.Received(1)
             .SaveAdjustBalanceBatchAsync(Arg.Any<IEnumerable<BatchAdjustBalanceItem>>());
+    }
+
+    [Test]
+    public async Task Check_Batch_Completed()
+    {
+        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
+
+        var sut = new CheckBatchCompletedQueryService(fakeBatchTempRepository);
+
+        var query = new CheckBatchCompletedQuery(Guid.NewGuid());
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakeBatchTempRepository.Received(1)
+            .GetBatchIsCompletedAsync(Arg.Is(query.BatchId));
     }
 }
