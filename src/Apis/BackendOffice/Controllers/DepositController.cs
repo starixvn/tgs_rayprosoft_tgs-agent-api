@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
@@ -87,6 +86,9 @@ public class DepositController : BaseContextController
         Guid brandId,
         Guid formId)
     {
+        _logger.LogInformation("GetDepositFormDetailAsync");
+        _logger.LogInformation("{0}", User);
+        _logger.LogInformation("{0}", User.Identity);
         _logger.LogInformation("{0}", User.Identity.Name);
 
         var formDetail = await getDepositFormService

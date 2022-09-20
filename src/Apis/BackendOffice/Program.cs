@@ -278,7 +278,7 @@ builder.Services
             {
                 options.SetDbStatementForText = true;
             })
-            .AddProfileViewExporter(_ => { })
+            .AddProfileViewExporter()
             .AddOtlpExporter())
     .Configure<AspNetCoreInstrumentationOptions>(options =>
     {
