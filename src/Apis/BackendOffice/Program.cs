@@ -29,6 +29,7 @@ using Prometheus;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.MessageQueue;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.SignalR;
 using TGS.Apis.BackendOffice.Workers;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
@@ -328,6 +329,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotifyHub>("api/notify");
 app.MapProfileViewer();
 app.MapHealthChecks("/health");
 app.MapMetrics();

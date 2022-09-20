@@ -89,9 +89,6 @@ public class DepositController : BaseContextController
         Guid brandId,
         Guid formId)
     {
-        _logger.LogInformation("GetDepositFormDetailAsync");
-        _logger.LogInformation("{0}", User.FindFirstValue(Consts.BackendOffice.UserInfo.UserIdKey));
-
         var formDetail = await getDepositFormService
             .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
             .ConfigureAwait(false);
