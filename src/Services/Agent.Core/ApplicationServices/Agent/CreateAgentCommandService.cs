@@ -33,16 +33,17 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
         CancellationToken cancellationToken = default)
     {
         var parentAgent = await _tgsRepository.Agents.AsQueryable()
-            .FirstAsync(x => x.Id == query.ParentAgentId);
+            .FirstAsync(x => x.Id == query.ParentAgentId, cancellationToken: cancellationToken);
 
         var brand = await _tgsRepository.Brands.AsQueryable()
             .Include(x => x.BrandAgentDividendConditions)
-            .FirstAsync(x => x.Id == query.BrandId)
+            .FirstAsync(x => x.Id == query.BrandId, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         var isAgentNameExist = await _tgsRepository.Agents.AsQueryable()
             .AnyAsync(x => x.BrandId == query.BrandId
-                && EF.Functions.ILike(x.Username, $"%{query.Username}%"))
+                && x.Username.ToLower().Equals(query.Username.ToLower()),
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (isAgentNameExist)
