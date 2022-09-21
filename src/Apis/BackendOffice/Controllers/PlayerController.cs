@@ -51,16 +51,57 @@ public partial class PlayerController : BaseContextController
 
     [HttpPost("{playerCode}/adjust/increase", Name = "CreatePlayerIncreaseAmount")]
     [Description("Create a player adjustment to increase amount")]
-    public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
+    public async Task<MessageResponse> CreatePlayerIncreaseAmountAsync(
+        [FromServices] ICommandService<AdjustPlayerBalanceCommand> adjustService,
+        string playerCode,
         CreatePlayerIncreaseAmountRequest request)
     {
-        request.PlayerCode = playerCode;
-        return _mediator.Send(request);
+        if (!Enum.IsDefined(request.TransactionType) ||
+            !Enum.IsDefined((PlayerAdjustmentTransactionType)request.TransactionType))
+            return new MessageResponse()
+            {
+                Valid = false,
+                Message = "is not define type"
+            };
+
+        try
+        {
+            var command = new AdjustPlayerBalanceCommand(
+                request.PlayerCode,
+                AdjustmentType.Add,
+                (PlayerAdjustmentTransactionType)request.TransactionType,
+                request.Amount,
+                request.BucketAmount,
+                request.Remark,
+                request.IncludeInNetProfit,
+                Guid.Parse(UserId),
+                Username);
+
+            await adjustService
+                .ExecuteAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+            return new MessageResponse()
+            {
+                Valid = true
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Adjust Fail");
+
+            return new MessageResponse
+            {
+                Valid = false,
+                Message = ex.Message
+            };
+        }
     }
 
     [HttpPost("{playerCode}/adjust/reduce", Name = "CreatePlayerReduceAmount")]
     [Description("Create a player adjustment to reduce amount")]
-    public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
+    public Task<MessageResponse> CreatePlayerReduceAmountAsync(
+        string playerCode,
         CreatePlayerReduceAmountRequest request)
     {
         request.PlayerCode = playerCode;

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -36,8 +36,6 @@ internal class BackOfficeRepository : IBackOfficeRepository
         banner.UpdatedOn = _systemClock.UtcNow;
 
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-
-     
     }
 
     public async ValueTask ChangeStatusAsync(Guid id, int status, string modifier)
@@ -158,6 +156,34 @@ internal class BackOfficeRepository : IBackOfficeRepository
         }
 
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async ValueTask InsertAdjustPlayerRecordAsync(
+        AdjustPlayerRecordCreateInfo createInfo,
+    string modifier,
+        CancellationToken cancellationToken = default)
+    {
+        var record = new AdjustPlayerRecord
+        {
+            BrandId = createInfo.BrandId,
+            PlayerCode = createInfo.PlayerCode,
+            IncludeInNetProfit = createInfo.IncludeInNetProfit,
+            AdjustmentType = createInfo.AdjustmentType,
+            Type = createInfo.TransactionType,
+            TransferType = createInfo.TransferType,
+            Amount = createInfo.Amount,
+            Remark = createInfo.Remark,
+            BucketAmount = createInfo.BucketAmount,
+            CreatedByUsername = modifier,
+            TransferTarget = createInfo.TargetAgentUserName,
+            CreatedOn = DateTimeOffset.Now
+        };
+
+        _ = await _tgsRepository.AdjustPlayerRecords
+            .AddAsync(record, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId)
