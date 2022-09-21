@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office.CustomUI;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.MarketingReport.Client;
 using Tgs.Paging;
@@ -133,8 +134,9 @@ public class MarketingReportController : BaseContextController
                             GamingCount = marketingItem?.GamingCount ?? 0
                         };
 
+
         var utcDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.Date);
-        var toDate = DateOnly.FromDateTime(request.To.ToOffset(TimeSpan.FromHours(8)).Date);
+        var toDate = end;
         var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(8D)).Date);
         if (toDate > today)
             toDate = today;
@@ -205,6 +207,9 @@ public class MarketingReportController : BaseContextController
                     });
             }
         }
+
+        dataQuery = dataQuery.Where(
+            item => item.ReportDate >= start && item.ReportDate < end);
 
         if (!string.IsNullOrWhiteSpace(request.AgentUsername))
         {

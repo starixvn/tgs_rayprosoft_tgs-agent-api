@@ -9,13 +9,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.2" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.1.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Services\Bucket\PlayerBucket.Core.csproj" />
-    <ProjectReference Include="..\..\Services\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
 </Project>

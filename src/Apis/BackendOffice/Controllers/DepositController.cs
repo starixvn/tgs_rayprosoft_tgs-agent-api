@@ -1,17 +1,20 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
+using Tgs.Promotion.Clients;
+using Tgs.Promotion.Clients.Models.Promotion;
 using Tgs.ServiceUtility;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Messages;
-using Tgs.Promotion.Clients;
-using Tgs.Promotion.Clients.Models.Promotion;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Application.Services;
@@ -22,6 +25,13 @@ namespace TGS.Apis.BackendOffice.Controllers;
 [ApiController]
 public class DepositController : BaseContextController
 {
+    private readonly ILogger<DepositController> _logger;
+
+    public DepositController(ILogger<DepositController> logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     [HttpGet("untreated/{brandId}")]
     public ValueTask<int> CountUntreatedDepositFormsAsync(
         [FromServices] IGetService<CountUntreatedDepositFormsQuery, int> countService,
@@ -53,6 +63,7 @@ public class DepositController : BaseContextController
             request.PaymentMethodId,
             request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
                 ?? default(FlowState?).ToPaymentFlowState(),
+            request.OrderNo,
             createOnRange,
             updateOnRange,
             paging);
@@ -131,7 +142,8 @@ public class DepositController : BaseContextController
                 Bonus = formDetail.PromotionPlayerId != null
                     && promotionBonus.TryGetValue(formDetail.PromotionPlayerId.Value, out var bonus)
                     ? bonus
-                    : null
+                    : null,
+                HandlingFee = formDetail.HandlingFee,
             }
         };
     }
@@ -224,7 +236,8 @@ public class DepositController : BaseContextController
                     Bonus = form.PromotionPlayerId != null
                         && promotionBonus.TryGetValue(form.PromotionPlayerId.Value, out var bonus)
                         ? bonus
-                        : null
+                        : null,
+                    HandlingFee = form.HandlingFee,
                 })
                 .ToArray(),
             Sum = result.Sum

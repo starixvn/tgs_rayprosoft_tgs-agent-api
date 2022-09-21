@@ -372,35 +372,4 @@ public class AgentReportController : ControllerBase
             Items = response.Items ?? Array.Empty<RoundModel>()
         };
     }
-
-    /// <summary>
-    /// Get team Information
-    /// </summary>
-    /// <param name="pagingRequest"></param>
-    /// <returns></returns>
-    [HttpGet("teaminfo")]
-    [Description("Get team Information")]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
-        [FromQuery] PagingRequest pagingRequest,
-        [FromQuery] Guid id)
-    {
-        var request = new GetAgentTeamInfoRequest
-        {
-            AgentId = id,
-            Page = pagingRequest.Page,
-            Rows = pagingRequest.Rows,
-            OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = pagingRequest.SortBy,
-            ShowAll = pagingRequest.ShowAll
-        };
-
-        var response = await _client.GetAgentTeamInfoAsync(request);
-
-        return new()
-        {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<TeamInfoModel>()
-        };
-    }
 }

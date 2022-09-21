@@ -7,10 +7,14 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Tgs.Paging;
+using Tgs.Payment.Clients;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Player;
 using Tgs.ServiceUtility;
+using Tgs.VipLevelService.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages.Promotion;
 using TGS.Apis.BackendOffice.Models;
 using TGS.Core.Models.Enums;
@@ -18,7 +22,10 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
+using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.Controllers;
 
@@ -194,8 +201,159 @@ public partial class PlayerController : BaseContextController
 
     [HttpGet(Name = "GetPlayerList")]
     [Description("Get player list")]
-    public Task<PagedResponse<PlayersModel>> GetListAsync([FromQuery] GetPlayersRequest request)
-        => _mediator.Send(request);
+    public async Task<PagedResponse<PlayersModel>> GetListAsync(
+        [FromServices] IPlayerServiceClient playerServiceClient,
+        [FromServices] IPaymentServiceClient paymentServiceClient,
+        [FromServices] IQueryService<AllAgentsByBrandQuery, AgentInfo> queryAgentsService,
+        [FromServices] IQueryService<AllVipLevelsQuery, VipLevelInfo> queryVipService,
+        [FromQuery] GetPlayersRequest request)
+    {
+        var agentQuery = queryAgentsService
+            .QueryAsync(new AllAgentsByBrandQuery(request.BrandId), HttpContext.RequestAborted);
+
+        var agentDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.UserName,
+                a => a.AgentId,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var agentId = string.IsNullOrWhiteSpace(request.AgentName)
+            ? (Guid?)null
+            : agentDict.TryGetValue(request.AgentName, out var id)
+                ? id
+                : Guid.Empty;
+
+        var parentPlayer = !string.IsNullOrWhiteSpace(request.ParentUsername)
+            ? await playerServiceClient
+                .GetPlayerInfoByUserNameAsync(request.BrandId, request.ParentUsername, HttpContext.RequestAborted)
+                .ConfigureAwait(false) ?? new Tgs.PlayerService.Client.PlayerInfo
+                {
+                    PlayerCode = string.Empty
+                }
+            : null;
+
+        if (agentId == Guid.Empty || parentPlayer?.PlayerCode == string.Empty)
+            return new PagedResponse<PlayersModel>
+            {
+                Valid = true,
+                TotalCount = 0,
+                Items = Array.Empty<PlayersModel>()
+            };
+
+        string[] bankInfoPlayers = Array.Empty<string>();
+
+        if (!string.IsNullOrWhiteSpace(request.BankInfoTagType) && !string.IsNullOrWhiteSpace(request.BankInfoTag))
+        {
+            bankInfoPlayers = await paymentServiceClient
+                .GetPlayersByBankInfoTagAsync(request.BrandId, request.BankInfoTagType, request.BankInfoTag)
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+            if (bankInfoPlayers.Length == 0)
+                return new PagedResponse<PlayersModel>
+                {
+                    Valid = true,
+                    TotalCount = 0,
+                    Items = Array.Empty<PlayersModel>()
+                };
+        }
+
+        var query = new PlayerListQuery
+        {
+            PlayerCodes = bankInfoPlayers,
+            AgentId = agentId,
+            BeginRegisteredTime = request.BeginRegisteredOn?.UtcDateTime,
+            EndRegisteredTime = request.EndRegisteredOn?.UtcDateTime,
+            Phone = request.Phone,
+            RealName = request.RealName,
+            RegisteredDomainName = request.RegisterHost,
+            Status = (Tgs.PlayerService.Client.PlayerStatus?)request.Status,
+            UserName = request.Username,
+            VipId = request.VipId,
+            ParentPlayerCode = parentPlayer?.PlayerCode
+        };
+
+        var result = playerServiceClient.QueryPlayerListAsync(
+            request.BrandId,
+            query,
+            HttpContext.RequestAborted);
+
+        var paging = new Paging<PlayerListItem>();
+
+        paging.Page = request.Page;
+        paging.RowCount = request.Rows;
+
+        var totalCount = await result.CountAsync(HttpContext.RequestAborted).ConfigureAwait(false);
+
+        result = result.ApplyPaging(paging);
+
+        var agentNameDict = await agentQuery
+            .ToDictionaryAsync(
+                a => a.AgentId,
+                a => a.UserName)
+            .ConfigureAwait(false);
+
+        var vipDict = await queryVipService
+            .QueryAsync(new(request.BrandId), HttpContext.RequestAborted)
+            .ToDictionaryAsync(
+                info => info.Id,
+                info => info.Level,
+                HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        var pagedView = await result
+                .ToArrayAsync(HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+        var parentPlayers = pagedView
+            .Where(p => p.ParentPlayerCode is not null)
+            .Select(p => p.ParentPlayerCode)
+            .Distinct();
+
+        var parentPlayerDict = parentPlayers.Any()
+            ? await playerServiceClient
+                .QueryPlayerListAsync(
+                    request.BrandId,
+                    new PlayerListQuery
+                    {
+                        PlayerCodes = parentPlayers
+                    },
+                    HttpContext.RequestAborted)
+                .ToDictionaryAsync(
+                    p => p.PlayerCode,
+                    p => p.UserName,
+                    HttpContext.RequestAborted)
+                .ConfigureAwait(false)
+            : new Dictionary<string, string>();
+
+        return new PagedResponse<PlayersModel>
+        {
+            Valid = true,
+            TotalCount = totalCount,
+            Items = pagedView
+                .Select(item => new PlayersModel
+                {
+                    PlayerCode = item.PlayerCode,
+                    RealName = item.RealName,
+                    RegisteredTime = item.RegisteredOn,
+                    RegisterHost = item.RegisteredDomainName,
+                    Status = (TGS.Core.Models.Enums.PlayerStatus)item.Status,
+                    Username = item.UserName,
+                    AgentName = agentId is not null && agentNameDict.TryGetValue(agentId.Value, out var agentName)
+                        ? agentName
+                        : null,
+                    VipLevel = item.VipId is not null && vipDict.TryGetValue(item.VipId.Value, out var level)
+                        ? level
+                        : null,
+                    ParentUsername = !string.IsNullOrEmpty(item.ParentPlayerCode)
+                        && parentPlayerDict.TryGetValue(item.ParentPlayerCode, out var parentName)
+                        ? parentName
+                        : null
+                })
+                .ToArray()
+        };
+    }
 
     [HttpGet("{playerBucketId}/playerBucketHistories", Name = "GetPlayerBucketHistories")]
     [Description("Get player buckets")]
@@ -215,7 +373,6 @@ public partial class PlayerController : BaseContextController
         [FromServices] IQueryService<GetPlayerGameProviderBalanceCommand, GetPlayerGameProviderBalanceResponse> service,
         string playerCode)
     {
-
         var datas = await service.QueryAsync(new GetPlayerGameProviderBalanceCommand(playerCode)).ToArrayAsync().ConfigureAwait(false);
 
         if (!datas.Any())
@@ -294,9 +451,11 @@ public partial class PlayerController : BaseContextController
             case TransactionType.BonusAdjust:
                 _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                 return remark.GetString();
+
             case TransactionType.GameProviderFundOut:
             case TransactionType.GameProviderFundIn:
                 return description;
+
             default:
                 return string.Empty;
         }

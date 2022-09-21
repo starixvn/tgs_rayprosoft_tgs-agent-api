@@ -4,8 +4,6 @@ variables:
 stages:
   - build
   - test
-  - publish
-  - dbmigrations
 
 build-code:
   stage: build
@@ -13,10 +11,9 @@ build-code:
     - dotnet build -c $BuildConfiguration
   only:
     - merge_requests
-    - develop
-  artifacts:
+  cache:
+    key: Tgs.$CI_PIPELINE_ID
     untracked: true
-    expire_in: "1 days"
 
 unit-test:
   stage: test
@@ -24,181 +21,13 @@ unit-test:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
     - job: build-code
-      artifacts: true
   only:
     - merge_requests
-    - develop
+  cache:
+    key: Tgs.$CI_PIPELINE_ID
+    untracked: true
+    policy: pull
   artifacts:
     when: always
     reports:
       junit: ./src/Tests/TestReports/*-TestReport.xml
-
-build-migrations-image:
-  variables:
-    BuildConfiguration: Release
-  stage: publish
-  needs:
-    - unit-test
-    - job: build-code
-      artifacts: true
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - dotnet build "src/Core/DataServices.Tgs/DataServices.Tgs.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$MigrationImageName:$Tag" --no-restore
-    - docker push $MigrationImageName:$Tag
-  when: manual
-  only: 
-    - develop
-
-push-migrations-k8s-template:
-  stage: publish
-  needs:
-    - unit-test
-    - build-migrations-image    
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - mkdir -p artifacts/k8s
-    - cp -R deployment/k8s/ef-migration artifacts/k8s/
-    - |
-      yq -i e '
-        .image.repository = strenv(MigrationImageName) |
-        .image.tag = strenv(Tag)
-      ' artifacts/k8s/ef-migration/values.yaml
-  only:
-    - develop    
-  artifacts:
-    name: HelmTemplate
-    untracked: false
-    expire_in: "180 days"
-    paths:
-      - artifacts/**/*
-
-migrate-dev:
-  variables:
-    namespace: dev
-    GIT_STRATEGY: none
-  stage: dbmigrations
-  needs:
-    - build-migrations-image
-    - job: push-migrations-k8s-template
-      artifacts: true
-  only:
-    - develop
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_dev
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - export release_name="tgs-$Tag"
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.ef-migration})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF
-
-migrate-staging:
-  variables:
-    namespace: staging
-    GIT_STRATEGY: none
-  stage: dbmigrations
-  needs:
-    - migrate-dev
-    - job: push-migrations-k8s-template
-      artifacts: true
-  when: manual
-  only:
-    - develop
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_staging
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - export release_name="tgs-$Tag"
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.ef-migration})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF
-
-migrate-prod:
-  variables:
-    namespace: prod
-    GIT_STRATEGY: none
-  stage: dbmigrations
-  needs:
-    - migrate-staging
-    - job: push-migrations-k8s-template
-      artifacts: true
-  when: manual
-  only:
-    - develop
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_prod
-  script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - export release_name="tgs-$Tag"
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.ef-migration})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/ef-migration \
-        -n $namespace \
-        --name-template $release_name \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources
-      }
-      EOF

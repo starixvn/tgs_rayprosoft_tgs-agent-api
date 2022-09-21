@@ -13,6 +13,7 @@ public record ExportDepositForm(
     Guid? FormId,
     Guid? PaymentMethodId,
     IEnumerable<PaymentFlowState> Status,
+    string OrderNo,
     (DateTimeOffset Begin, DateTimeOffset End)? CreateOnRange,
     (DateTimeOffset Begin, DateTimeOffset End)? UpdateOnRange,
     PageableRequest Paging);
