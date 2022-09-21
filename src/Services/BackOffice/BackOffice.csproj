@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -63,7 +63,8 @@
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.12" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.4" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.18" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.25" />    <PackageReference Include="Tgs.Report.Client" Version="0.0.40" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.25" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.40" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
     <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.5" />
   </ItemGroup>
