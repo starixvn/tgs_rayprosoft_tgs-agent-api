@@ -22,7 +22,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Models.PlayerBucket;
 using TGS.Services.BackOffice.Application.Models.ReportPlayer;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.PlayerHandlers;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
@@ -51,20 +50,118 @@ public partial class PlayerController : BaseContextController
 
     [HttpPost("{playerCode}/adjust/increase", Name = "CreatePlayerIncreaseAmount")]
     [Description("Create a player adjustment to increase amount")]
-    public Task<MessageResponse> CreatePlayerIncreaseAmountAsync(string playerCode,
+    public async Task<MessageResponse> CreatePlayerIncreaseAmountAsync(
+        [FromServices] ICommandService<AdjustPlayerBalanceCommand> adjustService,
+        string playerCode,
         CreatePlayerIncreaseAmountRequest request)
     {
-        request.PlayerCode = playerCode;
-        return _mediator.Send(request);
+        if (!Enum.IsDefined(request.TransactionType) ||
+            !Enum.IsDefined((PlayerAdjustmentTransactionType)request.TransactionType))
+            return new MessageResponse()
+            {
+                Valid = false,
+                Message = "is not define type"
+            };
+
+        try
+        {
+            var command = new AdjustPlayerBalanceCommand(
+                request.PlayerCode,
+                AdjustmentType.Add,
+                (PlayerAdjustmentTransactionType)request.TransactionType,
+                request.Amount,
+                request.BucketAmount,
+                request.Remark,
+                request.IncludeInNetProfit,
+                Guid.Parse(UserId),
+                Username);
+
+            await adjustService
+                .ExecuteAsync(command, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+            return new MessageResponse()
+            {
+                Valid = true
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Adjust Fail");
+
+            return new MessageResponse
+            {
+                Valid = false,
+                Message = ex.Message
+            };
+        }
     }
 
     [HttpPost("{playerCode}/adjust/reduce", Name = "CreatePlayerReduceAmount")]
     [Description("Create a player adjustment to reduce amount")]
-    public Task<MessageResponse> CreatePlayerReduceAmountAsync(string playerCode,
+    public async Task<MessageResponse> CreatePlayerReduceAmountAsync(
+        [FromServices] ICommandService<AdjustPlayerBalanceCommand> adjustService,
+        [FromServices] ICommandService<PlayerTransferBalanceToParentAgentCommand> transferService,
+        string playerCode,
         CreatePlayerReduceAmountRequest request)
     {
-        request.PlayerCode = playerCode;
-        return _mediator.Send(request);
+        if (!Enum.IsDefined(request.TransactionType) ||
+            !Enum.IsDefined((PlayerAdjustmentTransactionType)request.TransactionType))
+            return new MessageResponse()
+            {
+                Valid = false,
+                Message = "is not define type"
+            };
+
+        try
+        {
+            if (request.TransactionType == PlayerReduceTransactionType.TransferAdjust)
+            {
+                var command = new PlayerTransferBalanceToParentAgentCommand(
+                    request.PlayerCode,
+                    request.Amount,
+                    request.BucketAmount,
+                    request.Remark,
+                    request.IncludeInNetProfit,
+                    Guid.Parse(UserId));
+
+                await transferService
+                    .ExecuteAsync(command, HttpContext.RequestAborted)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var command = new AdjustPlayerBalanceCommand(
+                    request.PlayerCode,
+                    AdjustmentType.Subtract,
+                    (PlayerAdjustmentTransactionType)request.TransactionType,
+                    request.Amount,
+                    request.BucketAmount,
+                    request.Remark,
+                    request.IncludeInNetProfit,
+                    Guid.Parse(UserId),
+                    Username);
+
+                await adjustService
+                    .ExecuteAsync(command, HttpContext.RequestAborted)
+                    .ConfigureAwait(false);
+            }
+
+            return new MessageResponse()
+            {
+                Valid = true
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Adjust Fail");
+
+            return new MessageResponse
+            {
+                Valid = false,
+                Message = ex.Message
+            };
+        }
     }
 
     [HttpPost("{playerCode}/fundin/all", Name = "FundInAllPlayerGameProvider")]
@@ -340,7 +437,7 @@ public partial class PlayerController : BaseContextController
                     RegisterHost = item.RegisteredDomainName,
                     Status = (TGS.Core.Models.Enums.PlayerStatus)item.Status,
                     Username = item.UserName,
-                    AgentName = agentId is not null && agentNameDict.TryGetValue(agentId.Value, out var agentName)
+                    AgentName = item.AgentId is not null && agentNameDict.TryGetValue(item.AgentId.Value, out var agentName)
                         ? agentName
                         : null,
                     VipLevel = item.VipId is not null && vipDict.TryGetValue(item.VipId.Value, out var level)

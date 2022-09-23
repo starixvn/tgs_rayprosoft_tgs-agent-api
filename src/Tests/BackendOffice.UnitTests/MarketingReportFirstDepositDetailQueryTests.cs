@@ -4,7 +4,6 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
