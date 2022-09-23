@@ -6,4 +6,6 @@ public record ProcessBatchCommand(
     Guid BrandId,
     Guid BatchId,
     PlayerAdjustmentTransactionType AdjustTransferType,
-    Guid ModifyUserId);
+    bool IncludeInNetProfit,
+    Guid ModifyUserId,
+    string ModifyUserName);

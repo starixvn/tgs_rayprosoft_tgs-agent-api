@@ -13,5 +13,7 @@ message ProcessAdjustBalanceBatchRequest {
 	phoenix.protobuf.GuidValue brand_id = 1;
 	phoenix.protobuf.GuidValue batch_id = 2;
 	string adjust_transfer_type = 3;
-	phoenix.protobuf.GuidValue modify_user_id = 4;
+	bool include_in_net_profit = 4;
+	phoenix.protobuf.GuidValue modify_user_id = 5;
+	string modify_user_name = 6;
 }
