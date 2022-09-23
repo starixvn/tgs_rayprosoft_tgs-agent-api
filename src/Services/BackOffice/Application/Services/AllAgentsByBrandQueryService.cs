@@ -4,7 +4,7 @@ using System.Threading;
 using Tgs.ServiceUtility;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers;
+namespace TGS.Services.BackOffice.Application.Services;
 
 internal class AllAgentsByBrandQueryService : IQueryService<AllAgentsByBrandQuery, AgentInfo>
 {

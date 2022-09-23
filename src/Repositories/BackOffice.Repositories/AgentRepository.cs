@@ -39,14 +39,22 @@ internal class AgentRepository : IAgentRepository
     public async ValueTask<AgentInfo?> GetAgentAsync(Guid brandId, string userName, CancellationToken cancellationToken = default)
         => await _tgsRepository.Agents
             .Where(agent => agent.BrandId == brandId && agent.Username == userName)
-            .Select(agent => new AgentInfo(agent.Id, agent.Username, agent.Status))
+            .Select(agent => new AgentInfo(
+                agent.Id,
+                agent.Username,
+                agent.DefaultWalletId,
+                agent.Status))
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
     public IAsyncEnumerable<AgentInfo> GetAgentsAsync(Guid brandId)
         => _tgsRepository.Agents.AsQueryable()
             .Where(agent => agent.BrandId == brandId)
-            .Select(agent => new AgentInfo(agent.Id, agent.Username, agent.Status))
+            .Select(agent => new AgentInfo(
+                agent.Id,
+                agent.Username,
+                agent.DefaultWalletId,
+                agent.Status))
             .ToAsyncEnumerable();
 
     public IAsyncEnumerable<string> QueryDomainsFromAgentAsync(Guid agentId)

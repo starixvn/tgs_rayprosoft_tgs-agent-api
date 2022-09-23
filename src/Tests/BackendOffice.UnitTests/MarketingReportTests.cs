@@ -7,7 +7,6 @@ using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Queries.ReportMarketingQueries;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
@@ -32,6 +31,7 @@ internal class MarketingReportTests
         var agentInfo = new AgentInfo(
             Guid.NewGuid(),
             "Agent1",
+            Guid.NewGuid(),
             AgentStatus.Enabled);
 
         var query = new GetMarketingReportAggregateInfosByAgentQuery(
@@ -99,7 +99,11 @@ internal class MarketingReportTests
         _ = fakeAgentQueryService
             .QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
             .Returns(new[] {
-                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
+                new AgentInfo(
+                    Guid.NewGuid(),
+                    "Agent1",
+                    Guid.NewGuid(),
+                    AgentStatus.Enabled)
             }.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query).ConfigureAwait(false);
@@ -164,7 +168,11 @@ internal class MarketingReportTests
         _ = fakeAgentQueryService
             .QueryAsync(Arg.Is(new AllAgentsByBrandQuery(query.BrandId)))
             .Returns(new[] {
-                new AgentInfo(Guid.NewGuid(), "Agent1", AgentStatus.Enabled)
+                new AgentInfo(
+                    Guid.NewGuid(),
+                    "Agent1",
+                    Guid.NewGuid(),
+                    AgentStatus.Enabled)
             }.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query).ConfigureAwait(false);
