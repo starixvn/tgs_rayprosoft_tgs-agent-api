@@ -14,11 +14,4 @@ public class NotifyHub : Hub
     {
         _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
     }
-
-    public override Task OnConnectedAsync()
-    {
-        _logger.LogInformation("{0}", Context.User.FindFirstValue(Consts.BackendOffice.UserInfo.UserIdKey));
-
-        return base.OnConnectedAsync();
-    }
 }
