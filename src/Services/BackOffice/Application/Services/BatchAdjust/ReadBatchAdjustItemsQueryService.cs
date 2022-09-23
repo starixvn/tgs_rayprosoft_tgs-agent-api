@@ -31,7 +31,7 @@ internal class ReadBatchAdjustItemsQueryService : IQueryService<ReadBatchAdjustI
 
         var index = 2;
 
-        while (index < 152)
+        while (index < 52)
         {
             var userName = sheet.Cell(index, 1).GetFormattedString();
 

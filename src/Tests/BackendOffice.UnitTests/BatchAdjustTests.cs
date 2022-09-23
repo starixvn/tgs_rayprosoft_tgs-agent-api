@@ -157,12 +157,12 @@ public class BatchAdjustTests
 
         var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-        Assert.AreEqual(150, actual.Length);
+        Assert.AreEqual(50, actual.Length);
 
         var lastRow = actual.Last();
 
-        Assert.AreEqual(150, lastRow.AdjustAmount);
-        Assert.AreEqual(150, lastRow.Turnover);
+        Assert.AreEqual(50, lastRow.AdjustAmount);
+        Assert.AreEqual(50, lastRow.Turnover);
     }
 
     [Test]
