@@ -109,14 +109,16 @@ public class BatchAdjustBalanceController : BaseContextController
         [FromServices] IMessageSender messageSender,
         Guid brandId,
         Guid batchId,
-        [FromBody] PlayerAdjustmentTransactionType adjustmentTransactionType)
+        [FromBody] BatchAdjustBalanceProcessConditionViewModel conditionViewModel)
     {
         var request = new ProcessAdjustBalanceBatchRequest
         {
             BrandId = brandId,
             BatchId = batchId,
-            AdjustTransferType = adjustmentTransactionType.ToString(),
-            ModifyUserId = Guid.Parse(UserId)
+            AdjustTransferType = conditionViewModel.TransactionType.ToString(),
+            IncludeInNetProfit = conditionViewModel.IncludeInNetProfit,
+            ModifyUserId = Guid.Parse(UserId),
+            ModifyUserName = Username
         };
 
         return messageSender.PublishAsync(

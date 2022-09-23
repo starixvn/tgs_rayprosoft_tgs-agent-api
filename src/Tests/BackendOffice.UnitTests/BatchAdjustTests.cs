@@ -21,6 +21,21 @@ namespace TGS.Tests.BackendOffice.UnitTests;
 public class BatchAdjustTests
 {
     [Test]
+    public async Task Check_Batch_Completed()
+    {
+        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
+
+        var sut = new CheckBatchCompletedQueryService(fakeBatchTempRepository);
+
+        var query = new CheckBatchCompletedQuery(Guid.NewGuid());
+
+        _ = await sut.GetAsync(query);
+
+        _ = fakeBatchTempRepository.Received(1)
+            .GetBatchIsCompletedAsync(Arg.Is(query.BatchId));
+    }
+
+    [Test]
     public async Task Export_Form_Template()
     {
         var sut = new ExportBatchAdjustFormTemplateCommandService();
@@ -66,20 +81,20 @@ public class BatchAdjustTests
     public async Task Process_Batch_AdjustAmount()
     {
         var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
-        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+        var fakePlayerAdjustBalanceService = Substitute.For<IPlayerAdjustBalanceService>();
 
         var sut = new ProcessBatchCommandService(
             fakeBatchTempRepository,
-            fakeCashServiceClient,
-            fakePlayerBucketRepository,
+            fakePlayerAdjustBalanceService,
             NullLogger<ProcessBatchCommandService>.Instance);
 
         var command = new ProcessBatchCommand(
             Guid.NewGuid(),
             Guid.NewGuid(),
             PlayerAdjustmentTransactionType.CompanyAdjust,
-            Guid.NewGuid());
+            true,
+            Guid.NewGuid(),
+            "modifier");
 
         _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
             .Returns(true);
@@ -89,6 +104,7 @@ public class BatchAdjustTests
                 new[] {
                     new BatchAdjustBalanceItem(
                         1,
+                        command.BrandId,
                         Guid.NewGuid(),
                         "test1",
                         "test1",
@@ -99,120 +115,11 @@ public class BatchAdjustTests
 
         await sut.ExecuteAsync(command);
 
-        _ = fakeCashServiceClient.Received(1)
-            .AdjustCompanyAsync(
-                Arg.Any<Guid>(),
-                Arg.Is(100M),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Is(command.ModifyUserId));
-
-        _ = fakeBatchTempRepository.Received(1)
-            .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
-
-        _ = fakeBatchTempRepository.Received(1)
-            .CompleteBatchAsync(Arg.Is(command.BatchId));
-    }
-
-    [Test]
-    public async Task Process_Batch_By_PlayerAdjustmentTransactionType()
-    {
-        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
-        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-
-        var sut = new ProcessBatchCommandService(
-            fakeBatchTempRepository,
-            fakeCashServiceClient,
-            fakePlayerBucketRepository,
-            NullLogger<ProcessBatchCommandService>.Instance);
-
-        var command = new ProcessBatchCommand(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            PlayerAdjustmentTransactionType.BonusAdjust,
-            Guid.NewGuid());
-
-        _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
-            .Returns(true);
-
-        _ = fakeBatchTempRepository.GetAdjustBalanceBatchAsync(Arg.Is(command.BatchId))
-            .Returns(
-                new[] {
-                    new BatchAdjustBalanceItem(
-                        1,
-                        Guid.NewGuid(),
-                        "test1",
-                        "test1",
-                        100,
-                        0,
-                        null)
-                }.ToAsyncEnumerable());
-
-        await sut.ExecuteAsync(command);
-
-        _ = fakeCashServiceClient.Received(1)
-            .AdjustBonusAsync(
-                Arg.Any<Guid>(),
-                Arg.Is(100M),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Is(command.ModifyUserId));
-
-        _ = fakeBatchTempRepository.Received(1)
-            .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
-
-        _ = fakeBatchTempRepository.Received(1)
-            .CompleteBatchAsync(Arg.Is(command.BatchId));
-    }
-
-    [Test]
-    public async Task Process_Batch_TurnOver()
-    {
-        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
-        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-
-        var sut = new ProcessBatchCommandService(
-            fakeBatchTempRepository,
-            fakeCashServiceClient,
-            fakePlayerBucketRepository,
-            NullLogger<ProcessBatchCommandService>.Instance);
-
-        var command = new ProcessBatchCommand(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            PlayerAdjustmentTransactionType.CompanyAdjust,
-            Guid.NewGuid());
-
-        _ = fakeBatchTempRepository.BidBatchAsync(Arg.Is(command.BatchId))
-            .Returns(true);
-
-        var items = new[] {
-            new BatchAdjustBalanceItem(
-                1,
-                Guid.NewGuid(),
-                "test1",
-                "test1",
-                0,
-                100,
-                null)
-        };
-        _ = fakeBatchTempRepository.GetAdjustBalanceBatchAsync(Arg.Is(command.BatchId))
-            .Returns(
-                items.ToAsyncEnumerable());
-
-        await sut.ExecuteAsync(command);
-
-        _ = fakePlayerBucketRepository.Received(1)
-            .CreatePlayerBucketsAsync(Arg.Is<CreatePlayerBucketRequest[]>(x => Enumerable.SequenceEqual(
-                x,
-                items.Select(item => new CreatePlayerBucketRequest(
-                    command.BrandId,
-                    item.PlayerCode,
-                    item.WalletId,
-                    BucketType.Adjustment,
-                    item.Turnover)).ToArray())));
+        _ = fakePlayerAdjustBalanceService.Received(1)
+            .ProcessAdjustApplyAsync(
+                Arg.Any<PlayerBalanceAdjustmentApplyInfo>(),
+                Arg.Is(command.ModifyUserId),
+                Arg.Is(command.ModifyUserName));
 
         _ = fakeBatchTempRepository.Received(1)
             .SaveAdjustBalanceBatchResultAsync(Arg.Is(command.BatchId), Arg.Any<IEnumerable<BatchAdjustBalanceItemResult>>());
@@ -271,20 +178,5 @@ public class BatchAdjustTests
 
         _ = fakeBatchTempRepository.Received(1)
             .SaveAdjustBalanceBatchAsync(Arg.Any<IEnumerable<BatchAdjustBalanceItem>>());
-    }
-
-    [Test]
-    public async Task Check_Batch_Completed()
-    {
-        var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
-
-        var sut = new CheckBatchCompletedQueryService(fakeBatchTempRepository);
-
-        var query = new CheckBatchCompletedQuery(Guid.NewGuid());
-
-        _ = await sut.GetAsync(query);
-
-        _ = fakeBatchTempRepository.Received(1)
-            .GetBatchIsCompletedAsync(Arg.Is(query.BatchId));
     }
 }

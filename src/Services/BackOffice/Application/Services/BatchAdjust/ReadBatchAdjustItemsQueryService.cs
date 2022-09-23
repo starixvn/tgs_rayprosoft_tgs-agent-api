@@ -58,6 +58,7 @@ internal class ReadBatchAdjustItemsQueryService : IQueryService<ReadBatchAdjustI
 
             var item = new BatchAdjustBalanceItem(
                 index - 2,
+                playerInfo.BrandId,
                 walletId,
                 playerInfo.PlayerCode,
                 playerInfo.UserName,
