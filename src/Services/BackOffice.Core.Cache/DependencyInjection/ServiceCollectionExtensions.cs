@@ -1,6 +1,5 @@
 ﻿using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Cache;
 using TGS.Services.BackOffice.Domain;

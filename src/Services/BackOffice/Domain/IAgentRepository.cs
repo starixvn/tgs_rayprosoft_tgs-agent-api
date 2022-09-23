@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Tgs.Migrations;
 
 namespace TGS.Services.BackOffice.Domain;
 

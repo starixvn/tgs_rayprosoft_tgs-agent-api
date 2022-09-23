@@ -2,26 +2,34 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.CashService.Client;
+using Tgs.SerialNumberGenerator;
 using TGS.Core.Models.Enums;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Domain;
 
 internal class PlayerAdjustBalanceService : IPlayerAdjustBalanceService
 {
+    private readonly IAgentWalletRepository _agentWalletRepository;
     private readonly IBackOfficeRepository _backOfficeRepository;
     private readonly ICashServiceClient _cashServiceClient;
     private readonly IPlayerBucketRepository _playerBucketRepository;
+    private readonly ISerialNumberGenerator _serialNumberGenerator;
 
     public PlayerAdjustBalanceService(
         IBackOfficeRepository backOfficeRepository,
         ICashServiceClient cashServiceClient,
-        IPlayerBucketRepository playerBucketRepository)
+        IPlayerBucketRepository playerBucketRepository,
+        ISerialNumberGenerator serialNumberGenerator,
+        IAgentWalletRepository agentWalletRepository)
     {
         _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
         _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
         _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+        _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
+        _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
     }
 
     public async ValueTask ProcessAdjustApplyAsync(
@@ -30,17 +38,7 @@ internal class PlayerAdjustBalanceService : IPlayerAdjustBalanceService
         string modifyUser,
         CancellationToken cancellationToken = default)
     {
-        var transactionId = applyInfo.Amount > 0M
-            ? (await AdjustAsync(
-                applyInfo.TransactionType,
-                applyInfo.WalletId,
-                applyInfo.Amount,
-                applyInfo.Remark,
-                modifyUserId).ConfigureAwait(false)).TransactionId
-            : (Guid?)null;
-
         if (applyInfo.BucketAmount > 0M)
-        {
             await _playerBucketRepository
                 .CreatePlayerBucketsAsync(new[]
                 {
@@ -51,8 +49,18 @@ internal class PlayerAdjustBalanceService : IPlayerAdjustBalanceService
                         BucketType.Adjustment,
                         applyInfo.BucketAmount)
                 })
-            .ConfigureAwait(false);
-        }
+                .ConfigureAwait(false);
+
+        var transactionId = applyInfo.Amount > 0M
+            ? (await AdjustAsync(
+                applyInfo.TransactionType,
+                applyInfo.WalletId,
+                applyInfo.AdjustmentType == AdjustmentType.Subtract
+                    ? -applyInfo.Amount
+                    : applyInfo.Amount,
+                applyInfo.Remark,
+                modifyUserId).ConfigureAwait(false)).TransactionId
+            : (Guid?)null;
 
         var recordCreateInfo = new AdjustPlayerRecordCreateInfo(
             applyInfo.BrandId,
@@ -65,11 +73,85 @@ internal class PlayerAdjustBalanceService : IPlayerAdjustBalanceService
             applyInfo.IncludeInNetProfit,
             applyInfo.Remark,
             transactionId,
-            applyInfo.TargetAgentUserName);
+            null);
 
         await _backOfficeRepository.InsertAdjustPlayerRecordAsync(
             recordCreateInfo,
             modifyUser,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask ProcessTransferApplyAsync(
+        PlayerBalanceTransferApplyInfo applyInfo,
+        Guid modifyUserId,
+        CancellationToken cancellationToken = default)
+    {
+        if (applyInfo.BucketAmount > 0M)
+            await _playerBucketRepository
+                .CreatePlayerBucketsAsync(new[]
+                {
+                    new CreatePlayerBucketRequest(
+                        applyInfo.BrandId,
+                        applyInfo.PlayerCode,
+                        applyInfo.WalletId,
+                        BucketType.Adjustment,
+                        applyInfo.BucketAmount)
+                })
+                .ConfigureAwait(false);
+
+        var createId = await _serialNumberGenerator
+            .GenerateAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var lockResult = await _cashServiceClient.LockTransferAsync(
+            applyInfo.WalletId,
+            applyInfo.Amount,
+            applyInfo.Remark,
+            createId,
+            modifyUserId,
+            cancellationToken).ConfigureAwait(false);
+
+        if (lockResult.Balance < 0M)
+        {
+            _ = await _cashServiceClient.RollbackTransferAsync(
+                applyInfo.WalletId,
+                applyInfo.Amount,
+                applyInfo.Remark,
+                createId,
+                modifyUserId,
+                cancellationToken).ConfigureAwait(false);
+
+            throw new Exception("transfer fail");
+        }
+
+        var createInfo = new TransferBalanceCreateInfo(
+            applyInfo.BrandId,
+            applyInfo.Amount,
+            "Player",
+            applyInfo.PlayerCode,
+            "Agent",
+            applyInfo.TargetAgent.ToString(),
+            applyInfo.IncludeInNetProfit);
+
+        await _backOfficeRepository.InsertTransferBalanceFormAsync(
+            createId,
+            createInfo,
+            modifyUserId,
+            cancellationToken).ConfigureAwait(false);
+
+        _ = await _agentWalletRepository.ExchangeAsync(
+            applyInfo.BrandId,
+            applyInfo.TargetAgentWalletId,
+            applyInfo.TargetAgent,
+            TransactionTypes.CompanyAdjust,
+            applyInfo.Amount).ConfigureAwait(false);
+
+        _ = await _cashServiceClient.CommitTransferAsync(
+            applyInfo.WalletId,
+            applyInfo.Amount,
+            applyInfo.Remark,
+            createId,
+            modifyUserId,
             cancellationToken).ConfigureAwait(false);
     }
 

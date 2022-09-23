@@ -26,6 +26,12 @@ public interface IBackOfficeRepository
 
     ValueTask InsertAdjustPlayerRecordAsync(AdjustPlayerRecordCreateInfo createInfo, string modifier, CancellationToken cancellationToken = default);
 
+    ValueTask InsertTransferBalanceFormAsync(
+        Guid createId,
+        TransferBalanceCreateInfo createInfo,
+        Guid modifier,
+        CancellationToken cancellationToken = default);
+
     IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
     IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);

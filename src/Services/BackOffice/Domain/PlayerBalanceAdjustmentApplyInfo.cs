@@ -14,5 +14,4 @@ public record PlayerBalanceAdjustmentApplyInfo(
     decimal Amount,
     decimal BucketAmount,
     bool IncludeInNetProfit,
-    string? Remark,
-    string? TargetAgentUserName = null);
+    string? Remark);

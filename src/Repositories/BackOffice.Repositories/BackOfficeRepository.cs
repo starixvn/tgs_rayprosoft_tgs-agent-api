@@ -18,7 +18,9 @@ internal class BackOfficeRepository : IBackOfficeRepository
     private readonly ISystemClock _systemClock;
     private readonly ITgsRepository _tgsRepository;
 
-    public BackOfficeRepository(ITgsRepository tgsRepository, ISystemClock systemClock)
+    public BackOfficeRepository(
+        ITgsRepository tgsRepository,
+        ISystemClock systemClock)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
@@ -163,6 +165,8 @@ internal class BackOfficeRepository : IBackOfficeRepository
     string modifier,
         CancellationToken cancellationToken = default)
     {
+        var currentDate = DateTimeOffset.Now;
+
         var record = new AdjustPlayerRecord
         {
             BrandId = createInfo.BrandId,
@@ -176,7 +180,9 @@ internal class BackOfficeRepository : IBackOfficeRepository
             BucketAmount = createInfo.BucketAmount,
             CreatedByUsername = modifier,
             TransferTarget = createInfo.TargetAgentUserName,
-            CreatedOn = DateTimeOffset.Now
+            TransactionId = createInfo.TransactionId,
+            TransactionRecordedOn = currentDate,
+            CreatedOn = currentDate
         };
 
         _ = await _tgsRepository.AdjustPlayerRecords
@@ -184,6 +190,34 @@ internal class BackOfficeRepository : IBackOfficeRepository
             .ConfigureAwait(false);
 
         _ = await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask InsertTransferBalanceFormAsync(
+        Guid createId,
+        TransferBalanceCreateInfo createInfo,
+        Guid modifier,
+        CancellationToken cancellationToken = default)
+    {
+        var form = new TransferBalanceForm
+        {
+            Amount = createInfo.Amount,
+            BrandId = createInfo.BrandId,
+            CreatedUserId = modifier.ToString(),
+            Drawee = createInfo.Drawee,
+            DraweeType = createInfo.DraweeType,
+            Payee = createInfo.Payee,
+            PayeeType = createInfo.PayeeType,
+            IncludeInNetProfit = createInfo.IncludeInNetProfit,
+            Id = createId
+        };
+
+        _ = await _tgsRepository.TransferBalanceForms
+            .AddAsync(form, cancellationToken)
+            .ConfigureAwait(false);
+
+        _ = await _tgsRepository
+            .SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId)
@@ -441,11 +475,11 @@ internal class BackOfficeRepository : IBackOfficeRepository
     }
 
     private static BannerFlowStatus ConvertBannerStatus(int status)
-                => status switch
-                {
-                    0 => BannerFlowStatus.WaitApproving,
-                    1000 => BannerFlowStatus.Approved,
-                    2000 => BannerFlowStatus.Rejected,
-                    _ => BannerFlowStatus.Unknown
-                };
+        => status switch
+        {
+            0 => BannerFlowStatus.WaitApproving,
+            1000 => BannerFlowStatus.Approved,
+            2000 => BannerFlowStatus.Rejected,
+            _ => BannerFlowStatus.Unknown
+        };
 }

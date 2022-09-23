@@ -6,4 +6,5 @@ namespace TGS.Services.BackOffice.Domain;
 public record AgentInfo(
     Guid AgentId,
     string UserName,
+    Guid WalletId,
     AgentStatus Status);

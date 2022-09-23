@@ -11,4 +11,9 @@ public interface IPlayerAdjustBalanceService
         Guid modifyUserId,
         string modifyUser,
         CancellationToken cancellationToken = default);
+
+    ValueTask ProcessTransferApplyAsync(
+        PlayerBalanceTransferApplyInfo applyInfo,
+        Guid modifyUserId,
+        CancellationToken cancellationToken = default);
 }
