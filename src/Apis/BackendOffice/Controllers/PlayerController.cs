@@ -437,7 +437,7 @@ public partial class PlayerController : BaseContextController
                     RegisterHost = item.RegisteredDomainName,
                     Status = (TGS.Core.Models.Enums.PlayerStatus)item.Status,
                     Username = item.UserName,
-                    AgentName = agentId is not null && agentNameDict.TryGetValue(agentId.Value, out var agentName)
+                    AgentName = item.AgentId is not null && agentNameDict.TryGetValue(item.AgentId.Value, out var agentName)
                         ? agentName
                         : null,
                     VipLevel = item.VipId is not null && vipDict.TryGetValue(item.VipId.Value, out var level)
