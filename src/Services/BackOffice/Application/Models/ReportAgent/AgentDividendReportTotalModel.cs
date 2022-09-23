@@ -1,9 +1,6 @@
 ﻿namespace TGS.Services.BackOffice.Application.Models.ReportAgent;
 
 public record AgentDividendReportTotalModel(
-    decimal DepositAmount,
-    decimal WithdrawalAmount,
-    decimal CompanyAdjustAmount,
     decimal BonusAdjustAmount,
     decimal AgentAdjustAmount,
     decimal BonusAmount,
@@ -14,4 +11,7 @@ public record AgentDividendReportTotalModel(
     decimal NetProfit,
     decimal AgentDividendAmount,
     decimal FromPlayerAgentDividendAmount,
-    decimal FromTeamAgentDividendAmount);
+    decimal FromTeamAgentDividendAmount,
+    decimal AgentCoveredBonus,
+    decimal AgentCoveredBonusAdjust
+    );
