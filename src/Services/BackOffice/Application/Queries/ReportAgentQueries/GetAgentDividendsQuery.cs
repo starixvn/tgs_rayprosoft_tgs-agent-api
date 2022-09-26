@@ -47,7 +47,7 @@ public class
                 Message = response.Message,
                 TotalCount = response.TotalCount,
                 Items = Array.Empty<AgentDividendReportModel>(),
-                Total = new AgentDividendReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+                Total = new AgentDividendReportTotalModel(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0)
             };
         }
 
@@ -55,9 +55,6 @@ public class
         {
             Id = x.Id,
             Username = x.Username,
-            DepositAmount = x.DepositAmount,
-            WithdrawalAmount = x.WithdrawalAmount,
-            CompanyAdjustAmount = x.CompanyAdjustAmount,
             BonusAdjustAmount = x.BonusAdjustAmount,
             AgentAdjustAmount = x.AgentAdjustAmount,
             BonusAmount = x.BonusAmount,
@@ -68,7 +65,10 @@ public class
             NetProfit = x.NetProfit,
             AgentDividendAmount = x.AgentDividendAmount,
             FromPlayerAgentDividendAmount = x.FromPlayerAgentDividendAmount,
-            FromTeamAgentDividendAmount = x.FromTeamAgentDividendAmount
+            FromTeamAgentDividendAmount = x.FromTeamAgentDividendAmount,
+            AgentDividendPercentage = x.AgentDividendPercentage,
+            AgentCoveredBonus = x.AgentCoveredBonus,
+            AgentCoveredBonusAdjust = x.AgentCoveredBonusAdjust
         }).AsQueryable().CreatePagedResponse(new PageableRequest
         {
             Page = request.Page,
@@ -78,9 +78,6 @@ public class
         });
 
         var total = new AgentDividendReportTotalModel(
-            response.Items.Sum(x => x.DepositAmount),
-            response.Items.Sum(x => x.WithdrawalAmount),
-            response.Items.Sum(x => x.CompanyAdjustAmount),
             response.Items.Sum(x => x.BonusAdjustAmount),
             response.Items.Sum(x => x.AgentAdjustAmount),
             response.Items.Sum(x => x.BonusAmount),
@@ -91,7 +88,9 @@ public class
             response.Items.Sum(x => x.NetProfit),
             response.Items.Sum(x => x.AgentDividendAmount),
             response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
-            response.Items.Sum(x => x.FromTeamAgentDividendAmount)
+            response.Items.Sum(x => x.FromTeamAgentDividendAmount),
+            response.Items.Sum(x => x.AgentCoveredBonus) ?? 0M,
+            response.Items.Sum(x => x.AgentCoveredBonusAdjust) ?? 0M
         );
 
         return new GetAgentDividendsReportResponse
