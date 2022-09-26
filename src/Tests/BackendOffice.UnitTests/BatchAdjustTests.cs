@@ -8,13 +8,11 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.CashService.Client;
+using Tgs.MessageQueue;
 using Tgs.PlayerService.Client;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Services.BatchAdjust;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.PlayerBucket;
-using TGS.Services.PlayerBucket.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
 
@@ -82,10 +80,12 @@ public class BatchAdjustTests
     {
         var fakeBatchTempRepository = Substitute.For<IBatchTempRepository>();
         var fakePlayerAdjustBalanceService = Substitute.For<IPlayerAdjustBalanceService>();
+        var fakeMessageSender = Substitute.For<IMessageSender>();
 
         var sut = new ProcessBatchCommandService(
             fakeBatchTempRepository,
             fakePlayerAdjustBalanceService,
+            fakeMessageSender,
             NullLogger<ProcessBatchCommandService>.Instance);
 
         var command = new ProcessBatchCommand(
@@ -126,6 +126,11 @@ public class BatchAdjustTests
 
         _ = fakeBatchTempRepository.Received(1)
             .CompleteBatchAsync(Arg.Is(command.BatchId));
+
+        _ = fakeMessageSender.Received(1)
+            .SendAsync(
+                Arg.Is("tgs.bo.notify"),
+                Arg.Any<ReadOnlyMemory<byte>>());
     }
 
     [Test]

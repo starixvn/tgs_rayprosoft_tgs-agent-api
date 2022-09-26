@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf;
 using Microsoft.Extensions.Logging;
-using Tgs.CashService.Client;
+using Tgs.BrandService.Protos;
+using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.PlayerBucket;
 
 namespace TGS.Services.BackOffice.Application.Services.BatchAdjust;
 
@@ -15,15 +17,18 @@ internal class ProcessBatchCommandService : ICommandService<ProcessBatchCommand>
 {
     private readonly IBatchTempRepository _batchTempRepository;
     private readonly ILogger<ProcessBatchCommandService> _logger;
+    private readonly IMessageSender _messageSender;
     private readonly IPlayerAdjustBalanceService _playerAdjustBalanceService;
 
     public ProcessBatchCommandService(
         IBatchTempRepository batchTempRepository,
         IPlayerAdjustBalanceService playerAdjustBalanceService,
+        IMessageSender messageSender,
         ILogger<ProcessBatchCommandService> logger)
     {
         _batchTempRepository = batchTempRepository ?? throw new ArgumentNullException(nameof(batchTempRepository));
         _playerAdjustBalanceService = playerAdjustBalanceService ?? throw new ArgumentNullException(nameof(playerAdjustBalanceService));
+        _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -78,5 +83,31 @@ internal class ProcessBatchCommandService : ICommandService<ProcessBatchCommand>
         await _batchTempRepository
             .CompleteBatchAsync(command.BatchId, cancellationToken)
             .ConfigureAwait(false);
+
+        var notifyEvent = new NotifyEvent
+        {
+            Data = JsonSerializer.Serialize(command.BatchId)
+        };
+
+        notifyEvent.Tags.Add(new Tag
+        {
+            Name = "BrandId",
+            Value = command.BrandId.ToString()
+        });
+        notifyEvent.Tags.Add(new Tag
+        {
+            Name = "UserId",
+            Value = command.ModifyUserId.ToString()
+        });
+        notifyEvent.Tags.Add(new Tag
+        {
+            Name = "Feature",
+            Value = "BatchAdjustBalance"
+        });
+
+        await _messageSender.SendAsync(
+            "tgs.bo.notify",
+            notifyEvent.ToByteArray(),
+            cancellationToken).ConfigureAwait(false);
     }
 }
