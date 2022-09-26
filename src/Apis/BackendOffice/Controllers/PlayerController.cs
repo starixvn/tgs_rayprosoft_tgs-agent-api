@@ -546,6 +546,11 @@ public partial class PlayerController : BaseContextController
             case TransactionType.SystemAdjust:
             case TransactionType.TransferAdjust:
             case TransactionType.BonusAdjust:
+                if (string.IsNullOrEmpty(description))
+                {
+                    return string.Empty;
+                }
+
                 _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
                 return remark.GetString();
 
