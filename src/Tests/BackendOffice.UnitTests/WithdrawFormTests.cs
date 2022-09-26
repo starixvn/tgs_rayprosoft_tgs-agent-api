@@ -566,14 +566,15 @@ public class WithdrawFormTests
         var sut = new WithdrawFormQueryService(moqPaymentServiceClient.Object);
 
         var query = new WithdrawFormQuery(
-            Guid.NewGuid(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            BrandId: Guid.NewGuid(),
+            UserName: null,
+            ChannelName: null,
+            ThirdPartyOrderNo: null,
+            OrderNo: null,
+            FormId: null,
+            PaymentMethodId: null,
+            Status: null,
+            BrandPaymentIds: null,
             null,
             null,
             new PageableRequest());

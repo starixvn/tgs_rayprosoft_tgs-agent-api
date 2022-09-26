@@ -189,11 +189,14 @@ public class WithdrawController : BaseContextController
             request.PaymentMethodId,
             request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
                 ?? default(FlowState?).ToPaymentFlowState(),
+            request.BrandPaymentIds.Distinct() ?? Array.Empty<Guid>(),
             createOnRange,
             updateOnRange,
             paging);
 
-        var result = await queryService.GetAsync(query).ConfigureAwait(false);
+        var result = await queryService
+            .GetAsync(query, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
         var response = new PagingWithdrawFormViewModel()
         {
