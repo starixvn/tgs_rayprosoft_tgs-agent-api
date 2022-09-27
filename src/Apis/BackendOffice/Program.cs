@@ -12,6 +12,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.DataProtection.StackExchangeRedis;
 using Microsoft.AspNetCore.Http;
@@ -29,11 +30,13 @@ using Prometheus;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.MessageQueue;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Apis.BackendOffice.SignalR;
 using TGS.Apis.BackendOffice.Workers;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.BackOffice.Domain;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 SqlMapper.AddTypeMap(typeof(DateOnly), DbType.Date);
@@ -86,6 +89,8 @@ builder.Services
         .GetConnection()
         .GetDatabase())
     .AddBackOfficeCache()
+    .AddSingleton<MessageQueueNotifyEventSource>()
+    .AddSingleton<INotifyEventSource>(sp => sp.GetRequiredService<MessageQueueNotifyEventSource>())
     .AddMessageQueue()
     .AddNatsMessageQueue(config => config
         .ConfigQueueOptions((options, sp) =>
@@ -115,7 +120,8 @@ builder.Services
             "tgs.payment.withdraw.paid_ex")
         .AddHandler<BatchAdjustBalanceHandler>(
             "tgs.bo.background.adjust_batch",
-            "tgs.bo.background.adjust_batch"))
+            "tgs.bo.background.adjust_batch")
+        .AddHandler<BackgroundNotifyHandler>("tgs.bo.notify"))
     .AddNatsGlobPatternExchange("*");
 
 builder.Services

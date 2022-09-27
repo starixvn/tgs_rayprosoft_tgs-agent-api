@@ -16,26 +16,25 @@ internal class WithdrawFormQueryService : IGetService<WithdrawFormQuery, Withdra
     }
 
     public ValueTask<WithdrawForms> GetAsync(WithdrawFormQuery query, CancellationToken cancellationToken)
-        => _paymentServiceClient.QueryWithdrawFormsAsync(
-            new WithdrawFormQueryConditions
-            {
-                BrandId = query.BrandId,
-                ChannelName = query.ChannelName,
-                CreateOnRange = query.CreateOnRange,
-                PaymentMethodId = query.PaymentMethodId,
-                Status = query.Status,
-                ThirdPartyOrderNo = query.ThirdPartyOrderNo,
-                OrderNo = query.OrderNo,
-                FormId = query.FormId,
-                UpdateOnRange = query.UpdateOnRange,
-                UserName = query.UserName
-            },
-            new Tgs.Payment.Clients.Paging
-            {
-                IsDesc = query.Paging.IsDesc,
-                Page = query.Paging.Page,
-                Rows = query.Paging.Rows,
-                ShowAll = query.Paging.ShowAll,
-                SortBy = query.Paging.SortBy
-            });
+        => _paymentServiceClient.QueryWithdrawFormsAsync(new WithdrawFormQueryConditions
+        {
+            BrandId = query.BrandId,
+            ChannelName = query.ChannelName,
+            CreateOnRange = query.CreateOnRange,
+            PaymentMethodId = query.PaymentMethodId,
+            Status = query.Status,
+            BrandPaymentIds = query.BrandPaymentIds,
+            ThirdPartyOrderNo = query.ThirdPartyOrderNo,
+            OrderNo = query.OrderNo,
+            FormId = query.FormId,
+            UpdateOnRange = query.UpdateOnRange,
+            UserName = query.UserName
+        }, new Paging
+        {
+            IsDesc = query.Paging.IsDesc,
+            Page = query.Paging.Page,
+            Rows = query.Paging.Rows,
+            ShowAll = query.Paging.ShowAll,
+            SortBy = query.Paging.SortBy
+        }, cancellationToken);
 }

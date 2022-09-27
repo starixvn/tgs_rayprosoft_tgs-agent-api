@@ -26,7 +26,9 @@ public class BatchAdjustBalanceHandler : IMessageHandler
             request.BrandId,
             request.BatchId,
             Enum.Parse<PlayerAdjustmentTransactionType>(request.AdjustTransferType),
-            request.ModifyUserId);
+            request.IncludeInNetProfit,
+            request.ModifyUserId,
+            request.ModifyUserName);
 
         return _commandService.ExecuteAsync(command, cancellationToken);
     }

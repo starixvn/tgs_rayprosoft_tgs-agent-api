@@ -38,4 +38,7 @@ public record WithdrawFormRequest
 
     [FromQuery(Name = "eu")]
     public DateTimeOffset? EndUpdateOn { get; init; }
+
+    [FromQuery(Name = "bpid")]
+    public Guid[] BrandPaymentIds { get; init; } = Array.Empty<Guid>();
 }
