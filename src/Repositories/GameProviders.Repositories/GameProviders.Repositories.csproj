@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
+    <PackageReference Include="Tgs.Core" Version="1.0.10" />
+    <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
   </ItemGroup>
 
 </Project>

@@ -6,23 +6,21 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>TGS.Workers.Schedulers</AssemblyName>
     <RootNamespace>TGS.Workers.Schedulers</RootNamespace>
-    <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
-    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">scheduler</DockerfileTag>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.30" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.31" />
     <PackageReference Include="Hangfire.Console" Version="1.4.2" />
     <PackageReference Include="Hangfire.Dashboard.Management" Version="1.7.9" />
     <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.8.5" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
     <PackageReference Include="Tgs.ProfitRebate.Client" Version="1.0.18" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.25" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.26" />
     <PackageReference Include="Tgs.Report.Aggregate.Client" Version="0.0.8" />
   </ItemGroup>
 

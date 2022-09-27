@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.BackOffice.Application.Commands.PlayerIdentity;
 
@@ -20,15 +21,23 @@ public interface IBackOfficeRepository
     ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId);
 
     ValueTask ImportLocalizationStringsAsync(
-            string systemCode,
+        string systemCode,
         IEnumerable<LocalizationStringInfo> localizationStrings);
+
+    ValueTask InsertAdjustPlayerRecordAsync(AdjustPlayerRecordCreateInfo createInfo, string modifier, CancellationToken cancellationToken = default);
+
+    ValueTask InsertTransferBalanceFormAsync(
+        Guid createId,
+        TransferBalanceCreateInfo createInfo,
+        Guid modifier,
+        CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
     IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
 
     IAsyncEnumerable<PlayerIdentityAuthenticationInfo> QueryPlayerIdentityAuthenticationsAsync(
-            Guid brandId,
+        Guid brandId,
         PlayerIdentityReviewState? status,
         string username,
         DateTimeOffset? beginCreatedOn,

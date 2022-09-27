@@ -58,6 +58,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IAdjustTransferService, AdjustTransferService>();
         services.AddTransient<IPlayerBucketService, PlayerBucketService>();
         services.AddTransient<ITransactionService, TransactionService>();
+        services.AddTransient<IPlayerAdjustBalanceService, PlayerAdjustBalanceService>();
+        services.AddSerialNumberGenerator();
         services.AddTgsTransactionRepositoriesServices();
 
         services.AddSingleton<ISystemClock, DefaultSystemClock>();

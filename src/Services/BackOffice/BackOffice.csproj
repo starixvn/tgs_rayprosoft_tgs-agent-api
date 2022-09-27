@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\batch_adjust_template.xlsx" />
     <None Remove="Assets\deposit_forms_template.xlsx" />
     <None Remove="Assets\localization_template.xlsx" />
     <None Remove="Assets\withdraw_forms_template.xlsx" />
@@ -25,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\batch_adjust_template.xlsx" />
     <EmbeddedResource Include="Assets\withdraw_forms_template.xlsx" />
     <EmbeddedResource Include="Assets\deposit_forms_template.xlsx" />
     <EmbeddedResource Include="Assets\localization_template.xlsx" />
@@ -32,11 +34,9 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML.Report" Version="0.2.4" />
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.17.1" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.1.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.21.5" />
-    <PackageReference Include="Grpc.Tools" Version="2.47.0">
+    <PackageReference Include="Google.Protobuf" Version="3.21.6" />
+    <PackageReference Include="Grpc.Tools" Version="2.48.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -50,28 +50,29 @@
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Scrutor" Version="4.2.0" />
+    <PackageReference Include="System.Interactive.Async" Version="6.0.1" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Tgs.BrandCertificateClient" Version="0.0.20" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.2" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
+    <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
-    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.25" />    
-    <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />    
+    <PackageReference Include="Tgs.GameProviders.Pluggable.Client" Version="0.0.25" />
+    <PackageReference Include="Tgs.DomainSetting.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.MarketingReport.Client" Version="0.0.6-alpha" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.4.7" />
-    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.11" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.5.7" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.15" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.25" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.40" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.1.12" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.6.10" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.18" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.26" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.42" />
+    <PackageReference Include="Tgs.SerialNumberGenerator" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
+    <PackageReference Include="Tgs.VipLevelService.Client" Version="0.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\..\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj" />
     <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
-    <ProjectReference Include="..\Operations\Operations.csproj" />
     <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>

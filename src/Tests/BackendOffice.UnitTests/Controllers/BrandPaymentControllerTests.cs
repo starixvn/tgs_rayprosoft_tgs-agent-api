@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.BrandPayment;
@@ -33,7 +31,7 @@ public class BrandPaymentControllerTests : BaseTests
 
     private readonly Mock<IUploadService> _uploadServiceMock = new();
 
-    private BrandPaymentController _controller=default!;
+    private BrandPaymentController _controller = default!;
 
     [Test]
     public async Task Can_Create_Payment()
@@ -74,46 +72,6 @@ public class BrandPaymentControllerTests : BaseTests
             It.Is<CreateBrandPaymentRequest>(r => r.ChannelName == request.ChannelName),
             It.Is<PaymentTransferType>(x => x == PaymentTransferType.Deposit),
             It.Is<string>(r => r == Username)));
-    }
-
-    [TestCase(true)]
-    [TestCase(false)]
-    public async Task Can_Get_Payments(bool showAll)
-    {
-        var request = new GetBrandPaymentsRequest
-        {
-            PaymentStatus = SwitchStatus.Enabled,
-            Page = 1,
-            Rows = 10,
-            SortBy = "updatedOn",
-            OrderBy = SortOrder.Descending,
-            ShowAll = showAll
-        };
-
-        var list = CreatePaymentFixture()
-            .CreateMany<BrandPayment>(105)
-            .AsQueryable()
-            .BuildMock();
-
-        var (skip, take) = GetPage(request);
-        var orderedRoles = list.Where(x => x.PaymentStatus == SwitchStatus.Enabled)
-            .OrderByDescending(p => p.UpdatedOn);
-
-        var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
-
-        _paymentServiceMock.Setup(x => x.GetPaymentQueries(false))
-            .Returns(list);
-
-        var response = await _controller.GetBrandPaymentsAsync(request);
-        response.Valid.Should().BeTrue();
-
-        for (var i = 0; i < response.Items.Length; i++)
-        {
-            response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-            response.Items[i].ChannelName.Should().Be(expectedRoles[i].ChannelName);
-        }
-
-        _paymentServiceMock.Verify(p => p.GetPaymentQueries(false));
     }
 
     [Test]

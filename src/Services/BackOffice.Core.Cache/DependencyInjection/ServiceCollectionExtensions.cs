@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Tgs.MarketingReport.Client;
+﻿using Tgs.MarketingReport.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
 using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Cache;
 using TGS.Services.BackOffice.Domain;
 
-namespace TGS.Services.BackOffice.Cache.DependencyInjection;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

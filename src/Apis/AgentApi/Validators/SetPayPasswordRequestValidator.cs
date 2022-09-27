@@ -1,16 +1,18 @@
 ﻿using FluentValidation;
 using TGS.Apis.AgentApi.Models.Messages;
-using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Apis.AgentApi.Validators;
 
-public sealed class SetPayPasswordRequestValidator : BaseFluentValidator<SetPayPasswordRequest>
+public sealed class SetPayPasswordRequestValidator : AbstractValidator<SetPayPasswordRequest>
 {
     public SetPayPasswordRequestValidator()
     {
         RuleFor(x => x.Password)
             .NotEmpty()
             .Length(6, 20)
-            .WithName(x => GetBindPropertyName(x, nameof(x.Password)));
+            .WithName(x => x
+                .WithPropertyExpression(o => o.Password)
+                .GetBindPropertyName(nameof(x.Password)));
     }
 }

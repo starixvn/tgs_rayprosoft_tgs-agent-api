@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Services.BackOffice.Application.Queries.AgentHandlers;
+using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Tests.BackendOffice.UnitTests;
+
 public class AgentQueryTests
 {
     [Test]

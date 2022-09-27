@@ -2,17 +2,16 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Redis;
 using Tgs.Payment.Clients;
+using Tgs.Promotion.Clients;
+using Tgs.ServiceUtility;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using Tgs.ServiceUtility;
-using Tgs.Promotion.Clients;
-using Castle.Core.Logging;
-using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit;
 
@@ -79,11 +78,18 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                 return;
 
             if (command.ActualAmount != null)
+            {
+                var handlingFee = await _paymentServiceClient
+                    .CalculateHandlingFeeAsync(form.BrandPaymentId, command.ActualAmount.Value, cancellationToken)
+                    .ConfigureAwait(false);
+
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         form.Id,
-                        actualAmount: command.ActualAmount)
+                        actualAmount: command.ActualAmount,
+                        handlingFee: handlingFee)
                     .ConfigureAwait(false);
+            }
 
             if (command.Status == ReviewState.Approve)
             {
@@ -129,13 +135,21 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
+                var handlingFee = command.ActualAmount != null
+                    ? await _paymentServiceClient
+                        .CalculateHandlingFeeAsync(form.BrandPaymentId, command.ActualAmount.Value, cancellationToken)
+                        .ConfigureAwait(false)
+                    : await _paymentServiceClient
+                        .CalculateHandlingFeeAsync(form.BrandPaymentId, form.Amount, cancellationToken)
+                        .ConfigureAwait(false);
+
                 var promotionResponse = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
                         form.PromotionId,
                         player.PlayerCode,
                         player.DefaultWalletId,
-                        command.ActualAmount ?? form.Amount,
+                        (command.ActualAmount ?? form.Amount) - handlingFee,
                         command.Remark,
                         command.FormId,
                         string.IsNullOrEmpty(command.ReviewUserId) ? null : Guid.Parse(command.ReviewUserId)))
@@ -144,15 +158,19 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
                 await _paymentServiceClient
                     .SubmitDepositFormStatusAsync(
                         command.FormId,
-                        promotionPlayerId: promotionResponse.PromotionPlayerId)
+                        promotionPlayerId: promotionResponse.PromotionPlayerId,
+                        handlingFee: handlingFee)
                     .ConfigureAwait(false);
 
                 await _playerService
-                    .TopUpAccumulatedDepositAsync(form.PlayerCode, command.ActualAmount ?? form.Amount)
+                    .TopUpAccumulatedDepositAsync(
+                        form.PlayerCode,
+                        (command.ActualAmount ?? form.Amount) - handlingFee)
                     .ConfigureAwait(false);
 
                 if (form.PromotionId != null)
-                    await _promotionClient.DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
+                    _ = await _promotionClient
+                        .DepositJoinAsync(form.PromotionId.Value, form.PlayerCode)
                         .ConfigureAwait(false);
             }
             else
@@ -166,7 +184,7 @@ internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFo
         finally
         {
             if (isSaveSuccess)
-                await _redisDatabase
+                _ = await _redisDatabase
                     .KeyDeleteAsync(
                         $"Tgs:BucketDeposit:{command.FormId:N}")
                     .ConfigureAwait(false);
