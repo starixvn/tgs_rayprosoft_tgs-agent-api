@@ -546,8 +546,23 @@ public partial class PlayerController : BaseContextController
             case TransactionType.SystemAdjust:
             case TransactionType.TransferAdjust:
             case TransactionType.BonusAdjust:
-                _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
-                return remark.GetString();
+                {
+                    if (string.IsNullOrEmpty(description))
+                    {
+                        return string.Empty;
+                    }
+
+                    try
+                    {
+                        _ = JsonDocument.Parse(description).RootElement.TryGetProperty("Remark", out var remark);
+                        return remark.GetString();
+                    }
+                    catch (Exception)
+                    {
+                        return description;
+                    }
+                }
+
 
             case TransactionType.GameProviderFundOut:
             case TransactionType.GameProviderFundIn:
