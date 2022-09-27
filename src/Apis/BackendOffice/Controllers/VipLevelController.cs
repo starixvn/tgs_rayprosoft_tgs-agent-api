@@ -27,9 +27,27 @@ public class VipLevelController : BaseContextController
     [HttpPost]
     [Description("Create a vip level")]
     public async Task<MessageResponse> CreateAsync(
+        [FromServices] IQueryService<AllVipLevelsQuery, VipLevelInfo> queryService,
         [FromServices] IVipLevelServiceClient vipLevelServiceClient,
         [FromBody] CreateVipLevelRequest request)
     {
+        var lastVip = await queryService.QueryAsync(
+            new AllVipLevelsQuery(request.BrandId),
+            HttpContext.RequestAborted)
+            .OrderByDescending(vip => vip.Level)
+            .ThenByDescending(vip => vip.LevelUpAccumulateBetAmount)
+            .ThenByDescending(vip => vip.LevelUpAccumulateDeposit)
+            .FirstOrDefaultAsync(HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        if (lastVip != null
+            && (lastVip.LevelUpAccumulateBetAmount >= request.LevelUpAccumulateBetAmount
+                || lastVip.LevelUpAccumulateDeposit >= request.LevelUpAccumulateDeposit))
+            return CreateInvalidResponse<MessageResponse>(string.Format(
+                "Level up accumulate can't greater than next level (Bet Amount :{0}) (Deposit :{1})",
+                lastVip.LevelUpAccumulateBetAmount,
+                lastVip.LevelUpAccumulateDeposit));
+
         var createInfo = new VipLevelCreateInfo(
             request.Level,
             request.LevelUpAccumulateBetAmount,

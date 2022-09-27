@@ -563,6 +563,7 @@ public partial class PlayerController : BaseContextController
                     }
                 }
 
+
             case TransactionType.GameProviderFundOut:
             case TransactionType.GameProviderFundIn:
                 return description;
