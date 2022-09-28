@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
+using TGS.Services.BackOffice.Application.Queries.Withdraw;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 
@@ -41,4 +42,7 @@ public record WithdrawFormRequest
 
     [FromQuery(Name = "bpid")]
     public Guid[] BrandPaymentIds { get; init; } = Array.Empty<Guid>();
+
+    [FromQuery(Name = "userType")]
+    public UserType? UserType { get; init; }
 }

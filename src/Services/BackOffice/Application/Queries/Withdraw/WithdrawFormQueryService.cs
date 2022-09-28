@@ -28,7 +28,8 @@ internal class WithdrawFormQueryService : IGetService<WithdrawFormQuery, Withdra
             OrderNo = query.OrderNo,
             FormId = query.FormId,
             UpdateOnRange = query.UpdateOnRange,
-            UserName = query.UserName
+            UserName = query.UserName,
+            UserType = query.UserType == null ? null : (Tgs.Payment.Clients.UserType)query.UserType,
         }, new Paging
         {
             IsDesc = query.Paging.IsDesc,

@@ -130,7 +130,7 @@ public class WithdrawFormTests
         _ = fakeWalletExchangeService.Received(1)
             .RollbackWithdrawAsync(
                 Arg.Is(brandId),
-                Arg.Any<UserType>(),
+                Arg.Any<Tgs.Payment.Clients.UserType>(),
                 Arg.Any<string>(),
                 Arg.Is(1000M),
                 Arg.Any<string>(),
@@ -150,7 +150,7 @@ public class WithdrawFormTests
             moqAgentWalletRepository.Object);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Agent;
+        var userType = Tgs.Payment.Clients.UserType.Agent;
         var agentId = Guid.NewGuid();
         var transactionType = TransactionTypes.CancelWithdrawal;
         var amount = 1000M;
@@ -197,7 +197,7 @@ public class WithdrawFormTests
             moqAgentWalletRepository.Object);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Player;
+        var userType = Tgs.Payment.Clients.UserType.Player;
         var playerCode = "ThisIsPlayerCode";
         var amount = 1000M;
         var userId = Guid.NewGuid();
@@ -233,7 +233,7 @@ public class WithdrawFormTests
             fakeAgentWalletRepository);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Agent;
+        var userType = Tgs.Payment.Clients.UserType.Agent;
         var agentId = Guid.NewGuid();
         var transactionType = TransactionTypes.CancelWithdrawal;
         var amount = 1000M;
@@ -280,7 +280,7 @@ public class WithdrawFormTests
             fakeAgentWalletRepository);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Player;
+        var userType = Tgs.Payment.Clients.UserType.Player;
         var playerCode = "ThisIsPlayerCode";
         var amount = 1000M;
         var userId = Guid.NewGuid();
@@ -391,7 +391,7 @@ public class WithdrawFormTests
         _ = fakeWalletExchangeService.Received(1)
             .CommitWithdrawAsync(
                 Arg.Is(brandId),
-                Arg.Any<UserType>(),
+                Arg.Any<Tgs.Payment.Clients.UserType>(),
                 Arg.Any<string>(),
                 Arg.Is(1000M),
                 Arg.Is(1000M),
@@ -471,7 +471,7 @@ public class WithdrawFormTests
             fakeAgentWalletRepository);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Agent;
+        var userType = Tgs.Payment.Clients.UserType.Agent;
         var agentId = Guid.NewGuid();
         var transactionType = TransactionTypes.CancelWithdrawal;
         var amount = 1000M;
@@ -517,7 +517,7 @@ public class WithdrawFormTests
             fakeAgentWalletRepository);
 
         var brandId = Guid.NewGuid();
-        var userType = UserType.Player;
+        var userType = Tgs.Payment.Clients.UserType.Player;
         var playerCode = "ThisIsPlayerCode";
         var amount = 1000M;
         var userId = Guid.NewGuid();
@@ -575,9 +575,10 @@ public class WithdrawFormTests
             PaymentMethodId: null,
             Status: null,
             BrandPaymentIds: null,
-            null,
-            null,
-            new PageableRequest());
+            UserType: null,
+            CreateOnRange: null,
+            UpdateOnRange: null,
+            Paging: new PageableRequest());
 
         _ = await sut.GetAsync(query, default);
 
