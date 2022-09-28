@@ -15,6 +15,7 @@ public record WithdrawFormQuery(
     Guid? PaymentMethodId,
     IEnumerable<PaymentFlowState> Status,
     IEnumerable<Guid> BrandPaymentIds,
+    UserType? UserType,
     (DateTimeOffset Begin, DateTimeOffset End)? CreateOnRange,
     (DateTimeOffset Begin, DateTimeOffset End)? UpdateOnRange,
     PageableRequest Paging);

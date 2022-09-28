@@ -190,6 +190,7 @@ public class WithdrawController : BaseContextController
             request.Status?.SelectMany(s => s.ToPaymentFlowState()).Distinct()
                 ?? default(FlowState?).ToPaymentFlowState(),
             request.BrandPaymentIds.Distinct(),
+            request.UserType,
             createOnRange,
             updateOnRange,
             paging);
