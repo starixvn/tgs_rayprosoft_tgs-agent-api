@@ -2,14 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +28,6 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.PluggableServices.Extensions;
-using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.AgentApi;
 
@@ -102,7 +96,6 @@ public class Startup
             .AddOperations()
             .AddErrorMappers()
             .AddApiClient()
-            .AddPluggableServices()
             .AddReportClient((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();

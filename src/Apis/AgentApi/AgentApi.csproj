@@ -42,7 +42,6 @@
     <ProjectReference Include="..\..\Repositories\Agent.Repositories\Agent.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Agent.Core\Agent.Core.csproj" />
-    <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>
