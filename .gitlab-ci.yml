@@ -1,18 +1,23 @@
 variables:
-  MigrationImageName: pgtgs/migration
+  ImageName: pgtgs/agent-api
+  TgsSettingKey: agent-api
+  HelmTemplateFolderName: agent-api
 
 stages:
   - build
   - test
+  - publish
+  - deploy-dev
 
 build-code:
   stage: build
   script:
     - dotnet build -c $BuildConfiguration
   only:
-    - merge_requests
+    - merge_requests    
+    - main
   cache:
-    key: Tgs.$CI_PIPELINE_ID
+    key: Agent.$CI_PIPELINE_ID
     untracked: true
 
 unit-test:
@@ -20,14 +25,33 @@ unit-test:
   script:
     - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
-    - job: build-code
+    - build-code
   only:
     - merge_requests
+    - main
   cache:
-    key: Tgs.$CI_PIPELINE_ID
+    key: Agent.$CI_PIPELINE_ID
     untracked: true
     policy: pull
   artifacts:
     when: always
     reports:
-      junit: ./src/Tests/TestReports/*-TestReport.xml
+      junit: ./Tests/TestReports/*-TestReport.xml
+
+push-docker-image:
+  stage: publish
+  needs:
+    - build-code
+    - unit-test
+  only:
+    - main
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
+    - dotnet build "AgentApi/AgentApi.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - docker push $ImageName:$Tag
+  cache:
+    key: Agent.$CI_PIPELINE_ID
+    untracked: true
+    policy: pull
+
+
