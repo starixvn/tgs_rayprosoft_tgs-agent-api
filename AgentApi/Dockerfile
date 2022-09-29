@@ -8,16 +8,15 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG BuildConfiguration=Release
 WORKDIR /src
 COPY ["nuget.config", "."]
-COPY ["src/Apis/AgentApi/AgentApi.csproj", "src/Apis/AgentApi/"]
-COPY ["src/Repositories/Agent.Repositories/Agent.Repositories.csproj", "src/Repositories/Agent.Repositories/"]
-COPY ["src/Services/Agent.Core/Agent.Core.csproj", "src/Services/Agent.Core/"]
-COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
-COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
-COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
-COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
-RUN dotnet restore "src/Apis/AgentApi/AgentApi.csproj"
+COPY ["AgentApi/AgentApi.csproj", "AgentApi/"]
+COPY ["Agent.Repositories/Agent.Repositories.csproj", "Agent.Repositories/"]
+COPY ["Agent.Core/Agent.Core.csproj", "Agent.Core/"]
+COPY ["Operations/Operations.csproj", "Operations/"]
+COPY ["Wallet.Core/Wallet.Core.csproj", "Wallet.Core/"]
+COPY ["Wallet.Repositories/Wallet.Repositories.csproj", "Wallet.Repositories/"]
+RUN dotnet restore "AgentApi/AgentApi.csproj"
 COPY . .
-WORKDIR "/src/src/Apis/AgentApi"
+WORKDIR "/src/AgentApi"
 RUN dotnet build "AgentApi.csproj" -c $BuildConfiguration -o /app/build
 
 FROM build AS publish
