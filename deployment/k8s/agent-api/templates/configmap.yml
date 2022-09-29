@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "agent-api.fullname" . }}
+  namespace: {{ .Values.namespace }}
+data:
+  appsettings.json: |
+    {
+      "Agent": {
+        "ValidateCodeBaseUrl": "http://validatecode-api",
+        "PaymentServiceBaseUrl": "http://payment-api",
+        "BrandCertificateBaseUrl": "http://brand-cert-api"
+      },
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
+      },
+      "EmailSetting": {
+        "FromMail": "verifyme@163.com",
+        "FromName": "TGS",
+        "SmtpServer": "smtp.163.com",
+        "Port": 25,
+        "Password": "IAUSMDLMDZWJECBP"
+      },
+      "AllowedHosts": "*",
+      "ConnectionStrings": {
+        "Tgs": "{{ .Values.connectionStrings.tgs }}",
+        "RedisConfigurationString": "{{ .Values.connectionStrings.redis }}"
+      },
+      "NatsSetting": {
+        "Urls": "{{ .Values.nats.urls }}",
+        "ConnectTimeoutMs": 2000,
+        "PingInterval": 5000,
+        "PingMaxOutStanding": 3,
+        "SubscriptionBatchSize": 128
+      },
+      "CorsDomain": {
+        "Urls": [ "http://localhost", "https://localhost" ]
+      },
+      "Report": {
+        "Url": "http://report-api"
+      },
+      "Promotion": {
+        "Url": "http://promotion-api"
+      },
+      "Email": {
+        "Url": "{{ .Values.mail.url }}"
+      },
+      "RequestLocalization": {
+        "DefaultRequestCulture": "en-US",
+        "ApplyCurrentCultureToResponseHeaders": true,
+        "SupportedCultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ],
+        "SupportedUICultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ]
+      }
+    }
+  monitor.settings.json: |
+    {
+      "Metrics": {
+        "MetricCount": "1"
+      },
+      "Logging":{
+        "Console": {
+          "FormatterName": "json"
+        },
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft": "Warning",
+          "Microsoft.Diagnostics": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
+      }
+    }
