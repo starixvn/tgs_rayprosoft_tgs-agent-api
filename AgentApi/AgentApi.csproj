@@ -39,9 +39,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Repositories\Agent.Repositories\Agent.Repositories.csproj" />
-    <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
-    <ProjectReference Include="..\..\Services\Agent.Core\Agent.Core.csproj" />
+    <ProjectReference Include="..\Agent.Repositories\Agent.Repositories.csproj" />
+    <ProjectReference Include="..\Wallet.Repositories\Wallet.Repositories.csproj" />
   </ItemGroup>
 
   <ItemGroup>

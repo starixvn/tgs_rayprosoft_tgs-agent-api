@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Services\Wallet.Core\Wallet.Core.csproj" />
+    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
 </Project>
