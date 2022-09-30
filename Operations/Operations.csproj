@@ -27,4 +27,8 @@
     <PackageReference Include="Tgs.Logging" Version="0.0.19" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CodeMappers\" />
+  </ItemGroup>
+
 </Project>

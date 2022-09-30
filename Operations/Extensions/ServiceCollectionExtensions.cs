@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
@@ -18,36 +17,16 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddOperations(this IServiceCollection services)
     {
-        #region Code Mappers
-
-        services.AddScoped<IGameProviderCurrencyCodeMapper, GameProviderCurrencyCodeMapper>();
-        services.AddScoped<IGameProviderLanguageCodeMapper, GameProviderLanguageCodeMapper>();
-        services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
-        services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
-
-        #endregion Code Mappers
-
         #region Queries
 
         services.AddFactory<IBrandQueries, BrandQueries>();
-        services.AddFactory<IGameProviderQueries, GameProviderQueries>();
         services.AddFactory<IAgentQueries, AgentQueries>();
-        services.AddFactory<IPlayerQueries, PlayerQueries>();
         services.AddFactory<IWalletQueries, WalletQueries>();
-        services.AddFactory<ISettingQueries, SettingQueries>();
-        services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
-        services.AddFactory<IGameQueries, GameQueries>();
-
-        services.AddFactory<IGameActionQueries, GameActionQueries>();
-        services.AddFactory<IRoundQueries, RoundQueries>();
-
-        services.AddFactory<IBetLimitQueries, BetLimitQueries>();
 
         #endregion Queries
 
         #region Commands
 
-        services.AddFactory<IPlayerCommands, PlayerCommands>();
         services.AddFactory<IAgentCommands, AgentCommands>();
 
         #endregion Commands
@@ -55,19 +34,12 @@ public static class ServiceCollectionExtensions
         #region Operations
 
         services.AddScoped<IBrandOperations, BrandOperations>();
-        services.AddScoped<IGameProviderOperations, GameProviderOperations>();
-        services.AddScoped<IPlayerOperations, PlayerOperations>();
-        services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
-        services.AddScoped<ISettingOperations, SettingOperations>();
-        services.AddScoped<ILocalizationOperations, LocalizationOperations>();
         services.AddScoped<IAgentOperations, AgentOperations>();
 
         #endregion Operations
 
         services.AddSingleton<IValidStatus<Status>, ValidStatus>();
         services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();
-
-        services.AddSingleton<IAmountValidator, AmountValidator>();
 
         services.AddScoped<IStatusValidator, StatusValidator>();
 
