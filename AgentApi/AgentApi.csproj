@@ -4,7 +4,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>4740bb64-dc6f-4226-804a-68294f80c9b6</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\..</DockerfileContext>
     <AssemblyName>TGS.Apis.AgentApi</AssemblyName>
     <RootNamespace>TGS.Apis.AgentApi</RootNamespace>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
