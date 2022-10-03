@@ -26,12 +26,7 @@ data:
         "Password": "IAUSMDLMDZWJECBP"
       },
       "AllowedHosts": "*",
-      "ConnectionStrings": {
-        "Tgs": "{{ .Values.connectionStrings.tgs }}",
-        "RedisConfigurationString": "{{ .Values.connectionStrings.redis }}"
-      },
       "NatsSetting": {
-        "Urls": "{{ .Values.nats.urls }}",
         "ConnectTimeoutMs": 2000,
         "PingInterval": 5000,
         "PingMaxOutStanding": 3,
@@ -47,7 +42,7 @@ data:
         "Url": "http://promotion-api"
       },
       "Email": {
-        "Url": "{{ .Values.mail.url }}"
+        "Url": "https://email.srvptt.com"
       },
       "RequestLocalization": {
         "DefaultRequestCulture": "en-US",

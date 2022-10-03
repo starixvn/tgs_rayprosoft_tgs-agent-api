@@ -30,16 +30,6 @@ podAnnotations:
   prometheus.io/port: "52325"
   prometheus.io/scrape: "true"
 
-connectionStrings:
-  tgs: Server=pgpool;Port=9999;Database=tgs;User Id=rpdev;Password=abcd1234
-  redis: redis-master,abortConnect=false,connectTimeout=3000,password=1qaz2wsx
-
-nats:
-  urls: nats://nats-client:4222
-
-mail:
-  url: https://email.srvptt.com
-
 podSecurityContext: {}
   # fsGroup: 2000
 
