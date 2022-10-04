@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "agent-api.fullname" . }}
-  namespace: {{ .Values.namespace }}
   labels:
     type: backend
     {{- include "agent-api.labels" . | nindent 4 }}
@@ -43,7 +42,7 @@ spec:
               protocol: TCP
           env:
             - name: OTEL_SERVICE_NAME
-              value: Agent-Api({{ .Values.namespace }})
+              value: Agent-Api({{ .Release.namespace }})
             - name: NODE_IP
               valueFrom:
                 fieldRef:

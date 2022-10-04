@@ -14,7 +14,6 @@ imagePullSecrets:
   - name: dockerhub
 nameOverride: "agent-api"
 fullnameOverride: "agent-api"
-namespace: dev
 
 serviceAccount:
   # Specifies whether a service account should be created
