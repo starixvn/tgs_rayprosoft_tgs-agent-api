@@ -42,7 +42,7 @@ spec:
               protocol: TCP
           env:
             - name: OTEL_SERVICE_NAME
-              value: Agent-Api({{ .Release.namespace }})
+              value: Agent-Api({{ .Release.Namespace }})
             - name: NODE_IP
               valueFrom:
                 fieldRef:
