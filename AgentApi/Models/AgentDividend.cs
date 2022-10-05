@@ -5,9 +5,6 @@ namespace TGS.Apis.AgentApi.Models;
 public record AgentDividend(
     Guid Id,
     string Username,
-    decimal DepositAmount,
-    decimal WithdrawalAmount,
-    decimal CompanyAdjustAmount,
     decimal AgentAdjustAmount,
     decimal BonusAdjustAmount,
     decimal BonusAmount,
@@ -18,4 +15,7 @@ public record AgentDividend(
     decimal NetProfit,
     decimal AgentDividendAmount,
     decimal FromPlayerAgentDividendAmount,
-    decimal FromTeamAgentDividendAmount);
+    decimal FromTeamAgentDividendAmount,
+    decimal AgentDividendPercentage,
+    decimal? AgentCoveredBonus,
+    decimal? AgentCoveredBonusAdjust);

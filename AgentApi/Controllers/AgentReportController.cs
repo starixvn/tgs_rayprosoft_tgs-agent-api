@@ -288,9 +288,6 @@ public class AgentReportController : ControllerBase
         var items = response.Items.Select(x => new AgentDividend(
             x.Id,
             x.Username,
-            x.DepositAmount,
-            x.WithdrawalAmount,
-            x.CompanyAdjustAmount,
             x.AgentAdjustAmount,
             x.BonusAdjustAmount,
             x.BonusAmount,
@@ -301,12 +298,12 @@ public class AgentReportController : ControllerBase
             x.NetProfit,
             x.AgentDividendAmount,
             x.FromPlayerAgentDividendAmount,
-            x.FromTeamAgentDividendAmount)).Skip(page * pageSize).Take(pageSize).ToArray();
+            x.FromTeamAgentDividendAmount,
+            x.AgentDividendPercentage,
+            x.AgentCoveredBonus,
+            x.AgentCoveredBonusAdjust)).Skip(page * pageSize).Take(pageSize).ToArray();
 
         var total = new AgentDividendTotal(
-            response.Items.Sum(x => x.DepositAmount),
-            response.Items.Sum(x => x.WithdrawalAmount),
-            response.Items.Sum(x => x.CompanyAdjustAmount),
             response.Items.Sum(x => x.BonusAdjustAmount),
             response.Items.Sum(x => x.AgentAdjustAmount),
             response.Items.Sum(x => x.BonusAmount),
@@ -317,7 +314,9 @@ public class AgentReportController : ControllerBase
             response.Items.Sum(x => x.NetProfit),
             response.Items.Sum(x => x.AgentDividendAmount),
             response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
-            response.Items.Sum(x => x.FromTeamAgentDividendAmount));
+            response.Items.Sum(x => x.FromTeamAgentDividendAmount),
+            response.Items.Sum(x => x.AgentCoveredBonus) ?? 0M,
+            response.Items.Sum(x => x.AgentCoveredBonusAdjust) ?? 0M);
 
         return new()
         {
