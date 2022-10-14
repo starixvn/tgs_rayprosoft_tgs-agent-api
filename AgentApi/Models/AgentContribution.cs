@@ -11,5 +11,6 @@ public record AgentContribution(
     decimal BonusAmount,
     decimal BetAmount,
     decimal ValidBetAmount,
+    decimal Turnover,
     decimal WinLossAmount,
     decimal NetProfit);
