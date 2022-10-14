@@ -220,6 +220,7 @@ public class AgentReportController : ControllerBase
             x.BonusAmount,
             x.BetAmount,
             x.ValidBetAmount,
+            x.Turnover,
             x.WinLossAmount,
             x.NetProfit)).Skip(page * pageSize).Take(pageSize).ToArray();
 
