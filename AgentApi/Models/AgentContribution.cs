@@ -4,6 +4,7 @@ public record AgentContribution(
     string Username,
     short Type,
     decimal DepositAmount,
+    decimal DepositHandlingFee,
     decimal WithdrawalAmount,
     decimal CompanyAdjustAmount,
     decimal AgentAdjustAmount,

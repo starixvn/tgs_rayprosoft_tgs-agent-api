@@ -183,6 +183,7 @@ public class AgentReportController : ControllerBase
 
         var key =
             $"agentapi:contributions:{brandId}:{agentTokenData.AgentId}:{request.From.ToUnixTimeMilliseconds()}:{request.To.ToUnixTimeMilliseconds()}";
+
         if (!_memoryCache.TryGetValue(key, out PagedResponse<AgentContributionModel> response))
         {
             var contributionRequest = new GetAgentContributionsRequest
@@ -213,6 +214,7 @@ public class AgentReportController : ControllerBase
             x.Username,
             x.Type,
             x.DepositAmount,
+            x.DepositHandlingFee,
             x.WithdrawalAmount,
             x.CompanyAdjustAmount,
             x.AgentAdjustAmount,
@@ -226,6 +228,7 @@ public class AgentReportController : ControllerBase
 
         var total = new AgentContributionTotal(
             response.Items.Sum(x => x.DepositAmount),
+            response.Items.Sum(x => x.DepositHandlingFee),
             response.Items.Sum(x => x.WithdrawalAmount),
             response.Items.Sum(x => x.CompanyAdjustAmount),
             response.Items.Sum(x => x.BonusAdjustAmount),
