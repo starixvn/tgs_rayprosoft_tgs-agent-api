@@ -2,6 +2,7 @@
 
 public record AgentContributionTotal(
     decimal DepositAmount,
+    decimal DepositHandlingFee,
     decimal WithdrawalAmount,
     decimal CompanyAdjustAmount,
     decimal BonusAdjustAmount,
