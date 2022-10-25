@@ -37,7 +37,7 @@ public class AgentPasswordTests
             "0900123456");
 
         fakeAgentRepository.GetAgentsByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>())
-            .Returns(Array.Empty<AgentInfo>().ToAsyncEnumerable());
+            .Returns(Array.Empty<AgentContactInfo>().ToAsyncEnumerable());
 
         Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.AgentNotFoundException>(
             async () => await sut.GetAsync(command));
@@ -61,7 +61,7 @@ public class AgentPasswordTests
             "none@test.com");
 
         fakeAgentRepository.GetAgentsByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
-            .Returns(Array.Empty<AgentInfo>().ToAsyncEnumerable());
+            .Returns(Array.Empty<AgentContactInfo>().ToAsyncEnumerable());
 
         Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.AgentNotFoundException>(
             async () => await sut.GetAsync(command));
@@ -86,27 +86,14 @@ public class AgentPasswordTests
 
         fakeAgentRepository.GetAgentsByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
             .Returns(new[] {
-                new AgentInfo(
+                new AgentContactInfo(
                     Guid.NewGuid(),
                     "agent",
                     "Agent1",
                     null,
-                    Guid.NewGuid(),
                     null,
                     null,
-                    null,
-                    "test",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0M,
-                    0)
+                    null)
             }.ToAsyncEnumerable());
 
         fakeValidateCodeGenerator.GenerateCode()
@@ -152,27 +139,14 @@ public class AgentPasswordTests
 
         fakeAgentRepository.GetAgentsByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>())
             .Returns(new[] {
-                new AgentInfo(
+                new AgentContactInfo(
                     Guid.NewGuid(),
                     "agent",
                     "Agent1",
                     null,
-                    Guid.NewGuid(),
                     null,
                     null,
-                    null,
-                    "test",
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    Array.Empty<byte>(),
-                    null,
-                    DateTimeOffset.Now,
-                    AgentStatus.Enabled,
-                    AgentType.Cash,
-                    AgentLevelType.Agent,
-                    0M,
-                    0)
+                    null)
             }.ToAsyncEnumerable());
 
         fakeValidateCodeGenerator.GenerateCode()

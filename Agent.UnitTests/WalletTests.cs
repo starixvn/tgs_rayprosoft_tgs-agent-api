@@ -47,6 +47,7 @@ public class WalletTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0)));
 
         var expected = new BalanceInfo(10000M).ToExpectedObject();

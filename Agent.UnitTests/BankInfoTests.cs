@@ -58,6 +58,7 @@ public class BankInfoTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0));
 
         await sut.ExecuteAsync(command);

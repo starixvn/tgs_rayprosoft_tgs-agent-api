@@ -23,4 +23,5 @@ public record AgentInfo(
     AgentType Type,
     AgentLevelType AgentLevelType,
     decimal DividendPercentage,
-    int PlayerNumber);
+    int PlayerNumber,
+    decimal AccumulatedProfitSharing);

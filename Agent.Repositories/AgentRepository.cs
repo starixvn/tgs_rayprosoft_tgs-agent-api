@@ -23,6 +23,10 @@ internal class AgentRepository : IAgentRepository
             .FindAsync(id)
             .ConfigureAwait(false);
 
+        var dividend = await _tgsRepository.AgentDividends
+            .Where(x => x.AgentId == id && x.SentOn == null)
+            .SumAsync(x => x.AgentDividendAmount).ConfigureAwait(false);
+
         if (agent == null)
             return null;
 
@@ -48,7 +52,8 @@ internal class AgentRepository : IAgentRepository
                 agent.Type,
                 agent.LevelType,
                 agent.DividendPercentage,
-                playerNumber);
+                playerNumber,
+                dividend);
     }
 
     public IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId)
@@ -57,62 +62,36 @@ internal class AgentRepository : IAgentRepository
             .Select(ad => ad.DomainName)
             .ToAsyncEnumerable();
 
-    public IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email)
+    public IAsyncEnumerable<AgentContactInfo> GetAgentsByEmailAsync(Guid brandId, string email)
     {
         var query = from agent in _tgsRepository.Agents.AsQueryable()
                     where agent.BrandId == brandId
                           && agent.Email.ToLower() == email.ToLower()
-                    select new AgentInfo(
+                    select new AgentContactInfo(
                         agent.Id,
                         agent.Username,
                         agent.RealName,
                         agent.Phone,
-                        agent.DefaultWalletId,
                         agent.Email,
                         agent.QQ,
-                        agent.Wechat,
-                        agent.InvitationCode,
-                        agent.WithdrawPassword,
-                        agent.WithdrawSalt,
-                        agent.Password,
-                        agent.Salt,
-                        agent.ParentAgentId,
-                        agent.RegisteredOn,
-                        agent.Status,
-                        agent.Type,
-                        agent.LevelType,
-                        agent.DividendPercentage,
-                        agent.Players.Count(p => p.AgentId == agent.Id));
+                        agent.Wechat);
 
         return query.ToAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone)
+    public IAsyncEnumerable<AgentContactInfo> GetAgentsByPhoneAsync(Guid brandId, string phone)
     {
         var query = from agent in _tgsRepository.Agents.AsQueryable()
                     where agent.BrandId == brandId
                           && agent.Phone.ToLower() == phone.ToLower()
-                    select new AgentInfo(
+                    select new AgentContactInfo(
                         agent.Id,
                         agent.Username,
                         agent.RealName,
                         agent.Phone,
-                        agent.DefaultWalletId,
                         agent.Email,
                         agent.QQ,
-                        agent.Wechat,
-                        agent.InvitationCode,
-                        agent.WithdrawPassword,
-                        agent.WithdrawSalt,
-                        agent.Password,
-                        agent.Salt,
-                        agent.ParentAgentId,
-                        agent.RegisteredOn,
-                        agent.Status,
-                        agent.Type,
-                        agent.LevelType,
-                        agent.DividendPercentage,
-                        agent.Players.Count(p => p.AgentId == agent.Id));
+                        agent.Wechat);
 
         return query.ToAsyncEnumerable();
     }

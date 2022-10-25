@@ -54,6 +54,7 @@ public class PayPasswordTests
             AgentType.Cash,
             AgentLevelType.Agent,
             0M,
+            0,
             0);
 
         var newPassword = "newPassword";
@@ -153,6 +154,7 @@ public class PayPasswordTests
             AgentType.Cash,
             AgentLevelType.Agent,
             0M,
+            0,
             0);
 
         var newPassword = "newPassword";
@@ -215,6 +217,7 @@ public class PayPasswordTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0));
 
         Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
@@ -256,6 +259,7 @@ public class PayPasswordTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0));
 
         await sut.ExecuteAsync(command);
@@ -301,6 +305,7 @@ public class PayPasswordTests
             AgentType.Cash,
             AgentLevelType.Agent,
             0M,
+            0,
             0);
 
         var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
@@ -357,6 +362,7 @@ public class PayPasswordTests
             AgentType.Cash,
             AgentLevelType.Agent,
             0M,
+            0,
             0);
 
         fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
