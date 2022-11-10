@@ -89,10 +89,6 @@ builder.Services
     {
         config.GetSection("Agent").Bind(options);
     })
-    .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
-    {
-        config.GetSection("EmailSetting").Bind(options);
-    })
     .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
         .ConfigureHttpClient((sp, http) =>
         {
