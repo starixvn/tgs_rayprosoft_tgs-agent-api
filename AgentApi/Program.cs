@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,21 +15,20 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using TGS.Apis.AgentApi.Attributes;
-using TGS.Apis.AgentApi.Filters.Swaggers;
-using TGS.Apis.AgentApi.Filters;
-using TGS.Apis.AgentApi.Models;
 using TGS.Apis.AgentApi;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Filters;
+using TGS.Apis.AgentApi.Filters.Swaggers;
+using TGS.Apis.AgentApi.Models;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
-using Prometheus;
-using TGS.Core.Infrastructures.Log;
-using TGS.Apis.AgentApi.Extensions;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -68,6 +68,16 @@ builder.Services
         var config = sp.GetRequiredService<IConfiguration>();
 
         options.BaseUrl = config.GetValue<Uri>("Report:Url");
+    })
+    .AddBrandCertificateClient((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        options.BrandCertificateBaseUrl = config.GetValue<Uri>("Agent:BrandCertificateBaseUrl");
+    })
+    .AddBrandServiceClient((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        options.BrandCertificateBaseUrl = config.GetValue<Uri>("Agent:BrandCertificateBaseUrl");
     })
     .AddTransactions();
 
@@ -114,6 +124,7 @@ builder.Services
     .AddRouting(options => options.LowercaseUrls = true)
     .AddControllers(options =>
     {
+        options.AddBrandCertificateFilters();
         _ = options.Filters.Add<CheckAgentEnabledFilter>();
         _ = options.Filters.Add<ValidateModelFilter>();
         _ = options.Filters.Add<TgsResponseWrapperAttribute>();
@@ -147,29 +158,29 @@ builder.Services.AddCors(options =>
     var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>();
 
     options.AddDefaultPolicy(
-        builder =>
+        corsPolicyBuilder =>
         {
-            builder.WithOrigins(corsDomain.Urls)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetIsOriginAllowed(_ => true);
+            _ = corsPolicyBuilder.WithOrigins(corsDomain.Urls)
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                 .SetIsOriginAllowed(_ => true);
         });
 });
 
 builder.Services
     .AddOptions<OtlpExporterOptions>()
-    .Configure<IConfiguration>((options, conifg) =>
+    .Configure<IConfiguration>((options, config) =>
     {
-        var nodeIp = conifg.GetValue<string>("NODE_IP");
+        var nodeIp = config.GetValue<string>("NODE_IP");
 
         if (!string.IsNullOrWhiteSpace(nodeIp))
             options.Endpoint = new Uri($"http://{nodeIp}:4317");
 
-        conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+        config.GetSection("Opentelemetry:Tracing").Bind(options);
     })
     .Services
     .AddOpenTelemetryTracing(
-        builder => builder
+        tracerProviderBuilder => tracerProviderBuilder
             .SetResourceBuilder(ResourceBuilder.CreateDefault()
                 .AddEnvironmentVariableDetector())
             .AddSource("Tgs.*")
@@ -198,55 +209,40 @@ builder.Services
     .AddInterceptionService()
     .AddServiceUtiltiyInterceptors();
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc(
-        "Normal",
-        new OpenApiInfo
-        {
-            Title = "TGS Agent API",
-            Version = "Normal"
-        });
-    c.SwaggerDoc(
-        "HK28",
-        new OpenApiInfo
-        {
-            Title = "Tgs Agent API - HK28",
-            Version = "HK28"
-        });
-
-    var securityScheme = new OpenApiSecurityScheme
+builder.Services
+    .AddSwaggerGen(c =>
     {
-        Name = "Api Authorization",
-        Description = "authorized jwt token, get from api/auth/jwt",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer",
-        Reference = new OpenApiReference
+        c.SwaggerDoc(
+            "Normal",
+            new OpenApiInfo
+            {
+                Title = "TGS Agent API",
+                Version = "Normal"
+            });
+        c.SwaggerDoc(
+            "HK28",
+            new OpenApiInfo
+            {
+                Title = "Tgs Agent API - HK28",
+                Version = "HK28"
+            });
+
+        c.DocInclusionPredicate((groupName, desc)
+            => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
+
+        c.AddBrandCertificateSecurityDefinition();
+        c.OperationFilter<SwaggerHeaderFilter>();
+        c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+        c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+
+        var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+        if (File.Exists(path))
         {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
+            c.IncludeXmlComments(path);
         }
-    };
-
-    c.DocInclusionPredicate((groupName, desc)
-        => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
-
-    c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-
-    c.OperationFilter<SwaggerHeaderFilter>();
-    c.SchemaFilter<SwaggerEnumDescriptionFilter>();
-    c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
-
-    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var path = Path.Combine(AppContext.BaseDirectory, xml);
-
-    if (File.Exists(path))
-    {
-        c.IncludeXmlComments(path);
-    }
-});
+    });
 
 builder.Services.AddHealthChecks();
 
@@ -267,9 +263,11 @@ app.UseRequestLocalization(options =>
 });
 
 app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
 app.UseRouting();
 app.UseCors();
-app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+app.UseVerifyBrandTokenMiddlewares(Consts.DefaultBypassRouting);
 
 app.MapControllers();
 
