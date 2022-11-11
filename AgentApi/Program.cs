@@ -1,45 +1,285 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using TGS.Apis.AgentApi;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Filters;
+using TGS.Apis.AgentApi.Filters.Swaggers;
+using TGS.Apis.AgentApi.Models;
+using TGS.Core.DataServices.Tgs.Extensions;
+using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.Transactions;
+using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.Operations.Extensions;
 
-namespace TGS.Apis.AgentApi;
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .AddJsonFile("/config/appsettings.json", true)
+    .AddEnvironmentVariables();
+
+builder.Logging
+    .AddTgsLog()
+    .AddOpenTelemetry(options =>
+    {
+        options.IncludeFormattedMessage = true;
+        options.ParseStateValues = true;
+        _ = options.AddFluentdForwardExporter(fluentOptions =>
+        {
+            var nodeIp = builder.Configuration.GetValue<string>("NODE_IP");
+            fluentOptions.Host = nodeIp;
+            fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+            fluentOptions.UseMessagePack();
+        });
+    });
+
+builder.Services
+    .AddTgsRepository(builder.Configuration, "Tgs");
+
+builder.Services
+    .AddWebApiServices()
+    .AddSystemJsonSerializer()
+    .AddSecurity()
+    .AddOperations()
+    .AddErrorMappers()
+    .AddApiClient()
+    .AddReportClient((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+
+        options.BaseUrl = config.GetValue<Uri>("Report:Url");
+    })
+    .AddBrandCertificateClient((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        options.BrandCertificateBaseUrl = config.GetValue<Uri>("Agent:BrandCertificateBaseUrl");
+    })
+    .AddBrandServiceClient((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        options.BrandCertificateBaseUrl = config.GetValue<Uri>("Agent:BrandCertificateBaseUrl");
+    })
+    .AddTransactions();
+
+builder.Services
+    .AddErrorMapper()
+    .AddErrorMapper<ApiErrorMapper>();
+
+builder.Services
+    .AddRedis((options, sp) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+
+        options.ConnectionString = config.GetConnectionString("RedisConfigurationString");
+    });
+
+builder.Services
+    .AddAgentApiCore()
+    .ConfigureAgentOptions<IConfiguration>((options, config) =>
+    {
+        config.GetSection("Agent").Bind(options);
+    })
+    .AddPaymentServiceClient(httpClientBuilder => httpClientBuilder
+        .ConfigureHttpClient((sp, http) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+
+            http.BaseAddress = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
+        }))
+    .ConfigureWallet(config =>
+    {
+        config.AddTgsAgentWalletRepositories();
+    })
+    .AddTgsAgentRepository();
+
+builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 {
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((_, builder) =>
+    var url = builder.Configuration.GetSection("Email:Url");
+    c.BaseAddress = new Uri(url.Value);
+});
+
+builder.Services.AddMemoryCache();
+
+builder.Services
+    .AddRouting(options => options.LowercaseUrls = true)
+    .AddControllers(options =>
+    {
+        options.AddBrandCertificateFilters();
+        _ = options.Filters.Add<CheckAgentEnabledFilter>();
+        _ = options.Filters.Add<ValidateModelFilter>();
+        _ = options.Filters.Add<TgsResponseWrapperAttribute>();
+    })
+    .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
+
+builder.Services
+    .AddFluentValidationAutoValidation(c =>
+        c.DisableDataAnnotationsValidation = true)
+    .AddFluentValidationClientsideAdapters()
+    .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
+
+builder.Services
+    .AddMessageQueue()
+    .AddNatsMessageQueue(natsConfig =>
+    {
+        _ = natsConfig
+               .ConfigQueueOptions((options, sp) =>
+               {
+                   var config = sp.GetRequiredService<IConfiguration>();
+
+                   options.Url = config.GetValue<string>("NatsSetting:Urls");
+               });
+    });
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+
+builder.Services.AddCors(options =>
+{
+    var corsDomain = builder.Configuration.GetSection("CorsDomain").Get<CorsDomain>();
+
+    options.AddDefaultPolicy(
+        corsPolicyBuilder =>
+        {
+            _ = corsPolicyBuilder.WithOrigins(corsDomain.Urls)
+                 .AllowAnyHeader()
+                 .AllowAnyMethod()
+                 .SetIsOriginAllowed(_ => true);
+        });
+});
+
+builder.Services
+    .AddOptions<OtlpExporterOptions>()
+    .Configure<IConfiguration>((options, config) =>
+    {
+        var nodeIp = config.GetValue<string>("NODE_IP");
+
+        if (!string.IsNullOrWhiteSpace(nodeIp))
+            options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+        config.GetSection("Opentelemetry:Tracing").Bind(options);
+    })
+    .Services
+    .AddOpenTelemetryTracing(
+        tracerProviderBuilder => tracerProviderBuilder
+            .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                .AddEnvironmentVariableDetector())
+            .AddSource("Tgs.*")
+            .AddSource("TGS.*")
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation(options =>
             {
-                builder.AddJsonFile("/config/appsettings.json", true).AddEnvironmentVariables();
+                options.SetDbStatementForText = true;
             })
-            .ConfigureLogging((ctx, builder) =>
+            .AddProfileViewExporter(_ => { })
+            .AddOtlpExporter())
+    .Configure<AspNetCoreInstrumentationOptions>(options =>
+    {
+        options.Filter = httpContext =>
+        {
+            return !httpContext.Request.Path.HasValue
+                || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                && !httpContext.Request.Path.StartsWithSegments("/health")
+                && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                && !new[] { "html", "ico", "png", "jpg" }.Any(
+                    ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+        };
+    })
+    .AddProfileViewer()
+    .AddInterceptionService()
+    .AddServiceUtiltiyInterceptors();
+
+builder.Services
+    .AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc(
+            "Normal",
+            new OpenApiInfo
             {
-                builder
-                    .AddTgsLog()
-                    .AddOpenTelemetry(options =>
-                    {
-                        options.IncludeFormattedMessage = true;
-                        options.ParseStateValues = true;
-                        _ = options.AddFluentdForwardExporter(fluentOptions =>
-                        {
-                            var nodeIp = ctx.Configuration.GetValue<string>("NODE_IP");
-                            fluentOptions.Host = nodeIp;
-                            fluentOptions.Tag = ctx.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
-                            fluentOptions.UseMessagePack();
-                        });
-                    });
-            })
-            .ConfigureWebHostDefaults(webBuilder =>
+                Title = "TGS Agent API",
+                Version = "Normal"
+            });
+        c.SwaggerDoc(
+            "HK28",
+            new OpenApiInfo
             {
-                webBuilder.UseStartup<Startup>();
+                Title = "Tgs Agent API - HK28",
+                Version = "HK28"
             });
 
-    public static void Main(string[] args)
-    {
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        c.DocInclusionPredicate((groupName, desc)
+            => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
 
-        CreateHostBuilder(args).Build().Run();
-    }
-}
+        c.AddBrandCertificateSecurityDefinition();
+        c.OperationFilter<SwaggerHeaderFilter>();
+        c.SchemaFilter<SwaggerEnumDescriptionFilter>();
+        c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+
+        var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var path = Path.Combine(AppContext.BaseDirectory, xml);
+
+        if (File.Exists(path))
+        {
+            c.IncludeXmlComments(path);
+        }
+    });
+
+builder.Services.AddHealthChecks();
+
+var app = builder.Build();
+
+app.UseTgsErrorHandler();
+
+app.UseRequestLocalization(options =>
+{
+    var config = app.Services.GetRequiredService<IConfiguration>();
+
+    options.SupportedCultures.Clear();
+    options.SupportedUICultures.Clear();
+
+    config.GetSection("RequestLocalization").Bind(options);
+
+    _ = options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
+});
+
+app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
+app.UseRouting();
+app.UseCors();
+
+app.UseVerifyBrandTokenMiddlewares(Consts.DefaultBypassRouting);
+
+app.MapControllers();
+
+app.MapHealthChecks("/health");
+app.MapProfileViewer();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/Normal/swagger.json", "TGS Agent API");
+    c.SwaggerEndpoint("/swagger/HK28/swagger.json", "TGS Agent API - HK28");
+});
+
+app.Run();

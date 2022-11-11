@@ -81,15 +81,6 @@ public class AgentConfiguration
         return this;
     }
 
-    public AgentConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure) where TDep : class
-    {
-        _ = Services
-            .AddOptions<EmailConfiguration>()
-            .Configure(configure);
-
-        return this;
-    }
-
     public AgentConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
     {
         configure(Services.AddWallet());
