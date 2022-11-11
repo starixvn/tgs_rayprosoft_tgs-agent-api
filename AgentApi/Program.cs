@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -129,12 +129,13 @@ builder.Services
         _ = options.Filters.Add<ValidateModelFilter>();
         _ = options.Filters.Add<TgsResponseWrapperAttribute>();
     })
-    .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
-    .AddFluentValidation(c =>
-    {
-        _ = c.RegisterValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
-        c.DisableDataAnnotationsValidation = true;
-    });
+    .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
+
+builder.Services
+    .AddFluentValidationAutoValidation(c =>
+        c.DisableDataAnnotationsValidation = true)
+    .AddFluentValidationClientsideAdapters()
+    .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
 
 builder.Services
     .AddMessageQueue()
