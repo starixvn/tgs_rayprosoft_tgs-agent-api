@@ -25,7 +25,7 @@ internal class AgentRepository : IAgentRepository
 
         var dividend = await _tgsRepository.AgentDividends
             .Where(x => x.AgentId == id && x.SentOn == null)
-            .SumAsync(x => x.AgentDividendAmount).ConfigureAwait(false);
+            .SumAsync(x => x.BeforeDividendAmount ?? x.AgentDividendAmount).ConfigureAwait(false);
 
         if (agent == null)
             return null;
