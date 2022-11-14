@@ -17,13 +17,6 @@ data:
           "Microsoft.Hosting.Lifetime": "Information"
         }
       },
-      "EmailSetting": {
-        "FromMail": "verifyme@163.com",
-        "FromName": "TGS",
-        "SmtpServer": "smtp.163.com",
-        "Port": 25,
-        "Password": "IAUSMDLMDZWJECBP"
-      },
       "AllowedHosts": "*",
       "NatsSetting": {
         "ConnectTimeoutMs": 2000,
@@ -32,7 +25,7 @@ data:
         "SubscriptionBatchSize": 128
       },
       "CorsDomain": {
-        "Urls": [ "http://localhost", "https://localhost" ]
+        "Urls": []
       },
       "Report": {
         "Url": "http://report-api"
