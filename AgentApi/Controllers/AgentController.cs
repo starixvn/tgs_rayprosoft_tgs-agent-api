@@ -150,6 +150,7 @@ public class AgentController : ControllerBase
                 Type = agentInfo.Type.ToString(),
                 LevelType = agentInfo.AgentLevelType.ToString(),
                 AgentDividendType = brand.AgentDividendType.ToString(),
+                AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
                 DividendConditions = await queryDividendsService
                     .QueryAsync(new GetAgentDividendConditionsByIdQuery(brandId, agentId))
                     .OrderBy(dc => dc.Rank)

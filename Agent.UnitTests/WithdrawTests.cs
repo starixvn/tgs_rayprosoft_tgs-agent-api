@@ -55,6 +55,7 @@ public class WithdrawTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0));
 
         fakeWalletRepository
@@ -140,6 +141,7 @@ public class WithdrawTests
                 AgentType.Cash,
                 AgentLevelType.Agent,
                 0M,
+                0,
                 0));
 
         fakeWalletRepository

@@ -12,9 +12,9 @@ public interface IAgentRepository
 
     IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId);
 
-    IAsyncEnumerable<AgentInfo> GetAgentsByEmailAsync(Guid brandId, string email);
+    IAsyncEnumerable<AgentContactInfo> GetAgentsByEmailAsync(Guid brandId, string email);
 
-    IAsyncEnumerable<AgentInfo> GetAgentsByPhoneAsync(Guid brandId, string phone);
+    IAsyncEnumerable<AgentContactInfo> GetAgentsByPhoneAsync(Guid brandId, string phone);
 
     ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id);
 
