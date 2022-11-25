@@ -101,8 +101,9 @@ public class PlayerController : ControllerBase
     [HttpPost("create", Name = "CreatePlayer")]
     [Description("Create a player")]
     [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public ValueTask<string> CreatePlayerAsync(
-        [FromServices] IGetService<CreatePlayerQuery,string> queryService,
+        [FromServices] IGetService<CreatePlayerQuery, string> queryService,
         [FromBody] CreatePlayerRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
@@ -116,6 +117,7 @@ public class PlayerController : ControllerBase
     [HttpPut("email", Name = "SetEmail")]
     [Description("Set player email")]
     [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public ValueTask SetPlayerEmailAsync(
         [FromServices] ICommandService<SetPlayerEmailCommand> commandService,
         [FromBody] SetPlayerEmailRequest request)
@@ -128,6 +130,7 @@ public class PlayerController : ControllerBase
     [HttpPut("phone", Name = "SetPhone")]
     [Description("Set player phone")]
     [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public ValueTask SetPlayerPhoneAsync(
         [FromServices] ICommandService<SetPlayerPhoneCommand> commandService,
         [FromBody] SetPlayerPhoneRequest request)
