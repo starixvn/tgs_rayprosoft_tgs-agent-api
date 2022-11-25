@@ -41,7 +41,10 @@ data:
         "ApplyCurrentCultureToResponseHeaders": true,
         "SupportedCultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ],
         "SupportedUICultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ]
-      }
+      },
+      "Operator": {
+        "PlayerServiceBaseUrl": "http://player-api"
+      },
     }
   monitor.settings.json: |
     {
