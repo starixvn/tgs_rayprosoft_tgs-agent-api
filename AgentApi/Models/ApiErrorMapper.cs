@@ -48,7 +48,8 @@ public class ApiErrorMapper : IErrorMapper
             [TgsApiError.UserBanned] = "UserBanned",
             [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
             [TgsApiError.DividendConditionError] = "DividendConditionError",
-            [TgsApiError.DividendPercentageError] = "DividendPercentageError"
+            [TgsApiError.DividendPercentageError] = "DividendPercentageError",
+            [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired"
         };
 
     private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -88,7 +89,8 @@ public class ApiErrorMapper : IErrorMapper
             [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
             [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest,
             [TgsApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError
+            [TgsApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError,
+            [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest
         };
 
     private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -122,7 +124,8 @@ public class ApiErrorMapper : IErrorMapper
             [typeof(UserBannedException)] = TgsApiError.UserBanned,
             [typeof(DividendConditionException)] = TgsApiError.DividendConditionError,
             [typeof(DividendPercentageException)] = TgsApiError.DividendPercentageError,
-            [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify
+            [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
+            [typeof(PhoneRequiredException)] = TgsApiError.PhoneNumberRequired
         };
 
     public bool CanProcess(Exception exception)

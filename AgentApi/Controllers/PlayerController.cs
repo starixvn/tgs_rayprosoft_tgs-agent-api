@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
@@ -12,6 +11,8 @@ using TGS.Core.Models.Enums;
 using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
+using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -95,5 +96,48 @@ public class PlayerController : ControllerBase
                 Id = info.Id,
                 Level = info.Level
             });
+    }
+
+    [HttpPost("create", Name = "CreatePlayer")]
+    [Description("Create a player")]
+    [TgsResponseWrapper]
+    public ValueTask<string> CreatePlayerAsync(
+        [FromServices] IGetService<CreatePlayerQuery,string> queryService,
+        [FromBody] CreatePlayerRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var query = new CreatePlayerQuery(brandId, agentTokenData.AgentId, request.Username, request.Password);
+
+        return queryService.GetAsync(query);
+    }
+
+    [HttpPut("email", Name = "SetEmail")]
+    [Description("Set player email")]
+    [TgsResponseWrapper]
+    public ValueTask SetPlayerEmailAsync(
+        [FromServices] ICommandService<SetPlayerEmailCommand> commandService,
+        [FromBody] SetPlayerEmailRequest request)
+    {
+        var command = new SetPlayerEmailCommand(request.PlayerCode,request.Email);
+
+        return commandService.ExecuteAsync(command);
+    }
+
+    [HttpPut("phone", Name = "SetPhone")]
+    [Description("Set player phone")]
+    [TgsResponseWrapper]
+    public ValueTask SetPlayerPhoneAsync(
+        [FromServices] ICommandService<SetPlayerPhoneCommand> commandService,
+        [FromBody] SetPlayerPhoneRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Phone)
+            || string.IsNullOrWhiteSpace(request.AreaCode))
+            throw new PhoneRequiredException();
+
+        var command = new SetPlayerPhoneCommand(request.PlayerCode, request.AreaCode, request.Phone);
+
+        return commandService.ExecuteAsync(command);
     }
 }
