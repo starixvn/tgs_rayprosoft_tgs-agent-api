@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.Agent;
 
@@ -12,5 +11,5 @@ public interface IBrandRepository
 
     IAsyncEnumerable<VipLevelInfo> GetVipLevelsAsync(Guid brandId);
 
-    ValueTask<BrandBetLimit> GetBrandDefaultBetLimitAsync(Guid brandId, CancellationToken cancellationToken);
+    ValueTask<int> GetBrandDefaultBetLimitIdAsync(Guid brandId, CancellationToken cancellationToken);
 }

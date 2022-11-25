@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using Tgs.Paging;
 using Tgs.PlayerService.Client;
@@ -158,7 +157,6 @@ public class PlayerTests
             new VipLevelInfo(Guid.NewGuid(), 1)
         };
 
-        var brandBetLimit = new BrandBetLimit { BetLimitId = 10 };
         var playerCode = "playerCode";
 
         fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
@@ -166,7 +164,7 @@ public class PlayerTests
         fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>()).Returns(agentInfo);
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brand);
         fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Any<Guid>()).Returns(vipLevels.ToAsyncEnumerable());
-        fakeBrandRepository.GetBrandDefaultBetLimitAsync(Arg.Any<Guid>(), default).Returns(brandBetLimit);
+        fakeBrandRepository.GetBrandDefaultBetLimitIdAsync(Arg.Any<Guid>(), default).Returns(10);
         fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>()).Returns(playerCode);
 
         await sut.GetAsync(query).ConfigureAwait(false);

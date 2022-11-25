@@ -45,25 +45,23 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .GetBrandInfoAsync(query.BrandId, cancellationToken)
             .ConfigureAwait(false);
 
-        var vipIds = await _brandServiceClient
+        var vipInfo = await _brandServiceClient
             .GetVipLevelInfosAsync(query.BrandId, cancellationToken)
-            .ToArrayAsync(cancellationToken)
+            .FirstOrDefaultAsync(x => x.Level == 1, cancellationToken)
             .ConfigureAwait(false);
 
-        var betLimit = await _brandRepository
-            .GetBrandDefaultBetLimitAsync(query.BrandId, cancellationToken)
+        var betLimitId = await _brandRepository
+            .GetBrandDefaultBetLimitIdAsync(query.BrandId, cancellationToken)
             .ConfigureAwait(false);
-
-        var vipInfo = vipIds.First(x => x.Level == 1);
 
         var playerData = new CreatePlayerData(
             query.BrandId,
             query.AgentId,
-            vipInfo.Id,
+            vipInfo!.Id,
             brand.Currency,
             query.Username,
             query.Password,
-            betLimit.BetLimitId,
+            betLimitId,
             PlayerType.RealPlayer,
             agent!.Username
         );

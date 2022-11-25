@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;
@@ -46,7 +45,8 @@ internal class BrandRepository : IBrandRepository
             .Select(vip => new VipLevelInfo(vip.Id, vip.Level))
             .ToAsyncEnumerable();
 
-    public async ValueTask<BrandBetLimit> GetBrandDefaultBetLimitAsync(Guid brandId,
+    public async ValueTask<int> GetBrandDefaultBetLimitIdAsync(Guid brandId,
         CancellationToken cancellationToken)
-        => await _tgsRepository.BrandBetLimits.FirstAsync(x => x.BrandId == brandId && x.IsDefault, cancellationToken);
+        => (await _tgsRepository.BrandBetLimits.FirstAsync(x => x.BrandId == brandId && x.IsDefault, cancellationToken))
+            .BetLimitId;
 }
