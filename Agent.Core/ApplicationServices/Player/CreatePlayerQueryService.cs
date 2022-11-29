@@ -37,7 +37,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         if (player != null)
-            throw new PlayerIsExistsException(query.Username);
+            throw new PlayerExistAlreadyException(query.Username);
 
         var agent = await _agentRepository
             .GetAgentByIdAsync(query.AgentId);

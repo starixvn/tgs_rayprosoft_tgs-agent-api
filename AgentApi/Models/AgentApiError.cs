@@ -23,7 +23,7 @@
         PhoneNumberRequired = 212,
         GameBalanceFailed = 213,
         RegisterUndone = 214,
-        PlayerExistAlreadyError = 215,
+        PlayerExistAlready = 215,
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
         DuplicateTransaction = 303,

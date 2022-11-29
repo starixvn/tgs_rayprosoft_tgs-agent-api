@@ -2,9 +2,9 @@
 
 namespace TGS.Services.Agent.Exceptions;
 
-public class PlayerIsExistsException : Exception
+public class PlayerExistAlreadyException : Exception
 {
-    public PlayerIsExistsException(string info)
+    public PlayerExistAlreadyException(string info)
         : base($"The ({info}) is Existed.")
     {
     }

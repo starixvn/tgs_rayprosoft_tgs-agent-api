@@ -49,7 +49,7 @@ public class ApiErrorMapper : IErrorMapper
             [AgentApiError.DividendConditionError] = "DividendConditionError",
             [AgentApiError.DividendPercentageError] = "DividendPercentageError",
             [AgentApiError.PhoneNumberRequired] = "PhoneNumberRequired",
-            [AgentApiError.PlayerExistAlreadyError] = "PlayerExistAlreadyError"
+            [AgentApiError.PlayerExistAlready] = "PlayerExistAlready"
         };
 
     private static readonly IReadOnlyDictionary<AgentApiError, int> _HttpCodeByException =
@@ -91,7 +91,7 @@ public class ApiErrorMapper : IErrorMapper
             [AgentApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
             [AgentApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError,
             [AgentApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
-            [AgentApiError.PlayerExistAlreadyError] = StatusCodes.Status500InternalServerError
+            [AgentApiError.PlayerExistAlready] = StatusCodes.Status500InternalServerError
         };
 
     private static readonly IReadOnlyDictionary<Type, AgentApiError> _TgsApiErrorByException =
@@ -127,7 +127,7 @@ public class ApiErrorMapper : IErrorMapper
             [typeof(DividendPercentageException)] = AgentApiError.DividendPercentageError,
             [typeof(ValidateCodeNotVerifyException)] = AgentApiError.ValidateCodeNotVerify,
             [typeof(PhoneRequiredException)] = AgentApiError.PhoneNumberRequired,
-            [typeof(PlayerExistAlreadyException)] = AgentApiError.PlayerExistAlreadyError
+            [typeof(PlayerExistAlreadyException)] = AgentApiError.PlayerExistAlready
         };
 
     public bool CanProcess(Exception exception)
