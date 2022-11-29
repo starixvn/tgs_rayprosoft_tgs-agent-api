@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Agent.Exceptions;
@@ -12,120 +11,123 @@ namespace TGS.Apis.AgentApi.Models;
 
 public class ApiErrorMapper : IErrorMapper
 {
-    private static readonly IReadOnlyDictionary<TgsApiError, string> _ErrorCodeMessageIdMap =
-        new Dictionary<TgsApiError, string>
+    private static readonly IReadOnlyDictionary<AgentApiError, string> _ErrorCodeMessageIdMap =
+        new Dictionary<AgentApiError, string>
         {
-            [TgsApiError.InvalidCredentials] = "InvalidCredentials",
-            [TgsApiError.InvalidPassword] = "InvalidCredentials",
-            [TgsApiError.InvalidOrExpiredAgentToken] = "InvalidOrExpiredAgentToken",
-            [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
-            [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
-            [TgsApiError.AgentNotFound] = "AgentNotFound",
-            [TgsApiError.UserBlocked] = "UserBlocked",
-            [TgsApiError.CountryRestricted] = "CountryRestricted",
-            [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
-            [TgsApiError.InsufficientFunds] = "InsufficientFunds",
-            [TgsApiError.InvalidInvitationCode] = "InvalidInvitationCode",
-            [TgsApiError.InvalidGameAction] = "InvalidGameAction",
-            [TgsApiError.TransactionIdNotFound] = "TransactionIdNotFound",
-            [TgsApiError.DuplicateTransaction] = "DuplicateTransaction",
-            [TgsApiError.InvalidAmount] = "InvalidAmount",
-            [TgsApiError.LoginFail] = "LoginFail",
-            [TgsApiError.InvalidArguments] = "InvalidArguments",
-            [TgsApiError.IncorrectFormat] = "IncorrectFormat",
-            [TgsApiError.UnderMaintenance] = "UnderMaintenance",
-            [TgsApiError.InvalidStatus] = "InvalidStatus",
-            [TgsApiError.SystemError] = "SystemError",
-            [TgsApiError.OperationNotAllowed] = "OperationNotAllowed",
-            [TgsApiError.ProviderApiError] = "ProviderApiError",
-            [TgsApiError.ValidateCodeNotVerify] = "ValidateCodeNotVerify",
-            [TgsApiError.EmailNotVerify] = "EmailNotVerify",
-            [TgsApiError.InsufficientBucket] = "InsufficientBucket",
-            [TgsApiError.PromotionCannotJoin] = "PromotionCannotJoin",
-            [TgsApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
-            [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
-            [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
-            [TgsApiError.UserBanned] = "UserBanned",
-            [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
-            [TgsApiError.DividendConditionError] = "DividendConditionError",
-            [TgsApiError.DividendPercentageError] = "DividendPercentageError",
-            [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired"
+            [AgentApiError.InvalidCredentials] = "InvalidCredentials",
+            [AgentApiError.InvalidPassword] = "InvalidCredentials",
+            [AgentApiError.InvalidOrExpiredAgentToken] = "InvalidOrExpiredAgentToken",
+            [AgentApiError.InvalidCaptcha] = "InvalidCaptcha",
+            [AgentApiError.ClientIdNotFound] = "ClientIdNotFound",
+            [AgentApiError.AgentNotFound] = "AgentNotFound",
+            [AgentApiError.UserBlocked] = "UserBlocked",
+            [AgentApiError.CountryRestricted] = "CountryRestricted",
+            [AgentApiError.CurrencyMismatch] = "CurrencyMismatch",
+            [AgentApiError.InsufficientFunds] = "InsufficientFunds",
+            [AgentApiError.InvalidInvitationCode] = "InvalidInvitationCode",
+            [AgentApiError.InvalidGameAction] = "InvalidGameAction",
+            [AgentApiError.TransactionIdNotFound] = "TransactionIdNotFound",
+            [AgentApiError.DuplicateTransaction] = "DuplicateTransaction",
+            [AgentApiError.InvalidAmount] = "InvalidAmount",
+            [AgentApiError.LoginFail] = "LoginFail",
+            [AgentApiError.InvalidArguments] = "InvalidArguments",
+            [AgentApiError.IncorrectFormat] = "IncorrectFormat",
+            [AgentApiError.UnderMaintenance] = "UnderMaintenance",
+            [AgentApiError.InvalidStatus] = "InvalidStatus",
+            [AgentApiError.SystemError] = "SystemError",
+            [AgentApiError.OperationNotAllowed] = "OperationNotAllowed",
+            [AgentApiError.ProviderApiError] = "ProviderApiError",
+            [AgentApiError.ValidateCodeNotVerify] = "ValidateCodeNotVerify",
+            [AgentApiError.EmailNotVerify] = "EmailNotVerify",
+            [AgentApiError.InsufficientBucket] = "InsufficientBucket",
+            [AgentApiError.PromotionCannotJoin] = "PromotionCannotJoin",
+            [AgentApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
+            [AgentApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
+            [AgentApiError.FavoriteFull] = "FavoriteAlreadyFull",
+            [AgentApiError.UserBanned] = "UserBanned",
+            [AgentApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
+            [AgentApiError.DividendConditionError] = "DividendConditionError",
+            [AgentApiError.DividendPercentageError] = "DividendPercentageError",
+            [AgentApiError.PhoneNumberRequired] = "PhoneNumberRequired",
+            [AgentApiError.PlayerExistsError] = "PlayerExistsError"
         };
 
-    private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
-        new Dictionary<TgsApiError, int>
+    private static readonly IReadOnlyDictionary<AgentApiError, int> _HttpCodeByException =
+        new Dictionary<AgentApiError, int>
         {
-            [TgsApiError.InvalidCredentials] = StatusCodes.Status401Unauthorized,
-            [TgsApiError.InvalidOrExpiredAgentToken] = StatusCodes.Status401Unauthorized,
-            [TgsApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
-            [TgsApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
-            [TgsApiError.AgentNotFound] = StatusCodes.Status401Unauthorized,
-            [TgsApiError.UserBlocked] = StatusCodes.Status403Forbidden,
-            [TgsApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
-            [TgsApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InsufficientFunds] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InvalidInvitationCode] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InvalidGameAction] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.TransactionIdNotFound] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.DuplicateTransaction] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InvalidAmount] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InvalidArguments] = StatusCodes.Status400BadRequest,
-            [TgsApiError.IncorrectFormat] = StatusCodes.Status400BadRequest,
-            [TgsApiError.UnderMaintenance] = StatusCodes.Status503ServiceUnavailable,
-            [TgsApiError.InvalidStatus] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.LoginFail] = StatusCodes.Status400BadRequest,
-            [TgsApiError.SystemError] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
-            [TgsApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
-            [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
-            [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
-            [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
-            [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
-            [TgsApiError.GameBalanceFundInFailed] = StatusCodes.Status400BadRequest,
-            [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
-            [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
-            [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
-            [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest,
-            [TgsApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError,
-            [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest
+            [AgentApiError.InvalidCredentials] = StatusCodes.Status401Unauthorized,
+            [AgentApiError.InvalidOrExpiredAgentToken] = StatusCodes.Status401Unauthorized,
+            [AgentApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
+            [AgentApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
+            [AgentApiError.AgentNotFound] = StatusCodes.Status401Unauthorized,
+            [AgentApiError.UserBlocked] = StatusCodes.Status403Forbidden,
+            [AgentApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
+            [AgentApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InsufficientFunds] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InvalidInvitationCode] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InvalidGameAction] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.TransactionIdNotFound] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.DuplicateTransaction] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InvalidAmount] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InvalidArguments] = StatusCodes.Status400BadRequest,
+            [AgentApiError.IncorrectFormat] = StatusCodes.Status400BadRequest,
+            [AgentApiError.UnderMaintenance] = StatusCodes.Status503ServiceUnavailable,
+            [AgentApiError.InvalidStatus] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.LoginFail] = StatusCodes.Status400BadRequest,
+            [AgentApiError.SystemError] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
+            [AgentApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
+            [AgentApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
+            [AgentApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
+            [AgentApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
+            [AgentApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
+            [AgentApiError.GameBalanceFundInFailed] = StatusCodes.Status400BadRequest,
+            [AgentApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
+            [AgentApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
+            [AgentApiError.UserBanned] = StatusCodes.Status403Forbidden,
+            [AgentApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.InvalidPassword] = StatusCodes.Status400BadRequest,
+            [AgentApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
+            [AgentApiError.PlayerExistsError] = StatusCodes.Status500InternalServerError
         };
 
-    private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
-        new Dictionary<Type, TgsApiError>
+    private static readonly IReadOnlyDictionary<Type, AgentApiError> _TgsApiErrorByException =
+        new Dictionary<Type, AgentApiError>
         {
-            [typeof(InvalidCredentialsException)] = TgsApiError.InvalidCredentials,
-            [typeof(PasswordInvalidException)] = TgsApiError.InvalidPassword,
-            [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredAgentToken,
-            [typeof(AgentLoginExpiredException)] = TgsApiError.InvalidOrExpiredAgentToken,
-            [typeof(InvalidCaptchaException)] = TgsApiError.InvalidCaptcha,
-            [typeof(ClientIdNotFoundException)] = TgsApiError.ClientIdNotFound,
-            [typeof(AgentNotFoundException)] = TgsApiError.AgentNotFound,
-            [typeof(PlayerDisabledException)] = TgsApiError.UserBlocked,
-            [typeof(CountryRestrictedException)] = TgsApiError.CountryRestricted,
-            [typeof(CurrencyNotMatchingException)] = TgsApiError.CurrencyMismatch,
-            [typeof(PlayerHasInsufficientFundsException)] = TgsApiError.InsufficientFunds,
-            [typeof(InvalidInvitationCodeException)] = TgsApiError.InvalidInvitationCode,
-            [typeof(InvalidGameActionException)] = TgsApiError.InvalidGameAction,
-            [typeof(InvalidAmountException)] = TgsApiError.InvalidAmount,
-            [typeof(ArgumentException)] = TgsApiError.InvalidArguments,
-            [typeof(ModelBindingException)] = TgsApiError.InvalidArguments,
-            [typeof(FormatException)] = TgsApiError.IncorrectFormat,
-            [typeof(BrandUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
-            [typeof(GameProviderUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
-            [typeof(GameUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
-            [typeof(InvalidStatusException)] = TgsApiError.InvalidStatus,
-            [typeof(InvalidOperationException)] = TgsApiError.SystemError,
-            [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,
-            [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
-            [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.AgentNotFound,
-            [typeof(UserBannedException)] = TgsApiError.UserBanned,
-            [typeof(DividendConditionException)] = TgsApiError.DividendConditionError,
-            [typeof(DividendPercentageException)] = TgsApiError.DividendPercentageError,
-            [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
-            [typeof(PhoneRequiredException)] = TgsApiError.PhoneNumberRequired
+            [typeof(InvalidCredentialsException)] = AgentApiError.InvalidCredentials,
+            [typeof(PasswordInvalidException)] = AgentApiError.InvalidPassword,
+            [typeof(MissingTokenException)] = AgentApiError.InvalidOrExpiredAgentToken,
+            [typeof(AgentLoginExpiredException)] = AgentApiError.InvalidOrExpiredAgentToken,
+            [typeof(InvalidCaptchaException)] = AgentApiError.InvalidCaptcha,
+            [typeof(ClientIdNotFoundException)] = AgentApiError.ClientIdNotFound,
+            [typeof(AgentNotFoundException)] = AgentApiError.AgentNotFound,
+            [typeof(PlayerDisabledException)] = AgentApiError.UserBlocked,
+            [typeof(CountryRestrictedException)] = AgentApiError.CountryRestricted,
+            [typeof(CurrencyNotMatchingException)] = AgentApiError.CurrencyMismatch,
+            [typeof(PlayerHasInsufficientFundsException)] = AgentApiError.InsufficientFunds,
+            [typeof(InvalidInvitationCodeException)] = AgentApiError.InvalidInvitationCode,
+            [typeof(InvalidGameActionException)] = AgentApiError.InvalidGameAction,
+            [typeof(InvalidAmountException)] = AgentApiError.InvalidAmount,
+            [typeof(ArgumentException)] = AgentApiError.InvalidArguments,
+            [typeof(ModelBindingException)] = AgentApiError.InvalidArguments,
+            [typeof(FormatException)] = AgentApiError.IncorrectFormat,
+            [typeof(BrandUnderMaintenanceException)] = AgentApiError.UnderMaintenance,
+            [typeof(GameProviderUnderMaintenanceException)] = AgentApiError.UnderMaintenance,
+            [typeof(GameUnderMaintenanceException)] = AgentApiError.UnderMaintenance,
+            [typeof(InvalidStatusException)] = AgentApiError.InvalidStatus,
+            [typeof(InvalidOperationException)] = AgentApiError.SystemError,
+            [typeof(OperationNotAllowedException)] = AgentApiError.OperationNotAllowed,
+            [typeof(GameProviderApiErrorException)] = AgentApiError.ProviderApiError,
+            [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = AgentApiError.AgentNotFound,
+            [typeof(UserBannedException)] = AgentApiError.UserBanned,
+            [typeof(DividendConditionException)] = AgentApiError.DividendConditionError,
+            [typeof(DividendPercentageException)] = AgentApiError.DividendPercentageError,
+            [typeof(ValidateCodeNotVerifyException)] = AgentApiError.ValidateCodeNotVerify,
+            [typeof(PhoneRequiredException)] = AgentApiError.PhoneNumberRequired,
+            [typeof(PlayerIsExistsException)] = AgentApiError.PlayerExistsError
         };
 
     public bool CanProcess(Exception exception)
@@ -135,14 +137,14 @@ public class ApiErrorMapper : IErrorMapper
     {
         if (exception == null)
         {
-            return (int)TgsApiError.None;
+            return (int)AgentApiError.None;
         }
 
         var type = exception.GetType();
 
         return _TgsApiErrorByException.TryGetValue(type, out var error)
             ? (int)error
-            : (int)TgsApiError.SystemError;
+            : (int)AgentApiError.SystemError;
     }
 
     public int GetHttpStatusByException(Exception exception)
@@ -171,6 +173,6 @@ public class ApiErrorMapper : IErrorMapper
             && _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
             return messageKey;
 
-        return _ErrorCodeMessageIdMap[TgsApiError.SystemError];
+        return _ErrorCodeMessageIdMap[AgentApiError.SystemError];
     }
 }

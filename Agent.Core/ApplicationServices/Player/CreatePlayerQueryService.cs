@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
+using TGS.Services.Agent.Exceptions;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
@@ -36,7 +37,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         if (player != null)
-            return player.PlayerCode;
+            throw new PlayerIsExistsException(query.Username);
 
         var agent = await _agentRepository
             .GetAgentByIdAsync(query.AgentId);
