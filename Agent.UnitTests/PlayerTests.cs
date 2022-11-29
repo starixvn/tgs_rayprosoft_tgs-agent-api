@@ -114,8 +114,10 @@ public class PlayerTests
         var agentId = Guid.NewGuid();
         var username = "username";
         var password = "password";
+        var ipAddress = "127.0.0.1";
+        var hostName = "localhost";
 
-        var query = new CreatePlayerQuery(brandId, agentId, username, password);
+        var query = new CreatePlayerQuery(brandId, agentId, username, password, ipAddress, hostName);
 
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
