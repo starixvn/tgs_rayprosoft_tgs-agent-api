@@ -108,8 +108,16 @@ public class PlayerController : ControllerBase
     {
         var brandId = HttpContext.Items.GetBrandId();
         var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
 
-        var query = new CreatePlayerQuery(brandId, agentTokenData.AgentId, request.Username, request.Password);
+        var query = new CreatePlayerQuery(
+            brandId,
+            agentTokenData.AgentId,
+            request.Username,
+            request.Password,
+            ipAddress!.ToString(),
+            hostName);
 
         return queryService.GetAsync(query);
     }

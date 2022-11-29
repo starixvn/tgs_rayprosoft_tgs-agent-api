@@ -58,11 +58,13 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             query.BrandId,
             query.AgentId,
             vipInfo!.Id,
-            brand.Currency,
+            brand!.Currency,
             query.Username,
             query.Password,
+            null,
             betLimitId,
             PlayerType.RealPlayer,
+            RegisterPlatformType.Agent,
             agent!.Username
         );
 
@@ -72,6 +74,10 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
 
         await _playerServiceClient
             .SetPlayerStatusAsync(playerCode, PlayerStatus.Enabled, cancellationToken)
+            .ConfigureAwait(false);
+
+        await _playerServiceClient
+            .RecordRegisterIpAsync(playerCode, query.IpAddress, query.HostName, cancellationToken)
             .ConfigureAwait(false);
 
         return playerCode;

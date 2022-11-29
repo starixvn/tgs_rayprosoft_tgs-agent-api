@@ -45,6 +45,12 @@ data:
       "Operator": {
         "PlayerServiceBaseUrl": "http://player-api"
       },
+      "ForwardedHeaders": {
+        "ForwardLimit": 1,
+        "ForwardedForHeaderName": "cf-connecting-ip",
+        "KnownProxies": [],
+        "KnownNetworks": ["10.0.0.0/8"]
+      }
     }
   monitor.settings.json: |
     {

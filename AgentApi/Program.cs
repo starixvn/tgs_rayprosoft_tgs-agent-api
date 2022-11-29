@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +39,38 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .AddJsonFile("/config/appsettings.json", true)
     .AddEnvironmentVariables();
+
+builder.Services
+    .AddOptions<ForwardedHeadersOptions>()
+    .Configure<IConfiguration>((options, config) =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.All;
+        options.ForwardLimit = config.GetValue<int>("ForwardedHeaders:ForwardLimit");
+
+        var forwardedForHeaderName = config.GetValue<string>("ForwardedHeaders:ForwardedForHeaderName");
+        if (!string.IsNullOrWhiteSpace(forwardedForHeaderName))
+            options.ForwardedForHeaderName = forwardedForHeaderName;
+
+        var knownProxies = config.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? Array.Empty<string>();
+
+        foreach (var knownProxie in knownProxies)
+            options.KnownProxies.Add(IPAddress.Parse(knownProxie));
+
+        var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ??
+            Array.Empty<string>();
+
+        foreach (var cidr in knownNetworks)
+        {
+            var (ip, range) = cidr.Split("/");
+
+            options.KnownNetworks.Add(
+                new IPNetwork(
+                    IPAddress.Parse(ip),
+                    string.IsNullOrEmpty(range)
+                        ? 32
+                        : int.Parse(range)));
+        }
+    });
 
 builder.Logging
     .AddTgsLog()
@@ -255,6 +289,8 @@ builder.Services
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseTgsErrorHandler();
 
