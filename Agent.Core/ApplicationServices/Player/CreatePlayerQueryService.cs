@@ -65,7 +65,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             null,
             betLimitId,
             PlayerType.RealPlayer,
-            RegisterPlatformType.Agent,
+            RegisterSiteType.Agent,
             agent!.Username
         );
 
