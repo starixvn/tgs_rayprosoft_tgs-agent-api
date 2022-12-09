@@ -33,7 +33,7 @@ public class AgentEmailTests
 
         fakeValidateCodeOperator
             .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
-            .Returns((EmailValidateData)null);
+            .Returns((EmailValidateData?)null);
 
         Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
