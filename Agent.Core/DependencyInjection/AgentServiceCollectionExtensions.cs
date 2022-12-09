@@ -44,18 +44,13 @@ public static class AgentServiceCollectionExtensions
                 httpClient.BaseAddress = options.SmsBaseUrl;
             });
 
-        foreach (var type in _registrationTypes)
-        {
-            services.AddTransient(type.Value);
-        }
-
         services.AddTransient<Func<string, IRegistrationCondition?>>(serviceProvider => key =>
         {
             _ = _registrationTypes.TryGetValue(key, out var distributionType);
 
             return distributionType == null
                 ? null
-                : (IRegistrationCondition?)serviceProvider.GetService(distributionType);
+                : (IRegistrationCondition?)ActivatorUtilities.CreateInstance(serviceProvider, distributionType);
         });
 
         var agentConfiguration = new AgentConfiguration(services);
