@@ -105,7 +105,7 @@ public class AgentEmailTests
             Content = $"Your ID verification code is : {validateCode}"
         }.ToExpectedObject();
 
-        SendEmailRequest actual = null;
+        SendEmailRequest actual = null!;
         fakeEmailClient
             .SendAsync(Arg.Do<SendEmailRequest>(msg =>
             {

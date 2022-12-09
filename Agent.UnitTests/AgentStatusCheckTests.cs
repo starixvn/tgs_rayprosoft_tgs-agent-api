@@ -52,11 +52,11 @@ public class AgentStatusCheckTests
 
         Assert.IsNotNull(context.Result);
 
-        var result = (ObjectResult)context.Result;
+        var result = (ObjectResult?)context.Result;
 
-        Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+        Assert.AreEqual(StatusCodes.Status403Forbidden, result!.StatusCode);
         Assert.IsInstanceOf<TgsResponse>(result.Value);
-        Assert.AreEqual("AccessDenied", ((TgsResponse)result.Value).ErrorMessageKey);
+        Assert.AreEqual("AccessDenied", ((TgsResponse)result.Value!).ErrorMessageKey);
     }
 
     [Test]
@@ -91,11 +91,11 @@ public class AgentStatusCheckTests
 
         Assert.IsNotNull(context.Result);
 
-        var result = (ObjectResult)context.Result;
+        var result = (ObjectResult?)context.Result;
 
-        Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+        Assert.AreEqual(StatusCodes.Status403Forbidden, result!.StatusCode);
         Assert.IsInstanceOf<TgsResponse>(result.Value);
-        Assert.AreEqual("UserBlocked", ((TgsResponse)result.Value).ErrorMessageKey);
+        Assert.AreEqual("UserBlocked", ((TgsResponse)result.Value!).ErrorMessageKey);
     }
 
     [Test]
@@ -296,11 +296,11 @@ public class AgentStatusCheckTests
 
         Assert.IsNotNull(context.Result);
 
-        var result = (ObjectResult)context.Result;
+        var result = (ObjectResult?)context.Result;
 
-        Assert.AreEqual(StatusCodes.Status403Forbidden, result.StatusCode);
+        Assert.AreEqual(StatusCodes.Status403Forbidden, result!.StatusCode);
         Assert.IsInstanceOf<TgsResponse>(result.Value);
-        Assert.AreEqual("AccessDenied", ((TgsResponse)result.Value).ErrorMessageKey);
+        Assert.AreEqual("AccessDenied", ((TgsResponse)result.Value!).ErrorMessageKey);
     }
 
     [Test]

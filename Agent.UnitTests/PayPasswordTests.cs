@@ -170,8 +170,8 @@ public class PayPasswordTests
         fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
 
         fakeValidateCodeOperator
-            .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
-            .Returns((ValidateCodeData)null);
+            .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token!))
+            .Returns((ValidateCodeData?)null);
 
         Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
@@ -330,8 +330,8 @@ public class PayPasswordTests
         _ = fakeValidateCodeOperator
             .Received(1)
             .SendEmailAsync(
-                Arg.Is(command.CultureInfo),
-                Arg.Is(agent.Email),
+                Arg.Is(command.CultureInfo!),
+                Arg.Is(agent.Email!),
                 Arg.Is(validateCode));
 
         Assert.AreEqual(expectedSecurityKey, actualSecurityKey);

@@ -27,7 +27,7 @@ public class WalletTests
         var agentId = Guid.NewGuid();
 
         _ = moqAgentRepository.Setup(fake => fake.GetAgentByIdAsync(It.Is<Guid>(x => x == agentId)))
-            .Returns(ValueTask.FromResult(new AgentInfo(
+            .Returns(ValueTask.FromResult((AgentInfo?)new AgentInfo(
                 agentId,
                 "TestAgent",
                 null,
