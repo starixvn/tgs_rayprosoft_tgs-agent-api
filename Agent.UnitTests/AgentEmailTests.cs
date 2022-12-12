@@ -33,7 +33,7 @@ public class AgentEmailTests
 
         fakeValidateCodeOperator
             .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
-            .Returns((EmailValidateData)null);
+            .Returns((EmailValidateData?)null);
 
         Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
     }
@@ -105,7 +105,7 @@ public class AgentEmailTests
             Content = $"Your ID verification code is : {validateCode}"
         }.ToExpectedObject();
 
-        SendEmailRequest actual = null;
+        SendEmailRequest actual = null!;
         fakeEmailClient
             .SendAsync(Arg.Do<SendEmailRequest>(msg =>
             {

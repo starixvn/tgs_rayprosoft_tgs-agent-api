@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Microsoft.OpenApi.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -49,7 +50,9 @@ public class ApiErrorMapper : IErrorMapper
             [AgentApiError.DividendConditionError] = "DividendConditionError",
             [AgentApiError.DividendPercentageError] = "DividendPercentageError",
             [AgentApiError.PhoneNumberRequired] = "PhoneNumberRequired",
-            [AgentApiError.PlayerExistAlready] = "PlayerExistAlready"
+            [AgentApiError.PlayerExistAlready] = "PlayerExistAlready",
+            [AgentApiError.PlayerPhoneDuplicate] = "PlayerPhoneDuplicate",
+            [AgentApiError.PlayerEmailDuplicate] = "PlayerEmailDuplicate"
         };
 
     private static readonly IReadOnlyDictionary<AgentApiError, int> _HttpCodeByException =
@@ -91,7 +94,9 @@ public class ApiErrorMapper : IErrorMapper
             [AgentApiError.DividendConditionError] = StatusCodes.Status500InternalServerError,
             [AgentApiError.DividendPercentageError] = StatusCodes.Status500InternalServerError,
             [AgentApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest,
-            [AgentApiError.PlayerExistAlready] = StatusCodes.Status500InternalServerError
+            [AgentApiError.PlayerExistAlready] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.PlayerPhoneDuplicate] = StatusCodes.Status500InternalServerError,
+            [AgentApiError.PlayerEmailDuplicate] = StatusCodes.Status500InternalServerError
         };
 
     private static readonly IReadOnlyDictionary<Type, AgentApiError> _TgsApiErrorByException =
@@ -127,7 +132,9 @@ public class ApiErrorMapper : IErrorMapper
             [typeof(DividendPercentageException)] = AgentApiError.DividendPercentageError,
             [typeof(ValidateCodeNotVerifyException)] = AgentApiError.ValidateCodeNotVerify,
             [typeof(PhoneRequiredException)] = AgentApiError.PhoneNumberRequired,
-            [typeof(PlayerExistAlreadyException)] = AgentApiError.PlayerExistAlready
+            [typeof(PlayerExistAlreadyException)] = AgentApiError.PlayerExistAlready,
+            [typeof(PlayerPhoneDuplicateException)] = AgentApiError.PlayerPhoneDuplicate,
+            [typeof(PlayerEmailDuplicateException)] = AgentApiError.PlayerEmailDuplicate,
         };
 
     public bool CanProcess(Exception exception)

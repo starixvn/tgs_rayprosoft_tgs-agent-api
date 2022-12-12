@@ -8,7 +8,8 @@ data:
       "Agent": {
         "ValidateCodeBaseUrl": "http://validatecode-api",
         "PaymentServiceBaseUrl": "http://payment-api",
-        "BrandCertificateBaseUrl": "http://brand-cert-api"
+        "BrandCertificateBaseUrl": "http://brand-cert-api",
+        "PlayerServiceBaseUrl": "http://player-api"
       },
       "Logging": {
         "LogLevel": {
@@ -41,9 +42,6 @@ data:
         "ApplyCurrentCultureToResponseHeaders": true,
         "SupportedCultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ],
         "SupportedUICultures": [ "en-US", "zh-CN", "zh-TW", "th-TH" ]
-      },
-      "Operator": {
-        "PlayerServiceBaseUrl": "http://player-api"
       },
       "ForwardedHeaders": {
         "ForwardLimit": 1,

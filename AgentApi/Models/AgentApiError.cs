@@ -44,6 +44,8 @@
         BrandPhoneDuplicate = 412,
         ZeroNineNinePayDepositNeedRealName = 413,
         PreviousDepositStillProcessing = 414,
+        PlayerEmailDuplicate = 501,
+        PlayerPhoneDuplicate = 502,
         DividendConditionError = 600,
         DividendPercentageError = 601,
         SystemError = 900,

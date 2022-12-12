@@ -13,6 +13,10 @@ using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 using TGS.Services.Agent.Exceptions;
 using Tgs.ServiceUtility;
+using Microsoft.AspNetCore.Authorization;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Net;
+using TGS.Core.Models.Tokens;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -150,5 +154,24 @@ public class PlayerController : ControllerBase
         var command = new SetPlayerPhoneCommand(request.PlayerCode, request.AreaCode, request.Phone);
 
         return commandService.ExecuteAsync(command);
+    }
+
+    [HttpPost("check/registrationConditions", Name = "CheckRegistrationConditions")]
+    [Description("Check registration conditions")]
+    [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<bool> CheckRegistrationConditionsAsync(
+        [FromServices] IGetService<CheckRegistrationQuery,bool> queryService,
+        [FromBody] CheckRegistrationRequest request
+        )
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new CheckRegistrationQuery(
+            brandId,
+            request.Username,
+            request.Data);
+
+        return queryService.GetAsync(query);
     }
 }

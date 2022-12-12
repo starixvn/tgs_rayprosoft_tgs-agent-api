@@ -150,7 +150,7 @@ builder.Services.AddPlayerServiceClient((options, sp) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
 
-    options.BaseUrl = config.GetValue<Uri>("Operator:PlayerServiceBaseUrl");
+    options.BaseUrl = config.GetValue<Uri>("Agent:PlayerServiceBaseUrl");
 });
 
 builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
