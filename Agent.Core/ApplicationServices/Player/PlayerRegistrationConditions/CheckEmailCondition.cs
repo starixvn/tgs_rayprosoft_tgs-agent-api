@@ -21,6 +21,11 @@ namespace TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationCondit
         {
             var emailData = input.Deserialize<EmailData>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
 
+            if (string.IsNullOrEmpty(emailData.Email))
+            {
+                throw new EmailNotVerifyException();
+            }
+
             var findPlayer = await _playerServiceClient
                 .GetPlayerInfoByEmailAsync(brandId, emailData.Email, cancellationToken)
                 .ConfigureAwait(false);
