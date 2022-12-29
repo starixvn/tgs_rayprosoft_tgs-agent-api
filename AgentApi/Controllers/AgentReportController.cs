@@ -108,6 +108,7 @@ public class AgentReportController : ControllerBase
         var dividendRequest = new GetAgentDividendDetailsRequest
         {
             AgentId = request.AgentId,
+            AgentDividendPercentage = request.AgentDividendPercentage,
             From = request.From,
             To = request.To,
             Page = request.Page,
@@ -135,6 +136,7 @@ public class AgentReportController : ControllerBase
         var dividendRequest = new GetAgentDividendTeamDetailsRequest
         {
             AgentId = request.AgentId,
+            AgentDividendPercentage = request.AgentDividendPercentage,
             From = request.From,
             To = request.To,
             Page = request.Page,
