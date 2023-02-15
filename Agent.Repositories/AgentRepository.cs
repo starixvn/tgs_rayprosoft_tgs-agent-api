@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Paging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
-using Tgs.Paging;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;
@@ -240,8 +240,6 @@ internal class AgentRepository : IAgentRepository
 
         var query =
             from player in playerQuery
-            join wallet in _tgsRepository.Wallets.AsQueryable()
-                on player.DefaultWalletId equals wallet.Id
             join vip in _tgsRepository.VipLevels.AsQueryable()
                 on player.VipId equals vip.Id
             join ipRecord in playerIpQuery
@@ -251,7 +249,6 @@ internal class AgentRepository : IAgentRepository
             {
                 player.PlayerCode,
                 player.Username,
-                wallet.Balance,
                 player.RegisteredOn,
                 player.AreaCode,
                 player.Phone,
@@ -270,7 +267,6 @@ internal class AgentRepository : IAgentRepository
         return query.Select(p => new AgentPlayerInfo(
             p.PlayerCode,
             p.Username,
-            p.Balance,
             p.RegisteredOn,
             p.AreaCode,
             p.Phone,

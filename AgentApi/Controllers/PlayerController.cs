@@ -4,19 +4,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Paging;
+using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Enums;
-using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 using TGS.Services.Agent.Exceptions;
-using Tgs.ServiceUtility;
-using Microsoft.AspNetCore.Authorization;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Net;
-using TGS.Core.Models.Tokens;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -24,6 +20,61 @@ namespace TGS.Apis.AgentApi.Controllers;
 [ApiController]
 public class PlayerController : ControllerBase
 {
+    [HttpPost("check/registrationConditions", Name = "CheckRegistrationConditions")]
+    [Description("Check registration conditions")]
+    [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<bool> CheckRegistrationConditionsAsync(
+        [FromServices] IGetService<CheckRegistrationQuery, bool> queryService,
+        [FromBody] CheckRegistrationRequest request
+        )
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new CheckRegistrationQuery(
+            brandId,
+            request.Username,
+            request.Data);
+
+        return queryService.GetAsync(query);
+    }
+
+    [HttpPost("create", Name = "CreatePlayer")]
+    [Description("Create a player")]
+    [TgsResponseWrapper]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<string> CreatePlayerAsync(
+        [FromServices] IGetService<CreatePlayerQuery, string> queryService,
+        [FromBody] CreatePlayerRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var ipAddress = HttpContext.Connection.RemoteIpAddress;
+        var hostName = Request.Host.Host;
+
+        var query = new CreatePlayerQuery(
+            brandId,
+            agentTokenData.AgentId,
+            request.Username,
+            request.Password,
+            ipAddress!.ToString(),
+            hostName);
+
+        return queryService.GetAsync(query);
+    }
+
+    [HttpGet("balance/{playerCode}")]
+    [Description("Get a player balance")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask<decimal> GetPlayerBalanceAsync(
+        [FromServices] IGetService<GetPlayerBalanceQuery, decimal> getService,
+        string playerCode)
+    {
+        var agentToken = HttpContext.Items.GetAgentTokenData();
+
+        return getService.GetAsync(new GetPlayerBalanceQuery(agentToken.AgentId, playerCode));
+    }
+
     [HttpGet("list", Name = "GetPlayerInfos")]
     [Description("Get players of agent")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -58,8 +109,7 @@ public class PlayerController : ControllerBase
             Items = queryService.QueryAsync(query)
                 .Select(playerInfo => new PlayerInfoModel
                 {
-                    AreaCode = playerInfo.AreaCode,
-                    Balance = playerInfo.Balance,
+                    AreaCode = playerInfo.AreaCode,                    
                     Phone = playerInfo.Phone,
                     PlayerCode = playerInfo.PlayerCode,
                     RegisteredTime = playerInfo.RegisteredTime,
@@ -102,30 +152,6 @@ public class PlayerController : ControllerBase
             });
     }
 
-    [HttpPost("create", Name = "CreatePlayer")]
-    [Description("Create a player")]
-    [TgsResponseWrapper]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public ValueTask<string> CreatePlayerAsync(
-        [FromServices] IGetService<CreatePlayerQuery, string> queryService,
-        [FromBody] CreatePlayerRequest request)
-    {
-        var brandId = HttpContext.Items.GetBrandId();
-        var agentTokenData = HttpContext.Items.GetAgentTokenData();
-        var ipAddress = HttpContext.Connection.RemoteIpAddress;
-        var hostName = Request.Host.Host;
-
-        var query = new CreatePlayerQuery(
-            brandId,
-            agentTokenData.AgentId,
-            request.Username,
-            request.Password,
-            ipAddress!.ToString(),
-            hostName);
-
-        return queryService.GetAsync(query);
-    }
-
     [HttpPut("email", Name = "SetEmail")]
     [Description("Set player email")]
     [TgsResponseWrapper]
@@ -134,7 +160,7 @@ public class PlayerController : ControllerBase
         [FromServices] ICommandService<SetPlayerEmailCommand> commandService,
         [FromBody] SetPlayerEmailRequest request)
     {
-        var command = new SetPlayerEmailCommand(request.PlayerCode,request.Email);
+        var command = new SetPlayerEmailCommand(request.PlayerCode, request.Email);
 
         return commandService.ExecuteAsync(command);
     }
@@ -154,24 +180,5 @@ public class PlayerController : ControllerBase
         var command = new SetPlayerPhoneCommand(request.PlayerCode, request.AreaCode, request.Phone);
 
         return commandService.ExecuteAsync(command);
-    }
-
-    [HttpPost("check/registrationConditions", Name = "CheckRegistrationConditions")]
-    [Description("Check registration conditions")]
-    [TgsResponseWrapper]
-    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public ValueTask<bool> CheckRegistrationConditionsAsync(
-        [FromServices] IGetService<CheckRegistrationQuery,bool> queryService,
-        [FromBody] CheckRegistrationRequest request
-        )
-    {
-        var brandId = HttpContext.Items.GetBrandId();
-
-        var query = new CheckRegistrationQuery(
-            brandId,
-            request.Username,
-            request.Data);
-
-        return queryService.GetAsync(query);
     }
 }

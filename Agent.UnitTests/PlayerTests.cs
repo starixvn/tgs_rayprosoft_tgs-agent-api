@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
+using Tgs.CashService.Client;
 using Tgs.Paging;
 using Tgs.PlayerService.Client;
 using TGS.Core.Models.Enums;
@@ -92,6 +96,36 @@ public class PlayerTests
         _ = fakePlayerServiceClient
             .Received(1)
             .SetPlayerStatusAsync(Arg.Is(playerCode), Arg.Is(PlayerStatus.Enabled));
+    }
+
+    [Test]
+    public async Task Can_Get_Player_Balance()
+    {
+        var agentId = Guid.Parse("71e90747-fdb5-4a67-b4df-8c75f2d1535f");
+
+        var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+
+        var sut = new GetPlayerBalanceQueryService(fakePlayerServiceClient, fakeCashServiceClient);        
+
+        var query = new GetPlayerBalanceQuery(
+            agentId,
+            "4uhyekcw88dy");
+
+        var walletId = Guid.Parse("2b2b0a71-78cc-45b8-8f4b-08da9ad95d74");
+
+        _ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(query.PlayerCode), Arg.Any<CancellationToken>())
+            .Returns(new Dictionary<string, string>
+            {
+                ["DefaultWalletId"] = walletId.ToString()
+            }.ToImmutableDictionary());
+
+        _ = fakeCashServiceClient.GetBalanceAsync(walletId, Arg.Any<CancellationToken>())
+            .Returns(1000M);
+
+        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+
+        Assert.AreEqual(1000M, actual);
     }
 
     [Test]

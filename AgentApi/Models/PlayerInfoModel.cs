@@ -11,9 +11,6 @@ public class PlayerInfoModel
     [JsonPropertyName("areacode")]
     public string? AreaCode { get; init; }
 
-    [JsonPropertyName("balance")]
-    public decimal Balance { get; init; }
-
     [JsonPropertyName("phone")]
     public string? Phone { get; init; }
 
