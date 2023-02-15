@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -157,6 +158,13 @@ builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 {
     var url = builder.Configuration.GetSection("Email:Url");
     c.BaseAddress = new Uri(url.Value);
+});
+
+builder.Services.AddCashServiceClient((options, sp) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+
+    options.BaseUrl = config.GetValue<Uri>("Agent:CashBaseUrl");
 });
 
 builder.Services.AddMemoryCache();

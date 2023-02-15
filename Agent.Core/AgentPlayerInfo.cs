@@ -6,7 +6,6 @@ namespace TGS.Services.Agent;
 public record AgentPlayerInfo(
     string PlayerCode,
     string Username,
-    decimal Balance,
     DateTimeOffset? RegisteredTime,
     string? AreaCode,
     string? Phone,

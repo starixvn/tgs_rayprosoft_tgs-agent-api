@@ -9,7 +9,8 @@ data:
         "ValidateCodeBaseUrl": "http://validatecode-api",
         "PaymentServiceBaseUrl": "http://payment-api",
         "BrandCertificateBaseUrl": "http://brand-cert-api",
-        "PlayerServiceBaseUrl": "http://player-api"
+        "PlayerServiceBaseUrl": "http://player-api",
+        "CashBaseUrl": "http://cashservice-api"
       },
       "Logging": {
         "LogLevel": {
