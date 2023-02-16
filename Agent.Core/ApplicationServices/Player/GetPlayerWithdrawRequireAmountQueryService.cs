@@ -7,11 +7,11 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class GetPlayerBucketAmountQueryService : IGetService<GetPlayerWithdrawRequireAmountQuery, decimal>
+internal class GetPlayerWithdrawRequireAmountQueryService : IGetService<GetPlayerWithdrawRequireAmountQuery, decimal>
 {
     private readonly IPlayerBucketClient _playerBucketClient;
 
-    public GetPlayerBucketAmountQueryService(IPlayerBucketClient playerBucketClient)
+    public GetPlayerWithdrawRequireAmountQueryService(IPlayerBucketClient playerBucketClient)
     {
         _playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
     }

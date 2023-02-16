@@ -205,7 +205,7 @@ public class PlayerTests
     {
         var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
 
-        var sut = new GetPlayerBucketAmountQueryService(fakePlayerBucketClient);
+        var sut = new GetPlayerWithdrawRequireAmountQueryService(fakePlayerBucketClient);
 
         var query = new GetPlayerWithdrawRequireAmountQuery("4uhyekcw88dy");
 
