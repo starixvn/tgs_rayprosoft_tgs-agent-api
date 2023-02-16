@@ -63,7 +63,7 @@ public class PlayerController : ControllerBase
         return queryService.GetAsync(query);
     }
 
-    [HttpGet("balance/{playerCode}")]
+    [HttpGet("balance/{playerCode}",Name = "GetPlayerBalance")]
     [Description("Get a player balance")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public ValueTask<decimal> GetPlayerBalanceAsync(
@@ -152,7 +152,8 @@ public class PlayerController : ControllerBase
             });
     }
 
-    [HttpGet("withdraw/amount")]
+    [HttpGet("withdraw/amount/{playerCode}",Name = "GetPlayerWithdrawRequireAmount")]
+    [Description("Get a player withdraw require amount")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<decimal> GetPlayerWithdrawRequireAmountAsync(
         [FromServices] IGetService<GetPlayerWithdrawRequireAmountQuery, decimal> getService,
