@@ -109,7 +109,7 @@ public class PlayerController : ControllerBase
             Items = queryService.QueryAsync(query)
                 .Select(playerInfo => new PlayerInfoModel
                 {
-                    AreaCode = playerInfo.AreaCode,                    
+                    AreaCode = playerInfo.AreaCode,
                     Phone = playerInfo.Phone,
                     PlayerCode = playerInfo.PlayerCode,
                     RegisteredTime = playerInfo.RegisteredTime,
@@ -150,6 +150,17 @@ public class PlayerController : ControllerBase
                 Id = info.Id,
                 Level = info.Level
             });
+    }
+
+    [HttpGet("withdraw/amount")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<decimal> GetPlayerWithdrawRequireAmountAsync(
+        [FromServices] IGetService<GetPlayerWithdrawRequireAmountQuery, decimal> getService,
+        string playerCode)
+    {
+        var query = new GetPlayerWithdrawRequireAmountQuery(playerCode);
+
+        return await getService.GetAsync(query).ConfigureAwait(false);
     }
 
     [HttpPut("email", Name = "SetEmail")]
