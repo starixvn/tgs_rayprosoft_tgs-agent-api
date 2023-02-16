@@ -11,6 +11,7 @@ using Tgs.BrandCertificate.Clients;
 using Tgs.CashService.Client;
 using Tgs.Paging;
 using Tgs.PlayerService.Client;
+using Tgs.Service.PlayerBuckets;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
@@ -106,7 +107,7 @@ public class PlayerTests
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 
-        var sut = new GetPlayerBalanceQueryService(fakePlayerServiceClient, fakeCashServiceClient);        
+        var sut = new GetPlayerBalanceQueryService(fakePlayerServiceClient, fakeCashServiceClient);
 
         var query = new GetPlayerBalanceQuery(
             agentId,
@@ -197,6 +198,24 @@ public class PlayerTests
                 query.RegisterHost,
                 query.Status,
                 query.VipId);
+    }
+
+    [Test]
+    public async Task Can_Get_Player_Withdraw_Require_Amount()
+    {
+        var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
+
+        var sut = new GetPlayerWithdrawRequireAmountQueryService(fakePlayerBucketClient);
+
+        var query = new GetPlayerWithdrawRequireAmountQuery("4uhyekcw88dy");
+
+        _ = fakePlayerBucketClient
+            .ReadBucketsAsync(Arg.Is(query.PlayerCode), Arg.Any<CancellationToken>())
+            .Returns(new ReadBucketResult(168M, Guid.NewGuid()));
+
+        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+
+        Assert.AreEqual(168M, actual);
     }
 
     [Test]
