@@ -18,6 +18,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.PlayerBucket.Clients.DependencyInjection;
 using TGS.Apis.AgentApi;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -166,6 +167,8 @@ builder.Services.AddCashServiceClient((options, sp) =>
 
     options.BaseUrl = config.GetValue<Uri>("Agent:CashBaseUrl");
 });
+
+builder.Services.AddPlayerBucketClient(httpBuilder => { });
 
 builder.Services.AddMemoryCache();
 
