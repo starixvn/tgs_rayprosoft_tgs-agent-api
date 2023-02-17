@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -200,7 +199,8 @@ builder.Services
 
                    options.Url = config.GetValue<string>("NatsSetting:Urls");
                });
-    });
+    })
+    .AddNatsGlobPatternExchange("*");
 
 builder.Services.AddHttpContextAccessor();
 
