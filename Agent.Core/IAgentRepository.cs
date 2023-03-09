@@ -27,17 +27,7 @@ public interface IAgentRepository
         DateTimeOffset? endRegisteredOn,
         string? registerHost,
         PlayerStatus? status,
-        Guid? vipId,
-        Paging<AgentPlayerInfo> paging);
-
-    ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
-        Guid agentId,
-        string? username,
-        DateTimeOffset? beginRegisteredOn,
-        DateTimeOffset? endRegisteredOn,
-        string? registerHost,
-        PlayerStatus? status,
-        Guid? vipId);
+        Guid? vipId);   
 
     IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
 

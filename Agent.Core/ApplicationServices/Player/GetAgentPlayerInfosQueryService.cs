@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
-using Tgs.ServiceUtility;
+using System.Threading.Tasks;
 using Tgs.Paging;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class GetAgentPlayerInfosQueryService : IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo>
+internal class GetAgentPlayerInfosQueryService : IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo>,
+    IGetService<GetAgentPlayerInfosQuery, int>
 {
     private readonly IAgentRepository _agentRepository;
 
@@ -16,29 +19,28 @@ internal class GetAgentPlayerInfosQueryService : IQueryService<GetAgentPlayerInf
         _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
     }
 
-    public IAsyncEnumerable<AgentPlayerInfo> QueryAsync(
-        GetAgentPlayerInfosQuery query,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<int> GetAsync(GetAgentPlayerInfosQuery query, CancellationToken cancellationToken = default)
     {
-        var paging = new Paging<AgentPlayerInfo>
-        {
-            Page = query.Paging.Page,
-            RowCount = query.Paging.RowCount
-        };
+        var data = MakeDataSourceAsync(query);
 
-        if (!string.IsNullOrEmpty(query.Paging.SortBy))
-        {
-            paging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
-        }
+        return await data.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
 
-        return _agentRepository.QueryAgentPlayerInfosAsync(
-            query.AgentId,
+    public IAsyncEnumerable<AgentPlayerInfo> MakeDataSourceAsync(GetAgentPlayerInfosQuery query)
+            => _agentRepository.QueryAgentPlayerInfosAsync(query.AgentId,
             query.Username,
             query.BeginRegisteredOn,
             query.EndRegisteredOn,
             query.RegisterHost,
             query.Status,
-            query.VipId,
-            paging);
+            query.VipId);
+
+    public IAsyncEnumerable<AgentPlayerInfo> QueryAsync(
+        GetAgentPlayerInfosQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var data = MakeDataSourceAsync(query);
+
+        return data.ApplyOrderBy(query.Paging).ApplyPaging(query.Paging);
     }
 }

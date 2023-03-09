@@ -1,4 +1,5 @@
 ﻿using System;
+using Tgs.Paging;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
@@ -11,4 +12,4 @@ public record GetAgentPlayerInfosQuery(
     string? RegisterHost,
     PlayerStatus? Status,
     Guid? VipId,
-    PagingInfo Paging);
+    Paging<AgentPlayerInfo> Paging);
