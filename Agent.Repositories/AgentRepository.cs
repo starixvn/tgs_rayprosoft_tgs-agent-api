@@ -135,8 +135,7 @@ internal class AgentRepository : IAgentRepository
                 status,
                 vipId)
             .ApplyOrderBy(paging)
-            .ApplyPaging(paging)
-            .ToAsyncEnumerable();
+            .ApplyPaging(paging);
 
     public async ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
         Guid agentId,
@@ -202,7 +201,7 @@ internal class AgentRepository : IAgentRepository
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
     }
 
-    private IQueryable<AgentPlayerInfo> QueryAgentPlayerInfos(
+    private IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfos(
         Guid agentId,
         string? username,
         DateTimeOffset? beginRegisteredOn,
@@ -262,7 +261,7 @@ internal class AgentRepository : IAgentRepository
             query = query.Where(p =>
                 p.Host != null
                 && p.Host.ToLower() == registerHost.ToLower());
-        }
+        }        
 
         return query.Select(p => new AgentPlayerInfo(
             p.PlayerCode,
@@ -272,6 +271,6 @@ internal class AgentRepository : IAgentRepository
             p.Phone,
             p.Host,
             p.Status,
-            p.Level));
+            p.Level)).ToAsyncEnumerable();
     }
 }
