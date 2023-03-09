@@ -63,7 +63,7 @@ public class PlayerController : ControllerBase
         return queryService.GetAsync(query);
     }
 
-    [HttpGet("balance/{playerCode}",Name = "GetPlayerBalance")]
+    [HttpGet("balance/{playerCode}", Name = "GetPlayerBalance")]
     [Description("Get a player balance")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public ValueTask<decimal> GetPlayerBalanceAsync(
@@ -86,12 +86,13 @@ public class PlayerController : ControllerBase
     {
         var agentToken = HttpContext.Items.GetAgentTokenData();
 
-        var paging = new Paging<PlayerInfoModel>();
+        var paging = new Paging<AgentPlayerInfo>();
 
-        if (pagingRequest.ShowAll)
-        {
-            throw new InvalidOperationException("showall is not supported");
-        }
+        paging.SortByPropertyName(
+            string.IsNullOrWhiteSpace(pagingRequest.SortBy)
+                ? nameof(AgentPlayerInfo.RegisteredTime)
+                : pagingRequest.SortBy,
+            pagingRequest.IsDesc);
 
         var query = new GetAgentPlayerInfosQuery(
             agentToken.AgentId,
@@ -101,7 +102,7 @@ public class PlayerController : ControllerBase
             request.RegisterHost,
             request.Status,
             request.VipId,
-            new PagingInfo(pagingRequest.Page, pagingRequest.Rows, pagingRequest.SortBy, paging.IsDesc));
+            paging);
 
         return new PagingResponse<PlayerInfoModel>
         {
@@ -119,7 +120,6 @@ public class PlayerController : ControllerBase
                     VipLevel = playerInfo.VipLevel
                 })
                 .ToEnumerable()
-                
         };
     }
 
@@ -153,7 +153,7 @@ public class PlayerController : ControllerBase
             });
     }
 
-    [HttpGet("withdraw/amount/{playerCode}",Name = "GetPlayerWithdrawRequireAmount")]
+    [HttpGet("withdraw/amount/{playerCode}", Name = "GetPlayerWithdrawRequireAmount")]
     [Description("Get a player withdraw require amount")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<decimal> GetPlayerWithdrawRequireAmountAsync(

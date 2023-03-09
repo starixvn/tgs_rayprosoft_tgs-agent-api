@@ -124,90 +124,6 @@ internal class AgentRepository : IAgentRepository
         DateTimeOffset? endRegisteredOn,
         string? registerHost,
         PlayerStatus? status,
-        Guid? vipId,
-        Paging<AgentPlayerInfo> paging)
-        => QueryAgentPlayerInfos(
-                agentId,
-                username,
-                beginRegisteredOn,
-                endRegisteredOn,
-                registerHost,
-                status,
-                vipId)
-            .ApplyOrderBy(paging)
-            .ApplyPaging(paging);
-
-    public async ValueTask<int> QueryAgentPlayerInfosTotalCountAsync(
-        Guid agentId,
-        string? username,
-        DateTimeOffset? beginRegisteredOn,
-        DateTimeOffset? endRegisteredOn,
-        string? registerHost,
-        PlayerStatus? status,
-        Guid? vipId)
-        => await QueryAgentPlayerInfos(
-                agentId,
-                username,
-                beginRegisteredOn,
-                endRegisteredOn,
-                registerHost,
-                status,
-                vipId)
-            .CountAsync()
-            .ConfigureAwait(false);
-
-    public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
-    {
-        var rows = _tgsRepository.SystemLocalizations.AsQueryable()
-            .Where(loc => loc.SystemCode == "AGENT-API" && loc.CultureCode == cultureCode)
-            .Select(loc => new
-            {
-                loc.MessageId,
-                loc.Text
-            });
-
-        return rows.ToAsyncEnumerable()
-            .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
-    }
-
-    public async ValueTask SetPasswordAsync(
-        Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
-    {
-        var agent = await _tgsRepository.Agents
-            .FindAsync(agentId)
-            .ConfigureAwait(false);
-
-        agent!.Password = newPassword;
-        agent!.Salt = newSalt;
-        agent!.UpdatedOn = updatedOn;
-
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-    }
-
-    public async ValueTask SetPayPasswordAsync(
-        Guid agentId,
-        byte[] newPassword,
-        byte[] newSalt,
-        DateTimeOffset updatedOn)
-    {
-        var agent = await _tgsRepository.Agents
-            .FindAsync(agentId)
-            .ConfigureAwait(false);
-
-        agent!.WithdrawPassword = newPassword;
-        agent!.WithdrawSalt = newSalt;
-        agent!.UpdatedOn = updatedOn;
-
-        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-    }
-
-    private IAsyncEnumerable<AgentPlayerInfo> QueryAgentPlayerInfos(
-        Guid agentId,
-        string? username,
-        DateTimeOffset? beginRegisteredOn,
-        DateTimeOffset? endRegisteredOn,
-        string? registerHost,
-        PlayerStatus? status,
         Guid? vipId)
     {
         var playerQuery = _tgsRepository.Players
@@ -261,7 +177,7 @@ internal class AgentRepository : IAgentRepository
             query = query.Where(p =>
                 p.Host != null
                 && p.Host.ToLower() == registerHost.ToLower());
-        }        
+        }
 
         return query.Select(p => new AgentPlayerInfo(
             p.PlayerCode,
@@ -272,5 +188,50 @@ internal class AgentRepository : IAgentRepository
             p.Host,
             p.Status,
             p.Level)).ToAsyncEnumerable();
+    }   
+
+    public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
+    {
+        var rows = _tgsRepository.SystemLocalizations.AsQueryable()
+            .Where(loc => loc.SystemCode == "AGENT-API" && loc.CultureCode == cultureCode)
+            .Select(loc => new
+            {
+                loc.MessageId,
+                loc.Text
+            });
+
+        return rows.ToAsyncEnumerable()
+            .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
     }
+
+    public async ValueTask SetPasswordAsync(
+        Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+    {
+        var agent = await _tgsRepository.Agents
+            .FindAsync(agentId)
+            .ConfigureAwait(false);
+
+        agent!.Password = newPassword;
+        agent!.Salt = newSalt;
+        agent!.UpdatedOn = updatedOn;
+
+        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async ValueTask SetPayPasswordAsync(
+        Guid agentId,
+        byte[] newPassword,
+        byte[] newSalt,
+        DateTimeOffset updatedOn)
+    {
+        var agent = await _tgsRepository.Agents
+            .FindAsync(agentId)
+            .ConfigureAwait(false);
+
+        agent!.WithdrawPassword = newPassword;
+        agent!.WithdrawSalt = newSalt;
+        agent!.UpdatedOn = updatedOn;
+
+        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+    }    
 }

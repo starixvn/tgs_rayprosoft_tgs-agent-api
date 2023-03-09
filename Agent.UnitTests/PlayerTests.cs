@@ -138,7 +138,7 @@ public class PlayerTests
 
         var sut = new GetAgentPlayerInfosQueryService(fakeAgentRepository);
 
-        var pagingInfo = new PagingInfo(1, 10, null, false);
+        var pagingInfo = new Paging<AgentPlayerInfo>() { Page = 1, RowCount = 10, IsDesc = false };
 
         var query = new GetAgentPlayerInfosQuery(
             agentId,
@@ -161,8 +161,7 @@ public class PlayerTests
                 query.EndRegisteredOn,
                 query.RegisterHost,
                 query.Status,
-                query.VipId,
-                Arg.Any<Paging<AgentPlayerInfo>>());
+                query.VipId);
     }
 
     [Test]
@@ -172,9 +171,9 @@ public class PlayerTests
 
         var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-        var sut = new CountAgentPlayerInfosQueryService(fakeAgentRepository);
+        var sut = new GetAgentPlayerInfosQueryService(fakeAgentRepository);
 
-        var pagingInfo = new PagingInfo(1, 10, null, false);
+        var pagingInfo = new Paging<AgentPlayerInfo>() { Page = 1, RowCount = 10, IsDesc = false };
 
         var query = new GetAgentPlayerInfosQuery(
             agentId,
@@ -190,7 +189,7 @@ public class PlayerTests
 
         _ = fakeAgentRepository
             .Received(1)
-            .QueryAgentPlayerInfosTotalCountAsync(
+            .QueryAgentPlayerInfosAsync(
                 query.AgentId,
                 query.Username,
                 query.BeginRegisteredOn,
