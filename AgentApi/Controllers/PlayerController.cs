@@ -86,7 +86,12 @@ public class PlayerController : ControllerBase
     {
         var agentToken = HttpContext.Items.GetAgentTokenData();
 
-        var paging = new Paging<AgentPlayerInfo>();
+        var paging = new Paging<AgentPlayerInfo>
+        {
+            Page = pagingRequest.Page,
+            RowCount = pagingRequest.Rows,
+            IsDesc = pagingRequest.IsDesc,
+        };
 
         paging.SortByPropertyName(
             string.IsNullOrWhiteSpace(pagingRequest.SortBy)
