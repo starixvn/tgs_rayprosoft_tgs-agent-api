@@ -26,15 +26,6 @@ internal class GetAgentPlayerInfosQueryService : IQueryService<GetAgentPlayerInf
         return await data.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    public IAsyncEnumerable<AgentPlayerInfo> MakeDataSourceAsync(GetAgentPlayerInfosQuery query)
-            => _agentRepository.QueryAgentPlayerInfosAsync(query.AgentId,
-            query.Username,
-            query.BeginRegisteredOn,
-            query.EndRegisteredOn,
-            query.RegisterHost,
-            query.Status,
-            query.VipId);
-
     public IAsyncEnumerable<AgentPlayerInfo> QueryAsync(
         GetAgentPlayerInfosQuery query,
         CancellationToken cancellationToken = default)
@@ -43,4 +34,13 @@ internal class GetAgentPlayerInfosQueryService : IQueryService<GetAgentPlayerInf
 
         return data.ApplyOrderBy(query.Paging).ApplyPaging(query.Paging);
     }
+
+    private IAsyncEnumerable<AgentPlayerInfo> MakeDataSourceAsync(GetAgentPlayerInfosQuery query)
+        => _agentRepository.QueryAgentPlayerInfosAsync(query.AgentId,
+            query.Username,
+            query.BeginRegisteredOn,
+            query.EndRegisteredOn,
+            query.RegisterHost,
+            query.Status,
+            query.VipId);
 }
