@@ -352,4 +352,25 @@ public class PlayerTests
 
         await sut.ExecuteAsync(brandId, json, default);
     }
+
+    [Test]
+    public async Task Can_Get_Player_Payment_Overview()
+    {
+        var playerCode = "playerCode";
+
+        var fakePaymentServiceClient = Substitute.For<Tgs.Payment.Clients.IPaymentServiceClient>();
+
+        var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);        
+
+        var query = new GetPlayerPaymentOverviewQuery(playerCode);
+
+        _ = fakePaymentServiceClient.
+            GetPlayerPaymentOverviewAsync(query.PlayerCode)
+            .Returns(new Tgs.Payment.Clients.PaymentOverview(100M,0M,DateTime.Now,0M,0M,null,new DateOnly(2023,4,1),100M,0M));
+
+        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual(100M, actual.TotalDepositAmount);
+    }
 }

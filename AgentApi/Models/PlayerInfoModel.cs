@@ -11,6 +11,9 @@ public class PlayerInfoModel
     [JsonPropertyName("areacode")]
     public string? AreaCode { get; init; }
 
+    [JsonPropertyName("lastloginon")]
+    public DateTimeOffset? LastLoginOn { get; init; }
+
     [JsonPropertyName("phone")]
     public string? Phone { get; init; }
 
@@ -25,6 +28,12 @@ public class PlayerInfoModel
 
     [JsonPropertyName("status")]
     public PlayerStatus Status { get; init; }
+
+    [JsonPropertyName("totaldepositamount")]
+    public decimal TotalDepositAmount { get; init; }
+
+    [JsonPropertyName("totalwithdrawamount")]
+    public decimal TotalWithdrawAmount { get; set; }
 
     [JsonPropertyName("username")]
     public string Username { get; init; } = default!;

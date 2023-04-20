@@ -153,6 +153,13 @@ internal class AgentRepository : IAgentRepository
             where ipRecord.IpType == 1
             select ipRecord;
 
+        var playerLoginQuery = 
+            from loginRecord in _tgsRepository.PlayerIpRecords.AsQueryable()
+            join player in playerQuery
+                on loginRecord.PlayerCode equals player.PlayerCode
+            where loginRecord.IpType == 2
+            select loginRecord;
+
         var query =
             from player in playerQuery
             join vip in _tgsRepository.VipLevels.AsQueryable()
@@ -160,6 +167,9 @@ internal class AgentRepository : IAgentRepository
             join ipRecord in playerIpQuery
                 on player.PlayerCode equals ipRecord.PlayerCode into ipRecordGroup
             from ipRecord in ipRecordGroup.DefaultIfEmpty()
+            join loginRecord in playerLoginQuery
+                on player.PlayerCode equals loginRecord.PlayerCode into loginRecordGroup
+            from loginRecord in loginRecordGroup.DefaultIfEmpty()
             select new
             {
                 player.PlayerCode,
@@ -169,7 +179,8 @@ internal class AgentRepository : IAgentRepository
                 player.Phone,
                 ipRecord.Host,
                 player.Status,
-                vip.Level
+                vip.Level,
+                loginRecord.RecordOn
             };
 
         if (!string.IsNullOrWhiteSpace(registerHost))
@@ -187,7 +198,8 @@ internal class AgentRepository : IAgentRepository
             p.Phone,
             p.Host,
             p.Status,
-            p.Level)).ToAsyncEnumerable();
+            p.Level,
+            p.RecordOn)).ToAsyncEnumerable();
     }   
 
     public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
