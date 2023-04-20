@@ -6,9 +6,10 @@ namespace TGS.Services.Agent;
 public record AgentPlayerInfo(
     string PlayerCode,
     string Username,
-    DateTimeOffset? RegisteredTime,
+    DateTimeOffset? RegisteredTime,    
     string? AreaCode,
     string? Phone,
     string? RegisterHost,
     PlayerStatus Status,
-    int? VipLevel);
+    int? VipLevel,
+    DateTimeOffset? LastLoginOn);

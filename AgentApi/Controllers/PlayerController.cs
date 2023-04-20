@@ -81,6 +81,7 @@ public class PlayerController : ControllerBase
     public async ValueTask<PagingResponse<PlayerInfoModel>> GetPlayerInfosAsync(
         [FromServices] IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo> queryService,
         [FromServices] IGetService<GetAgentPlayerInfosQuery, int> countService,
+        [FromServices] IGetService<GetPlayerPaymentOverviewQuery, PlayerPaymentOverview> getService,
         [FromQuery] GetAgentPlayersRequest request,
         [FromQuery] PagingRequest pagingRequest)
     {
@@ -113,16 +114,26 @@ public class PlayerController : ControllerBase
         {
             TotalCount = await countService.GetAsync(query).ConfigureAwait(false),
             Items = queryService.QueryAsync(query)
-                .Select(playerInfo => new PlayerInfoModel
+                .Select(playerInfo =>
                 {
-                    AreaCode = playerInfo.AreaCode,
-                    Phone = playerInfo.Phone,
-                    PlayerCode = playerInfo.PlayerCode,
-                    RegisteredTime = playerInfo.RegisteredTime,
-                    RegisterHost = playerInfo.RegisterHost,
-                    Status = playerInfo.Status,
-                    Username = playerInfo.Username,
-                    VipLevel = playerInfo.VipLevel
+                    var overview = getService
+                        .GetAsync(new GetPlayerPaymentOverviewQuery(playerInfo.PlayerCode))
+                        .Result;
+
+                    return new PlayerInfoModel
+                    {
+                        AreaCode = playerInfo.AreaCode,
+                        Phone = playerInfo.Phone,
+                        PlayerCode = playerInfo.PlayerCode,
+                        LastLoginOn = playerInfo.LastLoginOn,
+                        RegisteredTime = playerInfo.RegisteredTime,
+                        RegisterHost = playerInfo.RegisterHost,
+                        Status = playerInfo.Status,
+                        Username = playerInfo.Username,
+                        VipLevel = playerInfo.VipLevel,
+                        TotalDepositAmount = overview.TotalDepositAmount,
+                        TotalWithdrawAmount = overview.TotalWithdrawAmount,
+                    };
                 })
                 .ToEnumerable()
         };
