@@ -152,6 +152,11 @@ builder.Services.AddPlayerServiceClient((options, sp) =>
     var config = sp.GetRequiredService<IConfiguration>();
 
     options.BaseUrl = config.GetValue<Uri>("Agent:PlayerServiceBaseUrl");
+}).AddAgentClient((options, sp) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+
+    options.BaseUrl = config.GetValue<Uri>("Agent:AgentServiceBaseUrl");
 });
 
 builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
@@ -204,7 +209,7 @@ builder.Services
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+builder.Services.AddMediatR(r => r.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 builder.Services.AddCors(options =>
 {
@@ -221,6 +226,22 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services
+    .AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder => tracerProviderBuilder
+        .SetResourceBuilder(ResourceBuilder.CreateDefault()
+            .AddEnvironmentVariableDetector())
+        .AddSource("Tgs.*")
+        .AddSource("TGS.*")
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation(options =>
+        {
+            options.SetDbStatementForText = true;
+        })
+        .AddProfileViewExporter()
+        .AddOtlpExporter())
+    .WithMetrics()
+    .Services
     .AddOptions<OtlpExporterOptions>()
     .Configure<IConfiguration>((options, config) =>
     {
@@ -232,20 +253,6 @@ builder.Services
         config.GetSection("Opentelemetry:Tracing").Bind(options);
     })
     .Services
-    .AddOpenTelemetryTracing(
-        tracerProviderBuilder => tracerProviderBuilder
-            .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                .AddEnvironmentVariableDetector())
-            .AddSource("Tgs.*")
-            .AddSource("TGS.*")
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddEntityFrameworkCoreInstrumentation(options =>
-            {
-                options.SetDbStatementForText = true;
-            })
-            .AddProfileViewExporter(_ => { })
-            .AddOtlpExporter())
     .Configure<AspNetCoreInstrumentationOptions>(options =>
     {
         options.Filter = httpContext =>

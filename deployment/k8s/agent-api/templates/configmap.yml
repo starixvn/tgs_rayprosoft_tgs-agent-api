@@ -10,7 +10,8 @@ data:
         "PaymentServiceBaseUrl": "http://payment-api",
         "BrandCertificateBaseUrl": "http://brand-cert-api",
         "PlayerServiceBaseUrl": "http://player-api",
-        "CashBaseUrl": "http://cashservice-api"
+        "CashBaseUrl": "http://cashservice-api",
+        "AgentServiceBaseUrl": "http://agent-service"
       },
       "Logging": {
         "LogLevel": {
