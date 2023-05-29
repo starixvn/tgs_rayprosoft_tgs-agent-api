@@ -27,7 +27,7 @@ public class SubAgentController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    [HttpPost("setinfo", Name = "SetSubAgentInfoAsync")]
+    [HttpPost("setinfo", Name = "SetSubAgentInfo")]
     public async ValueTask SetSubAgentInfoAsync(
         [FromServices] ICommandService<SetSubAgentInfoCommand> commandService,
         SetSubAgentInfoRequest request)
