@@ -13,7 +13,7 @@ namespace TGS.Apis.AgentApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class SubAgentController : ControllerBase
 {
-    [HttpPost("resetPwd", Name = "ResetSubAgentPassword")]
+    [HttpPost("resetpwd", Name = "ResetSubAgentPassword")]
     public async ValueTask ResetSubAgentPasswordAsync(
         [FromServices] ICommandService<ResetSubAgentPasswordCommand> commandService,
         ResetSubAgentPasswordRequest request)
@@ -27,7 +27,7 @@ public class SubAgentController : ControllerBase
             .ConfigureAwait(false);
     }
 
-    [HttpPost("setInfo", Name = "SetSubAgentInfoAsync")]
+    [HttpPost("setinfo", Name = "SetSubAgentInfoAsync")]
     public async ValueTask SetSubAgentInfoAsync(
         [FromServices] ICommandService<SetSubAgentInfoCommand> commandService,
         SetSubAgentInfoRequest request)
