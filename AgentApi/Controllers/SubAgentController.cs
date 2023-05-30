@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
+using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Services.Agent.ApplicationServices.SubAgent;
@@ -14,6 +15,7 @@ namespace TGS.Apis.AgentApi.Controllers;
 public class SubAgentController : ControllerBase
 {
     [HttpPatch("password", Name = "ResetSubAgentPassword")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask ResetSubAgentPasswordAsync(
         [FromServices] ICommandService<ResetSubAgentPasswordCommand> commandService,
         [FromBody] ResetSubAgentPasswordRequest request)
@@ -28,6 +30,7 @@ public class SubAgentController : ControllerBase
     }
 
     [HttpPatch("info", Name = "SetSubAgentInfo")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async ValueTask SetSubAgentInfoAsync(
         [FromServices] ICommandService<SetSubAgentInfoCommand> commandService,
         [FromBody] SetSubAgentInfoRequest request)
