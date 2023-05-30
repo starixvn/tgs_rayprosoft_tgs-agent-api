@@ -16,12 +16,24 @@ internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCo
         _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
     }
 
-    public ValueTask ExecuteAsync(SetSubAgentInfoCommand command, CancellationToken cancellationToken = default)
-        => _agentClient.SetSubAgentInfoAsync(
-            new SetSubAgentInfoRequest(
-                command.AgentId,
+    public async ValueTask ExecuteAsync(SetSubAgentInfoCommand command, CancellationToken cancellationToken = default)
+    {
+        var subAgent = await _agentClient
+            .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (subAgent is null)
+            return;
+
+        if (command.AgentId != subAgent.ParentAgentId)
+            return;
+
+        await _agentClient
+            .SetAgentInfoAsync(new SetAgentInfoRequest(
                 command.SubAgentId,
                 command.RealName,
                 command.Email,
-                command.Phone), cancellationToken);
+                command.Phone), cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

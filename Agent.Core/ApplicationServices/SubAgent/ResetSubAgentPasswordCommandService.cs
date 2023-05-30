@@ -16,7 +16,20 @@ internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAge
         _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
     }
 
-    public ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command, CancellationToken cancellationToken = default)
-    => _agentClient.ResetSubAgentPasswordAsync(
-        new ResetSubAgentPasswordRequest(command.AgentId, command.SubAgentId, command.Password), cancellationToken);
+    public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command, CancellationToken cancellationToken = default)
+    {
+        var subAgent = await _agentClient
+            .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
+            .ConfigureAwait(false);
+
+        if (subAgent is null)
+            return;
+
+        if (command.AgentId != subAgent.ParentAgentId)
+            return;
+
+        await _agentClient
+            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password), cancellationToken)
+            .ConfigureAwait(false);
+    }
 }
