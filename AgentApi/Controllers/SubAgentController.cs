@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.ServiceUtility;
@@ -14,9 +15,22 @@ namespace TGS.Apis.AgentApi.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class SubAgentController : ControllerBase
 {
+    [HttpGet("{subAgentId}/dividendrange", Name = "GetSubAgentDividendRange")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask<(decimal, decimal)> GetSubAgentDividendRangeAsync(
+        [FromServices] IGetService<GetSubAgentDividendRangeQuery, (decimal, decimal)> getService,
+        Guid subAgentId)
+    {
+        var agentToken = HttpContext.Items.GetAgentTokenData();
+
+        return await getService
+            .GetAsync(new GetSubAgentDividendRangeQuery(agentToken.AgentId, subAgentId))
+            .ConfigureAwait(false);
+    }
+
     [HttpPatch("password", Name = "ResetSubAgentPassword")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async ValueTask ResetSubAgentPasswordAsync(
+    public ValueTask ResetSubAgentPasswordAsync(
         [FromServices] ICommandService<ResetSubAgentPasswordCommand> commandService,
         [FromBody] ResetSubAgentPasswordRequest request)
     {
@@ -24,9 +38,23 @@ public class SubAgentController : ControllerBase
 
         var agentId = agentTokenData.AgentId;
 
-        await commandService
-            .ExecuteAsync(new ResetSubAgentPasswordCommand(agentId, request.SubAgentId, request.Password), HttpContext.RequestAborted)
-            .ConfigureAwait(false);
+        return commandService
+             .ExecuteAsync(new ResetSubAgentPasswordCommand(agentId, request.SubAgentId, request.Password), HttpContext.RequestAborted);
+    }
+
+    [HttpPatch("dividend", Name = "SetSubAgentDividendPercentage")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public ValueTask SetSubAgentDividendPercentageAsync(
+        [FromServices] ICommandService<SetSubAgentDividendPercentageCommand> commandService,
+        [FromBody] SetSubAgentDividendPercentageRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var agentId = agentTokenData.AgentId;
+        var brandId = HttpContext.Items.GetBrandId();
+
+        return commandService
+            .ExecuteAsync(new SetSubAgentDividendPercentageCommand(brandId, agentId, request.SubAgentId, request.DividendPercentage));
     }
 
     [HttpPatch("info", Name = "SetSubAgentInfo")]

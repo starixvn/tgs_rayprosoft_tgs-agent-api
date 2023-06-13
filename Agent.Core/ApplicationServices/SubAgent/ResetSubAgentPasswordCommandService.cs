@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using Tgs.Agent.Client.Models.Enums;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
@@ -30,6 +31,14 @@ internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAge
 
         await _agentClient
             .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password), cancellationToken)
+            .ConfigureAwait(false);
+
+        var parentAgent = await _agentClient
+            .GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
+            .ConfigureAwait(false);
+
+        await _agentClient
+            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(subAgent.Id, AgentOperation.Password, parentAgent!.Username), cancellationToken)
             .ConfigureAwait(false);
     }
 }
