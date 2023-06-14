@@ -1,25 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture.NUnit3;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using TGS.Core.Models.Enums;
+using Tgs.PlayerService.Client;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models;
+using Tgs.Report.Client.Models.AgentWinLoss;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.AgentWinLoss;
 using AgentPlayerSpecialDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentPlayerSpecialDetailModel;
 using AgentTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentTotalDetailModel;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using Tgs.Agent.Client;
-using Tgs.PlayerService.Client;
-using Tgs.Agent.Client.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Tgs.Report.Client.Models;
 using AgentWinLossModel = Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel;
 using CompanyTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.CompanyTotalDetailModel;
-using System.Threading;
 
 namespace Agent.UnitTests;
 
@@ -105,8 +105,9 @@ public class AgentWinLossTests
 
     [Test]
     [AutoData]
-    public async Task Get_Agent_Win_Loss_Breadcrumb_(
-        ChildAgentInfoModel[] childAgentInfoData)
+    public async Task Get_Agent_Win_Loss_Breadcrumb_By_Player(
+        ChildAgentInfoModel[] childAgentInfoData,
+        PlayerInfo playerInfo)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
@@ -121,7 +122,8 @@ public class AgentWinLossTests
         {
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            Username = "playerUsername",
+            MemberType = AccountType.Player
         };
 
         var breadcrumbData = new[]
@@ -130,9 +132,14 @@ public class AgentWinLossTests
         };
 
         reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
-
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+        playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
         var response = await sut.GetAsync(query);
+
+        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
+        _ = playerClient.Received(1).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(response.Any());
 
@@ -160,7 +167,7 @@ public class AgentWinLossTests
         {
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            MemberType = AccountType.Agent
         };
 
         var breadcrumbData = childAgentInfoData.Select(x => new BreadcrumbModel
@@ -171,9 +178,14 @@ public class AgentWinLossTests
         }).ToArray();
 
         reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
 
         var response = await sut.GetAsync(query);
+
+        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
+        _ = playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(response.Any());
 
@@ -202,13 +214,18 @@ public class AgentWinLossTests
         {
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            MemberType = AccountType.Agent
         };
 
         reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
 
         var response = await sut.GetAsync(query);
+
+        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
+        _ = playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(!response.Any());
     }
@@ -236,17 +253,19 @@ public class AgentWinLossTests
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
             Username = "",
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            MemberType = AccountType.Agent,
             DownLine = true
         };
 
         reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
         brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
-        _ = agentClient.Received(0).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+        _ = agentClient.Received(0)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
         _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
         _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
@@ -284,17 +303,19 @@ public class AgentWinLossTests
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
             Username = childAgentInfoData.First().AgentUsername,
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            MemberType = AccountType.Agent,
             DownLine = false
         };
 
         reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
         brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
-        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
         _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
         _ = reportClient.Received(1).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
@@ -312,11 +333,11 @@ public class AgentWinLossTests
     [Test]
     [AutoData]
     public async Task Get_Agent_Win_Loss_By_Player_Username(
-    ChildAgentInfoModel[] childAgentInfoData,
-    PagedResponse<AgentWinLossModel> agentWinLossData,
-    BrandInfo brandInfo,
-    PlayerInfo playerInfo,
-    Dictionary<string, string> playerProperties)
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo,
+        PlayerInfo playerInfo,
+        Dictionary<string, string> playerProperties)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
@@ -334,21 +355,23 @@ public class AgentWinLossTests
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
             Username = "playerUsername",
-            MemberType = TGS.Core.Models.Enums.AccountType.Player,
+            MemberType = AccountType.Player,
             DownLine = false
         };
 
         playerProperties["AgentId"] = childAgentInfoData.First().AgentId.ToString();
 
         reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
         brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
         playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
         playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
 
         var response = await sut.GetAsync(query);
 
-        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
         _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
         _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
@@ -367,9 +390,9 @@ public class AgentWinLossTests
     [Test]
     [AutoData]
     public async Task Get_Down_Line_Agent_Win_Loss_By_Agent_Username(
-    ChildAgentInfoModel[] childAgentInfoData,
-    PagedResponse<AgentWinLossModel> agentWinLossData,
-    BrandInfo brandInfo)
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
@@ -387,17 +410,19 @@ public class AgentWinLossTests
             BrandId = Guid.NewGuid(),
             AgentId = Guid.NewGuid(),
             Username = childAgentInfoData.First().AgentUsername,
-            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            MemberType = AccountType.Agent,
             DownLine = true
         };
 
         reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
         brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
-        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
         _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
         _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());

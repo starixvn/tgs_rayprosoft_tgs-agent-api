@@ -57,11 +57,11 @@ public class
 
         var response = await _reportClient.GetAgentWinLossBreadcrumbAsync(reportRequest);
 
-        var dd = await childAgents.AnyAsync(
+        var haveSubAgents = await childAgents.AnyAsync(
             x => response.Select(r => r.Id).Contains(x.ParentAgentId.ToString()) ||
                 response.Select(r => r.Id).Contains(x.AgentId.ToString()), cancellationToken);
 
-        return dd
+        return haveSubAgents
             ? response.Select(x => new AgentWinLossBreadcrumb
             {
                 Username = x.Name,
