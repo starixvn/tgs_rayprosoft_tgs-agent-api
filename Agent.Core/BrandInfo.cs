@@ -9,4 +9,5 @@ public record BrandInfo(
     bool AgentSmsEnabled,
     bool SmsRegisterFlowEnabled,
     AgentDividendType AgentDividendType,
-    string? DomainUrl);
+    string? DomainUrl,
+    decimal PlatformCharge);

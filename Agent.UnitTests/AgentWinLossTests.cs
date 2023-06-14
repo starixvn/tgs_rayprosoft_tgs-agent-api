@@ -1,0 +1,414 @@
+﻿using System;
+using System.Threading.Tasks;
+using AutoFixture.NUnit3;
+using NSubstitute;
+using NUnit.Framework;
+using TGS.Services.Agent;
+using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.AgentWinLoss;
+using AgentPlayerSpecialDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentPlayerSpecialDetailModel;
+using AgentTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentTotalDetailModel;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Tgs.Agent.Client;
+using Tgs.PlayerService.Client;
+using Tgs.Agent.Client.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Tgs.Report.Client.Models;
+using AgentWinLossModel = Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel;
+using CompanyTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.CompanyTotalDetailModel;
+using System.Threading;
+
+namespace Agent.UnitTests;
+
+[TestFixture]
+public class AgentWinLossTests
+{
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Player_Special_Detail(
+        GetAgentPlayerSpecialDetailQuery query,
+        AgentPlayerSpecialDetailModel data,
+        BrandInfo brandInfo)
+    {
+        var client = Substitute.For<IReportClient>();
+        var repository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentPlayerSpecialDetailQueryService(
+            client,
+            repository);
+
+        client.GetAgentPlayerSpecialDetailAsync(Arg.Any<GetAgentPlayerSpecialDetailRequest>()).Returns(data);
+
+        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        Assert.AreEqual(data.Bonus, response.Bonus);
+        Assert.AreEqual(data.BonusAdjust, response.BonusAdjust);
+        Assert.AreEqual(data.ProductFee, response.ProductFee);
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Total_Detail(
+        GetAgentTotalDetailQuery query,
+        AgentTotalDetailModel[] data,
+        BrandInfo brandInfo)
+    {
+        var client = Substitute.For<IReportClient>();
+        var repository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentTotalDetailQueryService(
+            client,
+            repository);
+
+        client.GetAgentTotalDetailAsync(Arg.Any<GetAgentTotalDetailRequest>()).Returns(data);
+
+        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        await response.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(data[index].AgentSpecial, x.AgentSpecial);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Company_Total_Detail(
+        GetCompanyTotalDetailQuery query,
+        CompanyTotalDetailModel[] data,
+        BrandInfo brandInfo)
+    {
+        var client = Substitute.For<IReportClient>();
+        var repository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetCompanyTotalDetailQueryService(
+            client,
+            repository);
+
+        client.GetCompanyTotalDetailAsync(Arg.Any<GetCompanyTotalDetailRequest>()).Returns(data);
+
+        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        await response.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(data[index].CompanySpecial, x.CompanySpecial);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Win_Loss_Breadcrumb_(
+        ChildAgentInfoModel[] childAgentInfoData)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new GetAgentWinLossBreadcrumbQueryService(
+            reportClient,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossBreadcrumbQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+        };
+
+        var breadcrumbData = new[]
+        {
+            new BreadcrumbModel { Id = childAgentInfoData.First().AgentId.ToString() }
+        };
+
+        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+
+        var response = await sut.GetAsync(query);
+
+        Assert.IsTrue(response.Any());
+
+        await response.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(breadcrumbData[index].Id, x.Id);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Win_Loss_Breadcrumb(
+        ChildAgentInfoModel[] childAgentInfoData)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new GetAgentWinLossBreadcrumbQueryService(
+            reportClient,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossBreadcrumbQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+        };
+
+        var breadcrumbData = childAgentInfoData.Select(x => new BreadcrumbModel
+        {
+            Id = x.AgentId.ToString(),
+            Name = x.AgentUsername,
+            Type = "Agent"
+        }).ToArray();
+
+        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+
+        var response = await sut.GetAsync(query);
+
+        Assert.IsTrue(response.Any());
+
+        await response.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(breadcrumbData[index].Id, x.Id);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Can_Not_Get_Agent_Win_Loss_Breadcrumb(
+        ChildAgentInfoModel[] childAgentInfoData,
+        BreadcrumbModel[] breadcrumbData)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new GetAgentWinLossBreadcrumbQueryService(
+            reportClient,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossBreadcrumbQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+        };
+
+        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+
+        var response = await sut.GetAsync(query);
+
+        Assert.IsTrue(!response.Any());
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Win_Loss_By_Logged_In_Agent(
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = "",
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            DownLine = true
+        };
+
+        reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        _ = agentClient.Received(0).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+
+        Assert.IsTrue(response.Items!.Any());
+
+        await response.Items!.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(agentWinLossData.Items[index].Id, x.Id);
+            Assert.AreEqual(agentWinLossData.Items[index].Turnover, x.Turnover);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Win_Loss_By_Agent_Username(
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = childAgentInfoData.First().AgentUsername,
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            DownLine = false
+        };
+
+        reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = reportClient.Received(1).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+
+        Assert.IsTrue(response.Items!.Any());
+
+        await response.Items!.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(agentWinLossData.Items[index].Id, x.Id);
+            Assert.AreEqual(agentWinLossData.Items[index].Turnover, x.Turnover);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Agent_Win_Loss_By_Player_Username(
+    ChildAgentInfoModel[] childAgentInfoData,
+    PagedResponse<AgentWinLossModel> agentWinLossData,
+    BrandInfo brandInfo,
+    PlayerInfo playerInfo,
+    Dictionary<string, string> playerProperties)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = "playerUsername",
+            MemberType = TGS.Core.Models.Enums.AccountType.Player,
+            DownLine = false
+        };
+
+        playerProperties["AgentId"] = childAgentInfoData.First().AgentId.ToString();
+
+        reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
+        playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
+
+        var response = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+        _ = reportClient.Received(1).GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>());
+
+        Assert.IsTrue(response.Items!.Any());
+
+        await response.Items!.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(agentWinLossData.Items[index].Id, x.Id);
+            Assert.AreEqual(agentWinLossData.Items[index].Turnover, x.Turnover);
+        });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Down_Line_Agent_Win_Loss_By_Agent_Username(
+    ChildAgentInfoModel[] childAgentInfoData,
+    PagedResponse<AgentWinLossModel> agentWinLossData,
+    BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new GetAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new GetAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = childAgentInfoData.First().AgentUsername,
+            MemberType = TGS.Core.Models.Enums.AccountType.Agent,
+            DownLine = true
+        };
+
+        reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>()).Returns(childAgentInfoData.ToAsyncEnumerable());
+        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        var response = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+
+        Assert.IsTrue(response.Items!.Any());
+
+        await response.Items!.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(agentWinLossData.Items[index].Id, x.Id);
+            Assert.AreEqual(agentWinLossData.Items[index].Turnover, x.Turnover);
+        });
+    }
+}
