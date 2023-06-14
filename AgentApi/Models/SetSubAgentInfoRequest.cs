@@ -6,10 +6,6 @@ namespace TGS.Apis.AgentApi.Models;
 
 public class SetSubAgentInfoRequest
 {
-    public string? Email { get; set; }
-
-    public string? Phone { get; set; }
-
     public string? RealName { get; set; }
 
     public Guid SubAgentId { get; set; }

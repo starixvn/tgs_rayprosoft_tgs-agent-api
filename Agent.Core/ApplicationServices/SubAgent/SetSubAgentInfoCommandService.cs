@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using Tgs.Agent.Client.Models.Enums;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
@@ -22,18 +23,25 @@ internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCo
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
             .ConfigureAwait(false);
 
-        if (subAgent is null)
-            return;
-
-        if (command.AgentId != subAgent.ParentAgentId)
+        if (subAgent is null || command.AgentId != subAgent.ParentAgentId)
             return;
 
         await _agentClient
             .SetAgentInfoAsync(new SetAgentInfoRequest(
                 command.SubAgentId,
-                command.RealName,
-                command.Email,
-                command.Phone), cancellationToken)
+                command.RealName), cancellationToken)
+            .ConfigureAwait(false);
+
+        var parentAgent = await _agentClient
+            .GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
+            .ConfigureAwait(false);
+
+        await _agentClient
+            .AddAgentAuditLogAsync(
+                new AddAgentAuditLogRequest(
+                    command.SubAgentId,
+                    AgentOperation.Info,
+                    parentAgent!.Username), cancellationToken)
             .ConfigureAwait(false);
     }
 }
