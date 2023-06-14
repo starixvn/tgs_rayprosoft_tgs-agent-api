@@ -21,10 +21,10 @@ public class SubAgentController : ControllerBase
         [FromServices] IGetService<GetSubAgentDividendRangeQuery, (decimal, decimal)> getService,
         Guid subAgentId)
     {
-        var agentToken = HttpContext.Items.GetAgentTokenData();
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
         return await getService
-            .GetAsync(new GetSubAgentDividendRangeQuery(agentToken.AgentId, subAgentId))
+            .GetAsync(new GetSubAgentDividendRangeQuery(agentTokenData.AgentId, subAgentId))
             .ConfigureAwait(false);
     }
 
@@ -39,7 +39,29 @@ public class SubAgentController : ControllerBase
         var agentId = agentTokenData.AgentId;
 
         return commandService
-             .ExecuteAsync(new ResetSubAgentPasswordCommand(agentId, request.SubAgentId, request.Password), HttpContext.RequestAborted);
+             .ExecuteAsync(new ResetSubAgentPasswordCommand(
+                 agentId,
+                 request.SubAgentId,
+                 request.Password), HttpContext.RequestAborted);
+    }
+
+    [HttpPatch("contact", Name = "SetSubAgentContact")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async ValueTask SetSubAgentContactAsync(
+        [FromServices] ICommandService<SetSubAgentContactCommand> commandService,
+        [FromBody] SetSubAgentContactRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var agentId = agentTokenData.AgentId;
+
+        await commandService
+            .ExecuteAsync(new SetSubAgentContactCommand(
+                agentId,
+                request.SubAgentId,
+                request.Email,
+                request.Phone), HttpContext.RequestAborted)
+            .ConfigureAwait(false);
     }
 
     [HttpPatch("dividend", Name = "SetSubAgentDividendPercentage")]
@@ -54,7 +76,11 @@ public class SubAgentController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         return commandService
-            .ExecuteAsync(new SetSubAgentDividendPercentageCommand(brandId, agentId, request.SubAgentId, request.DividendPercentage));
+            .ExecuteAsync(new SetSubAgentDividendPercentageCommand(
+                brandId,
+                agentId,
+                request.SubAgentId,
+                request.DividendPercentage));
     }
 
     [HttpPatch("info", Name = "SetSubAgentInfo")]
@@ -68,7 +94,10 @@ public class SubAgentController : ControllerBase
         var agentId = agentTokenData.AgentId;
 
         await commandService
-            .ExecuteAsync(new SetSubAgentInfoCommand(agentId, request.SubAgentId, request.RealName, request.Email, request.Phone), HttpContext.RequestAborted)
+            .ExecuteAsync(new SetSubAgentInfoCommand(
+                agentId,
+                request.SubAgentId,
+                request.RealName), HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 }
