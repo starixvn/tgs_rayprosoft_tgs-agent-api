@@ -53,7 +53,7 @@ public class AgentWinLossReportController : ControllerBase
     [Description("Get Agent WinLoss")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<GetAgentWinLossReportResponse>
-        GetBreadcrumbAsync(
+        GetAgentWinLossAsync(
             [FromServices] IGetService<GetAgentWinLossQuery, GetAgentWinLossResponse>
                 agentWinLossService,
             [FromQuery] GetAgentWinLossReportRequest request)
@@ -146,9 +146,9 @@ public class AgentWinLossReportController : ControllerBase
     [Description("Get Agent Total Detail")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<IEnumerable<AgentTotalDetailReportModel>>
-        GetAgentSpecialDetailAsync(
+        GetAgentTotalDetailAsync(
             [FromServices] IGetService<GetAgentTotalDetailQuery, IEnumerable<AgentTotalDetailModel>>
-                agentSpecialService,
+                agentTotalService,
             [FromQuery] GetAgentTotalDetailReportRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
@@ -161,7 +161,7 @@ public class AgentWinLossReportController : ControllerBase
             To = request.To,
         };
 
-        var response = await agentSpecialService
+        var response = await agentTotalService
             .GetAsync(query)
             .ConfigureAwait(false);
 
@@ -182,9 +182,9 @@ public class AgentWinLossReportController : ControllerBase
     [Description("Get Company Total Detail")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<IEnumerable<CompanyTotalDetailReportModel>>
-        GetCompanySpecialDetailAsync(
+        GetCompanyTotalDetailAsync(
             [FromServices] IGetService<GetCompanyTotalDetailQuery, IEnumerable<CompanyTotalDetailModel>>
-                companySpecialService,
+                companyTotalService,
             [FromQuery] GetCompanyTotalDetailReportRequest request)
     {
         var brandId = HttpContext.Items.GetBrandId();
@@ -197,7 +197,7 @@ public class AgentWinLossReportController : ControllerBase
             To = request.To,
         };
 
-        var response = await companySpecialService
+        var response = await companyTotalService
             .GetAsync(query)
             .ConfigureAwait(false);
 
