@@ -21,7 +21,7 @@ internal class GetSubAgentDividendRangeQueryService : IGetService<GetSubAgentDiv
     {
         var childInfos = await _agentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.SubAgentId), cancellationToken)
-            .ToArrayAsync();
+            .ToArrayAsync(cancellationToken: cancellationToken);
 
         var min = childInfos.Any()
             ? childInfos.Max(x => x.DividendPercentage)

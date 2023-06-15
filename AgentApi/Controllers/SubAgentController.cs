@@ -29,8 +29,7 @@ public class SubAgentController : ControllerBase
 
         return new GetSubAgentDividendRangeResponse
         {
-            Min = range.Item1,
-            Max = range.Item2,
+            Data = new SubAgentDividendRange(range.Item1, range.Item2)
         };
     }
 

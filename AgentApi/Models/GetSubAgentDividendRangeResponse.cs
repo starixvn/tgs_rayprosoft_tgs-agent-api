@@ -4,6 +4,5 @@ namespace TGS.Apis.AgentApi.Models;
 
 public record GetSubAgentDividendRangeResponse : TgsResponse
 {
-    public decimal Min { get; set; }
-    public decimal Max { get; set; }
+    public SubAgentDividendRange Data { get; set; }
 }
