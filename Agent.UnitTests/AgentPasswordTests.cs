@@ -195,7 +195,8 @@ public class AgentPasswordTests
                 false,
                 false,
                 AgentDividendType.OneLayer,
-                null));
+                null,
+                0));
 
         await sut.GetAsync(command);
 
@@ -230,7 +231,8 @@ public class AgentPasswordTests
                 true,
                 true,
                 AgentDividendType.OneLayer,
-                null));
+                null,
+                0));
 
         await sut.GetAsync(command);
 

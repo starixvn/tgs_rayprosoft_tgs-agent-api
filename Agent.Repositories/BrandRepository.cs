@@ -32,10 +32,11 @@ internal class BrandRepository : IBrandRepository
                 brand.EnableAgentSms,
                 brand.EnableSmsRegisterFlow,
                 brand.AgentDividendType,
-                _tgsRepository.BrandDomains.AsQueryable()
-                    .Where(bd => bd.BrandId == brand.Id)
-                    .FirstOrDefault()
-                    ?.Url);
+                _tgsRepository.BrandDomains
+                    .AsQueryable()
+                    .FirstOrDefault(bd => bd.BrandId == brand.Id)
+                    ?.Url,
+                brand.PlatformCharge);
     }
 
     public IAsyncEnumerable<VipLevelInfo> GetVipLevelsAsync(Guid brandId)
