@@ -17,15 +17,21 @@ public class SubAgentController : ControllerBase
 {
     [HttpGet("{subAgentId}/dividendrange", Name = "GetSubAgentDividendRange")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async ValueTask<(decimal, decimal)> GetSubAgentDividendRangeAsync(
+    public async ValueTask<GetSubAgentDividendRangeResponse> GetSubAgentDividendRangeAsync(
         [FromServices] IGetService<GetSubAgentDividendRangeQuery, (decimal, decimal)> getService,
         Guid subAgentId)
     {
         var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-        return await getService
+        var range = await getService
             .GetAsync(new GetSubAgentDividendRangeQuery(agentTokenData.AgentId, subAgentId))
             .ConfigureAwait(false);
+
+        return new GetSubAgentDividendRangeResponse
+        {
+            Min = range.Item1,
+            Max = range.Item2,
+        };
     }
 
     [HttpPatch("password", Name = "ResetSubAgentPassword")]
