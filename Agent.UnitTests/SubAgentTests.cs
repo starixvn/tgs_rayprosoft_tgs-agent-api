@@ -211,7 +211,8 @@ public class SubAgentTests
                 false,
                 false,
                 TGS.Core.Models.Enums.AgentDividendType.MultipleLayer,
-                null));
+                null,
+                0));
 
         var sut = new SetSubAgentDividendPercentageCommandService(fakeBrandRepository, fakeAgentClient);
 
@@ -314,7 +315,8 @@ public class SubAgentTests
                 false,
                 false,
                 TGS.Core.Models.Enums.AgentDividendType.OneLayer,
-                null));
+                null,
+                0));
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(subAgentId))
@@ -406,7 +408,8 @@ public class SubAgentTests
                 false,
                 false,
                 TGS.Core.Models.Enums.AgentDividendType.OneLayer,
-                null));
+                null,
+                0));
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(subAgentId))
