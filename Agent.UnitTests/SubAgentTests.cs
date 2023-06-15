@@ -446,7 +446,7 @@ public class SubAgentTests
                             AgentUsername = "agent3",
                             DividendPercentage = 20,
                             ParentAgentId = subAgentId
-                        }}.ToAsyncEnumerable());
+                }}.ToAsyncEnumerable());
 
         var parentAgent = new AgentInfoModel(
                 Id: agentId,
@@ -476,7 +476,7 @@ public class SubAgentTests
             brandId,
             agentId,
             subAgentId,
-            90M);
+            90);
 
         await sut.ExecuteAsync(command);
 
