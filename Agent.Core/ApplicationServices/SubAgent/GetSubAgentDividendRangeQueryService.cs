@@ -19,10 +19,13 @@ internal class GetSubAgentDividendRangeQueryService : IGetService<GetSubAgentDiv
 
     public async ValueTask<(decimal, decimal)> GetAsync(GetSubAgentDividendRangeQuery query, CancellationToken cancellationToken = default)
     {
-        var min = await _agentClient
+        var childInfos = await _agentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.SubAgentId), cancellationToken)
-            .MaxAsync(x => x.DividendPercentage, cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync();
+
+        var min = childInfos.Any()
+            ? childInfos.Max(x => x.DividendPercentage)
+            : 0M;
 
         var parentAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(query.AgentId), cancellationToken)
