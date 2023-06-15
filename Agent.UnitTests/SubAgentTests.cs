@@ -476,7 +476,7 @@ public class SubAgentTests
             brandId,
             agentId,
             subAgentId,
-            90);
+            90M);
 
         await sut.ExecuteAsync(command);
 
