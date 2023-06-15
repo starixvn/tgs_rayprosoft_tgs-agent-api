@@ -38,10 +38,14 @@ internal class SetSubAgentDividendPercentageCommandService : ICommandService<Set
         if (subAgent is null || command.AgentId != subAgent.ParentAgentId)
             return;
 
-        var childAgentMaxDividendPercentage = await _agentClient
+        var childInfos = await _agentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(command.SubAgentId), cancellationToken)
-            .MaxAsync(x => x.DividendPercentage, cancellationToken)
+            .ToArrayAsync(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+
+        var childAgentMaxDividendPercentage = childInfos.Any() 
+            ? childInfos.Max(x => x.DividendPercentage) 
+            : 0M;
 
         var parentAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
