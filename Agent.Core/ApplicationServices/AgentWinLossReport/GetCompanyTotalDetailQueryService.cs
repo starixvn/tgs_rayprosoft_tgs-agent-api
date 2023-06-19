@@ -27,7 +27,7 @@ public class
         GetCompanyTotalDetailQuery request,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandService.GetBrandInfoAsync(request.BrandId);
+        var brand = await _brandService.GetBrandInfoAsync(request.BrandId).ConfigureAwait(false);
 
         var response = await _reportClient.GetCompanyTotalDetailAsync(new()
         {
@@ -36,7 +36,7 @@ public class
             PlatformCharge = brand!.PlatformCharge,
             From = request.From,
             To = request.To
-        });
+        }).ConfigureAwait(false);
 
         return response.Select(x => new CompanyTotalDetailModel
         {

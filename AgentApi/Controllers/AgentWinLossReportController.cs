@@ -40,7 +40,7 @@ public class AgentWinLossReportController : ControllerBase
                 Username = request.Username,
                 MemberType = request.MemberType,
                 RoundId = request.RoundId
-            })
+            }, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new AgentWinLossBreadcrumbReportModel
@@ -80,7 +80,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await agentWinLossService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new GetAgentWinLossReportResponse
@@ -138,7 +138,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await agentPlayerSpecialService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new AgentPlayerSpecialDetailReportModel
@@ -169,7 +169,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await agentTotalService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new AgentTotalDetailReportModel
@@ -205,7 +205,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await companyTotalService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new CompanyTotalDetailReportModel
@@ -250,7 +250,9 @@ public class AgentWinLossReportController : ControllerBase
             ShowAll = request.ShowAll
         };
 
-        var response = await winLossRoundsService.GetAsync(roundsRequest);
+        var response = await winLossRoundsService
+            .GetAsync(roundsRequest, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
 
         return new RoundsReportResponse
         {

@@ -39,13 +39,13 @@ public class
 
         var agent = !string.IsNullOrEmpty(request.Username) && request.MemberType == AccountType.Agent
             ? await childAgents
-                .FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+                .FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken).ConfigureAwait(false)
             : (ChildAgentInfoModel?)null;
 
         var player = !string.IsNullOrEmpty(request.Username) && request.MemberType == AccountType.Player
             ? await _playerServiceClient.GetPlayerInfoByUserNameAsync(request.BrandId,
                 request.Username,
-                cancellationToken)
+                cancellationToken).ConfigureAwait(false)
             : null;
 
         var reportRequest = new GetBreadcrumbRequest
@@ -55,11 +55,11 @@ public class
             RoundId = request.RoundId
         };
 
-        var response = await _reportClient.GetAgentWinLossBreadcrumbAsync(reportRequest);
+        var response = await _reportClient.GetAgentWinLossBreadcrumbAsync(reportRequest).ConfigureAwait(false);
 
         var haveSubAgents = await childAgents.AnyAsync(
             x => response.Select(r => r.Id).Contains(x.ParentAgentId.ToString()) ||
-                response.Select(r => r.Id).Contains(x.AgentId.ToString()), cancellationToken);
+                response.Select(r => r.Id).Contains(x.AgentId.ToString()), cancellationToken).ConfigureAwait(false);
 
         return haveSubAgents
             ? response.Select(x => new AgentWinLossBreadcrumb

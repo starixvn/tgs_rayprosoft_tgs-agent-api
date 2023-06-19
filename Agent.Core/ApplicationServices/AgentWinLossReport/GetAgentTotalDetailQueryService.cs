@@ -36,7 +36,7 @@ public class
             PlatformCharge = brand!.PlatformCharge,
             From = request.From,
             To = request.To
-        });
+        }).ConfigureAwait(false);
 
         return response.Select(x => new AgentTotalDetailModel
         {

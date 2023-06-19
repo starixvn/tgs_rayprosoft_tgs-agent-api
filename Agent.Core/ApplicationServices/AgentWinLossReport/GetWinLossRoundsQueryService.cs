@@ -30,7 +30,7 @@ public class
     {
         var playerProperties =
             await _playerClient.GetPlayerPropertiesAsync(request.PlayerCode,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
         if (!(Guid.TryParse(playerProperties["AgentId"], out var agentId) && request.AgentId == agentId))
         {
@@ -48,7 +48,7 @@ public class
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
-        });
+        }).ConfigureAwait(false);
 
         var responseTotal = await _reportClient.GetRoundsTotalAsync(new()
         {
@@ -56,7 +56,7 @@ public class
             PlayerCode = request.PlayerCode,
             ClosedFrom = request.ClosedFrom,
             ClosedTo = request.ClosedTo
-        });
+        }).ConfigureAwait(false);
 
         return new RoundsResponse
         {
