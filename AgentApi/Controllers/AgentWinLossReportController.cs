@@ -12,6 +12,9 @@ using System.Linq;
 using TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.Round;
+using System.IO;
+using TGS.Apis.AgentApi.Models;
+using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -285,14 +288,60 @@ public class AgentWinLossReportController : ControllerBase
         };
     }
 
+    [HttpGet("exportAgentWinLoss")]
+    [Description("export agent winLoss")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<IActionResult> ExportAgentDividendsFileAsync(
+        [FromServices] IGetService<ExportAgentWinLossQuery, Stream>
+            exportAgentWinLossService,
+        [FromQuery] ExportAgentWinLossRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentData = HttpContext.Items.GetAgentTokenData();
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = brandId,
+            AgentId = agentData.AgentId,
+            Username = request.Username,
+            MemberType = request.MemberType,
+            DownLine = request.DownLine,
+            From = request.From,
+            To = request.To,
+        };
+
+        return File(
+            await exportAgentWinLossService
+                .GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "AgentWinLoss.xlsx");
+    }
+
     [HttpGet("exportRounds")]
     [Description("Export rounds")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<IActionResult> ExportRoundsAsync(
-        [FromServices] IReportClient client,
-        [FromQuery] ExportRoundsRequest request)
-        => File(await client
-                .ExportRoundsAsync(request)
+        [FromServices] IGetService<ExportWinLossRoundsQuery, Stream>
+            exportWinLossRoundsQueryService,
+        [FromQuery] ExportAgentPlayerWinLossRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentData = HttpContext.Items.GetAgentTokenData();
+
+        var query = new ExportWinLossRoundsQuery
+        {
+            BrandId = brandId,
+            AgentId = agentData.AgentId,
+            PlayerCode = request.PlayerCode,
+            ClosedFrom = request.ClosedFrom,
+            ClosedTo = request.ClosedTo,
+        };
+
+        return File(await exportWinLossRoundsQueryService
+                .GetAsync(query, HttpContext.RequestAborted)
                 .ConfigureAwait(false),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "Rounds.xlsx");
+    }
 }
