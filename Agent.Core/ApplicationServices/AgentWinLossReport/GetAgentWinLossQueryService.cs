@@ -112,12 +112,9 @@ public class
 
         var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken);
 
-        if (agent == null)
-        {
-            return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
-        }
-
-        return await _reportClient.GetAgentWinLossAsync(new()
+        return agent == null
+            ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
+            : await _reportClient.GetAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
             AgentId = agent.AgentId,
@@ -163,12 +160,9 @@ public class
 
         var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken);
 
-        if (agent == null)
-        {
-            return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
-        }
-
-        return await _reportClient.GetDownLineAgentWinLossAsync(new()
+        return agent == null
+            ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
+            : await _reportClient.GetDownLineAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
             AgentId = agent.AgentId,
@@ -205,10 +199,9 @@ public class
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,
                 cancellationToken);
 
-        if (Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken))
-        {
-            return await _reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
+        return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
+            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken)
+            ? await _reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
             {
                 PlayerCode = player.PlayerCode,
                 PlatformCharge = platformCharge,
@@ -219,9 +212,7 @@ public class
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
-            });
-        }
-
-        return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
+            })
+            : new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
     }
 }

@@ -3,7 +3,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Models;
 
-public record GetRoundsReportRequest
+public record GetAgentPlayerRoundsReportRequest
 {        
     public string Username { get; init; }        
 

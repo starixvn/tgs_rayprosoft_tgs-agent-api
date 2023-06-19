@@ -10,6 +10,8 @@ using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 using TGS.Services.Agent;
 using System.Linq;
 using TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -70,6 +72,11 @@ public class AgentWinLossReportController : ControllerBase
             DownLine = request.DownLine,
             From = request.From,
             To = request.To,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
         };
 
         var response = await agentWinLossService
@@ -213,4 +220,77 @@ public class AgentWinLossReportController : ControllerBase
             CompanyTotal = x.CompanyTotal,
         });
     }
+
+    /// <summary>
+    /// Get player round report
+    /// </summary>
+    [HttpGet("rounds", Name = "GetRounds")]
+    [Description("Get rounds")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<RoundsReportResponse> GetRoundsAsync(
+        [FromServices] IGetService<GetWinLossRoundsQuery, RoundsResponse>
+            winLossRoundsService,
+        [FromQuery] GetRoundsReportRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var roundsRequest = new GetWinLossRoundsQuery
+        {
+            BrandId = brandId,
+            AgentId = agentTokenData.AgentId,
+            PlayerCode = request.PlayerCode,
+            ClosedFrom = request.ClosedFrom,
+            ClosedTo = request.ClosedTo,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
+
+        var response = await winLossRoundsService.GetAsync(roundsRequest);
+
+        return new RoundsReportResponse
+        {
+            TotalCount = response.TotalCount,
+            Items = response.Items.Select(x => new RoundReportModel
+            {
+                Id = x.Id,
+                Status = x.Status,
+                PlayerCode = x.PlayerCode,
+                PlayerName = x.PlayerName,
+                GameProviderName = x.GameProviderName,
+                SubGameProviderName = x.SubGameProviderName,
+                GameName = x.GameName,
+                ExternalRoundId = x.ExternalRoundId,
+                CreatedOn = x.CreatedOn,
+                ClosedOn = x.ClosedOn,
+                BetAmount = x.BetAmount,
+                ValidBetAmount = x.ValidBetAmount,
+                Turnover = x.Turnover,
+                SettleAmount = x.SettleAmount,
+                WinLoss = x.WinLoss
+            }).ToArray(),
+            Total = new RoundTotalReportModel
+            {
+                WinLoss = response.Total.WinLoss,
+                ValidBetAmount = response.Total.ValidBetAmount,
+                BetAmount = response.Total.BetAmount,
+                SettleAmount = response.Total.SettleAmount,
+            }
+        };
+    }
+
+    [HttpGet("exportRounds")]
+    [Description("Export rounds")]
+    public async Task<IActionResult> ExportRoundsAsync(
+        [FromServices] IReportClient client,
+        [FromQuery] ExportRoundsRequest request)
+        => File(await client
+                .ExportRoundsAsync(request)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Rounds.xlsx");
 }
