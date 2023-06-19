@@ -36,19 +36,19 @@ public class
     public async ValueTask<GetAgentWinLossResponse> GetAsync(GetAgentWinLossQuery request,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandRepository.GetBrandInfoAsync(request.BrandId);
+        var brand = await _brandRepository.GetBrandInfoAsync(request.BrandId).ConfigureAwait(false);
 
         var response =
             string.IsNullOrEmpty(request.Username) switch
             {
                 true =>
-                    await GetDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge),
+                    await GetDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge).ConfigureAwait(false),
                 false when request is { DownLine: false, MemberType: AccountType.Agent } =>
-                    await GetAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken),
+                    await GetAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
                 false when request is { DownLine: true, MemberType: AccountType.Agent } =>
-                    await GetDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken),
+                    await GetDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
                 false when request.MemberType == AccountType.Player =>
-                    await GetPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken),
+                    await GetPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
                 _ => null
             };
 
@@ -110,14 +110,11 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken);
+        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken).ConfigureAwait(false);
 
-        if (agent == null)
-        {
-            return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
-        }
-
-        return await _reportClient.GetAgentWinLossAsync(new()
+        return agent == null
+            ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
+            : await _reportClient.GetAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
             AgentId = agent.AgentId,
@@ -129,7 +126,7 @@ public class
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
-        });
+        }).ConfigureAwait(false);
     }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
@@ -149,7 +146,7 @@ public class
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
-        });
+        }).ConfigureAwait(false);
     }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
@@ -161,14 +158,11 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken);
+        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken).ConfigureAwait(false);
 
-        if (agent == null)
-        {
-            return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
-        }
-
-        return await _reportClient.GetDownLineAgentWinLossAsync(new()
+        return agent == null
+            ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
+            : await _reportClient.GetDownLineAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
             AgentId = agent.AgentId,
@@ -180,7 +174,7 @@ public class
             OrderBy = (short)request.OrderBy,
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
-        });
+        }).ConfigureAwait(false);
     }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>> GetPlayerWinLossAsync(
@@ -194,7 +188,7 @@ public class
         var player =
             await _playerClient.GetPlayerInfoByUserNameAsync(request.BrandId,
                 request.Username,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
         if (player == null)
         {
@@ -203,12 +197,11 @@ public class
 
         var playerProperties =
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
-        if (Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken))
-        {
-            return await _reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
+        return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
+            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false)
+            ? await _reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
             {
                 PlayerCode = player.PlayerCode,
                 PlatformCharge = platformCharge,
@@ -219,9 +212,7 @@ public class
                 OrderBy = (short)request.OrderBy,
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
-            });
-        }
-
-        return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
+            }).ConfigureAwait(false)
+            : new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
     }
 }

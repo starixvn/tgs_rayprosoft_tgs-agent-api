@@ -20,6 +20,9 @@ using AgentPlayerSpecialDetailModel = Tgs.Report.Client.Models.AgentWinLoss.Agen
 using AgentTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentTotalDetailModel;
 using AgentWinLossModel = Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel;
 using CompanyTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.CompanyTotalDetailModel;
+using Tgs.Report.Client.Models.Round;
+using RoundModel = Tgs.Report.Client.Models.Round.RoundModel;
+using RoundTotalModel = Tgs.Report.Client.Models.Round.RoundTotalModel;
 
 namespace Agent.UnitTests;
 
@@ -50,7 +53,7 @@ public class AgentWinLossTests
         Assert.AreEqual(data.BonusAdjust, response.BonusAdjust);
         Assert.AreEqual(data.ProductFee, response.ProductFee);
     }
-
+    
     [Test]
     [AutoData]
     public async Task Get_Agent_Total_Detail(
@@ -91,9 +94,9 @@ public class AgentWinLossTests
             client,
             repository);
 
-        client.GetCompanyTotalDetailAsync(Arg.Any<GetCompanyTotalDetailRequest>()).Returns(data);
+        _ = client.GetCompanyTotalDetailAsync(Arg.Any<GetCompanyTotalDetailRequest>()).Returns(data);
 
-        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
@@ -131,15 +134,15 @@ public class AgentWinLossTests
             new BreadcrumbModel { Id = childAgentInfoData.First().AgentId.ToString() }
         };
 
-        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
+        _ = playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
         var response = await sut.GetAsync(query);
 
-        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = await reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
         _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
-        _ = playerClient.Received(1).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
+        _ = await playerClient.Received(1).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(response.Any());
 
@@ -177,15 +180,15 @@ public class AgentWinLossTests
             Type = "Agent"
         }).ToArray();
 
-        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
 
         var response = await sut.GetAsync(query);
 
-        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = await reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
         _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
-        _ = playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
+        _ = await playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(response.Any());
 
@@ -217,15 +220,15 @@ public class AgentWinLossTests
             MemberType = AccountType.Agent
         };
 
-        reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
 
         var response = await sut.GetAsync(query);
 
-        _ = reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
+        _ = await reportClient.Received(1).GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>());
         _ = agentClient.Received(1).GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>());
-        _ = playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
+        _ = await playerClient.Received(0).GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>());
 
         Assert.IsTrue(!response.Any());
     }
@@ -257,19 +260,19 @@ public class AgentWinLossTests
             DownLine = true
         };
 
-        reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
         _ = agentClient.Received(0)
             .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
-        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
-        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
-        _ = reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = await reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
 
         Assert.IsTrue(response.Items!.Any());
 
@@ -307,19 +310,19 @@ public class AgentWinLossTests
             DownLine = false
         };
 
-        reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
         _ = agentClient.Received(1)
             .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
-        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
-        _ = reportClient.Received(1).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
-        _ = reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(1).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
 
         Assert.IsTrue(response.Items!.Any());
 
@@ -361,22 +364,22 @@ public class AgentWinLossTests
 
         playerProperties["AgentId"] = childAgentInfoData.First().AgentId.ToString();
 
-        reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
-        playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
-        playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
+        _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
 
         var response = await sut.GetAsync(query);
 
         _ = agentClient.Received(1)
             .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
-        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
-        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
-        _ = reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
-        _ = reportClient.Received(1).GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>());
+        _ = await reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(1).GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>());
 
         Assert.IsTrue(response.Items!.Any());
 
@@ -414,19 +417,19 @@ public class AgentWinLossTests
             DownLine = true
         };
 
-        reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
-        agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
         _ = agentClient.Received(1)
             .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
 
-        _ = reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
-        _ = reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
-        _ = reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetMasterAgentWinLossAsync(Arg.Any<GetMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>());
+        _ = await reportClient.Received(1).GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>());
 
         Assert.IsTrue(response.Items!.Any());
 
@@ -435,5 +438,40 @@ public class AgentWinLossTests
             Assert.AreEqual(agentWinLossData.Items[index].Id, x.Id);
             Assert.AreEqual(agentWinLossData.Items[index].Turnover, x.Turnover);
         });
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Get_Win_Loss_Rounds(
+        GetWinLossRoundsQuery query,
+        PagedResponse<RoundModel> data,
+        RoundTotalModel roundTotal,
+        Dictionary<string, string> playerProperties)
+    {
+        var client = Substitute.For<IReportClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new GetWinLossRoundsQueryService(
+            client,
+            playerClient);
+
+        _ = client.GetRoundsAsync(Arg.Any<GetRoundsRequest>()).Returns(data);
+
+        _ = client.GetRoundsTotalAsync(Arg.Any<GetRoundsTotalRequest>()).Returns(roundTotal);
+
+        playerProperties["AgentId"] = query.AgentId.ToString();
+        _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
+
+        var response = await sut.GetAsync(query);
+
+        await response.Items.ToAsyncEnumerable().ForEachAsync((x, index) =>
+        {
+            Assert.AreEqual(data.Items[index].SettleAmount, x.SettleAmount);
+            Assert.AreEqual(data.Items[index].WinLoss, x.WinLoss);
+            Assert.AreEqual(data.Items[index].BetAmount, x.BetAmount);
+            Assert.AreEqual(data.Items[index].Turnover, x.Turnover);
+        });
+
+        Assert.AreEqual(roundTotal.BetAmount, response.Total.BetAmount);
     }
 }

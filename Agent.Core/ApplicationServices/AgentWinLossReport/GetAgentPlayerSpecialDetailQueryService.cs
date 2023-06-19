@@ -34,7 +34,7 @@ public class
             PlatformCharge = brand!.PlatformCharge,
             From = request.From,
             To = request.To
-        });
+        }).ConfigureAwait(false);
 
         return new AgentPlayerSpecialDetailModel
         {

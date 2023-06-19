@@ -10,6 +10,11 @@ using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 using TGS.Services.Agent;
 using System.Linq;
 using TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
+using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
+using System.IO;
+using TGS.Apis.AgentApi.Models;
+using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -38,7 +43,7 @@ public class AgentWinLossReportController : ControllerBase
                 Username = request.Username,
                 MemberType = request.MemberType,
                 RoundId = request.RoundId
-            })
+            }, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new AgentWinLossBreadcrumbReportModel
@@ -70,10 +75,15 @@ public class AgentWinLossReportController : ControllerBase
             DownLine = request.DownLine,
             From = request.From,
             To = request.To,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
         };
 
         var response = await agentWinLossService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new GetAgentWinLossReportResponse
@@ -131,7 +141,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await agentPlayerSpecialService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return new AgentPlayerSpecialDetailReportModel
@@ -162,7 +172,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await agentTotalService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new AgentTotalDetailReportModel
@@ -198,7 +208,7 @@ public class AgentWinLossReportController : ControllerBase
         };
 
         var response = await companyTotalService
-            .GetAsync(query)
+            .GetAsync(query, HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new CompanyTotalDetailReportModel
@@ -212,5 +222,126 @@ public class AgentWinLossReportController : ControllerBase
             CompanySpecial = x.CompanySpecial,
             CompanyTotal = x.CompanyTotal,
         });
+    }
+
+    /// <summary>
+    /// Get player round report
+    /// </summary>
+    [HttpGet("rounds", Name = "GetRounds")]
+    [Description("Get rounds")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<RoundsReportResponse> GetRoundsAsync(
+        [FromServices] IGetService<GetWinLossRoundsQuery, RoundsResponse>
+            winLossRoundsService,
+        [FromQuery] GetRoundsReportRequest request)
+    {
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var roundsRequest = new GetWinLossRoundsQuery
+        {
+            BrandId = brandId,
+            AgentId = agentTokenData.AgentId,
+            PlayerCode = request.PlayerCode,
+            ClosedFrom = request.ClosedFrom,
+            ClosedTo = request.ClosedTo,
+            Page = request.Page,
+            Rows = request.Rows,
+            OrderBy = request.OrderBy,
+            SortBy = request.SortBy,
+            ShowAll = request.ShowAll
+        };
+
+        var response = await winLossRoundsService
+            .GetAsync(roundsRequest, HttpContext.RequestAborted)
+            .ConfigureAwait(false);
+
+        return new RoundsReportResponse
+        {
+            TotalCount = response.TotalCount,
+            Items = response.Items.Select(x => new RoundReportModel
+            {
+                Id = x.Id,
+                Status = x.Status,
+                PlayerCode = x.PlayerCode,
+                PlayerName = x.PlayerName,
+                GameProviderName = x.GameProviderName,
+                SubGameProviderName = x.SubGameProviderName,
+                GameName = x.GameName,
+                ExternalRoundId = x.ExternalRoundId,
+                CreatedOn = x.CreatedOn,
+                ClosedOn = x.ClosedOn,
+                BetAmount = x.BetAmount,
+                ValidBetAmount = x.ValidBetAmount,
+                Turnover = x.Turnover,
+                SettleAmount = x.SettleAmount,
+                WinLoss = x.WinLoss
+            }).ToArray(),
+            Total = new RoundTotalReportModel
+            {
+                WinLoss = response.Total.WinLoss,
+                ValidBetAmount = response.Total.ValidBetAmount,
+                BetAmount = response.Total.BetAmount,
+                SettleAmount = response.Total.SettleAmount,
+            }
+        };
+    }
+
+    [HttpGet("exportAgentWinLoss")]
+    [Description("export agent winLoss")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<IActionResult> ExportAgentDividendsFileAsync(
+        [FromServices] IGetService<ExportAgentWinLossQuery, Stream>
+            exportAgentWinLossService,
+        [FromQuery] ExportAgentWinLossRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentData = HttpContext.Items.GetAgentTokenData();
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = brandId,
+            AgentId = agentData.AgentId,
+            Username = request.Username,
+            MemberType = request.MemberType,
+            DownLine = request.DownLine,
+            From = request.From,
+            To = request.To,
+        };
+
+        return File(
+            await exportAgentWinLossService
+                .GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "AgentWinLoss.xlsx");
+    }
+
+    [HttpGet("exportRounds")]
+    [Description("Export rounds")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+    public async Task<IActionResult> ExportRoundsAsync(
+        [FromServices] IGetService<ExportWinLossRoundsQuery, Stream>
+            exportWinLossRoundsQueryService,
+        [FromQuery] ExportAgentPlayerWinLossRequest request)
+    {
+        var brandId = HttpContext.Items.GetBrandId();
+        var agentData = HttpContext.Items.GetAgentTokenData();
+
+        var query = new ExportWinLossRoundsQuery
+        {
+            BrandId = brandId,
+            AgentId = agentData.AgentId,
+            PlayerCode = request.PlayerCode,
+            ClosedFrom = request.ClosedFrom,
+            ClosedTo = request.ClosedTo,
+        };
+
+        return File(await exportWinLossRoundsQueryService
+                .GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Rounds.xlsx");
     }
 }

@@ -456,7 +456,7 @@ public class AgentReportController : ControllerBase
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
         [FromQuery] PagingRequest pagingRequest,
-        [FromQuery] GetRoundsReportRequest request)
+        [FromQuery] GetAgentPlayerRoundsReportRequest request)
     {
         var agentTokenData = HttpContext.Items.GetAgentTokenData();
         var brandId = HttpContext.Items.GetBrandId();
