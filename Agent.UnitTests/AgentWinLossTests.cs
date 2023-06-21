@@ -484,6 +484,7 @@ public class AgentWinLossTests
     [Test]
     [AutoData]
     public async Task Get_Win_Loss_Rounds(
+        ChildAgentInfoModel[] childAgentInfoData,
         GetWinLossRoundsQuery query,
         PagedResponse<RoundModel> data,
         RoundTotalModel roundTotal,
@@ -491,16 +492,21 @@ public class AgentWinLossTests
     {
         var client = Substitute.For<IReportClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
+        var agentClient = Substitute.For<IAgentClient>();
 
         var sut = new GetWinLossRoundsQueryService(
             client,
-            playerClient);
+            playerClient,
+            agentClient);
 
         _ = client.GetRoundsAsync(Arg.Any<GetRoundsRequest>()).Returns(data);
 
         _ = client.GetRoundsTotalAsync(Arg.Any<GetRoundsTotalRequest>()).Returns(roundTotal);
 
-        playerProperties["AgentId"] = query.AgentId.ToString();
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+
+        playerProperties["AgentId"] = childAgentInfoData.First().AgentId.ToString();
         _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
 
         var response = await sut.GetAsync(query);

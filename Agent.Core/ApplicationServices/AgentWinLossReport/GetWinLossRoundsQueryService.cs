@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
 using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
 using Tgs.ServiceUtility;
@@ -13,15 +15,18 @@ public class
     GetWinLossRoundsQueryService : IGetService<GetWinLossRoundsQuery,
         RoundsResponse>
 {
+    private readonly IAgentClient _agentClient;
     private readonly IReportClient _reportClient;
     private readonly IPlayerServiceClient _playerClient;
 
     public GetWinLossRoundsQueryService(
         IReportClient reportClient,
-        IPlayerServiceClient playerClient)
+        IPlayerServiceClient playerClient,
+        IAgentClient agentClient)
     {
         _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
         _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
     }
 
     public async ValueTask<RoundsResponse> GetAsync(
@@ -32,7 +37,17 @@ public class
             await _playerClient.GetPlayerPropertiesAsync(request.PlayerCode,
                 cancellationToken).ConfigureAwait(false);
 
-        if (!(Guid.TryParse(playerProperties["AgentId"], out var agentId) && request.AgentId == agentId))
+        _ = Guid.TryParse(playerProperties["AgentId"], out var agentId);
+
+        var childAgents =
+            _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
+
+        var inAgentLine =
+            request.AgentId == agentId ||
+            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken)
+                .ConfigureAwait(false);
+
+        if (!inAgentLine)
         {
             return new RoundsResponse();
         }
