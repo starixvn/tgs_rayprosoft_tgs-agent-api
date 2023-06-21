@@ -474,4 +474,206 @@ public class AgentWinLossTests
 
         Assert.AreEqual(roundTotal.BetAmount, response.Total.BetAmount);
     }
+
+    [Test]
+    [AutoData]
+    public async Task Export_Agent_Win_Loss_Rounds(
+        ChildAgentInfoModel[] childAgentInfoData,
+        ExportWinLossRoundsQuery query,
+        Dictionary<string, string> playerProperties)
+    {
+        var agentClient = Substitute.For<IAgentClient>();
+        var client = Substitute.For<IReportClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+
+        var sut = new ExportWinLossRoundsQueryService(
+            client,
+            playerClient,
+            agentClient);
+
+        playerProperties["AgentId"] = query.AgentId.ToString();
+        _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
+
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+
+        _ = await sut.GetAsync(query);
+
+        _ = await client.Received(1).ExportRoundsAsync(Arg.Any<ExportRoundsRequest>());
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Export_Agent_Win_Loss_By_Logged_In_Agent(
+    ChildAgentInfoModel[] childAgentInfoData,
+    PagedResponse<AgentWinLossModel> agentWinLossData,
+    BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new ExportAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = "",
+            MemberType = AccountType.Agent,
+            DownLine = true
+        };
+
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        _ = await sut.GetAsync(query);
+
+        _ = agentClient.Received(0)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
+        _ = await reportClient.Received(1).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Export_Agent_Win_Loss_By_Agent_Username(
+    ChildAgentInfoModel[] childAgentInfoData,
+    PagedResponse<AgentWinLossModel> agentWinLossData,
+    BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new ExportAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = childAgentInfoData.First().AgentUsername,
+            MemberType = AccountType.Agent,
+            DownLine = false
+        };
+
+        _ = reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        _ = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(1).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
+        _ = await reportClient.Received(0).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Export_Agent_Win_Loss_By_Player_Username(
+    ChildAgentInfoModel[] childAgentInfoData,
+    PagedResponse<AgentWinLossModel> agentWinLossData,
+    BrandInfo brandInfo,
+    PlayerInfo playerInfo,
+    Dictionary<string, string> playerProperties)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new ExportAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = "playerUsername",
+            MemberType = AccountType.Player,
+            DownLine = false
+        };
+
+        playerProperties["AgentId"] = childAgentInfoData.First().AgentId.ToString();
+
+        _ = reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
+        _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
+
+        _ = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
+        _ = await reportClient.Received(0).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(1).ExportPlayerWinLossAsync(Arg.Any<ExportPlayerWinLossRequest>());
+    }
+
+    [Test]
+    [AutoData]
+    public async Task Export_Down_Line_Agent_Win_Loss_By_Agent_Username(
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo)
+    {
+        var reportClient = Substitute.For<IReportClient>();
+        var agentClient = Substitute.For<IAgentClient>();
+        var playerClient = Substitute.For<IPlayerServiceClient>();
+        var brandRepository = Substitute.For<IBrandRepository>();
+
+        var sut = new ExportAgentWinLossQueryService(
+            reportClient,
+            brandRepository,
+            agentClient,
+            playerClient);
+
+        var query = new ExportAgentWinLossQuery
+        {
+            BrandId = Guid.NewGuid(),
+            AgentId = Guid.NewGuid(),
+            Username = childAgentInfoData.First().AgentUsername,
+            MemberType = AccountType.Agent,
+            DownLine = true
+        };
+
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
+            .Returns(childAgentInfoData.ToAsyncEnumerable());
+        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+
+        _ = await sut.GetAsync(query);
+
+        _ = agentClient.Received(1)
+            .GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>(), Arg.Any<CancellationToken>());
+
+        _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
+        _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
+        _ = await reportClient.Received(1).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+    }
 }

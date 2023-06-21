@@ -39,21 +39,21 @@ public class
         var brand = await _brandRepository.GetBrandInfoAsync(request.BrandId).ConfigureAwait(false);
 
         return string.IsNullOrEmpty(request.Username) switch
-            {
-                true =>
-                    await ExportDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge)
-                        .ConfigureAwait(false),
-                false when request is { DownLine: false, MemberType: AccountType.Agent } =>
-                    await ExportAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
-                        .ConfigureAwait(false),
-                false when request is { DownLine: true, MemberType: AccountType.Agent } =>
-                    await ExportDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
-                        .ConfigureAwait(false),
-                false when request.MemberType == AccountType.Player =>
-                    await ExportPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
-                        .ConfigureAwait(false),
-                _ => new MemoryStream()
-            };
+        {
+            true =>
+                await ExportDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge)
+                    .ConfigureAwait(false),
+            false when request is { DownLine: false, MemberType: AccountType.Agent } =>
+                await ExportAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
+                    .ConfigureAwait(false),
+            false when request is { DownLine: true, MemberType: AccountType.Agent } =>
+                await ExportDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
+                    .ConfigureAwait(false),
+            false when request.MemberType == AccountType.Player =>
+                await ExportPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
+                    .ConfigureAwait(false),
+            _ => new MemoryStream()
+        };
     }
 
     private async Task<Stream> ExportAgentWinLossAsync(
@@ -64,16 +64,21 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
-            .ConfigureAwait(false);
+        var agent = await _agentClient
+            .GetAgentInfoByUsernameAsync(new GetAgentInfoByUsernameRequest(request.BrandId, request.Username),
+                cancellationToken).ConfigureAwait(false);
 
-        return agent == null
-            ? new MemoryStream()
-            : await _reportClient.ExportAgentWinLossAsync(new(request.BrandId,
-                agent.AgentId,
-                platformCharge,
-                request.From,
-                request.To)).ConfigureAwait(false);
+        var subAgent =
+            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+                .ConfigureAwait(false);
+
+        var agentId = agent?.Id ?? subAgent?.AgentId;
+
+        return await _reportClient.ExportAgentWinLossAsync(new(request.BrandId,
+            agentId ?? Guid.Empty,
+            platformCharge,
+            request.From,
+            request.To)).ConfigureAwait(false);
     }
 
     private async Task<Stream>
@@ -97,17 +102,22 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
-            .ConfigureAwait(false);
+        var agent = await _agentClient.GetAgentInfoByUsernameAsync(
+            new GetAgentInfoByUsernameRequest(request.BrandId, request.Username),
+            cancellationToken).ConfigureAwait(false);
 
-        return agent == null
-            ? new MemoryStream()
-            : await _reportClient
-                .ExportDownLineAgentWinLossAsync(new(request.BrandId,
-                    agent.AgentId,
-                    platformCharge,
-                    request.From,
-                    request.To)).ConfigureAwait(false);
+        var subAgent =
+            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+                .ConfigureAwait(false);
+
+        var agentId = agent?.Id ?? subAgent?.AgentId;
+
+        return await _reportClient
+            .ExportDownLineAgentWinLossAsync(new(request.BrandId,
+                agentId ?? Guid.Empty,
+                platformCharge,
+                request.From,
+                request.To)).ConfigureAwait(false);
     }
 
     private async Task<Stream> ExportPlayerWinLossAsync(
@@ -125,20 +135,29 @@ public class
 
         if (player == null)
         {
-            return new MemoryStream();
+            return await _reportClient
+                .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(
+                    "notInAgentLine",
+                    platformCharge,
+                    request.From,
+                    request.To)).ConfigureAwait(false);
         }
 
         var playerProperties =
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,
                 cancellationToken).ConfigureAwait(false);
 
-        return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false)
-                ? await _reportClient
-                    .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(player.PlayerCode,
-                        platformCharge,
-                        request.From,
-                        request.To)).ConfigureAwait(false)
-                : new MemoryStream();
+        _ = Guid.TryParse(playerProperties["AgentId"], out var agentId);
+
+        var inAgentLine = await childAgents
+            .AnyAsync(x => x.AgentId == agentId || x.ParentAgentId == agentId, cancellationToken)
+            .ConfigureAwait(false);
+
+        return await _reportClient
+            .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(
+                inAgentLine ? player.PlayerCode : "notInAgentLine",
+                platformCharge,
+                request.From,
+                request.To)).ConfigureAwait(false);
     }
 }
