@@ -75,10 +75,10 @@ public class
         var agentId = agent?.Id ?? subAgent?.AgentId;
 
         return await _reportClient.ExportAgentWinLossAsync(new(request.BrandId,
-                agentId ?? Guid.Empty,
-                platformCharge,
-                request.From,
-                request.To)).ConfigureAwait(false);
+            agentId ?? Guid.Empty,
+            platformCharge,
+            request.From,
+            request.To)).ConfigureAwait(false);
     }
 
     private async Task<Stream>
@@ -104,19 +104,20 @@ public class
 
         var agent = await _agentClient.GetAgentInfoByUsernameAsync(
             new GetAgentInfoByUsernameRequest(request.BrandId, request.Username),
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken);
+            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+                .ConfigureAwait(false);
 
         var agentId = agent?.Id ?? subAgent?.AgentId;
 
         return await _reportClient
-                .ExportDownLineAgentWinLossAsync(new(request.BrandId,
-                    agentId ?? Guid.Empty,
-                    platformCharge,
-                    request.From,
-                    request.To)).ConfigureAwait(false);
+            .ExportDownLineAgentWinLossAsync(new(request.BrandId,
+                agentId ?? Guid.Empty,
+                platformCharge,
+                request.From,
+                request.To)).ConfigureAwait(false);
     }
 
     private async Task<Stream> ExportPlayerWinLossAsync(
@@ -153,10 +154,10 @@ public class
             .ConfigureAwait(false);
 
         return await _reportClient
-                    .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(
-                        inAgentLine ? player.PlayerCode : "notInAgentLine",
-                        platformCharge,
-                        request.From,
-                        request.To)).ConfigureAwait(false);
+            .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(
+                inAgentLine ? player.PlayerCode : "notInAgentLine",
+                platformCharge,
+                request.From,
+                request.To)).ConfigureAwait(false);
     }
 }
