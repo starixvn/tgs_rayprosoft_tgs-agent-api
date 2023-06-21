@@ -43,7 +43,8 @@ public class
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
         var inAgentLine =
-            await childAgents.AnyAsync(x => x.AgentId == agentId || x.ParentAgentId == agentId, cancellationToken)
+            request.AgentId == agentId ||
+            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken)
                 .ConfigureAwait(false);
 
         if (!inAgentLine)
