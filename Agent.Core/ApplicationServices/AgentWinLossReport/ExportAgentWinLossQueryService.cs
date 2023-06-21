@@ -69,10 +69,10 @@ public class
                 cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
                 .ConfigureAwait(false);
 
-        var agentId = agent?.Id ?? subAgent?.AgentId;
+        var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
 
         return await _reportClient.ExportAgentWinLossAsync(new(request.BrandId,
             agentId ?? Guid.Empty,
@@ -107,10 +107,10 @@ public class
             cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
                 .ConfigureAwait(false);
 
-        var agentId = agent?.Id ?? subAgent?.AgentId;
+        var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
 
         return await _reportClient
             .ExportDownLineAgentWinLossAsync(new(request.BrandId,
