@@ -110,14 +110,22 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken).ConfigureAwait(false);
+        var agent = await _agentClient
+            .GetAgentInfoByUsernameAsync(new GetAgentInfoByUsernameRequest(request.BrandId, request.Username),
+                cancellationToken).ConfigureAwait(false);
 
-        return agent == null
+        var subAgent =
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+                .ConfigureAwait(false);
+
+        var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
+
+        return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
             : await _reportClient.GetAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
-            AgentId = agent.AgentId,
+            AgentId = agentId.Value,
             PlatformCharge = platformCharge,
             From = request.From,
             To = request.To,
@@ -158,14 +166,22 @@ public class
         var childAgents =
             _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(request.AgentId), cancellationToken);
 
-        var agent = await childAgents.FirstOrDefaultAsync(x => x.AgentUsername == request.Username, cancellationToken).ConfigureAwait(false);
+        var agent = await _agentClient
+            .GetAgentInfoByUsernameAsync(new GetAgentInfoByUsernameRequest(request.BrandId, request.Username),
+                cancellationToken).ConfigureAwait(false);
 
-        return agent == null
+        var subAgent =
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+                .ConfigureAwait(false);
+
+        var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
+
+        return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
             : await _reportClient.GetDownLineAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
-            AgentId = agent.AgentId,
+            AgentId = agentId.Value,
             PlatformCharge = platformCharge,
             From = request.From,
             To = request.To,
