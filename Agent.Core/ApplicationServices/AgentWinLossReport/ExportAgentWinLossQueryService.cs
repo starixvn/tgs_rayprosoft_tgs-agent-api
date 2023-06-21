@@ -146,7 +146,7 @@ public class
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,
                 cancellationToken).ConfigureAwait(false);
 
-        Guid.TryParse(playerProperties["AgentId"], out var agentId);
+        _ = Guid.TryParse(playerProperties["AgentId"], out var agentId);
 
         var inAgentLine = await childAgents
             .AnyAsync(x => x.AgentId == agentId || x.ParentAgentId == agentId, cancellationToken)
