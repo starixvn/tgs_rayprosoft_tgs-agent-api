@@ -148,16 +148,14 @@ builder.Services
     .AddTgsAgentRepository();
 
 builder.Services.AddPlayerServiceClient((options, sp) =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
 
-    options.BaseUrl = config.GetValue<Uri>("Agent:PlayerServiceBaseUrl");
-}).AddAgentClient((options, sp) =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-
-    options.BaseUrl = config.GetValue<Uri>("Agent:AgentServiceBaseUrl");
-});
+        options.BaseUrl = config.GetValue<Uri>("Agent:PlayerServiceBaseUrl");
+    })
+    .AddAgentClient()
+    .ConfigureHttpClient(httpBuilder => httpBuilder.BaseAddress =
+        builder.Configuration.GetValue<Uri>("Agent:AgentServiceBaseUrl"));
 
 builder.Services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
 {

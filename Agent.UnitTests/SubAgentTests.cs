@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.Agent.Client.Models.Enums;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.SubAgent;
 
@@ -19,6 +20,9 @@ public class SubAgentTests
     {
         var fakeAgentClient = Substitute.For<IAgentClient>();
 
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
+        var agentId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075c");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var parentAgentId = Guid.Parse("8480c811-879b-41e0-8b8b-bd0c9cdbdf31");
         var subAgentId = Guid.Parse("30945e96-a762-4b6e-9acb-0266727528d7");
 
@@ -44,7 +48,7 @@ public class SubAgentTests
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(childInfos.ToAsyncEnumerable());
 
-        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M);
+        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(parentAgentId))
@@ -61,7 +65,9 @@ public class SubAgentTests
     [Test]
     public async Task Reset_SubAgent_Password()
     {
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
         var agentId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075c");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("b9b3069f-d7ca-40d8-8996-a4df11986cd8");
         var password = "password";
 
@@ -87,7 +93,10 @@ public class SubAgentTests
                 AgentLevelType.Agent,
                 80M,
                 0,
-                0M));
+                0M,
+                brandId,
+                walletId,
+                walletId));
 
         var parent = new AgentInfoModel(
                 agentId,
@@ -105,7 +114,10 @@ public class SubAgentTests
                 AgentLevelType.Chief,
                 80M,
                 0,
-                0M);
+                0M,
+                brandId,
+                walletId,
+                walletId);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -117,7 +129,7 @@ public class SubAgentTests
 
         _ = fakeAgentClient
             .Received(1)
-            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password));
+            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password, parent.Username));
 
         _ = fakeAgentClient
             .Received(1)
@@ -127,7 +139,9 @@ public class SubAgentTests
     [Test]
     public async Task Set_SubAgent_Contact()
     {
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
         var agentId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075c");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("b9b3069f-d7ca-40d8-8996-a4df11986cd8");
         var realName = "";
         var email = "newEmail";
@@ -155,7 +169,10 @@ public class SubAgentTests
                 AgentLevelType.Agent,
                 60M,
                 0,
-                0M));
+                0M,
+                brandId,
+                walletId,
+                walletId));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -173,7 +190,11 @@ public class SubAgentTests
             AgentLevelType.Chief,
             80M,
             0,
-            0M);
+            0M,
+            brandId,
+            walletId,
+            walletId);
+
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
             .Returns(parentAgent);
@@ -231,7 +252,9 @@ public class SubAgentTests
     [Test]
     public async Task Set_SubAgent_Info()
     {
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
         var agentId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075c");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("b9b3069f-d7ca-40d8-8996-a4df11986cd8");
         var realName = "realName";
 
@@ -257,7 +280,10 @@ public class SubAgentTests
                 AgentLevelType.Agent,
                 60M,
                 0,
-                0M));
+                0M,
+                brandId,
+                walletId,
+                walletId));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -275,7 +301,11 @@ public class SubAgentTests
             AgentLevelType.Chief,
             80M,
             0,
-            0M);
+            0M,
+            brandId,
+            walletId,
+            walletId);
+
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
             .Returns(parentAgent);
@@ -304,7 +334,8 @@ public class SubAgentTests
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeAgentClient = Substitute.For<IAgentClient>();
 
-        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("30945e96-a762-4b6e-9acb-0266727528d7");
         var agentId = Guid.Parse("8480c811-879b-41e0-8b8b-bd0c9cdbdf31");
 
@@ -336,7 +367,10 @@ public class SubAgentTests
                 AgentLevelType.Agent,
                 50M,
                 0,
-                0M));
+                0M,
+                brandId,
+                walletId,
+                walletId));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -371,7 +405,10 @@ public class SubAgentTests
                 AgentLevelType.Chief,
                 90M,
                 0,
-                0M);
+                0M,
+                brandId,
+                walletId,
+                walletId);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -397,7 +434,8 @@ public class SubAgentTests
         var fakeBrandRepository = Substitute.For<IBrandRepository>();
         var fakeAgentClient = Substitute.For<IAgentClient>();
 
-        var brandId = Guid.Parse("4e86719f-243f-46f6-b010-5c758b7285af");
+        var brandId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075d");
+        var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("30945e96-a762-4b6e-9acb-0266727528d7");
         var agentId = Guid.Parse("8480c811-879b-41e0-8b8b-bd0c9cdbdf31");
 
@@ -429,7 +467,10 @@ public class SubAgentTests
                 AgentLevelType.Agent,
                 50M,
                 0,
-                0M));
+                0M,
+                brandId,
+                walletId,
+                walletId));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -464,7 +505,10 @@ public class SubAgentTests
                 AgentLevelType.Chief,
                 90M,
                 0,
-                0M);
+                0M,
+                brandId,
+                walletId,
+                walletId);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))

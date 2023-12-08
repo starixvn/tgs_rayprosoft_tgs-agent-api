@@ -44,4 +44,6 @@ public class CreateAgentCommand
     public string Username { get; set; } = default!;
 
     public decimal VirtualSportsRebatePercentage { get; init; }
+
+    public decimal CommissionPercentage { get; init; }
 }

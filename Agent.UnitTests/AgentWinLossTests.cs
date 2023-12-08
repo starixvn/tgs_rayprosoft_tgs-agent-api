@@ -296,6 +296,10 @@ public class AgentWinLossTests
         var playerClient = Substitute.For<IPlayerServiceClient>();
         var brandRepository = Substitute.For<IBrandRepository>();
 
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var walletId = Guid.NewGuid();
+
         var sut = new GetAgentWinLossQueryService(
             reportClient,
             brandRepository,
@@ -304,8 +308,8 @@ public class AgentWinLossTests
 
         var query = new GetAgentWinLossQuery
         {
-            BrandId = Guid.NewGuid(),
-            AgentId = Guid.NewGuid(),
+            BrandId = brandId,
+            AgentId = agentId,
             Username = childAgentInfoData.First().AgentUsername,
             MemberType = AccountType.Agent,
             DownLine = false
@@ -327,7 +331,10 @@ public class AgentWinLossTests
             Tgs.Agent.Client.Models.Enums.AgentLevelType.Agent,
             0,
             0,
-            0);
+            0,
+            brandId,
+            walletId,
+            walletId);
 
         _ = reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
@@ -423,6 +430,10 @@ public class AgentWinLossTests
         var playerClient = Substitute.For<IPlayerServiceClient>();
         var brandRepository = Substitute.For<IBrandRepository>();
 
+        var brandId = Guid.NewGuid();
+        var agentId = Guid.NewGuid();
+        var walletId = Guid.NewGuid();
+
         var sut = new GetAgentWinLossQueryService(
             reportClient,
             brandRepository,
@@ -454,7 +465,10 @@ public class AgentWinLossTests
             Tgs.Agent.Client.Models.Enums.AgentLevelType.Agent,
             0,
             0,
-            0);
+            0,
+            brandId,
+            walletId,
+            walletId);
 
         _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())

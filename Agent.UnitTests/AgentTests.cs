@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Agent.Client;
+using Tgs.CashService.Client;
 using TGS.Core.DataServices.Tgs;
 using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
@@ -131,6 +133,12 @@ public class AgentTests
     [Test]
     public async Task Create_Agent_Should_Success()
     {
+        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        var fakeAgentClient = Substitute.For<IAgentClient>();
+
+        fakePasswordHandler.GenerateCredential(Arg.Any<string>())
+            .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
+
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
 
         dbContextOptionsBuilder
@@ -161,7 +169,8 @@ public class AgentTests
             SecretKey = string.Empty
         };
 
-        await repository.Brands.AddAsync(brand);
+        _ = await repository.Brands.AddAsync(brand);
+
         var parentAgentId = Guid.NewGuid();
 
         var parentAgent = new CoreModels.Agent
@@ -184,15 +193,12 @@ public class AgentTests
             WithdrawPassword = Array.Empty<byte>(),
             WithdrawSalt = Array.Empty<byte>()
         };
-        await repository.Agents.AddAsync(parentAgent);
-        await repository.SaveChangesAsync();
 
-        var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+        _ = await repository.Agents.AddAsync(parentAgent);
 
-        fakePasswordHandler.GenerateCredential(Arg.Any<string>())
-            .Returns((Array.Empty<byte>(), Array.Empty<byte>()));
+        _ = await repository.SaveChangesAsync();
 
-        var sut = new CreateAgentCommandService(repository, fakePasswordHandler);
+        var sut = new CreateAgentCommandService(repository, fakeAgentClient);
 
         var query = new CreateAgentCommand
         {
@@ -206,6 +212,8 @@ public class AgentTests
         var info = await sut.GetAsync(query);
 
         Assert.IsTrue(info.IsNew);
+
+        _ = fakeAgentClient.ReceivedWithAnyArgs(1).CreateAgentAsync(null, default);
     }
 
     [Test]

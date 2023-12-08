@@ -4,28 +4,27 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Core.Infrastructures.Security;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
 using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent.Exceptions;
-using CoreModels = TGS.Core.DataServices.Tgs.Models;
-using CoreUtility = TGS.Core.Infrastructures.Utility;
+using AgentType = Tgs.Agent.Client.Models.Enums.AgentType;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
 internal class CreateAgentCommandService : IGetService<CreateAgentCommand, CreateAgentInfo>
 {
-    private readonly IPasswordHandler _passwordHandler;
     private readonly ITgsRepository _tgsRepository;
+    private readonly IAgentClient _agentClient;
 
     public CreateAgentCommandService(
         ITgsRepository tgsRepository,
-        IPasswordHandler passwordHandler)
+        IAgentClient agentClient)
     {
         _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+        _agentClient = agentClient;
     }
 
     public async ValueTask<CreateAgentInfo> GetAsync(
@@ -37,6 +36,7 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
 
         var brand = await _tgsRepository.Brands.AsQueryable()
             .Include(x => x.BrandAgentDividendConditions)
+            .Include(x => x.Currencies)
             .FirstAsync(x => x.Id == query.BrandId, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
@@ -58,95 +58,33 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
             throw new DividendPercentageException(JsonSerializer.Serialize(errorMessage));
         }
 
-        var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
-
-        while (await _tgsRepository.Agents.AsQueryable()
-            .AnyAsync(agent => agent.InvitationCode == invitationCode, cancellationToken)
-            .ConfigureAwait(false))
+        var agentId = await _agentClient.CreateAgentAsync(new CreateAgentRequest
         {
-            invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
-        }
-
-        var defaultWalletId = GuidExtensions.NewSequentialGuid();
-
-        var agentId = Guid.NewGuid();
-
-        var agent = new CoreModels.Agent
-        {
-            Id = agentId,
+            BrandId = query.BrandId,
+            ParentAgentId = parentAgent.ParentAgentId,
             Username = query.Username,
-            LevelType = AgentLevelType.Agent,
-            BrandId = parentAgent.BrandId,
-            Type = parentAgent.Type,
-            Status = AgentStatus.Enabled,
-            ParentAgentId = parentAgent?.Id,
-            DefaultWalletId = defaultWalletId,
-            AgentStatus =
-                brand.AgentDividendType == AgentDividendType.MultipleLayer &&
-                brand.BrandAgentDividendConditions?.Count > 0 ||
-                brand.AgentDividendType == AgentDividendType.OneLayer && query.DividendPercentage > 0
-                    ? AgentConfigStatus.DoneForConfigurePercentage
-                    : AgentConfigStatus.WaitForConfigurePercentage,
+            RealName = query.RealName,
+            CurrencyCode = brand.Currencies.First().CurrencyCode,
+            Type = (AgentType)parentAgent.Type,
+            LevelType = (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
+            Password = query.Password,
+            CardGameRebatePercentage = query.CardGameRebatePercentage,
+            CommissionPercentage = query.CommissionPercentage,
             DividendPercentage = query.DividendPercentage,
             LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
-            SlotRebatePercentage = query.SlotRebatePercentage,
             LotteryRebatePercentage = query.LotteryRebatePercentage,
-            CardGameRebatePercentage = query.CardGameRebatePercentage,
+            SlotRebatePercentage = query.SlotRebatePercentage,
             SportsRebatePercentage = query.SportsRebatePercentage,
             VirtualSportsRebatePercentage = query.VirtualSportsRebatePercentage,
-            InvitationCode = invitationCode,
-            Remarks = query.Remarks,
-            Email = string.IsNullOrWhiteSpace(query.Email) ? null : query.Email,
-            Phone = query.Phone,
-            RealName = query.RealName,
-            CreatedByUsername = parentAgent!.Username,
-            UpdatedByUsername = parentAgent!.Username,
-            CreatedOn = DateTimeOffset.Now,
-            UpdatedOn = DateTimeOffset.Now,
-            RegisteredOn = DateTimeOffset.Now,
-            Path = new LTree($"{parentAgent.Path}.{agentId:N}")
-        };
-
-        if (brand.AgentDividendType == AgentDividendType.MultipleLayer)
-        {
-            agent.AgentDividendConditions = brand.BrandAgentDividendConditions!.Select(
-                x => new CoreModels.AgentDividendCondition
-                {
-                    Rank = x.Rank,
-                    NetProfit = x.NetProfit,
-                    ActiveNumber = x.ActiveNumber,
-                    DividendPercentage = x.DividendPercentage
-                }).ToHashSet();
-        }
-
-        var (salt, pwd) = _passwordHandler.GenerateCredential(query.Password);
-
-        agent.Password = pwd;
-        agent.Salt = salt;
-        agent.WithdrawPassword = Array.Empty<byte>();
-        agent.WithdrawSalt = Array.Empty<byte>();
-
-        agent.Wallets = new[]
-            {
-                new CoreModels.AgentWallet
-                {
-                    Id = defaultWalletId,
-                    Agent = agent,
-                    Balance = 0,
-                    CurrencyCode = brand.Currencies.First().CurrencyCode,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedOn = DateTimeOffset.Now
-                }
-            }
-            .ToHashSet();
-
-        await _tgsRepository.Agents.AddAsync(agent, cancellationToken).ConfigureAwait(false);
-        await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            Remarks = query.Remarks ?? "",
+            EditorUsername = parentAgent.Username
+        },
+            cancellationToken);
 
         return new CreateAgentInfo
         {
             IsNew = true,
-            AgentId = agent.Id.ToString()
+            AgentId = agentId.ToString()
         };
     }
 }
