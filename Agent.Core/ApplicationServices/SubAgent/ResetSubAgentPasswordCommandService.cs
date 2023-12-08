@@ -29,12 +29,12 @@ internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAge
         if (command.AgentId != subAgent.ParentAgentId)
             return;
 
-        await _agentClient
-            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password), cancellationToken)
-            .ConfigureAwait(false);
-
         var parentAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
+            .ConfigureAwait(false);
+
+        await _agentClient
+            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password, parentAgent!.Username), cancellationToken)
             .ConfigureAwait(false);
 
         await _agentClient
