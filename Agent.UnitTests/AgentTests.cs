@@ -299,4 +299,20 @@ public class AgentTests
         _ = fakeAgentRepository.Received(1)
             .GetAgentDomainsByIdAsync(Arg.Is(query.AgentId));
     }
+
+    [Test]
+    public async Task Get_Agent_Balance()
+    {
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+
+        var sut = new GetAgentBalanceQueryService(fakeCashServiceClient);
+
+        var query = new GetAgentBalanceQuery(Guid.NewGuid(),Guid.NewGuid());
+
+        _ = fakeCashServiceClient.GetBalanceAsync(Arg.Any<Guid>()).Returns(121);
+
+        var response = await sut.GetAsync(query);
+
+        Assert.That(response, Is.EqualTo(121));
+    }
 }

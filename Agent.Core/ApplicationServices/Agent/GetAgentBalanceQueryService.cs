@@ -1,22 +1,21 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Tgs.CashService.Client;
 using Tgs.ServiceUtility;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
 internal class GetAgentBalanceQueryService : IGetService<GetAgentBalanceQuery, decimal>
 {
-    private readonly IAgentWalletRepository _agentWalletRepository;
+    private readonly ICashServiceClient _cashServiceClient;
 
-    public GetAgentBalanceQueryService(IAgentWalletRepository agentWalletRepository)
+    public GetAgentBalanceQueryService(ICashServiceClient cashServiceClient)
     {
-        _agentWalletRepository = agentWalletRepository ?? throw new ArgumentNullException(nameof(agentWalletRepository));
+        _cashServiceClient = cashServiceClient;
     }
 
     public async ValueTask<decimal> GetAsync(GetAgentBalanceQuery query, CancellationToken cancellationToken = default)
-        => await _agentWalletRepository
-            .GetBalanceAsync(query.WalletId, query.AgentId)
+        => await _cashServiceClient
+            .GetBalanceAsync(query.WalletId, cancellationToken)
             .ConfigureAwait(false);
 }
