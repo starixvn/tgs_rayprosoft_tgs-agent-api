@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
 using Tgs.CashService.Client;
 using TGS.Core.DataServices.Tgs;
 using Tgs.Core.Infrastructures.Security;
@@ -214,6 +215,7 @@ public class AgentTests
         Assert.IsTrue(info.IsNew);
 
         _ = fakeAgentClient.ReceivedWithAnyArgs(1).CreateAgentAsync(null, default);
+        _ = fakeAgentClient.Received(1).CreateAgentAsync(Arg.Is<CreateAgentRequest>(x => x.ParentAgentId == parentAgent.Id), default);
     }
 
     [Test]

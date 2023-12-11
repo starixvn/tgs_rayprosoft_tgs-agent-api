@@ -61,7 +61,7 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
         var agentId = await _agentClient.CreateAgentAsync(new CreateAgentRequest
         {
             BrandId = query.BrandId,
-            ParentAgentId = parentAgent.ParentAgentId,
+            ParentAgentId = parentAgent.Id,
             Username = query.Username,
             RealName = query.RealName,
             CurrencyCode = brand.Currencies.First().CurrencyCode,
