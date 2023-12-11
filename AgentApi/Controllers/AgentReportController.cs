@@ -5,8 +5,12 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using Tgs.CashService.Client;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Agent;
@@ -44,33 +48,38 @@ public class AgentReportController : ControllerBase
     [HttpGet("accountchanges")]
     [Description("Get account changes")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
+    public async Task<Models.PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
         [FromQuery] GetAccountChangesRequest request,
         [FromQuery] PagingRequest pagingRequest,
-        [FromQuery] Guid id)
+        [FromQuery] Guid id,
+        [FromServices] ICashServiceClient cashServiceClient,
+        [FromServices] IAgentClient agentClient)
     {
-        var brandId = HttpContext.Items.GetBrandId();
+        var agentData = HttpContext.Items.GetAgentTokenData();
 
-        var accountChangesRequest = new GetAgentAccountChangesRequest
-        {
-            AgentId = id,
-            BrandId = brandId,
-            From = request.From,
-            To = request.To,
-            TransactionType = (short?)request.TransactionType,
-            Page = pagingRequest.Page,
-            Rows = pagingRequest.Rows,
-            OrderBy = pagingRequest.IsDesc ? (short)SortOrder.Descending : (short)SortOrder.Ascending,
-            SortBy = pagingRequest.SortBy,
-            ShowAll = pagingRequest.ShowAll
-        };
+        var transactionTypes = request.TransactionType == null
+            ? Array.Empty<int>()
+            : new[] { (int)request.TransactionType };
 
-        var response = await _client.GetAgentAccountChangesAsync(accountChangesRequest);
+        var agent = await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(agentData.AgentId));
 
-        return new()
+        var response = await cashServiceClient.QueryTransactionLogsAsync(agent!.WalletId!.Value,
+            request.From.UtcDateTime,
+            request.To.UtcDateTime,
+            transactionTypes,
+            new PagingConditions(pagingRequest.Page, pagingRequest.Rows));
+
+        return new Models.PagingResponse<AgentAccountChangeModel>
         {
             TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<AgentAccountChangeModel>()
+            Items = response.Items.Select(x => new AgentAccountChangeModel
+            {
+                TransactionId = x.Id,
+                Amount = x.Amount,
+                Balance = x.Balance,
+                TransactionType = (short)x.TransactionType,
+                RecordedOn = x.RecordedOn
+            })
         };
     }
 
@@ -102,7 +111,7 @@ public class AgentReportController : ControllerBase
     [Description("Get agent dividend details")]
     [TgsResponseWrapper]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<AgentDividendDetailModel>>
+    public async Task<Models.PagingResponse<AgentDividendDetailModel>>
         GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
     {
         var dividendRequest = new GetAgentDividendDetailsRequest
@@ -130,7 +139,7 @@ public class AgentReportController : ControllerBase
     [Description("Get agent dividend team details")]
     [TgsResponseWrapper]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<AgentDividendTeamDetailModel>>
+    public async Task<Models.PagingResponse<AgentDividendTeamDetailModel>>
         GetAgentDividendDetailsAsync([FromQuery] GetDividendTeamDetailsRequest request)
     {
         var dividendRequest = new GetAgentDividendTeamDetailsRequest
@@ -454,7 +463,7 @@ public class AgentReportController : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     [TgsResponseWrapper]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-    public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
+    public async Task<Models.PagingResponse<RoundModel>> GetRoundsAsync(
         [FromQuery] PagingRequest pagingRequest,
         [FromQuery] GetAgentPlayerRoundsReportRequest request)
     {
