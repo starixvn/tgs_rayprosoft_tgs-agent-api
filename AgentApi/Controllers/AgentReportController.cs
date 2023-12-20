@@ -65,20 +65,24 @@ public class AgentReportController : ControllerBase
                 .ToArray()
             : request.TransactionType.Value switch
             {
-                Models.Enums.TransactionType.Deposit => new[]
+                TransactionType.Deposit => new[]
                 {
                     (int)Models.Enums.TransactionType.Deposit, 
                     (int)Models.Enums.TransactionType.Deposited
                 },
-                Models.Enums.TransactionType.Withdrawal => new[]
+                TransactionType.Withdrawal => new[]
                 {
                     (int)Models.Enums.TransactionType.Withdrawal, 
                     (int)Models.Enums.TransactionType.WithdrawLock
                 },
-                Models.Enums.TransactionType.CancelWithdrawal => new[]
+                TransactionType.CancelWithdrawal => new[]
                 {
                     (int)Models.Enums.TransactionType.CancelWithdrawal,
                     (int)Models.Enums.TransactionType.WithdrawRollback
+                },
+                TransactionType.Dividend => new[]
+                {
+                    (int)Models.Enums.TransactionType.AgentDividend
                 },
                 _ => new[] { (int)request.TransactionType.Value },
             };
@@ -115,15 +119,15 @@ public class AgentReportController : ControllerBase
     {
         var allowType = new[]
         {
-            Models.Enums.TransactionType.Deposit,
-            Models.Enums.TransactionType.Withdrawal,
-            Models.Enums.TransactionType.CancelWithdrawal,
-            Models.Enums.TransactionType.CompanyAdjust,
-            Models.Enums.TransactionType.AgentDividend
+            TransactionType.Deposit,
+            TransactionType.Withdrawal,
+            TransactionType.CancelWithdrawal,
+            TransactionType.CompanyAdjust,
+            TransactionType.Dividend
         };
 
-        var dict = Enum.GetValues(typeof(Models.Enums.TransactionType))
-            .Cast<Models.Enums.TransactionType>()
+        var dict = Enum.GetValues(typeof(TransactionType))
+            .Cast<TransactionType>()
             .Where(x => allowType.Contains(x))
             .ToDictionary(t => (int)t, t => t.ToString());
 

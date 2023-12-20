@@ -11,11 +11,11 @@ public sealed class GetAccountChangesRequestValidator : AbstractValidator<GetAcc
     {
         var allowType = new[]
         {
-            Models.Enums.TransactionType.Deposit,
-            Models.Enums.TransactionType.Withdrawal,
-            Models.Enums.TransactionType.CancelWithdrawal,
-            Models.Enums.TransactionType.CompanyAdjust,
-            Models.Enums.TransactionType.AgentDividend
+            TransactionType.Deposit,
+            TransactionType.Withdrawal,
+            TransactionType.CancelWithdrawal,
+            TransactionType.CompanyAdjust,
+            TransactionType.Dividend
         };
 
         RuleFor(r => r.TransactionType)
