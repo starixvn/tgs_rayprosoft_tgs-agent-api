@@ -119,7 +119,6 @@ public class AgentReportController : ControllerBase
     {
         var allowType = new[]
         {
-            TransactionType.Deposit,
             TransactionType.Withdrawal,
             TransactionType.CancelWithdrawal,
             TransactionType.CompanyAdjust,
