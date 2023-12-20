@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Models;
 
@@ -13,5 +12,5 @@ public class GetAccountChangesRequest
     public DateTimeOffset To { get; set; }
 
     [FromQuery(Name = "transactiontype")]
-    public TransactionType? TransactionType { get; set; }
+    public Enums.TransactionType? TransactionType { get; set; }
 }

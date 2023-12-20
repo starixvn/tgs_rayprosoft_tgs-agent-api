@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Tgs.Agent.Client;
@@ -51,22 +50,45 @@ public class AgentReportController : ControllerBase
     public async Task<Models.PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
         [FromQuery] GetAccountChangesRequest request,
         [FromQuery] PagingRequest pagingRequest,
-        [FromQuery] Guid id,
         [FromServices] ICashServiceClient cashServiceClient,
         [FromServices] IAgentClient agentClient)
     {
         var agentData = HttpContext.Items.GetAgentTokenData();
 
-        var transactionTypes = request.TransactionType == null
-            ? Array.Empty<int>()
-            : new[] { (int)request.TransactionType };
+        var queryTransactionTypes = request.TransactionType is null
+            ? Enum.GetValues(typeof(Models.Enums.TransactionType))
+                .Cast<Models.Enums.TransactionType>()
+                .Where(x => x is not Models.Enums.TransactionType.WithdrawCommit
+                    and not Models.Enums.TransactionType.TransferCommit
+                    and not Models.Enums.TransactionType.Receive)
+                .Select(x => (int)x)
+                .ToArray()
+            : request.TransactionType.Value switch
+            {
+                Models.Enums.TransactionType.Deposit => new[]
+                {
+                    (int)Models.Enums.TransactionType.Deposit, 
+                    (int)Models.Enums.TransactionType.Deposited
+                },
+                Models.Enums.TransactionType.Withdrawal => new[]
+                {
+                    (int)Models.Enums.TransactionType.Withdrawal, 
+                    (int)Models.Enums.TransactionType.WithdrawLock
+                },
+                Models.Enums.TransactionType.CancelWithdrawal => new[]
+                {
+                    (int)Models.Enums.TransactionType.CancelWithdrawal,
+                    (int)Models.Enums.TransactionType.WithdrawRollback
+                },
+                _ => new[] { (int)request.TransactionType.Value },
+            };
 
         var agent = await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(agentData.AgentId));
 
         var response = await cashServiceClient.QueryTransactionLogsAsync(agent!.WalletId!.Value,
             request.From.UtcDateTime,
             request.To.UtcDateTime,
-            transactionTypes,
+            queryTransactionTypes,
             new PagingConditions(pagingRequest.Page, pagingRequest.Rows));
 
         return new Models.PagingResponse<AgentAccountChangeModel>
@@ -93,14 +115,15 @@ public class AgentReportController : ControllerBase
     {
         var allowType = new[]
         {
-            TransactionType.Withdrawal,
-            TransactionType.CancelWithdrawal,
-            TransactionType.CompanyAdjust,
-            TransactionType.Dividend
+            Models.Enums.TransactionType.Deposit,
+            Models.Enums.TransactionType.Withdrawal,
+            Models.Enums.TransactionType.CancelWithdrawal,
+            Models.Enums.TransactionType.CompanyAdjust,
+            Models.Enums.TransactionType.AgentDividend
         };
 
-        var dict = Enum.GetValues(typeof(TransactionType))
-            .Cast<TransactionType>()
+        var dict = Enum.GetValues(typeof(Models.Enums.TransactionType))
+            .Cast<Models.Enums.TransactionType>()
             .Where(x => allowType.Contains(x))
             .ToDictionary(t => (int)t, t => t.ToString());
 
