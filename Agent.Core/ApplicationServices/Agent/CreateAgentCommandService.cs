@@ -64,6 +64,8 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
             ParentAgentId = parentAgent.Id,
             Username = query.Username,
             RealName = query.RealName,
+            Email = query.Email,
+            Phone = query.Phone,
             CurrencyCode = brand.Currencies.First().CurrencyCode,
             Type = (AgentType)parentAgent.Type,
             LevelType = (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
