@@ -6,7 +6,6 @@ using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.Agent.Client.Models.Enums;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.SubAgent;
 
@@ -48,7 +47,7 @@ public class SubAgentTests
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(childInfos.ToAsyncEnumerable());
 
-        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId);
+        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId, false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(parentAgentId))
@@ -96,7 +95,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId));
+                walletId,
+                false));
 
         var parent = new AgentInfoModel(
                 agentId,
@@ -117,7 +117,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId);
+                walletId,
+                false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -143,7 +144,7 @@ public class SubAgentTests
         var agentId = Guid.Parse("4980e08b-6bbc-4f0a-b027-90f837e0075c");
         var walletId = Guid.Parse("3980e08b-6bbc-4f0a-b027-90f837e0075d");
         var subAgentId = Guid.Parse("b9b3069f-d7ca-40d8-8996-a4df11986cd8");
-        var realName = "";
+
         var email = "newEmail";
         var phone = "newPhone";
 
@@ -172,7 +173,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId));
+                walletId,
+                false));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -193,7 +195,8 @@ public class SubAgentTests
             0M,
             brandId,
             walletId,
-            walletId);
+            walletId,
+            false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -283,7 +286,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId));
+                walletId,
+                false));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -304,7 +308,8 @@ public class SubAgentTests
             0M,
             brandId,
             walletId,
-            walletId);
+            walletId,
+            false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -370,7 +375,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId));
+                walletId,
+                false));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -408,7 +414,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId);
+                walletId,
+                false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -470,7 +477,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId));
+                walletId,
+                false));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -508,7 +516,8 @@ public class SubAgentTests
                 0M,
                 brandId,
                 walletId,
-                walletId);
+                walletId,
+                false);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
