@@ -313,7 +313,7 @@ public class AgentController : ControllerBase
                 ParentUsername = parentAgentInfo?.Username,
                 RegisteredOn = agentInfo.RegisteredOn,
                 Balance = await getAgentBalanceService
-                    .GetAsync(new GetAgentBalanceQuery(agentInfo.DefaultWalletId, agentInfo.Id))
+                    .GetAsync(new GetAgentBalanceQuery(agentInfo.WalletId.Value, agentInfo.Id))
                     .ConfigureAwait(false),
                 Status = agentInfo.Status.ToString(),
                 Type = agentInfo.Type.ToString(),
