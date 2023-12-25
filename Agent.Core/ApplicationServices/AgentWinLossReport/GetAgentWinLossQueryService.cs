@@ -2,14 +2,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Models.Enums;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
-using Tgs.PlayerService.Client;
-using Tgs.Agent.Client;
-using Tgs.Agent.Client.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
@@ -115,7 +115,7 @@ public class
                 cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent?.Id, cancellationToken)
                 .ConfigureAwait(false);
 
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
@@ -123,38 +123,18 @@ public class
         return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
             : await _reportClient.GetAgentWinLossAsync(new()
-        {
-            BrandId = request.BrandId,
-            AgentId = agentId.Value,
-            PlatformCharge = platformCharge,
-            From = request.From,
-            To = request.To,
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = (short)request.OrderBy,
-            SortBy = request.SortBy,
-            ShowAll = request.ShowAll
-        }).ConfigureAwait(false);
-    }
-
-    private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
-        GetDownLineAgentWinLossByMasterAgentIdAsync(
-            GetAgentWinLossQuery request,
-            decimal platformCharge)
-    {
-        return await _reportClient.GetDownLineAgentWinLossAsync(new()
-        {
-            BrandId = request.BrandId,
-            AgentId = request.AgentId,
-            PlatformCharge = platformCharge,
-            From = request.From,
-            To = request.To,
-            Page = request.Page,
-            Rows = request.Rows,
-            OrderBy = (short)request.OrderBy,
-            SortBy = request.SortBy,
-            ShowAll = request.ShowAll
-        }).ConfigureAwait(false);
+            {
+                BrandId = request.BrandId,
+                AgentId = agentId.Value,
+                PlatformCharge = platformCharge,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            }).ConfigureAwait(false);
     }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
@@ -171,7 +151,7 @@ public class
                 cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent?.Id, cancellationToken)
                 .ConfigureAwait(false);
 
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
@@ -179,9 +159,29 @@ public class
         return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
             : await _reportClient.GetDownLineAgentWinLossAsync(new()
+            {
+                BrandId = request.BrandId,
+                AgentId = agentId.Value,
+                PlatformCharge = platformCharge,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = (short)request.OrderBy,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            }).ConfigureAwait(false);
+    }
+
+    private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
+            GetDownLineAgentWinLossByMasterAgentIdAsync(
+            GetAgentWinLossQuery request,
+            decimal platformCharge)
+    {
+        return await _reportClient.GetDownLineAgentWinLossAsync(new()
         {
             BrandId = request.BrandId,
-            AgentId = agentId.Value,
+            AgentId = request.AgentId,
             PlatformCharge = platformCharge,
             From = request.From,
             To = request.To,
