@@ -37,7 +37,7 @@ internal class AgentRepository : IAgentRepository
                 agent.Username,
                 agent.RealName,
                 agent.Phone,
-                agent.DefaultWalletId,
+                agent.DefaultWalletId,                
                 agent.Email,
                 agent.QQ,
                 agent.Wechat,

@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Agent.Client;
 using Tgs.Paging;
 using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
@@ -268,7 +269,7 @@ public class AgentController : ControllerBase
     public async Task<GetAgentResponse> GetLoginAgentInfoAsync(
         [FromServices] IStatusValidator statusValidator,
         [FromServices] IGetService<GetBrandInfoQuery, BrandInfo> getBrandService,
-        [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
+        [FromServices] IAgentClient agentClient,
         [FromServices] IGetService<GetAgentBalanceQuery, decimal> getAgentBalanceService,
         [FromServices] IQueryService<GetAgentDomainsQuery, string> getAgentDomainsService,
         [FromServices] IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition> queryDividendsService)
@@ -284,15 +285,15 @@ public class AgentController : ControllerBase
 
         var agentId = agentTokenData.AgentId;
 
-        var agentInfo = await getAgentService
-            .GetAsync(new GetAgentInfoQuery(agentId))
+        var agentInfo = await agentClient
+            .GetAgentInfoAsync(new Tgs.Agent.Client.Models.GetAgentInfoRequest(agentId))
             .ConfigureAwait(false)
             ?? throw new Core.Models.Exceptions.AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
 
         var parentAgentInfo = agentInfo.ParentAgentId == null
             ? null
-            : await getAgentService
-                .GetAsync(new GetAgentInfoQuery(agentInfo.ParentAgentId.Value))
+            : await agentClient
+                .GetAgentInfoAsync(new Tgs.Agent.Client.Models.GetAgentInfoRequest(agentInfo.ParentAgentId.Value))
                 .ConfigureAwait(false);
 
         return new GetAgentResponse
@@ -308,12 +309,12 @@ public class AgentController : ControllerBase
                 Wechat = agentInfo.Wechat,
                 InvitationCode = agentInfo.InvitationCode,
                 BrandUrl = brand.DomainUrl,
-                IsSetPayPassword = agentInfo.PayPassword.Length > 0,
+                IsSetPayPassword = agentInfo.IsSetPayPassword,
                 DividendPercentage = agentInfo.DividendPercentage,
                 ParentUsername = parentAgentInfo?.Username,
                 RegisteredOn = agentInfo.RegisteredOn,
                 Balance = await getAgentBalanceService
-                    .GetAsync(new GetAgentBalanceQuery(agentInfo.DefaultWalletId, agentInfo.Id))
+                    .GetAsync(new GetAgentBalanceQuery(agentInfo.WalletId.Value, agentInfo.Id))
                     .ConfigureAwait(false),
                 Status = agentInfo.Status.ToString(),
                 Type = agentInfo.Type.ToString(),
@@ -347,5 +348,5 @@ public class AgentController : ControllerBase
     [Route("login")]
     [Consumes(MediaTypeNames.Application.Json)]
     public Task<LoginResponse> LoginAsync(LoginRequest request) =>
-        _mediator.Send(request);    
+        _mediator.Send(request);
 }

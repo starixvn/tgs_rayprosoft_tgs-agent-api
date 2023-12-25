@@ -334,7 +334,8 @@ public class AgentWinLossTests
             0,
             brandId,
             walletId,
-            walletId);
+            walletId,
+            false);
 
         _ = reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
@@ -468,7 +469,8 @@ public class AgentWinLossTests
             0,
             brandId,
             walletId,
-            walletId);
+            walletId,
+            false);
 
         _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())

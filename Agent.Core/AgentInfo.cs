@@ -8,7 +8,7 @@ public record AgentInfo(
     string Username,
     string? RealName,
     string? Phone,
-    Guid DefaultWalletId,
+    Guid DefaultWalletId,    
     string? Email,
     string? QQ,
     string? Wechat,
