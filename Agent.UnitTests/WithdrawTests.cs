@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
@@ -18,14 +22,15 @@ public class WithdrawTests
     [Test]
     public void Agent_Balance_Not_Enough_Create_Withdraw_Form_Will_Fail()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
-        var fakeWalletRepository = Substitute.For<IAgentWalletRepository>();
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakeAgentClient = Substitute.For<IAgentClient>();
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+
 
         var sut = new CreateWithdrawFormCommandService(
-            fakeAgentRepository,
-            fakeWalletRepository,
-            fakePaymentServiceClient);
+            fakePaymentServiceClient,
+            fakeCashServiceClient,
+            fakeAgentClient);
 
         var command = new CreateWithdrawFormCommand(
             Guid.NewGuid(),
@@ -33,34 +38,36 @@ public class WithdrawTests
             Guid.NewGuid(),
             1000M);
 
-        fakeAgentRepository
-            .GetAgentByIdAsync(Arg.Is(command.AgentId))
-            .Returns(new AgentInfo(
+        fakeAgentClient
+            .GetAgentInfoAsync(Arg.Any<GetAgentInfoRequest>())
+            .Returns(new AgentInfoModel(
                 command.AgentId,
                 "ThisIsAgentName",
-                null,
-                null,
-                Guid.NewGuid(),
-                "test@gmail.com",
-                null,
-                null,
-                "aaabbb",
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
+                "",
+                "",
+                "",
+                "",
+                "",
+                "code",
                 null,
                 DateTimeOffset.Now,
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Agent,
-                0M,
-                0,
-                0));
+                (Tgs.Agent.Client.Models.Enums.AgentStatus)AgentStatus.Enabled,
+                (Tgs.Agent.Client.Models.Enums.AgentType)AgentType.Cash,
+                (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
+                10,
+                1,
+                1,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                true));
 
-        fakeWalletRepository
-            .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
+        fakeCashServiceClient
+            .GetBalanceAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(2000M);
+
+        fakeCashServiceClient.LockWithdrawAsync(default, 0, null, null, default)
+            .ReturnsForAnyArgs(new TransactionResponse { Balance = -1 });
 
         var expected = new WithdrawFormCreateInfo
         {
@@ -82,16 +89,6 @@ public class WithdrawTests
                 expected.ShouldMatch(info);
             });
 
-        _ = fakeWalletRepository.ExchangeAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<TransactionTypes>(),
-                Arg.Any<decimal>(),
-                Arg.Any<string>())
-            .Returns(ValueTask.FromResult(
-                (Guid.NewGuid(), -100M)));
-
         Assert.ThrowsAsync<InsufficientFundsException>(
             async () => await sut.ExecuteAsync(command));
 
@@ -104,14 +101,15 @@ public class WithdrawTests
     [Test]
     public async Task Agent_Can_Create_Withdraw_Form()
     {
-        var fakeAgentRepository = Substitute.For<IAgentRepository>();
         var fakeWalletRepository = Substitute.For<IAgentWalletRepository>();
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+        var fakeAgentClient = Substitute.For<IAgentClient>();
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 
         var sut = new CreateWithdrawFormCommandService(
-            fakeAgentRepository,
-            fakeWalletRepository,
-            fakePaymentServiceClient);
+            fakePaymentServiceClient,
+            fakeCashServiceClient,
+            fakeAgentClient);
 
         var command = new CreateWithdrawFormCommand(
             Guid.NewGuid(),
@@ -119,34 +117,36 @@ public class WithdrawTests
             Guid.NewGuid(),
             1000M);
 
-        fakeAgentRepository
-            .GetAgentByIdAsync(Arg.Is(command.AgentId))
-            .Returns(new AgentInfo(
+        fakeAgentClient
+            .GetAgentInfoAsync(Arg.Any<GetAgentInfoRequest>())
+            .Returns(new AgentInfoModel(
                 command.AgentId,
                 "ThisIsAgentName",
-                null,
-                null,
-                Guid.NewGuid(),
-                "test@gmail.com",
-                null,
-                null,
-                "aaabbb",
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
-                Array.Empty<byte>(),
+                "",
+                "",
+                "",
+                "",
+                "",
+                "code",
                 null,
                 DateTimeOffset.Now,
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Agent,
-                0M,
-                0,
-                0));
+                (Tgs.Agent.Client.Models.Enums.AgentStatus)AgentStatus.Enabled,
+                (Tgs.Agent.Client.Models.Enums.AgentType)AgentType.Cash,
+                (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
+                10,
+                1,
+                1,
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                true));
 
-        fakeWalletRepository
-            .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
+        fakeCashServiceClient
+            .GetBalanceAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(2000M);
+
+        fakeCashServiceClient.LockWithdrawAsync(default, 0, null, null, default)
+            .ReturnsForAnyArgs(new TransactionResponse { Balance = 2222 });
 
         var expected = new WithdrawFormCreateInfo
         {

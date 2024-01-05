@@ -1,39 +1,39 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
-using TGS.Services.WalletService;
 
 namespace TGS.Services.Agent.ApplicationServices.Withdraw;
 
 internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
 {
-    private readonly IAgentRepository _agentRepository;
     private readonly IPaymentServiceClient _paymentServiceClient;
-    private readonly IAgentWalletRepository _walletRepository;
+    private readonly IAgentClient _agentClient;
+    private readonly ICashServiceClient _cashServiceClient;
 
     public CreateWithdrawFormCommandService(
-        IAgentRepository agentRepository,
-        IAgentWalletRepository walletRepository,
-        IPaymentServiceClient paymentServiceClient)
+        IPaymentServiceClient paymentServiceClient,
+        ICashServiceClient cashServiceClient,
+        IAgentClient agentClient)
     {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         _paymentServiceClient =
             paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+        _cashServiceClient = cashServiceClient;
+        _agentClient = agentClient;
     }
 
     public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command,
         CancellationToken cancellationToken = default)
     {
-        var agentData = await _agentRepository
-            .GetAgentByIdAsync(command.AgentId)
+        var agent = await _agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
             .ConfigureAwait(false);
 
-        var balance = await _walletRepository
-            .GetBalanceAsync(agentData!.DefaultWalletId, command.AgentId)
+        var balance = await _cashServiceClient.GetBalanceAsync(agent!.WalletId!.Value, cancellationToken)
             .ConfigureAwait(false);
 
         if (balance - command.Amount < 0)
@@ -47,36 +47,34 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
                     Amount = command.Amount,
                     BankInfoId = command.BankInfoId,
                     BrandId = command.BrandId,
-                    UserName = agentData.Username,
+                    UserName = agent.Username,
                     UserType = UserType.Agent
-                })
+                }, cancellationToken)
             .ConfigureAwait(false);
 
-        var result = await _walletRepository
-            .ExchangeAsync(
-                command.BrandId,
-                agentData.DefaultWalletId,
-                command.AgentId,
-                TransactionTypes.Withdrawal,
-                -command.Amount)
-            .ConfigureAwait(false);
+        var result = await _cashServiceClient.LockWithdrawAsync(
+            agent.WalletId.Value,
+            command.Amount,
+            null,
+            createFormId.ToString(),
+            cancellationToken).ConfigureAwait(false);
 
-        if (result.PostBalance < 0)
+        if (result.Balance < 0)
         {
-            await _walletRepository.ExchangeAsync(
-                command.BrandId,
-                agentData.DefaultWalletId,
-                command.AgentId,
-                TransactionTypes.Deposit,
-                command.Amount).ConfigureAwait(false);
+            _ = await _cashServiceClient.RollbackWithdrawAsync(
+                agent.WalletId.Value,
+                command.Amount,
+                null,
+                createFormId.ToString(),
+                null,
+                cancellationToken).ConfigureAwait(false);
 
             await _paymentServiceClient
                 .SubmitWithdrawFormStatusAsync(
                     createFormId,
-                    PaymentFlowState.Reject)
+                    PaymentFlowState.Reject,
+                    cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-
-            command.ReturnFormIdSource.SetResult(createFormId);
 
             throw new InsufficientFundsException();
         }
@@ -84,7 +82,8 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
         await _paymentServiceClient
             .SubmitWithdrawFormStatusAsync(
                 createFormId,
-                PaymentFlowState.WaitApprove)
+                PaymentFlowState.WaitApprove,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         command.ReturnFormIdSource.SetResult(createFormId);
