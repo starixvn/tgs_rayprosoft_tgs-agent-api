@@ -52,33 +52,6 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
                 }, cancellationToken)
             .ConfigureAwait(false);
 
-        var result = await _cashServiceClient.LockWithdrawAsync(
-            agent.WalletId.Value,
-            command.Amount,
-            null,
-            createFormId.ToString(),
-            cancellationToken).ConfigureAwait(false);
-
-        if (result.Balance < 0)
-        {
-            _ = await _cashServiceClient.RollbackWithdrawAsync(
-                agent.WalletId.Value,
-                command.Amount,
-                null,
-                createFormId.ToString(),
-                null,
-                cancellationToken).ConfigureAwait(false);
-
-            await _paymentServiceClient
-                .SubmitWithdrawFormStatusAsync(
-                    createFormId,
-                    PaymentFlowState.Reject,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-
-            throw new InsufficientFundsException();
-        }
-
         await _paymentServiceClient
             .SubmitWithdrawFormStatusAsync(
                 createFormId,
