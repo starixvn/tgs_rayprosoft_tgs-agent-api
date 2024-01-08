@@ -9,7 +9,6 @@ using Tgs.Agent.Client.Models;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using TGS.Core.Models.Enums;
-using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.WalletService;
@@ -25,7 +24,6 @@ public class WithdrawTests
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
         var fakeAgentClient = Substitute.For<IAgentClient>();
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-
 
         var sut = new CreateWithdrawFormCommandService(
             fakePaymentServiceClient,
@@ -64,10 +62,7 @@ public class WithdrawTests
 
         fakeCashServiceClient
             .GetBalanceAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(2000M);
-
-        fakeCashServiceClient.LockWithdrawAsync(default, 0, null, null, default)
-            .ReturnsForAnyArgs(new TransactionResponse { Balance = -1 });
+            .Returns(-2000M);
 
         var expected = new WithdrawFormCreateInfo
         {
@@ -93,7 +88,7 @@ public class WithdrawTests
             async () => await sut.ExecuteAsync(command));
 
         _ = fakePaymentServiceClient
-            .Received(1)
+            .Received(0)
             .CreateWithdrawFormAsync(
                 Arg.Any<WithdrawFormCreateInfo>());
     }
