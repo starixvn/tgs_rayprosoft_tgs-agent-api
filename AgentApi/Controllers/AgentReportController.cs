@@ -119,11 +119,14 @@ public class AgentReportController : ControllerBase
     {
         var allowType = new[]
         {
-            TransactionType.Deposit,
-            TransactionType.Withdrawal,
-            TransactionType.CancelWithdrawal,
-            TransactionType.CompanyAdjust,
-            TransactionType.Dividend
+            TransactionType.Transfer,
+            TransactionType.TransferRollback,
+            TransactionType.ReceiveCommit,
+            TransactionType.ReceiveRollback,
+            TransactionType.AgentDividend,
+            TransactionType.WithdrawLock,
+            TransactionType.WithdrawRollback,
+            TransactionType.CompanyAdjust
         };
 
         var dict = Enum.GetValues(typeof(TransactionType))
