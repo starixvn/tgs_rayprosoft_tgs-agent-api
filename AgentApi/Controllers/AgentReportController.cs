@@ -63,29 +63,7 @@ public class AgentReportController : ControllerBase
                     and not Models.Enums.TransactionType.Receive)
                 .Select(x => (int)x)
                 .ToArray()
-            : request.TransactionType.Value switch
-            {
-                TransactionType.Deposit => new[]
-                {
-                    (int)Models.Enums.TransactionType.Deposit, 
-                    (int)Models.Enums.TransactionType.Deposited
-                },
-                TransactionType.Withdrawal => new[]
-                {
-                    (int)Models.Enums.TransactionType.Withdrawal, 
-                    (int)Models.Enums.TransactionType.WithdrawLock
-                },
-                TransactionType.CancelWithdrawal => new[]
-                {
-                    (int)Models.Enums.TransactionType.CancelWithdrawal,
-                    (int)Models.Enums.TransactionType.WithdrawRollback
-                },
-                TransactionType.Dividend => new[]
-                {
-                    (int)Models.Enums.TransactionType.AgentDividend
-                },
-                _ => new[] { (int)request.TransactionType.Value },
-            };
+            : new[] { (int)request.TransactionType.Value };
 
         var agent = await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(agentData.AgentId));
 
