@@ -11,7 +11,8 @@ data:
         "BrandCertificateBaseUrl": "http://brand-cert-api",
         "PlayerServiceBaseUrl": "http://player-api",
         "CashBaseUrl": "http://cashservice-api",
-        "AgentServiceBaseUrl": "http://agent-service"
+        "AgentServiceBaseUrl": "http://agent-service",
+        "VipLevelServiceBaseUrl": "http://tgs-viplevel"
       },
       "Logging": {
         "LogLevel": {
