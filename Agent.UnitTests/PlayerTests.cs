@@ -76,10 +76,7 @@ public class PlayerTests
 
         var brand = new BrandInfo { Id = brandId };
 
-        var vipLevels = new[]
-        {
-            new VipLevelInfo(Guid.NewGuid(), 1)
-        };
+
 
         var playerCode = "playerCode";
 
@@ -87,11 +84,44 @@ public class PlayerTests
             .Returns((PlayerInfo?)null);
         fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>()).Returns(agentInfo);
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brand);
-        fakeBrandServiceClient.GetVipLevelInfosAsync(Arg.Any<Guid>()).Returns(vipLevels.ToAsyncEnumerable());
+
+        var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
+            Id: Guid.NewGuid(),
+            Level: 1,
+            BrandId: brandId,
+            LevelUpAccumulateBetAmount: 0M,
+            LevelUpAccumulateDeposit: 0M,
+            LevelKeepAccumulateBetAmount: 0M,
+            LevelKeepAccumulateDeposit: 0M,
+            LevelKeepCondition: false,
+            BirthBenefit: 0M,
+            PromotionBenefit: 0M,
+            QuarterlyBenefit: 0M,
+            LiveDealerRebate: 0M,
+            SlotRebate: 0M,
+            LotteryRebate: 0M,
+            CardGameRebate: 0M,
+            SportsRebate: 0M,
+            VirtualSportsRebate: 0M,
+            WithdrawTransactionsPerDay: -1,
+            WithdrawTotalAmountPerDay: -1m);
+        _ = fakeVipLevelServiceClient.VipLevelGetAsync(
+            brandId: Arg.Is(brandId),
+            level: Arg.Is(1))
+            .Returns(vipLevelInfo);
+
+
         fakeBrandRepository.GetBrandDefaultBetLimitIdAsync(Arg.Any<Guid>(), default).Returns(10);
         fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>()).Returns(playerCode);
 
         await sut.GetAsync(query).ConfigureAwait(false);
+
+        _ = fakeVipLevelServiceClient.Received(1)
+            .PlayerVipLevelRegisterAsync(
+            playerCode: Arg.Is(playerCode),
+            vipLevel: Arg.Is(vipLevelInfo.Level),
+            autoState: Arg.Is(Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable),
+            cancellationToken: Arg.Any<CancellationToken>());
 
         _ = fakePlayerServiceClient
             .Received(1)
@@ -363,13 +393,13 @@ public class PlayerTests
 
         var fakePaymentServiceClient = Substitute.For<Tgs.Payment.Clients.IPaymentServiceClient>();
 
-        var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);        
+        var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);
 
         var query = new GetPlayerPaymentOverviewQuery(playerCode);
 
         _ = fakePaymentServiceClient.
             GetPlayerPaymentOverviewAsync(query.PlayerCode)
-            .Returns(new Tgs.Payment.Clients.PaymentOverview(100M,0M,DateTime.Now,0M,0M,null,new DateOnly(2023,4,1),100M,0M));
+            .Returns(new Tgs.Payment.Clients.PaymentOverview(100M, 0M, DateTime.Now, 0M, 0M, null, new DateOnly(2023, 4, 1), 100M, 0M));
 
         var actual = await sut.GetAsync(query).ConfigureAwait(false);
 
