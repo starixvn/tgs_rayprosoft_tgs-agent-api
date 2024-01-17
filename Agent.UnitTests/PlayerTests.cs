@@ -12,6 +12,7 @@ using Tgs.CashService.Client;
 using Tgs.Paging;
 using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
+using Tgs.VipLevelService.Clients;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
@@ -42,11 +43,13 @@ public class PlayerTests
         var fakeBrandServiceClient = Substitute.For<IBrandServiceClient>();
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
         var fakeAgentRepository = Substitute.For<IAgentRepository>();
+        var fakeVipLevelServiceClient = Substitute.For<IVipLevelServiceClient>();
 
         var sut = new CreatePlayerQueryService(fakePlayerServiceClient,
             fakeAgentRepository,
             fakeBrandRepository,
-            fakeBrandServiceClient);
+            fakeBrandServiceClient,
+            fakeVipLevelServiceClient);
 
         var agentInfo = new AgentInfo(
             agentId,
