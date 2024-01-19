@@ -129,7 +129,7 @@ public class PlayerTests
 
         _ = fakePlayerServiceClient
             .Received(1)
-            .SetPlayerStatusAsync(Arg.Is(playerCode), Arg.Is(PlayerStatus.Enabled));
+            .SetPlayerStatusAsync(Arg.Is(playerCode), Arg.Is(PlayerStatus.Enabled), Arg.Any<string>());
     }
 
     [Test]

@@ -189,7 +189,9 @@ public class PlayerController : ControllerBase
         [FromServices] ICommandService<SetPlayerEmailCommand> commandService,
         [FromBody] SetPlayerEmailRequest request)
     {
-        var command = new SetPlayerEmailCommand(request.PlayerCode, request.Email);
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var command = new SetPlayerEmailCommand(agentTokenData.AgentId, request.PlayerCode, request.Email);
 
         return commandService.ExecuteAsync(command);
     }
@@ -206,7 +208,9 @@ public class PlayerController : ControllerBase
             || string.IsNullOrWhiteSpace(request.AreaCode))
             throw new PhoneRequiredException();
 
-        var command = new SetPlayerPhoneCommand(request.PlayerCode, request.AreaCode, request.Phone);
+        var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+        var command = new SetPlayerPhoneCommand(agentTokenData.AgentId, request.PlayerCode, request.AreaCode, request.Phone);
 
         return commandService.ExecuteAsync(command);
     }

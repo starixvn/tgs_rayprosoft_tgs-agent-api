@@ -53,7 +53,7 @@ public class WithdrawController : ControllerBase
 
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
-        catch (InsufficientFundsException)
+        catch (Services.Agent.Exceptions.InsufficientFundsException)
         {
             throw new PlayerHasInsufficientFundsException();
         }

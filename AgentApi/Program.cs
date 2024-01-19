@@ -17,7 +17,6 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.PlayerBucket.Clients.DependencyInjection;
 using TGS.Apis.AgentApi;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -192,7 +191,7 @@ builder.Services
     .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
 
 builder.Services
-    .AddMessageQueue()
+    .AddPhoenixToolkitsMessageQueue()
     .AddNatsMessageQueue(natsConfig =>
     {
         _ = natsConfig
@@ -251,7 +250,7 @@ builder.Services
         config.GetSection("Opentelemetry:Tracing").Bind(options);
     })
     .Services
-    .Configure<AspNetCoreInstrumentationOptions>(options =>
+    .Configure<AspNetCoreTraceInstrumentationOptions>(options =>
     {
         options.Filter = httpContext =>
         {

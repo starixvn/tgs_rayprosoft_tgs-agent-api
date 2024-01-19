@@ -57,8 +57,8 @@ public class SubAgentTests
 
         var actual = await sut.GetAsync(new GetSubAgentDividendRangeQuery(parentAgentId, subAgentId));
 
-        Assert.AreEqual(30M, actual.Item1);
-        Assert.AreEqual(90M, actual.Item2);
+        Assert.That(actual.Item1, Is.EqualTo(30M));
+        Assert.That(actual.Item2, Is.EqualTo(90M));
     }
 
     [Test]

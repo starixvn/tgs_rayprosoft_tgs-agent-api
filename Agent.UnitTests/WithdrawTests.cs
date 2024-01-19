@@ -84,7 +84,7 @@ public class WithdrawTests
                 expected.ShouldMatch(info);
             });
 
-        Assert.ThrowsAsync<InsufficientFundsException>(
+        Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.InsufficientFundsException>(
             async () => await sut.ExecuteAsync(command));
 
         _ = fakePaymentServiceClient

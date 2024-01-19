@@ -87,7 +87,7 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         await _playerServiceClient
-            .SetPlayerStatusAsync(playerCode, PlayerStatus.Enabled, cancellationToken)
+            .SetPlayerStatusAsync(playerCode, PlayerStatus.Enabled, agent.Username, cancellationToken)
             .ConfigureAwait(false);
 
         await _playerServiceClient

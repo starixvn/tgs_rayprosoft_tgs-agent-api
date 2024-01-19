@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-public record SetPlayerEmailCommand(string PlayerCode, string Email);
+public record SetPlayerEmailCommand(Guid AgentId, string PlayerCode, string Email);
