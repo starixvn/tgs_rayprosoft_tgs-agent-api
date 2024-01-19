@@ -111,6 +111,9 @@ builder.Services
         var config = sp.GetRequiredService<IConfiguration>();
         options.BrandCertificateBaseUrl = config.GetValue<Uri>("Agent:BrandCertificateBaseUrl");
     })
+    .AddVipLevelServiceClient(httpBuilder => httpBuilder
+        .ConfigureHttpClient(httpClient => httpClient.BaseAddress =
+        builder.Configuration.GetValue<Uri>("Agent:VipLevelServiceBaseUrl")!))
     .AddTransactions();
 
 builder.Services
