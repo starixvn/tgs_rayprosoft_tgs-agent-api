@@ -17,7 +17,6 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.PlayerBucket.Clients.DependencyInjection;
 using TGS.Apis.AgentApi;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -32,14 +31,11 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Configuration
-    .AddJsonFile("/config/appsettings.json", true)
-    .AddEnvironmentVariables();
 
 builder.Services
     .AddOptions<ForwardedHeadersOptions>()
@@ -195,7 +191,7 @@ builder.Services
     .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
 
 builder.Services
-    .AddMessageQueue()
+    .AddPhoenixToolkitsMessageQueue()
     .AddNatsMessageQueue(natsConfig =>
     {
         _ = natsConfig
@@ -254,7 +250,7 @@ builder.Services
         config.GetSection("Opentelemetry:Tracing").Bind(options);
     })
     .Services
-    .Configure<AspNetCoreInstrumentationOptions>(options =>
+    .Configure<AspNetCoreTraceInstrumentationOptions>(options =>
     {
         options.Filter = httpContext =>
         {

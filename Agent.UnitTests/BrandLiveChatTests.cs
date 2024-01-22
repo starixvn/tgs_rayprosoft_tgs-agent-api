@@ -36,6 +36,6 @@ public class BrandLiveChatTests
 
         var info = await sut.GetAsync(query);
 
-        Assert.IsTrue(info!.Setting != null);
+        Assert.That(info!.Setting, Is.Not.Null);
     }
 }

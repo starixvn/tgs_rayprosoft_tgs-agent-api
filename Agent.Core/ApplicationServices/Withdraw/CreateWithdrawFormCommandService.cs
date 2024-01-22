@@ -37,7 +37,7 @@ internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdraw
             .ConfigureAwait(false);
 
         if (balance - command.Amount < 0)
-            throw new InsufficientFundsException();
+            throw new Exceptions.InsufficientFundsException();
 
         var createFormId = await _paymentServiceClient
             .CreateWithdrawFormAsync(

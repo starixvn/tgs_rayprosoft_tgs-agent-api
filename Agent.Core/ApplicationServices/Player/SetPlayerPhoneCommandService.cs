@@ -5,23 +5,20 @@ using Tgs.ServiceUtility;
 using Tgs.PlayerService.Client;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Tgs.Agent.Client.Models;
+using Tgs.Agent.Client;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class SetPlayerPhoneCommandService : ICommandService<SetPlayerPhoneCommand>
+internal class SetPlayerPhoneCommandService(IAgentClient agentClient, IPlayerServiceClient playerServiceClient) : ICommandService<SetPlayerPhoneCommand>
 {
-    private readonly IPlayerServiceClient _playerServiceClient;
-
-    public SetPlayerPhoneCommandService(IPlayerServiceClient playerServiceClient)
-    {
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
-
     public async ValueTask ExecuteAsync(
         SetPlayerPhoneCommand command,
         CancellationToken cancellationToken = default)
     {
-        await _playerServiceClient.SetPlayerPropertiesAsync(
+        var agent = await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken);
+
+        await playerServiceClient.SetPlayerPropertiesAsync(
                 command.PlayerCode,
                 new Dictionary<PlayerPropertyName, string?>
                 {
@@ -29,6 +26,7 @@ internal class SetPlayerPhoneCommandService : ICommandService<SetPlayerPhoneComm
                     [PlayerPropertyName.Phone] = command.Phone,
                     [PlayerPropertyName.PhoneAuthentication] = true.ToString()
                 }.ToImmutableDictionary(),
+                agent.Username,
                 cancellationToken)
             .ConfigureAwait(false);
     }

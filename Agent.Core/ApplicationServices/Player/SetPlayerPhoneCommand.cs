@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-public record SetPlayerPhoneCommand(string PlayerCode, string AreaCode, string Phone);
+public record SetPlayerPhoneCommand(Guid AgentId, string PlayerCode, string AreaCode, string Phone);

@@ -129,7 +129,7 @@ public class AgentTests
 
         var actual = await sut.GetAsync(command);
 
-        Assert.IsFalse(actual);
+        Assert.That(!actual);
     }
 
     [Test]
@@ -296,7 +296,7 @@ public class AgentTests
 
         var info = await sut.GetAsync(query);
 
-        Assert.IsTrue(info.IsNew);
+        Assert.That(info.IsNew);
 
         _ = fakeAgentClient.ReceivedWithAnyArgs(1).CreateAgentAsync(default!, default);
         _ = fakeAgentClient.Received(1).CreateAgentAsync(Arg.Is<CreateAgentRequest>(x => x.ParentAgentId == parentAgent.Id), default);
@@ -399,6 +399,6 @@ public class AgentTests
 
         var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-        Assert.AreEqual(2, actual.Length);
+        Assert.That(actual.Length, Is.EqualTo(2));
     }
 }
