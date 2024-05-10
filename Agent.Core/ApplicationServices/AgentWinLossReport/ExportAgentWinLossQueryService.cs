@@ -69,7 +69,7 @@ public class
                 cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent!.Id, cancellationToken)
                 .ConfigureAwait(false);
 
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
@@ -107,7 +107,7 @@ public class
             cancellationToken).ConfigureAwait(false);
 
         var subAgent =
-            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent.Id, cancellationToken)
+            await childAgents.FirstOrDefaultAsync(x => x.AgentId == agent?.Id, cancellationToken)
                 .ConfigureAwait(false);
 
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;

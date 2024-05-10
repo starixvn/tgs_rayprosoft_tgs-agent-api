@@ -25,7 +25,7 @@ internal class SetPlayerEmailCommandService(IAgentClient agentClient, IPlayerSer
                 {
                     [PlayerPropertyName.Email] = command.Email
                 }.ToImmutableDictionary(),
-        agent.Username,
+        agent?.Username,
                 cancellationToken)
             .ConfigureAwait(false);
     }

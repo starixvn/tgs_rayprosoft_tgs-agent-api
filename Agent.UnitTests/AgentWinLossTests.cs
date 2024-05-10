@@ -280,15 +280,11 @@ public class AgentWinLossTests
         BrandInfo brandInfo)
     {
         var client = Substitute.For<IReportClient>();
-        var repository = Substitute.For<IBrandRepository>();
 
         var sut = new GetAgentPlayerSpecialDetailQueryService(
-            client,
-            repository);
+            client);
 
-        client.GetAgentPlayerSpecialDetailAsync(Arg.Any<GetAgentPlayerSpecialDetailRequest>()).Returns(data);
-
-        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
+        _ = client.GetAgentPlayerSpecialDetailAsync(Arg.Any<GetAgentPlayerSpecialDetailRequest>()).Returns(data);
 
         var response = await sut.GetAsync(query);
 
@@ -466,7 +462,8 @@ public class AgentWinLossTests
             brandId,
             walletId,
             walletId,
-            false);
+            false,
+            true);
 
         _ = reportClient.GetAgentWinLossAsync(Arg.Any<GetAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
@@ -677,7 +674,8 @@ public class AgentWinLossTests
             brandId,
             walletId,
             walletId,
-            false);
+            false,
+            true);
 
         _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())

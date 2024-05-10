@@ -148,6 +148,7 @@ public class AgentWinLossReportController : ControllerBase
         {
             Bonus = response.Bonus,
             BonusAdjust = response.BonusAdjust,
+            PlatformCharge = response.PlatformCharge,
             ProductFee = response.ProductFee,
         };
     }
