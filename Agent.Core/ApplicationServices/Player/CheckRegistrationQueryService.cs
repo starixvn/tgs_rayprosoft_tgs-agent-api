@@ -10,21 +10,15 @@ using TGS.Services.Agent.Exceptions;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class CheckRegistrationQueryService : IGetService<CheckRegistrationQuery, bool>
+internal class CheckRegistrationQueryService(
+    IBrandServiceClient brandServiceClient,
+    IPlayerServiceClient playerServiceClient,
+    Func<string, IRegistrationCondition?> conditionFunc)
+    : IGetService<CheckRegistrationQuery, bool>
 {
-    private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IPlayerServiceClient _playerServiceClient;
-    private readonly Func<string, IRegistrationCondition?> _conditionFunc;
-
-    public CheckRegistrationQueryService(
-        IBrandServiceClient brandServiceClient,
-        IPlayerServiceClient playerServiceClient,
-        Func<string, IRegistrationCondition?> conditionFunc)
-    {
-        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-        _conditionFunc = conditionFunc ?? throw new ArgumentNullException(nameof(conditionFunc));
-    }
+    private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+    private readonly Func<string, IRegistrationCondition?> _conditionFunc = conditionFunc ?? throw new ArgumentNullException(nameof(conditionFunc));
 
     public async ValueTask<bool> GetAsync(
         CheckRegistrationQuery query,

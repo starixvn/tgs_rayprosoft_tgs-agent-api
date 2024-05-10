@@ -9,19 +9,14 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
-    GetCompanyTotalDetailQueryService : IGetService<GetCompanyTotalDetailQuery,
-        IEnumerable<CompanyTotalDetailModel>>
-{
-    private readonly IBrandRepository _brandService;
-    private readonly IReportClient _reportClient;
-
-    public GetCompanyTotalDetailQueryService(
+    GetCompanyTotalDetailQueryService(
         IReportClient reportClient,
         IBrandRepository brandService)
-    {
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-        _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
-    }
+    : IGetService<GetCompanyTotalDetailQuery,
+        IEnumerable<CompanyTotalDetailModel>>
+{
+    private readonly IBrandRepository _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
+    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<IEnumerable<CompanyTotalDetailModel>> GetAsync(
         GetCompanyTotalDetailQuery request,

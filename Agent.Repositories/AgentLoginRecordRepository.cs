@@ -5,15 +5,9 @@ using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;
 
-internal class AgentLoginRecordRepository : IAgentLoginRecordRepository
+internal class AgentLoginRecordRepository(ITgsRepository tgsRepository) : IAgentLoginRecordRepository
 {
-    private readonly ITgsRepository _tgsRepository;
-
-    public AgentLoginRecordRepository(
-        ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
     {

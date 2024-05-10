@@ -10,30 +10,21 @@ using TGS.Services.Agent.Exceptions;
 
 namespace TGS.Services.Agent.ApplicationServices.Withdraw;
 
-internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
+internal class CreateWithdrawFormCommandService(
+    IPaymentServiceClient paymentServiceClient,
+    ICashServiceClient cashServiceClient,
+    IAgentClient agentClient)
+    : ICommandService<CreateWithdrawFormCommand>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient;
-    private readonly IAgentClient _agentClient;
-    private readonly ICashServiceClient _cashServiceClient;
-
-    public CreateWithdrawFormCommandService(
-        IPaymentServiceClient paymentServiceClient,
-        ICashServiceClient cashServiceClient,
-        IAgentClient agentClient)
-    {
-        _paymentServiceClient =
-            paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        _cashServiceClient = cashServiceClient;
-        _agentClient = agentClient;
-    }
+    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command,
         CancellationToken cancellationToken = default)
     {
-        var agent = await _agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
+        var agent = await agentClient.GetAgentInfoAsync(new GetAgentInfoRequest(command.AgentId), cancellationToken)
             .ConfigureAwait(false);
 
-        var balance = await _cashServiceClient.GetBalanceAsync(agent!.WalletId!.Value, cancellationToken)
+        var balance = await cashServiceClient.GetBalanceAsync(agent!.WalletId!.Value, cancellationToken)
             .ConfigureAwait(false);
 
         if (balance - command.Amount < 0)

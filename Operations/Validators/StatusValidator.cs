@@ -7,21 +7,13 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operations.Validators;
 
-public sealed class StatusValidator : IStatusValidator
+public sealed class StatusValidator(IBrandOperations brandOperations) : IStatusValidator
 {
-    private readonly IBrandOperations _brandOperations;
-
-    public StatusValidator(
-        IBrandOperations brandOperations)
-    {
-        _brandOperations = brandOperations;
-    }
-
     public async Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses)
     {
         EnsureStatus(statuses);
 
-        var status = await _brandOperations.GetBrandStatusAsync(brandId);
+        var status = await brandOperations.GetBrandStatusAsync(brandId);
 
         if (status == null)
         {

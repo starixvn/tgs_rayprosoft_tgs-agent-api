@@ -6,21 +6,15 @@ using TGS.Services.Agent.Exceptions;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ForgotPasswordCommandService : IGetService<ForgotPasswordCommand, string>
+internal class ForgotPasswordCommandService(
+    IBrandRepository brandRepository,
+    IGetService<ForgotPasswordByEmailCommand, string> forgotByMailService,
+    IGetService<ForgotPasswordByPhoneCommand, string> forgotByPhoneService)
+    : IGetService<ForgotPasswordCommand, string>
 {
-    private readonly IBrandRepository _brandRepository;
-    private readonly IGetService<ForgotPasswordByEmailCommand, string> _forgotByMailService;
-    private readonly IGetService<ForgotPasswordByPhoneCommand, string> _forgotByPhoneService;
-
-    public ForgotPasswordCommandService(
-        IBrandRepository brandRepository,
-        IGetService<ForgotPasswordByEmailCommand, string> forgotByMailService,
-        IGetService<ForgotPasswordByPhoneCommand, string> forgotByPhoneService)
-    {
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-        _forgotByMailService = forgotByMailService ?? throw new ArgumentNullException(nameof(forgotByMailService));
-        _forgotByPhoneService = forgotByPhoneService ?? throw new ArgumentNullException(nameof(forgotByPhoneService));
-    }
+    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+    private readonly IGetService<ForgotPasswordByEmailCommand, string> _forgotByMailService = forgotByMailService ?? throw new ArgumentNullException(nameof(forgotByMailService));
+    private readonly IGetService<ForgotPasswordByPhoneCommand, string> _forgotByPhoneService = forgotByPhoneService ?? throw new ArgumentNullException(nameof(forgotByPhoneService));
 
     public async ValueTask<string> GetAsync(ForgotPasswordCommand command,
         CancellationToken cancellationToken = default)

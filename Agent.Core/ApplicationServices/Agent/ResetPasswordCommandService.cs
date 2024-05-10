@@ -10,23 +10,15 @@ using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
+internal class ResetPasswordCommandService(
+    IAgentOperations agentOperations,
+    IPasswordHandler passwordHandler,
+    IValidateCodeOperator validateCodeOperator)
+    : ICommandService<ResetPasswordCommand>
 {
-    private readonly IAgentOperations _agentOperations;
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IValidateCodeOperator _validateCodeOperator;
-
-    public ResetPasswordCommandService(
-        IAgentOperations agentOperations,
-        IPasswordHandler passwordHandler,
-        IValidateCodeOperator validateCodeOperator)
-    {
-        _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-
-        _validateCodeOperator =
-            validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-    }
+    private readonly IAgentOperations _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask ExecuteAsync(ResetPasswordCommand command, CancellationToken cancellationToken = default)
     {

@@ -18,16 +18,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Middlewares;
 
-public sealed class VerifyAgentTokenMiddleware
+public sealed class VerifyAgentTokenMiddleware(RequestDelegate next)
 {
     private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
-
-    private readonly RequestDelegate _next;
-
-    public VerifyAgentTokenMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -44,7 +37,7 @@ public sealed class VerifyAgentTokenMiddleware
 
         if (attribute == null)
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -57,7 +50,7 @@ public sealed class VerifyAgentTokenMiddleware
                 throw new MissingTokenException(Resources.Agent.MissingAgentToken);
             }
 
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -83,7 +76,7 @@ public sealed class VerifyAgentTokenMiddleware
 
         if (!attribute.NeedAuthorize)
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -108,6 +101,6 @@ public sealed class VerifyAgentTokenMiddleware
             exception => throw new InvalidCredentialsException(exception.Message),
             _ => throw new AgentLoginExpiredException(agentId));
 
-        await _next(context);
+        await next(context);
     }
 }

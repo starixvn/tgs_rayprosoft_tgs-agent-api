@@ -14,18 +14,12 @@ using AgentType = Tgs.Agent.Client.Models.Enums.AgentType;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class CreateAgentCommandService : IGetService<CreateAgentCommand, CreateAgentInfo>
+internal class CreateAgentCommandService(
+    ITgsRepository tgsRepository,
+    IAgentClient agentClient)
+    : IGetService<CreateAgentCommand, CreateAgentInfo>
 {
-    private readonly ITgsRepository _tgsRepository;
-    private readonly IAgentClient _agentClient;
-
-    public CreateAgentCommandService(
-        ITgsRepository tgsRepository,
-        IAgentClient agentClient)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-        _agentClient = agentClient;
-    }
+    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<CreateAgentInfo> GetAsync(
         CreateAgentCommand query,
@@ -58,7 +52,7 @@ internal class CreateAgentCommandService : IGetService<CreateAgentCommand, Creat
             throw new DividendPercentageException(JsonSerializer.Serialize(errorMessage));
         }
 
-        var agentId = await _agentClient.CreateAgentAsync(new CreateAgentRequest
+        var agentId = await agentClient.CreateAgentAsync(new CreateAgentRequest
         {
             BrandId = query.BrandId,
             ParentAgentId = parentAgent.Id,

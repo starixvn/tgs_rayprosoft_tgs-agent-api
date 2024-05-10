@@ -8,18 +8,13 @@ using TGS.Services.ValidateCode.Clients;
 
 namespace TGS.Services.Agent.ValidateCode;
 
-internal class RestValidateCodeOperator : IValidateCodeOperator
+internal class RestValidateCodeOperator(
+    IValidateCodeServiceClient validateCodeServiceClient,
+    IEmailClient emailClient)
+    : IValidateCodeOperator
 {
-    private readonly IEmailClient _emailClient;
-    private readonly IValidateCodeServiceClient _validateCodeServiceClient;
-
-    public RestValidateCodeOperator(
-        IValidateCodeServiceClient validateCodeServiceClient,
-        IEmailClient emailClient)
-    {
-        _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
-        _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-    }
+    private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+    private readonly IValidateCodeServiceClient _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
 
     public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
     {

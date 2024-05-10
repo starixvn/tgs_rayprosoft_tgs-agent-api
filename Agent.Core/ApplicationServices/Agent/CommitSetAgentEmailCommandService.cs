@@ -8,19 +8,13 @@ using TGS.Services.Operations;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class CommitSetAgentEmailCommandService : ICommandService<CommitSetAgentEmailCommand>
+internal class CommitSetAgentEmailCommandService(
+    IValidateCodeOperator validateCodeOperator,
+    IAgentOperations agentOperations)
+    : ICommandService<CommitSetAgentEmailCommand>
 {
-    private readonly IAgentOperations _agentOperations;
-    private readonly IValidateCodeOperator _validateCodeOperator;
-
-    public CommitSetAgentEmailCommandService(
-        IValidateCodeOperator validateCodeOperator,
-        IAgentOperations agentOperations)
-    {
-        _validateCodeOperator =
-            validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-        _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
-    }
+    private readonly IAgentOperations _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask ExecuteAsync(CommitSetAgentEmailCommand command,
         CancellationToken cancellationToken = default)

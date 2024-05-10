@@ -8,16 +8,9 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.AgentApi.Middlewares;
 
-public sealed class VerifyCredentialsMiddleware
+public sealed class VerifyCredentialsMiddleware(RequestDelegate next)
 {
     private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
-
-    private readonly RequestDelegate _next;
-
-    public VerifyCredentialsMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -39,6 +32,6 @@ public sealed class VerifyCredentialsMiddleware
 
         context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
-        await _next(context);
+        await next(context);
     }
 }

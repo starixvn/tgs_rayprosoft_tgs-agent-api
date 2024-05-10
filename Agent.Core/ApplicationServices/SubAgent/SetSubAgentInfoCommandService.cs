@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCommand>
+internal class SetSubAgentInfoCommandService(IAgentClient agentClient) : ICommandService<SetSubAgentInfoCommand>
 {
-    private readonly IAgentClient _agentClient;
-
-    public SetSubAgentInfoCommandService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
     public async ValueTask ExecuteAsync(SetSubAgentInfoCommand command, CancellationToken cancellationToken = default)
     {

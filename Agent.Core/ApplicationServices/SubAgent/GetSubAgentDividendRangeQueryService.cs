@@ -8,14 +8,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class GetSubAgentDividendRangeQueryService : IGetService<GetSubAgentDividendRangeQuery, (decimal, decimal)>
+internal class GetSubAgentDividendRangeQueryService(IAgentClient agentClient)
+    : IGetService<GetSubAgentDividendRangeQuery, (decimal, decimal)>
 {
-    private readonly IAgentClient _agentClient;
-
-    public GetSubAgentDividendRangeQueryService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
     public async ValueTask<(decimal, decimal)> GetAsync(GetSubAgentDividendRangeQuery query, CancellationToken cancellationToken = default)
     {

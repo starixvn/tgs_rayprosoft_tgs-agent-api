@@ -8,21 +8,15 @@ using TGS.Services.Agent.ApplicationServices.Withdraw;
 
 namespace TGS.Services.Agent.ApplicationServices.PayPassowrd;
 
-internal class ChangePayPasswordCommandService : ICommandService<ChangePayPasswordCommand>
+internal class ChangePayPasswordCommandService(
+    ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
+    IPasswordHandler passwordHandler,
+    IAgentRepository agentRepository)
+    : ICommandService<ChangePayPasswordCommand>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly ICommandService<CheckWithdrawPayPasswordCommand> _checkPasswordService;
-    private readonly IPasswordHandler _passwordHandler;
-
-    public ChangePayPasswordCommandService(
-        ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
-        IPasswordHandler passwordHandler,
-        IAgentRepository agentRepository)
-    {
-        _checkPasswordService = checkPasswordService ?? throw new ArgumentNullException(nameof(checkPasswordService));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    private readonly ICommandService<CheckWithdrawPayPasswordCommand> _checkPasswordService = checkPasswordService ?? throw new ArgumentNullException(nameof(checkPasswordService));
+    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public async ValueTask ExecuteAsync(ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
     {

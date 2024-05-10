@@ -13,14 +13,10 @@ using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace TGS.Apis.AgentApi.Filters;
 
-public class CheckAgentEnabledFilter : IAsyncAuthorizationFilter
+public class CheckAgentEnabledFilter(IGetService<GetAgentStatusQuery, AgentStatus> getService)
+    : IAsyncAuthorizationFilter
 {
-    private readonly IGetService<GetAgentStatusQuery, AgentStatus> _getService;
-
-    public CheckAgentEnabledFilter(IGetService<GetAgentStatusQuery, AgentStatus> getService)
-    {
-        _getService = getService ?? throw new ArgumentNullException(nameof(getService));
-    }
+    private readonly IGetService<GetAgentStatusQuery, AgentStatus> _getService = getService ?? throw new ArgumentNullException(nameof(getService));
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {

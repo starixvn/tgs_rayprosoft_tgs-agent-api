@@ -5,7 +5,10 @@ using StackExchange.Redis;
 
 namespace TGS.Services.Agent;
 
-internal class RedisAgentLoginRecordRepository : IAgentLoginRecordRepository
+internal class RedisAgentLoginRecordRepository(
+    IAgentLoginRecordRepository loginRecordRepository,
+    IDatabase redisDatabase)
+    : IAgentLoginRecordRepository
 {
     private static readonly TimeSpan _Expiry = TimeSpan.FromHours(1D);
 
@@ -15,16 +18,8 @@ internal class RedisAgentLoginRecordRepository : IAgentLoginRecordRepository
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private readonly IAgentLoginRecordRepository _loginRecordRepository;
-    private readonly IDatabase _redisDatabase;
-
-    public RedisAgentLoginRecordRepository(
-        IAgentLoginRecordRepository loginRecordRepository,
-        IDatabase redisDatabase)
-    {
-        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-        _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
-    }
+    private readonly IAgentLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+    private readonly IDatabase _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
     {

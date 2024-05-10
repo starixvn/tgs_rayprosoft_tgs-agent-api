@@ -11,18 +11,11 @@ namespace TGS.Apis.AgentApi.Controllers;
 [ApiController]
 [Consumes(MediaTypeNames.Application.Json)]
 [Produces(MediaTypeNames.Application.Json)]
-public class AuthController : ControllerBase
+public class AuthController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public AuthController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpPost]
     [AllowAnonymous]
     [Route("jwt")]
     public Task<AuthResponse> AuthenticateAsync(AuthRequest request) =>
-        _mediator.Send(request);
+        mediator.Send(request);
 }

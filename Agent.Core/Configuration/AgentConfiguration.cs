@@ -7,14 +7,9 @@ using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Agent.Configuration;
 
-public class AgentConfiguration
+public class AgentConfiguration(IServiceCollection services)
 {
-    public IServiceCollection Services { get; }
-
-    public AgentConfiguration(IServiceCollection services)
-    {
-        Services = services ?? throw new ArgumentNullException(nameof(services));
-    }
+    public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
     public AgentConfiguration AddAgentLoginRecordRepository<TAgentLoginRecordRepository>()
         where TAgentLoginRecordRepository : class, IAgentLoginRecordRepository

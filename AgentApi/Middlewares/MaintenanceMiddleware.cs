@@ -7,15 +7,9 @@ using TGS.Services.Agent;
 
 namespace TGS.Apis.AgentApi.Middlewares;
 
-public sealed class MaintenanceMiddleware
+public sealed class MaintenanceMiddleware(RequestDelegate next)
 {
     private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(MaintenanceMiddleware)}");
-    private readonly RequestDelegate _next;
-
-    public MaintenanceMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
 
     public async Task InvokeAsync(HttpContext context,
        IMaintenanceRedisRepository maintenanceRedisService)
@@ -28,6 +22,6 @@ public sealed class MaintenanceMiddleware
         {
             throw new BrandUnderMaintenanceException("Brand is put into maintenance");
         }
-        await _next(context);
+        await next(context);
     }
 }

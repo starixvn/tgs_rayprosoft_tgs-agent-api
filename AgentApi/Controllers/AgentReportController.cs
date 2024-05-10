@@ -24,19 +24,11 @@ namespace TGS.Apis.AgentApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class AgentReportController : ControllerBase
+public class AgentReportController(
+    IReportClient client,
+    IMemoryCache memoryCache) : ControllerBase
 {
-    private readonly IReportClient _client;
-    private readonly IMemoryCache _memoryCache;
-
-    public AgentReportController(
-        IReportClient client,
-        IMemoryCache memoryCache
-    )
-    {
-        _client = client;
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     /// <summary>
     /// Get account changes
@@ -134,7 +126,7 @@ public class AgentReportController : ControllerBase
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
         };
-        var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+        var response = await client.GetAgentDividendDetailsAsync(dividendRequest);
 
         return new()
         {
@@ -162,7 +154,7 @@ public class AgentReportController : ControllerBase
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
         };
-        var response = await _client.GetAgentDividendTeamDetailsAsync(dividendRequest);
+        var response = await client.GetAgentDividendTeamDetailsAsync(dividendRequest);
 
         return new()
         {
@@ -219,7 +211,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response = await _client.GetAgentContributionsAsync(contributionRequest);
+            response = await client.GetAgentContributionsAsync(contributionRequest);
 
             if (response != null)
             {
@@ -298,7 +290,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response = await _client.GetAgentDividendsAsync(dividendRequest);
+            response = await client.GetAgentDividendsAsync(dividendRequest);
 
             _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
@@ -378,7 +370,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response.Main = await _client.GetSingleAgentDividendsAsync(singleDividendRequest);
+            response.Main = await client.GetSingleAgentDividendsAsync(singleDividendRequest);
 
             var subDividendRequest = new GetSubAgentDividendsRequest
             {
@@ -393,7 +385,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response.Sub = await _client.GetSubAgentDividendsAsync(subDividendRequest);
+            response.Sub = await client.GetSubAgentDividendsAsync(subDividendRequest);
 
             _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
@@ -498,7 +490,7 @@ public class AgentReportController : ControllerBase
             ShowAll = pagingRequest.ShowAll
         };
 
-        var response = await _client.GetAgentPlayerRoundsAsync(roundsRequest);
+        var response = await client.GetAgentPlayerRoundsAsync(roundsRequest);
 
         return new()
         {

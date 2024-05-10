@@ -4,18 +4,13 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace TGS.Services.Agent;
 
-internal class MemoryCachedAgentLoginRecordRepository : IAgentLoginRecordRepository
+internal class MemoryCachedAgentLoginRecordRepository(
+    IAgentLoginRecordRepository loginRecordRepository,
+    IMemoryCache memoryCache)
+    : IAgentLoginRecordRepository
 {
-    private readonly IAgentLoginRecordRepository _loginRecordRepository;
-    private readonly IMemoryCache _memoryCache;
-
-    public MemoryCachedAgentLoginRecordRepository(
-        IAgentLoginRecordRepository loginRecordRepository,
-        IMemoryCache memoryCache)
-    {
-        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly IAgentLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
     {

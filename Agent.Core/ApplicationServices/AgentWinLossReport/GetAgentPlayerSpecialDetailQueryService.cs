@@ -7,16 +7,10 @@ using Tgs.ServiceUtility;
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
-    GetAgentPlayerSpecialDetailQueryService : IGetService<GetAgentPlayerSpecialDetailQuery,
-        AgentPlayerSpecialDetailModel>
+    GetAgentPlayerSpecialDetailQueryService(IReportClient reportClient) : IGetService<GetAgentPlayerSpecialDetailQuery,
+    AgentPlayerSpecialDetailModel>
 {
-    private readonly IReportClient _reportClient;
-
-    public GetAgentPlayerSpecialDetailQueryService(
-        IReportClient reportClient)
-    {
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-    }
+    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<AgentPlayerSpecialDetailModel> GetAsync(
         GetAgentPlayerSpecialDetailQuery request,

@@ -7,15 +7,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Localization;
 
-internal class GetAllLocalizationStringsQueryService
+internal class GetAllLocalizationStringsQueryService(IAgentRepository agentRepository)
     : IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>>
 {
-    private readonly IAgentRepository _agentRepository;
-
-    public GetAllLocalizationStringsQueryService(IAgentRepository agentRepository)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
     public async ValueTask<IDictionary<string, string>> GetAsync(
         GetAllLocalizationStringsQuery query,

@@ -5,14 +5,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class GetAgentInfoQueryService : IGetService<GetAgentInfoQuery, AgentInfo?>
+internal class GetAgentInfoQueryService(IAgentRepository agentRepository) : IGetService<GetAgentInfoQuery, AgentInfo?>
 {
-    private readonly IAgentRepository _agentRepository;
-
-    public GetAgentInfoQueryService(IAgentRepository agentRepository)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
     public ValueTask<AgentInfo?> GetAsync(GetAgentInfoQuery query, CancellationToken cancellationToken = default)
     {

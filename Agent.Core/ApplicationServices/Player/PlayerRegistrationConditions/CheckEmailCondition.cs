@@ -7,14 +7,9 @@ using TGS.Services.Agent.Exceptions;
 
 namespace TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationConditions
 {
-    internal class CheckEmailCondition : IRegistrationCondition
+    internal class CheckEmailCondition(IPlayerServiceClient playerServiceClient) : IRegistrationCondition
     {
-        private readonly IPlayerServiceClient _playerServiceClient;
-
-        public CheckEmailCondition(IPlayerServiceClient playerServiceClient)
-        {
-            _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-        }
+        private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
         public async ValueTask ExecuteAsync(Guid brandId, JsonDocument input,
             CancellationToken cancellationToken)

@@ -26,12 +26,8 @@ namespace TGS.Apis.AgentApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class AgentController : ControllerBase
+public class AgentController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public AgentController(IMediator mediator) => _mediator = mediator;
-
     /// <summary>
     /// Check username existed
     /// </summary>
@@ -347,5 +343,5 @@ public class AgentController : ControllerBase
     [Route("login")]
     [Consumes(MediaTypeNames.Application.Json)]
     public Task<LoginResponse> LoginAsync(LoginRequest request) =>
-        _mediator.Send(request);
+        mediator.Send(request);
 }

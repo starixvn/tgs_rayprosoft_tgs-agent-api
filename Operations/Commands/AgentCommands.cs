@@ -19,19 +19,12 @@ public interface IAgentCommands
     Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn);
 }
 
-public sealed class AgentCommands : IAgentCommands
+public sealed class AgentCommands(
+    ITgsRepository repository,
+    ITgsLog log) : IAgentCommands
 {
     private const int RetryCount = 3;
-    private readonly ITgsLog _log;
-    private readonly ITgsRepository _repository;
-
-    public AgentCommands(
-        ITgsRepository repository,
-        ITgsLog log)
-    {
-        _repository = repository;
-        _log = log;
-    }
+    private readonly ITgsLog _log = log;
 
     public async Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data)
     {
@@ -46,30 +39,30 @@ public sealed class AgentCommands : IAgentCommands
             ExpiredOn = data.ExpiredOn
         };
 
-        await _repository.AgentLoginRecords.AddAsync(loginRecord);
-        await _repository.SaveChangesAsync();
+        await repository.AgentLoginRecords.AddAsync(loginRecord);
+        await repository.SaveChangesAsync();
 
         return loginRecord;
     }
 
     public async Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data)
     {
-        var agent = await _repository.Agents.FindAsync(data.Id).ConfigureAwait(false);
+        var agent = await repository.Agents.FindAsync(data.Id).ConfigureAwait(false);
 
         agent.Salt = data.Salt;
         agent.Password = data.Password;
         agent.UpdatedOn = data.UpdatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+        await repository.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
     {
-        var agent = await _repository.Agents.FindAsync(agentId).ConfigureAwait(false);
+        var agent = await repository.Agents.FindAsync(agentId).ConfigureAwait(false);
 
         agent.Email = email;
         agent.UpdatedOn = updatedOn;
 
-        await _repository.SaveChangesAsync().ConfigureAwait(false);
+        await repository.SaveChangesAsync().ConfigureAwait(false);
     }
 }

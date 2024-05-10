@@ -13,28 +13,18 @@ using TGS.Services.Operations.Validators;
 
 namespace TGS.Apis.AgentApi.Handlers.Auth;
 
-public sealed class AuthenticateHandler : IRequestHandler<AuthRequest, AuthResponse>
+public sealed class AuthenticateHandler(
+    IBrandOperations brandOperations,
+    IStatusValidator statusValidator,
+    IJwtTokenHandler handler)
+    : IRequestHandler<AuthRequest, AuthResponse>
 {
-    private readonly IBrandOperations _brandOperations;
-    private readonly IJwtTokenHandler _handler;
-    private readonly IStatusValidator _statusValidator;
-
-    public AuthenticateHandler(
-        IBrandOperations brandOperations,
-        IStatusValidator statusValidator,
-        IJwtTokenHandler handler)
-    {
-        _brandOperations = brandOperations;
-        _statusValidator = statusValidator;
-        _handler = handler;
-    }
-
     async Task<AuthResponse> IRequestHandler<AuthRequest, AuthResponse>.Handle(
         AuthRequest request,
         CancellationToken cancellationToken)
     {
-        var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(request.ApiKey);
-        await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+        var brandId = await brandOperations.GetBrandIdByApiKeyAsync(request.ApiKey);
+        await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
         var currency = request.Currency;
 
@@ -45,11 +35,11 @@ public sealed class AuthenticateHandler : IRequestHandler<AuthRequest, AuthRespo
             new Claim(Consts.ClaimName.Currency, currency)
         });
 
-        var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
+        var secretKey = await brandOperations.GetBrandSecretKeyAsync(brandId);
         var signature = $"{brandId}:{currency}:{secretKey}";
         var expires = DateTime.Now.AddSeconds(Core.Models.Consts.TokenExpireSeconds.Jwt);
 
-        var token = _handler.GenerateToken(identity,
+        var token = handler.GenerateToken(identity,
             Encoding.UTF8.GetBytes(signature),
             Consts.Site,
             expires);

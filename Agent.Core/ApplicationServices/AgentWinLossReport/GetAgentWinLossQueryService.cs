@@ -14,24 +14,17 @@ using TGS.Core.Models.Enums;
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
-    GetAgentWinLossQueryService : IGetService<GetAgentWinLossQuery, GetAgentWinLossResponse>
-{
-    private readonly IAgentClient _agentClient;
-    private readonly IBrandRepository _brandRepository;
-    private readonly IPlayerServiceClient _playerClient;
-    private readonly IReportClient _reportClient;
-
-    public GetAgentWinLossQueryService(
+    GetAgentWinLossQueryService(
         IReportClient reportClient,
         IBrandRepository brandRepository,
         IAgentClient agentClient,
         IPlayerServiceClient playerClient)
-    {
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-        _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
-    }
+    : IGetService<GetAgentWinLossQuery, GetAgentWinLossResponse>
+{
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
+    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+    private readonly IPlayerServiceClient _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<GetAgentWinLossResponse> GetAsync(GetAgentWinLossQuery request,
         CancellationToken cancellationToken = default)

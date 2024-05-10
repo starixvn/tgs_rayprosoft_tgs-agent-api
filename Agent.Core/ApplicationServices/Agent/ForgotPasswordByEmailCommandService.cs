@@ -9,21 +9,15 @@ using TGS.Services.Agent.ValidateCode;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ForgotPasswordByEmailCommandService : IGetService<ForgotPasswordByEmailCommand, string>
+internal class ForgotPasswordByEmailCommandService(
+    IAgentRepository agentRepository,
+    IValidateCodeGenerator codeGenerator,
+    IValidateCodeOperator validateCodeOperator)
+    : IGetService<ForgotPasswordByEmailCommand, string>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly IValidateCodeGenerator _codeGenerator;
-    private readonly IValidateCodeOperator _validateCodeOperator;
-
-    public ForgotPasswordByEmailCommandService(
-        IAgentRepository agentRepository,
-        IValidateCodeGenerator codeGenerator,
-        IValidateCodeOperator validateCodeOperator)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-        _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command, CancellationToken cancellationToken = default)
     {

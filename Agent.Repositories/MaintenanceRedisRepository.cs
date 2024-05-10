@@ -5,18 +5,13 @@ using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;
 
-public sealed class MaintenanceRedisRepository : IMaintenanceRedisRepository
+public sealed class MaintenanceRedisRepository(IRedisCacheManager cacheManager) : IMaintenanceRedisRepository
 {
     private const string _brands = "Brands";
     private const string _licensees = "Licensees";
     private const string _maintenance = "Maintenance";
     private const string _resellers = "Resellers";
-    private readonly IRedisCacheManager _cacheManager;
-
-    public MaintenanceRedisRepository(IRedisCacheManager cacheManager)
-    {
-        _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
-    }
+    private readonly IRedisCacheManager _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
 
     public ValueTask<string?> GetBrandMaintenanceAsync(Guid id)
         => GetMaintenanceAsync(_brands, id);

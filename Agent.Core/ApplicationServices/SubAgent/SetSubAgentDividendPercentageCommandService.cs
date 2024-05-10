@@ -9,18 +9,13 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class SetSubAgentDividendPercentageCommandService : ICommandService<SetSubAgentDividendPercentageCommand>
+internal class SetSubAgentDividendPercentageCommandService(
+    IBrandRepository brandRepository,
+    IAgentClient agentClient)
+    : ICommandService<SetSubAgentDividendPercentageCommand>
 {
-    private readonly IAgentClient _agentClient;
-    private readonly IBrandRepository _brandRepository;
-
-    public SetSubAgentDividendPercentageCommandService(
-        IBrandRepository brandRepository,
-        IAgentClient agentClient)
-    {
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
+    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 
     public async ValueTask ExecuteAsync(SetSubAgentDividendPercentageCommand command, CancellationToken cancellationToken = default)
     {

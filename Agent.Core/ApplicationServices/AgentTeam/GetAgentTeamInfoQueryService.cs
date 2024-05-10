@@ -9,18 +9,13 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentTeam;
 
-internal class GetAgentTeamInfoQueryService : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
+internal class GetAgentTeamInfoQueryService(
+    IAgentClient agentClient,
+    IPlayerServiceClient playerServiceClient)
+    : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
 {
-    private readonly IAgentClient _agentClient;
-    private readonly IPlayerServiceClient _playerServiceClient;
-
-    public GetAgentTeamInfoQueryService(
-        IAgentClient agentClient,
-        IPlayerServiceClient playerServiceClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
+    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<GetAgentTeamInfoModel?> GetAsync(GetAgentTeamInfoQuery query,
         CancellationToken cancellationToken = default)

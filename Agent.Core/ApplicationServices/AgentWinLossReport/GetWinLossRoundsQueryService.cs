@@ -12,22 +12,16 @@ using TGS.Core.Models.Enums;
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
-    GetWinLossRoundsQueryService : IGetService<GetWinLossRoundsQuery,
-        RoundsResponse>
-{
-    private readonly IAgentClient _agentClient;
-    private readonly IReportClient _reportClient;
-    private readonly IPlayerServiceClient _playerClient;
-
-    public GetWinLossRoundsQueryService(
+    GetWinLossRoundsQueryService(
         IReportClient reportClient,
         IPlayerServiceClient playerClient,
         IAgentClient agentClient)
-    {
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-        _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    : IGetService<GetWinLossRoundsQuery,
+        RoundsResponse>
+{
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
+    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+    private readonly IPlayerServiceClient _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
 
     public async ValueTask<RoundsResponse> GetAsync(
         GetWinLossRoundsQuery request,

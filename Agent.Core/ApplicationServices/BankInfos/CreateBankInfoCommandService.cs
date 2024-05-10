@@ -7,19 +7,13 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.BankInfos;
 
-internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoCommand>
+internal class CreateBankInfoCommandService(
+    IPaymentServiceClient paymentServiceClient,
+    IAgentRepository agentRepository)
+    : ICommandService<CreateBankInfoCommand>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly IPaymentServiceClient _paymentServiceClient;
-
-    public CreateBankInfoCommandService(
-        IPaymentServiceClient paymentServiceClient,
-        IAgentRepository agentRepository)
-    {
-        _paymentServiceClient =
-            paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public async ValueTask ExecuteAsync(CreateBankInfoCommand command,
         CancellationToken cancellationToken = default)

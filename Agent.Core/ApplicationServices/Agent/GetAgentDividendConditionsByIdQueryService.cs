@@ -5,14 +5,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class GetAgentDividendConditionsByIdQueryService : IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition>
+internal class GetAgentDividendConditionsByIdQueryService(IAgentRepository agentRepository)
+    : IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition>
 {
-    private readonly IAgentRepository _agentRepository;
-
-    public GetAgentDividendConditionsByIdQueryService(IAgentRepository agentRepository)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    }
+    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
     public IAsyncEnumerable<DividendCondition> QueryAsync(
         GetAgentDividendConditionsByIdQuery query,

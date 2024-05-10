@@ -16,14 +16,9 @@ namespace TGS.Apis.AgentApi.Controllers;
 
 [Route("api/pay/password")]
 [ApiController]
-public class PayPasswordController : ControllerBase
+public class PayPasswordController(ILogger<PayPasswordController> logger) : ControllerBase
 {
-    private readonly ILogger<PayPasswordController> _logger;
-
-    public PayPasswordController(ILogger<PayPasswordController> logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly ILogger<PayPasswordController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     [HttpPatch(Name = "ChangePayPassword"), HK28CheckContraint]
     [ApiExplorerSettings(GroupName = "HK28")]

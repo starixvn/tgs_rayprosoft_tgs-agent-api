@@ -5,15 +5,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ValidateAgentLoginRecordCommandService : ICommandService<ValidateAgentLoginRecordCommand>
+internal class ValidateAgentLoginRecordCommandService(IAgentLoginRecordRepository loginRecordRepository)
+    : ICommandService<ValidateAgentLoginRecordCommand>
 {
-    private readonly IAgentLoginRecordRepository _loginRecordRepository;
-
-    public ValidateAgentLoginRecordCommandService(
-        IAgentLoginRecordRepository loginRecordRepository)
-    {
-        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-    }
+    private readonly IAgentLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
 
     public async ValueTask ExecuteAsync(ValidateAgentLoginRecordCommand command,
         CancellationToken cancellationToken = default)

@@ -8,14 +8,10 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAgentPasswordCommand>
+internal class ResetSubAgentPasswordCommandService(IAgentClient agentClient)
+    : ICommandService<ResetSubAgentPasswordCommand>
 {
-    private readonly IAgentClient _agentClient;
-
-    public ResetSubAgentPasswordCommandService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
     public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command, CancellationToken cancellationToken = default)
     {

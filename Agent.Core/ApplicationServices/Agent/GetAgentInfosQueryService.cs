@@ -7,14 +7,9 @@ using TGS.Core.DataServices.Tgs;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, AgentInfos>
+internal class GetAgentInfosQueryService(ITgsRepository tgsRepository) : IQueryService<GetAgentInfosQuery, AgentInfos>
 {
-    private readonly ITgsRepository _tgsRepository;
-
-    public GetAgentInfosQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public IAsyncEnumerable<AgentInfos> QueryAsync(
         GetAgentInfosQuery query,
