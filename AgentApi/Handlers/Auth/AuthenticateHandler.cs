@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.AgentApi.Models;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
@@ -44,10 +44,6 @@ public sealed class AuthenticateHandler(
             Consts.Site,
             expires);
 
-        return new()
-        {
-            Token = token,
-            ExpiredOn = new DateTimeOffset(expires).ToUnixTimeMilliseconds()
-        };
+        return new AuthResponse { Token = token, ExpiredOn = new DateTimeOffset(expires).ToUnixTimeMilliseconds() };
     }
 }

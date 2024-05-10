@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TGS.Services.Agent;
+﻿namespace TGS.Services.Agent;
 
 public record AgentPlayerSpecialDetailModel
 {

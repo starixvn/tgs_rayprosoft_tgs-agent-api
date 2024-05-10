@@ -11,8 +11,11 @@ internal class ValidateAgentPasswordCommandService(
     IPasswordHandler passwordHandler)
     : IGetService<ValidateAgentPasswordCommand, bool>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public async ValueTask<bool> GetAsync(
         ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)

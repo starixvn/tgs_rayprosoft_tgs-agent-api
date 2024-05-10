@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;

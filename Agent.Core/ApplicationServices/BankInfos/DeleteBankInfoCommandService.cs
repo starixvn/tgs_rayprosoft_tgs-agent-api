@@ -9,7 +9,8 @@ namespace TGS.Services.Agent.ApplicationServices.BankInfos;
 internal class DeleteBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
     : ICommandService<DeleteBankInfoCommand>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public ValueTask ExecuteAsync(DeleteBankInfoCommand command, CancellationToken cancellationToken = default)
         => _paymentServiceClient.DeleteAgentBankInfoAsync(command.AgentId, command.BankInfoId);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Report.Client;
+using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
@@ -15,8 +16,11 @@ public class
     : IGetService<GetAgentTotalDetailQuery,
         IEnumerable<AgentTotalDetailModel>>
 {
-    private readonly IBrandRepository _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
-    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+    private readonly IBrandRepository _brandService =
+        brandService ?? throw new ArgumentNullException(nameof(brandService));
+
+    private readonly IReportClient
+        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<IEnumerable<AgentTotalDetailModel>> GetAsync(
         GetAgentTotalDetailQuery request,
@@ -24,7 +28,7 @@ public class
     {
         var brand = await _brandService.GetBrandInfoAsync(request.BrandId);
 
-        var response = await _reportClient.GetAgentTotalDetailAsync(new()
+        var response = await _reportClient.GetAgentTotalDetailAsync(new GetAgentTotalDetailRequest
         {
             BrandId = request.BrandId,
             AgentId = request.AgentId,

@@ -14,7 +14,9 @@ internal class RestValidateCodeOperator(
     : IValidateCodeOperator
 {
     private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-    private readonly IValidateCodeServiceClient _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
+
+    private readonly IValidateCodeServiceClient _validateCodeServiceClient =
+        validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
 
     public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
     {
@@ -29,10 +31,8 @@ internal class RestValidateCodeOperator(
     }
 
     public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
-    {
-        return _validateCodeServiceClient
+        => _validateCodeServiceClient
             .SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
-    }
 
     public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode)
     {

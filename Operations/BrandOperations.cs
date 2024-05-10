@@ -85,17 +85,11 @@ public sealed class BrandOperations : IBrandOperations
     {
         var brand = await GetCachedBrandOrNullAsync(brandId);
 
-        if (brand != null)
-        {
-            return brand;
-        }
+        if (brand != null) return brand;
 
         brand = await _brandQueries.GetCachedBrandAsync(brandId);
 
-        if (brand == null)
-        {
-            throw new InvalidOperationException($"Brand not found with id: {brandId}");
-        }
+        if (brand == null) throw new InvalidOperationException($"Brand not found with id: {brandId}");
 
         await CacheBrandAsync(brandId, brand);
 
@@ -137,29 +131,20 @@ public sealed class BrandOperations : IBrandOperations
     {
         var bgpc = await GetCachedBrandGameProviderConfigurationOrNullAsync(brandId, gameProviderId);
 
-        if (bgpc != null)
-        {
-            return bgpc;
-        }
+        if (bgpc != null) return bgpc;
 
         var r = await _brandQueries.GetCachedBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
         if (r == null)
-        {
             throw new InvalidOperationException(
                 $"BrandGameProviderConfiguration doesn't exist with brandId: {brandId} and gameProviderId: {gameProviderId}");
-        }
 
-        bgpc = new()
+        bgpc = new CachedBrandGameProviderConfiguration
         {
             GameProviderId = gameProviderId,
             GameProviderConfigurationId = r.GameProviderConfigurationId,
             DefaultLanguageCode = r.DefaultLanguageCode,
-            QueryStrings = new()
-            {
-                Desktop = r.DesktopQueryString,
-                Mobile = r.MobileQueryString
-            }
+            QueryStrings = new QueryStrings { Desktop = r.DesktopQueryString, Mobile = r.MobileQueryString }
         };
 
         await CacheBrandGameProviderConfigurationAsync(brandId, gameProviderId, bgpc);
@@ -175,7 +160,7 @@ public sealed class BrandOperations : IBrandOperations
         var types = platformTypes?.Length > 0 ? platformTypes : Consts.AllGamePlatformTypes;
 
         return games.Where(g => g.GameProviderId == gameProviderId &&
-            types.Contains(g.PlatformType)).ToArray();
+                                types.Contains(g.PlatformType)).ToArray();
     }
 
     async Task<CachedBrandGame> IBrandOperations.GetBrandGameAsync(Guid brandId, Guid gameProviderId, int gameId)
@@ -249,25 +234,17 @@ public sealed class BrandOperations : IBrandOperations
         const RedisCacheType type = RedisCacheType.BrandDefaultBetLimit;
         var value = await _cacheManager.SafeGetHashSetAsync(type, brandId, currencyCode);
 
-        if (value.HasValue)
-        {
-            return (int)value;
-        }
+        if (value.HasValue) return (int)value;
 
         var betLimitId = await _brandQueries.GetBrandDefaultBetLimitAsync(brandId, currencyCode);
 
         if (!betLimitId.HasValue)
-        {
             throw new InvalidOperationException(
                 $"Brand with id '{brandId}' doesn't have default bet limit for currency '{currencyCode}'");
-        }
 
         await _cacheManager.SafeCacheHashSetAsync(type,
             brandId,
-            new HashEntry[]
-            {
-                new(currencyCode, betLimitId.Value)
-            },
+            new HashEntry[] { new(currencyCode, betLimitId.Value) },
             TimeSpan.FromHours(2));
 
         return betLimitId.Value;
@@ -299,21 +276,14 @@ public sealed class BrandOperations : IBrandOperations
                 brandId,
                 new RedisValue[]
                 {
-                    CachedBrandFields.BrandCode,
-                    CachedBrandFields.BrandName,
-                    CachedBrandFields.TimeZoneId,
-                    CachedBrandFields.Status,
-                    CachedBrandFields.ResellerId,
-                    CachedBrandFields.ResellerCode,
-                    CachedBrandFields.LicenseeId,
-                    CachedBrandFields.LicenseeCode,
-                    CachedBrandFields.ClientId,
+                    CachedBrandFields.BrandCode, CachedBrandFields.BrandName, CachedBrandFields.TimeZoneId,
+                    CachedBrandFields.Status, CachedBrandFields.ResellerId, CachedBrandFields.ResellerCode,
+                    CachedBrandFields.LicenseeId, CachedBrandFields.LicenseeCode, CachedBrandFields.ClientId,
                     CachedBrandFields.SecretKey
                 });
 
             if (values.All(a => !a.IsNull))
-            {
-                return new()
+                return new CachedBrand
                 {
                     Code = values[0],
                     Name = values[1],
@@ -326,7 +296,6 @@ public sealed class BrandOperations : IBrandOperations
                     ClientId = values[8],
                     SecretKey = values[9]
                 };
-            }
         }
         catch (Exception e)
         {
@@ -342,16 +311,14 @@ public sealed class BrandOperations : IBrandOperations
         {
             var fields = new HashEntry[]
             {
-                new(CachedBrandFields.BrandCode, brand.Code),
-                new(CachedBrandFields.BrandName, brand.Name),
+                new(CachedBrandFields.BrandCode, brand.Code), new(CachedBrandFields.BrandName, brand.Name),
                 new(CachedBrandFields.TimeZoneId, brand.TimeZoneId ?? string.Empty),
                 new(CachedBrandFields.Status, (int)brand.Status),
                 new(CachedBrandFields.ResellerId, brand.ResellerId.ToString()),
                 new(CachedBrandFields.ResellerCode, brand.ResellerCode),
                 new(CachedBrandFields.LicenseeId, brand.LicenseeId.ToString()),
                 new(CachedBrandFields.LicenseeCode, brand.LicenseeCode),
-                new(CachedBrandFields.ClientId, brand.ClientId),
-                new(CachedBrandFields.SecretKey, brand.SecretKey)
+                new(CachedBrandFields.ClientId, brand.ClientId), new(CachedBrandFields.SecretKey, brand.SecretKey)
             };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.Brand,
@@ -375,10 +342,7 @@ public sealed class BrandOperations : IBrandOperations
                 brandId,
                 gameProviderId.ToString());
 
-            if (data.HasValue)
-            {
-                return _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(data);
-            }
+            if (data.HasValue) return _json.DeserializeFromString<CachedBrandGameProviderConfiguration>(data);
         }
         catch (Exception e)
         {
@@ -395,10 +359,7 @@ public sealed class BrandOperations : IBrandOperations
     {
         try
         {
-            var fields = new HashEntry[]
-            {
-                new(gameProviderId.ToString(), _json.SerializeToString(configuration))
-            };
+            var fields = new HashEntry[] { new(gameProviderId.ToString(), _json.SerializeToString(configuration)) };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.BrandGameProviderConfiguration,
                 brandId,
@@ -424,10 +385,7 @@ public sealed class BrandOperations : IBrandOperations
     {
         var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Brand, brandId, field);
 
-        if (value.HasValue)
-        {
-            return cached(value);
-        }
+        if (value.HasValue) return cached(value);
 
         var brand = await _interface.GetCachedBrandAsync(brandId);
 

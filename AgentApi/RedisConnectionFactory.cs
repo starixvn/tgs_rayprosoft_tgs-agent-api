@@ -26,7 +26,7 @@ internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
@@ -37,10 +37,7 @@ internal class RedisConnectionFactory : IRedisConnectionFactory, IDisposable
     {
         if (!_disposedValue)
         {
-            if (disposing)
-            {
-                _connectionMultiplexer?.Dispose();
-            }
+            if (disposing) _connectionMultiplexer?.Dispose();
 
             // TODO: free unmanaged resources (unmanaged objects) and override finalizer
             // TODO: set large fields to null

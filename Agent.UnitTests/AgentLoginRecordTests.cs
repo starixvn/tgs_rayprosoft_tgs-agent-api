@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Models.Enums;

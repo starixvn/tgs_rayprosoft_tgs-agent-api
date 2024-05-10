@@ -8,4 +8,4 @@ public record GetAgentInfosQuery(
     Guid ParentAgentId,
     AgentStatus? Status,
     string? Username
-    );
+);

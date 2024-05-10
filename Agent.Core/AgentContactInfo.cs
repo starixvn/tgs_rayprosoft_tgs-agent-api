@@ -10,4 +10,4 @@ public record AgentContactInfo(
     string? Email,
     string? QQ,
     string? Wechat
-    );
+);

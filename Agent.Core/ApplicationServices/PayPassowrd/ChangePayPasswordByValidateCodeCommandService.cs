@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.PayPassowrd;
 
@@ -14,9 +14,14 @@ internal class ChangePayPasswordByValidateCodeCommandService(
     IValidateCodeOperator validateCodeOperator)
     : ICommandService<ChangePayPasswordByValidateCodeCommand>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask ExecuteAsync(
         ChangePayPasswordByValidateCodeCommand command,

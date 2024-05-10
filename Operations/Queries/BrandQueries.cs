@@ -47,32 +47,24 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     Task<CachedBrand> IBrandQueries.GetCachedBrandAsync(Guid brandId)
     {
         const string sql = "dbo.brand_get_brand_for_cache";
-        return repository.SqlQuerySingleAsync<CachedBrand>(sql, parameters: new Dictionary<string, object>
-        {
-            {":brand_id", brandId}
-        });
+        return repository.SqlQuerySingleAsync<CachedBrand>(sql,
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
     }
 
     Task<GetCachedBrandGameProviderConfigurationResult> IBrandQueries.
         GetCachedBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
     {
         const string spName = "dbo.brand_get_brand_game_provider_configuration_for_cache";
-        return repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName, parameters:
-            new Dictionary<string, object>
-            {
-                {":brand_id", brandId},
-                {":game_provider_id", gameProviderId}
-            });
+        return repository.SqlQuerySingleAsync<GetCachedBrandGameProviderConfigurationResult>(spName,
+            parameters:
+            new Dictionary<string, object> { { ":brand_id", brandId }, { ":game_provider_id", gameProviderId } });
     }
 
     async Task<CachedBrandGame[]> IBrandQueries.GetBrandGamesAsync(Guid brandId)
     {
         const string spName = "dbo.brand_get_brand_games_for_cache";
         var r = await repository.SqlQueryMultipleAsync<CachedBrandGame>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToArray();
     }
@@ -93,10 +85,7 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     {
         const string spName = "dbo.brand_get_languages_by_external_code";
         var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
     }
@@ -105,10 +94,7 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     {
         const string spName = "dbo.brand_get_languages_by_internal_code";
         var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
     }
@@ -118,10 +104,7 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     {
         const string spName = "dbo.brand_get_currencies_by_external_code";
         var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
     }
@@ -131,10 +114,7 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     {
         const string spName = "dbo.brand_get_currencies_by_internal_code";
         var r = await repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
     }
@@ -143,10 +123,7 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
     {
         const string spName = "dbo.brand_get_brand_game_providers_for_cache";
         var r = await repository.SqlQueryMultipleAsync<CachedBrandGameProvider>(spName,
-            parameters: new Dictionary<string, object>
-            {
-                {":brand_id", brandId}
-            });
+            parameters: new Dictionary<string, object> { { ":brand_id", brandId } });
 
         return r.ToArray();
     }
@@ -162,8 +139,8 @@ public sealed class BrandQueries(ITgsRepository repository) : IBrandQueries
 
         return repository.Announcements
             .Where(a => a.BrandId == brandId &&
-                a.Status == AnnounceStatus.Effective &&
-                now >= a.From && now < a.To)
+                        a.Status == AnnounceStatus.Effective &&
+                        now >= a.From && now < a.To)
             .Select(a => new CachedAnnouncement
             {
                 Id = a.Id,

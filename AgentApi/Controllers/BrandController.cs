@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
@@ -10,34 +9,33 @@ using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.BrandLiveChat;
 using Tgs.ServiceUtility;
 
-namespace TGS.Apis.AgentApi.Controllers
+namespace TGS.Apis.AgentApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class BrandController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class BrandController : ControllerBase
+    [HttpGet]
+    [Description("Get a brand's live chat")]
+    [AuthorizeAgentToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+    public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
+        [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
     {
-        [HttpGet]
-        [Description("Get a brand's live chat")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
-            [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
+        var brandId = HttpContext.Items.GetBrandId();
+
+        var query = new BrandLiveChatQuery(brandId);
+
+        var info = await queryService.GetAsync(query).ConfigureAwait(false);
+
+        if (info == null)
+            return null;
+
+        return new BrandLiveChatModel
         {
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var query = new BrandLiveChatQuery(brandId);
-
-            var info = await queryService.GetAsync(query).ConfigureAwait(false);
-
-            if (info == null)
-                return null;
-
-            return new BrandLiveChatModel()
-            {
-                Name = info.Name,
-                Setting = string.IsNullOrEmpty(info.Setting)
-                    ? JsonDocument.Parse("{}")
-                    : JsonDocument.Parse(info.Setting)
-            };
-        }
+            Name = info.Name,
+            Setting = string.IsNullOrEmpty(info.Setting)
+                ? JsonDocument.Parse("{}")
+                : JsonDocument.Parse(info.Setting)
+        };
     }
 }

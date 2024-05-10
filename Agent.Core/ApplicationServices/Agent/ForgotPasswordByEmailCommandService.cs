@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
@@ -15,11 +15,17 @@ internal class ForgotPasswordByEmailCommandService(
     IValidateCodeOperator validateCodeOperator)
     : IGetService<ForgotPasswordByEmailCommand, string>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
-    public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command, CancellationToken cancellationToken = default)
+    private readonly IValidateCodeGenerator _codeGenerator =
+        codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+    public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command,
+        CancellationToken cancellationToken = default)
     {
         var foundAgents = await _agentRepository
             .GetAgentsByEmailAsync(command.BrandId, command.Email)

@@ -9,7 +9,8 @@ namespace TGS.Services.Agent.ApplicationServices.BankInfos;
 internal class GetAgentBankInfosQueryService(IPaymentServiceClient paymentServiceClient)
     : IQueryService<GetAgentBankInfosQuery, AgentBankInfo>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public IAsyncEnumerable<AgentBankInfo> QueryAsync(
         GetAgentBankInfosQuery query,

@@ -4,12 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using TGS.Core.Models.Enums;
 using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
@@ -22,9 +22,15 @@ public class
     : IGetService<GetAgentWinLossQuery, GetAgentWinLossResponse>
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-    private readonly IPlayerServiceClient _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
-    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+
+    private readonly IPlayerServiceClient _playerClient =
+        playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+
+    private readonly IReportClient
+        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<GetAgentWinLossResponse> GetAsync(GetAgentWinLossQuery request,
         CancellationToken cancellationToken = default)
@@ -35,27 +41,24 @@ public class
             string.IsNullOrEmpty(request.Username) switch
             {
                 true =>
-                    await GetDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge).ConfigureAwait(false),
+                    await GetDownLineAgentWinLossByMasterAgentIdAsync(request, brand!.PlatformCharge)
+                        .ConfigureAwait(false),
                 false when request is { DownLine: false, MemberType: AccountType.Agent } =>
                     await GetAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
                 false when request is { DownLine: true, MemberType: AccountType.Agent } =>
-                    await GetDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
+                    await GetDownLineAgentWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
+                        .ConfigureAwait(false),
                 false when request.MemberType == AccountType.Player =>
-                    await GetPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken).ConfigureAwait(false),
+                    await GetPlayerWinLossAsync(request, brand!.PlatformCharge, cancellationToken)
+                        .ConfigureAwait(false),
                 _ => null
             };
 
         if (response == null)
-        {
-            return new()
-            {
-                Valid = true,
-                Items = Array.Empty<AgentWinLossModel>(),
-            };
-        }
+            return new GetAgentWinLossResponse { Valid = true, Items = Array.Empty<AgentWinLossModel>() };
 
         var pageArray = response.Items.Select(x
-            => new Services.Agent.AgentWinLossModel
+            => new AgentWinLossModel
             {
                 Id = x.Id,
                 Username = x.Username,
@@ -86,12 +89,9 @@ public class
             CompanyTotal = response.Items.Sum(x => x.CompanyTotal)
         };
 
-        return new()
+        return new GetAgentWinLossResponse
         {
-            Valid = true,
-            TotalCount = response.TotalCount,
-            Items = pageArray.ToArray(),
-            Total = total
+            Valid = true, TotalCount = response.TotalCount, Items = pageArray.ToArray(), Total = total
         };
     }
 
@@ -115,7 +115,7 @@ public class
 
         return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
-            : await _reportClient.GetAgentWinLossAsync(new()
+            : await _reportClient.GetAgentWinLossAsync(new GetAgentWinLossRequest
             {
                 BrandId = request.BrandId,
                 AgentId = agentId.Value,
@@ -151,7 +151,7 @@ public class
 
         return agentId == null
             ? new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>()
-            : await _reportClient.GetDownLineAgentWinLossAsync(new()
+            : await _reportClient.GetDownLineAgentWinLossAsync(new GetDownLineAgentWinLossRequest
             {
                 BrandId = request.BrandId,
                 AgentId = agentId.Value,
@@ -167,11 +167,10 @@ public class
     }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>>
-            GetDownLineAgentWinLossByMasterAgentIdAsync(
+        GetDownLineAgentWinLossByMasterAgentIdAsync(
             GetAgentWinLossQuery request,
             decimal platformCharge)
-    {
-        return await _reportClient.GetDownLineAgentWinLossAsync(new()
+        => await _reportClient.GetDownLineAgentWinLossAsync(new GetDownLineAgentWinLossRequest
         {
             BrandId = request.BrandId,
             AgentId = request.AgentId,
@@ -184,7 +183,6 @@ public class
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
         }).ConfigureAwait(false);
-    }
 
     private async Task<PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>> GetPlayerWinLossAsync(
         GetAgentWinLossQuery request,
@@ -199,17 +197,14 @@ public class
                 request.Username,
                 cancellationToken).ConfigureAwait(false);
 
-        if (player == null)
-        {
-            return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
-        }
+        if (player == null) return new PagedResponse<Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel>();
 
         var playerProperties =
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,
                 cancellationToken).ConfigureAwait(false);
 
         return Guid.TryParse(playerProperties["AgentId"], out var agentId) &&
-            await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false)
+               await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken).ConfigureAwait(false)
             ? await _reportClient.GetAgentPlayerWinLossAsync(new GetPlayerWinLossRequest
             {
                 PlayerCode = player.PlayerCode,

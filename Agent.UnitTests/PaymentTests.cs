@@ -23,17 +23,10 @@ public class PaymentTests
 
         moqPaymentServiceClient
             .Setup(fake => fake.GetAllPaymentChannelsAsync(It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new PaymentChannelInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test1"
-                },
-                new PaymentChannelInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "test2"
-                }
+            .Returns(new[]
+            {
+                new PaymentChannelInfo { Id = Guid.NewGuid(), Name = "test1" },
+                new PaymentChannelInfo { Id = Guid.NewGuid(), Name = "test2" }
             }.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query);
@@ -54,17 +47,10 @@ public class PaymentTests
 
         moqPaymentServiceClient
             .Setup(fake => fake.GetAllPaymentMethodsAsync(It.IsAny<CancellationToken>()))
-            .Returns(new[] {
-                new PaymentMethodInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Bank"
-                } ,
-                new PaymentMethodInfo
-                {
-                    Id = Guid.NewGuid(),
-                    Name= "Crypto"
-                }
+            .Returns(new[]
+            {
+                new PaymentMethodInfo { Id = Guid.NewGuid(), Name = "Bank" },
+                new PaymentMethodInfo { Id = Guid.NewGuid(), Name = "Crypto" }
             }.ToAsyncEnumerable());
 
         _ = await sut.GetAsync(query);

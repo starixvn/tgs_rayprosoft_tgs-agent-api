@@ -12,13 +12,14 @@ internal class GetAgentPlayerInfosQueryService(IAgentRepository agentRepository)
     : IQueryService<GetAgentPlayerInfosQuery, AgentPlayerInfo>,
         IGetService<GetAgentPlayerInfosQuery, int>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
     public async ValueTask<int> GetAsync(GetAgentPlayerInfosQuery query, CancellationToken cancellationToken = default)
     {
         var data = MakeDataSourceAsync(query);
 
-        return await data.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        return await data.CountAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<AgentPlayerInfo> QueryAsync(

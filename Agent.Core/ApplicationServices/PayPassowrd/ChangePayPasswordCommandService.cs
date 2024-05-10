@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Core.Infrastructures.Security;
-using Tgs.ServiceUtility;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.PayPassowrd;
 
@@ -14,9 +14,14 @@ internal class ChangePayPasswordCommandService(
     IAgentRepository agentRepository)
     : ICommandService<ChangePayPasswordCommand>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly ICommandService<CheckWithdrawPayPasswordCommand> _checkPasswordService = checkPasswordService ?? throw new ArgumentNullException(nameof(checkPasswordService));
-    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly ICommandService<CheckWithdrawPayPasswordCommand> _checkPasswordService =
+        checkPasswordService ?? throw new ArgumentNullException(nameof(checkPasswordService));
+
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public async ValueTask ExecuteAsync(ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
     {

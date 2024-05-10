@@ -7,5 +7,5 @@ public record CheckWithdrawPayPasswordCommand(
     Guid AgentId,
     string PayPassword)
 {
-    public TaskCompletionSource<bool> ReturnSource { get; } = new TaskCompletionSource<bool>();
+    public TaskCompletionSource<bool> ReturnSource { get; } = new();
 }

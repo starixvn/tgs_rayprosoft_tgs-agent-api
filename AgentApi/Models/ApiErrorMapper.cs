@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using Microsoft.OpenApi.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -134,7 +133,7 @@ public class ApiErrorMapper : IErrorMapper
             [typeof(PhoneRequiredException)] = AgentApiError.PhoneNumberRequired,
             [typeof(PlayerExistAlreadyException)] = AgentApiError.PlayerExistAlready,
             [typeof(PlayerPhoneDuplicateException)] = AgentApiError.PlayerPhoneDuplicate,
-            [typeof(PlayerEmailDuplicateException)] = AgentApiError.PlayerEmailDuplicate,
+            [typeof(PlayerEmailDuplicateException)] = AgentApiError.PlayerEmailDuplicate
         };
 
     public bool CanProcess(Exception exception)
@@ -142,10 +141,7 @@ public class ApiErrorMapper : IErrorMapper
 
     public int GetApiErrorByException(Exception exception)
     {
-        if (exception == null)
-        {
-            return (int)AgentApiError.None;
-        }
+        if (exception == null) return (int)AgentApiError.None;
 
         var type = exception.GetType();
 
@@ -156,17 +152,14 @@ public class ApiErrorMapper : IErrorMapper
 
     public int GetHttpStatusByException(Exception exception)
     {
-        if (exception == null)
-        {
-            return StatusCodes.Status200OK;
-        }
+        if (exception == null) return StatusCodes.Status200OK;
 
         var type = exception.GetType();
 
         return _TgsApiErrorByException.TryGetValue(type, out var error) &&
-            _HttpCodeByException.TryGetValue(error, out var statusCode)
-                ? statusCode
-                : StatusCodes.Status500InternalServerError;
+               _HttpCodeByException.TryGetValue(error, out var statusCode)
+            ? statusCode
+            : StatusCodes.Status500InternalServerError;
     }
 
     public string GetMessageByException(Exception exception)

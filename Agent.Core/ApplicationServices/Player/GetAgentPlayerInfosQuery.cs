@@ -1,6 +1,6 @@
 ﻿using System;
-using Tgs.Paging;
 using TGS.Core.Models.Enums;
+using Tgs.Paging;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 

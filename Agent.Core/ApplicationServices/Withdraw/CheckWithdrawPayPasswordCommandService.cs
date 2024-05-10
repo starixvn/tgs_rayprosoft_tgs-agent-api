@@ -11,8 +11,11 @@ internal class CheckWithdrawPayPasswordCommandService(
     IPasswordHandler passwordHandler)
     : ICommandService<CheckWithdrawPayPasswordCommand>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public async ValueTask ExecuteAsync(
         CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)

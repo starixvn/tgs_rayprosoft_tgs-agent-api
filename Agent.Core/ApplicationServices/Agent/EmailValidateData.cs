@@ -2,4 +2,4 @@
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-record EmailValidateData(string Email, Guid AgentId);
+internal record EmailValidateData(string Email, Guid AgentId);

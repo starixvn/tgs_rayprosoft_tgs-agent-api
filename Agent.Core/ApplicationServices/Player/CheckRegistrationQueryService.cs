@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
 using Tgs.PlayerService.Client;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationConditions;
 using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
@@ -16,9 +16,14 @@ internal class CheckRegistrationQueryService(
     Func<string, IRegistrationCondition?> conditionFunc)
     : IGetService<CheckRegistrationQuery, bool>
 {
-    private readonly IBrandServiceClient _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    private readonly Func<string, IRegistrationCondition?> _conditionFunc = conditionFunc ?? throw new ArgumentNullException(nameof(conditionFunc));
+    private readonly IBrandServiceClient _brandServiceClient =
+        brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+
+    private readonly Func<string, IRegistrationCondition?> _conditionFunc =
+        conditionFunc ?? throw new ArgumentNullException(nameof(conditionFunc));
+
+    private readonly IPlayerServiceClient _playerServiceClient =
+        playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<bool> GetAsync(
         CheckRegistrationQuery query,
@@ -35,17 +40,15 @@ internal class CheckRegistrationQueryService(
         if (player != null)
             throw new PlayerExistAlreadyException(query.Username);
 
-        if (brandFrontendInfo.PlayerRegisterFlowSettings is null)
-        {
-            return true;
-        }
+        if (brandFrontendInfo.PlayerRegisterFlowSettings is null) return true;
 
-        foreach (var type in brandFrontendInfo.PlayerRegisterFlowSettings.RootElement.EnumerateArray().Select(element => element.GetProperty("type").GetString()))
+        foreach (var type in brandFrontendInfo.PlayerRegisterFlowSettings.RootElement.EnumerateArray()
+                     .Select(element => element.GetProperty("type").GetString()))
         {
             if (string.IsNullOrWhiteSpace(type))
                 throw new InvalidOperationException("RegisterFlowStep type is not specified");
 
-            var registerService =  _conditionFunc.Invoke(type);
+            var registerService = _conditionFunc.Invoke(type);
 
             if (registerService != null)
                 await registerService.ExecuteAsync(query.BrandId, query.Data, cancellationToken);

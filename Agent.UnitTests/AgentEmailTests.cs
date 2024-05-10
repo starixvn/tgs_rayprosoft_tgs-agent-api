@@ -5,10 +5,10 @@ using ExpectedObjects;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Agent.ApplicationServices.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
-using TGS.Services.Agent.ApplicationServices.Agent;
 
 namespace Agent.UnitTests;
 
@@ -97,10 +97,7 @@ public class AgentEmailTests
 
         var expected = new
         {
-            Receivers = new[]
-            {
-                email
-            },
+            Receivers = new[] { email },
             Subject = "Verification Code",
             Content = $"Your ID verification code is : {validateCode}"
         }.ToExpectedObject();

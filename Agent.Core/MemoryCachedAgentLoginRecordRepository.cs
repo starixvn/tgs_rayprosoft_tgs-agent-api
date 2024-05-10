@@ -9,7 +9,9 @@ internal class MemoryCachedAgentLoginRecordRepository(
     IMemoryCache memoryCache)
     : IAgentLoginRecordRepository
 {
-    private readonly IAgentLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+    private readonly IAgentLoginRecordRepository _loginRecordRepository =
+        loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+
     private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)

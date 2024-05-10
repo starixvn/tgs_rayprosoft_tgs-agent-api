@@ -13,7 +13,8 @@ internal class ResetSubAgentPasswordCommandService(IAgentClient agentClient)
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
-    public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command,
+        CancellationToken cancellationToken = default)
     {
         var subAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
@@ -30,11 +31,15 @@ internal class ResetSubAgentPasswordCommandService(IAgentClient agentClient)
             .ConfigureAwait(false);
 
         await _agentClient
-            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password, parentAgent!.Username), cancellationToken)
+            .SetAgentPasswordAsync(
+                new SetAgentPasswordRequest(command.SubAgentId, command.Password, parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
 
         await _agentClient
-            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(subAgent.Id, AgentOperation.Password, parentAgent!.Username), cancellationToken)
+            .AddAgentAuditLogAsync(
+                new AddAgentAuditLogRequest(subAgent.Id, AgentOperation.Password, parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

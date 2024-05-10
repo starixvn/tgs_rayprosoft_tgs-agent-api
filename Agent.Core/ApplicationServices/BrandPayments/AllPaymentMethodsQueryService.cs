@@ -12,9 +12,11 @@ namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
 internal class AllPaymentMethodsQueryService(IPaymentServiceClient paymentServiceClient)
     : IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
-    public async ValueTask<IDictionary<Guid, PaymentMethodInfo>> GetAsync(AllPaymentMethodsQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<IDictionary<Guid, PaymentMethodInfo>> GetAsync(AllPaymentMethodsQuery query,
+        CancellationToken cancellationToken = default)
     {
         var allPaymentMethods = await _paymentServiceClient.GetAllPaymentMethodsAsync()
             .ToDictionaryAsync(method => method.Id)

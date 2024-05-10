@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
+﻿namespace TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
 
 public record AgentPlayerSpecialDetailReportModel
 {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
@@ -13,8 +13,11 @@ internal class CommitSetAgentEmailCommandService(
     IAgentOperations agentOperations)
     : ICommandService<CommitSetAgentEmailCommand>
 {
-    private readonly IAgentOperations _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
-    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+    private readonly IAgentOperations _agentOperations =
+        agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask ExecuteAsync(CommitSetAgentEmailCommand command,
         CancellationToken cancellationToken = default)

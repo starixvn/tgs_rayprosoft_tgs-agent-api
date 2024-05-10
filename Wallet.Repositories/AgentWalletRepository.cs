@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.WalletService;
@@ -12,7 +13,8 @@ namespace TGS.Wallet.Repositories;
 
 internal class AgentWalletRepository(ITgsRepository tgsRepository) : IAgentWalletRepository
 {
-    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
         Guid brandId,
@@ -39,7 +41,7 @@ internal class AgentWalletRepository(ITgsRepository tgsRepository) : IAgentWalle
             }).ConfigureAwait(false);
 
         await _tgsRepository.AgentTransactions
-            .AddAsync(new()
+            .AddAsync(new AgentTransaction
             {
                 Id = transactionId,
                 AgentId = agentId,
@@ -49,15 +51,15 @@ internal class AgentWalletRepository(ITgsRepository tgsRepository) : IAgentWalle
                 Balance = postBalance,
                 Type = transactionType switch
                 {
-                    TransactionTypes.Deposit          => AgentTransactionType.Deposit,
-                    TransactionTypes.Withdrawal       => AgentTransactionType.Withdrawal,
-                    TransactionTypes.CompanyAdjust    => AgentTransactionType.CompanyAdjust,
-                    TransactionTypes.Bonus            => AgentTransactionType.Bonus,
-                    TransactionTypes.Rebate           => AgentTransactionType.Rebate,
-                    TransactionTypes.Dividend         => AgentTransactionType.Dividend,
-                    TransactionTypes.Promotion        => AgentTransactionType.Promotion,
+                    TransactionTypes.Deposit => AgentTransactionType.Deposit,
+                    TransactionTypes.Withdrawal => AgentTransactionType.Withdrawal,
+                    TransactionTypes.CompanyAdjust => AgentTransactionType.CompanyAdjust,
+                    TransactionTypes.Bonus => AgentTransactionType.Bonus,
+                    TransactionTypes.Rebate => AgentTransactionType.Rebate,
+                    TransactionTypes.Dividend => AgentTransactionType.Dividend,
+                    TransactionTypes.Promotion => AgentTransactionType.Promotion,
                     TransactionTypes.CancelWithdrawal => AgentTransactionType.CancelWithdrawal,
-                    _                                 => AgentTransactionType.Other
+                    _ => AgentTransactionType.Other
                 },
                 Description = description,
                 RecordedOn = DateTimeOffset.Now

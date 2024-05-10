@@ -1,3 +1,3 @@
 ﻿namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
 
-public record AllPaymentChannelsQuery();
+public record AllPaymentChannelsQuery;

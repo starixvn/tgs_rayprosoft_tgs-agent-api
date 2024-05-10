@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
-using Tgs.Paging;
 
 namespace TGS.Services.Agent;
 
@@ -27,7 +26,7 @@ public interface IAgentRepository
         DateTimeOffset? endRegisteredOn,
         string? registerHost,
         PlayerStatus? status,
-        Guid? vipId);   
+        Guid? vipId);
 
     IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode);
 

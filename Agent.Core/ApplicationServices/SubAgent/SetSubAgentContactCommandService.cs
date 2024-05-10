@@ -12,7 +12,8 @@ internal class SetSubAgentContactCommandService(IAgentClient agentClient) : ICom
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
-    public async ValueTask ExecuteAsync(SetSubAgentContactCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask ExecuteAsync(SetSubAgentContactCommand command,
+        CancellationToken cancellationToken = default)
     {
         var subAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
@@ -23,9 +24,10 @@ internal class SetSubAgentContactCommandService(IAgentClient agentClient) : ICom
 
         await _agentClient
             .SetAgentContactAsync(new SetAgentContactRequest(
-                command.SubAgentId,
-                command.Email,
-                command.Phone), cancellationToken)
+                    command.SubAgentId,
+                    command.Email,
+                    command.Phone),
+                cancellationToken)
             .ConfigureAwait(false);
 
         var parentAgent = await _agentClient
@@ -37,7 +39,8 @@ internal class SetSubAgentContactCommandService(IAgentClient agentClient) : ICom
                 new AddAgentAuditLogRequest(
                     command.SubAgentId,
                     AgentOperation.Contact,
-                    parentAgent!.Username), cancellationToken)
+                    parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

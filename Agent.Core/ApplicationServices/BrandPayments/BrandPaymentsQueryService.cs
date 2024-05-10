@@ -9,7 +9,8 @@ namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
 internal class BrandPaymentsQueryService(IPaymentServiceClient paymentServiceClient)
     : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public IAsyncEnumerable<BrandPaymentInfo> QueryAsync(
         BrandPaymentsQuery query,

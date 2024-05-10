@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Tgs.Payment.Clients;
-using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.WalletService.Configuration;
 
@@ -23,7 +21,9 @@ public class AgentConfiguration(IServiceCollection services)
                     .GetConnection()
                     .GetDatabase();
 
-                return ActivatorUtilities.CreateInstance<RedisAgentLoginRecordRepository>(sp, innerRepository, redisDatabase);
+                return ActivatorUtilities.CreateInstance<RedisAgentLoginRecordRepository>(sp,
+                    innerRepository,
+                    redisDatabase);
             })
             .Decorate<IAgentLoginRecordRepository, MemoryCachedAgentLoginRecordRepository>();
 
@@ -44,7 +44,8 @@ public class AgentConfiguration(IServiceCollection services)
         return this;
     }
 
-    public AgentConfiguration AddGameProviderRepository<TGameProviderRepository>() where TGameProviderRepository : class, IGameProviderRepository
+    public AgentConfiguration AddGameProviderRepository<TGameProviderRepository>()
+        where TGameProviderRepository : class, IGameProviderRepository
     {
         _ = Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
@@ -52,7 +53,7 @@ public class AgentConfiguration(IServiceCollection services)
     }
 
     public AgentConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
-                where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
     {
         Services
             .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
@@ -12,9 +12,14 @@ internal class ForgotPasswordCommandService(
     IGetService<ForgotPasswordByPhoneCommand, string> forgotByPhoneService)
     : IGetService<ForgotPasswordCommand, string>
 {
-    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-    private readonly IGetService<ForgotPasswordByEmailCommand, string> _forgotByMailService = forgotByMailService ?? throw new ArgumentNullException(nameof(forgotByMailService));
-    private readonly IGetService<ForgotPasswordByPhoneCommand, string> _forgotByPhoneService = forgotByPhoneService ?? throw new ArgumentNullException(nameof(forgotByPhoneService));
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+
+    private readonly IGetService<ForgotPasswordByEmailCommand, string> _forgotByMailService =
+        forgotByMailService ?? throw new ArgumentNullException(nameof(forgotByMailService));
+
+    private readonly IGetService<ForgotPasswordByPhoneCommand, string> _forgotByPhoneService =
+        forgotByPhoneService ?? throw new ArgumentNullException(nameof(forgotByPhoneService));
 
     public async ValueTask<string> GetAsync(ForgotPasswordCommand command,
         CancellationToken cancellationToken = default)
@@ -34,16 +39,14 @@ internal class ForgotPasswordCommandService(
                 .GetAsync(forgotPasswordByPhoneCommand, cancellationToken)
                 .ConfigureAwait(false);
         }
-        else
-        {
-            var forgetPasswordByMailCommand = new ForgotPasswordByEmailCommand(
-                command.BrandId,
-                command.CultureInfo,
-                command.EmailOrPhone);
 
-            return await _forgotByMailService
-                .GetAsync(forgetPasswordByMailCommand, cancellationToken)
-                .ConfigureAwait(false);
-        }
+        var forgetPasswordByMailCommand = new ForgotPasswordByEmailCommand(
+            command.BrandId,
+            command.CultureInfo,
+            command.EmailOrPhone);
+
+        return await _forgotByMailService
+            .GetAsync(forgetPasswordByMailCommand, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

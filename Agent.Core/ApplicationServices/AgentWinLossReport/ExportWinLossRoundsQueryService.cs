@@ -7,6 +7,7 @@ using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
+using Tgs.Report.Client.Models.Round;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
@@ -20,8 +21,12 @@ public class
         Stream>
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-    private readonly IPlayerServiceClient _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+
+    private readonly IPlayerServiceClient _playerClient =
+        playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+
+    private readonly IReportClient
+        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<Stream> GetAsync(
         ExportWinLossRoundsQuery request,
@@ -41,18 +46,18 @@ public class
             await childAgents.AnyAsync(x => x.AgentId == agentId, cancellationToken)
                 .ConfigureAwait(false);
 
-        return await _reportClient.ExportRoundsAsync(new(
-                BrandId: request.BrandId,
-                inAgentLine ? null : "notInAgentLine",
-                PlayerCode: request.PlayerCode,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                request.ClosedFrom,
-                request.ClosedTo)).ConfigureAwait(false);
+        return await _reportClient.ExportRoundsAsync(new ExportRoundsRequest(
+            request.BrandId,
+            inAgentLine ? null : "notInAgentLine",
+            request.PlayerCode,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            request.ClosedFrom,
+            request.ClosedTo)).ConfigureAwait(false);
     }
 }

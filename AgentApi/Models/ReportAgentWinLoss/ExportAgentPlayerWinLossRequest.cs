@@ -1,5 +1,4 @@
 ﻿using System;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
 

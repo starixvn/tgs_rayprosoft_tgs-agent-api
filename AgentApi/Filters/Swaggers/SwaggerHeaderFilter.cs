@@ -18,8 +18,7 @@ public sealed class SwaggerHeaderFilter : IOperationFilter
             .FirstOrDefault(o => o is AuthorizeAgentTokenAttribute);
 
         if (attribute != null)
-        {
-            operation.Parameters.Add(new()
+            operation.Parameters.Add(new OpenApiParameter
             {
                 Name = "Token",
                 In = ParameterLocation.Header,
@@ -27,6 +26,5 @@ public sealed class SwaggerHeaderFilter : IOperationFilter
                 Description = "agent token, provided when agent login successfully",
                 AllowEmptyValue = attribute.AllowNullOrEmpty
             });
-        }
     }
 }

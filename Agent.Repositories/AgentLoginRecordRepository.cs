@@ -7,7 +7,8 @@ namespace TGS.Agent.Repositories;
 
 internal class AgentLoginRecordRepository(ITgsRepository tgsRepository) : IAgentLoginRecordRepository
 {
-    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
     {
@@ -15,9 +16,9 @@ internal class AgentLoginRecordRepository(ITgsRepository tgsRepository) : IAgent
             .FindAsync(loginRecordId)
             .ConfigureAwait(false);
 
-        return loginRecord == null ?
-            null :
-            new AgentLoginRecordInfo(
+        return loginRecord == null
+            ? null
+            : new AgentLoginRecordInfo(
                 loginRecord.Id,
                 loginRecord.AgentId,
                 loginRecord.Status,

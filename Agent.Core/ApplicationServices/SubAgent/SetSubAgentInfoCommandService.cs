@@ -23,8 +23,9 @@ internal class SetSubAgentInfoCommandService(IAgentClient agentClient) : IComman
 
         await _agentClient
             .SetAgentInfoAsync(new SetAgentInfoRequest(
-                command.SubAgentId,
-                command.RealName), cancellationToken)
+                    command.SubAgentId,
+                    command.RealName),
+                cancellationToken)
             .ConfigureAwait(false);
 
         var parentAgent = await _agentClient
@@ -36,7 +37,8 @@ internal class SetSubAgentInfoCommandService(IAgentClient agentClient) : IComman
                 new AddAgentAuditLogRequest(
                     command.SubAgentId,
                     AgentOperation.Info,
-                    parentAgent!.Username), cancellationToken)
+                    parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

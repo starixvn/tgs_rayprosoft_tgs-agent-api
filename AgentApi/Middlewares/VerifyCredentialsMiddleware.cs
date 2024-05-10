@@ -10,7 +10,8 @@ namespace TGS.Apis.AgentApi.Middlewares;
 
 public sealed class VerifyCredentialsMiddleware(RequestDelegate next)
 {
-    private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
+    private static readonly ActivitySource _VerifyCredentialsMiddlewareSource =
+        new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -20,10 +21,7 @@ public sealed class VerifyCredentialsMiddleware(RequestDelegate next)
 
         var brandId = context.GetBrandId();
 
-        if (brandId is null)
-        {
-            throw new InvalidCredentialsException("Brand doesn't exist");
-        }
+        if (brandId is null) throw new InvalidCredentialsException("Brand doesn't exist");
 
         var brandStatus = await brandServiceClient.GetBrandStatusAsync(brandId.Value).ConfigureAwait(false);
 

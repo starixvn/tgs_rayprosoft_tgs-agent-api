@@ -28,12 +28,12 @@ public class AgentTeamController : ControllerBase
         await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
         var agentTeamInfo = await getAgentService
-            .GetAsync(new(brandId, agentData.AgentId))
+            .GetAsync(new GetAgentTeamInfoQuery(brandId, agentData.AgentId))
             .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
-        return new()
+        return new AgentTeamResponse
         {
-            Data = new()
+            Data = new AgentTeamData
             {
                 DirectAgentCount = agentTeamInfo.DirectAgentCount,
                 DirectPlayerCount = agentTeamInfo.DirectPlayerCount,

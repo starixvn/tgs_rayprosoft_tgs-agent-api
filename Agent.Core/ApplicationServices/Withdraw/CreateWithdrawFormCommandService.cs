@@ -6,7 +6,7 @@ using Tgs.Agent.Client.Models;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
-using TGS.Services.Agent.Exceptions;
+using InsufficientFundsException = TGS.Services.Agent.Exceptions.InsufficientFundsException;
 
 namespace TGS.Services.Agent.ApplicationServices.Withdraw;
 
@@ -16,7 +16,8 @@ internal class CreateWithdrawFormCommandService(
     IAgentClient agentClient)
     : ICommandService<CreateWithdrawFormCommand>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command,
         CancellationToken cancellationToken = default)
@@ -28,7 +29,7 @@ internal class CreateWithdrawFormCommandService(
             .ConfigureAwait(false);
 
         if (balance - command.Amount < 0)
-            throw new Exceptions.InsufficientFundsException();
+            throw new InsufficientFundsException();
 
         var createFormId = await _paymentServiceClient
             .CreateWithdrawFormAsync(
@@ -40,7 +41,8 @@ internal class CreateWithdrawFormCommandService(
                     BrandId = command.BrandId,
                     UserName = agent.Username,
                     UserType = UserType.Agent
-                }, cancellationToken)
+                },
+                cancellationToken)
             .ConfigureAwait(false);
 
         await _paymentServiceClient

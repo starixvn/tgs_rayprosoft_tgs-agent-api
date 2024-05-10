@@ -3,13 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
 using TGS.Core.Models.Enums;
+using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
-using Tgs.PlayerService.Client;
-using Tgs.Agent.Client;
-using Tgs.Agent.Client.Models;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
@@ -22,9 +22,15 @@ public class
     : IGetService<ExportAgentWinLossQuery, Stream>
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-    private readonly IPlayerServiceClient _playerClient = playerClient ?? throw new ArgumentNullException(nameof(playerClient));
-    private readonly IReportClient _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
+
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+
+    private readonly IPlayerServiceClient _playerClient =
+        playerClient ?? throw new ArgumentNullException(nameof(playerClient));
+
+    private readonly IReportClient
+        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
 
     public async ValueTask<Stream> GetAsync(ExportAgentWinLossQuery request,
         CancellationToken cancellationToken = default)
@@ -67,7 +73,7 @@ public class
 
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
 
-        return await _reportClient.ExportAgentWinLossAsync(new(request.BrandId,
+        return await _reportClient.ExportAgentWinLossAsync(new ExportAgentWinLossRequest(request.BrandId,
             agentId ?? Guid.Empty,
             platformCharge,
             request.From,
@@ -78,13 +84,11 @@ public class
         ExportDownLineAgentWinLossByMasterAgentIdAsync(
             ExportAgentWinLossQuery request,
             decimal platformCharge)
-    {
-        return await _reportClient.ExportDownLineAgentWinLossAsync(new(request.BrandId,
+        => await _reportClient.ExportDownLineAgentWinLossAsync(new ExportDownLineAgentWinLossRequest(request.BrandId,
             request.AgentId,
             platformCharge,
             request.From,
             request.To)).ConfigureAwait(false);
-    }
 
     private async Task<Stream>
         ExportDownLineAgentWinLossAsync(
@@ -106,7 +110,7 @@ public class
         var agentId = request.AgentId == agent?.Id ? request.AgentId : subAgent?.AgentId;
 
         return await _reportClient
-            .ExportDownLineAgentWinLossAsync(new(request.BrandId,
+            .ExportDownLineAgentWinLossAsync(new ExportDownLineAgentWinLossRequest(request.BrandId,
                 agentId ?? Guid.Empty,
                 platformCharge,
                 request.From,
@@ -127,14 +131,12 @@ public class
                 cancellationToken).ConfigureAwait(false);
 
         if (player == null)
-        {
             return await _reportClient
                 .ExportPlayerWinLossAsync(new ExportPlayerWinLossRequest(
                     "notInAgentLine",
                     platformCharge,
                     request.From,
                     request.To)).ConfigureAwait(false);
-        }
 
         var playerProperties =
             await _playerClient.GetPlayerPropertiesAsync(player.PlayerCode,

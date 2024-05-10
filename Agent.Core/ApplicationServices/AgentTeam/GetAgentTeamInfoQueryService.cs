@@ -15,7 +15,9 @@ internal class GetAgentTeamInfoQueryService(
     : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+
+    private readonly IPlayerServiceClient _playerServiceClient =
+        playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<GetAgentTeamInfoModel?> GetAsync(GetAgentTeamInfoQuery query,
         CancellationToken cancellationToken = default)
@@ -40,7 +42,7 @@ internal class GetAgentTeamInfoQueryService(
             agentPlayerCounts.Where(x => x.AgentId != null && allChildAgentIds.Contains(x.AgentId.Value))
                 .Sum(x => x.PlayerCount);
 
-        return new()
+        return new GetAgentTeamInfoModel
         {
             DirectAgentCount = directAgents.Count(),
             DirectPlayerCount = directPlayerCountInfo?.PlayerCount ?? 0,

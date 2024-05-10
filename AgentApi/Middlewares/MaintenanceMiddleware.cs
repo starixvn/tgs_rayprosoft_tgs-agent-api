@@ -9,19 +9,18 @@ namespace TGS.Apis.AgentApi.Middlewares;
 
 public sealed class MaintenanceMiddleware(RequestDelegate next)
 {
-    private static readonly ActivitySource _MaintenanceMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(MaintenanceMiddleware)}");
+    private static readonly ActivitySource _MaintenanceMiddlewareSource =
+        new($"TGS.Apis.AgentApi.Middlewares.{nameof(MaintenanceMiddleware)}");
 
     public async Task InvokeAsync(HttpContext context,
-       IMaintenanceRedisRepository maintenanceRedisService)
+        IMaintenanceRedisRepository maintenanceRedisService)
     {
         using var activity = _MaintenanceMiddlewareSource.StartActivity(nameof(MaintenanceMiddleware));
 
         var brandId = context.Items.GetBrandId();
 
-        if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
-        {
-            throw new BrandUnderMaintenanceException("Brand is put into maintenance");
-        }
+        if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId)
+                .ConfigureAwait(false))) throw new BrandUnderMaintenanceException("Brand is put into maintenance");
         await next(context);
     }
 }

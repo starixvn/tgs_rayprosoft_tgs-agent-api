@@ -6,21 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.AgentApi.Attributes;
-using TGS.Core.Infrastructures.Extensions;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Agent.ApplicationServices.Agent;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Validators;
 using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Middlewares;
 
 public sealed class VerifyAgentTokenMiddleware(RequestDelegate next)
 {
-    private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
+    private static readonly ActivitySource _VerifyAgentTokenMiddlewareSource =
+        new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyAgentTokenMiddleware)}");
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -45,10 +44,7 @@ public sealed class VerifyAgentTokenMiddleware(RequestDelegate next)
 
         if (string.IsNullOrEmpty(token))
         {
-            if (!attribute.AllowNullOrEmpty)
-            {
-                throw new MissingTokenException(Resources.Agent.MissingAgentToken);
-            }
+            if (!attribute.AllowNullOrEmpty) throw new MissingTokenException(Resources.Agent.MissingAgentToken);
 
             await next(context);
             return;
@@ -58,16 +54,10 @@ public sealed class VerifyAgentTokenMiddleware(RequestDelegate next)
 
         var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
 
-        if (string.IsNullOrEmpty(sub))
-        {
-            throw new MissingTokenException(Resources.Agent.MissingAgentToken);
-        }
+        if (string.IsNullOrEmpty(sub)) throw new MissingTokenException(Resources.Agent.MissingAgentToken);
 
         var tokenData = await tokenProvider.DecryptAsync<AgentTokenData>(sub);
-        if (tokenData == null)
-        {
-            throw new MissingTokenException(Resources.Agent.MissingAgentToken);
-        }
+        if (tokenData == null) throw new MissingTokenException(Resources.Agent.MissingAgentToken);
 
         context.Items.Add(Core.Models.Consts.ContextItems.AgentToken, tokenData);
 

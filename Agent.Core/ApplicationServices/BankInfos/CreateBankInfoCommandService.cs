@@ -12,8 +12,11 @@ internal class CreateBankInfoCommandService(
     IAgentRepository agentRepository)
     : ICommandService<CreateBankInfoCommand>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public async ValueTask ExecuteAsync(CreateBankInfoCommand command,
         CancellationToken cancellationToken = default)

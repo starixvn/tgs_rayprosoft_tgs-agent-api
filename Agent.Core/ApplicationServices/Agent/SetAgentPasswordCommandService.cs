@@ -11,8 +11,11 @@ internal class SetAgentPasswordCommandService(
     IAgentRepository agentRepository)
     : ICommandService<SetAgentPasswordCommand>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-    private readonly IPasswordHandler _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public ValueTask ExecuteAsync(SetAgentPasswordCommand command, CancellationToken cancellationToken = default)
     {

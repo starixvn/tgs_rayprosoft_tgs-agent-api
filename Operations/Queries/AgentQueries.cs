@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Queries;
 
@@ -22,7 +21,7 @@ public class AgentQueries(ITgsRepository repository) : IAgentQueries
     Task<Agent> IAgentQueries.GetAgentByInvitationCodeAsync(Guid brandId, string invitationCode)
         => repository.Agents
             .Where(agent => agent.BrandId == brandId
-                && agent.InvitationCode == invitationCode)
+                            && agent.InvitationCode == invitationCode)
             .FirstOrDefaultAsync();
 
     Task<AgentLoginRecord> IAgentQueries.GetAgentLoginRecordAsync(

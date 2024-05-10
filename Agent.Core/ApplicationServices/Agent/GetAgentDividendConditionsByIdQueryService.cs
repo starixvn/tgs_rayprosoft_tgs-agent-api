@@ -8,7 +8,8 @@ namespace TGS.Services.Agent.ApplicationServices.Agent;
 internal class GetAgentDividendConditionsByIdQueryService(IAgentRepository agentRepository)
     : IQueryService<GetAgentDividendConditionsByIdQuery, DividendCondition>
 {
-    private readonly IAgentRepository _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
     public IAsyncEnumerable<DividendCondition> QueryAsync(
         GetAgentDividendConditionsByIdQuery query,

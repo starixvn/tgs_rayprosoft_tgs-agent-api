@@ -13,9 +13,7 @@ public sealed class AgentOperations(IAgentQueries agentQueries, IAgentCommands a
         agentCommands.AgentLoginAsync(data);
 
     public async Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data)
-    {
-        await agentCommands.ChangeAgentPasswordAsync(data);
-    }
+        => await agentCommands.ChangeAgentPasswordAsync(data);
 
     public Task<Agent> GetAgentAsync(Guid agentId)
         => agentQueries.GetAgentAsync(x => x.Id == agentId);
@@ -27,7 +25,5 @@ public sealed class AgentOperations(IAgentQueries agentQueries, IAgentCommands a
         agentQueries.GetAgentLoginRecordAsync(x => x.Id == loginRecordId);
 
     public Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
-    {
-        return agentCommands.SetEmailAsync(agentId, email, updatedOn);
-    }
+        => agentCommands.SetEmailAsync(agentId, email, updatedOn);
 }

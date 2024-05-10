@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Properties;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
@@ -16,9 +16,13 @@ internal class StartSetAgentEmailCommandService(
     IValidateCodeOperator validateCodeOperator)
     : IGetService<StartSetAgentEmailCommand, string>
 {
-    private readonly IValidateCodeGenerator _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+    private readonly IValidateCodeGenerator _codeGenerator =
+        codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
+
     private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-    private readonly IValidateCodeOperator _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask<string> GetAsync(StartSetAgentEmailCommand command,
         CancellationToken cancellationToken = default)
@@ -51,10 +55,7 @@ internal class StartSetAgentEmailCommandService(
             saveResult.ValidateCode);
 
         var mailMessage = new SendEmailRequest(
-            new[]
-            {
-                command.Email
-            },
+            new[] { command.Email },
             mailSubject,
             mailBody);
 

@@ -3,12 +3,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.GameProvder;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -26,10 +26,6 @@ public class GameProviderController : ControllerBase
         var brandId = HttpContext.Items.GetBrandId();
 
         return queryService.QueryAsync(new GetGameProvidersQuery(brandId))
-            .Select(info => new GameProviderBaseModel
-            {
-                Id = info.Id,
-                Name = info.Name
-            });
+            .Select(info => new GameProviderBaseModel { Id = info.Id, Name = info.Name });
     }
 }

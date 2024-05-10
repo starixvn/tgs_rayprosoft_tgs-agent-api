@@ -12,8 +12,11 @@ internal class GetPlayerBalanceQueryService(
     ICashServiceClient cashServiceClient)
     : IGetService<GetPlayerBalanceQuery, decimal>
 {
-    private readonly ICashServiceClient _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-    private readonly IPlayerServiceClient _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+    private readonly ICashServiceClient _cashServiceClient =
+        cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
+
+    private readonly IPlayerServiceClient _playerServiceClient =
+        playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<decimal> GetAsync(GetPlayerBalanceQuery query, CancellationToken cancellationToken = default)
     {
@@ -29,8 +32,8 @@ internal class GetPlayerBalanceQueryService(
         var playerWalletId = Guid.Parse(playerProps["DefaultWalletId"]!);
 
         var balance = await _cashServiceClient
-        .GetBalanceAsync(playerWalletId, cancellationToken)
-        .ConfigureAwait(false);
+            .GetBalanceAsync(playerWalletId, cancellationToken)
+            .ConfigureAwait(false);
 
         return balance;
     }

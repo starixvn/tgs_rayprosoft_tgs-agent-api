@@ -16,9 +16,7 @@ public class WalletQueries(ITgsRepository repository) : IWalletQueries
     Task<decimal> IWalletQueries.GetBalanceAsync(Guid walletId)
     {
         const string spName = "dbo.wallet_get_balance";
-        return repository.SqlQuerySingleAsync<decimal>(spName, parameters: new Dictionary<string, object>
-        {
-            {":wallet_id", walletId}
-        });
+        return repository.SqlQuerySingleAsync<decimal>(spName,
+            parameters: new Dictionary<string, object> { { ":wallet_id", walletId } });
     }
 }

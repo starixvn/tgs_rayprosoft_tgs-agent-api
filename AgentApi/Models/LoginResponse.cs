@@ -5,8 +5,7 @@ namespace TGS.Apis.AgentApi.Models;
 
 public record LoginResponse : TgsResponse
 {
-    [JsonPropertyName("token")]
-    public string AgentToken { get; init; }
+    [JsonPropertyName("token")] public string AgentToken { get; init; }
 
     /// <summary>
     ///     unix timestamp to milliseconds

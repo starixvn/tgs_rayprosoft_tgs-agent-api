@@ -11,7 +11,8 @@ namespace TGS.Agent.Repositories;
 
 internal class BrandRepository(ITgsRepository tgsRepository) : IBrandRepository
 {
-    private readonly ITgsRepository _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<BrandInfo?> GetBrandInfoAsync(Guid brandId)
     {

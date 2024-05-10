@@ -3,12 +3,12 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.ApplicationServices.Agent;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -82,9 +82,7 @@ public class AgentPasswordController : ControllerBase
     public async ValueTask ResetPasswordAsync(
         [FromServices] ICommandService<ResetPasswordCommand> resetService,
         [FromBody] ResetPasswordRequest request)
-    {
-        await resetService
+        => await resetService
             .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
             .ConfigureAwait(false);
-    }
 }

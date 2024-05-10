@@ -22,6 +22,5 @@ public class DividendConditionModel
     [JsonPropertyName("netprofit")]
     public decimal NetProfit { get; set; }
 
-    [JsonPropertyName("rank")]
-    public int Rank { get; set; }
+    [JsonPropertyName("rank")] public int Rank { get; set; }
 }

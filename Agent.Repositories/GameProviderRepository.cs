@@ -12,11 +12,7 @@ internal class GameProviderRepository(ITgsRepository tgsRepository) : IGameProvi
     {
         var gameProviders = tgsRepository.GameProviders.AsQueryable()
             .Where(gp => gp.Brands.Select(b => b.BrandId).Contains(brandId))
-            .Select(gp => new GameProviderInfo
-            {
-                Id = gp.Id,
-                Name = gp.Name,
-            });
+            .Select(gp => new GameProviderInfo { Id = gp.Id, Name = gp.Name });
 
         return gameProviders.ToAsyncEnumerable();
     }

@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
-using Tgs.ServiceUtility;
 using TGS.Core.Models.Enums;
+using Tgs.ServiceUtility;
+using AgentOperation = Tgs.Agent.Client.Models.Enums.AgentOperation;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
@@ -15,9 +16,12 @@ internal class SetSubAgentDividendPercentageCommandService(
     : ICommandService<SetSubAgentDividendPercentageCommand>
 {
     private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 
-    public async ValueTask ExecuteAsync(SetSubAgentDividendPercentageCommand command, CancellationToken cancellationToken = default)
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+
+    public async ValueTask ExecuteAsync(SetSubAgentDividendPercentageCommand command,
+        CancellationToken cancellationToken = default)
     {
         var brand = await _brandRepository
             .GetBrandInfoAsync(command.BrandId)
@@ -35,11 +39,11 @@ internal class SetSubAgentDividendPercentageCommandService(
 
         var childInfos = await _agentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(command.SubAgentId), cancellationToken)
-            .ToArrayAsync(cancellationToken: cancellationToken)
+            .ToArrayAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var childAgentMaxDividendPercentage = childInfos.Any() 
-            ? childInfos.Max(x => x.DividendPercentage) 
+        var childAgentMaxDividendPercentage = childInfos.Any()
+            ? childInfos.Max(x => x.DividendPercentage)
             : 0M;
 
         var parentAgent = await _agentClient
@@ -49,21 +53,24 @@ internal class SetSubAgentDividendPercentageCommandService(
         if (parentAgent is null)
             return;
 
-        if (command.DividendPercentage < childAgentMaxDividendPercentage || command.DividendPercentage > parentAgent.DividendPercentage)
+        if (command.DividendPercentage < childAgentMaxDividendPercentage ||
+            command.DividendPercentage > parentAgent.DividendPercentage)
             return;
 
         await _agentClient
             .SetAgentDividendPercentageAsync(
                 new SetAgentDividendPercentageRequest(
                     command.SubAgentId,
-                    command.DividendPercentage), cancellationToken)
+                    command.DividendPercentage),
+                cancellationToken)
             .ConfigureAwait(false);
 
         await _agentClient
             .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(
                     command.SubAgentId,
-                    Tgs.Agent.Client.Models.Enums.AgentOperation.Info,
-                    parentAgent.Username), cancellationToken)
+                    AgentOperation.Info,
+                    parentAgent.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

@@ -12,13 +12,14 @@ internal class RedisAgentLoginRecordRepository(
 {
     private static readonly TimeSpan _Expiry = TimeSpan.FromHours(1D);
 
-    private static readonly JsonSerializerOptions _SerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions _SerializerOptions = new()
     {
-        WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        WriteIndented = false, PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private readonly IAgentLoginRecordRepository _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+    private readonly IAgentLoginRecordRepository _loginRecordRepository =
+        loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
+
     private readonly IDatabase _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
@@ -40,7 +41,7 @@ internal class RedisAgentLoginRecordRepository(
             key,
             value,
             _Expiry,
-            when: When.NotExists).ConfigureAwait(false);
+            When.NotExists).ConfigureAwait(false);
 
         return loginRecord;
     }

@@ -9,7 +9,8 @@ namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
 internal class GetPaymentQueryService(IPaymentServiceClient paymentServiceClient)
     : IGetService<GetPaymentQuery, PaymentInfo>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
     public ValueTask<PaymentInfo> GetAsync(GetPaymentQuery query, CancellationToken cancellationToken = default)
         => _paymentServiceClient.GetPaymentByIdAsync(query.PaymentId)!;

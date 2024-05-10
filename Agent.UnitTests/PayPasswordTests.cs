@@ -5,17 +5,16 @@ using System.Threading.Tasks;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Core.Infrastructures.Security;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
-using TGS.Core.DataServices.Tgs.Models;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
-using TGS.Services.Agent.Exceptions;
-using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Agent.ApplicationServices.PayPassowrd;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
+using TGS.Services.Agent.Exceptions;
+using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace Agent.UnitTests;
 
@@ -202,12 +201,7 @@ public class PayPasswordTests
                 null,
                 null,
                 "aaabbb",
-                new byte[]
-                {
-                    1,
-                    2,
-                    3
-                },
+                new byte[] { 1, 2, 3 },
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),

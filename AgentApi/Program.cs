@@ -5,7 +5,6 @@ using System.Net;
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +53,7 @@ builder.Services
             options.KnownProxies.Add(IPAddress.Parse(knownProxie));
 
         var knownNetworks = config.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ??
-            Array.Empty<string>();
+                            Array.Empty<string>();
 
         foreach (var cidr in knownNetworks)
         {
@@ -112,7 +111,7 @@ builder.Services
     })
     .AddVipLevelServiceClient(httpBuilder => httpBuilder
         .ConfigureHttpClient(httpClient => httpClient.BaseAddress =
-        builder.Configuration.GetValue<Uri>("Agent:VipLevelServiceBaseUrl")!))
+            builder.Configuration.GetValue<Uri>("Agent:VipLevelServiceBaseUrl")!))
     .AddTransactions();
 
 builder.Services
@@ -188,19 +187,19 @@ builder.Services
     .AddFluentValidationAutoValidation(c =>
         c.DisableDataAnnotationsValidation = true)
     .AddFluentValidationClientsideAdapters()
-    .AddValidatorsFromAssemblyContaining<Program>(lifetime: ServiceLifetime.Scoped);
+    .AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Scoped);
 
 builder.Services
     .AddPhoenixToolkitsMessageQueue()
     .AddNatsMessageQueue(natsConfig =>
     {
         _ = natsConfig
-               .ConfigQueueOptions((options, sp) =>
-               {
-                   var config = sp.GetRequiredService<IConfiguration>();
+            .ConfigQueueOptions((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
 
-                   options.Url = config.GetValue<string>("NatsSetting:Urls");
-               });
+                options.Url = config.GetValue<string>("NatsSetting:Urls");
+            });
     })
     .AddNatsGlobPatternExchange("*");
 
@@ -216,9 +215,9 @@ builder.Services.AddCors(options =>
         corsPolicyBuilder =>
         {
             _ = corsPolicyBuilder.WithOrigins(corsDomain.Urls)
-                 .AllowAnyHeader()
-                 .AllowAnyMethod()
-                 .SetIsOriginAllowed(_ => true);
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed(_ => true);
         });
 });
 
@@ -255,11 +254,11 @@ builder.Services
         options.Filter = httpContext =>
         {
             return !httpContext.Request.Path.HasValue
-                || !httpContext.Request.Path.StartsWithSegments("/swagger")
-                && !httpContext.Request.Path.StartsWithSegments("/health")
-                && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                && !new[] { "html", "ico", "png", "jpg" }.Any(
-                    ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                   || !httpContext.Request.Path.StartsWithSegments("/swagger")
+                   && !httpContext.Request.Path.StartsWithSegments("/health")
+                   && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+                   && !new[] { "html", "ico", "png", "jpg" }.Any(
+                       ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
         };
     })
     .AddProfileViewer()
@@ -271,18 +270,10 @@ builder.Services
     {
         c.SwaggerDoc(
             "Normal",
-            new OpenApiInfo
-            {
-                Title = "TGS Agent API",
-                Version = "Normal"
-            });
+            new OpenApiInfo { Title = "TGS Agent API", Version = "Normal" });
         c.SwaggerDoc(
             "HK28",
-            new OpenApiInfo
-            {
-                Title = "Tgs Agent API - HK28",
-                Version = "HK28"
-            });
+            new OpenApiInfo { Title = "Tgs Agent API - HK28", Version = "HK28" });
 
         c.DocInclusionPredicate((groupName, desc)
             => groupName == "Normal" ? desc.GroupName is null : desc.GroupName == groupName);
@@ -295,10 +286,7 @@ builder.Services
         var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         var path = Path.Combine(AppContext.BaseDirectory, xml);
 
-        if (File.Exists(path))
-        {
-            c.IncludeXmlComments(path);
-        }
+        if (File.Exists(path)) c.IncludeXmlComments(path);
     });
 
 builder.Services.AddHealthChecks();

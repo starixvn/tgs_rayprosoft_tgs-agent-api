@@ -5,6 +5,5 @@ namespace TGS.Apis.AgentApi.Models;
 
 public record CheckUsernameResponse : TgsResponse
 {
-    [JsonPropertyName("isexist")]
-    public bool Exists { get; init; }
+    [JsonPropertyName("isexist")] public bool Exists { get; init; }
 }

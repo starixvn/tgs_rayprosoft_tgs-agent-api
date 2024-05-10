@@ -8,7 +8,8 @@ namespace TGS.Services.Agent.ApplicationServices.Player;
 internal class GetPlayerVipLevelsQueryService(IBrandRepository brandRepository)
     : IQueryService<GetPlayerVipLevelsQuery, VipLevelInfo>
 {
-    private readonly IBrandRepository _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
 
     public IAsyncEnumerable<VipLevelInfo> QueryAsync(
         GetPlayerVipLevelsQuery query,

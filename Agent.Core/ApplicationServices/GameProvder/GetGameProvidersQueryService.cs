@@ -7,6 +7,7 @@ namespace TGS.Services.Agent.ApplicationServices.GameProvder;
 internal class GetGameProvidersQueryService(IGameProviderRepository gameProviderRepository)
     : IQueryService<GetGameProvidersQuery, GameProviderInfo>
 {
-    public IAsyncEnumerable<GameProviderInfo> QueryAsync(GetGameProvidersQuery query, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<GameProviderInfo> QueryAsync(GetGameProvidersQuery query,
+        CancellationToken cancellationToken = default)
         => gameProviderRepository.GetGameProvidersAsync(query.BrandId);
 }

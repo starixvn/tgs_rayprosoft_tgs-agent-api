@@ -9,8 +9,8 @@ using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
 using Tgs.CashService.Client;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Core.DataServices.Tgs;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Agent;
@@ -153,15 +153,11 @@ public class AgentTests
         var brand = new CoreModels.Brand
         {
             Id = brandId,
-            Currencies = new List<CoreModels.BrandCurrency>
-            {
-                new CoreModels.BrandCurrency
+            Currencies =
+                new List<CoreModels.BrandCurrency>
                 {
-                    BrandId = brandId,
-                    CurrencyCode = "CNY",
-                    BrandCurrencyCode = "CNY"
-                }
-            },
+                    new() { BrandId = brandId, CurrencyCode = "CNY", BrandCurrencyCode = "CNY" }
+                },
             ApiKey = string.Empty,
             ClientId = string.Empty,
             Code = "Test",
@@ -179,16 +175,14 @@ public class AgentTests
         {
             BrandId = brandId,
             Id = parentAgentId,
-            AgentDividendConditions = new[]
-            {
-                new CoreModels.AgentDividendCondition
+            AgentDividendConditions =
+                new[]
                 {
-                    Rank = 1,
-                    NetProfit = 1,
-                    ActiveNumber = 1,
-                    DividendPercentage = 50
-                }
-            },
+                    new CoreModels.AgentDividendCondition
+                    {
+                        Rank = 1, NetProfit = 1, ActiveNumber = 1, DividendPercentage = 50
+                    }
+                },
             InvitationCode = "Test",
             Password = Array.Empty<byte>(),
             Salt = Array.Empty<byte>(),
@@ -236,15 +230,11 @@ public class AgentTests
         var brand = new CoreModels.Brand
         {
             Id = brandId,
-            Currencies = new List<CoreModels.BrandCurrency>
-            {
-                new CoreModels.BrandCurrency
+            Currencies =
+                new List<CoreModels.BrandCurrency>
                 {
-                    BrandId = brandId,
-                    CurrencyCode = "CNY",
-                    BrandCurrencyCode = "CNY"
-                }
-            },
+                    new() { BrandId = brandId, CurrencyCode = "CNY", BrandCurrencyCode = "CNY" }
+                },
             ApiKey = string.Empty,
             ClientId = string.Empty,
             Code = "Test",
@@ -261,16 +251,14 @@ public class AgentTests
         var parentAgent = new CoreModels.Agent
         {
             Id = parentAgentId,
-            AgentDividendConditions = new[]
-            {
-                new CoreModels.AgentDividendCondition
+            AgentDividendConditions =
+                new[]
                 {
-                    Rank = 1,
-                    NetProfit = 1,
-                    ActiveNumber = 1,
-                    DividendPercentage = 50
-                }
-            },
+                    new CoreModels.AgentDividendCondition
+                    {
+                        Rank = 1, NetProfit = 1, ActiveNumber = 1, DividendPercentage = 50
+                    }
+                },
             InvitationCode = "Test",
             Password = Array.Empty<byte>(),
             Salt = Array.Empty<byte>(),
@@ -298,8 +286,9 @@ public class AgentTests
 
         Assert.That(info.IsNew);
 
-        _ = fakeAgentClient.ReceivedWithAnyArgs(1).CreateAgentAsync(default!, default);
-        _ = fakeAgentClient.Received(1).CreateAgentAsync(Arg.Is<CreateAgentRequest>(x => x.ParentAgentId == parentAgent.Id), default);
+        _ = fakeAgentClient.ReceivedWithAnyArgs(1).CreateAgentAsync(default!);
+        _ = fakeAgentClient.Received(1)
+            .CreateAgentAsync(Arg.Is<CreateAgentRequest>(x => x.ParentAgentId == parentAgent.Id));
     }
 
     [Test]

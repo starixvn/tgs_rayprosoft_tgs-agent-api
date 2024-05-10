@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Validations.Rules;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Controllers.Contraints;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Services.Agent.ApplicationServices.PayPassowrd;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -20,7 +18,8 @@ public class PayPasswordController(ILogger<PayPasswordController> logger) : Cont
 {
     private readonly ILogger<PayPasswordController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    [HttpPatch(Name = "ChangePayPassword"), HK28CheckContraint]
+    [HttpPatch(Name = "ChangePayPassword")]
+    [HK28CheckContraint]
     [ApiExplorerSettings(GroupName = "HK28")]
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     [TgsResponseWrapper]

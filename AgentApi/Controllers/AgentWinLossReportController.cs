@@ -1,20 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
-using Tgs.ServiceUtility;
-using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
-using TGS.Services.Agent;
-using System.Linq;
 using TGS.Apis.AgentApi.Models.ReportAgentWinLoss;
-using Tgs.Report.Client;
-using Tgs.Report.Client.Models.Round;
-using System.IO;
-using TGS.Apis.AgentApi.Models;
-using TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.Agent;
+using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -37,20 +33,19 @@ public class AgentWinLossReportController : ControllerBase
 
         var response = await agentWinLossBreadcrumbService
             .GetAsync(new GetAgentWinLossBreadcrumbQuery
-            {
-                BrandId = brandId,
-                AgentId = agentData.AgentId,
-                Username = request.Username,
-                MemberType = request.MemberType,
-                RoundId = request.RoundId
-            }, HttpContext.RequestAborted)
+                {
+                    BrandId = brandId,
+                    AgentId = agentData.AgentId,
+                    Username = request.Username,
+                    MemberType = request.MemberType,
+                    RoundId = request.RoundId
+                },
+                HttpContext.RequestAborted)
             .ConfigureAwait(false);
 
         return response.Select(x => new AgentWinLossBreadcrumbReportModel
         {
-            Username = x.Username,
-            MemberType = x.MemberType,
-            Id = x.Id
+            Username = x.Username, MemberType = x.MemberType, Id = x.Id
         });
     }
 
@@ -88,22 +83,23 @@ public class AgentWinLossReportController : ControllerBase
 
         return new GetAgentWinLossReportResponse
         {
-            Items = response.Items?.Select(x => new AgentWinLossReportModel
-            {
-                Id = x.Id,
-                Username = x.Username,
-                MemberType = x.MemberType,
-                RoundCount = x.RoundCount,
-                Turnover = x.Turnover,
-                WinLoss = x.WinLoss,
-                AgentWinLoss = x.AgentWinLoss,
-                CompanyWinLoss = x.CompanyWinLoss,
-                Special = x.Special,
-                AgentSpecial = x.AgentSpecial,
-                CompanySpecial = x.CompanySpecial,
-                AgentTotal = x.AgentTotal,
-                CompanyTotal = x.CompanyTotal,
-            }).ToArray(),
+            Items =
+                response.Items?.Select(x => new AgentWinLossReportModel
+                {
+                    Id = x.Id,
+                    Username = x.Username,
+                    MemberType = x.MemberType,
+                    RoundCount = x.RoundCount,
+                    Turnover = x.Turnover,
+                    WinLoss = x.WinLoss,
+                    AgentWinLoss = x.AgentWinLoss,
+                    CompanyWinLoss = x.CompanyWinLoss,
+                    Special = x.Special,
+                    AgentSpecial = x.AgentSpecial,
+                    CompanySpecial = x.CompanySpecial,
+                    AgentTotal = x.AgentTotal,
+                    CompanyTotal = x.CompanyTotal
+                }).ToArray(),
             Total = new AgentWinLossReportTotalModel
             {
                 RoundCount = response.Total?.RoundCount ?? default,
@@ -115,7 +111,7 @@ public class AgentWinLossReportController : ControllerBase
                 AgentSpecial = response.Total?.AgentSpecial ?? default,
                 CompanySpecial = response.Total?.CompanySpecial ?? default,
                 AgentTotal = response.Total?.AgentTotal ?? default,
-                CompanyTotal = response.Total?.CompanyTotal ?? default,
+                CompanyTotal = response.Total?.CompanyTotal ?? default
             },
             TotalCount = response.TotalCount
         };
@@ -134,10 +130,7 @@ public class AgentWinLossReportController : ControllerBase
 
         var query = new GetAgentPlayerSpecialDetailQuery
         {
-            BrandId = brandId,
-            AgentId = request.AgentId,
-            From = request.From,
-            To = request.To,
+            BrandId = brandId, AgentId = request.AgentId, From = request.From, To = request.To
         };
 
         var response = await agentPlayerSpecialService
@@ -149,7 +142,7 @@ public class AgentWinLossReportController : ControllerBase
             Bonus = response.Bonus,
             BonusAdjust = response.BonusAdjust,
             PlatformCharge = response.PlatformCharge,
-            ProductFee = response.ProductFee,
+            ProductFee = response.ProductFee
         };
     }
 
@@ -166,10 +159,7 @@ public class AgentWinLossReportController : ControllerBase
 
         var query = new GetAgentTotalDetailQuery
         {
-            BrandId = brandId,
-            AgentId = request.AgentId,
-            From = request.From,
-            To = request.To,
+            BrandId = brandId, AgentId = request.AgentId, From = request.From, To = request.To
         };
 
         var response = await agentTotalService
@@ -185,7 +175,7 @@ public class AgentWinLossReportController : ControllerBase
             PlayerSpecial = x.PlayerSpecial,
             AgentWinLoss = x.AgentWinLoss,
             AgentSpecial = x.AgentSpecial,
-            AgentTotal = x.AgentTotal,
+            AgentTotal = x.AgentTotal
         });
     }
 
@@ -202,10 +192,7 @@ public class AgentWinLossReportController : ControllerBase
 
         var query = new GetCompanyTotalDetailQuery
         {
-            BrandId = brandId,
-            AgentId = request.AgentId,
-            From = request.From,
-            To = request.To,
+            BrandId = brandId, AgentId = request.AgentId, From = request.From, To = request.To
         };
 
         var response = await companyTotalService
@@ -221,7 +208,7 @@ public class AgentWinLossReportController : ControllerBase
             PlayerSpecial = x.PlayerSpecial,
             CompanyWinLoss = x.CompanyWinLoss,
             CompanySpecial = x.CompanySpecial,
-            CompanyTotal = x.CompanyTotal,
+            CompanyTotal = x.CompanyTotal
         });
     }
 
@@ -284,7 +271,7 @@ public class AgentWinLossReportController : ControllerBase
                 WinLoss = response.Total.WinLoss,
                 ValidBetAmount = response.Total.ValidBetAmount,
                 BetAmount = response.Total.BetAmount,
-                SettleAmount = response.Total.SettleAmount,
+                SettleAmount = response.Total.SettleAmount
             }
         };
     }
@@ -308,7 +295,7 @@ public class AgentWinLossReportController : ControllerBase
             MemberType = request.MemberType,
             DownLine = request.DownLine,
             From = request.From,
-            To = request.To,
+            To = request.To
         };
 
         return File(
@@ -336,7 +323,7 @@ public class AgentWinLossReportController : ControllerBase
             AgentId = agentData.AgentId,
             PlayerCode = request.PlayerCode,
             ClosedFrom = request.ClosedFrom,
-            ClosedTo = request.ClosedTo,
+            ClosedTo = request.ClosedTo
         };
 
         return File(await exportWinLossRoundsQueryService

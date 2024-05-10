@@ -7,19 +7,22 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Agent.Client;
-using Tgs.Paging;
-using Tgs.ServiceUtility;
+using Tgs.Agent.Client.Models;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices;
 using TGS.Services.Agent.ApplicationServices.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Operations.Validators;
+using Tgs.ServiceUtility;
+using AgentNotFoundException = TGS.Core.Models.Exceptions.AgentNotFoundException;
+using CreateAgentRequest = TGS.Apis.AgentApi.Models.CreateAgentRequest;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -77,12 +80,7 @@ public class AgentController(IMediator mediator) : ControllerBase
             .GetAsync(query)
             .ConfigureAwait(false);
 
-        return new CreateAgentResponse
-        {
-            IsNew = info.IsNew,
-            AgentId = info.AgentId,
-            Message = info.Message
-        };
+        return new CreateAgentResponse { IsNew = info.IsNew, AgentId = info.AgentId, Message = info.Message };
     }
 
     [HttpGet("list/statuses")]
@@ -116,9 +114,9 @@ public class AgentController(IMediator mediator) : ControllerBase
             .ConfigureAwait(false) ?? throw new BrandNotFoundException();
 
         var agentInfo = await getAgentService
-            .GetAsync(new GetAgentInfoQuery(agentId))
-            .ConfigureAwait(false)
-            ?? throw new Core.Models.Exceptions.AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+                            .GetAsync(new GetAgentInfoQuery(agentId))
+                            .ConfigureAwait(false)
+                        ?? throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
 
         var parentAgentInfo = agentInfo.ParentAgentId == null
             ? null
@@ -186,12 +184,9 @@ public class AgentController(IMediator mediator) : ControllerBase
         var paging = new Paging<AgentModel>();
 
         if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
-        {
             paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
-        }
 
         if (pagingRequest.ShowAll)
-        {
             return new PagedResponse<AgentModel>
             {
                 TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
@@ -220,7 +215,6 @@ public class AgentController(IMediator mediator) : ControllerBase
                     .ToArrayAsync()
                     .ConfigureAwait(false)
             };
-        }
 
         paging.Page = pagingRequest.Page;
         paging.RowCount = pagingRequest.Rows;
@@ -281,14 +275,14 @@ public class AgentController(IMediator mediator) : ControllerBase
         var agentId = agentTokenData.AgentId;
 
         var agentInfo = await agentClient
-            .GetAgentInfoAsync(new Tgs.Agent.Client.Models.GetAgentInfoRequest(agentId), HttpContext.RequestAborted)
-            .ConfigureAwait(false)
-            ?? throw new Core.Models.Exceptions.AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+                            .GetAgentInfoAsync(new GetAgentInfoRequest(agentId), HttpContext.RequestAborted)
+                            .ConfigureAwait(false)
+                        ?? throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
 
         var parentAgentInfo = agentInfo.ParentAgentId == null
             ? null
             : await agentClient
-                .GetAgentInfoAsync(new Tgs.Agent.Client.Models.GetAgentInfoRequest(agentInfo.ParentAgentId.Value), HttpContext.RequestAborted)
+                .GetAgentInfoAsync(new GetAgentInfoRequest(agentInfo.ParentAgentId.Value), HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
         return new GetAgentResponse
