@@ -58,6 +58,7 @@ public class WithdrawTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
+                true,
                 true));
 
         fakeCashServiceClient
@@ -134,6 +135,7 @@ public class WithdrawTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
+                true,
                 true));
 
         fakeCashServiceClient

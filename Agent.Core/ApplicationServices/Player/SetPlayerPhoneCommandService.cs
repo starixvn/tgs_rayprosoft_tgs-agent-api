@@ -26,7 +26,7 @@ internal class SetPlayerPhoneCommandService(IAgentClient agentClient, IPlayerSer
                     [PlayerPropertyName.Phone] = command.Phone,
                     [PlayerPropertyName.PhoneAuthentication] = true.ToString()
                 }.ToImmutableDictionary(),
-                agent.Username,
+                agent?.Username,
                 cancellationToken)
             .ConfigureAwait(false);
     }

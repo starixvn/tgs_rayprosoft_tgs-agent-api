@@ -47,7 +47,8 @@ public class SubAgentTests
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(childInfos.ToAsyncEnumerable());
 
-        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId, false);
+        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId, false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(parentAgentId))
@@ -96,7 +97,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false));
+                false,
+                true));
 
         var parent = new AgentInfoModel(
                 agentId,
@@ -118,7 +120,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false);
+                false,
+                true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -174,7 +177,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false));
+                false,
+                true));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -196,7 +200,8 @@ public class SubAgentTests
             brandId,
             walletId,
             walletId,
-            false);
+            false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -287,7 +292,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false));
+                false,
+                true));
 
         var parentAgent = new AgentInfoModel(
             agentId,
@@ -309,7 +315,8 @@ public class SubAgentTests
             brandId,
             walletId,
             walletId,
-            false);
+            false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -376,7 +383,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false));
+                false,
+                true));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -415,7 +423,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false);
+                false,
+                true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -478,7 +487,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false));
+                false,
+                true));
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
@@ -517,7 +527,8 @@ public class SubAgentTests
                 brandId,
                 walletId,
                 walletId,
-                false);
+                false,
+                true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
