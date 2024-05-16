@@ -11,28 +11,18 @@ namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
     GetAgentTotalDetailQueryService(
-        IReportClient reportClient,
-        IBrandRepository brandService)
+        IReportClient reportClient)
     : IGetService<GetAgentTotalDetailQuery,
         IEnumerable<AgentTotalDetailModel>>
 {
-    private readonly IBrandRepository _brandService =
-        brandService ?? throw new ArgumentNullException(nameof(brandService));
-
-    private readonly IReportClient
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-
     public async ValueTask<IEnumerable<AgentTotalDetailModel>> GetAsync(
         GetAgentTotalDetailQuery request,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandService.GetBrandInfoAsync(request.BrandId);
-
-        var response = await _reportClient.GetAgentTotalDetailAsync(new GetAgentTotalDetailRequest
+        var response = await reportClient.GetAgentTotalDetailAsync(new GetAgentTotalDetailRequest
         {
             BrandId = request.BrandId,
             AgentId = request.AgentId,
-            PlatformCharge = brand!.PlatformCharge,
             From = request.From,
             To = request.To
         }).ConfigureAwait(false);
@@ -46,6 +36,7 @@ public class
             PlayerSpecial = x.PlayerSpecial,
             AgentWinLoss = x.AgentWinLoss,
             AgentSpecial = x.AgentSpecial,
+            PlatformChargeAmount = x.PlatformChargeAmount,
             AgentTotal = x.AgentTotal
         });
     }
