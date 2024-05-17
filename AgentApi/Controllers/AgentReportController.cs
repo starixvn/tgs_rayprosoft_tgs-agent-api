@@ -9,34 +9,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Models;
 using Tgs.CashService.Client;
+using TGS.Core.Models.Enums;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.Agent;
 using Tgs.Report.Client.Models.Round;
-using TGS.Apis.AgentApi.Attributes;
-using TGS.Apis.AgentApi.Extensions;
-using TGS.Apis.AgentApi.Models;
-using TGS.Core.Models.Enums;
+using TransactionType = TGS.Apis.AgentApi.Models.Enums.TransactionType;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
-public class AgentReportController : ControllerBase
+public class AgentReportController(
+    IReportClient client,
+    IMemoryCache memoryCache) : ControllerBase
 {
-    private readonly IReportClient _client;
-    private readonly IMemoryCache _memoryCache;
-
-    public AgentReportController(
-        IReportClient client,
-        IMemoryCache memoryCache
-    )
-    {
-        _client = client;
-        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-    }
+    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     /// <summary>
     /// Get account changes
@@ -56,11 +49,11 @@ public class AgentReportController : ControllerBase
         var agentData = HttpContext.Items.GetAgentTokenData();
 
         var queryTransactionTypes = request.TransactionType is null
-            ? Enum.GetValues(typeof(Models.Enums.TransactionType))
-                .Cast<Models.Enums.TransactionType>()
-                .Where(x => x is not Models.Enums.TransactionType.WithdrawCommit
-                    and not Models.Enums.TransactionType.TransferCommit
-                    and not Models.Enums.TransactionType.Receive)
+            ? Enum.GetValues(typeof(TransactionType))
+                .Cast<TransactionType>()
+                .Where(x => x is not TransactionType.WithdrawCommit
+                    and not TransactionType.TransferCommit
+                    and not TransactionType.Receive)
                 .Select(x => (int)x)
                 .ToArray()
             : new[] { (int)request.TransactionType.Value };
@@ -97,18 +90,14 @@ public class AgentReportController : ControllerBase
     {
         var allowType = new[]
         {
-            TransactionType.Transfer,
-            TransactionType.TransferRollback,
-            TransactionType.ReceiveCommit,
-            TransactionType.ReceiveRollback,
-            TransactionType.AgentDividend,
-            TransactionType.WithdrawLock,
-            TransactionType.WithdrawRollback,
-            TransactionType.CompanyAdjust
+            Core.Models.Enums.TransactionType.Transfer, Core.Models.Enums.TransactionType.TransferRollback,
+            Core.Models.Enums.TransactionType.ReceiveCommit, Core.Models.Enums.TransactionType.ReceiveRollback,
+            Core.Models.Enums.TransactionType.AgentDividend, Core.Models.Enums.TransactionType.WithdrawLock,
+            Core.Models.Enums.TransactionType.WithdrawRollback, Core.Models.Enums.TransactionType.CompanyAdjust
         };
 
-        var dict = Enum.GetValues(typeof(TransactionType))
-            .Cast<TransactionType>()
+        var dict = Enum.GetValues(typeof(Core.Models.Enums.TransactionType))
+            .Cast<Core.Models.Enums.TransactionType>()
             .Where(x => allowType.Contains(x))
             .ToDictionary(t => (int)t, t => t.ToString());
 
@@ -134,12 +123,11 @@ public class AgentReportController : ControllerBase
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
         };
-        var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+        var response = await client.GetAgentDividendDetailsAsync(dividendRequest);
 
-        return new()
+        return new Models.PagingResponse<AgentDividendDetailModel>
         {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+            TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
         };
     }
 
@@ -162,12 +150,11 @@ public class AgentReportController : ControllerBase
             SortBy = request.SortBy,
             ShowAll = request.ShowAll
         };
-        var response = await _client.GetAgentDividendTeamDetailsAsync(dividendRequest);
+        var response = await client.GetAgentDividendTeamDetailsAsync(dividendRequest);
 
-        return new()
+        return new Models.PagingResponse<AgentDividendTeamDetailModel>
         {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<AgentDividendTeamDetailModel>()
+            TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<AgentDividendTeamDetailModel>()
         };
     }
 
@@ -219,12 +206,9 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response = await _client.GetAgentContributionsAsync(contributionRequest);
+            response = await client.GetAgentContributionsAsync(contributionRequest);
 
-            if (response != null)
-            {
-                _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
-            }
+            if (response != null) _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
 
         var page = request.Page <= 0 ? 0 : request.Page - 1;
@@ -259,11 +243,9 @@ public class AgentReportController : ControllerBase
             response.Items.Sum(x => x.WinLossAmount),
             response.Items.Sum(x => x.NetProfit));
 
-        return new()
+        return new AgentContributionResponse
         {
-            TotalCount = response.TotalCount,
-            Items = items ?? Array.Empty<AgentContribution>(),
-            Total = total
+            TotalCount = response.TotalCount, Items = items ?? Array.Empty<AgentContribution>(), Total = total
         };
     }
 
@@ -298,7 +280,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response = await _client.GetAgentDividendsAsync(dividendRequest);
+            response = await client.GetAgentDividendsAsync(dividendRequest);
 
             _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
@@ -338,12 +320,7 @@ public class AgentReportController : ControllerBase
             response.Items.Sum(x => x.AgentCoveredBonus) ?? 0M,
             response.Items.Sum(x => x.AgentCoveredBonusAdjust) ?? 0M);
 
-        return new()
-        {
-            TotalCount = response.TotalCount,
-            Items = items,
-            Total = total
-        };
+        return new AgentDividendResponse { TotalCount = response.TotalCount, Items = items, Total = total };
     }
 
     /// <summary>
@@ -378,7 +355,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response.Main = await _client.GetSingleAgentDividendsAsync(singleDividendRequest);
+            response.Main = await client.GetSingleAgentDividendsAsync(singleDividendRequest);
 
             var subDividendRequest = new GetSubAgentDividendsRequest
             {
@@ -393,7 +370,7 @@ public class AgentReportController : ControllerBase
                 ShowAll = true
             };
 
-            response.Sub = await _client.GetSubAgentDividendsAsync(subDividendRequest);
+            response.Sub = await client.GetSubAgentDividendsAsync(subDividendRequest);
 
             _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
@@ -454,10 +431,7 @@ public class AgentReportController : ControllerBase
 
         return new MainSubAgentDividendResponse
         {
-            SubTotalCount = response.Sub.TotalCount,
-            MainItems = mainItems,
-            SubItems = subItems,
-            SubTotal = subTotal
+            SubTotalCount = response.Sub.TotalCount, MainItems = mainItems, SubItems = subItems, SubTotal = subTotal
         };
     }
 
@@ -498,12 +472,11 @@ public class AgentReportController : ControllerBase
             ShowAll = pagingRequest.ShowAll
         };
 
-        var response = await _client.GetAgentPlayerRoundsAsync(roundsRequest);
+        var response = await client.GetAgentPlayerRoundsAsync(roundsRequest);
 
-        return new()
+        return new Models.PagingResponse<RoundModel>
         {
-            TotalCount = response.TotalCount,
-            Items = response.Items ?? Array.Empty<RoundModel>()
+            TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<RoundModel>()
         };
     }
 }

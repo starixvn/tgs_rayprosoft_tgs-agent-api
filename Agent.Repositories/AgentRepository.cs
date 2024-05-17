@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Paging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories;
 
-internal class AgentRepository : IAgentRepository
+internal class AgentRepository(ITgsRepository tgsRepository) : IAgentRepository
 {
-    private readonly ITgsRepository _tgsRepository;
-
-    public AgentRepository(ITgsRepository tgsRepository)
-        => _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<AgentInfo?> GetAgentByIdAsync(Guid id)
     {
@@ -33,27 +30,27 @@ internal class AgentRepository : IAgentRepository
         var playerNumber = agent.Players.Count(p => p.AgentId == id);
 
         return new AgentInfo(
-                agent.Id,
-                agent.Username,
-                agent.RealName,
-                agent.Phone,
-                agent.DefaultWalletId,
-                agent.Email,
-                agent.QQ,
-                agent.Wechat,
-                agent.InvitationCode,
-                agent.WithdrawPassword,
-                agent.WithdrawSalt,
-                agent.Password,
-                agent.Salt,
-                agent.ParentAgentId,
-                agent.RegisteredOn,
-                agent.Status,
-                agent.Type,
-                agent.LevelType,
-                agent.DividendPercentage,
-                playerNumber,
-                dividend);
+            agent.Id,
+            agent.Username,
+            agent.RealName,
+            agent.Phone,
+            agent.DefaultWalletId,
+            agent.Email,
+            agent.QQ,
+            agent.Wechat,
+            agent.InvitationCode,
+            agent.WithdrawPassword,
+            agent.WithdrawSalt,
+            agent.Password,
+            agent.Salt,
+            agent.ParentAgentId,
+            agent.RegisteredOn,
+            agent.Status,
+            agent.Type,
+            agent.LevelType,
+            agent.DividendPercentage,
+            playerNumber,
+            dividend);
     }
 
     public IAsyncEnumerable<string> GetAgentDomainsByIdAsync(Guid agentId)
@@ -140,11 +137,9 @@ internal class AgentRepository : IAgentRepository
             playerQuery = playerQuery.Where(player => player.VipId == vipId);
 
         if (beginRegisteredOn != null && endRegisteredOn != null)
-        {
             playerQuery = playerQuery.Where(p =>
                 p.RegisteredOn > beginRegisteredOn
                 && p.RegisteredOn <= endRegisteredOn);
-        }
 
         var playerIpQuery =
             from ipRecord in _tgsRepository.PlayerIpRecords.AsQueryable()
@@ -153,7 +148,7 @@ internal class AgentRepository : IAgentRepository
             where ipRecord.IpType == 1
             select ipRecord;
 
-        var playerLoginQuery = 
+        var playerLoginQuery =
             from loginRecord in _tgsRepository.PlayerIpRecords.AsQueryable()
             join player in playerQuery
                 on loginRecord.PlayerCode equals player.PlayerCode
@@ -184,11 +179,9 @@ internal class AgentRepository : IAgentRepository
             };
 
         if (!string.IsNullOrWhiteSpace(registerHost))
-        {
             query = query.Where(p =>
                 p.Host != null
                 && p.Host.ToLower() == registerHost.ToLower());
-        }
 
         return query.Select(p => new AgentPlayerInfo(
             p.PlayerCode,
@@ -200,17 +193,13 @@ internal class AgentRepository : IAgentRepository
             p.Status,
             p.Level,
             p.RecordOn)).ToAsyncEnumerable();
-    }   
+    }
 
     public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
     {
         var rows = _tgsRepository.SystemLocalizations.AsQueryable()
             .Where(loc => loc.SystemCode == "AGENT-API" && loc.CultureCode == cultureCode)
-            .Select(loc => new
-            {
-                loc.MessageId,
-                loc.Text
-            });
+            .Select(loc => new { loc.MessageId, loc.Text });
 
         return rows.ToAsyncEnumerable()
             .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
@@ -245,5 +234,5 @@ internal class AgentRepository : IAgentRepository
         agent!.UpdatedOn = updatedOn;
 
         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-    }    
+    }
 }

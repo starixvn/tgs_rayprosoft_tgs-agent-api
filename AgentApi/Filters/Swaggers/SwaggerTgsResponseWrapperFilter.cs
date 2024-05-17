@@ -15,7 +15,6 @@ public class SwaggerTgsResponseWrapperFilter : IOperationFilter
             .OfType<TgsResponseWrapperAttribute>();
 
         if (responseAdjustments.Any())
-        {
             foreach (var response in operation.Responses)
             {
                 var resType = context.ApiDescription.SupportedResponseTypes
@@ -23,7 +22,6 @@ public class SwaggerTgsResponseWrapperFilter : IOperationFilter
                     .FirstOrDefault();
 
                 foreach (var content in response.Value.Content)
-                {
                     if (resType != null)
                     {
                         var type = typeof(SuccessResponse<>).MakeGenericType(resType.Type);
@@ -31,8 +29,6 @@ public class SwaggerTgsResponseWrapperFilter : IOperationFilter
 
                         content.Value.Schema = schema;
                     }
-                }
             }
-        }
     }
 }

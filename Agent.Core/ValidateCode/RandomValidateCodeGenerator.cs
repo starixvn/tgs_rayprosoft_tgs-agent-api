@@ -7,15 +7,9 @@ namespace TGS.Services.Agent.ValidateCode;
 
 internal class RandomValidateCodeGenerator : IValidateCodeGenerator
 {
-    public string GenerateCode()
-    {
-        return string.Join(string.Empty, CreateNumberSerial().Take(6));
-    }
+    public string GenerateCode() => string.Join(string.Empty, CreateNumberSerial().Take(6));
 
-    public string GenerateSecurityKey()
-    {
-        return Guid.NewGuid().ToString();
-    }
+    public string GenerateSecurityKey() => Guid.NewGuid().ToString();
 
     private IEnumerable<int> CreateNumberSerial()
     {

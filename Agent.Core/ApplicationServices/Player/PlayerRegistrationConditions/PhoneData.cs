@@ -1,9 +1,7 @@
-﻿
-namespace TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationConditions
+﻿namespace TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationConditions;
+
+internal class PhoneData
 {
-    internal class PhoneData
-    {
-        public string AreaCode { get; init; } = default!;
-        public string Phone { get; init; } = default!;
-    }
+    public string AreaCode { get; init; } = default!;
+    public string Phone { get; init; } = default!;
 }

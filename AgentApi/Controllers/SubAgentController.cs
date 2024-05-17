@@ -2,11 +2,11 @@
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Services.Agent.ApplicationServices.SubAgent;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -27,10 +27,7 @@ public class SubAgentController : ControllerBase
             .GetAsync(new GetSubAgentDividendRangeQuery(agentTokenData.AgentId, subAgentId))
             .ConfigureAwait(false);
 
-        return new GetSubAgentDividendRangeResponse
-        {
-            Data = new SubAgentDividendRange(range.Item1, range.Item2)
-        };
+        return new GetSubAgentDividendRangeResponse { Data = new SubAgentDividendRange(range.Item1, range.Item2) };
     }
 
     [HttpPatch("password", Name = "ResetSubAgentPassword")]
@@ -44,10 +41,11 @@ public class SubAgentController : ControllerBase
         var agentId = agentTokenData.AgentId;
 
         return commandService
-             .ExecuteAsync(new ResetSubAgentPasswordCommand(
-                 agentId,
-                 request.SubAgentId,
-                 request.Password), HttpContext.RequestAborted);
+            .ExecuteAsync(new ResetSubAgentPasswordCommand(
+                    agentId,
+                    request.SubAgentId,
+                    request.Password),
+                HttpContext.RequestAborted);
     }
 
     [HttpPatch("contact", Name = "SetSubAgentContact")]
@@ -62,10 +60,11 @@ public class SubAgentController : ControllerBase
 
         await commandService
             .ExecuteAsync(new SetSubAgentContactCommand(
-                agentId,
-                request.SubAgentId,
-                request.Email,
-                request.Phone), HttpContext.RequestAborted)
+                    agentId,
+                    request.SubAgentId,
+                    request.Email,
+                    request.Phone),
+                HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 
@@ -100,9 +99,10 @@ public class SubAgentController : ControllerBase
 
         await commandService
             .ExecuteAsync(new SetSubAgentInfoCommand(
-                agentId,
-                request.SubAgentId,
-                request.RealName), HttpContext.RequestAborted)
+                    agentId,
+                    request.SubAgentId,
+                    request.RealName),
+                HttpContext.RequestAborted)
             .ConfigureAwait(false);
     }
 }

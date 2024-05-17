@@ -4,9 +4,7 @@ namespace TGS.Apis.AgentApi.Models.Messages;
 
 public record SubmitChangeEmailRequest
 {
-    [JsonPropertyName("securitykey")]
-    public string SecurityKey { get; init; }
+    [JsonPropertyName("securitykey")] public string SecurityKey { get; init; }
 
-    [JsonPropertyName("validatecode")]
-    public string ValidateCode { get; init; }
+    [JsonPropertyName("validatecode")] public string ValidateCode { get; init; }
 }

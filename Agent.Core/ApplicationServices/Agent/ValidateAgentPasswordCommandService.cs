@@ -6,18 +6,16 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ValidateAgentPasswordCommandService : IGetService<ValidateAgentPasswordCommand, bool>
+internal class ValidateAgentPasswordCommandService(
+    IAgentRepository agentRepository,
+    IPasswordHandler passwordHandler)
+    : IGetService<ValidateAgentPasswordCommand, bool>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly IPasswordHandler _passwordHandler;
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
-    public ValidateAgentPasswordCommandService(
-        IAgentRepository agentRepository,
-        IPasswordHandler passwordHandler)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-    }
+    private readonly IPasswordHandler _passwordHandler =
+        passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
 
     public async ValueTask<bool> GetAsync(
         ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)

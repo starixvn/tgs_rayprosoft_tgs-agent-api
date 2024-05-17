@@ -13,8 +13,8 @@ using TGS.Apis.AgentApi.Filters;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Tokens;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.ApplicationServices.Agent;
+using Tgs.ServiceUtility;
 
 namespace Agent.UnitTests;
 
@@ -41,11 +41,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true }
         };
 
         await sut.OnAuthorizationAsync(context);
@@ -80,11 +76,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            },
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true },
             new CheckAgentEnabledAttribute()
         };
         await sut.OnAuthorizationAsync(context);
@@ -117,11 +109,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true }
         };
         await sut.OnAuthorizationAsync(context);
 
@@ -147,11 +135,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true }
         };
 
         await sut.OnAuthorizationAsync(context);
@@ -173,11 +157,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                NeedAuthorize = false,
-                AllowNullOrEmpty = false
-            }
+            new AuthorizeAgentTokenAttribute { NeedAuthorize = false, AllowNullOrEmpty = false }
         };
         await sut.OnAuthorizationAsync(context);
 
@@ -203,11 +183,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true }
         };
         await sut.OnAuthorizationAsync(context);
 
@@ -229,11 +205,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = true,
-                NeedAuthorize = false
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = true, NeedAuthorize = false }
         };
         await sut.OnAuthorizationAsync(context);
 
@@ -255,11 +227,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = true,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = true, NeedAuthorize = true }
         };
         await sut.OnAuthorizationAsync(context);
 
@@ -286,11 +254,7 @@ public class AgentStatusCheckTests
         var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
         context.ActionDescriptor.EndpointMetadata = new List<object>
         {
-            new AuthorizeAgentTokenAttribute
-            {
-                AllowNullOrEmpty = false,
-                NeedAuthorize = true
-            }
+            new AuthorizeAgentTokenAttribute { AllowNullOrEmpty = false, NeedAuthorize = true }
         };
         await sut.OnAuthorizationAsync(context);
 

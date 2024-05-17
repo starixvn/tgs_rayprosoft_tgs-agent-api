@@ -11,5 +11,5 @@ internal static class ContextItemExtensions
         items.TryGetValue(AgentToken, out var v) && v != null ? (AgentTokenData)v : null;
 
     public static Guid GetBrandId(this IDictionary<object, object> items) =>
-                items.TryGetValue(BrandId, out var v) && v != null ? (Guid)v : Guid.Empty;
+        items.TryGetValue(BrandId, out var v) && v != null ? (Guid)v : Guid.Empty;
 }

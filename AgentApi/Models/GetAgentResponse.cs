@@ -5,6 +5,5 @@ namespace TGS.Apis.AgentApi.Models;
 
 public record GetAgentResponse : TgsResponse
 {
-    [JsonPropertyName("data")]
-    public AgentData Data { get; init; }
+    [JsonPropertyName("data")] public AgentData Data { get; init; }
 }

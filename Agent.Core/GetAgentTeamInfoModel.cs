@@ -1,4 +1,5 @@
 ﻿namespace TGS.Services.Agent;
+
 public class GetAgentTeamInfoModel
 {
     public int DirectAgentCount { get; set; }

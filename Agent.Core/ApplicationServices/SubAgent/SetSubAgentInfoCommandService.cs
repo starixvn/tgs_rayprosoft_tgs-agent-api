@@ -8,14 +8,9 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCommand>
+internal class SetSubAgentInfoCommandService(IAgentClient agentClient) : ICommandService<SetSubAgentInfoCommand>
 {
-    private readonly IAgentClient _agentClient;
-
-    public SetSubAgentInfoCommandService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
     public async ValueTask ExecuteAsync(SetSubAgentInfoCommand command, CancellationToken cancellationToken = default)
     {
@@ -28,8 +23,9 @@ internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCo
 
         await _agentClient
             .SetAgentInfoAsync(new SetAgentInfoRequest(
-                command.SubAgentId,
-                command.RealName), cancellationToken)
+                    command.SubAgentId,
+                    command.RealName),
+                cancellationToken)
             .ConfigureAwait(false);
 
         var parentAgent = await _agentClient
@@ -41,7 +37,8 @@ internal class SetSubAgentInfoCommandService : ICommandService<SetSubAgentInfoCo
                 new AddAgentAuditLogRequest(
                     command.SubAgentId,
                     AgentOperation.Info,
-                    parentAgent!.Username), cancellationToken)
+                    parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

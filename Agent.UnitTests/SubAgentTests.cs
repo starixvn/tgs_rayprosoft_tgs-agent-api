@@ -5,9 +5,13 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
-using Tgs.Agent.Client.Models.Enums;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.SubAgent;
+using AgentLevelType = Tgs.Agent.Client.Models.Enums.AgentLevelType;
+using AgentOperation = Tgs.Agent.Client.Models.Enums.AgentOperation;
+using AgentStatus = Tgs.Agent.Client.Models.Enums.AgentStatus;
+using AgentType = Tgs.Agent.Client.Models.Enums.AgentType;
 
 namespace Agent.UnitTests;
 
@@ -27,27 +31,46 @@ public class SubAgentTests
 
         var childInfos = new ChildAgentInfoModel[]
         {
-            new ChildAgentInfoModel
+            new()
             {
                 AgentId = Guid.Parse("30ae0dc5-f9a3-4441-95cc-12c6a8b92ffd"),
                 AgentUsername = "agent2",
                 DividendPercentage = 30M,
                 ParentAgentId = subAgentId
             },
-            new ChildAgentInfoModel
+            new()
             {
                 AgentId = Guid.Parse("0bda4cb0-cea0-4d7e-ab4e-17793074d801"),
                 AgentUsername = "agent3",
                 DividendPercentage = 20M,
                 ParentAgentId = subAgentId
-            },
+            }
         };
 
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(childInfos.ToAsyncEnumerable());
 
-        var parentAgent = new AgentInfoModel(parentAgentId, "parentUsername", null, null, null, null, null, "wg5g8h", null, DateTimeOffset.UtcNow.AddMonths(-10), AgentStatus.Enabled, AgentType.Cash, AgentLevelType.Chief, 90M, 0, 0M, brandId, walletId, walletId, false,
+        var parentAgent = new AgentInfoModel(parentAgentId,
+            "parentUsername",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "wg5g8h",
+            null,
+            DateTimeOffset.UtcNow.AddMonths(-10),
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Chief,
+            90M,
+            0,
+            0M,
+            brandId,
+            walletId,
+            walletId,
+            false,
             true);
 
         _ = fakeAgentClient
@@ -86,7 +109,7 @@ public class SubAgentTests
                 null,
                 null,
                 "nc97ra",
-                ParentAgentId: agentId,
+                agentId,
                 DateTimeOffset.UtcNow,
                 AgentStatus.Enabled,
                 AgentType.Cash,
@@ -101,27 +124,27 @@ public class SubAgentTests
                 true));
 
         var parent = new AgentInfoModel(
-                agentId,
-                "parent",
-                null,
-                null,
-                null,
-                null,
-                null,
-                "nc97ra",
-                ParentAgentId: null,
-                DateTimeOffset.UtcNow,
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Chief,
-                80M,
-                0,
-                0M,
-                brandId,
-                walletId,
-                walletId,
-                false,
-                true);
+            agentId,
+            "parent",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "nc97ra",
+            null,
+            DateTimeOffset.UtcNow,
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Chief,
+            80M,
+            0,
+            0M,
+            brandId,
+            walletId,
+            walletId,
+            false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -137,7 +160,9 @@ public class SubAgentTests
 
         _ = fakeAgentClient
             .Received(1)
-            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(command.SubAgentId, AgentOperation.Password, parent.Username));
+            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(command.SubAgentId,
+                AgentOperation.Password,
+                parent.Username));
     }
 
     [Test]
@@ -166,7 +191,7 @@ public class SubAgentTests
                 null,
                 null,
                 "nc97ra",
-                ParentAgentId: agentId,
+                agentId,
                 DateTimeOffset.UtcNow,
                 AgentStatus.Enabled,
                 AgentType.Cash,
@@ -189,7 +214,7 @@ public class SubAgentTests
             null,
             null,
             "uayygs",
-            ParentAgentId: null,
+            null,
             DateTimeOffset.UtcNow,
             AgentStatus.Enabled,
             AgentType.Cash,
@@ -239,7 +264,7 @@ public class SubAgentTests
                 "GPI",
                 false,
                 false,
-                TGS.Core.Models.Enums.AgentDividendType.MultipleLayer,
+                AgentDividendType.MultipleLayer,
                 null,
                 0));
 
@@ -254,7 +279,8 @@ public class SubAgentTests
         await sut.ExecuteAsync(command);
 
         _ = fakeAgentClient.Received(0)
-            .SetAgentDividendPercentageAsync(new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
+            .SetAgentDividendPercentageAsync(
+                new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
     }
 
     [Test]
@@ -281,7 +307,7 @@ public class SubAgentTests
                 null,
                 null,
                 "nc97ra",
-                ParentAgentId: agentId,
+                agentId,
                 DateTimeOffset.UtcNow,
                 AgentStatus.Enabled,
                 AgentType.Cash,
@@ -304,7 +330,7 @@ public class SubAgentTests
             null,
             null,
             "uayygs",
-            ParentAgentId: null,
+            null,
             DateTimeOffset.UtcNow,
             AgentStatus.Enabled,
             AgentType.Cash,
@@ -357,14 +383,14 @@ public class SubAgentTests
                 "GPI",
                 false,
                 false,
-                TGS.Core.Models.Enums.AgentDividendType.OneLayer,
+                AgentDividendType.OneLayer,
                 null,
                 0));
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(subAgentId))
             .Returns(new AgentInfoModel(
-                Id: subAgentId,
+                subAgentId,
                 "childUsername",
                 null,
                 null,
@@ -389,42 +415,46 @@ public class SubAgentTests
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(
-                new ChildAgentInfoModel[] {
-                    new ChildAgentInfoModel() {
+                new ChildAgentInfoModel[]
+                {
+                    new()
+                    {
                         AgentId = brandId,
                         AgentUsername = "agent2",
                         DividendPercentage = 30,
                         ParentAgentId = subAgentId
                     },
-                    new ChildAgentInfoModel() {
-                            AgentId = brandId,
-                            AgentUsername = "agent3",
-                            DividendPercentage = 20,
-                            ParentAgentId = subAgentId
-                        }}.ToAsyncEnumerable());
+                    new()
+                    {
+                        AgentId = brandId,
+                        AgentUsername = "agent3",
+                        DividendPercentage = 20,
+                        ParentAgentId = subAgentId
+                    }
+                }.ToAsyncEnumerable());
 
         var parentAgent = new AgentInfoModel(
-                Id: agentId,
-                "parentUsername",
-                null,
-                null,
-                null,
-                null,
-                null,
-                "wg5g8h",
-                null,
-                DateTimeOffset.UtcNow.AddMonths(-10),
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Chief,
-                90M,
-                0,
-                0M,
-                brandId,
-                walletId,
-                walletId,
-                false,
-                true);
+            agentId,
+            "parentUsername",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "wg5g8h",
+            null,
+            DateTimeOffset.UtcNow.AddMonths(-10),
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Chief,
+            90M,
+            0,
+            0M,
+            brandId,
+            walletId,
+            walletId,
+            false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -441,7 +471,8 @@ public class SubAgentTests
         await sut.ExecuteAsync(command);
 
         _ = fakeAgentClient.Received(0)
-            .SetAgentDividendPercentageAsync(new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
+            .SetAgentDividendPercentageAsync(
+                new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
     }
 
     [Test]
@@ -461,14 +492,14 @@ public class SubAgentTests
                 "GPI",
                 false,
                 false,
-                TGS.Core.Models.Enums.AgentDividendType.OneLayer,
+                AgentDividendType.OneLayer,
                 null,
                 0));
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(subAgentId))
             .Returns(new AgentInfoModel(
-                Id: subAgentId,
+                subAgentId,
                 "childUsername",
                 null,
                 null,
@@ -493,42 +524,46 @@ public class SubAgentTests
         _ = fakeAgentClient
             .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(subAgentId))
             .Returns(
-                new ChildAgentInfoModel[] {
-                    new ChildAgentInfoModel() {
+                new ChildAgentInfoModel[]
+                {
+                    new()
+                    {
                         AgentId = brandId,
                         AgentUsername = "agent2",
                         DividendPercentage = 30,
                         ParentAgentId = subAgentId
                     },
-                    new ChildAgentInfoModel() {
-                            AgentId = brandId,
-                            AgentUsername = "agent3",
-                            DividendPercentage = 20,
-                            ParentAgentId = subAgentId
-                }}.ToAsyncEnumerable());
+                    new()
+                    {
+                        AgentId = brandId,
+                        AgentUsername = "agent3",
+                        DividendPercentage = 20,
+                        ParentAgentId = subAgentId
+                    }
+                }.ToAsyncEnumerable());
 
         var parentAgent = new AgentInfoModel(
-                Id: agentId,
-                "parentUsername",
-                null,
-                null,
-                null,
-                null,
-                null,
-                "wg5g8h",
-                null,
-                DateTimeOffset.UtcNow.AddMonths(-10),
-                AgentStatus.Enabled,
-                AgentType.Cash,
-                AgentLevelType.Chief,
-                90M,
-                0,
-                0M,
-                brandId,
-                walletId,
-                walletId,
-                false,
-                true);
+            agentId,
+            "parentUsername",
+            null,
+            null,
+            null,
+            null,
+            null,
+            "wg5g8h",
+            null,
+            DateTimeOffset.UtcNow.AddMonths(-10),
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Chief,
+            90M,
+            0,
+            0M,
+            brandId,
+            walletId,
+            walletId,
+            false,
+            true);
 
         _ = fakeAgentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(agentId))
@@ -546,10 +581,13 @@ public class SubAgentTests
 
         _ = fakeAgentClient
             .Received(1)
-            .SetAgentDividendPercentageAsync(new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
+            .SetAgentDividendPercentageAsync(
+                new SetAgentDividendPercentageRequest(command.SubAgentId, command.DividendPercentage));
 
         _ = fakeAgentClient
             .Received(1)
-            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(command.SubAgentId, AgentOperation.Info, parentAgent.Username));
+            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(command.SubAgentId,
+                AgentOperation.Info,
+                parentAgent.Username));
     }
 }

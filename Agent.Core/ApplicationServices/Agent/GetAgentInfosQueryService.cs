@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, AgentInfos>
+internal class GetAgentInfosQueryService(ITgsRepository tgsRepository) : IQueryService<GetAgentInfosQuery, AgentInfos>
 {
-    private readonly ITgsRepository _tgsRepository;
-
-    public GetAgentInfosQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public IAsyncEnumerable<AgentInfos> QueryAsync(
         GetAgentInfosQuery query,
@@ -22,13 +18,13 @@ internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, Age
     {
         var agents = from agent in _tgsRepository.Agents.AsQueryable()
                      where agent.BrandId == query.BrandId
-                        && agent.ParentAgentId == query.ParentAgentId
+                           && agent.ParentAgentId == query.ParentAgentId
                      select new AgentInfos
                      {
                          AgentStatus = agent.AgentStatus,
                          Balance = agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id) != null
-                            ? agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id)!.Balance
-                            : 0,
+                             ? agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id)!.Balance
+                             : 0,
                          CardGameRebatePercentage = agent.CardGameRebatePercentage,
                          CommissionPercentage = agent.CommissionPercentage,
                          DividendPercentage = agent.DividendPercentage,
@@ -46,14 +42,8 @@ internal class GetAgentInfosQueryService : IQueryService<GetAgentInfosQuery, Age
                          AgentId = agent.Id
                      };
 
-        if (query.Status != null)
-        {
-            agents = agents.Where(x => x.Status == query.Status);
-        }
-        if (!string.IsNullOrWhiteSpace(query.Username))
-        {
-            agents = agents.Where(x => x.Username == query.Username);
-        }
+        if (query.Status != null) agents = agents.Where(x => x.Status == query.Status);
+        if (!string.IsNullOrWhiteSpace(query.Username)) agents = agents.Where(x => x.Username == query.Username);
 
         return agents.ToAsyncEnumerable();
     }

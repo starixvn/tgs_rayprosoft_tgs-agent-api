@@ -8,16 +8,13 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAgentPasswordCommand>
+internal class ResetSubAgentPasswordCommandService(IAgentClient agentClient)
+    : ICommandService<ResetSubAgentPasswordCommand>
 {
-    private readonly IAgentClient _agentClient;
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
-    public ResetSubAgentPasswordCommandService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
-
-    public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask ExecuteAsync(ResetSubAgentPasswordCommand command,
+        CancellationToken cancellationToken = default)
     {
         var subAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
@@ -34,11 +31,15 @@ internal class ResetSubAgentPasswordCommandService : ICommandService<ResetSubAge
             .ConfigureAwait(false);
 
         await _agentClient
-            .SetAgentPasswordAsync(new SetAgentPasswordRequest(command.SubAgentId, command.Password, parentAgent!.Username), cancellationToken)
+            .SetAgentPasswordAsync(
+                new SetAgentPasswordRequest(command.SubAgentId, command.Password, parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
 
         await _agentClient
-            .AddAgentAuditLogAsync(new AddAgentAuditLogRequest(subAgent.Id, AgentOperation.Password, parentAgent!.Username), cancellationToken)
+            .AddAgentAuditLogAsync(
+                new AddAgentAuditLogRequest(subAgent.Id, AgentOperation.Password, parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

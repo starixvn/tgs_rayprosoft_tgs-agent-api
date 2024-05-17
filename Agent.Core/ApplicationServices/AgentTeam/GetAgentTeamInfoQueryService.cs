@@ -9,18 +9,15 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentTeam;
 
-internal class GetAgentTeamInfoQueryService : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
+internal class GetAgentTeamInfoQueryService(
+    IAgentClient agentClient,
+    IPlayerServiceClient playerServiceClient)
+    : IGetService<GetAgentTeamInfoQuery, GetAgentTeamInfoModel?>
 {
-    private readonly IAgentClient _agentClient;
-    private readonly IPlayerServiceClient _playerServiceClient;
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
-    public GetAgentTeamInfoQueryService(
-        IAgentClient agentClient,
-        IPlayerServiceClient playerServiceClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-    }
+    private readonly IPlayerServiceClient _playerServiceClient =
+        playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 
     public async ValueTask<GetAgentTeamInfoModel?> GetAsync(GetAgentTeamInfoQuery query,
         CancellationToken cancellationToken = default)
@@ -45,7 +42,7 @@ internal class GetAgentTeamInfoQueryService : IGetService<GetAgentTeamInfoQuery,
             agentPlayerCounts.Where(x => x.AgentId != null && allChildAgentIds.Contains(x.AgentId.Value))
                 .Sum(x => x.PlayerCount);
 
-        return new()
+        return new GetAgentTeamInfoModel
         {
             DirectAgentCount = directAgents.Count(),
             DirectPlayerCount = directPlayerCountInfo?.PlayerCount ?? 0,

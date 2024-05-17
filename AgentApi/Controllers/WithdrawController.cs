@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment.Clients;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
+using Tgs.Payment.Clients;
 using TGS.Services.Agent.ApplicationServices.BrandPayments;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
-using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 using BrandPaymentResponse = TGS.Apis.AgentApi.Models.Messages.BrandPaymentResponse;
+using InsufficientFundsException = TGS.Services.Agent.Exceptions.InsufficientFundsException;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -53,7 +53,7 @@ public class WithdrawController : ControllerBase
 
             return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
-        catch (Services.Agent.Exceptions.InsufficientFundsException)
+        catch (InsufficientFundsException)
         {
             throw new PlayerHasInsufficientFundsException();
         }
@@ -102,11 +102,7 @@ public class WithdrawController : ControllerBase
                 ChannelId = bp.ChannelId,
                 ChannelName = bp.ChannelName,
                 ChannelCode = bp.ChannelCode,
-                TransferLimit = new ValueRange<decimal>
-                {
-                    From = bp.TransferLimit.From,
-                    To = bp.TransferLimit.To
-                },
+                TransferLimit = new ValueRange<decimal> { From = bp.TransferLimit.From, To = bp.TransferLimit.To },
                 ExtendedData = JsonDocument.Parse("{}"),
                 PaymentId = bp.PaymentId,
                 PaymentCode = paymentInfo.Code,

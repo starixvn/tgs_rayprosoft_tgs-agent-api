@@ -3,33 +3,34 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 using TGS.SmsService.Client;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ForgotPasswordByPhoneCommandService : IGetService<ForgotPasswordByPhoneCommand, string>
+internal class ForgotPasswordByPhoneCommandService(
+    IAgentRepository agentRepository,
+    IValidateCodeGenerator codeGenerator,
+    IValidateCodeOperator validateCodeOperator,
+    ISmsServiceClient smsServiceClient)
+    : IGetService<ForgotPasswordByPhoneCommand, string>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly IValidateCodeGenerator _codeGenerator;
-    private readonly ISmsServiceClient _smsServiceClient;
-    private readonly IValidateCodeOperator _validateCodeOperator;
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
-    public ForgotPasswordByPhoneCommandService(
-        IAgentRepository agentRepository,
-        IValidateCodeGenerator codeGenerator,
-        IValidateCodeOperator validateCodeOperator,
-        ISmsServiceClient smsServiceClient)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-        _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-        _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-    }
+    private readonly IValidateCodeGenerator _codeGenerator =
+        codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
 
-    public async ValueTask<string> GetAsync(ForgotPasswordByPhoneCommand command, CancellationToken cancellationToken = default)
+    private readonly ISmsServiceClient _smsServiceClient =
+        smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+    public async ValueTask<string> GetAsync(ForgotPasswordByPhoneCommand command,
+        CancellationToken cancellationToken = default)
     {
         var foundAgents = await _agentRepository
             .GetAgentsByPhoneAsync(command.BrandId, command.Phone)

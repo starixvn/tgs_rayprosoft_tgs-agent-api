@@ -6,12 +6,9 @@ namespace TGS.Apis.AgentApi.Models.Messages;
 
 public record CreateBankInfoRequest
 {
-    [JsonPropertyName("paymentchannelid")]
-    public Guid PaymentChannelId { get; init; }
+    [JsonPropertyName("paymentchannelid")] public Guid PaymentChannelId { get; init; }
 
-    [JsonPropertyName("banktype")]
-    public string BankType { get; init; }
+    [JsonPropertyName("banktype")] public string BankType { get; init; }
 
-    [JsonPropertyName("detail")]
-    public JsonDocument Detail { get; init; }
+    [JsonPropertyName("detail")] public JsonDocument Detail { get; init; }
 }

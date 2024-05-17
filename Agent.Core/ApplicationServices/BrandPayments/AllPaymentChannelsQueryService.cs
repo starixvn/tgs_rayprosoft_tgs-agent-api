@@ -9,16 +9,14 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.BrandPayments;
 
-internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
+internal class AllPaymentChannelsQueryService(IPaymentServiceClient paymentServiceClient)
+    : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient;
+    private readonly IPaymentServiceClient _paymentServiceClient =
+        paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
 
-    public AllPaymentChannelsQueryService(IPaymentServiceClient paymentServiceClient)
-    {
-        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-    }
-
-    public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query,
+        CancellationToken cancellationToken = default)
     {
         var allPaymentChannels = await _paymentServiceClient.GetAllPaymentChannelsAsync()
             .ToDictionaryAsync(method => method.Id)

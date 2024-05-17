@@ -4,6 +4,7 @@ public enum TransactionType
 {
     Deposit = 0,
     Withdrawal = 1,
+
     /// <summary>
     /// 公司調帳
     /// </summary>
@@ -123,5 +124,5 @@ public enum TransactionType
     GameProvider = 15000,
 
     // 遊戲供應資金退款
-    GameProviderFundRefund = 15300,
+    GameProviderFundRefund = 15300
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.BrandCertificate.Clients;
@@ -7,30 +6,32 @@ using Tgs.PlayerService.Client;
 using TGS.Services.Agent.Exceptions;
 using Tgs.ServiceUtility;
 using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
+internal class CreatePlayerQueryService(
+    IPlayerServiceClient playerServiceClient,
+    IAgentRepository agentRepository,
+    IBrandRepository brandRepository,
+    IBrandServiceClient brandServiceClient,
+    IVipLevelServiceClient vipLevelServiceClient)
+    : IGetService<CreatePlayerQuery, string>
 {
-    private readonly IPlayerServiceClient _playerServiceClient;
-    private readonly IAgentRepository _agentRepository;
-    private readonly IBrandRepository _brandRepository;
-    private readonly IBrandServiceClient _brandServiceClient;
-    private readonly IVipLevelServiceClient _vipLevelServiceClient;
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
-    public CreatePlayerQueryService(
-        IPlayerServiceClient playerServiceClient,
-        IAgentRepository agentRepository,
-        IBrandRepository brandRepository,
-        IBrandServiceClient brandServiceClient,
-        IVipLevelServiceClient vipLevelServiceClient)
-    {
-        _playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _brandRepository = brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
-        _brandServiceClient = brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
-        _vipLevelServiceClient = vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
-    }
+    private readonly IBrandRepository _brandRepository =
+        brandRepository ?? throw new ArgumentNullException(nameof(brandRepository));
+
+    private readonly IBrandServiceClient _brandServiceClient =
+        brandServiceClient ?? throw new ArgumentNullException(nameof(brandServiceClient));
+
+    private readonly IPlayerServiceClient _playerServiceClient =
+        playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
+
+    private readonly IVipLevelServiceClient _vipLevelServiceClient =
+        vipLevelServiceClient ?? throw new ArgumentNullException(nameof(vipLevelServiceClient));
 
     public async ValueTask<string> GetAsync(
         CreatePlayerQuery query,
@@ -52,9 +53,9 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
 
         var vipInfo = await _vipLevelServiceClient
             .VipLevelGetAsync(
-            brandId: query.BrandId,
-            level: 1,
-            cancellationToken: cancellationToken)
+                query.BrandId,
+                1,
+                cancellationToken)
             .ConfigureAwait(false);
 
         var betLimitId = await _brandRepository
@@ -80,10 +81,10 @@ internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, string>
             .ConfigureAwait(false);
 
         await _vipLevelServiceClient.PlayerVipLevelRegisterAsync(
-            playerCode: playerCode,
-            vipLevel: vipInfo.Level,
-            autoState: Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable,
-            cancellationToken: cancellationToken)
+                playerCode,
+                vipInfo.Level,
+                PlayerVipLevelAutoState.Enable,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         await _playerServiceClient

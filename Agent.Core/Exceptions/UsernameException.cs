@@ -2,10 +2,4 @@
 
 namespace TGS.Services.Agent.Exceptions;
 
-public class UsernameException : Exception
-{
-    public UsernameException()
-        : base("NameExisted")
-    {
-    }
-}
+public class UsernameException() : Exception("NameExisted");

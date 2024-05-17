@@ -1,20 +1,13 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Tgs.Payment.Clients;
-using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Agent.Configuration;
 
-public class AgentConfiguration
+public class AgentConfiguration(IServiceCollection services)
 {
-    public IServiceCollection Services { get; }
-
-    public AgentConfiguration(IServiceCollection services)
-    {
-        Services = services ?? throw new ArgumentNullException(nameof(services));
-    }
+    public IServiceCollection Services { get; } = services ?? throw new ArgumentNullException(nameof(services));
 
     public AgentConfiguration AddAgentLoginRecordRepository<TAgentLoginRecordRepository>()
         where TAgentLoginRecordRepository : class, IAgentLoginRecordRepository
@@ -28,7 +21,9 @@ public class AgentConfiguration
                     .GetConnection()
                     .GetDatabase();
 
-                return ActivatorUtilities.CreateInstance<RedisAgentLoginRecordRepository>(sp, innerRepository, redisDatabase);
+                return ActivatorUtilities.CreateInstance<RedisAgentLoginRecordRepository>(sp,
+                    innerRepository,
+                    redisDatabase);
             })
             .Decorate<IAgentLoginRecordRepository, MemoryCachedAgentLoginRecordRepository>();
 
@@ -49,7 +44,8 @@ public class AgentConfiguration
         return this;
     }
 
-    public AgentConfiguration AddGameProviderRepository<TGameProviderRepository>() where TGameProviderRepository : class, IGameProviderRepository
+    public AgentConfiguration AddGameProviderRepository<TGameProviderRepository>()
+        where TGameProviderRepository : class, IGameProviderRepository
     {
         _ = Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
 
@@ -57,7 +53,7 @@ public class AgentConfiguration
     }
 
     public AgentConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>()
-                where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
     {
         Services
             .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();

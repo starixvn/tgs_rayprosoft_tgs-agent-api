@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Tgs.ServiceUtility;
 using TGS.Core.DataServices.Tgs;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.BrandLiveChat;
 
-internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
+internal class GetBrandLiveChatQueryService(ITgsRepository tgsRepository)
+    : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
 {
-    private readonly ITgsRepository _tgsRepository;
-
-    public GetBrandLiveChatQueryService(ITgsRepository tgsRepository)
-    {
-        _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-    }
+    private readonly ITgsRepository _tgsRepository =
+        tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 
     public async ValueTask<BrandLiveChatInfo?> GetAsync(
         BrandLiveChatQuery query,
@@ -23,15 +19,8 @@ internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, Br
     {
         var brandLiveChat = await _tgsRepository.BrandLiveChats
             .FirstOrDefaultAsync(x => x.BrandId == query.BrandId);
-        if (brandLiveChat == null)
-        {
-            return null;
-        }
+        if (brandLiveChat == null) return null;
 
-        return new BrandLiveChatInfo()
-        {
-            Name = brandLiveChat.ChatName,
-            Setting = brandLiveChat.ChatSetting
-        };
+        return new BrandLiveChatInfo { Name = brandLiveChat.ChatName, Setting = brandLiveChat.ChatSetting };
     }
 }

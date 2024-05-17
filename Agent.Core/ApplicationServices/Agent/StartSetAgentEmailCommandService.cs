@@ -2,30 +2,27 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using Tgs.ServiceUtility;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Properties;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class StartSetAgentEmailCommandService : IGetService<StartSetAgentEmailCommand, string>
+internal class StartSetAgentEmailCommandService(
+    IEmailClient emailClient,
+    IValidateCodeGenerator codeGenerator,
+    IValidateCodeOperator validateCodeOperator)
+    : IGetService<StartSetAgentEmailCommand, string>
 {
-    private readonly IValidateCodeGenerator _codeGenerator;
-    private readonly IEmailClient _emailClient;
-    private readonly IValidateCodeOperator _validateCodeOperator;
+    private readonly IValidateCodeGenerator _codeGenerator =
+        codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
 
-    public StartSetAgentEmailCommandService(
-        IEmailClient emailClient,
-        IValidateCodeGenerator codeGenerator,
-        IValidateCodeOperator validateCodeOperator)
-    {
-        _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-        _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-        _validateCodeOperator =
-            validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-    }
+    private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
 
     public async ValueTask<string> GetAsync(StartSetAgentEmailCommand command,
         CancellationToken cancellationToken = default)
@@ -58,10 +55,7 @@ internal class StartSetAgentEmailCommandService : IGetService<StartSetAgentEmail
             saveResult.ValidateCode);
 
         var mailMessage = new SendEmailRequest(
-            new[]
-            {
-                command.Email
-            },
+            new[] { command.Email },
             mailSubject,
             mailBody);
 

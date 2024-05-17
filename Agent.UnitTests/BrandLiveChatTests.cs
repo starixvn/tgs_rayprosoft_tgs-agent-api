@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using CoreModels = TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Agent.ApplicationServices.BrandLiveChat;
+using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace Agent.UnitTests;
 
@@ -22,17 +22,15 @@ public class BrandLiveChatTests
         ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
         var brandId = Guid.NewGuid();
 
-        repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat()
+        repository.BrandLiveChats.Add(new CoreModels.BrandLiveChat
         {
-            BrandId = brandId,
-            ChatName = "LiveChat",
-            ChatSetting = "{\"url\":\"https://www.google.com\"}"
+            BrandId = brandId, ChatName = "LiveChat", ChatSetting = "{\"url\":\"https://www.google.com\"}"
         });
         await repository.SaveChangesAsync();
 
         var sut = new GetBrandLiveChatQueryService(repository);
 
-        var query = new BrandLiveChatQuery(BrandId: brandId);
+        var query = new BrandLiveChatQuery(brandId);
 
         var info = await sut.GetAsync(query);
 

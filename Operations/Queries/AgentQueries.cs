@@ -5,31 +5,23 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Queries;
 
-public class AgentQueries : IAgentQueries
+public class AgentQueries(ITgsRepository repository) : IAgentQueries
 {
-    private readonly ITgsRepository _repository;
-
-    public AgentQueries(ITgsRepository repository)
-    {
-        _repository = repository;
-    }
-
     Task<Agent> IAgentQueries.GetAgentAsync(Expression<Func<Agent, bool>> predicate,
         Func<IQueryable<Agent>, IQueryable<Agent>> preQuery)
     {
         preQuery ??= c => c;
 
-        return preQuery(_repository.Agents).FirstOrDefaultAsync(predicate);
+        return preQuery(repository.Agents).FirstOrDefaultAsync(predicate);
     }
 
     Task<Agent> IAgentQueries.GetAgentByInvitationCodeAsync(Guid brandId, string invitationCode)
-        => _repository.Agents
+        => repository.Agents
             .Where(agent => agent.BrandId == brandId
-                && agent.InvitationCode == invitationCode)
+                            && agent.InvitationCode == invitationCode)
             .FirstOrDefaultAsync();
 
     Task<AgentLoginRecord> IAgentQueries.GetAgentLoginRecordAsync(
@@ -38,6 +30,6 @@ public class AgentQueries : IAgentQueries
     {
         preQuery ??= c => c;
 
-        return preQuery(_repository.AgentLoginRecords).FirstOrDefaultAsync(predicate);
+        return preQuery(repository.AgentLoginRecords).FirstOrDefaultAsync(predicate);
     }
 }

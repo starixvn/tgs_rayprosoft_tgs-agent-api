@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Agent.Client;
-using Tgs.ServiceUtility;
+using Tgs.Agent.Client.Models;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent.ApplicationServices.Agent;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -31,9 +31,10 @@ public class WalletController : ControllerBase
         var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
         var agentInfo = await agentClient
-            .GetAgentInfoAsync(new Tgs.Agent.Client.Models.GetAgentInfoRequest(agentTokenData.AgentId))
-            .ConfigureAwait(false)
-            ?? throw new AgentNotFoundException(agentTokenData.AgentId.ToString(), Resources.Agent.NotFound);
+                            .GetAgentInfoAsync(new GetAgentInfoRequest(agentTokenData.AgentId))
+                            .ConfigureAwait(false)
+                        ?? throw new AgentNotFoundException(agentTokenData.AgentId.ToString(),
+                            Resources.Agent.NotFound);
 
         if (agentInfo.WalletId is null)
             throw new Exception("Wallet Not Found.");
@@ -42,9 +43,6 @@ public class WalletController : ControllerBase
             .GetAsync(new GetAgentBalanceQuery(agentInfo.WalletId.Value, agentInfo.Id))
             .ConfigureAwait(false);
 
-        return new BalanceInfoResponse
-        {
-            Main = balance
-        };
+        return new BalanceInfoResponse { Main = balance };
     }
 }

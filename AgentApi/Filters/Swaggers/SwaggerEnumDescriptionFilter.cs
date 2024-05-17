@@ -10,10 +10,7 @@ public class SwaggerEnumDescriptionFilter : ISchemaFilter
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         var type = context.Type;
-        if (!type.IsEnum)
-        {
-            return;
-        }
+        if (!type.IsEnum) return;
 
         var extension = new OpenApiObject();
 

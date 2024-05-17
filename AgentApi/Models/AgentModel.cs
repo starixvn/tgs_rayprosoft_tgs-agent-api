@@ -5,14 +5,11 @@ namespace TGS.Apis.AgentApi.Models;
 
 public class AgentModel
 {
-    [JsonPropertyName("agentstatus")]
-    public string AgentStatus { get; set; }
+    [JsonPropertyName("agentstatus")] public string AgentStatus { get; set; }
 
-    [JsonPropertyName("id")]
-    public Guid AgnetId { get; set; }
+    [JsonPropertyName("id")] public Guid AgnetId { get; set; }
 
-    [JsonPropertyName("balance")]
-    public decimal Balance { get; set; }
+    [JsonPropertyName("balance")] public decimal Balance { get; set; }
 
     [JsonPropertyName("cardgamerebatepercentage")]
     public decimal CardGameRebatePercentage { get; set; }
@@ -26,8 +23,7 @@ public class AgentModel
     [JsonPropertyName("dividendpercentage")]
     public decimal DividendPercentage { get; set; }
 
-    [JsonPropertyName("leveltype")]
-    public string LevelType { get; set; }
+    [JsonPropertyName("leveltype")] public string LevelType { get; set; }
 
     [JsonPropertyName("livedealerrebatepercentage")]
     public decimal LiveDealerRebatePercentage { get; set; }
@@ -35,8 +31,7 @@ public class AgentModel
     [JsonPropertyName("lotteryrebatepercentage")]
     public decimal LotteryRebatePercentage { get; set; }
 
-    [JsonPropertyName("registeredon")]
-    public DateTimeOffset RegisteredOn { get; set; }
+    [JsonPropertyName("registeredon")] public DateTimeOffset RegisteredOn { get; set; }
 
     [JsonPropertyName("slotrebatepercentage")]
     public decimal SlotRebatePercentage { get; set; }
@@ -44,17 +39,13 @@ public class AgentModel
     [JsonPropertyName("sportsrebatepercentage")]
     public decimal SportsRebatePercentage { get; set; }
 
-    [JsonPropertyName("status")]
-    public string Status { get; set; }
+    [JsonPropertyName("status")] public string Status { get; set; }
 
-    [JsonPropertyName("teamnumber")]
-    public int TeamNumber { get; set; }
+    [JsonPropertyName("teamnumber")] public int TeamNumber { get; set; }
 
-    [JsonPropertyName("type")]
-    public string Type { get; set; }
+    [JsonPropertyName("type")] public string Type { get; set; }
 
-    [JsonPropertyName("username")]
-    public string Username { get; set; }
+    [JsonPropertyName("username")] public string Username { get; set; }
 
     [JsonPropertyName("virtualsportsrebatepercentage")]
     public decimal VirtualSportsRebatePercentage { get; set; }

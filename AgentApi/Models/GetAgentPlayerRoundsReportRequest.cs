@@ -4,8 +4,8 @@ using TGS.Core.Models.Enums;
 namespace TGS.Apis.AgentApi.Models;
 
 public record GetAgentPlayerRoundsReportRequest
-{        
-    public string Username { get; init; }        
+{
+    public string Username { get; init; }
 
     public Guid? RoundId { get; init; }
 

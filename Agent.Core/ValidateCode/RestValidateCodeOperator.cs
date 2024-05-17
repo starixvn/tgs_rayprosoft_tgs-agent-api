@@ -8,18 +8,15 @@ using TGS.Services.ValidateCode.Clients;
 
 namespace TGS.Services.Agent.ValidateCode;
 
-internal class RestValidateCodeOperator : IValidateCodeOperator
+internal class RestValidateCodeOperator(
+    IValidateCodeServiceClient validateCodeServiceClient,
+    IEmailClient emailClient)
+    : IValidateCodeOperator
 {
-    private readonly IEmailClient _emailClient;
-    private readonly IValidateCodeServiceClient _validateCodeServiceClient;
+    private readonly IEmailClient _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
 
-    public RestValidateCodeOperator(
-        IValidateCodeServiceClient validateCodeServiceClient,
-        IEmailClient emailClient)
-    {
-        _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
-        _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-    }
+    private readonly IValidateCodeServiceClient _validateCodeServiceClient =
+        validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
 
     public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
     {
@@ -34,10 +31,8 @@ internal class RestValidateCodeOperator : IValidateCodeOperator
     }
 
     public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
-    {
-        return _validateCodeServiceClient
+        => _validateCodeServiceClient
             .SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
-    }
 
     public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode)
     {

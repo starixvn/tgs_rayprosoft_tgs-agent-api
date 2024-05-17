@@ -9,18 +9,21 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.BrandCertificate.Clients;
 using Tgs.CashService.Client;
+using TGS.Core.Models.Enums;
 using Tgs.Paging;
+using Tgs.Payment.Clients;
 using Tgs.PlayerService.Client;
 using Tgs.Service.PlayerBuckets;
-using Tgs.VipLevelService.Clients;
-using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 using TGS.Services.Agent.ApplicationServices.Player.PlayerRegistrationConditions;
 using TGS.Services.Agent.Exceptions;
+using Tgs.VipLevelService.Clients;
+using Tgs.VipLevelService.Common;
+using Tgs.VipLevelService.Common.ViewModels;
 using BrandInfo = Tgs.BrandCertificate.Clients.BrandInfo;
+using PlayerInfo = Tgs.PlayerService.Client.PlayerInfo;
 using PlayerStatus = Tgs.PlayerService.Client.PlayerStatus;
-using VipLevelInfo = Tgs.BrandCertificate.Clients.VipLevelInfo;
 
 namespace Agent.UnitTests;
 
@@ -54,8 +57,8 @@ public class PlayerTests
         var agentInfo = new AgentInfo(
             agentId,
             username,
-            RealName: username,
-            Phone: "123",
+            username,
+            "123",
             Email: "email@123",
             QQ: "QQ",
             Wechat: "wechat",
@@ -76,8 +79,6 @@ public class PlayerTests
 
         var brand = new BrandInfo { Id = brandId };
 
-
-
         var playerCode = "playerCode";
 
         fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
@@ -85,31 +86,30 @@ public class PlayerTests
         fakeAgentRepository.GetAgentByIdAsync(Arg.Any<Guid>()).Returns(agentInfo);
         fakeBrandServiceClient.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brand);
 
-        var vipLevelInfo = new Tgs.VipLevelService.Common.ViewModels.VipLevelInfoViewModel(
-            Id: Guid.NewGuid(),
-            Level: 1,
-            BrandId: brandId,
-            LevelUpAccumulateBetAmount: 0M,
-            LevelUpAccumulateDeposit: 0M,
-            LevelKeepAccumulateBetAmount: 0M,
-            LevelKeepAccumulateDeposit: 0M,
-            LevelKeepCondition: false,
-            BirthBenefit: 0M,
-            PromotionBenefit: 0M,
-            QuarterlyBenefit: 0M,
-            LiveDealerRebate: 0M,
-            SlotRebate: 0M,
-            LotteryRebate: 0M,
-            CardGameRebate: 0M,
-            SportsRebate: 0M,
-            VirtualSportsRebate: 0M,
-            WithdrawTransactionsPerDay: -1,
-            WithdrawTotalAmountPerDay: -1m);
+        var vipLevelInfo = new VipLevelInfoViewModel(
+            Guid.NewGuid(),
+            1,
+            brandId,
+            0M,
+            0M,
+            0M,
+            0M,
+            false,
+            0M,
+            0M,
+            0M,
+            0M,
+            0M,
+            0M,
+            0M,
+            0M,
+            0M,
+            -1,
+            -1m);
         _ = fakeVipLevelServiceClient.VipLevelGetAsync(
-            brandId: Arg.Is(brandId),
-            level: Arg.Is(1))
+                Arg.Is(brandId),
+                Arg.Is(1))
             .Returns(vipLevelInfo);
-
 
         fakeBrandRepository.GetBrandDefaultBetLimitIdAsync(Arg.Any<Guid>(), default).Returns(10);
         fakePlayerServiceClient.CreatePlayerAsync(Arg.Any<CreatePlayerData>()).Returns(playerCode);
@@ -118,10 +118,10 @@ public class PlayerTests
 
         _ = fakeVipLevelServiceClient.Received(1)
             .PlayerVipLevelRegisterAsync(
-            playerCode: Arg.Is(playerCode),
-            vipLevel: Arg.Is(vipLevelInfo.Level),
-            autoState: Arg.Is(Tgs.VipLevelService.Common.PlayerVipLevelAutoState.Enable),
-            cancellationToken: Arg.Any<CancellationToken>());
+                Arg.Is(playerCode),
+                Arg.Is(vipLevelInfo.Level),
+                Arg.Is(PlayerVipLevelAutoState.Enable),
+                cancellationToken: Arg.Any<CancellationToken>());
 
         _ = fakePlayerServiceClient
             .Received(1)
@@ -149,10 +149,8 @@ public class PlayerTests
         var walletId = Guid.Parse("2b2b0a71-78cc-45b8-8f4b-08da9ad95d74");
 
         _ = fakePlayerServiceClient.GetPlayerPropertiesAsync(Arg.Is(query.PlayerCode), Arg.Any<CancellationToken>())
-            .Returns(new Dictionary<string, string>
-            {
-                ["DefaultWalletId"] = walletId.ToString()
-            }.ToImmutableDictionary());
+            .Returns(
+                new Dictionary<string, string> { ["DefaultWalletId"] = walletId.ToString() }.ToImmutableDictionary());
 
         _ = fakeCashServiceClient.GetBalanceAsync(walletId, Arg.Any<CancellationToken>())
             .Returns(1000M);
@@ -171,7 +169,7 @@ public class PlayerTests
 
         var sut = new GetAgentPlayerInfosQueryService(fakeAgentRepository);
 
-        var pagingInfo = new Paging<AgentPlayerInfo>() { Page = 1, RowCount = 10, IsDesc = false };
+        var pagingInfo = new Paging<AgentPlayerInfo> { Page = 1, RowCount = 10, IsDesc = false };
 
         var query = new GetAgentPlayerInfosQuery(
             agentId,
@@ -206,7 +204,7 @@ public class PlayerTests
 
         var sut = new GetAgentPlayerInfosQueryService(fakeAgentRepository);
 
-        var pagingInfo = new Paging<AgentPlayerInfo>() { Page = 1, RowCount = 10, IsDesc = false };
+        var pagingInfo = new Paging<AgentPlayerInfo> { Page = 1, RowCount = 10, IsDesc = false };
 
         var query = new GetAgentPlayerInfosQuery(
             agentId,
@@ -272,11 +270,13 @@ public class PlayerTests
     public void Return_Exception_When_Email_Is_Existed()
     {
         var brandId = Guid.NewGuid();
-        var json = JsonDocument.Parse("{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
+        var json = JsonDocument.Parse(
+            "{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(new PlayerInfo { });
+        _ = fakePlayerServiceClient.GetPlayerInfoByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
+            .Returns(new PlayerInfo());
 
         var sut = new CheckEmailCondition(fakePlayerServiceClient);
 
@@ -287,15 +287,18 @@ public class PlayerTests
     public void Return_Exception_When_Phone_Is_Existed()
     {
         var brandId = Guid.NewGuid();
-        var json = JsonDocument.Parse("{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
+        var json = JsonDocument.Parse(
+            "{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new PlayerInfo { });
+        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(new PlayerInfo());
 
         var sut = new CheckPhoneCondition(fakePlayerServiceClient);
 
-        Assert.ThrowsAsync<PlayerPhoneDuplicateException>(async () => await sut.ExecuteAsync(brandId, json, default).ConfigureAwait(false));
+        Assert.ThrowsAsync<PlayerPhoneDuplicateException>(async ()
+            => await sut.ExecuteAsync(brandId, json, default).ConfigureAwait(false));
     }
 
     [Test]
@@ -319,9 +322,12 @@ public class PlayerTests
 
         _ = fakeBrandServiceClient.GetBrandFrontendInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(new PlayerInfo { });
+        _ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+            .Returns(new PlayerInfo());
 
-        var sut = new CheckRegistrationQueryService(fakeBrandServiceClient, fakePlayerServiceClient, fakeRegistrationConditionFuck);
+        var sut = new CheckRegistrationQueryService(fakeBrandServiceClient,
+            fakePlayerServiceClient,
+            fakeRegistrationConditionFuck);
 
         Assert.ThrowsAsync<PlayerExistAlreadyException>(async () => await sut.GetAsync(query).ConfigureAwait(false));
     }
@@ -347,9 +353,12 @@ public class PlayerTests
 
         _ = fakeBrandServiceClient.GetBrandFrontendInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns((PlayerInfo?)null);
+        _ = fakePlayerServiceClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+            .Returns((PlayerInfo?)null);
 
-        var sut = new CheckRegistrationQueryService(fakeBrandServiceClient, fakePlayerServiceClient, fakeRegistrationConditionFuck);
+        var sut = new CheckRegistrationQueryService(fakeBrandServiceClient,
+            fakePlayerServiceClient,
+            fakeRegistrationConditionFuck);
 
         var response = await sut.GetAsync(query).ConfigureAwait(false);
 
@@ -360,11 +369,13 @@ public class PlayerTests
     public async Task Success_For_Email_Not_Exists()
     {
         var brandId = Guid.NewGuid();
-        var json = JsonDocument.Parse("{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
+        var json = JsonDocument.Parse(
+            "{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns((PlayerInfo?)null);
+        _ = fakePlayerServiceClient.GetPlayerInfoByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
+            .Returns((PlayerInfo?)null);
 
         var sut = new CheckEmailCondition(fakePlayerServiceClient);
 
@@ -375,11 +386,13 @@ public class PlayerTests
     public async Task Success_For_Phone_Not_Exists()
     {
         var brandId = Guid.NewGuid();
-        var json = JsonDocument.Parse("{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
+        var json = JsonDocument.Parse(
+            "{\"username\":\"username\",\"areaCode\":\"+86\",\"phone\":\"0909090909\",\"email\":\"123@test.com\"}");
 
         var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>()).Returns((PlayerInfo?)null);
+        _ = fakePlayerServiceClient.GetPlayerInfoByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns((PlayerInfo?)null);
 
         var sut = new CheckPhoneCondition(fakePlayerServiceClient);
 
@@ -391,15 +404,14 @@ public class PlayerTests
     {
         var playerCode = "playerCode";
 
-        var fakePaymentServiceClient = Substitute.For<Tgs.Payment.Clients.IPaymentServiceClient>();
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
         var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);
 
         var query = new GetPlayerPaymentOverviewQuery(playerCode);
 
-        _ = fakePaymentServiceClient.
-            GetPlayerPaymentOverviewAsync(query.PlayerCode)
-            .Returns(new Tgs.Payment.Clients.PaymentOverview(100M, 0M, DateTime.Now, 0M, 0M, null, new DateOnly(2023, 4, 1), 100M, 0M));
+        _ = fakePaymentServiceClient.GetPlayerPaymentOverviewAsync(query.PlayerCode)
+            .Returns(new PaymentOverview(100M, 0M, DateTime.Now, 0M, 0M, null, new DateOnly(2023, 4, 1), 100M, 0M));
 
         var actual = await sut.GetAsync(query).ConfigureAwait(false);
 

@@ -8,16 +8,12 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.SubAgent;
 
-internal class SetSubAgentContactCommandService : ICommandService<SetSubAgentContactCommand>
+internal class SetSubAgentContactCommandService(IAgentClient agentClient) : ICommandService<SetSubAgentContactCommand>
 {
-    private readonly IAgentClient _agentClient;
+    private readonly IAgentClient _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
 
-    public SetSubAgentContactCommandService(IAgentClient agentClient)
-    {
-        _agentClient = agentClient ?? throw new ArgumentNullException(nameof(agentClient));
-    }
-
-    public async ValueTask ExecuteAsync(SetSubAgentContactCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask ExecuteAsync(SetSubAgentContactCommand command,
+        CancellationToken cancellationToken = default)
     {
         var subAgent = await _agentClient
             .GetAgentInfoAsync(new GetAgentInfoRequest(command.SubAgentId), cancellationToken)
@@ -28,9 +24,10 @@ internal class SetSubAgentContactCommandService : ICommandService<SetSubAgentCon
 
         await _agentClient
             .SetAgentContactAsync(new SetAgentContactRequest(
-                command.SubAgentId,
-                command.Email,
-                command.Phone), cancellationToken)
+                    command.SubAgentId,
+                    command.Email,
+                    command.Phone),
+                cancellationToken)
             .ConfigureAwait(false);
 
         var parentAgent = await _agentClient
@@ -42,7 +39,8 @@ internal class SetSubAgentContactCommandService : ICommandService<SetSubAgentCon
                 new AddAgentAuditLogRequest(
                     command.SubAgentId,
                     AgentOperation.Contact,
-                    parentAgent!.Username), cancellationToken)
+                    parentAgent!.Username),
+                cancellationToken)
             .ConfigureAwait(false);
     }
 }

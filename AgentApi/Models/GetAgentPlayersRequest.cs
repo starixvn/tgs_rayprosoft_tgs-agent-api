@@ -1,7 +1,7 @@
-﻿using System;
-using TGS.Core.Models.Enums;
+﻿#nullable enable
 
-#nullable enable
+using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.AgentApi.Models;
 

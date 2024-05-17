@@ -12,10 +12,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 {
     public override void OnResultExecuting(ResultExecutingContext context)
     {
-        if (!context.ModelState.IsValid)
-        {
-            return;
-        }
+        if (!context.ModelState.IsValid) return;
 
         switch (context.Result)
         {
@@ -23,12 +20,10 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
                 context.Result = new ObjectResult(new TgsResponse());
                 break;
 
-            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<object> ae:
+            case ObjectResult result
+                when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<object> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -39,10 +34,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 
             case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<int> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -53,10 +45,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 
             case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<long> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -67,10 +56,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 
             case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<float> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -79,12 +65,10 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
                 }
                 break;
 
-            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<double> ae:
+            case ObjectResult result
+                when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<double> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -93,12 +77,10 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
                 }
                 break;
 
-            case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<decimal> ae:
+            case ObjectResult result
+                when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<decimal> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -109,10 +91,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 
             case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<Guid> ae:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = ae.ToEnumerable()
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = ae.ToEnumerable() });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;
@@ -123,10 +102,7 @@ public class TgsResponseWrapperAttribute : ActionFilterAttribute
 
             case ObjectResult result when result.Value is not TgsResponse:
                 {
-                    var adjustResult = new ObjectResult(new SuccessResponse<object>
-                    {
-                        Data = result.Value
-                    });
+                    var adjustResult = new ObjectResult(new SuccessResponse<object> { Data = result.Value });
 
                     adjustResult.StatusCode = result.StatusCode;
                     adjustResult.Formatters = result.Formatters;

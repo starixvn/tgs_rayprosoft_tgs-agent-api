@@ -1,16 +1,16 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.ServiceUtility;
-using Tgs.PlayerService.Client;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using Tgs.Agent.Client.Models;
 using Tgs.Agent.Client;
+using Tgs.Agent.Client.Models;
+using Tgs.PlayerService.Client;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class SetPlayerPhoneCommandService(IAgentClient agentClient, IPlayerServiceClient playerServiceClient) : ICommandService<SetPlayerPhoneCommand>
+internal class SetPlayerPhoneCommandService(IAgentClient agentClient, IPlayerServiceClient playerServiceClient)
+    : ICommandService<SetPlayerPhoneCommand>
 {
     public async ValueTask ExecuteAsync(
         SetPlayerPhoneCommand command,

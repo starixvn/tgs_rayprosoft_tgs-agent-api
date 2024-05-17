@@ -7,19 +7,17 @@ using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Player;
 
-internal class GetPlayerWithdrawRequireAmountQueryService : IGetService<GetPlayerWithdrawRequireAmountQuery, decimal>
+internal class GetPlayerWithdrawRequireAmountQueryService(IPlayerBucketClient playerBucketClient)
+    : IGetService<GetPlayerWithdrawRequireAmountQuery, decimal>
 {
-    private readonly IPlayerBucketClient _playerBucketClient;
+    private readonly IPlayerBucketClient _playerBucketClient =
+        playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
 
-    public GetPlayerWithdrawRequireAmountQueryService(IPlayerBucketClient playerBucketClient)
-    {
-        _playerBucketClient = playerBucketClient ?? throw new ArgumentNullException(nameof(playerBucketClient));
-    }
-
-    public ValueTask<decimal> GetAsync(GetPlayerWithdrawRequireAmountQuery query, CancellationToken cancellationToken = default)
+    public ValueTask<decimal> GetAsync(GetPlayerWithdrawRequireAmountQuery query,
+        CancellationToken cancellationToken = default)
         => _playerBucketClient.ReadBucketsAsync(query.PlayerCode, cancellationToken)
             .AsTask()
             .ToAsyncEnumerable()
             .Select(result => result.Amount)
-            .SingleAsync(cancellationToken: cancellationToken);
+            .SingleAsync(cancellationToken);
 }

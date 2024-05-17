@@ -4,36 +4,25 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Report.Client;
+using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
 
 public class
-    GetCompanyTotalDetailQueryService : IGetService<GetCompanyTotalDetailQuery,
+    GetCompanyTotalDetailQueryService(
+        IReportClient reportClient)
+    : IGetService<GetCompanyTotalDetailQuery,
         IEnumerable<CompanyTotalDetailModel>>
 {
-    private readonly IBrandRepository _brandService;
-    private readonly IReportClient _reportClient;
-
-    public GetCompanyTotalDetailQueryService(
-        IReportClient reportClient,
-        IBrandRepository brandService)
-    {
-        _reportClient = reportClient ?? throw new ArgumentNullException(nameof(reportClient));
-        _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
-    }
-
     public async ValueTask<IEnumerable<CompanyTotalDetailModel>> GetAsync(
         GetCompanyTotalDetailQuery request,
         CancellationToken cancellationToken = default)
     {
-        var brand = await _brandService.GetBrandInfoAsync(request.BrandId).ConfigureAwait(false);
-
-        var response = await _reportClient.GetCompanyTotalDetailAsync(new()
+        var response = await reportClient.GetCompanyTotalDetailAsync(new GetCompanyTotalDetailRequest
         {
             BrandId = request.BrandId,
             AgentId = request.AgentId,
-            PlatformCharge = brand!.PlatformCharge,
             From = request.From,
             To = request.To
         }).ConfigureAwait(false);
@@ -47,6 +36,7 @@ public class
             PlayerSpecial = x.PlayerSpecial,
             CompanyWinLoss = x.CompanyWinLoss,
             CompanySpecial = x.CompanySpecial,
+            PlatformChargeAmount = x.PlatformChargeAmount,
             CompanyTotal = x.CompanyTotal
         });
     }

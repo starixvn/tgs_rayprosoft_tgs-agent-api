@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.ApplicationServices.Localization;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 

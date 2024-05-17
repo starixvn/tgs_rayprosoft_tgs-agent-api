@@ -5,26 +5,22 @@ using StackExchange.Redis;
 
 namespace TGS.Services.Agent;
 
-internal class RedisAgentLoginRecordRepository : IAgentLoginRecordRepository
+internal class RedisAgentLoginRecordRepository(
+    IAgentLoginRecordRepository loginRecordRepository,
+    IDatabase redisDatabase)
+    : IAgentLoginRecordRepository
 {
     private static readonly TimeSpan _Expiry = TimeSpan.FromHours(1D);
 
-    private static readonly JsonSerializerOptions _SerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions _SerializerOptions = new()
     {
-        WriteIndented = false,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        WriteIndented = false, PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private readonly IAgentLoginRecordRepository _loginRecordRepository;
-    private readonly IDatabase _redisDatabase;
+    private readonly IAgentLoginRecordRepository _loginRecordRepository =
+        loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
 
-    public RedisAgentLoginRecordRepository(
-        IAgentLoginRecordRepository loginRecordRepository,
-        IDatabase redisDatabase)
-    {
-        _loginRecordRepository = loginRecordRepository ?? throw new ArgumentNullException(nameof(loginRecordRepository));
-        _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
-    }
+    private readonly IDatabase _redisDatabase = redisDatabase ?? throw new ArgumentNullException(nameof(redisDatabase));
 
     public async ValueTask<AgentLoginRecordInfo?> GetAgentLoginRecordByIdAsync(Guid loginRecordId)
     {
@@ -45,7 +41,7 @@ internal class RedisAgentLoginRecordRepository : IAgentLoginRecordRepository
             key,
             value,
             _Expiry,
-            when: When.NotExists).ConfigureAwait(false);
+            When.NotExists).ConfigureAwait(false);
 
         return loginRecord;
     }

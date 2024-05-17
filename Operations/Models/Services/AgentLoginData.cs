@@ -1,5 +1,4 @@
 ﻿using System;
-using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operations.Models.Services;
 

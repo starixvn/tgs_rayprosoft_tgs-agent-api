@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;

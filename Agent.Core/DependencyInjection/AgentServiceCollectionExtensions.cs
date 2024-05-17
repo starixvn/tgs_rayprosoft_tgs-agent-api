@@ -15,8 +15,7 @@ public static class AgentServiceCollectionExtensions
 {
     private static readonly IImmutableDictionary<string, Type> _registrationTypes = new Dictionary<string, Type>
     {
-        { "InitPhone", typeof(CheckPhoneCondition)},
-        { "InitMail", typeof(CheckEmailCondition) }
+        { "InitPhone", typeof(CheckPhoneCondition) }, { "InitMail", typeof(CheckEmailCondition) }
     }.ToImmutableDictionary();
 
     public static AgentConfiguration AddAgentApiCore(this IServiceCollection services)

@@ -9,16 +9,19 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using TGS.Core.Models.Enums;
 using Tgs.PlayerService.Client;
 using Tgs.Report.Client;
 using Tgs.Report.Client.Models;
 using Tgs.Report.Client.Models.AgentWinLoss;
 using Tgs.Report.Client.Models.Round;
-using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.AgentWinLossReport;
+using AgentLevelType = Tgs.Agent.Client.Models.Enums.AgentLevelType;
 using AgentPlayerSpecialDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentPlayerSpecialDetailModel;
+using AgentStatus = Tgs.Agent.Client.Models.Enums.AgentStatus;
 using AgentTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.AgentTotalDetailModel;
+using AgentType = Tgs.Agent.Client.Models.Enums.AgentType;
 using AgentWinLossModel = Tgs.Report.Client.Models.AgentWinLoss.AgentWinLossModel;
 using CompanyTotalDetailModel = Tgs.Report.Client.Models.AgentWinLoss.CompanyTotalDetailModel;
 using RoundModel = Tgs.Report.Client.Models.Round.RoundModel;
@@ -46,9 +49,7 @@ public class AgentWinLossTests
 
         var query = new GetAgentWinLossBreadcrumbQuery
         {
-            BrandId = Guid.NewGuid(),
-            AgentId = Guid.NewGuid(),
-            MemberType = AccountType.Agent
+            BrandId = Guid.NewGuid(), AgentId = Guid.NewGuid(), MemberType = AccountType.Agent
         };
 
         _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
@@ -67,19 +68,17 @@ public class AgentWinLossTests
     [Test]
     [AutoData]
     public async Task Export_Agent_Win_Loss_By_Agent_Username(
-    ChildAgentInfoModel[] childAgentInfoData,
-    PagedResponse<AgentWinLossModel> agentWinLossData,
-    BrandInfo brandInfo,
-    AgentInfoModel agentInfo)
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo,
+        AgentInfoModel agentInfo)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new ExportAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -97,7 +96,6 @@ public class AgentWinLossTests
             .Returns(childAgentInfoData.ToAsyncEnumerable());
         _ = agentClient.GetAgentInfoByUsernameAsync(Arg.Any<GetAgentInfoByUsernameRequest>())
             .Returns(agentInfo);
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         _ = await sut.GetAsync(query);
 
@@ -106,24 +104,23 @@ public class AgentWinLossTests
 
         _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
         _ = await reportClient.Received(1).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
-        _ = await reportClient.Received(0).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(0)
+            .ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
     }
 
     [Test]
     [AutoData]
     public async Task Export_Agent_Win_Loss_By_Logged_In_Agent(
-    ChildAgentInfoModel[] childAgentInfoData,
-    PagedResponse<AgentWinLossModel> agentWinLossData,
-    BrandInfo brandInfo)
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new ExportAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -136,10 +133,10 @@ public class AgentWinLossTests
             DownLine = true
         };
 
-        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>())
+            .Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         _ = await sut.GetAsync(query);
 
@@ -148,26 +145,25 @@ public class AgentWinLossTests
 
         _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
         _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
-        _ = await reportClient.Received(1).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(1)
+            .ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
     }
 
     [Test]
     [AutoData]
     public async Task Export_Agent_Win_Loss_By_Player_Username(
-    ChildAgentInfoModel[] childAgentInfoData,
-    PagedResponse<AgentWinLossModel> agentWinLossData,
-    BrandInfo brandInfo,
-    PlayerInfo playerInfo,
-    Dictionary<string, string> playerProperties)
+        ChildAgentInfoModel[] childAgentInfoData,
+        PagedResponse<AgentWinLossModel> agentWinLossData,
+        BrandInfo brandInfo,
+        PlayerInfo playerInfo,
+        Dictionary<string, string> playerProperties)
     {
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new ExportAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -185,7 +181,6 @@ public class AgentWinLossTests
         _ = reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
         _ = playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
         _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
 
@@ -196,7 +191,8 @@ public class AgentWinLossTests
 
         _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
         _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
-        _ = await reportClient.Received(0).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(0)
+            .ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
         _ = await reportClient.Received(1).ExportPlayerWinLossAsync(Arg.Any<ExportPlayerWinLossRequest>());
     }
 
@@ -238,11 +234,9 @@ public class AgentWinLossTests
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new ExportAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -255,12 +249,12 @@ public class AgentWinLossTests
             DownLine = true
         };
 
-        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>())
+            .Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
         _ = agentClient.GetAgentInfoByUsernameAsync(Arg.Any<GetAgentInfoByUsernameRequest>())
             .Returns(agentInfo);
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         _ = await sut.GetAsync(query);
 
@@ -269,7 +263,8 @@ public class AgentWinLossTests
 
         _ = await reportClient.Received(0).ExportMasterAgentWinLossAsync(Arg.Any<ExportMasterAgentWinLossRequest>());
         _ = await reportClient.Received(0).ExportAgentWinLossAsync(Arg.Any<ExportAgentWinLossRequest>());
-        _ = await reportClient.Received(1).ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
+        _ = await reportClient.Received(1)
+            .ExportDownLineAgentWinLossAsync(Arg.Any<ExportDownLineAgentWinLossRequest>());
     }
 
     [Test]
@@ -290,7 +285,6 @@ public class AgentWinLossTests
 
         Assert.AreEqual(data.Bonus, response.Bonus);
         Assert.AreEqual(data.BonusAdjust, response.BonusAdjust);
-        Assert.AreEqual(data.ProductFee, response.ProductFee);
     }
 
     [Test]
@@ -301,15 +295,11 @@ public class AgentWinLossTests
         BrandInfo brandInfo)
     {
         var client = Substitute.For<IReportClient>();
-        var repository = Substitute.For<IBrandRepository>();
 
         var sut = new GetAgentTotalDetailQueryService(
-            client,
-            repository);
+            client);
 
         client.GetAgentTotalDetailAsync(Arg.Any<GetAgentTotalDetailRequest>()).Returns(data);
-
-        repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
@@ -335,16 +325,12 @@ public class AgentWinLossTests
 
         var query = new GetAgentWinLossBreadcrumbQuery
         {
-            BrandId = Guid.NewGuid(),
-            AgentId = Guid.NewGuid(),
-            MemberType = AccountType.Agent
+            BrandId = Guid.NewGuid(), AgentId = Guid.NewGuid(), MemberType = AccountType.Agent
         };
 
         var breadcrumbData = childAgentInfoData.Select(x => new BreadcrumbModel
         {
-            Id = x.AgentId.ToString(),
-            Name = x.AgentUsername,
-            Type = "Agent"
+            Id = x.AgentId.ToString(), Name = x.AgentUsername, Type = "Agent"
         }).ToArray();
 
         _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
@@ -388,10 +374,7 @@ public class AgentWinLossTests
             MemberType = AccountType.Player
         };
 
-        var breadcrumbData = new[]
-        {
-            new BreadcrumbModel { Id = childAgentInfoData.First().AgentId.ToString() }
-        };
+        var breadcrumbData = new[] { new BreadcrumbModel { Id = childAgentInfoData.First().AgentId.ToString() } };
 
         _ = reportClient.GetAgentWinLossBreadcrumbAsync(Arg.Any<GetBreadcrumbRequest>()).Returns(breadcrumbData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
@@ -421,7 +404,6 @@ public class AgentWinLossTests
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -429,7 +411,6 @@ public class AgentWinLossTests
 
         var sut = new GetAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -443,8 +424,8 @@ public class AgentWinLossTests
         };
 
         var agentInfo = new AgentInfoModel(
-            Id: childAgentInfoData.First().AgentId,
-            Username: childAgentInfoData.First().AgentUsername,
+            childAgentInfoData.First().AgentId,
+            childAgentInfoData.First().AgentUsername,
             null,
             null,
             null,
@@ -453,9 +434,9 @@ public class AgentWinLossTests
             "",
             null,
             DateTimeOffset.UtcNow,
-            Tgs.Agent.Client.Models.Enums.AgentStatus.Enabled,
-            Tgs.Agent.Client.Models.Enums.AgentType.Cash,
-            Tgs.Agent.Client.Models.Enums.AgentLevelType.Agent,
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Agent,
             0,
             0,
             0,
@@ -470,7 +451,6 @@ public class AgentWinLossTests
             .Returns(childAgentInfoData.ToAsyncEnumerable());
         _ = agentClient.GetAgentInfoByUsernameAsync(Arg.Any<GetAgentInfoByUsernameRequest>())
             .Returns(agentInfo);
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
@@ -500,11 +480,9 @@ public class AgentWinLossTests
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new GetAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -517,10 +495,10 @@ public class AgentWinLossTests
             DownLine = true
         };
 
-        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>())
+            .Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
@@ -552,11 +530,9 @@ public class AgentWinLossTests
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var sut = new GetAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -574,7 +550,6 @@ public class AgentWinLossTests
         _ = reportClient.GetAgentPlayerWinLossAsync(Arg.Any<GetPlayerWinLossRequest>()).Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
         _ = playerClient.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>()).Returns(playerInfo);
         _ = playerClient.GetPlayerPropertiesAsync(Arg.Any<string>()).Returns(playerProperties.ToImmutableDictionary());
 
@@ -605,15 +580,11 @@ public class AgentWinLossTests
         BrandInfo brandInfo)
     {
         var client = Substitute.For<IReportClient>();
-        var repository = Substitute.For<IBrandRepository>();
 
         var sut = new GetCompanyTotalDetailQueryService(
-            client,
-            repository);
+            client);
 
         _ = client.GetCompanyTotalDetailAsync(Arg.Any<GetCompanyTotalDetailRequest>()).Returns(data);
-
-        _ = repository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 
@@ -633,7 +604,6 @@ public class AgentWinLossTests
         var reportClient = Substitute.For<IReportClient>();
         var agentClient = Substitute.For<IAgentClient>();
         var playerClient = Substitute.For<IPlayerServiceClient>();
-        var brandRepository = Substitute.For<IBrandRepository>();
 
         var brandId = Guid.NewGuid();
         var agentId = Guid.NewGuid();
@@ -641,7 +611,6 @@ public class AgentWinLossTests
 
         var sut = new GetAgentWinLossQueryService(
             reportClient,
-            brandRepository,
             agentClient,
             playerClient);
 
@@ -655,8 +624,8 @@ public class AgentWinLossTests
         };
 
         var agentInfo = new AgentInfoModel(
-            Id: childAgentInfoData.First().AgentId,
-            Username: childAgentInfoData.First().AgentUsername,
+            childAgentInfoData.First().AgentId,
+            childAgentInfoData.First().AgentUsername,
             null,
             null,
             null,
@@ -665,9 +634,9 @@ public class AgentWinLossTests
             "",
             null,
             DateTimeOffset.UtcNow,
-            Tgs.Agent.Client.Models.Enums.AgentStatus.Enabled,
-            Tgs.Agent.Client.Models.Enums.AgentType.Cash,
-            Tgs.Agent.Client.Models.Enums.AgentLevelType.Agent,
+            AgentStatus.Enabled,
+            AgentType.Cash,
+            AgentLevelType.Agent,
             0,
             0,
             0,
@@ -677,12 +646,12 @@ public class AgentWinLossTests
             false,
             true);
 
-        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>()).Returns(agentWinLossData);
+        _ = reportClient.GetDownLineAgentWinLossAsync(Arg.Any<GetDownLineAgentWinLossRequest>())
+            .Returns(agentWinLossData);
         _ = agentClient.GetChildAgentInfosAsync(Arg.Any<GetChildAgentInfosRequest>())
             .Returns(childAgentInfoData.ToAsyncEnumerable());
         _ = agentClient.GetAgentInfoByUsernameAsync(Arg.Any<GetAgentInfoByUsernameRequest>())
             .Returns(agentInfo);
-        _ = brandRepository.GetBrandInfoAsync(Arg.Any<Guid>()).Returns(brandInfo);
 
         var response = await sut.GetAsync(query);
 

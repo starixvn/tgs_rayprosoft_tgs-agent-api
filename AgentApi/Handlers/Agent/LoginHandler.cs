@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Tgs.Core.Infrastructures.Security;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -16,80 +16,51 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using AgentNotFoundException = TGS.Core.Models.Exceptions.AgentNotFoundException;
 
 namespace TGS.Apis.AgentApi.Handlers.Agent;
 
-public sealed class LoginHandler : IRequestHandler<LoginRequest, LoginResponse>
+public sealed class LoginHandler(
+    IHttpContextAccessor httpContextAccessor,
+    IAgentQueries agentQueries,
+    IAgentOperations agentOperations,
+    IBrandOperations brandOperations,
+    IJwtTokenHandler jwtTokenHandler,
+    ITokenProvider tokenProvider,
+    IHashProvider hashProvider,
+    IPasswordHandler passwordHandler,
+    IStatusValidator statusValidator,
+    IRequestAnalyzer requestAnalyzer)
+    : IRequestHandler<LoginRequest, LoginResponse>
 {
-    private readonly IAgentOperations _agentOperations;
-    private readonly IAgentQueries _agentQueries;
-    private readonly IBrandOperations _brandOperations;
-    private readonly IHashProvider _hashProvider;
-    private readonly HttpContext _httpContext;
-    private readonly IJwtTokenHandler _jwtTokenHandler;
-    private readonly IPasswordHandler _passwordHandler;
-    private readonly IRequestAnalyzer _requestAnalyzer;
-    private readonly IStatusValidator _statusValidator;
-    private readonly ITokenProvider _tokenProvider;
-
-    public LoginHandler(
-        IHttpContextAccessor httpContextAccessor,
-        IAgentQueries agentQueries,
-        IAgentOperations agentOperations,
-        IBrandOperations brandOperations,
-        IJwtTokenHandler jwtTokenHandler,
-        ITokenProvider tokenProvider,
-        IHashProvider hashProvider,
-        IPasswordHandler passwordHandler,
-        IStatusValidator statusValidator,
-        IRequestAnalyzer requestAnalyzer)
-    {
-        _httpContext = httpContextAccessor.HttpContext;
-        _tokenProvider = tokenProvider;
-        _hashProvider = hashProvider;
-        _passwordHandler = passwordHandler;
-        _statusValidator = statusValidator;
-        _agentQueries = agentQueries;
-        _agentOperations = agentOperations;
-        _brandOperations = brandOperations;
-        _requestAnalyzer = requestAnalyzer;
-        _jwtTokenHandler = jwtTokenHandler;
-    }
+    private readonly HttpContext _httpContext = httpContextAccessor.HttpContext;
 
     async Task<LoginResponse> IRequestHandler<LoginRequest, LoginResponse>.Handle(
         LoginRequest request,
         CancellationToken cancellationToken)
     {
         var brandId = _httpContext.Items.GetBrandId();
-        await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+        await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
 
         var username = request.Username;
-        var agent = await _agentQueries.GetAgentAsync(x => x.BrandId == brandId && x.Username == username);
+        var agent = await agentQueries.GetAgentAsync(x => x.BrandId == brandId && x.Username == username);
 
-        if (agent is null)
-        {
-            throw new AgentNotFoundException(username, Resources.Agent.NotFound);
-        }
+        if (agent is null) throw new AgentNotFoundException(username, Resources.Agent.NotFound);
 
-        if (agent.Status == AgentStatus.InBlacklist)
-        {
-            throw new UserBannedException();
-        }
+        if (agent.Status == AgentStatus.InBlacklist) throw new UserBannedException();
 
-        if (!_passwordHandler.Verify(agent.Password, agent.Salt, request.Password))
-        {
+        if (!passwordHandler.Verify(agent.Password, agent.Salt, request.Password))
             throw new InvalidCredentialsException(Resources.Agent.PasswordMismatched);
-        }
 
-        _statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
+        statusValidator.ThrowIfPlayerDisabled(PlayerStatus.Enabled);
 
         var createdOn = DateTimeOffset.UtcNow;
-        var ipAddress = _requestAnalyzer.GetIp(_httpContext);
+        var ipAddress = requestAnalyzer.GetIp(_httpContext);
 
-        var record = await _agentOperations.AgentLoginAsync(new()
+        var record = await agentOperations.AgentLoginAsync(new AgentLoginData
         {
             BrandId = brandId,
             Username = username,
@@ -100,37 +71,27 @@ public sealed class LoginHandler : IRequestHandler<LoginRequest, LoginResponse>
         });
 
         var token = await GenerateAgentJwtTokenAsync(brandId,
-            new()
-            {
-                AgentId = agent.Id,
-                LoginRecordId = record.Id,
-                ExpiredOn = record.ExpiredOn
-            });
+            new AgentTokenData { AgentId = agent.Id, LoginRecordId = record.Id, ExpiredOn = record.ExpiredOn });
 
-        return new()
-        {
-            AgentToken = token,
-            LoginTime = createdOn.ToUnixTimeMilliseconds()
-        };
+        return new LoginResponse { AgentToken = token, LoginTime = createdOn.ToUnixTimeMilliseconds() };
     }
 
     private async Task<string> GenerateAgentJwtTokenAsync(Guid brandId, AgentTokenData agentTokenData)
     {
-        var data = await _tokenProvider.EncryptAsync(agentTokenData);
+        var data = await tokenProvider.EncryptAsync(agentTokenData);
 
         var jti = Guid.NewGuid().ToString();
 
         var identity = new ClaimsIdentity(new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, data),
-            new Claim(JwtRegisteredClaimNames.Jti, jti)
+            new Claim(JwtRegisteredClaimNames.Sub, data), new Claim(JwtRegisteredClaimNames.Jti, jti)
         });
 
-        var payload = _hashProvider.Hash($"{data}:{jti}");
-        var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
+        var payload = hashProvider.Hash($"{data}:{jti}");
+        var secretKey = await brandOperations.GetBrandSecretKeyAsync(brandId);
         var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
 
-        return _jwtTokenHandler.GenerateToken(identity,
+        return jwtTokenHandler.GenerateToken(identity,
             signature,
             Consts.Site,
             agentTokenData.ExpiredOn.DateTime);

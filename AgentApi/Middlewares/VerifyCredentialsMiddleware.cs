@@ -8,16 +8,10 @@ using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.AgentApi.Middlewares;
 
-public sealed class VerifyCredentialsMiddleware
+public sealed class VerifyCredentialsMiddleware(RequestDelegate next)
 {
-    private static readonly ActivitySource _VerifyCredentialsMiddlewareSource = new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
-
-    private readonly RequestDelegate _next;
-
-    public VerifyCredentialsMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    private static readonly ActivitySource _VerifyCredentialsMiddlewareSource =
+        new($"TGS.Apis.AgentApi.Middlewares.{nameof(VerifyCredentialsMiddleware)}");
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -27,10 +21,7 @@ public sealed class VerifyCredentialsMiddleware
 
         var brandId = context.GetBrandId();
 
-        if (brandId is null)
-        {
-            throw new InvalidCredentialsException("Brand doesn't exist");
-        }
+        if (brandId is null) throw new InvalidCredentialsException("Brand doesn't exist");
 
         var brandStatus = await brandServiceClient.GetBrandStatusAsync(brandId.Value).ConfigureAwait(false);
 
@@ -39,6 +30,6 @@ public sealed class VerifyCredentialsMiddleware
 
         context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
-        await _next(context);
+        await next(context);
     }
 }

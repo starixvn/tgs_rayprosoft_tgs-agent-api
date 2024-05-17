@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
 using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Agent;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 using TGS.SmsService.Client;
 
 namespace Agent.UnitTests;
@@ -39,7 +40,7 @@ public class AgentPasswordTests
         fakeAgentRepository.GetAgentsByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>())
             .Returns(Array.Empty<AgentContactInfo>().ToAsyncEnumerable());
 
-        Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.AgentNotFoundException>(
+        Assert.ThrowsAsync<AgentNotFoundException>(
             async () => await sut.GetAsync(command));
     }
 
@@ -63,7 +64,7 @@ public class AgentPasswordTests
         fakeAgentRepository.GetAgentsByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
             .Returns(Array.Empty<AgentContactInfo>().ToAsyncEnumerable());
 
-        Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.AgentNotFoundException>(
+        Assert.ThrowsAsync<AgentNotFoundException>(
             async () => await sut.GetAsync(command));
     }
 
@@ -85,7 +86,8 @@ public class AgentPasswordTests
             "agent@test.com");
 
         fakeAgentRepository.GetAgentsByEmailAsync(Arg.Any<Guid>(), Arg.Any<string>())
-            .Returns(new[] {
+            .Returns(new[]
+            {
                 new AgentContactInfo(
                     Guid.NewGuid(),
                     "agent",
@@ -102,9 +104,9 @@ public class AgentPasswordTests
             .Returns("security");
 
         fakeValidateCodeOperator.SaveValidateDataAsync(
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<ValidateCodeData>())
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ValidateCodeData>())
             .Returns(true);
 
         var actual = await sut.GetAsync(command);
@@ -138,7 +140,8 @@ public class AgentPasswordTests
             "0900123456");
 
         fakeAgentRepository.GetAgentsByPhoneAsync(Arg.Any<Guid>(), Arg.Any<string>())
-            .Returns(new[] {
+            .Returns(new[]
+            {
                 new AgentContactInfo(
                     Guid.NewGuid(),
                     "agent",
@@ -155,9 +158,9 @@ public class AgentPasswordTests
             .Returns("security");
 
         fakeValidateCodeOperator.SaveValidateDataAsync(
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<ValidateCodeData>())
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<ValidateCodeData>())
             .Returns(true);
 
         var actual = await sut.GetAsync(command);

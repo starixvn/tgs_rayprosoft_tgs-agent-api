@@ -4,15 +4,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Paging;
-using Tgs.ServiceUtility;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models.Enums;
+using Tgs.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.ApplicationServices.Player;
 using TGS.Services.Agent.Exceptions;
+using Tgs.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -27,7 +27,7 @@ public class PlayerController : ControllerBase
     public ValueTask<bool> CheckRegistrationConditionsAsync(
         [FromServices] IGetService<CheckRegistrationQuery, bool> queryService,
         [FromBody] CheckRegistrationRequest request
-        )
+    )
     {
         var brandId = HttpContext.Items.GetBrandId();
 
@@ -89,9 +89,7 @@ public class PlayerController : ControllerBase
 
         var paging = new Paging<AgentPlayerInfo>
         {
-            Page = pagingRequest.Page,
-            RowCount = pagingRequest.Rows,
-            IsDesc = pagingRequest.IsDesc,
+            Page = pagingRequest.Page, RowCount = pagingRequest.Rows, IsDesc = pagingRequest.IsDesc
         };
 
         paging.SortByPropertyName(
@@ -132,7 +130,7 @@ public class PlayerController : ControllerBase
                         Username = playerInfo.Username,
                         VipLevel = playerInfo.VipLevel,
                         TotalDepositAmount = overview.TotalDepositAmount,
-                        TotalWithdrawAmount = overview.TotalWithdrawAmount,
+                        TotalWithdrawAmount = overview.TotalWithdrawAmount
                     };
                 })
                 .ToEnumerable()
@@ -162,11 +160,7 @@ public class PlayerController : ControllerBase
         var query = new GetPlayerVipLevelsQuery(brandId);
 
         return queryService.QueryAsync(query)
-            .Select(info => new VipLevelInfoModel
-            {
-                Id = info.Id,
-                Level = info.Level
-            });
+            .Select(info => new VipLevelInfoModel { Id = info.Id, Level = info.Level });
     }
 
     [HttpGet("withdraw/amount/{playerCode}", Name = "GetPlayerWithdrawRequireAmount")]
@@ -210,7 +204,8 @@ public class PlayerController : ControllerBase
 
         var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-        var command = new SetPlayerPhoneCommand(agentTokenData.AgentId, request.PlayerCode, request.AreaCode, request.Phone);
+        var command =
+            new SetPlayerPhoneCommand(agentTokenData.AgentId, request.PlayerCode, request.AreaCode, request.Phone);
 
         return commandService.ExecuteAsync(command);
     }

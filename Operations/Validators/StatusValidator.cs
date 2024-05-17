@@ -1,42 +1,25 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 
 namespace TGS.Services.Operations.Validators;
 
-public sealed class StatusValidator : IStatusValidator
+public sealed class StatusValidator(IBrandOperations brandOperations) : IStatusValidator
 {
-    private readonly IBrandOperations _brandOperations;
-
-    public StatusValidator(
-        IBrandOperations brandOperations)
-    {
-        _brandOperations = brandOperations;
-    }
-
     public async Task ThrowIfBrandStatusIsNotOneOfAsync(Guid brandId, params Status[] statuses)
     {
         EnsureStatus(statuses);
 
-        var status = await _brandOperations.GetBrandStatusAsync(brandId);
+        var status = await brandOperations.GetBrandStatusAsync(brandId);
 
-        if (status == null)
-        {
-            throw new InvalidStatusException("Brand doesn't exist");
-        }
+        if (status == null) throw new InvalidStatusException("Brand doesn't exist");
 
         if (!statuses.Contains(Status.Maintenance) && status == Status.Maintenance)
-        {
             throw new BrandUnderMaintenanceException("Brand is put into maintenance");
-        }
 
-        if (!statuses.Contains(status.Value))
-        {
-            throw new InvalidStatusException("Brand doesn't exist or is not active");
-        }
+        if (!statuses.Contains(status.Value)) throw new InvalidStatusException("Brand doesn't exist or is not active");
     }
 
     public void ThrowIfPlayerDisabled(PlayerStatus status) =>
@@ -46,23 +29,14 @@ public sealed class StatusValidator : IStatusValidator
 
     private static void EnsurePlayerStatus(PlayerStatus playerStatus, PlayerStatus statusToThrowException)
     {
-        if (playerStatus == PlayerStatus.Enabled)
-        {
-            return;
-        }
+        if (playerStatus == PlayerStatus.Enabled) return;
 
-        if (playerStatus == statusToThrowException)
-        {
-            throw new PlayerDisabledException(playerStatus);
-        }
+        if (playerStatus == statusToThrowException) throw new PlayerDisabledException(playerStatus);
     }
 
     private static void EnsureStatus<T>(T[] status) where T : struct
     {
-        if (status == null || status.Length == 0)
-        {
-            throw new ArgumentException("No status provided");
-        }
+        if (status == null || status.Length == 0) throw new ArgumentException("No status provided");
     }
 
     #endregion Private Methods

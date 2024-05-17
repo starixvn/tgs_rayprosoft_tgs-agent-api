@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using TGS.Apis.AgentApi.Middlewares;
 
@@ -15,10 +14,10 @@ public static class ApplicationBuilderExtensions
         _ = app.UseBrandCertificate();
 
         _ = app.UseWhen(context => bypass.All(r => !context.Request.Path.StartsWithSegments(r)),
-             builder => builder
-                 .UseMiddleware<VerifyCredentialsMiddleware>()
-                 .UseMiddleware<MaintenanceMiddleware>()
-                 .UseMiddleware<VerifyAgentTokenMiddleware>());
+            builder => builder
+                .UseMiddleware<VerifyCredentialsMiddleware>()
+                .UseMiddleware<MaintenanceMiddleware>()
+                .UseMiddleware<VerifyAgentTokenMiddleware>());
 
         return app;
     }

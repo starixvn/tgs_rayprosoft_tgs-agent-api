@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="1.1.0" />
-    <PackageReference Include="Polly" Version="8.2.1" />
+    <PackageReference Include="Polly" Version="8.3.1" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="Tgs.Agent.Client" Version="0.0.35" />
@@ -23,7 +23,7 @@
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.8.0" />
     <PackageReference Include="Tgs.PlayerBucket.Client" Version="1.0.0" />
     <PackageReference Include="Tgs.PlayerService.Client" Version="0.2.1" />
-    <PackageReference Include="Tgs.Report.Client" Version="0.0.74" />
+    <PackageReference Include="Tgs.Report.Client" Version="0.0.76" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.8" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.1.0" />

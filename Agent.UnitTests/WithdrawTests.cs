@@ -6,12 +6,12 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Agent.Client;
 using Tgs.Agent.Client.Models;
+using Tgs.Agent.Client.Models.Enums;
 using Tgs.CashService.Client;
 using Tgs.Payment.Clients;
-using TGS.Core.Models.Enums;
 using TGS.Services.Agent.ApplicationServices.Withdraw;
-using TGS.Services.Agent.Exceptions;
 using TGS.Services.WalletService;
+using InsufficientFundsException = TGS.Services.Agent.Exceptions.InsufficientFundsException;
 
 namespace Agent.UnitTests;
 
@@ -49,9 +49,9 @@ public class WithdrawTests
                 "code",
                 null,
                 DateTimeOffset.Now,
-                (Tgs.Agent.Client.Models.Enums.AgentStatus)AgentStatus.Enabled,
-                (Tgs.Agent.Client.Models.Enums.AgentType)AgentType.Cash,
-                (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
+                (AgentStatus)TGS.Core.Models.Enums.AgentStatus.Enabled,
+                (AgentType)TGS.Core.Models.Enums.AgentType.Cash,
+                (AgentLevelType)TGS.Core.Models.Enums.AgentLevelType.Agent,
                 10,
                 1,
                 1,
@@ -85,7 +85,7 @@ public class WithdrawTests
                 expected.ShouldMatch(info);
             });
 
-        Assert.ThrowsAsync<TGS.Services.Agent.Exceptions.InsufficientFundsException>(
+        Assert.ThrowsAsync<InsufficientFundsException>(
             async () => await sut.ExecuteAsync(command));
 
         _ = fakePaymentServiceClient
@@ -126,9 +126,9 @@ public class WithdrawTests
                 "code",
                 null,
                 DateTimeOffset.Now,
-                (Tgs.Agent.Client.Models.Enums.AgentStatus)AgentStatus.Enabled,
-                (Tgs.Agent.Client.Models.Enums.AgentType)AgentType.Cash,
-                (Tgs.Agent.Client.Models.Enums.AgentLevelType)AgentLevelType.Agent,
+                (AgentStatus)TGS.Core.Models.Enums.AgentStatus.Enabled,
+                (AgentType)TGS.Core.Models.Enums.AgentType.Cash,
+                (AgentLevelType)TGS.Core.Models.Enums.AgentLevelType.Agent,
                 10,
                 1,
                 1,
@@ -142,7 +142,7 @@ public class WithdrawTests
             .GetBalanceAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(2000M);
 
-        fakeCashServiceClient.LockWithdrawAsync(default, 0, null, null, default)
+        fakeCashServiceClient.LockWithdrawAsync(default, 0, null, null)
             .ReturnsForAnyArgs(new TransactionResponse { Balance = 2222 });
 
         var expected = new WithdrawFormCreateInfo

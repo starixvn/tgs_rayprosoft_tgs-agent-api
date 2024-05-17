@@ -3,29 +3,29 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using Tgs.ServiceUtility;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
+using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
 
-internal class ForgotPasswordByEmailCommandService : IGetService<ForgotPasswordByEmailCommand, string>
+internal class ForgotPasswordByEmailCommandService(
+    IAgentRepository agentRepository,
+    IValidateCodeGenerator codeGenerator,
+    IValidateCodeOperator validateCodeOperator)
+    : IGetService<ForgotPasswordByEmailCommand, string>
 {
-    private readonly IAgentRepository _agentRepository;
-    private readonly IValidateCodeGenerator _codeGenerator;
-    private readonly IValidateCodeOperator _validateCodeOperator;
+    private readonly IAgentRepository _agentRepository =
+        agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
 
-    public ForgotPasswordByEmailCommandService(
-        IAgentRepository agentRepository,
-        IValidateCodeGenerator codeGenerator,
-        IValidateCodeOperator validateCodeOperator)
-    {
-        _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-        _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-    }
+    private readonly IValidateCodeGenerator _codeGenerator =
+        codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
 
-    public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command, CancellationToken cancellationToken = default)
+    private readonly IValidateCodeOperator _validateCodeOperator =
+        validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+    public async ValueTask<string> GetAsync(ForgotPasswordByEmailCommand command,
+        CancellationToken cancellationToken = default)
     {
         var foundAgents = await _agentRepository
             .GetAgentsByEmailAsync(command.BrandId, command.Email)

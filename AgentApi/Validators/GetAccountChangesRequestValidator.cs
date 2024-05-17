@@ -11,14 +11,9 @@ public sealed class GetAccountChangesRequestValidator : AbstractValidator<GetAcc
     {
         var allowType = new[]
         {
-            TransactionType.Transfer,
-            TransactionType.TransferRollback,
-            TransactionType.ReceiveCommit,
-            TransactionType.ReceiveRollback,
-            TransactionType.AgentDividend,
-            TransactionType.WithdrawLock,
-            TransactionType.WithdrawRollback,
-            TransactionType.CompanyAdjust
+            TransactionType.Transfer, TransactionType.TransferRollback, TransactionType.ReceiveCommit,
+            TransactionType.ReceiveRollback, TransactionType.AgentDividend, TransactionType.WithdrawLock,
+            TransactionType.WithdrawRollback, TransactionType.CompanyAdjust
         };
 
         RuleFor(r => r.TransactionType)
