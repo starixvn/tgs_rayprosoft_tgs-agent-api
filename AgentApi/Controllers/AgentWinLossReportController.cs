@@ -98,8 +98,7 @@ public class AgentWinLossReportController : ControllerBase
                     AgentSpecial = x.AgentSpecial,
                     CompanySpecial = x.CompanySpecial,
                     AgentTotal = x.AgentTotal,
-                    CompanyTotal = x.CompanyTotal,
-                    PlatformChargeAmount = x.PlatformChargeAmount
+                    CompanyTotal = x.CompanyTotal
                 }).ToArray(),
             Total = new AgentWinLossReportTotalModel
             {
@@ -112,8 +111,7 @@ public class AgentWinLossReportController : ControllerBase
                 AgentSpecial = response.Total?.AgentSpecial ?? default,
                 CompanySpecial = response.Total?.CompanySpecial ?? default,
                 AgentTotal = response.Total?.AgentTotal ?? default,
-                CompanyTotal = response.Total?.CompanyTotal ?? default,
-                PlatformChargeAmount = response.Total?.PlatformChargeAmount ?? default,
+                CompanyTotal = response.Total?.CompanyTotal ?? default
             },
             TotalCount = response.TotalCount
         };
@@ -175,7 +173,6 @@ public class AgentWinLossReportController : ControllerBase
             PlayerSpecial = x.PlayerSpecial,
             AgentWinLoss = x.AgentWinLoss,
             AgentSpecial = x.AgentSpecial,
-            PlatformChargeAmount = x.PlatformChargeAmount,
             AgentTotal = x.AgentTotal
         });
     }
@@ -209,7 +206,6 @@ public class AgentWinLossReportController : ControllerBase
             PlayerSpecial = x.PlayerSpecial,
             CompanyWinLoss = x.CompanyWinLoss,
             CompanySpecial = x.CompanySpecial,
-            PlatformChargeAmount = x.PlatformChargeAmount,
             CompanyTotal = x.CompanyTotal
         });
     }
