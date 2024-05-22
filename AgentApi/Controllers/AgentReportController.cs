@@ -301,6 +301,7 @@ public class AgentReportController(
             x.AgentDividendAmount,
             x.FromPlayerAgentDividendAmount,
             x.FromTeamAgentDividendAmount,
+            x.ProductFee,
             x.AgentDividendPercentage,
             x.AgentCoveredBonus,
             x.AgentCoveredBonusAdjust)).Skip(page * pageSize).Take(pageSize).ToArray();
@@ -317,6 +318,7 @@ public class AgentReportController(
             response.Items.Sum(x => x.AgentDividendAmount),
             response.Items.Sum(x => x.FromPlayerAgentDividendAmount),
             response.Items.Sum(x => x.FromTeamAgentDividendAmount),
+            response.Items.Sum(x => x.ProductFee),
             response.Items.Sum(x => x.AgentCoveredBonus) ?? 0M,
             response.Items.Sum(x => x.AgentCoveredBonusAdjust) ?? 0M);
 
@@ -392,6 +394,7 @@ public class AgentReportController(
             x.AgentDividendAmount,
             x.FromPlayerAgentDividendAmount,
             x.FromTeamAgentDividendAmount,
+            x.ProductFee,
             x.AgentDividendPercentage,
             x.AgentCoveredBonus,
             x.AgentCoveredBonusAdjust)).ToArray();
@@ -410,6 +413,7 @@ public class AgentReportController(
             x.AgentDividendAmount,
             x.FromPlayerAgentDividendAmount,
             x.FromTeamAgentDividendAmount,
+            x.ProductFee,
             x.AgentDividendPercentage,
             x.AgentCoveredBonus,
             x.AgentCoveredBonusAdjust)).Skip(page * pageSize).Take(pageSize).ToArray();
@@ -426,6 +430,7 @@ public class AgentReportController(
             response.Sub.Items.Sum(x => x.AgentDividendAmount),
             response.Sub.Items.Sum(x => x.FromPlayerAgentDividendAmount),
             response.Sub.Items.Sum(x => x.FromTeamAgentDividendAmount),
+            response.Sub.Items.Sum(x => x.ProductFee),
             response.Sub.Items.Sum(x => x.AgentCoveredBonus) ?? 0M,
             response.Sub.Items.Sum(x => x.AgentCoveredBonusAdjust) ?? 0M);
 

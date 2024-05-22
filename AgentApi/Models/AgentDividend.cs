@@ -16,6 +16,7 @@ public record AgentDividend(
     decimal AgentDividendAmount,
     decimal FromPlayerAgentDividendAmount,
     decimal FromTeamAgentDividendAmount,
+    decimal ProductFeeAmount,
     decimal AgentDividendPercentage,
     decimal? AgentCoveredBonus,
     decimal? AgentCoveredBonusAdjust);
