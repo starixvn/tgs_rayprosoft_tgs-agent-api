@@ -208,7 +208,7 @@ public class AgentReportController(
 
             response = await client.GetAgentContributionsAsync(contributionRequest);
 
-            if (response != null) _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
+            _ = _memoryCache.Set(key, response, TimeSpan.FromMinutes(5));
         }
 
         var page = request.Page <= 0 ? 0 : request.Page - 1;
@@ -245,7 +245,7 @@ public class AgentReportController(
 
         return new AgentContributionResponse
         {
-            TotalCount = response.TotalCount, Items = items ?? Array.Empty<AgentContribution>(), Total = total
+            TotalCount = response.TotalCount, Items = items, Total = total
         };
     }
 

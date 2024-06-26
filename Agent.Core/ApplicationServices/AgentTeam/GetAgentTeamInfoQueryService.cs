@@ -22,7 +22,7 @@ internal class GetAgentTeamInfoQueryService(
     public async ValueTask<GetAgentTeamInfoModel?> GetAsync(GetAgentTeamInfoQuery query,
         CancellationToken cancellationToken = default)
     {
-        var allChildAgents = await _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.AgentId))
+        var allChildAgents = await _agentClient.GetChildAgentInfosAsync(new GetChildAgentInfosRequest(query.AgentId), cancellationToken)
             .ToArrayAsync(cancellationToken);
 
         var directAgents = allChildAgents.Where(x => x.ParentAgentId == query.AgentId);
