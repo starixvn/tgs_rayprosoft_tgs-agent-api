@@ -24,6 +24,7 @@ using Tgs.ServiceUtility;
 using AgentNotFoundException = TGS.Core.Models.Exceptions.AgentNotFoundException;
 using CreateAgentRequest = TGS.Apis.AgentApi.Models.CreateAgentRequest;
 using Tgs.PlayerService.Client;
+using Tgs.CashService.Client;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -170,6 +171,7 @@ public class AgentController(IMediator mediator) : ControllerBase
         [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
         [FromServices] IAgentClient agentClient,
         [FromServices] IPlayerServiceClient playerServiceClient,
+        [FromServices] ICashServiceClient cashServiceClient,
         [FromQuery] GetAgentsRequest request,
         [FromQuery] PagingRequest pagingRequest)
     {
@@ -203,7 +205,7 @@ public class AgentController(IMediator mediator) : ControllerBase
             {
                 TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
                 Items = await agentInfos
-                    .Select(agentInfo =>
+                    .SelectAwait(async agentInfo =>
                     {
                         var agentIds = Array.Empty<Guid>();
 
@@ -214,7 +216,9 @@ public class AgentController(IMediator mediator) : ControllerBase
                         var playerCount = agentPlayerCounts
                             .Where(a => a.AgentId is not null)
                             .Where(a => agentIds.Contains(a.AgentId.Value))
-                            .Sum(s => s.PlayerCount);
+                        .Sum(s => s.PlayerCount);
+
+                        var balance = await cashServiceClient.GetBalanceAsync(agentInfo.WalletId, HttpContext.RequestAborted);
 
                         return new AgentModel
                         {
@@ -224,7 +228,8 @@ public class AgentController(IMediator mediator) : ControllerBase
                             TeamNumber = agentIds.Length + playerCount,
                             Type = agentInfo.Type.ToString(),
                             Username = agentInfo.Username,
-                            AgnetId = agentInfo.AgentId
+                            AgnetId = agentInfo.AgentId,
+                            Balance = balance
                         };
                     })
                     .ApplyOrderBy(paging)
@@ -239,7 +244,7 @@ public class AgentController(IMediator mediator) : ControllerBase
         {
             TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
             Items = await agentInfos
-                .Select(agentInfo =>
+                .SelectAwait(async agentInfo =>
                 {
                     var agentIds = Array.Empty<Guid>();
 
@@ -252,9 +257,11 @@ public class AgentController(IMediator mediator) : ControllerBase
                         .Where(a => agentIds.Contains(a.AgentId.Value))
                         .Sum(s => s.PlayerCount);
 
+                    var balance = await cashServiceClient.GetBalanceAsync(agentInfo.WalletId, HttpContext.RequestAborted);
+
                     return new AgentModel
                     {
-                        Balance = agentInfo.Balance,
+                        Balance = balance,
                         DividendPercentage = agentInfo.DividendPercentage,
                         RegisteredOn = agentInfo.RegisteredOn,
                         Status = agentInfo.Status.ToString(),
