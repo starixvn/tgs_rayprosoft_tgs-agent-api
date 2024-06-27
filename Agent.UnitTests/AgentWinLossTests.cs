@@ -285,6 +285,8 @@ public class AgentWinLossTests
 
         Assert.AreEqual(data.Bonus, response.Bonus);
         Assert.AreEqual(data.BonusAdjust, response.BonusAdjust);
+        Assert.AreEqual(data.CompanyAdjust, response.CompanyAdjust);
+        Assert.AreEqual(data.AgentAdjust, response.AgentAdjust);
     }
 
     [Test]

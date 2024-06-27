@@ -30,7 +30,7 @@ internal class GetAgentTeamInfoQueryService(
         var indirectAgents = allChildAgents.Where(x => x.ParentAgentId != query.AgentId);
 
         var agentPlayerCounts =
-            await _playerServiceClient.GetPlayerCountInfosByBrandIdAsync(query.BrandId, cancellationToken)
+            await _playerServiceClient.GetPlayerCountInfosByBrandIdAsync(query.BrandId, false, cancellationToken)
                 .ToArrayAsync(cancellationToken);
 
         var directPlayerCountInfo =
