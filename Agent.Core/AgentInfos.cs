@@ -34,8 +34,6 @@ public class AgentInfos
 
     public AgentStatus Status { get; set; }
 
-    public int TeamNumber { get; set; }
-
     public AgentType Type { get; set; }
 
     public string Username { get; set; } = default!;

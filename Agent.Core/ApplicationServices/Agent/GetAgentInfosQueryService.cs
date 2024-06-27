@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models.Enums;
 using Tgs.ServiceUtility;
 
 namespace TGS.Services.Agent.ApplicationServices.Agent;
@@ -35,15 +36,16 @@ internal class GetAgentInfosQueryService(ITgsRepository tgsRepository) : IQueryS
                          SlotRebatePercentage = agent.SlotRebatePercentage,
                          SportsRebatePercentage = agent.SportsRebatePercentage,
                          Status = agent.Status,
-                         TeamNumber = 1 + agent.Players.Count(x => x.AgentId == agent.Id),
                          Type = agent.Type,
                          Username = agent.Username,
                          VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
                          AgentId = agent.Id
                      };
 
-        if (query.Status != null) agents = agents.Where(x => x.Status == query.Status);
-        if (!string.IsNullOrWhiteSpace(query.Username)) agents = agents.Where(x => x.Username == query.Username);
+        if (query.Status != null)
+            agents = agents.Where(x => x.Status == query.Status);
+        if (!string.IsNullOrWhiteSpace(query.Username))
+            agents = agents.Where(x => x.Username == query.Username);
 
         return agents.ToAsyncEnumerable();
     }

@@ -23,6 +23,7 @@ using TGS.Services.Operations.Validators;
 using Tgs.ServiceUtility;
 using AgentNotFoundException = TGS.Core.Models.Exceptions.AgentNotFoundException;
 using CreateAgentRequest = TGS.Apis.AgentApi.Models.CreateAgentRequest;
+using Tgs.PlayerService.Client;
 
 namespace TGS.Apis.AgentApi.Controllers;
 
@@ -167,6 +168,8 @@ public class AgentController(IMediator mediator) : ControllerBase
     [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
     public async Task<PagedResponse<AgentModel>> GetAgentsAsync(
         [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
+        [FromServices] IAgentClient agentClient,
+        [FromServices] IPlayerServiceClient playerServiceClient,
         [FromQuery] GetAgentsRequest request,
         [FromQuery] PagingRequest pagingRequest)
     {
@@ -186,30 +189,43 @@ public class AgentController(IMediator mediator) : ControllerBase
         if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
             paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
 
+        var childAgentInfos = await agentClient
+            .GetChildAgentInfosAsync(new GetChildAgentInfosRequest(agentTokenData.AgentId), HttpContext.RequestAborted)
+            .ToArrayAsync(HttpContext.RequestAborted);
+
+        var agentPlayerCounts =
+            await playerServiceClient
+                .GetPlayerCountInfosByBrandIdAsync(brandId, false, HttpContext.RequestAborted)
+                .ToArrayAsync(HttpContext.RequestAborted);
+
         if (pagingRequest.ShowAll)
             return new PagedResponse<AgentModel>
             {
                 TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
                 Items = await agentInfos
-                    .Select(agentInfo => new AgentModel
+                    .Select(agentInfo =>
                     {
-                        AgentStatus = agentInfo.AgentStatus.ToString(),
-                        Balance = agentInfo.Balance,
-                        CardGameRebatePercentage = agentInfo.CardGameRebatePercentage,
-                        CommissionPercentage = agentInfo.CommissionPercentage,
-                        DividendPercentage = agentInfo.DividendPercentage,
-                        LevelType = agentInfo.LevelType.ToString(),
-                        LiveDealerRebatePercentage = agentInfo.LiveDealerRebatePercentage,
-                        LotteryRebatePercentage = agentInfo.LotteryRebatePercentage,
-                        RegisteredOn = agentInfo.RegisteredOn,
-                        SlotRebatePercentage = agentInfo.SlotRebatePercentage,
-                        SportsRebatePercentage = agentInfo.SportsRebatePercentage,
-                        Status = agentInfo.Status.ToString(),
-                        TeamNumber = agentInfo.TeamNumber,
-                        Type = agentInfo.Type.ToString(),
-                        Username = agentInfo.Username,
-                        VirtualSportsRebatePercentage = agentInfo.VirtualSportsRebatePercentage,
-                        AgnetId = agentInfo.AgentId
+                        var agentIds = Array.Empty<Guid>();
+
+                        GetAgentIds(agentInfo.AgentId, childAgentInfos, ref agentIds);
+
+                        agentIds = [.. agentIds, agentInfo.AgentId];
+
+                        var playerCount = agentPlayerCounts
+                            .Where(a => a.AgentId is not null)
+                            .Where(a => agentIds.Contains(a.AgentId.Value))
+                            .Sum(s => s.PlayerCount);
+
+                        return new AgentModel
+                        {
+                            DividendPercentage = agentInfo.DividendPercentage,
+                            RegisteredOn = agentInfo.RegisteredOn,
+                            Status = agentInfo.Status.ToString(),
+                            TeamNumber = agentIds.Length + playerCount,
+                            Type = agentInfo.Type.ToString(),
+                            Username = agentInfo.Username,
+                            AgnetId = agentInfo.AgentId
+                        };
                     })
                     .ApplyOrderBy(paging)
                     .ToArrayAsync()
@@ -223,25 +239,30 @@ public class AgentController(IMediator mediator) : ControllerBase
         {
             TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
             Items = await agentInfos
-                .Select(agentInfo => new AgentModel
+                .Select(agentInfo =>
                 {
-                    AgentStatus = agentInfo.AgentStatus.ToString(),
-                    Balance = agentInfo.Balance,
-                    CardGameRebatePercentage = agentInfo.CardGameRebatePercentage,
-                    CommissionPercentage = agentInfo.CommissionPercentage,
-                    DividendPercentage = agentInfo.DividendPercentage,
-                    LevelType = agentInfo.LevelType.ToString(),
-                    LiveDealerRebatePercentage = agentInfo.LiveDealerRebatePercentage,
-                    LotteryRebatePercentage = agentInfo.LotteryRebatePercentage,
-                    RegisteredOn = agentInfo.RegisteredOn,
-                    SlotRebatePercentage = agentInfo.SlotRebatePercentage,
-                    SportsRebatePercentage = agentInfo.SportsRebatePercentage,
-                    Status = agentInfo.Status.ToString(),
-                    TeamNumber = agentInfo.TeamNumber,
-                    Type = agentInfo.Type.ToString(),
-                    Username = agentInfo.Username,
-                    VirtualSportsRebatePercentage = agentInfo.VirtualSportsRebatePercentage,
-                    AgnetId = agentInfo.AgentId
+                    var agentIds = Array.Empty<Guid>();
+
+                    GetAgentIds(agentInfo.AgentId, childAgentInfos, ref agentIds);
+
+                    agentIds = [.. agentIds, agentInfo.AgentId];
+
+                    var playerCount = agentPlayerCounts
+                        .Where(a => a.AgentId is not null)
+                        .Where(a => agentIds.Contains(a.AgentId.Value))
+                        .Sum(s => s.PlayerCount);
+
+                    return new AgentModel
+                    {
+                        Balance = agentInfo.Balance,
+                        DividendPercentage = agentInfo.DividendPercentage,
+                        RegisteredOn = agentInfo.RegisteredOn,
+                        Status = agentInfo.Status.ToString(),
+                        TeamNumber = agentIds.Length + playerCount,
+                        Type = agentInfo.Type.ToString(),
+                        Username = agentInfo.Username,
+                        AgnetId = agentInfo.AgentId
+                    };
                 })
                 .ApplyOrderBy(paging)
                 .ApplyPaging(paging)
@@ -338,4 +359,21 @@ public class AgentController(IMediator mediator) : ControllerBase
     [Consumes(MediaTypeNames.Application.Json)]
     public Task<LoginResponse> LoginAsync(LoginRequest request) =>
         mediator.Send(request);
+
+    private static void GetAgentIds(Guid id, ChildAgentInfoModel[] models, ref Guid[] agentIds)
+    {
+        var childAgents = models.Where(x => x.ParentAgentId == id).ToArray();
+
+        if (childAgents.Length <= 0)
+            return;
+
+        {
+            agentIds = [.. agentIds, .. childAgents.Select(x => x.AgentId)];
+
+            foreach (var childAgentInfoModel in childAgents)
+            {
+                GetAgentIds(childAgentInfoModel.AgentId, models, ref agentIds);
+            }
+        }
+    }
 }
