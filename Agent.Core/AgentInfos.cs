@@ -9,7 +9,7 @@ public class AgentInfos
 
     public AgentConfigStatus AgentStatus { get; set; }
 
-    public decimal Balance { get; set; }
+    public Guid WalletId { get; set; }
 
     public decimal CardGameRebatePercentage { get; set; }
 

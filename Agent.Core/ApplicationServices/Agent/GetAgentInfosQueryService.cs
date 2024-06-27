@@ -23,9 +23,7 @@ internal class GetAgentInfosQueryService(ITgsRepository tgsRepository) : IQueryS
                      select new AgentInfos
                      {
                          AgentStatus = agent.AgentStatus,
-                         Balance = agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id) != null
-                             ? agent.Wallets.FirstOrDefault(x => x.AgentId == agent.Id)!.Balance
-                             : 0,
+                         WalletId = agent.WalletId.Value,
                          CardGameRebatePercentage = agent.CardGameRebatePercentage,
                          CommissionPercentage = agent.CommissionPercentage,
                          DividendPercentage = agent.DividendPercentage,

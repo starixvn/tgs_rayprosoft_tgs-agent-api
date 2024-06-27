@@ -361,7 +361,8 @@ public class AgentTests
                 Salt = Array.Empty<byte>(),
                 Username = "agent1",
                 WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawSalt = Array.Empty<byte>(),
+                WalletId = Guid.NewGuid()
             },
             new CoreModels.Agent
             {
@@ -373,7 +374,8 @@ public class AgentTests
                 Salt = Array.Empty<byte>(),
                 Username = "agent2",
                 WithdrawPassword = Array.Empty<byte>(),
-                WithdrawSalt = Array.Empty<byte>()
+                WithdrawSalt = Array.Empty<byte>(),
+                WalletId = Guid.NewGuid()
             });
 
         await repository.SaveChangesAsync();
