@@ -36,7 +36,6 @@ internal class GetAgentInfosQueryService(ITgsRepository tgsRepository) : IQueryS
                          SlotRebatePercentage = agent.SlotRebatePercentage,
                          SportsRebatePercentage = agent.SportsRebatePercentage,
                          Status = agent.Status,
-                         TeamNumber = 1 + agent.Players.Where(x => x.Status != PlayerStatus.RegisterUndone).Count(x => x.AgentId == agent.Id),
                          Type = agent.Type,
                          Username = agent.Username,
                          VirtualSportsRebatePercentage = agent.VirtualSportsRebatePercentage,
