@@ -231,6 +231,26 @@ public class PlayerTests
     }
 
     [Test]
+    public async Task Can_Get_Player_Payment_Overview()
+    {
+        var playerCode = "playerCode";
+
+        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+
+        var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);
+
+        var query = new GetPlayerPaymentOverviewQuery(playerCode);
+
+        _ = fakePaymentServiceClient.GetPlayerPaymentOverviewAsync(query.PlayerCode)
+            .Returns(new PaymentOverview(100M, 0M, DateTime.Now, 0M, 0M, null, new DateOnly(2023, 4, 1), 100M, 0, 0M, 0));
+
+        var actual = await sut.GetAsync(query).ConfigureAwait(false);
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual(100M, actual.TotalDepositAmount);
+    }
+
+    [Test]
     public async Task Can_Get_Player_Withdraw_Require_Amount()
     {
         var fakePlayerBucketClient = Substitute.For<IPlayerBucketClient>();
@@ -397,25 +417,5 @@ public class PlayerTests
         var sut = new CheckPhoneCondition(fakePlayerServiceClient);
 
         await sut.ExecuteAsync(brandId, json, default);
-    }
-
-    [Test]
-    public async Task Can_Get_Player_Payment_Overview()
-    {
-        var playerCode = "playerCode";
-
-        var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
-
-        var sut = new GetPlayerPaymentOverviewQueryService(fakePaymentServiceClient);
-
-        var query = new GetPlayerPaymentOverviewQuery(playerCode);
-
-        _ = fakePaymentServiceClient.GetPlayerPaymentOverviewAsync(query.PlayerCode)
-            .Returns(new PaymentOverview(100M, 0M, DateTime.Now, 0M, 0M, null, new DateOnly(2023, 4, 1), 100M, 0M));
-
-        var actual = await sut.GetAsync(query).ConfigureAwait(false);
-
-        Assert.IsNotNull(actual);
-        Assert.AreEqual(100M, actual.TotalDepositAmount);
     }
 }
