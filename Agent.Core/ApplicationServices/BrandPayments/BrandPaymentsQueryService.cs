@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Tgs.Payment.Clients;
 using Tgs.ServiceUtility;
@@ -15,5 +16,6 @@ internal class BrandPaymentsQueryService(IPaymentServiceClient paymentServiceCli
     public IAsyncEnumerable<BrandPaymentInfo> QueryAsync(
         BrandPaymentsQuery query,
         CancellationToken cancellationToken = default)
-        => _paymentServiceClient.GetBrandPaymentsAsync(query.BrandId);
+        => _paymentServiceClient.GetBrandPaymentsAsync(query.BrandId, cancellationToken)
+            .Where(bp => bp.Enabled == true);
 }
